@@ -21,7 +21,7 @@
 #include <mbgl/util/logging.hpp>
 
 #define PIPE_OUT 0
-#define PIPE_IN  1
+#define PIPE_IN 1
 
 namespace {
 
@@ -29,7 +29,8 @@ using namespace mbgl::util;
 
 int looperCallbackNew(int fd, int, void* data) {
     int buffer[1];
-    while (read(fd, buffer, sizeof(buffer)) > 0) {}
+    while (read(fd, buffer, sizeof(buffer)) > 0) {
+    }
 
     auto runLoopImpl = reinterpret_cast<RunLoop::Impl*>(data);
 
@@ -41,7 +42,8 @@ int looperCallbackNew(int fd, int, void* data) {
 
 int looperCallbackDefault(int fd, int, void* data) {
     int buffer[1];
-    while (read(fd, buffer, sizeof(buffer)) > 0) {}
+    while (read(fd, buffer, sizeof(buffer)) > 0) {
+    }
 
     auto runLoopImpl = reinterpret_cast<RunLoop::Impl*>(data);
 
@@ -82,7 +84,8 @@ namespace util {
 // efficient way of waking up the RunLoop and it is also thread-safe.
 class Alarm {
 public:
-    Alarm(ActorRef<Alarm>, RunLoop::Impl* loop_) : loop(loop_) {}
+    Alarm(ActorRef<Alarm>, RunLoop::Impl* loop_)
+        : loop(loop_) {}
 
     void set(const Milliseconds& timeout) {
         alarm.start(timeout, mbgl::Duration::zero(), [this]() { loop->wake(); });
@@ -93,7 +96,8 @@ private:
     RunLoop::Impl* loop;
 };
 
-RunLoop::Impl::Impl(RunLoop* runLoop_, RunLoop::Type type) : runLoop(runLoop_) {
+RunLoop::Impl::Impl(RunLoop* runLoop_, RunLoop::Type type)
+    : runLoop(runLoop_) {
     loop = ALooper_prepare(0);
     assert(loop);
 
@@ -110,16 +114,16 @@ RunLoop::Impl::Impl(RunLoop* runLoop_, RunLoop::Type type) : runLoop(runLoop_) {
     int ret = 0;
 
     switch (type) {
-    case Type::New:
-        ret = ALooper_addFd(loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK,
-            ALOOPER_EVENT_INPUT, looperCallbackNew, this);
-        break;
-    case Type::Default:
-        ret = ALooper_addFd(loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK,
-            ALOOPER_EVENT_INPUT, looperCallbackDefault, this);
-        alarm = std::make_unique<Thread<Alarm>>("Alarm", this);
-        running = true;
-        break;
+        case Type::New:
+            ret = ALooper_addFd(
+                loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackNew, this);
+            break;
+        case Type::Default:
+            ret = ALooper_addFd(
+                loop, fds[PIPE_OUT], ALOOPER_POLL_CALLBACK, ALOOPER_EVENT_INPUT, looperCallbackDefault, this);
+            alarm = std::make_unique<Thread<Alarm>>("Alarm", this);
+            running = true;
+            break;
     }
 
     if (ret != 1) {
@@ -209,7 +213,8 @@ RunLoop* RunLoop::Get() {
     return static_cast<RunLoop*>(Scheduler::GetCurrent());
 }
 
-RunLoop::RunLoop(Type type) : impl(std::make_unique<Impl>(this, type)) {
+RunLoop::RunLoop(Type type)
+    : impl(std::make_unique<Impl>(this, type)) {
     Scheduler::SetCurrent(this);
 }
 
@@ -231,7 +236,7 @@ void RunLoop::run() {
     impl->running = true;
 
     int outFd, outEvents;
-    char *outData = nullptr;
+    char* outData = nullptr;
 
     while (impl->running) {
         process();

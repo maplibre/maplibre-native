@@ -10,45 +10,64 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4805)
+#pragma warning(disable : 4805)
 #endif
 
 // mbgl::GLContextMode
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::UniqueGLContext) == mbgl::underlying_type(mbgl::gfx::ContextMode::Unique), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::SharedGLContext) == mbgl::underlying_type(mbgl::gfx::ContextMode::Shared), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::UniqueGLContext) ==
+                  mbgl::underlying_type(mbgl::gfx::ContextMode::Unique),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::SharedGLContext) ==
+                  mbgl::underlying_type(mbgl::gfx::ContextMode::Shared),
+              "error");
 
 // mbgl::MapMode
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::Continuous) == mbgl::underlying_type(mbgl::MapMode::Continuous), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::Static) == mbgl::underlying_type(mbgl::MapMode::Static), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::Continuous) ==
+                  mbgl::underlying_type(mbgl::MapMode::Continuous),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::Static) == mbgl::underlying_type(mbgl::MapMode::Static),
+              "error");
 
 // mbgl::ConstrainMode
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::NoConstrain) == mbgl::underlying_type(mbgl::ConstrainMode::None), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::ConstrainHeightOnly) == mbgl::underlying_type(mbgl::ConstrainMode::HeightOnly), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::ConstrainWidthAndHeight) == mbgl::underlying_type(mbgl::ConstrainMode::WidthAndHeight), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::NoConstrain) ==
+                  mbgl::underlying_type(mbgl::ConstrainMode::None),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::ConstrainHeightOnly) ==
+                  mbgl::underlying_type(mbgl::ConstrainMode::HeightOnly),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::ConstrainWidthAndHeight) ==
+                  mbgl::underlying_type(mbgl::ConstrainMode::WidthAndHeight),
+              "error");
 
 // mbgl::ViewportMode
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::DefaultViewport) == mbgl::underlying_type(mbgl::ViewportMode::Default), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Settings::FlippedYViewport) == mbgl::underlying_type(mbgl::ViewportMode::FlippedY), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::DefaultViewport) ==
+                  mbgl::underlying_type(mbgl::ViewportMode::Default),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Settings::FlippedYViewport) ==
+                  mbgl::underlying_type(mbgl::ViewportMode::FlippedY),
+              "error");
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
-
 namespace QMapLibreGL {
 
 /*!
     \class QMapLibreGL::Settings
-    \brief The Settings class stores the initial configuration for QMapLibreGL::Map.
+    \brief The Settings class stores the initial configuration for
+   QMapLibreGL::Map.
 
     \inmodule MapLibre Maps SDK for Qt
 
-    Settings is used to configure QMapLibreGL::Map at the moment of its creation.
-    Once created, the Settings of a QMapLibreGL::Map can no longer be changed.
+    Settings is used to configure QMapLibreGL::Map at the moment of its
+   creation. Once created, the Settings of a QMapLibreGL::Map can no longer be
+   changed.
 
-    Cache-related settings are shared between all QMapLibreGL::Map instances using the same cache path.
-    The first map to configure cache properties such as size will force the configuration
-    to all newly instantiated QMapLibreGL::Map objects using the same cache in the same process.
+    Cache-related settings are shared between all QMapLibreGL::Map instances
+   using the same cache path. The first map to configure cache properties such
+   as size will force the configuration to all newly instantiated
+   QMapLibreGL::Map objects using the same cache in the same process.
 */
 
 /*!
@@ -56,15 +75,15 @@ namespace QMapLibreGL {
 
     This enum sets the expectations for the OpenGL state.
 
-    \value UniqueGLContext  The OpenGL context is only used by QMapLibreGL::Map, so it is not
-    reset before each rendering. Use this mode if the intention is to only draw a
-    fullscreen map.
+    \value UniqueGLContext  The OpenGL context is only used by QMapLibreGL::Map,
+   so it is not reset before each rendering. Use this mode if the intention is
+   to only draw a fullscreen map.
 
     \value SharedGLContext  The OpenGL context is shared and the state will be
     marked dirty - which invalidates any previously assumed GL state. The
     embedder is responsible for clearing up the viewport prior to calling
-    QMapLibreGL::Map::render. The embedder is also responsible for resetting its own
-    GL state after QMapLibreGL::Map::render has finished, if needed.
+    QMapLibreGL::Map::render. The embedder is also responsible for resetting its
+   own GL state after QMapLibreGL::Map::render has finished, if needed.
 
     \sa contextMode()
 */
@@ -95,15 +114,15 @@ namespace QMapLibreGL {
 
     This enum determines if the map wraps.
 
-    \value NoConstrain              The map will wrap on the horizontal axis. Since it doesn't
-    make sense to wrap on the vertical axis in a Web Mercator projection, the map will scroll
-    and show some empty space.
+    \value NoConstrain              The map will wrap on the horizontal axis.
+   Since it doesn't make sense to wrap on the vertical axis in a Web Mercator
+   projection, the map will scroll and show some empty space.
 
-    \value ConstrainHeightOnly      The map will wrap around the horizontal axis, like a spinning
-    globe. This is the recommended constrain mode.
+    \value ConstrainHeightOnly      The map will wrap around the horizontal
+   axis, like a spinning globe. This is the recommended constrain mode.
 
-    \value ConstrainWidthAndHeight  The map won't wrap and panning is restricted to the boundaries
-    of the map.
+    \value ConstrainWidthAndHeight  The map won't wrap and panning is restricted
+   to the boundaries of the map.
 
     \sa constrainMode()
 */
@@ -125,17 +144,15 @@ namespace QMapLibreGL {
     configuration is valid for initializing a QMapLibreGL::Map.
 */
 Settings::Settings()
-    : m_contextMode(Settings::SharedGLContext)
-    , m_mapMode(Settings::Continuous)
-    , m_constrainMode(Settings::ConstrainHeightOnly)
-    , m_viewportMode(Settings::DefaultViewport)
-    , m_cacheMaximumSize(mbgl::util::DEFAULT_MAX_CACHE_SIZE)
-    , m_cacheDatabasePath(":memory:")
-    , m_assetPath(QCoreApplication::applicationDirPath())
-    , m_apiKey(qgetenv("MLN_API_KEY"))
-    , m_tileServerOptionsInternal(new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration()))
-{
-}
+    : m_contextMode(Settings::SharedGLContext),
+      m_mapMode(Settings::Continuous),
+      m_constrainMode(Settings::ConstrainHeightOnly),
+      m_viewportMode(Settings::DefaultViewport),
+      m_cacheMaximumSize(mbgl::util::DEFAULT_MAX_CACHE_SIZE),
+      m_cacheDatabasePath(":memory:"),
+      m_assetPath(QCoreApplication::applicationDirPath()),
+      m_apiKey(qgetenv("MLN_API_KEY")),
+      m_tileServerOptionsInternal(new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration())) {}
 
 /*!
     Returns the OpenGL context mode. This is specially important when mixing
@@ -143,16 +160,14 @@ Settings::Settings()
 
     By default, it is set to Settings::SharedGLContext.
 */
-Settings::GLContextMode Settings::contextMode() const
-{
+Settings::GLContextMode Settings::contextMode() const {
     return m_contextMode;
 }
 
 /*!
     Sets the OpenGL context \a mode.
 */
-void Settings::setContextMode(GLContextMode mode)
-{
+void Settings::setContextMode(GLContextMode mode) {
     m_contextMode = mode;
 }
 
@@ -168,16 +183,14 @@ void Settings::setContextMode(GLContextMode mode)
 
     By default, it is set to QMapLibreGL::Settings::Continuous.
 */
-Settings::MapMode Settings::mapMode() const
-{
+Settings::MapMode Settings::mapMode() const {
     return m_mapMode;
 }
 
 /*!
     Sets the map \a mode.
 */
-void Settings::setMapMode(MapMode mode)
-{
+void Settings::setMapMode(MapMode mode) {
     m_mapMode = mode;
 }
 
@@ -187,16 +200,14 @@ void Settings::setMapMode(MapMode mode)
 
     By default, it is set to QMapLibreGL::Settings::ConstrainHeightOnly.
 */
-Settings::ConstrainMode Settings::constrainMode() const
-{
+Settings::ConstrainMode Settings::constrainMode() const {
     return m_constrainMode;
 }
 
 /*!
     Sets the map constrain \a mode.
 */
-void Settings::setConstrainMode(ConstrainMode mode)
-{
+void Settings::setConstrainMode(ConstrainMode mode) {
     m_constrainMode = mode;
 }
 
@@ -206,16 +217,14 @@ void Settings::setConstrainMode(ConstrainMode mode)
 
     By default, it is set to QMapLibreGL::Settings::DefaultViewport.
 */
-Settings::ViewportMode Settings::viewportMode() const
-{
+Settings::ViewportMode Settings::viewportMode() const {
     return m_viewportMode;
 }
 
 /*!
     Sets the viewport \a mode.
 */
-void Settings::setViewportMode(ViewportMode mode)
-{
+void Settings::setViewportMode(ViewportMode mode) {
     m_viewportMode = mode;
 }
 
@@ -227,16 +236,14 @@ void Settings::setViewportMode(ViewportMode mode)
 
     By default, it is set to 50 MB.
 */
-unsigned Settings::cacheDatabaseMaximumSize() const
-{
+unsigned Settings::cacheDatabaseMaximumSize() const {
     return m_cacheMaximumSize;
 }
 
 /*!
     Returns the maximum allowed cache database \a size in bytes.
 */
-void Settings::setCacheDatabaseMaximumSize(unsigned size)
-{
+void Settings::setCacheDatabaseMaximumSize(unsigned size) {
     m_cacheMaximumSize = size;
 }
 
@@ -250,8 +257,7 @@ void Settings::setCacheDatabaseMaximumSize(unsigned size)
     By default, it is set to \c :memory: meaning it will create an in-memory
     cache instead of a file on disk.
 */
-QString Settings::cacheDatabasePath() const
-{
+QString Settings::cacheDatabasePath() const {
     return m_cacheDatabasePath;
 }
 
@@ -260,8 +266,7 @@ QString Settings::cacheDatabasePath() const
 
     Setting the \a path to \c :memory: will create an in-memory cache.
 */
-void Settings::setCacheDatabasePath(const QString &path)
-{
+void Settings::setCacheDatabasePath(const QString &path) {
     m_cacheDatabasePath = path;
 }
 
@@ -273,16 +278,14 @@ void Settings::setCacheDatabasePath(const QString &path)
 
     By default, it is set to the value returned by QCoreApplication::applicationDirPath().
 */
-QString Settings::assetPath() const
-{
+QString Settings::assetPath() const {
     return m_assetPath;
 }
 
 /*!
     Sets the asset \a path.
 */
-void Settings::setAssetPath(const QString &path)
-{
+void Settings::setAssetPath(const QString &path) {
     m_assetPath = path;
 }
 
@@ -302,16 +305,14 @@ QString Settings::apiKey() const {
     MapTiler-hosted and Mapbox-hosted vector tiles and styles require an API
     key or access token.
 */
-void Settings::setApiKey(const QString &key)
-{
+void Settings::setApiKey(const QString &key) {
     m_apiKey = key;
 }
 
 /*!
     Returns the API base URL.
 */
-QString Settings::apiBaseUrl() const
-{
+QString Settings::apiBaseUrl() const {
     return QString::fromStdString(m_tileServerOptionsInternal->baseURL());
 }
 
@@ -322,61 +323,55 @@ QString Settings::apiBaseUrl() const
     be resolved to. It defaults to "https://api.mapbox.com" but can be
     changed, for instance, to a tile cache server address.
 */
-void Settings::setApiBaseUrl(const QString& url)
-{
+void Settings::setApiBaseUrl(const QString &url) {
     m_tileServerOptionsInternal = &m_tileServerOptionsInternal->withBaseURL(url.toStdString());
 }
 
 /*!
     Returns the local font family. Returns an empty string if no local font family is set.
 */
-QString Settings::localFontFamily() const
-{
+QString Settings::localFontFamily() const {
     return m_localFontFamily;
 }
 
 /*!
     Sets the local font family.
 
-   Rendering Chinese/Japanese/Korean (CJK) ideographs and precomposed Hangul Syllables requires
-   downloading large amounts of font data, which can significantly slow map load times. Use the
-   localIdeographFontFamily setting to speed up map load times by using locally available fonts
-   instead of font data fetched from the server.
+   Rendering Chinese/Japanese/Korean (CJK) ideographs and precomposed Hangul
+   Syllables requires downloading large amounts of font data, which can
+   significantly slow map load times. Use the localIdeographFontFamily setting
+   to speed up map load times by using locally available fonts instead of font
+   data fetched from the server.
 */
-void Settings::setLocalFontFamily(const QString &family)
-{
+void Settings::setLocalFontFamily(const QString &family) {
     m_localFontFamily = family;
 }
 
 /*!
     Returns the client name. Returns an empty string if no client name is set.
 */
-QString Settings::clientName() const
-{
+QString Settings::clientName() const {
     return m_clientName;
 }
 
 /*!
     Sets the client name.
 */
-void Settings::setClientName(const QString &name)
-{
+void Settings::setClientName(const QString &name) {
     m_clientName = name;
 }
 
 /*!
     Returns the client version. Returns an empty string if no client version is set.
 */
-QString Settings::clientVersion() const
-{
+QString Settings::clientVersion() const {
     return m_clientVersion;
 }
 
 /*!
     Sets the client version.
 */
-void Settings::setClientVersion(const QString &version)
-{
+void Settings::setClientVersion(const QString &version) {
     m_clientVersion = version;
 }
 
@@ -407,17 +402,16 @@ void Settings::setResourceTransform(const std::function<std::string(const std::s
     in the library. This function will re-initialise all settings based
     on the default values of specific service provider defaults.
 */
-void Settings::resetToTemplate(SettingsTemplate settings_template)
-{
-    if(m_tileServerOptionsInternal) delete m_tileServerOptionsInternal;
+void Settings::resetToTemplate(SettingsTemplate settings_template) {
+    if (m_tileServerOptionsInternal) delete m_tileServerOptionsInternal;
 
-    if(settings_template == MapLibreSettings){
+    if (settings_template == MapLibreSettings) {
         m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapLibreConfiguration());
-    }else if(settings_template == MapTilerSettings){
+    } else if (settings_template == MapTilerSettings) {
         m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapTilerConfiguration());
-    }else if(settings_template == MapboxSettings){
+    } else if (settings_template == MapboxSettings) {
         m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::MapboxConfiguration());
-    }else{
+    } else {
         m_tileServerOptionsInternal = new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration());
     }
 }
@@ -427,11 +421,11 @@ void Settings::resetToTemplate(SettingsTemplate settings_template)
 
     Return all styles that are defined in default settings.
 */
-QVector<QPair<QString, QString> > Settings::defaultStyles() const {
+QVector<QPair<QString, QString>> Settings::defaultStyles() const {
     QVector<QPair<QString, QString>> styles;
     for (const auto &style : tileServerOptionsInternal()->defaultStyles()) {
-        styles.append(QPair<QString, QString>(
-                                 QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName())));
+        styles.append(
+            QPair<QString, QString>(QString::fromStdString(style.getUrl()), QString::fromStdString(style.getName())));
     }
     return styles;
 }

@@ -29,7 +29,9 @@ static RendererObserver& nullObserver() {
     return observer;
 }
 
-Renderer::Impl::Impl(gfx::RendererBackend& backend_, float pixelRatio_, const std::optional<std::string>& localFontFamily_)
+Renderer::Impl::Impl(gfx::RendererBackend& backend_,
+                     float pixelRatio_,
+                     const std::optional<std::string>& localFontFamily_)
     : orchestrator(!backend_.contextIsShared(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
@@ -52,8 +54,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& renderTreeParameters = renderTree.getParameters();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(pixelRatio,
-            std::make_unique<gfx::ShaderRegistry>());
+        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
         staticData->programs.registerWith(*staticData->shaders);
         observer->onRegisterShaders(*staticData->shaders);
     }
@@ -68,19 +69,17 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
 
-    PaintParameters parameters {
-        context,
-        pixelRatio,
-        backend,
-        renderTreeParameters.light,
-        renderTreeParameters.mapMode,
-        renderTreeParameters.debugOptions,
-        renderTreeParameters.timePoint,
-        renderTreeParameters.transformParams,
-        *staticData,
-        renderTree.getLineAtlas(),
-        renderTree.getPatternAtlas()
-    };
+    PaintParameters parameters{context,
+                               pixelRatio,
+                               backend,
+                               renderTreeParameters.light,
+                               renderTreeParameters.mapMode,
+                               renderTreeParameters.debugOptions,
+                               renderTreeParameters.timePoint,
+                               renderTreeParameters.transformParams,
+                               *staticData,
+                               renderTree.getLineAtlas(),
+                               renderTree.getPatternAtlas()};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -151,9 +150,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    // - 3D PASS -------------------------------------------------------------------------------------
-    // Renders any 3D layers bottom-to-top to unique FBOs with texture attachments, but share the same
-    // depth rbo between them.
+    // - 3D PASS
+    // -------------------------------------------------------------------------------------
+    // Renders any 3D layers bottom-to-top to unique FBOs with texture
+    // attachments, but share the same depth rbo between them.
     if (parameters.staticData.has3D) {
         parameters.staticData.backendSize = parameters.backend.getDefaultRenderable().getSize();
 
@@ -163,7 +163,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         if (!parameters.staticData.depthRenderbuffer ||
             parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
             parameters.staticData.depthRenderbuffer =
-                parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(parameters.staticData.backendSize);
+                parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+                    parameters.staticData.backendSize);
         }
         parameters.staticData.depthRenderbuffer->setShouldClear(true);
 
@@ -178,9 +179,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    // - CLEAR -------------------------------------------------------------------------------------
-    // Renders the backdrop of the OpenGL view. This also paints in areas where we don't have any
-    // tiles whatsoever.
+    // - CLEAR
+    // -------------------------------------------------------------------------------------
+    // Renders the backdrop of the OpenGL view. This also paints in areas where
+    // we don't have any tiles whatsoever.
     {
         std::optional<Color> color;
         if (parameters.debugOptions & MapDebugOptions::Overdraw) {
@@ -188,7 +190,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         } else if (!backend.contextIsShared()) {
             color = renderTreeParameters.backgroundColor;
         }
-        parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1.0f, 0 });
+        parameters.renderPass = parameters.encoder->createRenderPass(
+            "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
     }
 
     // Draw Drawables
@@ -266,15 +269,16 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    // - DEBUG PASS --------------------------------------------------------------------------------
+    // - DEBUG PASS
+    // --------------------------------------------------------------------------------
     // Renders debug overlays.
     {
         const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
 
         // Finalize the rendering, e.g. by calling debug render calls per tile.
         // This guarantees that we have at least one function per tile called.
-        // When only rendering layers via the stylesheet, it's possible that we don't
-        // ever visit a tile during rendering.
+        // When only rendering layers via the stylesheet, it's possible that we
+        // don't ever visit a tile during rendering.
         for (const RenderItem& renderItem : sourceRenderItems) {
             renderItem.render(parameters);
         }
@@ -303,8 +307,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
-        renderTreeParameters.placementChanged
-    );
+        renderTreeParameters.placementChanged);
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

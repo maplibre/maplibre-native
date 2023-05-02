@@ -7,7 +7,7 @@
 using namespace mbgl;
 
 TEST(Image, PNGRoundTrip) {
-    PremultipliedImage rgba({ 1, 1 });
+    PremultipliedImage rgba({1, 1});
     rgba.data[0] = 128;
     rgba.data[1] = 0;
     rgba.data[2] = 0;
@@ -21,7 +21,7 @@ TEST(Image, PNGRoundTrip) {
 }
 
 TEST(Image, PNGRoundTripAlpha) {
-    PremultipliedImage rgba({ 1, 1 });
+    PremultipliedImage rgba({1, 1});
     rgba.data[0] = 128;
     rgba.data[1] = 0;
     rgba.data[2] = 0;
@@ -124,7 +124,7 @@ TEST(Image, Copy) {
 }
 
 TEST(Image, Move) {
-    UnassociatedImage rgba({ 1, 1 });
+    UnassociatedImage rgba({1, 1});
     rgba.data[0] = 255;
     rgba.data[1] = 254;
     rgba.data[2] = 253;
@@ -139,7 +139,7 @@ TEST(Image, Move) {
 }
 
 TEST(Image, Premultiply) {
-    UnassociatedImage rgba({ 1, 1 });
+    UnassociatedImage rgba({1, 1});
     rgba.data[0] = 255;
     rgba.data[1] = 254;
     rgba.data[2] = 253;

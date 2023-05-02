@@ -11,7 +11,10 @@ class TransitionOptions : private mbgl::util::noncopyable {
 public:
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/TransitionOptions"; };
 
-    static jni::Local<jni::Object<TransitionOptions>> fromTransitionOptions(jni::JNIEnv&, jlong duration, jlong delay, jboolean enablePlacementTransitions);
+    static jni::Local<jni::Object<TransitionOptions>> fromTransitionOptions(jni::JNIEnv&,
+                                                                            jlong duration,
+                                                                            jlong delay,
+                                                                            jboolean enablePlacementTransitions);
 
     static long getDuration(jni::JNIEnv&, const jni::Object<TransitionOptions>&);
 

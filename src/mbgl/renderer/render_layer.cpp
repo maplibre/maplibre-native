@@ -15,8 +15,7 @@ using namespace style;
 
 RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
-      baseImpl(evaluatedProperties->baseImpl) {
-}
+      baseImpl(evaluatedProperties->baseImpl) {}
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
@@ -24,8 +23,8 @@ void RenderLayer::transition(const TransitionParameters& parameters, Immutable<s
 }
 
 bool RenderLayer::needsPlacement() const {
-    return baseImpl->getTypeInfo()->crossTileIndex == style::LayerTypeInfo::CrossTileIndex::Required
-           && !placementData.empty();
+    return baseImpl->getTypeInfo()->crossTileIndex == style::LayerTypeInfo::CrossTileIndex::Required &&
+           !placementData.empty();
 }
 
 const std::string& RenderLayer::getID() const {
@@ -37,8 +36,7 @@ bool RenderLayer::hasRenderPass(RenderPass pass) const {
 }
 
 bool RenderLayer::needsRendering() const {
-    return passes != RenderPass::None
-           && baseImpl->visibility != style::VisibilityType::None;
+    return passes != RenderPass::None && baseImpl->visibility != style::VisibilityType::None;
 }
 
 bool RenderLayer::supportsZoom(float zoom) const {
@@ -61,8 +59,7 @@ void RenderLayer::markContextDestroyed() {
     // no-op
 }
 
-void RenderLayer::checkRenderability(const PaintParameters& parameters,
-                                     const uint32_t activeBindingCount) {
+void RenderLayer::checkRenderability(const PaintParameters& parameters, const uint32_t activeBindingCount) {
     // Only warn once for every layer.
     if (hasRenderFailures) {
         return;
@@ -70,18 +67,26 @@ void RenderLayer::checkRenderability(const PaintParameters& parameters,
 
     if (activeBindingCount > parameters.context.maximumVertexBindingCount) {
         Log::Error(Event::OpenGL,
-                   "The layer '" + getID() + "' uses more data-driven properties than the current device "
-                   "supports, and will have rendering errors. To ensure compatibility with this "
-                   "device, use " + std::to_string(activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount) +
-                   " fewer data driven properties in this layer.");
+                   "The layer '" + getID() +
+                       "' uses more data-driven properties than the current device "
+                       "supports, and will have rendering errors. To ensure "
+                       "compatibility with this "
+                       "device, use " +
+                       std::to_string(activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount) +
+                       " fewer data driven properties in this layer.");
         hasRenderFailures = true;
     } else if (activeBindingCount > gfx::Context::minimumRequiredVertexBindingCount) {
         Log::Warning(Event::OpenGL,
-                     "The layer '" + getID() + "' uses more data-driven properties than some devices may support. "
-                     "Though it will render correctly on this device, it may have rendering errors "
-                     "on other devices. To ensure compatibility with all devices, use " +
-                     std::to_string(activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount) + "fewer "
-                     "data-driven properties in this layer.");
+                     "The layer '" + getID() +
+                         "' uses more data-driven properties than some devices may "
+                         "support. "
+                         "Though it will render correctly on this device, it may have "
+                         "rendering errors "
+                         "on other devices. To ensure compatibility with all devices, "
+                         "use " +
+                         std::to_string(activeBindingCount - gfx::Context::minimumRequiredVertexBindingCount) +
+                         "fewer "
+                         "data-driven properties in this layer.");
         hasRenderFailures = true;
     }
 }
@@ -102,5 +107,4 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     return nullptr;
 }
 
-} //namespace mbgl
-
+} // namespace mbgl

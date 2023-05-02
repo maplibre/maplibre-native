@@ -38,7 +38,8 @@ ActiveUniforms activeUniforms(ProgramID);
 template <class Value>
 class UniformState {
 public:
-    UniformState(UniformLocation location_ = -1) : location(location_) {}
+    UniformState(UniformLocation location_ = -1)
+        : location(location_) {}
 
     UniformState& operator=(const Value& value) {
         if (location >= 0 && (!current || *current != value)) {
@@ -74,22 +75,26 @@ public:
         const auto active = gl::activeUniforms(id);
 
         util::ignore(
-            { // Some shader programs have uniforms declared, but not used, so they're not active.
-              // Therefore, we'll only verify them when they are indeed active.
-              (active.find(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value()) != active.end()
-                   ? verifyUniform<typename Us::Value>(active.at(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value()))
-                   : false)... });
+            {// Some shader programs have uniforms declared, but not used, so
+             // they're not active. Therefore, we'll only verify them when they
+             // are indeed active.
+             (active.find(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value()) != active.end()
+                  ? verifyUniform<typename Us::Value>(
+                        active.at(concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value()))
+                  : false)...});
 #endif
 
-        state = State{ gl::uniformLocation(id, concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value())... };
+        state = State{
+            gl::uniformLocation(id, concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value())...};
     }
 
     NamedUniformLocations getNamedLocations() const {
-        return NamedUniformLocations{ { concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value(), state.template get<Us>().location }... };
+        return NamedUniformLocations{{concat_literals<&string_literal<'u', '_'>::value, &Us::name>::value(),
+                                      state.template get<Us>().location}...};
     }
 
     void bind(const gfx::UniformValues<TypeList<Us...>>& values) {
-        util::ignore({ (state.template get<Us>() = values.template get<Us>(), 0)... });
+        util::ignore({(state.template get<Us>() = values.template get<Us>(), 0)...});
     }
 };
 

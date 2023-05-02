@@ -14,9 +14,12 @@ class CullFaceMode;
 class DrawScope;
 class IndexBuffer;
 class RenderPass;
-template <class> class UniformValues;
-template <class> class AttributeBindings;
-template <class> class TextureBindings;
+template <class>
+class UniformValues;
+template <class>
+class AttributeBindings;
+template <class>
+class TextureBindings;
 
 template <class Name>
 class Program {

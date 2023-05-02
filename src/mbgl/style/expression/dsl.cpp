@@ -23,11 +23,11 @@ namespace dsl {
 
 std::unique_ptr<Expression> compound(const char* op, std::vector<std::unique_ptr<Expression>> args) {
     ParsingContext ctx;
-    ParseResult result =  createCompoundExpression(op, std::move(args), ctx);
+    ParseResult result = createCompoundExpression(op, std::move(args), ctx);
     assert(result);
     return std::move(*result);
 }
-    
+
 std::unique_ptr<Expression> createExpression(const char* expr) {
     using JSValue = rapidjson::GenericValue<rapidjson::UTF8<>, rapidjson::CrtAllocator>;
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
@@ -36,8 +36,7 @@ std::unique_ptr<Expression> createExpression(const char* expr) {
 
     const JSValue* expression = &document;
     expression::ParsingContext ctx;
-    expression::ParseResult parsed =
-    ctx.parseExpression(mbgl::style::conversion::Convertible(expression));
+    expression::ParseResult parsed = ctx.parseExpression(mbgl::style::conversion::Convertible(expression));
     return parsed ? std::move(*parsed) : nullptr;
 }
 
@@ -67,7 +66,7 @@ std::unique_ptr<Expression> literal(std::initializer_list<double> value) {
     return literal(values);
 }
 
-std::unique_ptr<Expression> literal(std::initializer_list<const char *> value) {
+std::unique_ptr<Expression> literal(std::initializer_list<const char*> value) {
     std::vector<Value> values;
     for (auto i : value) {
         values.emplace_back(std::string(i));
@@ -78,25 +77,22 @@ std::unique_ptr<Expression> literal(std::initializer_list<const char *> value) {
 std::unique_ptr<Expression> assertion(const type::Type& type,
                                       std::unique_ptr<Expression> value,
                                       std::unique_ptr<Expression> def) {
-    std::vector<std::unique_ptr<Expression>> v  = vec(std::move(value));
+    std::vector<std::unique_ptr<Expression>> v = vec(std::move(value));
     if (def) {
         v.push_back(std::move(def));
     }
     return std::make_unique<Assertion>(type, std::move(v));
 }
 
-std::unique_ptr<Expression> number(std::unique_ptr<Expression> value,
-                                   std::unique_ptr<Expression> def) {
+std::unique_ptr<Expression> number(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return assertion(type::Number, std::move(value), std::move(def));
 }
 
-std::unique_ptr<Expression> string(std::unique_ptr<Expression> value,
-                                   std::unique_ptr<Expression> def) {
+std::unique_ptr<Expression> string(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return assertion(type::String, std::move(value), std::move(def));
 }
 
-std::unique_ptr<Expression> boolean(std::unique_ptr<Expression> value,
-                                    std::unique_ptr<Expression> def) {
+std::unique_ptr<Expression> boolean(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return assertion(type::Boolean, std::move(value), std::move(def));
 }
 
@@ -110,18 +106,15 @@ std::unique_ptr<Expression> coercion(const type::Type& type,
     return std::make_unique<Coercion>(type, std::move(v));
 }
 
-std::unique_ptr<Expression> toColor(std::unique_ptr<Expression> value,
-                                    std::unique_ptr<Expression> def) {
+std::unique_ptr<Expression> toColor(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return coercion(type::Color, std::move(value), std::move(def));
 }
 
-std::unique_ptr<Expression> toString(std::unique_ptr<Expression> value,
-                                     std::unique_ptr<Expression> def) {
+std::unique_ptr<Expression> toString(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return coercion(type::String, std::move(value), std::move(def));
 }
 
-std::unique_ptr<Expression> toFormatted(std::unique_ptr<Expression> value,
-                                        std::unique_ptr<Expression> def) {
+std::unique_ptr<Expression> toFormatted(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return coercion(type::Formatted, std::move(value), std::move(def));
 }
 
@@ -145,29 +138,26 @@ std::unique_ptr<Expression> zoom() {
     return compound("zoom");
 }
 
-std::unique_ptr<Expression> eq(std::unique_ptr<Expression> lhs,
-                               std::unique_ptr<Expression> rhs) {
+std::unique_ptr<Expression> eq(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) {
     return std::make_unique<BasicComparison>("==", std::move(lhs), std::move(rhs));
 }
 
-std::unique_ptr<Expression> ne(std::unique_ptr<Expression> lhs,
-                               std::unique_ptr<Expression> rhs) {
+std::unique_ptr<Expression> ne(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) {
     return std::make_unique<BasicComparison>("!=", std::move(lhs), std::move(rhs));
 }
 
-std::unique_ptr<Expression> gt(std::unique_ptr<Expression> lhs,
-                               std::unique_ptr<Expression> rhs) {
+std::unique_ptr<Expression> gt(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) {
     return std::make_unique<BasicComparison>(">", std::move(lhs), std::move(rhs));
 }
 
-std::unique_ptr<Expression> lt(std::unique_ptr<Expression> lhs,
-                               std::unique_ptr<Expression> rhs) {
+std::unique_ptr<Expression> lt(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) {
     return std::make_unique<BasicComparison>("<", std::move(lhs), std::move(rhs));
 }
 
 std::unique_ptr<Expression> step(std::unique_ptr<Expression> input,
                                  std::unique_ptr<Expression> output0,
-                                 double input1, std::unique_ptr<Expression> output1) {
+                                 double input1,
+                                 std::unique_ptr<Expression> output1) {
     type::Type type = output0->getType();
     std::map<double, std::unique_ptr<Expression>> stops;
     stops[-std::numeric_limits<double>::infinity()] = std::move(output0);
@@ -189,7 +179,8 @@ Interpolator cubicBezier(double x1, double y1, double x2, double y2) {
 
 std::unique_ptr<Expression> interpolate(Interpolator interpolator,
                                         std::unique_ptr<Expression> input,
-                                        double input1, std::unique_ptr<Expression> output1) {
+                                        double input1,
+                                        std::unique_ptr<Expression> output1) {
     type::Type type = output1->getType();
     std::map<double, std::unique_ptr<Expression>> stops;
     stops[input1] = std::move(output1);
@@ -201,8 +192,10 @@ std::unique_ptr<Expression> interpolate(Interpolator interpolator,
 
 std::unique_ptr<Expression> interpolate(Interpolator interpolator,
                                         std::unique_ptr<Expression> input,
-                                        double input1, std::unique_ptr<Expression> output1,
-                                        double input2, std::unique_ptr<Expression> output2) {
+                                        double input1,
+                                        std::unique_ptr<Expression> output1,
+                                        double input2,
+                                        std::unique_ptr<Expression> output2) {
     type::Type type = output1->getType();
     std::map<double, std::unique_ptr<Expression>> stops;
     stops[input1] = std::move(output1);
@@ -215,9 +208,12 @@ std::unique_ptr<Expression> interpolate(Interpolator interpolator,
 
 std::unique_ptr<Expression> interpolate(Interpolator interpolator,
                                         std::unique_ptr<Expression> input,
-                                        double input1, std::unique_ptr<Expression> output1,
-                                        double input2, std::unique_ptr<Expression> output2,
-                                        double input3, std::unique_ptr<Expression> output3) {
+                                        double input1,
+                                        std::unique_ptr<Expression> output1,
+                                        double input2,
+                                        std::unique_ptr<Expression> output2,
+                                        double input3,
+                                        std::unique_ptr<Expression> output3) {
     type::Type type = output1->getType();
     std::map<double, std::unique_ptr<Expression>> stops;
     stops[input1] = std::move(output1);

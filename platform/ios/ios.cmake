@@ -1,5 +1,5 @@
-option(MBGL_WITH_IOS_CCACHE "Enable ccache for iOS" OFF)
-option(MBGL_IOS_RENDER_TEST "Include render tests" ON)
+option(MLN_WITH_IOS_CCACHE "Enable ccache for iOS" OFF)
+option(MLN_IOS_RENDER_TEST "Include render tests" ON)
 
 if(NOT DEFINED IOS_DEPLOYMENT_TARGET)
     set(IOS_DEPLOYMENT_TARGET "12.0")
@@ -22,7 +22,7 @@ endmacro()
 
 set_target_properties(mbgl-core PROPERTIES XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES)
 
-if(MBGL_WITH_OPENGL)
+if(MLN_WITH_OPENGL)
     target_compile_definitions(
         mbgl-core
         PUBLIC GLES_SILENCE_DEPRECATION GLES_SILENCE_DEPRECATION
@@ -91,10 +91,10 @@ target_include_directories(
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
-if(MBGL_WITH_IOS_CCACHE)
+if(MLN_WITH_IOS_CCACHE)
     include(${PROJECT_SOURCE_DIR}/platform/ios/ccache.cmake)
 endif()
-if(MBGL_WITH_OPENGL)
+if(MLN_WITH_OPENGL)
     include(${PROJECT_SOURCE_DIR}/platform/ios/ios-test-runners.cmake)
 endif()
 

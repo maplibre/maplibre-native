@@ -35,7 +35,7 @@ void quit_handler(int) {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     args::ArgumentParser argumentParser("Mapbox GL GLFW example");
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
 
@@ -112,22 +112,27 @@ int main(int argc, char *argv[]) {
     GLFWView backend(fullscreen, benchmark, resourceOptions, clientOptions);
     view = &backend;
 
-    std::shared_ptr<mbgl::FileSource> onlineFileSource =
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions, clientOptions);
+    std::shared_ptr<mbgl::FileSource> onlineFileSource = mbgl::FileSourceManager::get()->getFileSource(
+        mbgl::FileSourceType::Network, resourceOptions, clientOptions);
     if (!settings.online) {
         if (onlineFileSource) {
             onlineFileSource->setProperty("online-status", false);
             mbgl::Log::Warning(mbgl::Event::Setup, "Application is offline. Press `O` to toggle online status.");
         } else {
             mbgl::Log::Warning(mbgl::Event::Setup,
-                               "Network resource provider is not available, only local requests are supported.");
+                               "Network resource provider is not available, only local "
+                               "requests are supported.");
         }
     }
 
-    GLFWRendererFrontend rendererFrontend { std::make_unique<mbgl::Renderer>(view->getRendererBackend(), view->getPixelRatio()), *view };
+    GLFWRendererFrontend rendererFrontend{
+        std::make_unique<mbgl::Renderer>(view->getRendererBackend(), view->getPixelRatio()), *view};
 
-    mbgl::Map map(rendererFrontend, *view,
-                  mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()), resourceOptions, clientOptions);
+    mbgl::Map map(rendererFrontend,
+                  *view,
+                  mbgl::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
+                  resourceOptions,
+                  clientOptions);
 
     backend.setMap(&map);
 
@@ -136,7 +141,7 @@ int main(int argc, char *argv[]) {
     }
 
     map.jumpTo(mbgl::CameraOptions()
-                   .withCenter(mbgl::LatLng {settings.latitude, settings.longitude})
+                   .withCenter(mbgl::LatLng{settings.latitude, settings.longitude})
                    .withZoom(settings.zoom)
                    .withBearing(settings.bearing)
                    .withPitch(settings.pitch));
@@ -147,15 +152,18 @@ int main(int argc, char *argv[]) {
     view->setOnlineStatusCallback([&settings, onlineFileSource]() {
         if (!onlineFileSource) {
             mbgl::Log::Warning(mbgl::Event::Setup,
-                               "Cannot change online status. Network resource provider is not available.");
+                               "Cannot change online status. Network resource provider is not "
+                               "available.");
             return;
         }
         settings.online = !settings.online;
         onlineFileSource->setProperty("online-status", settings.online);
-        mbgl::Log::Info(mbgl::Event::Setup, std::string("Application is ") + (settings.online ? "online" : "offline") + ". Press `O` to toggle online status.");
+        mbgl::Log::Info(mbgl::Event::Setup,
+                        std::string("Application is ") + (settings.online ? "online" : "offline") +
+                            ". Press `O` to toggle online status.");
     });
 
-    view->setChangeStyleCallback([&map,&orderedStyles] () {
+    view->setChangeStyleCallback([&map, &orderedStyles]() {
         static uint8_t currentStyleIndex;
 
         if (++currentStyleIndex == orderedStyles.size()) {
@@ -169,9 +177,10 @@ int main(int argc, char *argv[]) {
         mbgl::Log::Info(mbgl::Event::Setup, "Changed style to: " + newStyle.getName());
     });
 
-    // Resource loader controls top-level request processing and can resume / pause all managed sources simultaneously.
-    std::shared_ptr<mbgl::FileSource> resourceLoader =
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
+    // Resource loader controls top-level request processing and can resume /
+    // pause all managed sources simultaneously.
+    std::shared_ptr<mbgl::FileSource> resourceLoader = mbgl::FileSourceManager::get()->getFileSource(
+        mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
     view->setPauseResumeCallback([resourceLoader]() {
         static bool isPaused = false;
 
@@ -197,7 +206,7 @@ int main(int argc, char *argv[]) {
 
     // Load style
     if (style.empty()) {
-        const char *url = getenv("MAPBOX_STYLE_URL");
+        const char* url = getenv("MAPBOX_STYLE_URL");
         if (url == nullptr) {
             mbgl::util::DefaultStyle newStyle = orderedStyles[0];
             style = newStyle.getUrl();
@@ -222,10 +231,9 @@ int main(int argc, char *argv[]) {
     settings.debug = mbgl::EnumType(map.getDebug());
     settings.save();
     mbgl::Log::Info(mbgl::Event::General,
-                     "Exit location: --lat=\"" + std::to_string(settings.latitude) +
-                     "\" --lon=\"" + std::to_string(settings.longitude) +
-                     "\" --zoom=\"" + std::to_string(settings.zoom) +
-                     "\" --bearing=\"" + std::to_string(settings.bearing) + "\"");
+                    "Exit location: --lat=\"" + std::to_string(settings.latitude) + "\" --lon=\"" +
+                        std::to_string(settings.longitude) + "\" --zoom=\"" + std::to_string(settings.zoom) +
+                        "\" --bearing=\"" + std::to_string(settings.bearing) + "\"");
 
     view = nullptr;
 

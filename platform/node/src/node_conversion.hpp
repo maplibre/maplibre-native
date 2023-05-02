@@ -46,12 +46,13 @@ public:
         return value->IsObject() && !value->IsArray();
     }
 
-    static std::optional<v8::Local<v8::Value>> objectMember(const v8::Local<v8::Value>& value, const char * name) {
+    static std::optional<v8::Local<v8::Value>> objectMember(const v8::Local<v8::Value>& value, const char* name) {
         Nan::EscapableHandleScope scope;
         if (!Nan::Has(Nan::To<v8::Object>(value).ToLocalChecked(), Nan::New(name).ToLocalChecked()).FromJust()) {
             return {};
         }
-        Nan::MaybeLocal<v8::Value> result = Nan::Get(Nan::To<v8::Object>(value).ToLocalChecked(), Nan::New(name).ToLocalChecked());
+        Nan::MaybeLocal<v8::Value> result = Nan::Get(Nan::To<v8::Object>(value).ToLocalChecked(),
+                                                     Nan::New(name).ToLocalChecked());
         if (result.IsEmpty()) {
             return {};
         }
@@ -61,11 +62,13 @@ public:
     template <class Fn>
     static std::optional<Error> eachMember(const v8::Local<v8::Value>& value, Fn&& fn) {
         Nan::HandleScope scope;
-        v8::Local<v8::Array> names = Nan::GetOwnPropertyNames(Nan::To<v8::Object>(value).ToLocalChecked()).ToLocalChecked();
+        v8::Local<v8::Array> names =
+            Nan::GetOwnPropertyNames(Nan::To<v8::Object>(value).ToLocalChecked()).ToLocalChecked();
         for (uint32_t i = 0; i < names->Length(); ++i) {
             v8::Local<v8::Value> k = Nan::Get(names, i).ToLocalChecked();
             v8::Local<v8::Value> v = Nan::Get(Nan::To<v8::Object>(value).ToLocalChecked(), k).ToLocalChecked();
-            std::optional<Error> result = fn(*Nan::Utf8String(k), std::move(v)); // NOLINT(performance-move-const-arg)
+            std::optional<Error> result = fn(*Nan::Utf8String(k),
+                                             std::move(v)); // NOLINT(performance-move-const-arg)
             if (result) {
                 return result;
             }
@@ -107,17 +110,17 @@ public:
 
     static std::optional<Value> toValue(const v8::Local<v8::Value>& value) {
         if (value->IsFalse()) {
-            return { false };
+            return {false};
         } else if (value->IsTrue()) {
-            return { true };
+            return {true};
         } else if (value->IsString()) {
-            return { std::string(*Nan::Utf8String(value)) };
+            return {std::string(*Nan::Utf8String(value))};
         } else if (value->IsUint32()) {
-            return { Nan::To<std::uint32_t>(value).ToChecked() };
+            return {Nan::To<std::uint32_t>(value).ToChecked()};
         } else if (value->IsInt32()) {
-            return { Nan::To<std::int32_t>(value).ToChecked() };
+            return {Nan::To<std::int32_t>(value).ToChecked()};
         } else if (value->IsNumber()) {
-            return { Nan::To<double>(value).ToChecked() };
+            return {Nan::To<double>(value).ToChecked()};
         } else {
             return {};
         }
@@ -131,14 +134,14 @@ public:
             std::string string = *Nan::Utf8String(stringified);
             return parseGeoJSON(string, error);
         } catch (const std::exception& ex) {
-            error = { ex.what() };
+            error = {ex.what()};
             return {};
         }
     }
 };
 
-template <class T, class...Args>
-std::optional<T> convert(const v8::Local<v8::Value>& value, Error& error, Args&&...args) {
+template <class T, class... Args>
+std::optional<T> convert(const v8::Local<v8::Value>& value, Error& error, Args&&... args) {
     return convert<T>(Convertible(value), error, std::forward<Args>(args)...);
 }
 

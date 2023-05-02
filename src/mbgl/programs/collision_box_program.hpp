@@ -10,58 +10,35 @@
 
 namespace mbgl {
 
-using CollisionBoxLayoutAttributes = TypeList<
-    attributes::pos,
-    attributes::anchor_pos,
-    attributes::extrude>;
+using CollisionBoxLayoutAttributes = TypeList<attributes::pos, attributes::anchor_pos, attributes::extrude>;
 
 using CollisionBoxDynamicAttributes = TypeList<attributes::placed, attributes::shift>;
 
-class CollisionBoxProgram final : public Program<
-    CollisionBoxProgram,
-    shaders::BuiltIn::CollisionBoxProgram,
-    gfx::PrimitiveType::Line,
-    TypeListConcat<CollisionBoxLayoutAttributes, CollisionBoxDynamicAttributes>,
-    TypeList<
-        uniforms::matrix,
-        uniforms::extrude_scale,
-        uniforms::camera_to_center_distance>,
-    TypeList<>,
-    style::Properties<>>
-{
+class CollisionBoxProgram final
+    : public Program<CollisionBoxProgram,
+                     shaders::BuiltIn::CollisionBoxProgram,
+                     gfx::PrimitiveType::Line,
+                     TypeListConcat<CollisionBoxLayoutAttributes, CollisionBoxDynamicAttributes>,
+                     TypeList<uniforms::matrix, uniforms::extrude_scale, uniforms::camera_to_center_distance>,
+                     TypeList<>,
+                     style::Properties<>> {
 public:
     static constexpr std::string_view Name{"CollisionBoxProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using Program::Program;
 
     static gfx::Vertex<CollisionBoxLayoutAttributes> layoutVertex(Point<float> a, Point<float> anchor, Point<float> o) {
-        return {
-            {{
-                static_cast<int16_t>(a.x),
-                static_cast<int16_t>(a.y)
-            }},
-            {{
-                static_cast<int16_t>(anchor.x),
-                static_cast<int16_t>(anchor.y)
-            }},
-            {{
-                static_cast<int16_t>(::round(o.x)),
-                static_cast<int16_t>(::round(o.y))
-            }}
-        };
+        return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
+                {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
+                {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
     static gfx::Vertex<CollisionBoxDynamicAttributes> dynamicVertex(bool placed, bool notUsed, Point<float> shift) {
-        return {
-            {{ static_cast<uint8_t>(placed), static_cast<uint8_t>(notUsed)  }},
-            {{ shift.x, shift.y }}
-        };
+        return {{{static_cast<uint8_t>(placed), static_cast<uint8_t>(notUsed)}}, {{shift.x, shift.y}}};
     }
 
-	template <class DrawMode>
+    template <class DrawMode>
     void draw(gfx::Context& context,
               gfx::RenderPass& renderPass,
               const DrawMode& drawMode,
@@ -79,12 +56,13 @@ public:
               const TextureBindings& textureBindings,
               float currentZoom,
               const std::string& layerID) {
-        UniformValues uniformValues = layoutUniformValues
-            .concat(paintPropertyBinders.uniformValues(currentZoom, currentProperties));
+        UniformValues uniformValues = layoutUniformValues.concat(
+            paintPropertyBinders.uniformValues(currentZoom, currentProperties));
 
-        AttributeBindings allAttributeBindings = gfx::AttributeBindings<CollisionBoxLayoutAttributes>(layoutVertexBuffer)
-            .concat(gfx::AttributeBindings<CollisionBoxDynamicAttributes>(dynamicVertexBuffer))
-            .concat(paintPropertyBinders.attributeBindings(currentProperties));
+        AttributeBindings allAttributeBindings =
+            gfx::AttributeBindings<CollisionBoxLayoutAttributes>(layoutVertexBuffer)
+                .concat(gfx::AttributeBindings<CollisionBoxDynamicAttributes>(dynamicVertexBuffer))
+                .concat(paintPropertyBinders.attributeBindings(currentProperties));
 
         assert(layoutVertexBuffer.elements == dynamicVertexBuffer.elements);
 
@@ -113,43 +91,27 @@ public:
     }
 };
 
-
-class CollisionCircleProgram final : public Program<
-    CollisionCircleProgram,
-    shaders::BuiltIn::CollisionCircleProgram,
-    gfx::PrimitiveType::Triangle,
-    TypeListConcat<CollisionBoxLayoutAttributes, CollisionBoxDynamicAttributes>,
-    TypeList<
-        uniforms::matrix,
-        uniforms::extrude_scale,
-        uniforms::overscale_factor,
-        uniforms::camera_to_center_distance>,
-    TypeList<>,
-    style::Properties<>>
-{
+class CollisionCircleProgram final
+    : public Program<CollisionCircleProgram,
+                     shaders::BuiltIn::CollisionCircleProgram,
+                     gfx::PrimitiveType::Triangle,
+                     TypeListConcat<CollisionBoxLayoutAttributes, CollisionBoxDynamicAttributes>,
+                     TypeList<uniforms::matrix,
+                              uniforms::extrude_scale,
+                              uniforms::overscale_factor,
+                              uniforms::camera_to_center_distance>,
+                     TypeList<>,
+                     style::Properties<>> {
 public:
     static constexpr std::string_view Name{"CollisionCircleProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using Program::Program;
 
     static gfx::Vertex<CollisionBoxLayoutAttributes> vertex(Point<float> a, Point<float> anchor, Point<float> o) {
-        return {
-            {{
-                static_cast<int16_t>(a.x),
-                static_cast<int16_t>(a.y)
-            }},
-            {{
-                static_cast<int16_t>(anchor.x),
-                static_cast<int16_t>(anchor.y)
-            }},
-            {{
-                static_cast<int16_t>(::round(o.x)),
-                static_cast<int16_t>(::round(o.y))
-            }}
-        };
+        return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
+                {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
+                {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
     template <class DrawMode>
@@ -170,12 +132,13 @@ public:
               const TextureBindings& textureBindings,
               float currentZoom,
               const std::string& layerID) {
-        UniformValues uniformValues = layoutUniformValues
-            .concat(paintPropertyBinders.uniformValues(currentZoom, currentProperties));
+        UniformValues uniformValues = layoutUniformValues.concat(
+            paintPropertyBinders.uniformValues(currentZoom, currentProperties));
 
-        AttributeBindings allAttributeBindings = gfx::AttributeBindings<CollisionBoxLayoutAttributes>(layoutVertexBuffer)
-            .concat(gfx::AttributeBindings<CollisionBoxDynamicAttributes>(dynamicVertexBuffer))
-            .concat(paintPropertyBinders.attributeBindings(currentProperties));
+        AttributeBindings allAttributeBindings =
+            gfx::AttributeBindings<CollisionBoxLayoutAttributes>(layoutVertexBuffer)
+                .concat(gfx::AttributeBindings<CollisionBoxDynamicAttributes>(dynamicVertexBuffer))
+                .concat(paintPropertyBinders.attributeBindings(currentProperties));
 
         for (auto& segment : segments) {
             auto drawScopeIt = segment.drawScopes.find(layerID);

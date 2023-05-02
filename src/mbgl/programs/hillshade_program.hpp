@@ -18,42 +18,26 @@ MBGL_DEFINE_UNIFORM_VECTOR(float, 2, light);
 MBGL_DEFINE_UNIFORM_VECTOR(float, 2, latrange);
 } // namespace uniforms
 
-class HillshadeProgram final : public Program<
-    HillshadeProgram,
-    shaders::BuiltIn::HillshadeProgram,
-    gfx::PrimitiveType::Triangle,
-    TypeList<
-        attributes::pos,
-        attributes::texture_pos>,
-    TypeList<
-        uniforms::matrix,
-        uniforms::highlight,
-        uniforms::shadow,
-        uniforms::accent,
-        uniforms::light,
-        uniforms::latrange>,
-    TypeList<
-        textures::image>,
-    style::HillshadePaintProperties>{
+class HillshadeProgram final : public Program<HillshadeProgram,
+                                              shaders::BuiltIn::HillshadeProgram,
+                                              gfx::PrimitiveType::Triangle,
+                                              TypeList<attributes::pos, attributes::texture_pos>,
+                                              TypeList<uniforms::matrix,
+                                                       uniforms::highlight,
+                                                       uniforms::shadow,
+                                                       uniforms::accent,
+                                                       uniforms::light,
+                                                       uniforms::latrange>,
+                                              TypeList<textures::image>,
+                                              style::HillshadePaintProperties> {
 public:
     static constexpr std::string_view Name{"HillshadeProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using Program::Program;
 
     static LayoutVertex layoutVertex(Point<int16_t> p, Point<uint16_t> t) {
-        return LayoutVertex {
-            {{
-                p.x,
-                p.y
-            }},
-            {{
-                t.x,
-                t.y
-            }}
-        };
+        return LayoutVertex{{{p.x, p.y}}, {{t.x, t.y}}};
     }
 };
 

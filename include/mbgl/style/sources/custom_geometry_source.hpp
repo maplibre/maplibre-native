@@ -33,9 +33,10 @@ public:
     struct Options {
         TileFunction fetchTileFunction;
         TileFunction cancelTileFunction;
-        Range<uint8_t> zoomRange = { 0, 18};
+        Range<uint8_t> zoomRange = {0, 18};
         TileOptions tileOptions;
     };
+
 public:
     CustomGeometrySource(std::string id, const CustomGeometrySource::Options& options);
     ~CustomGeometrySource() final;
@@ -47,9 +48,7 @@ public:
     class Impl;
     const Impl& impl() const;
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
@@ -57,7 +56,7 @@ protected:
 private:
     std::shared_ptr<ThreadPool> threadPool;
     std::unique_ptr<Actor<CustomTileLoader>> loader;
-    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
 
 template <>

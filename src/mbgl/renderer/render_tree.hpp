@@ -24,7 +24,7 @@ public:
     virtual void upload(gfx::UploadPass&) const = 0;
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
-    virtual const std::string& getName() const = 0; 
+    virtual const std::string& getName() const = 0;
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;
@@ -66,9 +66,8 @@ public:
     virtual LineAtlas& getLineAtlas() const = 0;
     virtual PatternAtlas& getPatternAtlas() const = 0;
     // Parameters
-    const RenderTreeParameters& getParameters() const {
-        return *parameters;
-    }
+    const RenderTreeParameters& getParameters() const { return *parameters; }
+
 protected:
     RenderTree(std::unique_ptr<RenderTreeParameters> parameters_)
         : parameters(std::move(parameters_)) {
@@ -76,6 +75,5 @@ protected:
     }
     std::unique_ptr<RenderTreeParameters> parameters;
 };
-
 
 } // namespace mbgl

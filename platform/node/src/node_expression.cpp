@@ -59,7 +59,8 @@ type::Type parseType(v8::Local<v8::Object> type) {
 #else
         v8::Local<v8::Context> context = type->GetCreationContext().ToLocalChecked();
 #endif
-        type::Type itemType = parseType(Nan::Get(type, Nan::New("itemType").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
+        type::Type itemType = parseType(
+            Nan::Get(type, Nan::New("itemType").ToLocalChecked()).ToLocalChecked()->ToObject(context).ToLocalChecked());
         std::optional<std::size_t> N;
 
         v8::Local<v8::String> Nkey = Nan::New("N").ToLocalChecked();
@@ -97,12 +98,8 @@ void NodeExpression::Parse(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         for (std::size_t i = 0; i < errors.size(); ++i) {
             const auto& error = errors[i];
             v8::Local<v8::Object> err = Nan::New<v8::Object>();
-            Nan::Set(err,
-                    Nan::New("key").ToLocalChecked(),
-                    Nan::New(error.key.c_str()).ToLocalChecked());
-            Nan::Set(err,
-                    Nan::New("error").ToLocalChecked(),
-                    Nan::New(error.message.c_str()).ToLocalChecked());
+            Nan::Set(err, Nan::New("key").ToLocalChecked(), Nan::New(error.key.c_str()).ToLocalChecked());
+            Nan::Set(err, Nan::New("error").ToLocalChecked(), Nan::New(error.message.c_str()).ToLocalChecked());
             Nan::Set(result, Nan::New(static_cast<uint32_t>(i)), err);
         }
         info.GetReturnValue().Set(result);
@@ -119,7 +116,7 @@ void NodeExpression::Parse(const Nan::FunctionCallbackInfo<v8::Value>& info) {
             if (func) {
                 return success(std::move(*func));
             }
-            return fail({ { error.message, "" } });
+            return fail({{error.message, ""}});
         }
 
         ParsingContext ctx = expected ? ParsingContext(*expected) : ParsingContext();
@@ -129,7 +126,7 @@ void NodeExpression::Parse(const Nan::FunctionCallbackInfo<v8::Value>& info) {
             return success(std::move(*parsed));
         }
         return fail(ctx.getErrors());
-    } catch(std::exception &ex) {
+    } catch (std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
 }
@@ -213,12 +210,10 @@ struct ToValue {
     }
 
     v8::Local<v8::Value> operator()(const mbgl::Color& color) {
-        return operator()(std::vector<Value> {
-            static_cast<double>(color.r),
-            static_cast<double>(color.g),
-            static_cast<double>(color.b),
-            static_cast<double>(color.a)
-        });
+        return operator()(std::vector<Value>{static_cast<double>(color.r),
+                                             static_cast<double>(color.g),
+                                             static_cast<double>(color.b),
+                                             static_cast<double>(color.a)});
     }
 
     v8::Local<v8::Value> operator()(const std::unordered_map<std::string, Value>& map) {
@@ -248,11 +243,14 @@ void NodeExpression::Evaluate(const Nan::FunctionCallbackInfo<v8::Value>& info) 
     }
 
     std::optional<float> zoom;
-    v8::Local<v8::Value> v8zoom = Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("zoom").ToLocalChecked()).ToLocalChecked();
+    v8::Local<v8::Value> v8zoom =
+        Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("zoom").ToLocalChecked()).ToLocalChecked();
     if (v8zoom->IsNumber()) zoom = static_cast<float>(Nan::To<double>(v8zoom).FromJust());
 
     std::optional<double> heatmapDensity;
-    v8::Local<v8::Value> v8heatmapDensity = Nan::Get(info[0]->ToObject(context).ToLocalChecked(), Nan::New("heatmapDensity").ToLocalChecked()).ToLocalChecked();
+    v8::Local<v8::Value> v8heatmapDensity = Nan::Get(info[0]->ToObject(context).ToLocalChecked(),
+                                                     Nan::New("heatmapDensity").ToLocalChecked())
+                                                .ToLocalChecked();
     if (v8heatmapDensity->IsNumber()) heatmapDensity = Nan::To<double>(v8heatmapDensity).FromJust();
 
     Nan::JSON NanJSON;
@@ -270,12 +268,11 @@ void NodeExpression::Evaluate(const Nan::FunctionCallbackInfo<v8::Value>& info) 
             info.GetReturnValue().Set(toJS(*result));
         } else {
             v8::Local<v8::Object> res = Nan::New<v8::Object>();
-            Nan::Set(res,
-                    Nan::New("error").ToLocalChecked(),
-                    Nan::New(result.error().message.c_str()).ToLocalChecked());
+            Nan::Set(
+                res, Nan::New("error").ToLocalChecked(), Nan::New(result.error().message.c_str()).ToLocalChecked());
             info.GetReturnValue().Set(res);
         }
-    } catch(std::exception &ex) {
+    } catch (std::exception& ex) {
         return Nan::ThrowTypeError(ex.what());
     }
 }
@@ -285,7 +282,7 @@ void NodeExpression::GetType(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     const std::unique_ptr<Expression>& expression = nodeExpr->expression;
 
     const type::Type type = expression->getType();
-    const std::string name = type.match([&] (const auto& t) { return t.getName(); });
+    const std::string name = type.match([&](const auto& t) { return t.getName(); });
     info.GetReturnValue().Set(Nan::New(name.c_str()).ToLocalChecked());
 }
 

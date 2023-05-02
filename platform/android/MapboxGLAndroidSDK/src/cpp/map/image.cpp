@@ -13,7 +13,7 @@ mbgl::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& i
     static auto bufferField = javaClass.GetField<jni::Array<jbyte>>(env, "buffer");
     static auto nameField = javaClass.GetField<jni::String>(env, "name");
     static auto sdfField = javaClass.GetField<jni::jboolean>(env, "sdf");
-    static auto contentField = javaClass.GetField<jni::Array<jfloat >>(env, "content");
+    static auto contentField = javaClass.GetField<jni::Array<jfloat>>(env, "content");
     static auto stretchXField = javaClass.GetField<jni::Array<jfloat>>(env, "stretchX");
     static auto stretchYField = javaClass.GetField<jni::Array<jfloat>>(env, "stretchY");
 
@@ -22,20 +22,19 @@ mbgl::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& i
     auto pixelRatio = image.Get(env, pixelRatioField);
     auto pixels = image.Get(env, bufferField);
     auto name = jni::Make<std::string>(env, image.Get(env, nameField));
-    auto sdf = (bool) image.Get(env, sdfField);
+    auto sdf = (bool)image.Get(env, sdfField);
     auto content = image.Get(env, contentField);
     auto stretchX = image.Get(env, stretchXField);
     auto stretchY = image.Get(env, stretchYField);
     jni::NullCheck(env, pixels.get());
     std::size_t size = pixels.Length(env);
 
-    mbgl::PremultipliedImage premultipliedImage({ static_cast<uint32_t>(width), static_cast<uint32_t>(height) });
+    mbgl::PremultipliedImage premultipliedImage({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
     if (premultipliedImage.bytes() != uint32_t(size)) {
         throw mbgl::util::StyleImageException("Image pixel count mismatch");
     }
 
-    jni::GetArrayRegion(env, *pixels, 0, size,
-                        reinterpret_cast<jbyte *>(premultipliedImage.data.get()));
+    jni::GetArrayRegion(env, *pixels, 0, size, reinterpret_cast<jbyte*>(premultipliedImage.data.get()));
 
     style::ImageStretches imageStretchesX = {};
     style::ImageStretches imageStretchesY = {};
@@ -53,24 +52,23 @@ mbgl::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& i
     }
 
     if (content) {
-        const style::ImageContent imageContent = style::ImageContent{content.Get(env, 0),
-                                                                     content.Get(env, 1),
-                                                                     content.Get(env, 2),
-                                                                     content.Get(env, 3)};
-        return mbgl::style::Image{name, std::move(premultipliedImage), pixelRatio, sdf,
+        const style::ImageContent imageContent = style::ImageContent{
+            content.Get(env, 0), content.Get(env, 1), content.Get(env, 2), content.Get(env, 3)};
+        return mbgl::style::Image{name,
+                                  std::move(premultipliedImage),
+                                  pixelRatio,
+                                  sdf,
                                   imageStretchesX,
                                   imageStretchesY,
                                   std::move(imageContent)};
     }
 
-    return mbgl::style::Image{name, std::move(premultipliedImage), pixelRatio, sdf,
-                              imageStretchesX,
-                              imageStretchesY};
+    return mbgl::style::Image{name, std::move(premultipliedImage), pixelRatio, sdf, imageStretchesX, imageStretchesY};
 }
 
-void Image::registerNative(jni::JNIEnv &env) {
+void Image::registerNative(jni::JNIEnv& env) {
     jni::Class<Image>::Singleton(env);
 }
 
 } // namespace android
-} // namespace mb
+} // namespace mbgl

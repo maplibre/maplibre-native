@@ -55,7 +55,7 @@ struct DepthMask {
 
 struct ColorMask {
     using Type = gfx::ColorMode::Mask;
-    static const constexpr Type Default = { true, true, true, true };
+    static const constexpr Type Default = {true, true, true, true};
     static void Set(const Type&);
     static Type Get();
 };
@@ -66,7 +66,7 @@ struct StencilFunc {
         int32_t ref;
         uint32_t mask;
     };
-    static const constexpr Type Default = { gfx::StencilMode::Always::func, 0, ~0u };
+    static const constexpr Type Default = {gfx::StencilMode::Always::func, 0, ~0u};
     static void Set(const Type&);
     static Type Get();
 };
@@ -88,7 +88,8 @@ struct StencilOp {
         gfx::StencilOpType dpfail;
         gfx::StencilOpType dppass;
     };
-    static const constexpr Type Default = { gfx::StencilOpType::Keep, gfx::StencilOpType::Keep, gfx::StencilOpType::Keep };
+    static const constexpr Type Default = {
+        gfx::StencilOpType::Keep, gfx::StencilOpType::Keep, gfx::StencilOpType::Keep};
     static void Set(const Type&);
     static Type Get();
 };
@@ -99,7 +100,7 @@ constexpr bool operator!=(const StencilOp::Type& a, const StencilOp::Type& b) {
 
 struct DepthRange {
     using Type = Range<float>;
-    static const constexpr Type Default = { 0, 1 };
+    static const constexpr Type Default = {0, 1};
     static void Set(const Type&);
     static Type Get();
 };
@@ -137,7 +138,7 @@ struct BlendFunc {
         gfx::ColorBlendFactorType sfactor;
         gfx::ColorBlendFactorType dfactor;
     };
-    static const constexpr Type Default = { gfx::ColorBlendFactorType::One, gfx::ColorBlendFactorType::Zero };
+    static const constexpr Type Default = {gfx::ColorBlendFactorType::One, gfx::ColorBlendFactorType::Zero};
     static void Set(const Type&);
     static Type Get();
 };
@@ -180,7 +181,7 @@ struct Viewport {
         int32_t y;
         Size size;
     };
-    static const constexpr Type Default = { 0, 0, { 0, 0 } };
+    static const constexpr Type Default = {0, 0, {0, 0}};
     static void Set(const Type&);
     static Type Get();
 };
@@ -271,14 +272,14 @@ struct VertexAttribute {
 
 struct PixelStorePack {
     using Type = PixelStorageType;
-    static const constexpr Type Default = { 4 };
+    static const constexpr Type Default = {4};
     static void Set(const Type&);
     static Type Get();
 };
 
 struct PixelStoreUnpack {
     using Type = PixelStorageType;
-    static const constexpr Type Default = { 4 };
+    static const constexpr Type Default = {4};
     static void Set(const Type&);
     static Type Get();
 };

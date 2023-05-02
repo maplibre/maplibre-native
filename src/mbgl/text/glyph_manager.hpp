@@ -28,20 +28,19 @@ class GlyphManager {
 public:
     GlyphManager(const GlyphManager&) = delete;
     GlyphManager& operator=(const GlyphManager&) = delete;
-    explicit GlyphManager(std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()));
+    explicit GlyphManager(
+        std::unique_ptr<LocalGlyphRasterizer> = std::make_unique<LocalGlyphRasterizer>(std::optional<std::string>()));
     ~GlyphManager();
 
-    // Workers send a `getGlyphs` message to the main thread once they have determined
-    // their `GlyphDependencies`. If all glyphs are already locally available, GlyphManager
-    // will provide them to the requestor immediately. Otherwise, it makes a request on the
-    // FileSource is made for each range needed, and notifies the observer when all are
-    // complete.
+    // Workers send a `getGlyphs` message to the main thread once they have
+    // determined their `GlyphDependencies`. If all glyphs are already locally
+    // available, GlyphManager will provide them to the requestor immediately.
+    // Otherwise, it makes a request on the FileSource is made for each range
+    // needed, and notifies the observer when all are complete.
     void getGlyphs(GlyphRequestor&, GlyphDependencies, FileSource&);
     void removeRequestor(GlyphRequestor&);
 
-    void setURL(const std::string& url) {
-        glyphURL = url;
-    }
+    void setURL(const std::string& url) { glyphURL = url; }
 
     void setObserver(GlyphManagerObserver*);
 
@@ -68,9 +67,9 @@ private:
     void requestRange(GlyphRequest&, const FontStack&, const GlyphRange&, FileSource& fileSource);
     void processResponse(const Response&, const FontStack&, const GlyphRange&);
     void notify(GlyphRequestor&, const GlyphDependencies&);
-    
+
     GlyphManagerObserver* observer = nullptr;
-    
+
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
 };
 

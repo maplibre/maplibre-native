@@ -21,8 +21,7 @@ class Context;
 class VertexArrayState {
 public:
     VertexArrayState(UniqueVertexArray vertexArray_)
-        : vertexArray(std::move(vertexArray_)) {
-    }
+        : vertexArray(std::move(vertexArray_)) {}
 
     void setDirty() {
         indexBuffer.setDirty();
@@ -58,11 +57,9 @@ using UniqueVertexArrayState = std::unique_ptr<VertexArrayState, VertexArrayStat
 class VertexArray {
 public:
     VertexArray(UniqueVertexArrayState state_)
-        : state(std::move(state_)) {
-    }
+        : state(std::move(state_)) {}
     VertexArray(VertexArray&& other)
-        : state(std::move(other.state)) {
-    }
+        : state(std::move(other.state)) {}
 
     void bind(Context&, const gfx::IndexBuffer&, const AttributeBindingArray&);
 

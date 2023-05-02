@@ -56,12 +56,11 @@ void RenderCustomLayer::markContextDestroyed() {
     contextDestroyed = true;
 }
 
-void RenderCustomLayer::prepare(const LayerPrepareParameters&) {
-}
+void RenderCustomLayer::prepare(const LayerPrepareParameters&) {}
 
 void RenderCustomLayer::render(PaintParameters& paintParameters) {
     if (host != impl(baseImpl).host) {
-        //If the context changed, deinitialize the previous one before initializing the new one.
+        // If the context changed, deinitialize the previous one before initializing the new one.
         if (host && !contextDestroyed) {
             MBGL_CHECK_ERROR(host->deinitialize());
         }
@@ -96,8 +95,8 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 
     MBGL_CHECK_ERROR(host->render(parameters));
 
-    // Reset the view back to our original one, just in case the CustomLayer changed
-    // the viewport or Framebuffer.
+    // Reset the view back to our original one, just in case the CustomLayer
+    // changed the viewport or Framebuffer.
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
     glContext.setDirtyState();
 }

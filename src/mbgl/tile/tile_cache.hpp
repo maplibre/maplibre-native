@@ -3,7 +3,6 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile.hpp>
 
-
 #include <list>
 #include <memory>
 #include <map>
@@ -12,7 +11,8 @@ namespace mbgl {
 
 class TileCache {
 public:
-    TileCache(size_t size_ = 0) : size(size_) {}
+    TileCache(size_t size_ = 0)
+        : size(size_) {}
 
     void setSize(size_t);
     size_t getSize() const { return size; };

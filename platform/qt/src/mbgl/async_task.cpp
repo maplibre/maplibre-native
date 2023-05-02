@@ -28,15 +28,13 @@ void AsyncTask::Impl::runTask() {
 }
 
 AsyncTask::AsyncTask(std::function<void()>&& fn)
-    : impl(std::make_unique<Impl>(std::move(fn))) {
-}
+    : impl(std::make_unique<Impl>(std::move(fn))) {}
 
-AsyncTask::~AsyncTask() {
-}
+AsyncTask::~AsyncTask() {}
 
 void AsyncTask::send() {
     impl->maySend();
 }
 
-}
-}
+} // namespace util
+} // namespace mbgl

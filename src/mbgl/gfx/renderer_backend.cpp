@@ -5,15 +5,13 @@
 namespace mbgl {
 namespace gfx {
 
-RendererBackend::RendererBackend(const ContextMode contextMode_) : contextMode(contextMode_) {
-}
+RendererBackend::RendererBackend(const ContextMode contextMode_)
+    : contextMode(contextMode_) {}
 RendererBackend::~RendererBackend() = default;
 
 gfx::Context& RendererBackend::getContext() {
     assert(BackendScope::exists());
-    std::call_once(initialized, [this] {
-        context = createContext();
-    });
+    std::call_once(initialized, [this] { context = createContext(); });
     assert(context);
     return *context;
 }

@@ -17,8 +17,8 @@ using namespace mbgl;
 using namespace mbgl::style;
 using namespace mbgl::platform;
 
-// Note that custom layers need to draw geometry with a z value of 1 to take advantage of
-// depth-based fragment culling.
+// Note that custom layers need to draw geometry with a z value of 1 to take
+// advantage of depth-based fragment culling.
 static const GLchar* vertexShaderSource = R"MBGL_SHADER(
 attribute vec2 a_pos;
 void main() {
@@ -32,9 +32,9 @@ void main() {
 }
 )MBGL_SHADER";
 
-// Not using any mbgl-specific stuff (other than a basic error-checking macro) in the
-// layer implementation because it is intended to reflect how someone using custom layers
-// might actually write their own implementation.
+// Not using any mbgl-specific stuff (other than a basic error-checking macro)
+// in the layer implementation because it is intended to reflect how someone
+// using custom layers might actually write their own implementation.
 
 class TestLayer : public mbgl::style::CustomLayerHost {
 public:
@@ -52,7 +52,7 @@ public:
         MBGL_CHECK_ERROR(glLinkProgram(program));
         a_pos = MBGL_CHECK_ERROR(glGetAttribLocation(program, "a_pos"));
 
-        GLfloat triangle[] = { 0, 0.5, 0.5, -0.5, -0.5, -0.5 };
+        GLfloat triangle[] = {0, 0.5, 0.5, -0.5, -0.5, -0.5};
         MBGL_CHECK_ERROR(glGenBuffers(1, &buffer));
         MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, buffer));
         MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(GLfloat), triangle, GL_STATIC_DRAW));
@@ -69,14 +69,14 @@ public:
     void contextLost() override {}
 
     void deinitialize() override {
-         if (program) {
-                MBGL_CHECK_ERROR(glDeleteBuffers(1, &buffer));
-                MBGL_CHECK_ERROR(glDetachShader(program, vertexShader));
-                MBGL_CHECK_ERROR(glDetachShader(program, fragmentShader));
-                MBGL_CHECK_ERROR(glDeleteShader(vertexShader));
-                MBGL_CHECK_ERROR(glDeleteShader(fragmentShader));
-                MBGL_CHECK_ERROR(glDeleteProgram(program));
-            }
+        if (program) {
+            MBGL_CHECK_ERROR(glDeleteBuffers(1, &buffer));
+            MBGL_CHECK_ERROR(glDetachShader(program, vertexShader));
+            MBGL_CHECK_ERROR(glDetachShader(program, fragmentShader));
+            MBGL_CHECK_ERROR(glDeleteShader(vertexShader));
+            MBGL_CHECK_ERROR(glDeleteShader(fragmentShader));
+            MBGL_CHECK_ERROR(glDeleteProgram(program));
+        }
     }
 
     GLuint program = 0;
@@ -93,19 +93,18 @@ TEST(CustomLayer, Basic) {
 
     util::RunLoop loop;
 
-    HeadlessFrontend frontend { 1 };
-    Map map(frontend, MapObserver::nullObserver(),
+    HeadlessFrontend frontend{1};
+    Map map(frontend,
+            MapObserver::nullObserver(),
             MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
             ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
-    map.jumpTo(CameraOptions().withCenter(LatLng { 37.8, -122.5 }).withZoom(10.0));
-    map.getStyle().addLayer(std::make_unique<CustomLayer>(
-        "custom",
-        std::make_unique<TestLayer>()));
+    map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
+    map.getStyle().addLayer(std::make_unique<CustomLayer>("custom", std::make_unique<TestLayer>()));
 
     auto layer = std::make_unique<FillLayer>("landcover", "mapbox");
     layer->setSourceLayer("landcover");
-    layer->setFillColor(Color{ 1.0, 1.0, 0.0, 1.0 });
+    layer->setFillColor(Color{1.0, 1.0, 0.0, 1.0});
     map.getStyle().addLayer(std::move(layer));
 
     test::checkImage("test/fixtures/custom_layer/basic", frontend.render(map).image, 0.0006, 0.1);

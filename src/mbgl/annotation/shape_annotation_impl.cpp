@@ -14,8 +14,7 @@ using namespace style;
 
 ShapeAnnotationImpl::ShapeAnnotationImpl(const AnnotationID id_)
     : id(id_),
-      layerID(AnnotationManager::ShapeLayerID + util::toString(id)) {
-}
+      layerID(AnnotationManager::ShapeLayerID + util::toString(id)) {}
 
 void ShapeAnnotationImpl::updateTileData(const CanonicalTileID& tileID, AnnotationTileData& data) {
     static const double baseTolerance = 4;
@@ -25,8 +24,8 @@ void ShapeAnnotationImpl::updateTileData(const CanonicalTileID& tileID, Annotati
         features.emplace_back(ShapeAnnotationGeometry::visit(
             geometry(), [](auto&& geom) { return Feature{std::forward<decltype(geom)>(geom)}; }));
         mapbox::geojsonvt::Options options;
-        // The annotation source is currently hard coded to maxzoom 16, so we're topping out at z16
-        // here as well.
+        // The annotation source is currently hard coded to maxzoom 16, so we're
+        // topping out at z16 here as well.
         options.maxZoom = 16;
         options.buffer = 255u;
         options.extent = util::EXTENT;
@@ -35,8 +34,7 @@ void ShapeAnnotationImpl::updateTileData(const CanonicalTileID& tileID, Annotati
     }
 
     const auto& shapeTile = shapeTiler->getTile(tileID.z, tileID.x, tileID.y);
-    if (shapeTile.features.empty())
-        return;
+    if (shapeTile.features.empty()) return;
 
     auto layer = data.addLayer(layerID);
 

@@ -9,7 +9,8 @@ const style::LayerTypeInfo* CustomLayerFactory::getTypeInfo() const noexcept {
     return style::CustomLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> CustomLayerFactory::createLayer(const std::string&, const style::conversion::Convertible&) noexcept {
+std::unique_ptr<style::Layer> CustomLayerFactory::createLayer(const std::string&,
+                                                              const style::conversion::Convertible&) noexcept {
     assert(false);
     return nullptr;
 }

@@ -64,32 +64,30 @@ public:
     virtual void prepare(const SourcePrepareParameters&) = 0;
     virtual void updateFadingTiles() = 0;
     virtual bool hasFadingTiles() const = 0;
-    // If supported, returns a shared list of RenderTiles, sorted by tile id and excluding tiles hold for fade;
-    // returns nullptr otherwise.
+    // If supported, returns a shared list of RenderTiles, sorted by tile id and
+    // excluding tiles hold for fade; returns nullptr otherwise.
     virtual RenderTiles getRenderTiles() const { return nullptr; }
-    // If supported, returns a shared list of RenderTiles, sorted in opposite y position, so tiles with overlapping
-    // symbols are drawn on top of each other, with lower symbols being drawn on top of higher symbols;
-    // returns nullptr otherwise.
+    // If supported, returns a shared list of RenderTiles, sorted in opposite y
+    // position, so tiles with overlapping symbols are drawn on top of each other,
+    // with lower symbols being drawn on top of higher symbols; returns nullptr otherwise.
     virtual RenderTiles getRenderTilesSortedByYPosition() const { return nullptr; }
     // If supported, returns pointer to image data; returns nullptr otherwise.
     virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
     virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
 
-    virtual std::unordered_map<std::string, std::vector<Feature>>
-    queryRenderedFeatures(const ScreenLineString& geometry,
-                          const TransformState& transformState,
-                          const std::unordered_map<std::string, const RenderLayer*>& layers,
-                          const RenderedQueryOptions& options,
-                          const mat4& projMatrix) const = 0;
+    virtual std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
+        const ScreenLineString& geometry,
+        const TransformState& transformState,
+        const std::unordered_map<std::string, const RenderLayer*>& layers,
+        const RenderedQueryOptions& options,
+        const mat4& projMatrix) const = 0;
 
-    virtual std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const = 0;
+    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const = 0;
 
-    virtual FeatureExtensionValue
-    queryFeatureExtensions(const Feature&,
-                           const std::string&,
-                           const std::string&,
-                           const std::optional<std::map<std::string, Value>>&) const {
+    virtual FeatureExtensionValue queryFeatureExtensions(const Feature&,
+                                                         const std::string&,
+                                                         const std::string&,
+                                                         const std::optional<std::map<std::string, Value>>&) const {
         return {};
     }
 
@@ -97,7 +95,8 @@ public:
 
     virtual void getFeatureState(FeatureState&, const std::optional<std::string>&, const std::string&) const {}
 
-    virtual void removeFeatureState(const std::optional<std::string>&, const std::optional<std::string>&,
+    virtual void removeFeatureState(const std::optional<std::string>&,
+                                    const std::optional<std::string>&,
                                     const std::optional<std::string>&) {}
 
     virtual void reduceMemoryUse() = 0;

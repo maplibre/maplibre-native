@@ -26,30 +26,28 @@ namespace sqlite {
 void checkQueryError(const QSqlQuery& query) {
     QSqlError lastError = query.lastError();
     if (lastError.type() != QSqlError::NoError) {
-        throw Exception { lastError.nativeErrorCode().toInt(), lastError.databaseText().toStdString() };
+        throw Exception{lastError.nativeErrorCode().toInt(), lastError.databaseText().toStdString()};
     }
 }
 
-void checkDatabaseError(const QSqlDatabase &db) {
+void checkDatabaseError(const QSqlDatabase& db) {
     QSqlError lastError = db.lastError();
     if (lastError.type() != QSqlError::NoError) {
-        throw Exception { lastError.nativeErrorCode().toInt(), lastError.databaseText().toStdString() };
+        throw Exception{lastError.nativeErrorCode().toInt(), lastError.databaseText().toStdString()};
     }
 }
 
 namespace {
-    QString incrementCounter() {
-        static QAtomicInt count = 0;
-        return QString::number(count.fetchAndAddAcquire(1));
-    }
+QString incrementCounter() {
+    static QAtomicInt count = 0;
+    return QString::number(count.fetchAndAddAcquire(1));
 }
+} // namespace
 
 class DatabaseImpl {
 public:
     DatabaseImpl(QString connectionName_)
-        : connectionName(std::move(connectionName_))
-    {
-    }
+        : connectionName(std::move(connectionName_)) {}
 
     ~DatabaseImpl() {
         auto db = QSqlDatabase::database(connectionName);
@@ -65,24 +63,23 @@ public:
 
 class StatementImpl {
 public:
-    StatementImpl(const QString& sql, const QSqlDatabase& db) : query(db) {
+    StatementImpl(const QString& sql, const QSqlDatabase& db)
+        : query(db) {
         if (!query.prepare(sql)) {
             checkQueryError(query);
         }
     }
 
-    ~StatementImpl() {
-        query.clear();
-    }
+    ~StatementImpl() { query.clear(); }
 
     QSqlQuery query;
     int64_t lastInsertRowId = 0;
     int64_t changes = 0;
 };
 
-mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string &filename, int flags) {
+mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
     if (!QSqlDatabase::drivers().contains("QSQLITE")) {
-        return Exception { ResultCode::CantOpen, "SQLite driver not found." };
+        return Exception{ResultCode::CantOpen, "SQLite driver not found."};
     }
 
     QString connectionName = QString::number(uint64_t(QThread::currentThread())) + incrementCounter();
@@ -107,13 +104,13 @@ mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string &
     if (!db.open()) {
         // Assume every error when opening the data as CANTOPEN. Qt
         // always returns -1 for `nativeErrorCode()` on database errors.
-        return Exception { ResultCode::CantOpen, "Error opening the database." };
+        return Exception{ResultCode::CantOpen, "Error opening the database."};
     }
 
     return Database(std::make_unique<DatabaseImpl>(connectionName));
 }
 
-Database Database::open(const std::string &filename, int flags) {
+Database Database::open(const std::string& filename, int flags) {
     auto result = tryOpen(filename, flags);
     if (result.is<Exception>()) {
         throw result.get<Exception>();
@@ -123,22 +120,20 @@ Database Database::open(const std::string &filename, int flags) {
 }
 
 Database::Database(std::unique_ptr<DatabaseImpl> impl_)
-    : impl(std::move(impl_))
-{}
+    : impl(std::move(impl_)) {}
 
-Database::Database(Database &&other) noexcept
-        : impl(std::move(other.impl)) {
+Database::Database(Database&& other) noexcept
+    : impl(std::move(other.impl)) {
     assert(impl);
 }
 
-Database &Database::operator=(Database &&other) noexcept {
+Database& Database::operator=(Database&& other) noexcept {
     std::swap(impl, other.impl);
     assert(impl);
     return *this;
 }
 
-Database::~Database() {
-}
+Database::~Database() {}
 
 void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
     assert(impl);
@@ -163,11 +158,11 @@ void DatabaseImpl::setBusyTimeout(std::chrono::milliseconds timeout) {
     if (!db.open()) {
         // Assume every error when opening the data as CANTOPEN. Qt
         // always returns -1 for `nativeErrorCode()` on database errors.
-        throw Exception { ResultCode::CantOpen, "Error opening the database." };
+        throw Exception{ResultCode::CantOpen, "Error opening the database."};
     }
 }
 
-void Database::exec(const std::string &sql) {
+void Database::exec(const std::string& sql) {
     assert(impl);
     impl->exec(sql);
 }
@@ -193,8 +188,7 @@ void DatabaseImpl::exec(const std::string& sql) {
 }
 
 Statement::Statement(Database& db, const char* sql)
-    : impl(std::make_unique<StatementImpl>(QString(sql),
-                                           QSqlDatabase::database(db.impl->connectionName))) {
+    : impl(std::make_unique<StatementImpl>(QString(sql), QSqlDatabase::database(db.impl->connectionName))) {
     assert(impl);
 }
 
@@ -205,7 +199,8 @@ Statement::~Statement() {
 #endif
 }
 
-Query::Query(Statement& stmt_) : stmt(stmt_) {
+Query::Query(Statement& stmt_)
+    : stmt(stmt_) {
     assert(stmt.impl);
 
 #ifndef NDEBUG
@@ -314,8 +309,10 @@ void Query::bindBlob(int offset, const void* value_, std::size_t length, bool re
     }
 
     // Field numbering starts at 0.
-    stmt.impl->query.bindValue(offset - 1, retain ? QByteArray(value, static_cast<int>(length)) :
-            QByteArray::fromRawData(value, static_cast<int>(length)), QSql::In | QSql::Binary);
+    stmt.impl->query.bindValue(
+        offset - 1,
+        retain ? QByteArray(value, static_cast<int>(length)) : QByteArray::fromRawData(value, static_cast<int>(length)),
+        QSql::In | QSql::Binary);
 
     checkQueryError(stmt.impl->query);
 }
@@ -328,12 +325,12 @@ bool Query::run() {
     assert(stmt.impl);
 
     if (!stmt.impl->query.isValid()) {
-       if (stmt.impl->query.exec()) {
-           stmt.impl->lastInsertRowId = stmt.impl->query.lastInsertId().value<int64_t>();
-           stmt.impl->changes = stmt.impl->query.numRowsAffected();
-       } else {
-           checkQueryError(stmt.impl->query);
-       }
+        if (stmt.impl->query.exec()) {
+            stmt.impl->lastInsertRowId = stmt.impl->query.lastInsertId().value<int64_t>();
+            stmt.impl->changes = stmt.impl->query.numRowsAffected();
+        } else {
+            checkQueryError(stmt.impl->query);
+        }
     }
 
     const bool hasNext = stmt.impl->query.next();
@@ -347,14 +344,16 @@ template int Query::get(int);
 template int64_t Query::get(int);
 template double Query::get(int);
 
-template <typename T> T Query::get(int offset) {
+template <typename T>
+T Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
     return value.value<T>();
 }
 
-template <> std::vector<uint8_t> Query::get(int offset) {
+template <>
+std::vector<uint8_t> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QByteArray byteArray = stmt.impl->query.value(offset).toByteArray();
     checkQueryError(stmt.impl->query);
@@ -362,7 +361,8 @@ template <> std::vector<uint8_t> Query::get(int offset) {
     return blob;
 }
 
-template <> mbgl::Timestamp Query::get(int offset) {
+template <>
+mbgl::Timestamp Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
@@ -370,48 +370,49 @@ template <> mbgl::Timestamp Query::get(int offset) {
         std::chrono::system_clock::from_time_t(value.value<::time_t>()));
 }
 
-template <> std::optional<int64_t> Query::get(int offset) {
+template <>
+std::optional<int64_t> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
-    if (value.isNull())
-        return {};
-    return { value.value<int64_t>() };
+    if (value.isNull()) return {};
+    return {value.value<int64_t>()};
 }
 
-template <> std::optional<double> Query::get(int offset) {
+template <>
+std::optional<double> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
-    if (value.isNull())
-        return {};
-    return { value.value<double>() };
+    if (value.isNull()) return {};
+    return {value.value<double>()};
 }
 
-template <> std::string Query::get(int offset) {
+template <>
+std::string Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QByteArray value = stmt.impl->query.value(offset).toByteArray();
     checkQueryError(stmt.impl->query);
     return std::string(value.constData(), value.size());
 }
 
-template <> std::optional<std::string> Query::get(int offset) {
+template <>
+std::optional<std::string> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QByteArray value = stmt.impl->query.value(offset).toByteArray();
     checkQueryError(stmt.impl->query);
-    if (value.isNull())
-        return {};
-    return { std::string(value.constData(), value.size()) };
+    if (value.isNull()) return {};
+    return {std::string(value.constData(), value.size())};
 }
 
-template <> std::optional<mbgl::Timestamp> Query::get(int offset) {
+template <>
+std::optional<mbgl::Timestamp> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
-    if (value.isNull())
-        return {};
-    return { std::chrono::time_point_cast<mbgl::Seconds>(
-        std::chrono::system_clock::from_time_t(value.value<::time_t>())) };
+    if (value.isNull()) return {};
+    return {
+        std::chrono::time_point_cast<mbgl::Seconds>(std::chrono::system_clock::from_time_t(value.value<::time_t>()))};
 }
 
 void Query::reset() {
@@ -436,15 +437,15 @@ uint64_t Query::changes() const {
 Transaction::Transaction(Database& db_, Mode mode)
     : dbImpl(*db_.impl) {
     switch (mode) {
-    case Deferred:
-        dbImpl.exec("BEGIN DEFERRED TRANSACTION");
-        break;
-    case Immediate:
-        dbImpl.exec("BEGIN IMMEDIATE TRANSACTION");
-        break;
-    case Exclusive:
-        dbImpl.exec("BEGIN EXCLUSIVE TRANSACTION");
-        break;
+        case Deferred:
+            dbImpl.exec("BEGIN DEFERRED TRANSACTION");
+            break;
+        case Immediate:
+            dbImpl.exec("BEGIN IMMEDIATE TRANSACTION");
+            break;
+        case Exclusive:
+            dbImpl.exec("BEGIN EXCLUSIVE TRANSACTION");
+            break;
     }
 }
 

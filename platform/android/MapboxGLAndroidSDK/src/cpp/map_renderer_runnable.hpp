@@ -19,7 +19,6 @@ namespace android {
  */
 class MapRendererRunnable {
 public:
-
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/maps/renderer/MapRendererRunnable"; };
 
     static void registerNative(jni::JNIEnv&);
@@ -27,9 +26,7 @@ public:
     MapRendererRunnable(jni::JNIEnv&, std::function<void()>);
 
     // Only for jni registration, unused
-    MapRendererRunnable(jni::JNIEnv&) {
-        assert(false);
-    }
+    MapRendererRunnable(jni::JNIEnv&) { assert(false); }
 
     ~MapRendererRunnable();
 

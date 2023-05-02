@@ -2,13 +2,13 @@
 
 ## Documentation
 
-- For a high-level overview of MapLibre Native, check out the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/).
+- For a high-level overview of MapLibre Native, check out the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/).
 - See [`DEVELOPING.md`](DEVELOPING.md) for getting started with development.
 
 ## Source code checkout
 
 ```bash
-git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
+git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
 ```
 
 ## Building
@@ -17,11 +17,11 @@ MapLibre Native shares a single C++ core library with all platforms. To build it
 
 To build, run the following from the root directory
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
 ```
 
 `CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
-`MBGL_WITH_CORE_ONLY=ON` will build only the core libraries.
+`MLN_WITH_CORE_ONLY=ON` will build only the core libraries.
 Built artifacts should be available on `build` folder.
 
 
@@ -31,7 +31,7 @@ If you want to contribute code:
 
 1. Please familiarize yourself with the installation process of your chosen platform.
 
-1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-gl-native/pulls) and [issues](https://github.com/maplibre/maplibre-gl-native/issues) don’t already cover your contribution or question.
+1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-native/pulls) and [issues](https://github.com/maplibre/maplibre-native/issues) don’t already cover your contribution or question.
 
 1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
 

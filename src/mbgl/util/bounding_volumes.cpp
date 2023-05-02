@@ -33,9 +33,13 @@ Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3&
 
 namespace util {
 
-AABB::AABB() : min({{0, 0, 0}}), max({{0, 0, 0}}) {}
+AABB::AABB()
+    : min({{0, 0, 0}}),
+      max({{0, 0, 0}}) {}
 
-AABB::AABB(const vec3& min_, const vec3& max_) : min(min_), max(max_) {}
+AABB::AABB(const vec3& min_, const vec3& max_)
+    : min(min_),
+      max(max_) {}
 
 vec3 AABB::closestPoint(const vec3& point) const {
     return {{std::max(std::min(max[0], point[0]), min[0]),
@@ -60,8 +64,9 @@ AABB AABB::quadrant(int idx) const {
     const double xCenter = 0.5 * (max[0] + min[0]);
     const double yCenter = 0.5 * (max[1] + min[1]);
 
-    // This aabb is split into 4 quadrants. For each axis define in which side of the split "idx" is
-    // The result for indices 0, 1, 2, 3 is: { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 }
+    // This aabb is split into 4 quadrants. For each axis define in which side
+    // of the split "idx" is The result for indices 0, 1, 2, 3 is: { 0, 0 }, {
+    // 1, 0 }, { 0, 1 }, { 1, 1 }
     const std::array<int, 4> xSplit = {{0, 1, 0, 1}};
     const std::array<int, 4> ySplit = {{0, 0, 1, 1}};
 
@@ -102,15 +107,17 @@ enum {
 };
 
 Frustum::Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& planes_)
-    : points(points_), planes(planes_) {
+    : points(points_),
+      planes(planes_) {
     const Point<double> xBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{1, 0, 0}});
     const Point<double> yBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{0, 1, 0}});
     const Point<double> zBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{0, 0, 1}});
 
     bounds = AABB({{xBounds.x, yBounds.x, zBounds.x}}, {{xBounds.y, yBounds.y, zBounds.y}});
 
-    // Precompute a set of separating axis candidates for precise intersection tests.
-    // Remaining axes not covered in basic intersection tests are: axis[] = (edges of aabb) x (edges of frustum)
+    // Precompute a set of separating axis candidates for precise intersection
+    // tests. Remaining axes not covered in basic intersection tests are: axis[]
+    // = (edges of aabb) x (edges of frustum)
     std::array<vec3, 6> frustumEdges = {{vec3Sub(points[near_br], points[near_bl]),
                                          vec3Sub(points[near_tl], points[near_bl]),
                                          vec3Sub(points[far_tl], points[near_tl]),

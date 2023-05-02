@@ -35,8 +35,7 @@ using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 class Context {
 protected:
     Context(uint32_t maximumVertexBindingCount_)
-        : maximumVertexBindingCount(maximumVertexBindingCount_) {
-    }
+        : maximumVertexBindingCount(maximumVertexBindingCount_) {}
 
 public:
     static constexpr const uint32_t minimumRequiredVertexBindingCount = 8;
@@ -64,28 +63,23 @@ public:
     Texture createTexture(const Size size,
                           TexturePixelType format = TexturePixelType::RGBA,
                           TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        return { size, createTextureResource(size, format, type) };
+        return {size, createTextureResource(size, format, type)};
     }
 
 protected:
-    virtual std::unique_ptr<TextureResource>
-        createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
+    virtual std::unique_ptr<TextureResource> createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
 
 public:
     template <RenderbufferPixelType pixelType>
-    Renderbuffer<pixelType>
-    createRenderbuffer(const Size size) {
-        return { size, createRenderbufferResource(pixelType, size) };
+    Renderbuffer<pixelType> createRenderbuffer(const Size size) {
+        return {size, createRenderbufferResource(pixelType, size)};
     }
 
 protected:
-    virtual std::unique_ptr<RenderbufferResource>
-    createRenderbufferResource(RenderbufferPixelType, Size) = 0;
+    virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
 
 public:
-    DrawScope createDrawScope() {
-        return DrawScope{ createDrawScopeResource() };
-    }
+    DrawScope createDrawScope() { return DrawScope{createDrawScopeResource()}; }
 
 protected:
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;

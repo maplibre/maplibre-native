@@ -49,18 +49,16 @@ public:
 
     bool isLoaded() const;
 
-    std::exception_ptr getLastError() const {
-        return lastError;
-    }
+    std::exception_ptr getLastError() const { return lastError; }
 
-    std::vector<      Source*> getSources();
+    std::vector<Source*> getSources();
     std::vector<const Source*> getSources() const;
     Source* getSource(const std::string& id) const;
 
     void addSource(std::unique_ptr<Source>);
     std::unique_ptr<Source> removeSource(const std::string& sourceID);
 
-    std::vector<      Layer*> getLayers();
+    std::vector<Layer*> getLayers();
     std::vector<const Layer*> getLayers() const;
     Layer* getLayer(const std::string& id) const;
 

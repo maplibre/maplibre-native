@@ -89,7 +89,8 @@ static void updateTransform(mat4& transform, const vec3& position) {
     getColumn(transform, 3)[2] = position[2];
 }
 
-Camera::Camera() : orientation(Quaternion::identity) {
+Camera::Camera()
+    : orientation(Quaternion::identity) {
     matrix::identity(transform);
 }
 
