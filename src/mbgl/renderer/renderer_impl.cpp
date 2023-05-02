@@ -94,7 +94,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     std::transform(orchestrator.getDrawables().begin(),
                    orchestrator.getDrawables().end(),
                    drawables.begin(),
-                   std::bind(&RenderOrchestrator::DrawableMap::value_type::second));
+                   std::bind(&RenderOrchestrator::DrawableMap::value_type::second, std::placeholders::_1));
 
     // Run tweakers to update any dynamic elements
     for (auto& drawable : drawables) {
