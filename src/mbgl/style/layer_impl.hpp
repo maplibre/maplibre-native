@@ -63,7 +63,8 @@ public:
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 
     /// Generate any changes needed by the layer
-    virtual void update(gfx::Context&,
+    virtual void update(int32_t /*layerIndex*/,
+                        gfx::Context&,
                         const TransformState&,
                         const PropertyEvaluationParameters&,
                         UniqueChangeRequestVec&) const {}

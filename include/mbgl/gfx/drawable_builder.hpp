@@ -48,10 +48,13 @@ public:
     /// Get the ID of the drawable we're currently working on, if any
     util::SimpleIdentity getDrawableId();
 
-    /// Get the draw priority assigned to generated drawables
+    /// The draw priority assigned to generated drawables
     DrawPriority getDrawPriority() const;
-    /// Set the draw priority assigned to generated drawables
     void setDrawPriority(DrawPriority);
+
+    /// The layer index assigned to generated drawables
+    int32_t getLayerIndex() const { return layerIndex; }
+    void setLayerIndex(int32_t value) { layerIndex = value; }
 
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);
@@ -106,6 +109,7 @@ protected:
     std::string name;
     std::string drawableName;
     DrawPriority drawPriority = 0;
+    int32_t layerIndex = -1;
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;
     mat4 matrix;
