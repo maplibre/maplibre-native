@@ -8,10 +8,12 @@
 #include <memory>
 #include <cassert>
 
-#define MBGL_DEFINE_TEXTURE(name_)                      \
-    struct name_ {                                      \
-        using Value = ::mbgl::gfx::TextureBinding;      \
-        static constexpr auto name() { return #name_; } \
+#define MBGL_DEFINE_TEXTURE(name_)                 \
+    struct name_ {                                 \
+        using Value = ::mbgl::gfx::TextureBinding; \
+        static constexpr auto name() {             \
+            return #name_;                         \
+        }                                          \
     }
 
 namespace mbgl {
