@@ -54,15 +54,13 @@ jobs:
             s3://maplibre-native-test-artifacts/${{ github.run_id	}}-linux-gcc8-release-style.html \
             --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')"
 
+      - run: echo pr_number="$(cat ./pr_number)" >> "$GITHUB_ENV"
+
       - name: 'Leave comment on PR with test results'
-        uses: actions/github-script@v6
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            let fs = require('fs');
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number:  Number(fs.readFileSync('./pr_number')),
-              body: `Test results at https://maplibre-native-test-artifacts.s3.eu-central-1.amazonaws.com/${context.runId}-linux-gcc8-release-style.html`
-            });
+          number: ${{ env.pr_number }}
+          hide_and_recreate: true
+          hide_classify: "OUTDATED"
+          message: |
+            Render test results at https://maplibre-native-test-artifacts.s3.eu-central-1.amazonaws.com/${context.runId}-linux-gcc8-release-style.html
