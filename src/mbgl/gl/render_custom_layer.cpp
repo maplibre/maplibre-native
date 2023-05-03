@@ -5,6 +5,7 @@
 #include <mbgl/gl/render_custom_layer.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -55,12 +56,11 @@ void RenderCustomLayer::markContextDestroyed() {
     contextDestroyed = true;
 }
 
-void RenderCustomLayer::prepare(const LayerPrepareParameters&) {
-}
+void RenderCustomLayer::prepare(const LayerPrepareParameters&) {}
 
 void RenderCustomLayer::render(PaintParameters& paintParameters) {
     if (host != impl(baseImpl).host) {
-        //If the context changed, deinitialize the previous one before initializing the new one.
+        // If the context changed, deinitialize the previous one before initializing the new one.
         if (host && !contextDestroyed) {
             MBGL_CHECK_ERROR(host->deinitialize());
         }
@@ -86,7 +86,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
     parameters.latitude = state.getLatLng().latitude();
     parameters.longitude = state.getLatLng().longitude();
     parameters.zoom = state.getZoom();
-    parameters.bearing = -state.getBearing() * util::RAD2DEG_D;
+    parameters.bearing = util::rad2deg(-state.getBearing());
     parameters.pitch = state.getPitch();
     parameters.fieldOfView = state.getFieldOfView();
     mat4 projMatrix;
@@ -95,8 +95,8 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 
     MBGL_CHECK_ERROR(host->render(parameters));
 
-    // Reset the view back to our original one, just in case the CustomLayer changed
-    // the viewport or Framebuffer.
+    // Reset the view back to our original one, just in case the CustomLayer
+    // changed the viewport or Framebuffer.
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
     glContext.setDirtyState();
 }

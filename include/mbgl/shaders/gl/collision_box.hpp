@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,19 +7,20 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::CollisionBoxProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* vertex = R"(attribute vec2 a_pos;
-attribute vec2 a_anchor_pos;
-attribute vec2 a_extrude;
-attribute vec2 a_placed;
-attribute vec2 a_shift;
+template <>
+struct ShaderSource<BuiltIn::CollisionBoxProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+layout (location = 1) in vec2 a_anchor_pos;
+layout (location = 2) in vec2 a_extrude;
+layout (location = 3) in vec2 a_placed;
+layout (location = 4) in vec2 a_shift;
 
 uniform mat4 u_matrix;
 uniform vec2 u_extrude_scale;
 uniform float u_camera_to_center_distance;
 
-varying float v_placed;
-varying float v_notUsed;
+out float v_placed;
+out float v_notUsed;
 
 void main() {
     vec4 projectedPoint = u_matrix * vec4(a_anchor_pos, 0, 1);
@@ -37,24 +38,24 @@ void main() {
 }
 )";
     static constexpr const char* fragment = R"(
-varying float v_placed;
-varying float v_notUsed;
+in float v_placed;
+in float v_notUsed;
 
 void main() {
 
     float alpha = 0.5;
 
     // Red = collision, hide label
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0) * alpha;
+    fragColor = vec4(1.0, 0.0, 0.0, 1.0) * alpha;
 
     // Blue = no collision, label is showing
     if (v_placed > 0.5) {
-        gl_FragColor = vec4(0.0, 0.0, 1.0, 0.5) * alpha;
+        fragColor = vec4(0.0, 0.0, 1.0, 0.5) * alpha;
     }
 
     if (v_notUsed > 0.5) {
         // This box not used, fade it out
-        gl_FragColor *= .1;
+        fragColor *= .1;
     }
 })";
 };

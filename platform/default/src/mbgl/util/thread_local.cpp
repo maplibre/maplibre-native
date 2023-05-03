@@ -20,8 +20,8 @@ ThreadLocalBase::ThreadLocalBase() {
 }
 
 ThreadLocalBase::~ThreadLocalBase() {
-    // ThreadLocal will not take ownership of the pointer it is managing. The pointer
-    // needs to be explicitly cleared before we destroy this object.
+    // ThreadLocal will not take ownership of the pointer it is managing. The
+    // pointer needs to be explicitly cleared before we destroy this object.
     assert(!get());
 
     if (pthread_key_delete(reinterpret_cast<pthread_key_t&>(storage)) != 0) {

@@ -26,7 +26,7 @@ cc_library(
         "src",
     ],
     local_defines = [
-        r"MBGL_VERSION_REV=\"standalone\"",
+        r"MLN_VERSION_REV=\"standalone\"",
     ],
     visibility = ["//visibility:public"],
     deps = [

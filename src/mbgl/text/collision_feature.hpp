@@ -18,8 +18,12 @@ public:
     };
 
     ProjectedCollisionBox() = default;
-    ProjectedCollisionBox(float x1, float y1, float x2, float y2) : geometry(x1, y1, x2, y2), type(Type::Box) {}
-    ProjectedCollisionBox(float x, float y, float r) : geometry(x, y, r), type(Type::Circle) {}
+    ProjectedCollisionBox(float x1, float y1, float x2, float y2)
+        : geometry(x1, y1, x2, y2),
+          type(Type::Box) {}
+    ProjectedCollisionBox(float x, float y, float r)
+        : geometry(x, y, r),
+          type(Type::Circle) {}
 
     const mapbox::geometry::box<float>& box() const {
         assert(isBox());
@@ -38,8 +42,10 @@ private:
     union Geometry {
         // NOLINTNEXTLINE(modernize-use-equals-default)
         Geometry() {}
-        Geometry(float x1, float y1, float x2, float y2) : box({x1, y1}, {x2, y2}) {}
-        Geometry(float x, float y, float r) : circle({x, y}, r) {}
+        Geometry(float x1, float y1, float x2, float y2)
+            : box({x1, y1}, {x2, y2}) {}
+        Geometry(float x, float y, float r)
+            : circle({x, y}, r) {}
         mapbox::geometry::box<float> box;
         geometry::circle<float> circle;
     } geometry;
@@ -49,7 +55,12 @@ private:
 class CollisionBox {
 public:
     CollisionBox(Point<float> _anchor, float _x1, float _y1, float _x2, float _y2, float _signedDistanceFromAnchor = 0)
-        : anchor(_anchor), x1(_x1), y1(_y1), x2(_x2), y2(_y2), signedDistanceFromAnchor(_signedDistanceFromAnchor) {}
+        : anchor(_anchor),
+          x1(_x1),
+          y1(_y1),
+          x2(_x2),
+          y2(_y2),
+          signedDistanceFromAnchor(_signedDistanceFromAnchor) {}
 
     // the box is centered around the anchor point
     Point<float> anchor;
@@ -69,7 +80,6 @@ public:
 
 class CollisionFeature {
 public:
-
     // for text
     CollisionFeature(const GeometryCoordinates& line,
                      const Anchor& anchor,
@@ -95,11 +105,13 @@ public:
                            rotate) {}
 
     // for icons
-    // Icons collision features are always SymbolPlacementType::Point, which means the collision feature
-    // will be viewport-rotation-aligned even if the icon is map-rotation-aligned (e.g. `icon-rotation-alignment: map`
-    // _or_ `symbol-placement: line`). We're relying on most icons being "close enough" to square that having
-    // incorrect rotation alignment doesn't throw off collision detection too much.
-    // See: https://github.com/mapbox/mapbox-gl-js/issues/4861
+    // Icons collision features are always SymbolPlacementType::Point, which
+    // means the collision feature will be viewport-rotation-aligned even if the
+    // icon is map-rotation-aligned (e.g. `icon-rotation-alignment: map` _or_
+    // `symbol-placement: line`). We're relying on most icons being "close
+    // enough" to square that having incorrect rotation alignment doesn't throw
+    // off collision detection too much. See:
+    // https://github.com/mapbox/mapbox-gl-js/issues/4861
     CollisionFeature(const GeometryCoordinates& line,
                      const Anchor& anchor,
                      std::optional<PositionedIcon> shapedIcon,

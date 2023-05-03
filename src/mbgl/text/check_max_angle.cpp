@@ -4,11 +4,12 @@
 
 #include <queue>
 
-namespace mbgl{
+namespace mbgl {
 
 struct Corner {
-    Corner(float _distance, float _angleDelta) :
-        distance(_distance), angleDelta(_angleDelta) {}
+    Corner(float _distance, float _angleDelta)
+        : distance(_distance),
+          angleDelta(_angleDelta) {}
     float distance;
     float angleDelta;
 };
@@ -22,7 +23,7 @@ bool checkMaxAngle(const GeometryCoordinates& line,
     if (!anchor.segment) return true;
 
     GeometryCoordinate anchorPoint = convertPoint<int16_t>(anchor.point);
-    GeometryCoordinate &p = anchorPoint;
+    GeometryCoordinate& p = anchorPoint;
     std::size_t index = *anchor.segment + 1;
     float anchorDistance = 0;
 
@@ -43,9 +44,8 @@ bool checkMaxAngle(const GeometryCoordinates& line,
     std::queue<Corner> recentCorners;
     float recentAngleDelta = 0;
 
-     // move forwards by the length of the label and check angles along the way
+    // move forwards by the length of the label and check angles along the way
     while (anchorDistance < labelLength / 2) {
-
         // there isn't enough room for the label before the end of the line
         if (index + 1 >= line.size()) return false;
 
@@ -58,7 +58,7 @@ bool checkMaxAngle(const GeometryCoordinates& line,
         angleDelta = std::fabs(std::fmod(angleDelta + 3 * M_PI, M_PI * 2) - M_PI);
 
         recentCorners.emplace(anchorDistance, static_cast<float>(angleDelta));
-        recentAngleDelta +=  static_cast<float>(angleDelta);
+        recentAngleDelta += static_cast<float>(angleDelta);
 
         // remove corners that are far enough away from the list of recent anchors
         while (anchorDistance - recentCorners.front().distance > windowSize) {

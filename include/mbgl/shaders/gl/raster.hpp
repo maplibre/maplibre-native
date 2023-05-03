@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,17 +7,18 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::RasterProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::RasterProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_tl_parent;
 uniform float u_scale_parent;
 uniform float u_buffer_scale;
 
-attribute vec2 a_pos;
-attribute vec2 a_texture_pos;
+layout (location = 0) in vec2 a_pos;
+layout (location = 1) in vec2 a_texture_pos;
 
-varying vec2 v_pos0;
-varying vec2 v_pos1;
+out vec2 v_pos0;
+out vec2 v_pos1;
 
 void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
@@ -34,8 +35,8 @@ void main() {
 uniform float u_opacity;
 uniform sampler2D u_image0;
 uniform sampler2D u_image1;
-varying vec2 v_pos0;
-varying vec2 v_pos1;
+in vec2 v_pos0;
+in vec2 v_pos1;
 
 uniform float u_brightness_low;
 uniform float u_brightness_high;
@@ -47,8 +48,8 @@ uniform vec3 u_spin_weights;
 void main() {
 
     // read and cross-fade colors from the main and parent tiles
-    vec4 color0 = texture2D(u_image0, v_pos0);
-    vec4 color1 = texture2D(u_image1, v_pos1);
+    vec4 color0 = texture(u_image0, v_pos0);
+    vec4 color1 = texture(u_image1, v_pos1);
     if (color0.a > 0.0) {
         color0.rgb = color0.rgb / color0.a;
     }
@@ -76,10 +77,10 @@ void main() {
     vec3 u_high_vec = vec3(u_brightness_low, u_brightness_low, u_brightness_low);
     vec3 u_low_vec = vec3(u_brightness_high, u_brightness_high, u_brightness_high);
 
-    gl_FragColor = vec4(mix(u_high_vec, u_low_vec, rgb) * color.a, color.a);
+    fragColor = vec4(mix(u_high_vec, u_low_vec, rgb) * color.a, color.a);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

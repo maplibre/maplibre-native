@@ -42,10 +42,10 @@ template <class T>
 class PropertyExpression final : public PropertyExpressionBase {
 public:
     // Second parameter to be used only for conversions from legacy functions.
-    PropertyExpression(std::unique_ptr<expression::Expression> expression_, std::optional<T> defaultValue_ = std::nullopt)
+    PropertyExpression(std::unique_ptr<expression::Expression> expression_,
+                       std::optional<T> defaultValue_ = std::nullopt)
         : PropertyExpressionBase(std::move(expression_)),
-          defaultValue(std::move(defaultValue_)) {
-    }
+          defaultValue(std::move(defaultValue_)) {}
 
     T evaluate(const expression::EvaluationContext& context, T finalDefaultValue = T()) const {
         const expression::EvaluationResult result = expression->evaluate(context);
@@ -129,8 +129,7 @@ public:
         return expression::fromExpressionValues<T>(expression->possibleOutputs());
     }
 
-    friend bool operator==(const PropertyExpression& lhs,
-                           const PropertyExpression& rhs) {
+    friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) {
         return *lhs.expression == *rhs.expression;
     }
 

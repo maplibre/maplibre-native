@@ -77,7 +77,7 @@ mbgl::Value Formatted::toObject() const {
 } // namespace expression
 
 namespace conversion {
-    
+
 using namespace mbgl::style::expression;
 
 std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& value, Error& error) const {
@@ -89,7 +89,9 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
             const Convertible& section = arrayMember(value, i);
             std::size_t sectionLength = arrayLength(section);
             if (sectionLength < 1) {
-                error.message = "Section has to contain a text and std::optional parameters or an image.";
+                error.message =
+                    "Section has to contain a text and std::optional "
+                    "parameters or an image.";
                 return std::nullopt;
             }
 
@@ -102,13 +104,17 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
 
                 std::optional<std::string> imageOp = toString(arrayMember(firstElement, 0));
                 if (!imageOp || *imageOp != "image") {
-                    error.message = "Serialized image section has to contain 'image' operator.";
+                    error.message =
+                        "Serialized image section has to contain 'image' "
+                        "operator.";
                     return std::nullopt;
                 }
 
                 std::optional<std::string> imageArg = toString(arrayMember(firstElement, 1));
                 if (!imageArg) {
-                    error.message = "Serialized image section agument has to be of a String type.";
+                    error.message =
+                        "Serialized image section agument has to be of a "
+                        "String type.";
                     return std::nullopt;
                 }
 
@@ -180,4 +186,3 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
 } // namespace conversion
 } // namespace style
 } // namespace mbgl
-

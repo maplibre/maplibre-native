@@ -1,4 +1,4 @@
-# MapLibre GL Native Docs
+# MapLibre Native Docs
 
 ## Build Locally
 

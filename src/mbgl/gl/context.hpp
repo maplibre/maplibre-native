@@ -15,7 +15,6 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
-
 #include <functional>
 #include <memory>
 #include <vector>
@@ -62,38 +61,24 @@ public:
     Framebuffer createFramebuffer(const gfx::Texture&,
                                   const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Texture&);
-    Framebuffer createFramebuffer(const gfx::Texture&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
+    Framebuffer createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
 
     template <typename Image,
               gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA
-                                                          : gfx::TexturePixelType::Alpha>
+                                                                  : gfx::TexturePixelType::Alpha>
     Image readFramebuffer(const Size size, bool flip = true) {
-        static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1),
-                      "image format mismatch");
-        return { size, readFramebuffer(size, format, flip) };
+        static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1), "image format mismatch");
+        return {size, readFramebuffer(size, format, flip)};
     }
 
-#if !MBGL_USE_GLES2
-    template <typename Image>
-    void drawPixels(const Image& image) {
-        auto format = image.channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha;
-        drawPixels(image.size, image.data.get(), format);
-    }
-#endif // MBGL_USE_GLES2
-
-    void clear(std::optional<mbgl::Color> color,
-               std::optional<float> depth,
-               std::optional<int32_t> stencil);
+    void clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil);
 
     void setDepthMode(const gfx::DepthMode&);
     void setStencilMode(const gfx::StencilMode&);
     void setColorMode(const gfx::ColorMode&);
     void setCullFaceMode(const gfx::CullFaceMode&);
 
-    void draw(const gfx::DrawMode&,
-              std::size_t indexOffset,
-              std::size_t indexLength);
+    void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 
     void finish();
 
@@ -108,28 +93,16 @@ public:
     void reset();
 
     bool empty() const {
-        return pooledTextures.empty()
-            && abandonedPrograms.empty()
-            && abandonedShaders.empty()
-            && abandonedBuffers.empty()
-            && abandonedTextures.empty()
-            && abandonedVertexArrays.empty()
-            && abandonedFramebuffers.empty();
+        return pooledTextures.empty() && abandonedPrograms.empty() && abandonedShaders.empty() &&
+               abandonedBuffers.empty() && abandonedTextures.empty() && abandonedVertexArrays.empty() &&
+               abandonedFramebuffers.empty();
     }
 
     void setDirtyState();
 
-    extension::Debugging* getDebuggingExtension() const {
-        return debugging.get();
-    }
+    extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 
-    extension::VertexArray* getVertexArrayExtension() const {
-        return vertexArray.get();
-    }
-
-    void setCleanupOnDestruction(bool cleanup) {
-        cleanupOnDestruction = cleanup;
-    }
+    void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
 private:
     RendererBackend& backend;
@@ -137,7 +110,6 @@ private:
 
     gfx::RenderingStats stats;
     std::unique_ptr<extension::Debugging> debugging;
-    std::unique_ptr<extension::VertexArray> vertexArray;
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;
@@ -148,18 +120,11 @@ public:
     State<value::Program> program;
     State<value::BindVertexBuffer> vertexBuffer;
 
-    State<value::BindVertexArray, const Context&> bindVertexArray { *this };
-    VertexArrayState globalVertexArrayState { UniqueVertexArray(0, { const_cast<Context*>(this) }) };
+    State<value::BindVertexArray> bindVertexArray;
+    VertexArrayState globalVertexArrayState{UniqueVertexArray(0, {const_cast<Context*>(this)})};
 
     State<value::PixelStorePack> pixelStorePack;
     State<value::PixelStoreUnpack> pixelStoreUnpack;
-
-#if !MBGL_USE_GLES2
-    State<value::PixelZoom> pixelZoom;
-    State<value::RasterPos> rasterPos;
-    State<value::PixelTransferDepth> pixelTransferDepth;
-    State<value::PixelTransferStencil> pixelTransferStencil;
-#endif // MBGL_USE_GLES2
 
 private:
     State<value::StencilFunc> stencilFunc;
@@ -183,27 +148,22 @@ private:
     State<value::CullFace> cullFace;
     State<value::CullFaceSide> cullFaceSide;
     State<value::CullFaceWinding> cullFaceWinding;
-#if !MBGL_USE_GLES2
-    State<value::PointSize> pointSize;
-#endif // MBGL_USE_GLES2
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gfx::TextureResource>
-        createTextureResource(Size, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
+    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
+                                                                gfx::TexturePixelType,
+                                                                gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType, Size size) override;
+    std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
+                                                                          Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
 
     UniqueFramebuffer createFramebuffer();
     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
-#if !MBGL_USE_GLES2
-    void drawPixels(Size size, const void* data, gfx::TexturePixelType);
-#endif // MBGL_USE_GLES2
 
     VertexArray createVertexArray();
-    bool supportsVertexArrays() const;
 
     friend detail::ProgramDeleter;
     friend detail::ShaderDeleter;
@@ -224,9 +184,6 @@ private:
     std::vector<RenderbufferID> abandonedRenderbuffers;
 
 public:
-    // For testing
-    bool disableVAOExtension = false;
-
 #if !defined(NDEBUG)
 public:
     void visualizeStencilBuffer() override;

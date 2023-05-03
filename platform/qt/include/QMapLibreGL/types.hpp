@@ -28,9 +28,14 @@ struct Q_MAPLIBREGL_EXPORT Feature {
     };
 
     /*! Class constructor. */
-    Feature(Type type_ = PointType, const CoordinatesCollections& geometry_ = CoordinatesCollections(),
-            const QVariantMap& properties_ = QVariantMap(), const QVariant& id_ = QVariant())
-        : type(type_), geometry(geometry_), properties(properties_), id(id_) {}
+    Feature(Type type_ = PointType,
+            const CoordinatesCollections& geometry_ = CoordinatesCollections(),
+            const QVariantMap& properties_ = QVariantMap(),
+            const QVariant& id_ = QVariant())
+        : type(type_),
+          geometry(geometry_),
+          properties(properties_),
+          id(id_) {}
 
     Type type;
     CoordinatesCollections geometry;
@@ -47,8 +52,10 @@ struct Q_MAPLIBREGL_EXPORT ShapeAnnotationGeometry {
     };
 
     /*! Class constructor. */
-    ShapeAnnotationGeometry(Type type_ = LineStringType, const CoordinatesCollections& geometry_ = CoordinatesCollections())
-        : type(type_), geometry(geometry_) {}
+    ShapeAnnotationGeometry(Type type_ = LineStringType,
+                            const CoordinatesCollections& geometry_ = CoordinatesCollections())
+        : type(type_),
+          geometry(geometry_) {}
 
     Type type;
     CoordinatesCollections geometry;
@@ -61,9 +68,14 @@ struct Q_MAPLIBREGL_EXPORT SymbolAnnotation {
 
 struct Q_MAPLIBREGL_EXPORT LineAnnotation {
     /*! Class constructor. */
-    LineAnnotation(const ShapeAnnotationGeometry& geometry_ = ShapeAnnotationGeometry(), float opacity_ = 1.0f,
-            float width_ = 1.0f, const QColor& color_ = Qt::black)
-        : geometry(geometry_), opacity(opacity_), width(width_), color(color_) {}
+    LineAnnotation(const ShapeAnnotationGeometry& geometry_ = ShapeAnnotationGeometry(),
+                   float opacity_ = 1.0f,
+                   float width_ = 1.0f,
+                   const QColor& color_ = Qt::black)
+        : geometry(geometry_),
+          opacity(opacity_),
+          width(width_),
+          color(color_) {}
 
     ShapeAnnotationGeometry geometry;
     float opacity;
@@ -73,9 +85,14 @@ struct Q_MAPLIBREGL_EXPORT LineAnnotation {
 
 struct Q_MAPLIBREGL_EXPORT FillAnnotation {
     /*! Class constructor. */
-    FillAnnotation(const ShapeAnnotationGeometry& geometry_ = ShapeAnnotationGeometry(), float opacity_ = 1.0f,
-            const QColor& color_ = Qt::black, const QVariant& outlineColor_ = QVariant())
-        : geometry(geometry_), opacity(opacity_), color(color_), outlineColor(outlineColor_) {}
+    FillAnnotation(const ShapeAnnotationGeometry& geometry_ = ShapeAnnotationGeometry(),
+                   float opacity_ = 1.0f,
+                   const QColor& color_ = Qt::black,
+                   const QVariant& outlineColor_ = QVariant())
+        : geometry(geometry_),
+          opacity(opacity_),
+          color(color_),
+          outlineColor(outlineColor_) {}
 
     ShapeAnnotationGeometry geometry;
     float opacity;

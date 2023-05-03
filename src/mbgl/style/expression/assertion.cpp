@@ -10,7 +10,8 @@ namespace expression {
 using namespace mbgl::style::conversion;
 
 Assertion::Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
-    : Expression(Kind::Assertion, std::move(type_)), inputs(std::move(inputs_)) {
+    : Expression(Kind::Assertion, std::move(type_)),
+      inputs(std::move(inputs_)) {
     assert(!inputs.empty());
 }
 
@@ -39,10 +40,7 @@ ParseResult Assertion::parse(const Convertible& value, ParsingContext& ctx) {
             std::optional<std::string> itemTypeName = toString(arrayMember(value, 1));
             auto it = itemTypeName ? types.find(*itemTypeName) : types.end();
             if (it == types.end() || it->second == type::Object) {
-                ctx.error(
-                    R"(The item type argument of "array" must be one of string, number, boolean)",
-                    1
-                );
+                ctx.error(R"(The item type argument of "array" must be one of string, number, boolean)", 1);
                 return ParseResult();
             }
             itemType = it->second;
@@ -55,12 +53,8 @@ ParseResult Assertion::parse(const Convertible& value, ParsingContext& ctx) {
         if (length > 3) {
             auto m = arrayMember(value, 2);
             std::optional<float> n = toNumber(m);
-            if (!isUndefined(m) &&
-                (!n || *n < 0 || *n != std::floor(*n))) {
-                ctx.error(
-                    R"(The length argument to "array" must be a positive integer literal.)",
-                    2
-                );
+            if (!isUndefined(m) && (!n || *n < 0 || *n != std::floor(*n))) {
+                ctx.error(R"(The length argument to "array" must be a positive integer literal.)", 2);
                 return ParseResult();
             }
             if (n) {
@@ -96,19 +90,17 @@ EvaluationResult Assertion::evaluate(const EvaluationContext& params) const {
         if (!type::checkSubtype(getType(), typeOf(*value))) {
             return value;
         } else if (i == inputs.size() - 1) {
-            return EvaluationError {
-                "Expected value to be of type " + toString(getType()) +
-                ", but found " + toString(typeOf(*value)) + " instead."
-            };
+            return EvaluationError{"Expected value to be of type " + toString(getType()) + ", but found " +
+                                   toString(typeOf(*value)) + " instead."};
         }
     }
 
     assert(false);
-    return EvaluationError { "Unreachable" };
+    return EvaluationError{"Unreachable"};
 };
 
 void Assertion::eachChild(const std::function<void(const Expression&)>& visit) const {
-    for(const std::unique_ptr<Expression>& input : inputs) {
+    for (const std::unique_ptr<Expression>& input : inputs) {
         visit(*input);
     }
 };
@@ -137,9 +129,8 @@ mbgl::Value Assertion::serialize() const {
 
     if (getType().is<type::Array>()) {
         const auto array = getType().get<type::Array>();
-        if (array.itemType.is<type::StringType>()
-         || array.itemType.is<type::NumberType>()
-         || array.itemType.is<type::BooleanType>()) {
+        if (array.itemType.is<type::StringType>() || array.itemType.is<type::NumberType>() ||
+            array.itemType.is<type::BooleanType>()) {
             serialized.emplace_back(type::toString(array.itemType));
             if (array.N) {
                 serialized.emplace_back(uint64_t(*array.N));
@@ -159,5 +150,3 @@ mbgl::Value Assertion::serialize() const {
 } // namespace expression
 } // namespace style
 } // namespace mbgl
-
-

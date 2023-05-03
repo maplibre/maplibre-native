@@ -35,6 +35,10 @@
         <attr name="maplibre_uiTiltGestures" format="boolean"/>
         <attr name="maplibre_uiDoubleTapGestures" format="boolean"/>
         <attr name="maplibre_uiQuickZoomGestures" format="boolean"/>
+        
+        <!--Compatibility fix until plugins are updated to reflect changes-->
+        <attr name="mapbox_uiRotateGestures" format="boolean"/>
+        <attr name="mapbox_uiTiltGestures" format="boolean"/>
 
         <!--Compass-->
         <attr name="maplibre_uiCompass" format="boolean"/>

@@ -99,12 +99,10 @@ std::vector<GeometryCollection> classifyRings(const GeometryCollection& rings) {
 
 void limitHoles(GeometryCollection& polygon, uint32_t maxHoles) {
     if (polygon.size() > 1 + maxHoles) {
-        std::nth_element(polygon.begin() + 1,
-                         polygon.begin() + 1 + maxHoles,
-                         polygon.end(),
-                         [] (const auto& a, const auto& b) {
-                             return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
-                         });
+        std::nth_element(
+            polygon.begin() + 1, polygon.begin() + 1 + maxHoles, polygon.end(), [](const auto& a, const auto& b) {
+                return std::fabs(signedArea(a)) > std::fabs(signedArea(b));
+            });
         polygon.resize(1 + maxHoles);
     }
 }
@@ -114,12 +112,9 @@ Feature::geometry_type convertGeometry(const GeometryTileFeature& geometryTileFe
     const double x0 = util::EXTENT * static_cast<double>(tileID.x);
     const double y0 = util::EXTENT * static_cast<double>(tileID.y);
 
-    auto tileCoordinatesToLatLng = [&] (const Point<int16_t>& p) {
+    auto tileCoordinatesToLatLng = [&](const Point<int16_t>& p) {
         double y2 = 180 - (p.y + y0) * 360 / size;
-        return Point<double>(
-            (p.x + x0) * 360 / size - 180,
-            360.0 / M_PI * std::atan(std::exp(y2 * M_PI / 180)) - 90.0
-        );
+        return Point<double>((p.x + x0) * 360 / size - 180, std::atan(std::exp(y2 * M_PI / 180)) * 360.0 / M_PI - 90.0);
     };
 
     const GeometryCollection& geometries = geometryTileFeature.getGeometries();
@@ -192,12 +187,12 @@ GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFea
         Point<int16_t> p;
 
         auto x = (c.x + 180.0) * size / 360.0 - x0;
-        p.x =
-            int16_t(util::clamp<int64_t>(static_cast<int16_t>(x), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
+        p.x = int16_t(util::clamp<int64_t>(
+            static_cast<int16_t>(x), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 
         auto y = (180 - (std::log(std::tan((c.y + 90) * M_PI / 360.0)) * 180 / M_PI)) * size / 360 - y0;
-        p.y =
-            int16_t(util::clamp<int64_t>(static_cast<int16_t>(y), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
+        p.y = int16_t(util::clamp<int64_t>(
+            static_cast<int16_t>(y), std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()));
 
         return p;
     };
@@ -265,7 +260,7 @@ GeometryCollection convertGeometry(const Feature::geometry_type& geometryTileFea
 }
 
 Feature convertFeature(const GeometryTileFeature& geometryTileFeature, const CanonicalTileID& tileID) {
-    Feature feature { convertGeometry(geometryTileFeature, tileID) };
+    Feature feature{convertGeometry(geometryTileFeature, tileID)};
     feature.properties = geometryTileFeature.getProperties();
     feature.id = geometryTileFeature.getID();
     return feature;

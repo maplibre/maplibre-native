@@ -12,8 +12,8 @@ using namespace mbgl;
 TEST(DatabaseFileSource, PauseResume) {
     util::RunLoop loop;
 
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                               ResourceOptions{});
     dbfs->pause();
 
     const Resource res{Resource::Unknown, "http://127.0.0.1:3000/test", {}, Resource::LoadingMethod::CacheOnly};
@@ -28,8 +28,8 @@ TEST(DatabaseFileSource, PauseResume) {
 TEST(DatabaseFileSource, VolatileResource) {
     util::RunLoop loop;
 
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                               ResourceOptions{});
 
     Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test", {}, Resource::LoadingMethod::CacheOnly};
     Response response{};

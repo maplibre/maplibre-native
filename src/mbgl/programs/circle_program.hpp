@@ -12,27 +12,21 @@ namespace uniforms {
 MBGL_DEFINE_UNIFORM_SCALAR(bool, scale_with_map);
 } // namespace uniforms
 
-class CircleProgram final : public Program<
-    CircleProgram,
-    shaders::BuiltIn::CircleProgram,
-    gfx::PrimitiveType::Triangle,
-    TypeList<
-        attributes::pos>,
-    TypeList<
-        uniforms::matrix,
-        uniforms::scale_with_map,
-        uniforms::extrude_scale,
-        uniforms::device_pixel_ratio,
-        uniforms::camera_to_center_distance,
-        uniforms::pitch_with_map>,
-    TypeList<>,
-    style::CirclePaintProperties>
-{
+class CircleProgram final : public Program<CircleProgram,
+                                           shaders::BuiltIn::CircleProgram,
+                                           gfx::PrimitiveType::Triangle,
+                                           TypeList<attributes::pos>,
+                                           TypeList<uniforms::matrix,
+                                                    uniforms::scale_with_map,
+                                                    uniforms::extrude_scale,
+                                                    uniforms::device_pixel_ratio,
+                                                    uniforms::camera_to_center_distance,
+                                                    uniforms::pitch_with_map>,
+                                           TypeList<>,
+                                           style::CirclePaintProperties> {
 public:
     static constexpr std::string_view Name{"CircleProgram"};
-    const std::string_view typeName() const noexcept override {
-        return Name;
-    }
+    const std::string_view typeName() const noexcept override { return Name; }
 
     using Program::Program;
 
@@ -43,12 +37,8 @@ public:
      * @param {number} ey extrude normal
      */
     static LayoutVertex vertex(Point<int16_t> p, float ex, float ey) {
-        return LayoutVertex {
-            {{
-                static_cast<int16_t>((p.x * 2) + ((ex + 1) / 2)),
-                static_cast<int16_t>((p.y * 2) + ((ey + 1) / 2))
-            }}
-        };
+        return LayoutVertex{
+            {{static_cast<int16_t>((p.x * 2) + ((ex + 1) / 2)), static_cast<int16_t>((p.y * 2) + ((ey + 1) / 2))}}};
     }
 };
 

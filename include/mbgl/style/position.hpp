@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/math/angles.hpp>
 #include <mbgl/util/constants.hpp>
 
 #include <array>
@@ -10,18 +11,19 @@ class Position {
 public:
     Position() = default;
     Position(std::array<float, 3>& position_)
-        : radial(position_[0]), azimuthal(position_[1]), polar(position_[2]) {
+        : radial(position_[0]),
+          azimuthal(position_[1]),
+          polar(position_[2]) {
         calculateCartesian();
     };
 
     friend bool operator==(const Position& lhs, const Position& rhs) {
         return lhs.radial == rhs.radial && lhs.azimuthal == rhs.azimuthal && lhs.polar == rhs.polar;
-        // TODO this doesn't address wrapping, which would be better addressed by comparing cartesian coordinates but being calculated floats are ont to be trusted.
+        // TODO this doesn't address wrapping, which would be better addressed
+        // by comparing cartesian coordinates but being calculated floats are ont to be trusted.
     }
 
-    friend bool operator!=(const Position& lhs, const Position& rhs) {
-        return !(lhs == rhs);
-    }
+    friend bool operator!=(const Position& lhs, const Position& rhs) { return !(lhs == rhs); }
 
     std::array<float, 3> getCartesian() const { return {{x, y, z}}; };
 
@@ -34,7 +36,8 @@ public:
         calculateCartesian();
     };
 
-    /// Utility function to be used only during interpolation; this leaves spherical coordinates undefined.
+    /// Utility function to be used only during interpolation; this leaves
+    /// spherical coordinates undefined.
     void setCartesian(std::array<float, 3>& position_) {
         x = position_[0];
         y = position_[1];
@@ -50,10 +53,10 @@ private:
     float z;
 
     void calculateCartesian() {
-        // We abstract "north"/"up" (compass-wise) to be 0° when really this is 90° (π/2): we
-        // correct for that here
-        const float _a = (azimuthal + 90) * util::DEG2RAD_F;
-        const float _p = polar * util::DEG2RAD_F;
+        // We abstract "north"/"up" (compass-wise) to be 0° when really this is
+        // 90° (π/2): we correct for that here
+        const float _a = util::deg2radf(azimuthal + 90);
+        const float _p = util::deg2radf(polar);
 
         x = radial * std::cos(_a) * std::sin(_p);
         y = radial * std::sin(_a) * std::sin(_p);

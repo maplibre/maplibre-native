@@ -1,5 +1,3 @@
-set(USE_GLES2 ON)
-
 macro(initialize_ios_target target)
     set_xcode_property(${target} IPHONEOS_DEPLOYMENT_TARGET "9.0")
     set_xcode_property(${target} ENABLE_BITCODE "YES")

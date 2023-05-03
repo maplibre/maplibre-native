@@ -5,6 +5,8 @@
 using namespace mbgl::platform;
 
 TEST(GLFunctions, OpenGLES) {
+    /* OpenGL ES 2.0 */
+
     EXPECT_NE(glActiveTexture, nullptr);
     EXPECT_NE(glAttachShader, nullptr);
     EXPECT_NE(glBindAttribLocation, nullptr);
@@ -74,6 +76,7 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glGetRenderbufferParameteriv, nullptr);
     EXPECT_NE(glGetShaderInfoLog, nullptr);
     EXPECT_NE(glGetShaderiv, nullptr);
+    EXPECT_NE(glGetShaderPrecisionFormat, nullptr);
     EXPECT_NE(glGetShaderSource, nullptr);
     EXPECT_NE(glGetString, nullptr);
     EXPECT_NE(glGetTexParameterfv, nullptr);
@@ -97,9 +100,11 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glPixelStorei, nullptr);
     EXPECT_NE(glPolygonOffset, nullptr);
     EXPECT_NE(glReadPixels, nullptr);
+    EXPECT_NE(glReleaseShaderCompiler, nullptr);
     EXPECT_NE(glRenderbufferStorage, nullptr);
     EXPECT_NE(glSampleCoverage, nullptr);
     EXPECT_NE(glScissor, nullptr);
+    EXPECT_NE(glShaderBinary, nullptr);
     EXPECT_NE(glShaderSource, nullptr);
     EXPECT_NE(glStencilFunc, nullptr);
     EXPECT_NE(glStencilFuncSeparate, nullptr);
@@ -144,15 +149,111 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glVertexAttrib4fv, nullptr);
     EXPECT_NE(glVertexAttribPointer, nullptr);
     EXPECT_NE(glViewport, nullptr);
-}
 
-#ifndef MBGL_USE_GLES2
-TEST(GLFunctions, OpenDesktop) {
-    EXPECT_NE(glDrawPixels, nullptr);
-    EXPECT_NE(glGetDoublev, nullptr);
-    EXPECT_NE(glPixelTransferf, nullptr);
-    EXPECT_NE(glPixelZoom, nullptr);
-    EXPECT_NE(glPointSize, nullptr);
-    EXPECT_NE(glRasterPos4d, nullptr);
+    /* OpenGL ES 3.0 */
+
+    EXPECT_NE(glReadBuffer, nullptr);
+    EXPECT_NE(glDrawRangeElements, nullptr);
+    EXPECT_NE(glTexImage3D, nullptr);
+    EXPECT_NE(glTexSubImage3D, nullptr);
+    EXPECT_NE(glCopyTexSubImage3D, nullptr);
+    EXPECT_NE(glCompressedTexImage3D, nullptr);
+    EXPECT_NE(glCompressedTexSubImage3D, nullptr);
+    EXPECT_NE(glGenQueries, nullptr);
+    EXPECT_NE(glDeleteQueries, nullptr);
+    EXPECT_NE(glIsQuery, nullptr);
+    EXPECT_NE(glBeginQuery, nullptr);
+    EXPECT_NE(glEndQuery, nullptr);
+    EXPECT_NE(glGetQueryiv, nullptr);
+    EXPECT_NE(glGetQueryObjectuiv, nullptr);
+    EXPECT_NE(glUnmapBuffer, nullptr);
+    EXPECT_NE(glGetBufferPointerv, nullptr);
+    EXPECT_NE(glDrawBuffers, nullptr);
+    EXPECT_NE(glUniformMatrix2x3fv, nullptr);
+    EXPECT_NE(glUniformMatrix3x2fv, nullptr);
+    EXPECT_NE(glUniformMatrix2x4fv, nullptr);
+    EXPECT_NE(glUniformMatrix4x2fv, nullptr);
+    EXPECT_NE(glUniformMatrix3x4fv, nullptr);
+    EXPECT_NE(glUniformMatrix4x3fv, nullptr);
+    EXPECT_NE(glBlitFramebuffer, nullptr);
+    EXPECT_NE(glRenderbufferStorageMultisample, nullptr);
+    EXPECT_NE(glFramebufferTextureLayer, nullptr);
+    EXPECT_NE(glMapBufferRange, nullptr);
+    EXPECT_NE(glFlushMappedBufferRange, nullptr);
+    EXPECT_NE(glBindVertexArray, nullptr);
+    EXPECT_NE(glDeleteVertexArrays, nullptr);
+    EXPECT_NE(glGenVertexArrays, nullptr);
+    EXPECT_NE(glIsVertexArray, nullptr);
+    EXPECT_NE(glGetIntegeri_v, nullptr);
+    EXPECT_NE(glBeginTransformFeedback, nullptr);
+    EXPECT_NE(glEndTransformFeedback, nullptr);
+    EXPECT_NE(glBindBufferRange, nullptr);
+    EXPECT_NE(glBindBufferBase, nullptr);
+    EXPECT_NE(glTransformFeedbackVaryings, nullptr);
+    EXPECT_NE(glGetTransformFeedbackVarying, nullptr);
+    EXPECT_NE(glVertexAttribIPointer, nullptr);
+    EXPECT_NE(glGetVertexAttribIiv, nullptr);
+    EXPECT_NE(glGetVertexAttribIuiv, nullptr);
+    EXPECT_NE(glVertexAttribI4i, nullptr);
+    EXPECT_NE(glVertexAttribI4ui, nullptr);
+    EXPECT_NE(glVertexAttribI4iv, nullptr);
+    EXPECT_NE(glVertexAttribI4uiv, nullptr);
+    EXPECT_NE(glGetUniformuiv, nullptr);
+    EXPECT_NE(glGetFragDataLocation, nullptr);
+    EXPECT_NE(glUniform1ui, nullptr);
+    EXPECT_NE(glUniform2ui, nullptr);
+    EXPECT_NE(glUniform3ui, nullptr);
+    EXPECT_NE(glUniform4ui, nullptr);
+    EXPECT_NE(glUniform1uiv, nullptr);
+    EXPECT_NE(glUniform2uiv, nullptr);
+    EXPECT_NE(glUniform3uiv, nullptr);
+    EXPECT_NE(glUniform4uiv, nullptr);
+    EXPECT_NE(glClearBufferiv, nullptr);
+    EXPECT_NE(glClearBufferuiv, nullptr);
+    EXPECT_NE(glClearBufferfv, nullptr);
+    EXPECT_NE(glClearBufferfi, nullptr);
+    EXPECT_NE(glGetStringi, nullptr);
+    EXPECT_NE(glCopyBufferSubData, nullptr);
+    EXPECT_NE(glGetUniformIndices, nullptr);
+    EXPECT_NE(glGetActiveUniformsiv, nullptr);
+    EXPECT_NE(glGetUniformBlockIndex, nullptr);
+    EXPECT_NE(glGetActiveUniformBlockiv, nullptr);
+    EXPECT_NE(glGetActiveUniformBlockName, nullptr);
+    EXPECT_NE(glUniformBlockBinding, nullptr);
+    EXPECT_NE(glDrawArraysInstanced, nullptr);
+    EXPECT_NE(glDrawElementsInstanced, nullptr);
+    EXPECT_NE(glFenceSync, nullptr);
+    EXPECT_NE(glIsSync, nullptr);
+    EXPECT_NE(glDeleteSync, nullptr);
+    EXPECT_NE(glClientWaitSync, nullptr);
+    EXPECT_NE(glWaitSync, nullptr);
+    EXPECT_NE(glGetInteger64v, nullptr);
+    EXPECT_NE(glGetSynciv, nullptr);
+    EXPECT_NE(glGetInteger64i_v, nullptr);
+    EXPECT_NE(glGetBufferParameteri64v, nullptr);
+    EXPECT_NE(glGenSamplers, nullptr);
+    EXPECT_NE(glDeleteSamplers, nullptr);
+    EXPECT_NE(glIsSampler, nullptr);
+    EXPECT_NE(glBindSampler, nullptr);
+    EXPECT_NE(glSamplerParameteri, nullptr);
+    EXPECT_NE(glSamplerParameteriv, nullptr);
+    EXPECT_NE(glSamplerParameterf, nullptr);
+    EXPECT_NE(glSamplerParameterfv, nullptr);
+    EXPECT_NE(glGetSamplerParameteriv, nullptr);
+    EXPECT_NE(glGetSamplerParameterfv, nullptr);
+    EXPECT_NE(glVertexAttribDivisor, nullptr);
+    EXPECT_NE(glBindTransformFeedback, nullptr);
+    EXPECT_NE(glDeleteTransformFeedbacks, nullptr);
+    EXPECT_NE(glGenTransformFeedbacks, nullptr);
+    EXPECT_NE(glIsTransformFeedback, nullptr);
+    EXPECT_NE(glPauseTransformFeedback, nullptr);
+    EXPECT_NE(glResumeTransformFeedback, nullptr);
+    EXPECT_NE(glGetProgramBinary, nullptr);
+    EXPECT_NE(glProgramBinary, nullptr);
+    EXPECT_NE(glProgramParameteri, nullptr);
+    EXPECT_NE(glInvalidateFramebuffer, nullptr);
+    EXPECT_NE(glInvalidateSubFramebuffer, nullptr);
+    EXPECT_NE(glTexStorage2D, nullptr);
+    EXPECT_NE(glTexStorage3D, nullptr);
+    EXPECT_NE(glGetInternalformativ, nullptr);
 }
-#endif

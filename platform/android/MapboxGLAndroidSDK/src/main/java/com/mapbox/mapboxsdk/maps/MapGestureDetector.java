@@ -169,7 +169,7 @@ final class MapGestureDetector {
     }
 
     gesturesManager = androidGesturesManager;
-    gesturesManager.getRotateGestureDetector().setAngleThreshold(3f);
+    //gesturesManager.getRotateGestureDetector().setAngleThreshold(3f);
   }
 
   /**

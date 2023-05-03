@@ -1,0 +1,131 @@
+name: linux-ci
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "include/**"
+      - ".github/workflows/linux-ci.yml"
+      - "vendor/**"
+      - "CMakeLists.txt"
+      - metrics/linux-gcc8-release-style.json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: hendrikmuhs/ccache-action@v1.2
+
+      - name: Get latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.24.1
+          ninjaVersion: latest
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libuv1-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libglfw3-dev
+
+      - name: Build Maplibre GL Core
+        run: |
+          cmake --version
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner
+
+      - name: Archive mbgl-test-runner
+        uses: actions/upload-artifact@v3
+        with:
+          name: mbgl-test-runner
+          path: build/mbgl-test-runner
+          retention-days: 1
+
+      - name: Archive mbgl-render-test-runner
+        uses: actions/upload-artifact@v3
+        with:
+          name: mbgl-render-test-runner
+          path: build/mbgl-render-test-runner
+          retention-days: 1
+  
+  test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libopengl0
+
+      - name: Download mbgl-test-runner
+        uses: actions/download-artifact@v3
+        with:
+          name: mbgl-test-runner
+
+      - run: chmod +x ./mbgl-test-runner
+      
+      - name: Install npm packages and run test server in background
+        run: |
+          npm install
+          node test/storage/server.js &
+
+      - name: Run C++ tests
+        run: xvfb-run -a ./mbgl-test-runner
+
+  render-test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libopengl0
+
+      - uses: actions/checkout@v3
+
+      - name: Download mbgl-render-test-runner
+        uses: actions/download-artifact@v3
+        with:
+          name: mbgl-render-test-runner
+      
+      - run: chmod +x ./mbgl-render-test-runner
+
+      - name: Run render test
+        continue-on-error: true
+        id: render_test
+        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          echo $PR_NUMBER > ./pr_number
+
+      - name: Upload render test result
+        uses: actions/upload-artifact@v3
+        with:
+          name: render-test-result
+          path: |
+            metrics/linux-gcc8-release-style.html
+            ./pr_number

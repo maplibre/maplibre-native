@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,35 +7,36 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::FillPatternProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::FillPatternProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
 uniform vec4 u_scale;
 
-attribute vec2 a_pos;
+layout (location = 0) in vec2 a_pos;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
+out vec2 v_pos_a;
+out vec2 v_pos_b;
 
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 1) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
-attribute lowp vec4 a_pattern_from;
-varying lowp vec4 pattern_from;
+layout (location = 2) in lowp vec4 a_pattern_from;
+out lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
-attribute lowp vec4 a_pattern_to;
-varying lowp vec4 pattern_to;
+layout (location = 3) in lowp vec4 a_pattern_to;
+out lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
@@ -80,21 +81,21 @@ uniform float u_fade;
 
 uniform sampler2D u_image;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
+in vec2 v_pos_a;
+in vec2 v_pos_b;
 
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-varying lowp vec4 pattern_from;
+in lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-varying lowp vec4 pattern_to;
+in lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
@@ -117,16 +118,16 @@ mediump vec4 pattern_to = u_pattern_to;
 
     vec2 imagecoord = mod(v_pos_a, 1.0);
     vec2 pos = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, imagecoord);
-    vec4 color1 = texture2D(u_image, pos);
+    vec4 color1 = texture(u_image, pos);
 
     vec2 imagecoord_b = mod(v_pos_b, 1.0);
     vec2 pos2 = mix(pattern_tl_b / u_texsize, pattern_br_b / u_texsize, imagecoord_b);
-    vec4 color2 = texture2D(u_image, pos2);
+    vec4 color2 = texture(u_image, pos2);
 
-    gl_FragColor = mix(color1, color2, u_fade) * opacity;
+    fragColor = mix(color1, color2, u_fade) * opacity;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

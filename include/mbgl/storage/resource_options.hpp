@@ -24,7 +24,8 @@ public:
     ResourceOptions clone() const;
 
     /**
-     * @brief Sets the Mapbox access token - see https://docs.mapbox.com/help/how-mapbox-works/access-tokens/ for details.
+     * @brief Sets the Mapbox access token - see
+     * https://docs.mapbox.com/help/how-mapbox-works/access-tokens/ for details.
      *
      * @param token Mapbox access token.
      * @return ResourceOptions for chaining options together.

@@ -12,7 +12,6 @@ namespace android {
 
 class LatLngQuad : private mbgl::util::noncopyable {
 public:
-
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/geometry/LatLngQuad"; };
 
     static jni::Local<jni::Object<LatLngQuad>> New(jni::JNIEnv&, std::array<mbgl::LatLng, 4>);
@@ -21,7 +20,6 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 };
-
 
 } // namespace android
 } // namespace mbgl

@@ -10,7 +10,10 @@
 
 #include <mbgl/test/util.hpp>
 
-QMapLibreGLTest::QMapLibreGLTest() : size(512, 512), fbo((assert(widget.context()->isValid()), widget.makeCurrent(), size)), map(nullptr, settings, size) {
+QMapLibreGLTest::QMapLibreGLTest()
+    : size(512, 512),
+      fbo((assert(widget.context()->isValid()), widget.makeCurrent(), size)),
+      map(nullptr, settings, size) {
     connect(&map, &QMapLibreGL::mapChanged, this, &QMapLibreGLTest::onMapChanged);
     connect(&map, &QMapLibreGL::needsRendering, this, &QMapLibreGLTest::onNeedsRendering);
     map.resize(fbo.size());
@@ -41,7 +44,6 @@ void QMapLibreGLTest::onNeedsRendering() {
     QOpenGLContext::currentContext()->functions()->glViewport(0, 0, fbo.width(), fbo.height());
     map.render();
 }
-
 
 TEST_F(QMapLibreGLTest, TEST_DISABLED_ON_CI(styleJson)) {
     QFile f("test/fixtures/resources/style_vector.json");

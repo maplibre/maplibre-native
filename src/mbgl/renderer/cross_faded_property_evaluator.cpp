@@ -26,9 +26,7 @@ Faded<T> CrossFadedPropertyEvaluator<T>::operator()(const style::PropertyExpress
 template <typename T>
 Faded<T> CrossFadedPropertyEvaluator<T>::calculate(const T& min, const T& mid, const T& max) const {
     const float z = parameters.z;
-    return z > parameters.zoomHistory.lastIntegerZoom
-        ? Faded<T> { min, mid }
-        : Faded<T> { max, mid };
+    return z > parameters.zoomHistory.lastIntegerZoom ? Faded<T>{min, mid} : Faded<T>{max, mid};
 }
 
 template class CrossFadedPropertyEvaluator<style::expression::Image>;

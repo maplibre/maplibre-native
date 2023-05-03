@@ -1,0 +1,131 @@
+name: android-local-release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: platform/android
+    env:
+      JOBS: 8
+      BUILDTYPE: Release
+      IS_LOCAL_DEVELOPMENT: false
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Ensure source code revision
+        run: scripts/ensure-code-revision.sh        
+        working-directory: platform/android
+        shell: bash 
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: npm install
+        run: npm install --ignore-scripts          
+        working-directory: platform/android
+
+      - name: Install ccache
+        run: sudo apt-get install -y ccache
+
+      - name: Prepare ccache
+        run: ccache --clear       
+
+      - name: Cache ccache
+        uses: actions/cache@v3
+        env:
+          cache-name: ccache-v1     
+        with:
+          path: ~/.ccache'
+          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
+
+      - name: Clear ccache statistics
+        run: |
+          ccache --zero-stats
+          ccache --max-size=2G
+          ccache --show-stats   
+
+      - name: restore-gradle-cache
+        uses: actions/cache@v3
+        env:
+          cache-name: gradle-v1
+        with:
+          path: ~/.gradle'     
+          key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
+          restore-keys: |
+            - ${{ env.cache-name }}   
+
+      - name: Android nitpick
+        run: make run-android-nitpick
+        
+      - name: Update version name
+        run: |
+          RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
+          echo "Latest version from tag: $RELEASE_VERSION"
+          if [ ! -z "$RELEASE_VERSION" ]; then
+            sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapboxGLAndroidSDK/gradle.properties
+            echo "MapboxGLAndroidSDK/gradle.properties:"
+            cat MapboxGLAndroidSDK/gradle.properties
+          fi
+        shell: bash
+
+      - name: Build package
+        run: make apackage 
+
+      # create github release
+      - name: Prepare release
+        id: prepare_release
+        run: |
+          RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
+          ./scripts/release-notes.js > ${RELEASE_NOTES_PATH}
+          echo ::set-output name=release_notes::${RELEASE_NOTES_PATH}
+          echo ::set-output name=version_tag::$( git describe --tags --match=android-v*.*.* --abbrev=0 )
+        shell: bash          
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.prepare_release.outputs.version_tag }}
+          release_name: ${{steps.prepare_release.outputs.version_tag }}
+          body_path: ${{ steps.prepare_release.outputs.release_notes }}
+          draft: false
+          prerelease: false
+
+      - name: Upload aar
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar
+          asset_name: MapboxGLAndroidSDK-release.aar
+          asset_content_type: application/zip 
+
+      - name: Clean release
+        run: |
+          rm -f ${{ steps.prepare_release.outputs.release_notes }}
+        shell: bash                           

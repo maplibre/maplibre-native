@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but
@@ -20,8 +21,8 @@ template <> struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::Ope
 // long distances for long segments. Use this value to unscale the distance.
 #define LINE_DISTANCE_SCALE 2.0
 
-attribute vec2 a_pos_normal;
-attribute vec4 a_data;
+layout (location = 0) in vec2 a_pos_normal;
+layout (location = 1) in vec4 a_data;
 
 uniform mat4 u_matrix;
 uniform mediump float u_ratio;
@@ -32,56 +33,56 @@ uniform vec2 u_patternscale_b;
 uniform float u_tex_y_b;
 uniform vec2 u_units_to_pixels;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying vec2 v_tex_a;
-varying vec2 v_tex_b;
-varying float v_gamma_scale;
+out vec2 v_normal;
+out vec2 v_width2;
+out vec2 v_tex_a;
+out vec2 v_tex_b;
+out float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_color
 uniform lowp float u_color_t;
-attribute highp vec4 a_color;
-varying highp vec4 color;
+layout (location = 2) in highp vec4 a_color;
+out highp vec4 color;
 #else
 uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_blur
 uniform lowp float u_blur_t;
-attribute lowp vec2 a_blur;
-varying lowp float blur;
+layout (location = 3) in lowp vec2 a_blur;
+out lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 4) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_gapwidth
 uniform lowp float u_gapwidth_t;
-attribute mediump vec2 a_gapwidth;
+layout (location = 5) in mediump vec2 a_gapwidth;
 #else
 uniform mediump float u_gapwidth;
 #endif
 #ifndef HAS_UNIFORM_u_offset
 uniform lowp float u_offset_t;
-attribute lowp vec2 a_offset;
+layout (location = 6) in lowp vec2 a_offset;
 #else
 uniform lowp float u_offset;
 #endif
 #ifndef HAS_UNIFORM_u_width
 uniform lowp float u_width_t;
-attribute mediump vec2 a_width;
-varying mediump float width;
+layout (location = 7) in mediump vec2 a_width;
+out mediump float width;
 #else
 uniform mediump float u_width;
 #endif
 #ifndef HAS_UNIFORM_u_floorwidth
 uniform lowp float u_floorwidth_t;
-attribute lowp vec2 a_floorwidth;
-varying lowp float floorwidth;
+layout (location = 8) in lowp vec2 a_floorwidth;
+out lowp float floorwidth;
 #else
 uniform lowp float u_floorwidth;
 #endif
@@ -181,34 +182,34 @@ uniform sampler2D u_image;
 uniform float u_sdfgamma;
 uniform float u_mix;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying vec2 v_tex_a;
-varying vec2 v_tex_b;
-varying float v_gamma_scale;
+in vec2 v_normal;
+in vec2 v_width2;
+in vec2 v_tex_a;
+in vec2 v_tex_b;
+in float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_color
-varying highp vec4 color;
+in highp vec4 color;
 #else
 uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_blur
-varying lowp float blur;
+in lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_width
-varying mediump float width;
+in mediump float width;
 #else
 uniform mediump float u_width;
 #endif
 #ifndef HAS_UNIFORM_u_floorwidth
-varying lowp float floorwidth;
+in lowp float floorwidth;
 #else
 uniform lowp float u_floorwidth;
 #endif
@@ -239,15 +240,15 @@ lowp float floorwidth = u_floorwidth;
     float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
-    float sdfdist_a = texture2D(u_image, v_tex_a).a;
-    float sdfdist_b = texture2D(u_image, v_tex_b).a;
+    float sdfdist_a = texture(u_image, v_tex_a).a;
+    float sdfdist_b = texture(u_image, v_tex_b).a;
     float sdfdist = mix(sdfdist_a, sdfdist_b, u_mix);
     alpha *= smoothstep(0.5 - u_sdfgamma / floorwidth, 0.5 + u_sdfgamma / floorwidth, sdfdist);
 
-    gl_FragColor = color * (alpha * opacity);
+    fragColor = color * (alpha * opacity);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

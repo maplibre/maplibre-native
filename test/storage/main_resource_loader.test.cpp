@@ -35,8 +35,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheResponse)) {
         EXPECT_FALSE(bool(res.etag));
         response = res;
 
-        // Now test that we get the same values as in the previous request. If we'd go to the server
-        // again, we'd get different values.
+        // Now test that we get the same values as in the previous request. If
+        // we'd go to the server again, we'd get different values.
         req2 = fs.request(resource, [&](Response res2) {
             req2.reset();
             EXPECT_EQ(response.error, res2.error);
@@ -103,15 +103,17 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateSame)) {
         EXPECT_FALSE(bool(res.modified));
         EXPECT_EQ("snowfall", *res.etag);
 
-        // The first response is stored in the cache, but it has 'must-revalidate' set. This means
-        // it can't return the cached response right away and we must wait for the revalidation
-        // request to complete. We can distinguish the cached response from the revalided response
-        // because the latter has an expiration date, while the cached response doesn't.
+        // The first response is stored in the cache, but it has
+        // 'must-revalidate' set. This means it can't return the cached response
+        // right away and we must wait for the revalidation request to complete.
+        // We can distinguish the cached response from the revalided response because
+        // the latter has an expiration date, while the cached response doesn't.
         req2 = fs.request(revalidateSame, [&](Response res2) {
             if (!gotResponse) {
-                // Even though we could find the response in the database, we send a revalidation
-                // request and get a 304 response. Since we haven't sent a reply yet, we're forcing
-                // notModified to be false so that implementations can continue to use the
+                // Even though we could find the response in the database, we
+                // send a revalidation request and get a 304 response. Since we
+                // haven't sent a reply yet, we're forcing notModified to be
+                // false so that implementations can continue to use the
                 // notModified flag to skip parsing new data.
                 gotResponse = true;
                 EXPECT_EQ(nullptr, res2.error);
@@ -123,10 +125,12 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateSame)) {
                 EXPECT_FALSE(bool(res2.modified));
                 EXPECT_EQ("snowfall", *res2.etag);
             } else {
-                // The test server sends a Cache-Control header with a max-age of 1 second. This
-                // means that our OnlineFileSource implementation will request the tile again after
-                // 1 second. This time, our request already had a prior response, so we don't need
-                // to send the data again, and instead can actually forward the notModified flag.
+                // The test server sends a Cache-Control header with a max-age
+                // of 1 second. This means that our OnlineFileSource
+                // implementation will request the tile again after 1 second.
+                // This time, our request already had a prior response, so we
+                // don't need to send the data again, and instead can actually
+                // forward the notModified flag.
                 req2.reset();
                 EXPECT_EQ(nullptr, res2.error);
                 EXPECT_TRUE(res2.notModified);
@@ -165,15 +169,17 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
         EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res.modified);
         EXPECT_FALSE(res.etag);
 
-        // The first response is stored in the cache, but it has 'must-revalidate' set. This means
-        // it can't return the cached response right away and we must wait for the revalidation
-        // request to complete. We can distinguish the cached response from the revalided response
-        // because the latter has an expiration date, while the cached response doesn't.
+        // The first response is stored in the cache, but it has
+        // 'must-revalidate' set. This means it can't return the cached response
+        // right away and we must wait for the revalidation request to complete.
+        // We can distinguish the cached response from the revalided response because
+        // the latter has an expiration date, while the cached response doesn't.
         req2 = fs.request(revalidateModified, [&, res](Response res2) {
             if (!gotResponse) {
-                // Even though we could find the response in the database, we send a revalidation
-                // request and get a 304 response. Since we haven't sent a reply yet, we're forcing
-                // notModified to be false so that implementations can continue to use the
+                // Even though we could find the response in the database, we
+                // send a revalidation request and get a 304 response. Since we
+                // haven't sent a reply yet, we're forcing notModified to be
+                // false so that implementations can continue to use the
                 // notModified flag to skip parsing new data.
                 gotResponse = true;
                 EXPECT_EQ(nullptr, res2.error);
@@ -185,10 +191,12 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
                 EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res2.modified);
                 EXPECT_FALSE(res2.etag);
             } else {
-                // The test server sends a Cache-Control header with a max-age of 1 second. This
-                // means that our OnlineFileSource implementation will request the tile again after
-                // 1 second. This time, our request already had a prior response, so we don't need
-                // to send the data again, and instead can actually forward the notModified flag.
+                // The test server sends a Cache-Control header with a max-age
+                // of 1 second. This means that our OnlineFileSource
+                // implementation will request the tile again after 1 second.
+                // This time, our request already had a prior response, so we
+                // don't need to send the data again, and instead can actually
+                // forward the notModified flag.
                 req2.reset();
                 EXPECT_EQ(nullptr, res2.error);
                 EXPECT_TRUE(res2.notModified);
@@ -225,7 +233,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateEtag)) {
         EXPECT_FALSE(bool(res.modified));
         EXPECT_EQ("response-1", *res.etag);
 
-        // Second request does not return the cached response, since it had Cache-Control: must-revalidate set.
+        // Second request does not return the cached response, since it had
+        // Cache-Control: must-revalidate set.
         req2 = fs.request(revalidateEtag, [&, res](Response res2) {
             req2.reset();
 
@@ -247,14 +256,15 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateEtag)) {
 
 // Test for https://github.com/mapbox/mapbox-gl-native/issue/1369
 //
-// A request for http://example.com is made. This triggers a cache get. While the cache get is
-// pending, the request is canceled. This removes it from pending. Then, still while the cache get
-// is pending, a second request is made for the same resource. This adds an entry back to pending
-// and queues another cache request, even though the first one is still pending. Now both cache
-// requests resolve to misses, resulting in two HTTP requests for the same resource. The first one
-// will notify as expected, the second one will have bound a DefaultFileRequest* in the lambda that
-// gets invalidated by the first notify's pending.erase, and when it gets notified, the crash
-// occurs.
+// A request for http://example.com is made. This triggers a cache get. While
+// the cache get is pending, the request is canceled. This removes it from
+// pending. Then, still while the cache get is pending, a second request is made
+// for the same resource. This adds an entry back to pending and queues another
+// cache request, even though the first one is still pending. Now both cache
+// requests resolve to misses, resulting in two HTTP requests for the same
+// resource. The first one will notify as expected, the second one will have
+// bound a DefaultFileRequest* in the lambda that gets invalidated by the first
+// notify's pending.erase, and when it gets notified, the crash occurs.
 TEST(MainResourceLoader, TEST_REQUIRES_SERVER(HTTPIssue1369)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
@@ -292,8 +302,8 @@ TEST(MainResourceLoader, OptionalNonExpired) {
     response.expires = util::now() + 1h;
 
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(optionalResource, response, [&] {
         req = fs.request(optionalResource, [&](Response res) {
             req.reset();
@@ -324,8 +334,8 @@ TEST(MainResourceLoader, OptionalExpired) {
     Response response;
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() - 1h;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     std::unique_ptr<AsyncRequest> req;
     dbfs->forward(optionalResource, response, [&] {
         req = fs.request(optionalResource, [&](Response res) {
@@ -376,7 +386,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagNotModified)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorEtag.emplace("snowfall");
 
@@ -387,8 +397,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagNotModified)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             req.reset();
@@ -413,7 +423,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagModified)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorEtag.emplace("sunshine");
 
@@ -424,8 +434,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagModified)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             req.reset();
@@ -450,7 +460,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheFull)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
 
     using namespace std::chrono_literals;
@@ -460,8 +470,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheFull)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             req.reset();
@@ -481,13 +491,13 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheFull)) {
     loop.run();
 }
 
-// Test that we can make a request with a Modified field that doesn't first try to load
-// from cache like a regular request
+// Test that we can make a request with a Modified field that doesn't first try
+// to load from cache like a regular request
 TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorModified.emplace(Seconds(1420070400)); // January 1, 2015
 
@@ -498,8 +508,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             req.reset();
@@ -519,13 +529,13 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)
     loop.run();
 }
 
-// Test that we can make a request with a Modified field that doesn't first try to load
-// from cache like a regular request
+// Test that we can make a request with a Modified field that doesn't first try
+// to load from cache like a regular request
 TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-modified"};
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorModified.emplace(Seconds(1417392000)); // December 1, 2014
 
@@ -536,8 +546,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             req.reset();
@@ -559,8 +569,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
 TEST(MainResourceLoader, TEST_REQUIRES_SERVER(SetResourceTransform)) {
     util::RunLoop loop;
     MainResourceLoader resourceLoader(ResourceOptions{}, ClientOptions{});
-    std::shared_ptr<FileSource> onlinefs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Network, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> onlinefs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Network, ResourceOptions{}, ClientOptions{});
 
     // Translates the URL "localhost://test to http://127.0.0.1:3000/test
     Actor<ResourceTransform::TransformCallback> transform(
@@ -615,8 +625,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(SetResourceTransform)) {
 TEST(MainResourceLoader, SetResourceCachePath) {
     util::RunLoop loop;
     MainResourceLoader resourceLoader(ResourceOptions{}, ClientOptions{});
-    std::shared_ptr<FileSource> fs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> fs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     auto dbfs = std::static_pointer_cast<DatabaseFileSource>(fs);
     dbfs->setDatabasePath("./new_offline.db", [&loop] { loop.stop(); });
     loop.run();
@@ -627,7 +637,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
-    Resource resource { Resource::Unknown, "http://127.0.0.1:3000/revalidate-same" };
+    Resource resource{Resource::Unknown, "http://127.0.0.1:3000/revalidate-same"};
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
 
     // using namespace std::chrono_literals;
@@ -640,8 +650,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
     response.mustRevalidate = true;
     response.etag.emplace("snowfall");
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             req.reset();
@@ -670,30 +680,32 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
 
     loop.run();
 
-    // Now run this request again, with the data we gathered from the previous stale/unusable
-    // request. We're replacing the data so that we can check that the MainResourceLoader doesn't
-    // attempt another database access if we already have the value.
+    // Now run this request again, with the data we gathered from the previous
+    // stale/unusable request. We're replacing the data so that we can check
+    // that the MainResourceLoader doesn't attempt another database access if we
+    // already have the value.
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.priorData = std::make_shared<std::string>("Prior value");
 
     req = fs.request(resource, [&](Response res) {
         req.reset();
         ASSERT_EQ(nullptr, res.error.get());
-        // Since the data was found in the cache, we're doing a revalidation request. Yet, since
-        // this request hasn't returned data before, we're setting notModified to false in the
-        // OnlineFileSource to ensure that requestors know that this is the first time they're
-        // seeing this data.
+        // Since the data was found in the cache, we're doing a revalidation
+        // request. Yet, since this request hasn't returned data before, we're
+        // setting notModified to false in the OnlineFileSource to ensure that
+        // requestors know that this is the first time they're seeing this data.
         EXPECT_FALSE(res.notModified);
         ASSERT_TRUE(res.data.get());
-        // Ensure that it's the value that we manually inserted into the cache rather than the value
-        // the server returns, since we should be executing a revalidation request which doesn't
-        // return new data, only a 304 Not Modified response.
+        // Ensure that it's the value that we manually inserted into the cache
+        // rather than the value the server returns, since we should be
+        // executing a revalidation request which doesn't return new data, only
+        // a 304 Not Modified response.
         EXPECT_EQ("Prior value", *res.data);
         ASSERT_TRUE(res.expires);
         EXPECT_LE(util::now(), *res.expires);
         EXPECT_TRUE(res.mustRevalidate);
         ASSERT_TRUE(res.modified);
-        EXPECT_EQ(Timestamp{ Seconds(1417392000) }, *res.modified);
+        EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
         ASSERT_TRUE(res.etag);
         EXPECT_EQ("snowfall", *res.etag);
         loop.stop();
@@ -713,10 +725,10 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CachedResourceLowPriority)) {
     using namespace std::chrono_literals;
     response.expires = util::now() - 1h;
 
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
-    std::shared_ptr<FileSource> onlineFs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Network, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> onlineFs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Network, ResourceOptions{}, ClientOptions{});
 
     // Put existing values into the cache.
     Resource resource1{Resource::Unknown, "http://127.0.0.1:3000/load/3", {}, Resource::LoadingMethod::All};
@@ -735,7 +747,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CachedResourceLowPriority)) {
     Resource nonCached0{Resource::Unknown, "http://127.0.0.1:3000/load/0", {}, Resource::LoadingMethod::All};
     std::unique_ptr<AsyncRequest> req0 = fs.request(nonCached0, [&](Response res) {
         req0.reset();
-        EXPECT_EQ(online_response_counter, 0); // make sure this is responded first
+        EXPECT_EQ(online_response_counter,
+                  0); // make sure this is responded first
         EXPECT_EQ("Request 0", *res.data);
     });
 
@@ -743,7 +756,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CachedResourceLowPriority)) {
     std::unique_ptr<AsyncRequest> req1 = fs.request(nonCached1, [&](Response res) {
         online_response_counter++;
         req1.reset();
-        EXPECT_EQ(online_response_counter, 1); // make sure this is responded second
+        EXPECT_EQ(online_response_counter,
+                  1); // make sure this is responded second
         EXPECT_EQ("Request 1", *res.data);
     });
 
@@ -780,7 +794,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CachedResourceLowPriority)) {
     std::unique_ptr<AsyncRequest> req2 = fs.request(nonCached2, [&](Response res) {
         online_response_counter++;
         req2.reset();
-        EXPECT_EQ(online_response_counter, 2); // make sure this is responded third
+        EXPECT_EQ(online_response_counter,
+                  2); // make sure this is responded third
         EXPECT_EQ("Request 2", *res.data);
     });
 
@@ -801,8 +816,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoDoubleDispatch)) {
 
     std::unique_ptr<AsyncRequest> req;
     unsigned responseCount = 0u;
-    std::shared_ptr<FileSource> dbfs =
-        FileSourceManager::get()->getFileSource(FileSourceType::Database, ResourceOptions{}, ClientOptions{});
+    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
             EXPECT_EQ(nullptr, res.error);
@@ -827,25 +842,17 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoDoubleDispatch)) {
 }
 
 TEST(MainResourceLoader, ResourceOptions) {
-    MainResourceLoader fs(
-        ResourceOptions().withTileServerOptions(
-                TileServerOptions()
-                    .withBaseURL("originalBaseURL")
-                    .withUriSchemeAlias("originalAlias")
-                ),
-        ClientOptions()
-    );
-    
-    fs.setResourceOptions(ResourceOptions()
-        .withTileServerOptions(
-              TileServerOptions()
-                  .withBaseURL("updatedBaseURL")
-                  .withUriSchemeAlias("updatedAlias")
-              ).clone()
-    );
-    
+    MainResourceLoader fs(ResourceOptions().withTileServerOptions(
+                              TileServerOptions().withBaseURL("originalBaseURL").withUriSchemeAlias("originalAlias")),
+                          ClientOptions());
+
+    fs.setResourceOptions(
+        ResourceOptions()
+            .withTileServerOptions(TileServerOptions().withBaseURL("updatedBaseURL").withUriSchemeAlias("updatedAlias"))
+            .clone());
+
     auto updatedOptions = fs.getResourceOptions().tileServerOptions();
-    
+
     EXPECT_EQ(updatedOptions.baseURL(), "updatedBaseURL");
-    EXPECT_EQ(updatedOptions.uriSchemeAlias(), "updatedAlias");  
+    EXPECT_EQ(updatedOptions.uriSchemeAlias(), "updatedAlias");
 }

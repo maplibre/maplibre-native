@@ -242,6 +242,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
         bitsPerComponent,
         bytesPerRow,
         *colorSpace,
+        // NOLINTNEXTLINE(bugprone-suspicious-enum-usage)
         kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast));
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");

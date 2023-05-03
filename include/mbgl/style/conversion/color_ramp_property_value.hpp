@@ -9,7 +9,10 @@ namespace conversion {
 
 template <>
 struct Converter<ColorRampPropertyValue> {
-    std::optional<ColorRampPropertyValue> operator()(const Convertible& value, Error& error, bool /* allowDataExpressions */ = false, bool /* convertTokens */ = false) const;
+    std::optional<ColorRampPropertyValue> operator()(const Convertible& value,
+                                                     Error& error,
+                                                     bool /* allowDataExpressions */ = false,
+                                                     bool /* convertTokens */ = false) const;
 };
 
 } // namespace conversion

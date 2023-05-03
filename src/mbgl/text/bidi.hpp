@@ -19,7 +19,7 @@ std::u16string applyArabicShaping(const std::u16string&);
 // The data structure is intended to accomodate the reordering/interleaving
 // of formatting that can happen when BiDi rearranges inputs
 using StyledText = std::pair<std::u16string, std::vector<uint8_t>>;
-    
+
 class BiDi : private util::noncopyable {
 public:
     BiDi();

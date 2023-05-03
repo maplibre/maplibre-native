@@ -26,7 +26,8 @@ TEST(Actor, Construction) {
 
 TEST(Actor, Destruction) {
     struct TestActor {
-        TestActor(ActorRef<TestActor>, bool& destructed_) : destructed(destructed_){};
+        TestActor(ActorRef<TestActor>, bool& destructed_)
+            : destructed(destructed_){};
         ~TestActor() { destructed = true; }
 
         bool& destructed;
@@ -47,7 +48,9 @@ TEST(Actor, DestructionBlocksOnReceive) {
         std::atomic<bool> waited;
 
         TestActor(ActorRef<TestActor>, std::promise<void> promise_, std::future<void> future_)
-            : promise(std::move(promise_)), future(std::move(future_)), waited(false) {}
+            : promise(std::move(promise_)),
+              future(std::move(future_)),
+              waited(false) {}
 
         ~TestActor() { EXPECT_TRUE(waited.load()); }
 
@@ -84,12 +87,9 @@ TEST(Actor, DestructionBlocksOnSend) {
         TestScheduler(std::promise<void> promise_, std::future<void> future_)
             : promise(std::move(promise_)),
               future(std::move(future_)),
-              waited(false) {
-        }
+              waited(false) {}
 
-        ~TestScheduler() override {
-            EXPECT_TRUE(waited.load());
-        }
+        ~TestScheduler() override { EXPECT_TRUE(waited.load()); }
 
         void schedule(std::function<void()>) final {
             promise.set_value();
@@ -133,9 +133,7 @@ TEST(Actor, DestructionAllowedInReceiveOnSameThread) {
     struct TestActor {
         TestActor(ActorRef<TestActor>){};
 
-        void callMeBack(std::function<void ()> callback) {
-            callback();
-        }
+        void callMeBack(std::function<void()> callback) { callback(); }
     };
 
     std::promise<void> callbackFiredPromise;
@@ -161,9 +159,7 @@ TEST(Actor, SelfDestructionDoesntCrashWaitingReceivingThreads) {
     struct TestActor {
         TestActor(ActorRef<TestActor>){};
 
-        void callMeBack(std::function<void ()> callback) {
-            callback();
-        }
+        void callMeBack(std::function<void()> callback) { callback(); }
     };
 
     std::promise<void> actorClosedPromise;
@@ -171,7 +167,7 @@ TEST(Actor, SelfDestructionDoesntCrashWaitingReceivingThreads) {
     auto closingActor = std::make_unique<Actor<TestActor>>(Scheduler::GetBackground());
     auto waitingActor = std::make_unique<Actor<TestActor>>(Scheduler::GetBackground());
 
-    std::atomic<bool> waitingMessageProcessed {false};
+    std::atomic<bool> waitingMessageProcessed{false};
 
     // Callback (triggered while mutex is locked in Mailbox::receive())
     closingActor->self().invoke(&TestActor::callMeBack, [&]() {
@@ -187,10 +183,7 @@ TEST(Actor, SelfDestructionDoesntCrashWaitingReceivingThreads) {
         });
 
         // Wait for the message to be queued
-        ASSERT_EQ(
-                messageQueuedPromise.get_future().wait_for(std::chrono::seconds(1)),
-                std::future_status::ready
-        );
+        ASSERT_EQ(messageQueuedPromise.get_future().wait_for(std::chrono::seconds(1)), std::future_status::ready);
 
         // Destroy the Actor/Mailbox in the same thread
         closingActor.reset();
@@ -209,16 +202,15 @@ TEST(Actor, OrderedMailbox) {
         int last = 0;
         std::promise<void> promise;
 
-        TestActor(ActorRef<TestActor>, std::promise<void> promise_) : promise(std::move(promise_)) {}
+        TestActor(ActorRef<TestActor>, std::promise<void> promise_)
+            : promise(std::move(promise_)) {}
 
         void receive(int i) {
             EXPECT_EQ(i, last + 1);
             last = i;
         }
 
-        void end() {
-            promise.set_value();
-        }
+        void end() { promise.set_value(); }
     };
 
     std::promise<void> endedPromise;
@@ -240,7 +232,8 @@ TEST(Actor, NonConcurrentMailbox) {
         int last = 0;
         std::promise<void> promise;
 
-        TestActor(ActorRef<TestActor>, std::promise<void> promise_) : promise(std::move(promise_)) {}
+        TestActor(ActorRef<TestActor>, std::promise<void> promise_)
+            : promise(std::move(promise_)) {}
 
         void receive(int i) {
             EXPECT_EQ(i, last + 1);
@@ -248,9 +241,7 @@ TEST(Actor, NonConcurrentMailbox) {
             std::this_thread::sleep_for(1ms);
         }
 
-        void end() {
-            promise.set_value();
-        }
+        void end() { promise.set_value(); }
     };
 
     std::promise<void> endedPromise;
@@ -271,9 +262,7 @@ TEST(Actor, Ask) {
     struct TestActor {
         TestActor(ActorRef<TestActor>) {}
 
-        int doubleIt(int i) {
-            return i * 2;
-        }
+        int doubleIt(int i) { return i * 2; }
     };
 
     Actor<TestActor> test(Scheduler::GetBackground());
@@ -293,11 +282,10 @@ TEST(Actor, AskVoid) {
     struct TestActor {
         bool& executed;
 
-        TestActor(bool& executed_) : executed(executed_) {}
+        TestActor(bool& executed_)
+            : executed(executed_) {}
 
-        void doIt() {
-            executed = true;
-        }
+        void doIt() { executed = true; }
     };
 
     bool executed = false;
@@ -315,18 +303,14 @@ TEST(Actor, NoSelfActorRef) {
 
     Actor<Trivial> trivial(Scheduler::GetBackground());
 
-
     // With arguments
     struct WithArguments {
         std::promise<void> promise;
 
         WithArguments(std::promise<void> promise_)
-        : promise(std::move(promise_)) {
-        }
+            : promise(std::move(promise_)) {}
 
-        void receive() {
-            promise.set_value();
-        }
+        void receive() { promise.set_value(); }
     };
 
     std::promise<void> promise;
@@ -338,22 +322,20 @@ TEST(Actor, NoSelfActorRef) {
 }
 
 TEST(Actor, TwoPhaseConstruction) {
-    // This test mimics, in simplified form, the approach used by the Thread<Object> to construct
-    // its actor in two parts so that the Thread<Object> instance can be created without waiting
-    // for the target thread to be up and running.
+    // This test mimics, in simplified form, the approach used by the
+    // Thread<Object> to construct its actor in two parts so that the
+    // Thread<Object> instance can be created without waiting for the target
+    // thread to be up and running.
 
     struct TestActor {
-        TestActor(ActorRef<TestActor>, std::shared_ptr<bool> destroyed_) : destroyed(std::move(destroyed_)){};
+        TestActor(ActorRef<TestActor>, std::shared_ptr<bool> destroyed_)
+            : destroyed(std::move(destroyed_)){};
 
         ~TestActor() { *destroyed = true; }
 
-        void callMe(std::promise<void> p) {
-            p.set_value();
-        }
+        void callMe(std::promise<void> p) { p.set_value(); }
 
-        void stop() {
-            util::RunLoop::Get()->stop();
-        }
+        void stop() { util::RunLoop::Get()->stop(); }
 
         std::shared_ptr<bool> destroyed;
     };
@@ -368,10 +350,7 @@ TEST(Actor, TwoPhaseConstruction) {
     parent.self().invoke(&TestActor::callMe, std::move(queueExecuted));
     parent.self().invoke(&TestActor::stop);
 
-    auto thread = std::thread([
-        capturedArgs = std::make_tuple(destroyed),
-        &parent
-    ] () mutable {
+    auto thread = std::thread([capturedArgs = std::make_tuple(destroyed), &parent]() mutable {
         util::RunLoop loop(util::RunLoop::Type::New);
         EstablishedActor<TestActor> test(loop, parent, capturedArgs);
         loop.run();
@@ -383,5 +362,3 @@ TEST(Actor, TwoPhaseConstruction) {
 
     EXPECT_TRUE(*destroyed);
 }
-
-
