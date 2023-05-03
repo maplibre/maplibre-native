@@ -21,6 +21,7 @@ void DrawableGLBuilder::init() {
             posAttr->set(index++, gfx::VertexAttribute::int2{vert.a1[0], vert.a1[1]});
         }
     }
+    
     if (auto colorAttr = attrs.getOrAdd("a_color")) {
         std::size_t index = 0;
         for (const auto& color : impl->colors) {
