@@ -44,11 +44,16 @@ public:
         fileSource->sourceResponse = [&](const Resource& res) {
             auto resName = "source_" + getType(res) + ".json";
             return response(resName);
-            
         };
-        fileSource->glyphsResponse = [&](const Resource&) { return response("glyphs.pbf"); };
-        fileSource->spriteJSONResponse = [&](const Resource&) { return response("sprite.json"); };
-        fileSource->spriteImageResponse = [&](const Resource&) { return response("sprite.png"); };
+        fileSource->glyphsResponse = [&](const Resource&) {
+            return response("glyphs.pbf");
+        };
+        fileSource->spriteJSONResponse = [&](const Resource&) {
+            return response("sprite.json");
+        };
+        fileSource->spriteImageResponse = [&](const Resource&) {
+            return response("sprite.png");
+        };
     }
 
     util::RunLoop runLoop;
@@ -62,8 +67,7 @@ private:
         if (it != cache.end()) {
             result.data = it->second;
         } else {
-            auto data = std::make_shared<std::string>(
-                util::read_file("test/fixtures/resources/"s + path));
+            auto data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/"s + path));
 
             cache.insert(it, std::make_pair(path, data));
             result.data = data;
@@ -85,10 +89,12 @@ private:
 
 TEST(Memory, Vector) {
     MemoryTest test;
-    float ratio { 2 };
+    float ratio{2};
 
-    HeadlessFrontend frontend { { 256, 256 }, ratio };
-    MapAdapter map(frontend, MapObserver::nullObserver(), test.fileSource,
+    HeadlessFrontend frontend{{256, 256}, ratio};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   test.fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
     map.jumpTo(CameraOptions().withZoom(16));
     map.getStyle().loadURL("maptiler://maps/streets");
@@ -98,10 +104,12 @@ TEST(Memory, Vector) {
 
 TEST(Memory, Raster) {
     MemoryTest test;
-    float ratio { 2 };
+    float ratio{2};
 
-    HeadlessFrontend frontend { { 256, 256 }, ratio };
-    MapAdapter map(frontend, MapObserver::nullObserver(), test.fileSource,
+    HeadlessFrontend frontend{{256, 256}, ratio};
+    MapAdapter map(frontend,
+                   MapObserver::nullObserver(),
+                   test.fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(ratio));
     map.getStyle().loadURL("maptiler://maps/hybrid");
 
@@ -115,7 +123,7 @@ run locally, use `DO_MEMORY_FOOTPRINT=1 make run-test-Memory.Footprint.
 */
 bool shouldRunFootprint() {
     const char* preload = getenv("LD_PRELOAD");
-    
+
     if (preload) {
         return std::string(preload).find("libjemalloc.so") != std::string::npos;
     } else {
@@ -138,8 +146,10 @@ TEST(Memory, Footprint) {
     class FrontendAndMap {
     public:
         FrontendAndMap(MemoryTest& test_, const char* style)
-            : frontend(Size{ 256, 256 }, 2)
-            , map(frontend, MapObserver::nullObserver(), test_.fileSource,
+            : frontend(Size{256, 256}, 2),
+              map(frontend,
+                  MapObserver::nullObserver(),
+                  test_.fileSource,
                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(2)) {
             map.jumpTo(CameraOptions().withZoom(16));
             map.getStyle().loadURL(style);
@@ -176,7 +186,7 @@ TEST(Memory, Footprint) {
     }
 
     double rasterFootprint = (mbgl::test::getCurrentRSS() - rasterInitialRSS) / double(runs);
-    
+
     RecordProperty("vectorFootprint", static_cast<int>(vectorFootprint));
     RecordProperty("rasterFootprint", static_cast<int>(rasterFootprint));
 

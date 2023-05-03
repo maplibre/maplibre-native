@@ -8,7 +8,7 @@ namespace mbgl {
 namespace gl {
 
 gfx::DrawablePtr DrawableGLBuilder::createDrawable() const {
-    return std::make_shared<DrawableGL>();
+    return std::make_shared<DrawableGL>(drawableName.empty() ? name : drawableName);
 };
 
 void DrawableGLBuilder::init() {
@@ -23,6 +23,8 @@ void DrawableGLBuilder::init() {
     }
 
     if (auto colorAttr = attrs.getOrAdd("a_color")) {
+        // We should have either a single color or one per vertex.  Otherwise,
+        // the color mode was probably changed after vertexes were added.
         std::size_t index = 0;
         for (const auto& color : impl->colors) {
             const auto comp = util::convert<float>(color.toArray());
@@ -42,4 +44,3 @@ void DrawableGLBuilder::init() {
 
 } // namespace gl
 } // namespace mbgl
-

@@ -71,7 +71,7 @@ target_link_libraries(
 
 # FIXME: Node bindings only run fully on Linux now because it requires libuv RunLoop (which is the default on Linux). Also, Sanitizer will
 # not work here because node will do a dlopen(), which is not currently supported.
-if(CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT MBGL_WITH_SANITIZER)
+if(CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT MLN_WITH_SANITIZER)
     add_test(NAME mbgl-node-memory COMMAND npm run test-memory WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
     add_test(NAME mbgl-node-test COMMAND npm run test WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()

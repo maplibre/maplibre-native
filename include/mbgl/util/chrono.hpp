@@ -15,7 +15,7 @@ using Seconds = std::chrono::seconds;
 using Milliseconds = std::chrono::milliseconds;
 
 using TimePoint = Clock::time_point;
-using Duration  = Clock::duration;
+using Duration = Clock::duration;
 
 // Used to measure second-precision times, such as times gathered from HTTP responses.
 using Timestamp = std::chrono::time_point<std::chrono::system_clock, Seconds>;
@@ -42,13 +42,15 @@ template <class _Rep, class _Period, std::enable_if_t<std::numeric_limits<_Rep>:
 _NODISCARD constexpr std::chrono::duration<_Rep, _Period> abs(const std::chrono::duration<_Rep, _Period> _Dur) noexcept(
     std::is_arithmetic_v<_Rep>) /* strengthened */ {
     // create a duration with count() the absolute value of _Dur.count()
-    return _Dur < std::chrono::duration<_Rep, _Period>::zero() ? std::chrono::duration<_Rep, _Period>::zero() - _Dur : _Dur;
+    return _Dur < std::chrono::duration<_Rep, _Period>::zero() ? std::chrono::duration<_Rep, _Period>::zero() - _Dur
+                                                               : _Dur;
 }
 #else
-template <class Rep, class Period, class = std::enable_if_t<
-   std::chrono::duration<Rep, Period>::min() < std::chrono::duration<Rep, Period>::zero()>>
-constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d)
-{
+template <
+    class Rep,
+    class Period,
+    class = std::enable_if_t<std::chrono::duration<Rep, Period>::min() < std::chrono::duration<Rep, Period>::zero()>>
+constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Period> d) {
     return d >= d.zero() ? d : -d;
 }
 #endif

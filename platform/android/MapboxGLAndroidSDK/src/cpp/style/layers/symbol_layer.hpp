@@ -162,7 +162,7 @@ public:
 
 }; // class SymbolLayer
 
-class SymbolJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::SymbolLayerFactory {
+class SymbolJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::SymbolLayerFactory {
 public:
     ~SymbolJavaLayerPeerFactory() override;
 
@@ -174,7 +174,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class SymbolJavaLayerPeerFactory
+}; // class SymbolJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

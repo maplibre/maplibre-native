@@ -5,7 +5,8 @@ namespace mbgl {
 namespace android {
 namespace geojson {
 
-jni::Local<jni::Object<GeometryCollection>> GeometryCollection::New(jni::JNIEnv& env, const mapbox::geometry::geometry_collection<double>& collection) {
+jni::Local<jni::Object<GeometryCollection>> GeometryCollection::New(
+    jni::JNIEnv& env, const mapbox::geometry::geometry_collection<double>& collection) {
     // Create an array of geometries
     auto jarray = jni::Array<jni::Object<Geometry>>::New(env, collection.size());
 
@@ -15,14 +16,16 @@ jni::Local<jni::Object<GeometryCollection>> GeometryCollection::New(jni::JNIEnv&
 
     // create the GeometryCollection
     static auto& javaClass = jni::Class<GeometryCollection>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<GeometryCollection> (jni::Object<java::util::List>)>(env, "fromGeometries");
+    static auto method = javaClass.GetStaticMethod<jni::Object<GeometryCollection>(jni::Object<java::util::List>)>(
+        env, "fromGeometries");
     return javaClass.Call(env, method, java::util::Arrays::asList(env, jarray));
 }
 
-mapbox::geometry::geometry_collection<double> GeometryCollection::convert(jni::JNIEnv &env, const jni::Object<GeometryCollection>& jCollection) {
+mapbox::geometry::geometry_collection<double> GeometryCollection::convert(
+    jni::JNIEnv& env, const jni::Object<GeometryCollection>& jCollection) {
     // Get geometries
     static auto& javaClass = jni::Class<GeometryCollection>::Singleton(env);
-    static auto getGeometries = javaClass.GetMethod<jni::Object<java::util::List> ()>(env, "geometries");
+    static auto getGeometries = javaClass.GetMethod<jni::Object<java::util::List>()>(env, "geometries");
 
     // Turn into array
     auto jarray = java::util::List::toArray<Geometry>(env, jCollection.Call(env, getGeometries));
@@ -38,7 +41,7 @@ mapbox::geometry::geometry_collection<double> GeometryCollection::convert(jni::J
     return collection;
 }
 
-void GeometryCollection::registerNative(jni::JNIEnv &env) {
+void GeometryCollection::registerNative(jni::JNIEnv& env) {
     jni::Class<GeometryCollection>::Singleton(env);
 }
 

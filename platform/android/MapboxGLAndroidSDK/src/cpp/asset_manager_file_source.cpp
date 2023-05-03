@@ -16,10 +16,13 @@ namespace mbgl {
 
 class AssetManagerFileSource::Impl {
 public:
-    Impl(ActorRef<Impl>, AAssetManager* assetManager_, const ResourceOptions resourceOptions_, const ClientOptions clientOptions_) :
-        resourceOptions(resourceOptions_.clone()),
-        clientOptions(clientOptions_.clone()),
-        assetManager(assetManager_) {}
+    Impl(ActorRef<Impl>,
+         AAssetManager* assetManager_,
+         const ResourceOptions resourceOptions_,
+         const ClientOptions clientOptions_)
+        : resourceOptions(resourceOptions_.clone()),
+          clientOptions(clientOptions_.clone()),
+          assetManager(assetManager_) {}
 
     void request(const std::string& url, ActorRef<FileSourceRequest> req) {
         // Note: AssetManager already prepends "assets" to the filename.
@@ -28,8 +31,8 @@ public:
         Response response;
 
         if (AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER)) {
-            response.data = std::make_shared<std::string>(
-                reinterpret_cast<const char*>(AAsset_getBuffer(asset)), AAsset_getLength64(asset));
+            response.data = std::make_shared<std::string>(reinterpret_cast<const char*>(AAsset_getBuffer(asset)),
+                                                          AAsset_getLength64(asset));
             AAsset_close(asset);
         } else {
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
@@ -39,21 +42,13 @@ public:
         req.invoke(&FileSourceRequest::setResponse, response);
     }
 
-    void setResourceOptions(ResourceOptions options) {
-        resourceOptions = options;
-    }
+    void setResourceOptions(ResourceOptions options) { resourceOptions = options; }
 
-    ResourceOptions getResourceOptions() {
-        return resourceOptions.clone();
-    }
+    ResourceOptions getResourceOptions() { return resourceOptions.clone(); }
 
-    void setClientOptions(ClientOptions options) {
-        clientOptions = options;
-    }
+    void setClientOptions(ClientOptions options) { clientOptions = options; }
 
-    ClientOptions getClientOptions() {
-        return clientOptions.clone();
-    }
+    ClientOptions getClientOptions() { return clientOptions.clone(); }
 
 private:
     AAssetManager* assetManager;

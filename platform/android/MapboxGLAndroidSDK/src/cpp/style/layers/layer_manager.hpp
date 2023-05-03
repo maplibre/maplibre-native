@@ -15,7 +15,8 @@ namespace mbgl {
 namespace android {
 
 /**
- * @brief A singleton class forwarding calls to the corresponding  \c JavaLayerPeerFactory instance.
+ * @brief A singleton class forwarding calls to the corresponding  \c
+ * JavaLayerPeerFactory instance.
  */
 class LayerManagerAndroid final : public mbgl::LayerManager {
 public:
@@ -32,13 +33,13 @@ private:
     /**
      * @brief Enables a layer type for both JSON style and runtime API.
      */
-    void addLayerType(std::unique_ptr<JavaLayerPeerFactory>); 
+    void addLayerType(std::unique_ptr<JavaLayerPeerFactory>);
     /**
      * @brief Enables a layer type for JSON style only.
      *
      * We might not want to expose runtime API for some layer types
      * in order to save binary size - JNI glue code for these layer types
-     * won't be added to the binary. 
+     * won't be added to the binary.
      */
     void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>);
 
@@ -53,5 +54,5 @@ private:
     std::map<std::string, mbgl::LayerFactory*> typeToFactory;
 };
 
-}  // namespace android
-}  // namespace mbgl
+} // namespace android
+} // namespace mbgl

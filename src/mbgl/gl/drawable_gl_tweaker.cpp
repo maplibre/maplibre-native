@@ -5,7 +5,7 @@
 namespace mbgl {
 namespace gl {
 
-void DrawableGLTweaker::execute(gfx::Drawable& drawable, const PaintParameters &) {
+void DrawableGLTweaker::execute(gfx::Drawable& drawable, const PaintParameters&) {
     auto& drawGL = (gl::DrawableGL&)drawable;
     // apply expressions based on current state, update attributes, uniforms, etc.
     drawGL.getId();
@@ -13,4 +13,3 @@ void DrawableGLTweaker::execute(gfx::Drawable& drawable, const PaintParameters &
 
 } // namespace gl
 } // namespace mbgl
-

@@ -36,7 +36,7 @@ void ImageSourceRenderData::render(PaintParameters& parameters) const {
         return;
     }
     assert(debugTexture);
-    static const style::Properties<>::PossiblyEvaluated properties {};
+    static const style::Properties<>::PossiblyEvaluated properties{};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
     auto programInstance = parameters.shaders.get<DebugProgram>();
@@ -46,31 +46,30 @@ void ImageSourceRenderData::render(PaintParameters& parameters) const {
 
     for (auto matrix : matrices) {
         programInstance->draw(parameters.context,
-                             *parameters.renderPass,
-                             gfx::LineStrip{4.0f * parameters.pixelRatio},
-                             gfx::DepthMode::disabled(),
-                             gfx::StencilMode::disabled(),
-                             gfx::ColorMode::unblended(),
-                             gfx::CullFaceMode::disabled(),
-                             *parameters.staticData.tileBorderIndexBuffer,
-                             RenderStaticData::tileBorderSegments(),
-                             DebugProgram::computeAllUniformValues(
-                                 DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
-                                                                   uniforms::color::Value(Color::red()),
-                                                                   uniforms::overlay_scale::Value(1.0f)},
-                                 paintAttributeData,
-                                 properties,
-                                 static_cast<float>(parameters.state.getZoom())),
-                             DebugProgram::computeAllAttributeBindings(
-                                 *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
-                             DebugProgram::TextureBindings{textures::image::Value{debugTexture->getResource()}},
-                             "image");
+                              *parameters.renderPass,
+                              gfx::LineStrip{4.0f * parameters.pixelRatio},
+                              gfx::DepthMode::disabled(),
+                              gfx::StencilMode::disabled(),
+                              gfx::ColorMode::unblended(),
+                              gfx::CullFaceMode::disabled(),
+                              *parameters.staticData.tileBorderIndexBuffer,
+                              RenderStaticData::tileBorderSegments(),
+                              DebugProgram::computeAllUniformValues(
+                                  DebugProgram::LayoutUniformValues{uniforms::matrix::Value(matrix),
+                                                                    uniforms::color::Value(Color::red()),
+                                                                    uniforms::overlay_scale::Value(1.0f)},
+                                  paintAttributeData,
+                                  properties,
+                                  static_cast<float>(parameters.state.getZoom())),
+                              DebugProgram::computeAllAttributeBindings(
+                                  *parameters.staticData.tileVertexBuffer, paintAttributeData, properties),
+                              DebugProgram::TextureBindings{textures::image::Value{debugTexture->getResource()}},
+                              "image");
     }
 }
 
 RenderImageSource::RenderImageSource(Immutable<style::ImageSource::Impl> impl_)
-    : RenderSource(std::move(impl_)) {
-}
+    : RenderSource(std::move(impl_)) {}
 
 RenderImageSource::~RenderImageSource() = default;
 
@@ -105,13 +104,13 @@ void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
     renderData = std::make_unique<ImageSourceRenderData>(bucket, std::move(matrices), baseImpl->id);
 }
 
-std::unordered_map<std::string, std::vector<Feature>>
-RenderImageSource::queryRenderedFeatures(const ScreenLineString&,
-                                         const TransformState&,
-                                         const std::unordered_map<std::string, const RenderLayer*>&,
-                                         const RenderedQueryOptions&,
-                                         const mat4&) const {
-    return std::unordered_map<std::string, std::vector<Feature>> {};
+std::unordered_map<std::string, std::vector<Feature>> RenderImageSource::queryRenderedFeatures(
+    const ScreenLineString&,
+    const TransformState&,
+    const std::unordered_map<std::string, const RenderLayer*>&,
+    const RenderedQueryOptions&,
+    const mat4&) const {
+    return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
 std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOptions&) const {
@@ -140,8 +139,8 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     }
 
     // Compute the z0 tile coordinates for the given LatLngs
-    TileCoordinatePoint nePoint = { -INFINITY, -INFINITY };
-    TileCoordinatePoint swPoint = { INFINITY, INFINITY };
+    TileCoordinatePoint nePoint = {-INFINITY, -INFINITY};
+    TileCoordinatePoint swPoint = {INFINITY, INFINITY};
     std::vector<TileCoordinatePoint> tileCoordinates;
     for (LatLng latLng : coords) {
         auto point = TileCoordinate::fromLatLng(0, latLng).p;
@@ -150,7 +149,7 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
         nePoint.x = std::max(nePoint.x, point.x);
         swPoint.y = std::min(swPoint.y, point.y);
         nePoint.y = std::max(nePoint.y, point.y);
-   }
+    }
 
     // Calculate the optimum zoom level to determine the tile ids to use for transforms
     const auto dx = nePoint.x - swPoint.x;
@@ -182,11 +181,9 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
         if (tile.wrap != 0 && tileCover[0].canonical.isChildOf(tile.canonical)) {
             tileIds.emplace_back(tile.wrap, tileCover[0].canonical);
             hasVisibleTile = true;
-        }
-        else if (!hasVisibleTile) {
-            for (auto coveringTile: tileCover) {
-                if(coveringTile.canonical == tile.canonical ||
-                    coveringTile.canonical.isChildOf(tile.canonical) ||
+        } else if (!hasVisibleTile) {
+            for (auto coveringTile : tileCover) {
+                if (coveringTile.canonical == tile.canonical || coveringTile.canonical.isChildOf(tile.canonical) ||
                     tile.canonical.isChildOf(coveringTile.canonical)) {
                     hasVisibleTile = true;
                 }
@@ -215,14 +212,11 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     }
 
     // Set Bucket Vertices, Indices, and segments
+    bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[0].x, geomCoords[0].y}, {0, 0}));
+    bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[1].x, geomCoords[1].y}, {util::EXTENT, 0}));
+    bucket->vertices.emplace_back(RasterProgram::layoutVertex({geomCoords[3].x, geomCoords[3].y}, {0, util::EXTENT}));
     bucket->vertices.emplace_back(
-        RasterProgram::layoutVertex({ geomCoords[0].x, geomCoords[0].y }, { 0, 0 }));
-    bucket->vertices.emplace_back(
-        RasterProgram::layoutVertex({ geomCoords[1].x, geomCoords[1].y }, { util::EXTENT, 0 }));
-    bucket->vertices.emplace_back(
-        RasterProgram::layoutVertex({ geomCoords[3].x, geomCoords[3].y }, { 0, util::EXTENT }));
-    bucket->vertices.emplace_back(
-        RasterProgram::layoutVertex({ geomCoords[2].x, geomCoords[2].y }, { util::EXTENT, util::EXTENT }));
+        RasterProgram::layoutVertex({geomCoords[2].x, geomCoords[2].y}, {util::EXTENT, util::EXTENT}));
 
     bucket->indices.emplace_back(0, 1, 2);
     bucket->indices.emplace_back(1, 2, 3);

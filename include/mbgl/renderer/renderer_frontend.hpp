@@ -16,7 +16,6 @@ class UpdateParameters;
 /// the original thread.
 class RendererFrontend {
 public:
-
     virtual ~RendererFrontend() = default;
 
     /// Must synchronously clean up the Renderer if set
@@ -28,7 +27,7 @@ public:
 
     /// Coalescing updates is up to the implementer
     virtual void update(std::shared_ptr<UpdateParameters>) = 0;
-    
+
 protected:
 };
 

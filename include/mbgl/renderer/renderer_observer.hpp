@@ -42,7 +42,7 @@ public:
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 
     // Entry point for custom shader registration
-    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onRegisterShaders(gfx::ShaderRegistry&){};
 };
 
 } // namespace mbgl

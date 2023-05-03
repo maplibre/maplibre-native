@@ -14,58 +14,72 @@ namespace gl {
 static gfx::AttributeDataType mapType(platform::GLenum attrType) {
     using T = gfx::AttributeDataType;
     switch (attrType) {
-        case GL_FLOAT:              return T::Float;
-        case GL_FLOAT_VEC2:         return T::Float2;
-        case GL_FLOAT_VEC3:         return T::Float3;
-        case GL_FLOAT_VEC4:         return T::Float4;
-        case GL_FLOAT_MAT2:         return T::Float4;   // does that work ?
+        case GL_FLOAT:
+            return T::Float;
+        case GL_FLOAT_VEC2:
+            return T::Float2;
+        case GL_FLOAT_VEC3:
+            return T::Float3;
+        case GL_FLOAT_VEC4:
+            return T::Float4;
+        case GL_FLOAT_MAT2:
+            return T::Float4; // does that work ?
         case GL_FLOAT_MAT3:
-        case GL_FLOAT_MAT4:         return T::Float4;
-        case GL_INT:                return T::Int;
-        case GL_INT_VEC2:           return T::Int2;
-        case GL_INT_VEC3:           return T::Int3;
-        case GL_INT_VEC4:           return T::Int4;
-        case GL_UNSIGNED_INT:       return T::UInt;
+        case GL_FLOAT_MAT4:
+            return T::Float4;
+        case GL_INT:
+            return T::Int;
+        case GL_INT_VEC2:
+            return T::Int2;
+        case GL_INT_VEC3:
+            return T::Int3;
+        case GL_INT_VEC4:
+            return T::Int4;
+        case GL_UNSIGNED_INT:
+            return T::UInt;
         // ES3 stuff that isn't defined yet:
-        //case GL_FLOAT_MAT2x3:
-        //case GL_FLOAT_MAT2x4:
-        //case GL_FLOAT_MAT3x2:
-        //case GL_FLOAT_MAT3x4:
-        //case GL_FLOAT_MAT4x2:
-        //case GL_FLOAT_MAT4x3:       return T::Invalid;
-        //case GL_UNSIGNED_INT_VEC2:  return T::UInt2;
-        //case GL_UNSIGNED_INT_VEC3:  return T::UInt3;
-        //case GL_UNSIGNED_INT_VEC4:  return T::UInt4;
-        //case GL_DOUBLE:             return T::Float;
-        //case GL_DOUBLE_VEC2:        return T::Float2;
-        //case GL_DOUBLE_VEC3:        return T::Float3;
-        //case GL_DOUBLE_VEC4:        return T::Float4;
-        //case GL_DOUBLE_MAT2:        return T::Float4;
-        //case GL_DOUBLE_MAT3:
-        //case GL_DOUBLE_MAT4:
-        //case GL_DOUBLE_MAT2x3:
-        //case GL_DOUBLE_MAT2x4:
-        //case GL_DOUBLE_MAT3x2:
-        //case GL_DOUBLE_MAT3x4:
-        //case GL_DOUBLE_MAT4x2:
-        //case GL_DOUBLE_MAT4x3:
-        default:                    return T::Invalid;
+        // case GL_FLOAT_MAT2x3:
+        // case GL_FLOAT_MAT2x4:
+        // case GL_FLOAT_MAT3x2:
+        // case GL_FLOAT_MAT3x4:
+        // case GL_FLOAT_MAT4x2:
+        // case GL_FLOAT_MAT4x3:       return T::Invalid;
+        // case GL_UNSIGNED_INT_VEC2:  return T::UInt2;
+        // case GL_UNSIGNED_INT_VEC3:  return T::UInt3;
+        // case GL_UNSIGNED_INT_VEC4:  return T::UInt4;
+        // case GL_DOUBLE:             return T::Float;
+        // case GL_DOUBLE_VEC2:        return T::Float2;
+        // case GL_DOUBLE_VEC3:        return T::Float3;
+        // case GL_DOUBLE_VEC4:        return T::Float4;
+        // case GL_DOUBLE_MAT2:        return T::Float4;
+        // case GL_DOUBLE_MAT3:
+        // case GL_DOUBLE_MAT4:
+        // case GL_DOUBLE_MAT2x3:
+        // case GL_DOUBLE_MAT2x4:
+        // case GL_DOUBLE_MAT3x2:
+        // case GL_DOUBLE_MAT3x4:
+        // case GL_DOUBLE_MAT4x2:
+        // case GL_DOUBLE_MAT4x3:
+        default:
+            return T::Invalid;
     }
 }
 
 // No `AttributeDataType` for 4x4, so we have to account for it separately...
 static int mapCount(const platform::GLenum attrType) {
     switch (attrType) {
-        case GL_FLOAT_MAT3:         return 3;
-        case GL_FLOAT_MAT4:         return 4;
-        default:                    return 1;
+        case GL_FLOAT_MAT3:
+            return 3;
+        case GL_FLOAT_MAT4:
+            return 4;
+        default:
+            return 1;
     }
 }
 
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
     : ShaderProgramBase(),
-      glProgram(std::move(glProgram_)) {
-}
+      glProgram(std::move(glProgram_)) {}
 
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
                                  VertexAttributeArrayGL&& uniforms_,
@@ -73,20 +87,18 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
     : ShaderProgramBase(),
       glProgram(std::move(program)),
       uniforms(std::move(uniforms_)),
-      vertexAttributes(std::move(attributes_)) {
-}
+      vertexAttributes(std::move(attributes_)) {}
 
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
       glProgram(std::move(other.glProgram)),
       uniforms(std::move(other.uniforms)),
-      vertexAttributes(std::move(other.vertexAttributes)) {
-}
+      vertexAttributes(std::move(other.vertexAttributes)) {}
 
 using namespace platform;
 
-static void addAttr(VertexAttributeArrayGL& attrs, const char* name, GLint index,
-                    GLsizei length, GLint count, GLenum glType) {
+static void addAttr(
+    VertexAttributeArrayGL& attrs, const char* name, GLint index, GLsizei length, GLint count, GLenum glType) {
     const auto elementType = mapType(glType);
     const auto elementCount = mapCount(glType); // number of `elementType`, hopefully temporary
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
@@ -97,22 +109,21 @@ static void addAttr(VertexAttributeArrayGL& attrs, const char* name, GLint index
     }
 }
 
-std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
-        Context& context,
-        std::string_view /*name*/,
-        std::string_view vertexSource,
-        std::string_view fragmentSource) noexcept(false) {
-    
+std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
+                                                         std::string_view /*name*/,
+                                                         std::string_view vertexSource,
+                                                         std::string_view fragmentSource) noexcept(false) {
     const auto firstAttrib = "a_pos";
 
     // throws on compile error
     auto vertProg = context.createShader(ShaderType::Vertex, std::initializer_list<const char*>{vertexSource.data()});
-    auto fragProg = context.createShader(ShaderType::Fragment, std::initializer_list<const char*>{fragmentSource.data()});
+    auto fragProg = context.createShader(ShaderType::Fragment,
+                                         std::initializer_list<const char*>{fragmentSource.data()});
     auto program = context.createProgram(vertProg, fragProg, firstAttrib);
 
     // GLES3.1
-    //GLint numAttribs;
-    //glGetProgramInterfaceiv(program, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
+    // GLint numAttribs;
+    // glGetProgramInterfaceiv(program, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
 
     VertexAttributeArrayGL uniforms;
 

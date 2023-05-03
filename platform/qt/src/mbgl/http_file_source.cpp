@@ -14,13 +14,11 @@ namespace mbgl {
 HTTPFileSource::Impl::Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : m_manager(new QNetworkAccessManager(this)),
       m_resourceOptions(resourceOptions.clone()),
-      m_clientOptions(clientOptions.clone())
-{
+      m_clientOptions(clientOptions.clone()) {
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 }
 
-void HTTPFileSource::Impl::request(HTTPRequest* req)
-{
+void HTTPFileSource::Impl::request(HTTPRequest* req) {
     QUrl url = req->requestUrl();
 
     QPair<QPointer<QNetworkReply>, QVector<HTTPRequest*>>& data = m_pending[url];
@@ -33,12 +31,11 @@ void HTTPFileSource::Impl::request(HTTPRequest* req)
 
     QNetworkRequest networkRequest = req->networkRequest();
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#   if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
-    networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
-                                QNetworkRequest::NoLessSafeRedirectPolicy);
-#   elif QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+    networkRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
     networkRequest.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-#   endif
+#endif
 #endif
 
     data.first = m_manager->get(networkRequest);
@@ -50,8 +47,7 @@ void HTTPFileSource::Impl::request(HTTPRequest* req)
 #endif
 }
 
-void HTTPFileSource::Impl::cancel(HTTPRequest* req)
-{
+void HTTPFileSource::Impl::cancel(HTTPRequest* req) {
     QUrl url = req->requestUrl();
 
     auto it = m_pending.find(url);
@@ -76,9 +72,8 @@ void HTTPFileSource::Impl::cancel(HTTPRequest* req)
     }
 }
 
-void HTTPFileSource::Impl::onReplyFinished()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
+void HTTPFileSource::Impl::onReplyFinished() {
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
     const QUrl& url = reply->request().url();
 
     auto it = m_pending.find(url);
@@ -101,34 +96,28 @@ void HTTPFileSource::Impl::onReplyFinished()
     reply->deleteLater();
 }
 
-void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options)
-{
+void HTTPFileSource::Impl::setResourceOptions(ResourceOptions options) {
     m_resourceOptions = options;
 }
 
-ResourceOptions HTTPFileSource::Impl::getResourceOptions()
-{
+ResourceOptions HTTPFileSource::Impl::getResourceOptions() {
     return m_resourceOptions.clone();
 }
 
-void HTTPFileSource::Impl::setClientOptions(ClientOptions options)
-{
+void HTTPFileSource::Impl::setClientOptions(ClientOptions options) {
     m_clientOptions = options;
 }
 
-ClientOptions HTTPFileSource::Impl::getClientOptions()
-{
+ClientOptions HTTPFileSource::Impl::getClientOptions() {
     return m_clientOptions.clone();
 }
 
 HTTPFileSource::HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
-    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {
-}
+    : impl(std::make_unique<Impl>(resourceOptions, clientOptions)) {}
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback)
-{
+std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
     return std::make_unique<HTTPRequest>(impl.get(), resource, callback);
 }
 
@@ -147,6 +136,5 @@ void HTTPFileSource::setClientOptions(ClientOptions options) {
 ClientOptions HTTPFileSource::getClientOptions() {
     return impl->getClientOptions();
 }
-
 
 } // namespace mbgl

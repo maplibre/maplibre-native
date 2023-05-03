@@ -5,8 +5,7 @@ namespace mbgl {
 TileRenderData::TileRenderData() = default;
 
 TileRenderData::TileRenderData(std::shared_ptr<TileAtlasTextures> atlasTextures_)
-    : atlasTextures(std::move(atlasTextures_)) {
-}
+    : atlasTextures(std::move(atlasTextures_)) {}
 
 TileRenderData::~TileRenderData() = default;
 

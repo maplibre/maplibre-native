@@ -29,7 +29,9 @@ static RendererObserver& nullObserver() {
     return observer;
 }
 
-Renderer::Impl::Impl(gfx::RendererBackend& backend_, float pixelRatio_, const std::optional<std::string>& localFontFamily_)
+Renderer::Impl::Impl(gfx::RendererBackend& backend_,
+                     float pixelRatio_,
+                     const std::optional<std::string>& localFontFamily_)
     : orchestrator(!backend_.contextIsShared(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
@@ -52,8 +54,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& renderTreeParameters = renderTree.getParameters();
 
     if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(pixelRatio,
-            std::make_unique<gfx::ShaderRegistry>());
+        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
         staticData->programs.registerWith(*staticData->shaders);
         observer->onRegisterShaders(*staticData->shaders);
     }
@@ -68,19 +69,17 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
 
-    PaintParameters parameters {
-        context,
-        pixelRatio,
-        backend,
-        renderTreeParameters.light,
-        renderTreeParameters.mapMode,
-        renderTreeParameters.debugOptions,
-        renderTreeParameters.timePoint,
-        renderTreeParameters.transformParams,
-        *staticData,
-        renderTree.getLineAtlas(),
-        renderTree.getPatternAtlas()
-    };
+    PaintParameters parameters{context,
+                               pixelRatio,
+                               backend,
+                               renderTreeParameters.light,
+                               renderTreeParameters.mapMode,
+                               renderTreeParameters.debugOptions,
+                               renderTreeParameters.timePoint,
+                               renderTreeParameters.transformParams,
+                               *staticData,
+                               renderTree.getLineAtlas(),
+                               renderTree.getPatternAtlas()};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -89,6 +88,23 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     // Run changes
     orchestrator.processChanges();
+
+    // Collect drawables
+    std::vector<gfx::DrawablePtr> drawables(orchestrator.getDrawables().size());
+    std::transform(orchestrator.getDrawables().begin(),
+                   orchestrator.getDrawables().end(),
+                   drawables.begin(),
+                   std::bind(&RenderOrchestrator::DrawableMap::value_type::second, std::placeholders::_1));
+
+    // Run tweakers to update any dynamic elements
+    for (auto& drawable : drawables) {
+        for (auto& tweaker : drawable->getTweakers()) {
+            tweaker->execute(*drawable, parameters);
+        }
+    }
+
+    // Sort the drawables
+    std::sort(drawables.begin(), drawables.end(), gfx::DrawablePtrLessByLayer(/*descending=*/true));
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
@@ -105,54 +121,46 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
-        
-        for (const auto& pair : orchestrator.getDrawables()) {
-            auto& drawable = *pair.second;
 
-            // Run tweakers to update any dynamic elements
-            for (auto& tweaker : drawable.getTweakers()) {
-                tweaker->execute(drawable, parameters);
-            }
+        for (const auto& drawPtr : drawables) {
+            auto& drawable = *drawPtr;
 
             auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
             auto& shader = drawable.getShader();
 
             // Generate a vertex array object for the drawable state, if necessary
-            if (shader && !drawableGL.getVertexArray().isValid()) {
+            if (shader && (!drawableGL.getVertexArray().isValid() || drawableGL.getVertexAttributes().isDirty())) {
                 const auto usage = gfx::BufferUsageType::StaticDraw;
 
                 // Build index buffer
                 const auto& indexData = drawable.getIndexData();
-                auto indexBuffer = gfx::IndexBuffer {
+                auto indexBuffer = gfx::IndexBuffer{
                     indexData.size(),
                     uploadPass->createIndexBufferResource(
-                        indexData.data(),
-                        indexData.size() * sizeof(indexData[0]),
-                        usage)
-                };
+                        indexData.data(), indexData.size() * sizeof(indexData[0]), usage)};
 
                 // Apply drawable values to shader defaults
                 const auto& defaults = shader->getVertexAttributes();
                 const auto& overrides = drawable.getVertexAttributes();
                 const auto vertexCount = drawable.getVertexCount();
                 std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
-                auto bindings = uploadPass->buildAttributeBindings(vertexCount, defaults, overrides, usage, vertexBuffer);
+                auto bindings = uploadPass->buildAttributeBindings(
+                    vertexCount, defaults, overrides, usage, vertexBuffer);
 
                 auto& glContext = static_cast<gl::Context&>(context);
                 auto vertexArray = glContext.createVertexArray();
                 vertexArray.bind(glContext, indexBuffer, bindings);
                 glContext.bindVertexArray = gl::value::BindVertexArray::Default;
 
-                drawableGL.setVertexArray(std::move(vertexArray),
-                                          std::move(vertexBuffer),
-                                          std::move(indexBuffer));
+                drawableGL.setVertexArray(std::move(vertexArray), std::move(vertexBuffer), std::move(indexBuffer));
             }
         }
     }
 
-    // - 3D PASS -------------------------------------------------------------------------------------
-    // Renders any 3D layers bottom-to-top to unique FBOs with texture attachments, but share the same
-    // depth rbo between them.
+    // - 3D PASS
+    // -------------------------------------------------------------------------------------
+    // Renders any 3D layers bottom-to-top to unique FBOs with texture
+    // attachments, but share the same depth rbo between them.
     if (parameters.staticData.has3D) {
         parameters.staticData.backendSize = parameters.backend.getDefaultRenderable().getSize();
 
@@ -162,7 +170,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         if (!parameters.staticData.depthRenderbuffer ||
             parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
             parameters.staticData.depthRenderbuffer =
-                parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(parameters.staticData.backendSize);
+                parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+                    parameters.staticData.backendSize);
         }
         parameters.staticData.depthRenderbuffer->setShouldClear(true);
 
@@ -177,9 +186,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    // - CLEAR -------------------------------------------------------------------------------------
-    // Renders the backdrop of the OpenGL view. This also paints in areas where we don't have any
-    // tiles whatsoever.
+    // - CLEAR
+    // -------------------------------------------------------------------------------------
+    // Renders the backdrop of the OpenGL view. This also paints in areas where
+    // we don't have any tiles whatsoever.
     {
         std::optional<Color> color;
         if (parameters.debugOptions & MapDebugOptions::Overdraw) {
@@ -187,7 +197,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         } else if (!backend.contextIsShared()) {
             color = renderTreeParameters.backgroundColor;
         }
-        parameters.renderPass = parameters.encoder->createRenderPass("main buffer", { parameters.backend.getDefaultRenderable(), color, 1.0f, 0 });
+        parameters.renderPass = parameters.encoder->createRenderPass(
+            "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
     }
 
     // Draw Drawables
@@ -199,8 +210,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables"));
 
-        for (const auto &pair : orchestrator.getDrawables()) {
-            const auto& drawable = *pair.second;
+        for (const auto& drawPtr : drawables) {
+            auto& drawable = *drawPtr;
 
             if (!context.setupDraw(parameters, drawable)) {
                 continue;
@@ -230,7 +241,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     {
-            
         parameters.pass = RenderPass::Opaque;
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
 
@@ -265,15 +275,16 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    // - DEBUG PASS --------------------------------------------------------------------------------
+    // - DEBUG PASS
+    // --------------------------------------------------------------------------------
     // Renders debug overlays.
     {
         const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
 
         // Finalize the rendering, e.g. by calling debug render calls per tile.
         // This guarantees that we have at least one function per tile called.
-        // When only rendering layers via the stylesheet, it's possible that we don't
-        // ever visit a tile during rendering.
+        // When only rendering layers via the stylesheet, it's possible that we
+        // don't ever visit a tile during rendering.
         for (const RenderItem& renderItem : sourceRenderItems) {
             renderItem.render(parameters);
         }
@@ -302,8 +313,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
-        renderTreeParameters.placementChanged
-    );
+        renderTreeParameters.placementChanged);
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

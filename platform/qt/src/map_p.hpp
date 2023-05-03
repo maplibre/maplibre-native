@@ -19,17 +19,16 @@
 
 namespace QMapLibreGL {
 
-class MapPrivate : public QObject, public mbgl::RendererFrontend
-{
+class MapPrivate : public QObject, public mbgl::RendererFrontend {
     Q_OBJECT
 
 public:
-    explicit MapPrivate(Map *, const Settings &, const QSize &size, qreal pixelRatio);
+    explicit MapPrivate(Map*, const Settings&, const QSize& size, qreal pixelRatio);
     virtual ~MapPrivate();
 
     // mbgl::RendererFrontend implementation.
     void reset() final {}
-    void setObserver(mbgl::RendererObserver &) final;
+    void setObserver(mbgl::RendererObserver&) final;
     void update(std::shared_ptr<mbgl::UpdateParameters>) final;
 
     // These need to be called on the same thread.
@@ -38,7 +37,8 @@ public:
     void render();
     void setFramebufferObject(quint32 fbo, const QSize& size);
 
-    using PropertySetter = std::optional<mbgl::style::conversion::Error> (mbgl::style::Layer::*)(const std::string&, const mbgl::style::conversion::Convertible&);
+    using PropertySetter = std::optional<mbgl::style::conversion::Error> (mbgl::style::Layer::*)(
+        const std::string&, const mbgl::style::conversion::Convertible&);
     bool setProperty(const PropertySetter& setter, const QString& layer, const QString& name, const QVariant& value);
 
     mbgl::EdgeInsets margins;

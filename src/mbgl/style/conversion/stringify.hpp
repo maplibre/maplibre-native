@@ -109,39 +109,40 @@ void stringify(Writer& writer, const std::unordered_map<std::string, T>& m) {
 
 template <class Writer>
 void stringify(Writer& writer, const Value& v) {
-    Value::visit(v, [&] (const auto& v_) { stringify(writer, v_); });
+    Value::visit(v, [&](const auto& v_) { stringify(writer, v_); });
 }
 
 template <class Writer>
 void stringify(Writer& writer, FeatureType type) {
     switch (type) {
-    case FeatureType::Unknown:
-        writer.String("Unknown");
-        break;
-    case FeatureType::Point:
-        writer.String("Point");
-        break;
-    case FeatureType::LineString:
-        writer.String("LineString");
-        break;
-    case FeatureType::Polygon:
-        writer.String("Polygon");
-        break;
+        case FeatureType::Unknown:
+            writer.String("Unknown");
+            break;
+        case FeatureType::Point:
+            writer.String("Point");
+            break;
+        case FeatureType::LineString:
+            writer.String("LineString");
+            break;
+        case FeatureType::Polygon:
+            writer.String("Polygon");
+            break;
     }
 }
 
 template <class Writer>
 void stringify(Writer& writer, const FeatureIdentifier& id) {
-    FeatureIdentifier::visit(id, [&] (const auto& id_) { stringify(writer, id_); });
+    FeatureIdentifier::visit(id, [&](const auto& id_) { stringify(writer, id_); });
 }
 
 template <class Writer>
 void stringify(Writer& writer, const Filter& filter) {
-    if (!filter.expression) writer.Null();
-    else stringify(writer, (*filter.expression)->serialize());
+    if (!filter.expression)
+        writer.Null();
+    else
+        stringify(writer, (*filter.expression)->serialize());
 }
-    
-    
+
 template <class Writer>
 void stringify(Writer& writer, const expression::Formatted& v) {
     // Convert to mbgl::Value and then use the existing stringify
@@ -168,7 +169,7 @@ void stringify(Writer& writer, const PropertyExpression<T>& fn) {
 
 template <class Writer, class T>
 void stringify(Writer& writer, const PropertyValue<T>& v) {
-    v.evaluate([&] (const auto& v_) { stringify(writer, v_); });
+    v.evaluate([&](const auto& v_) { stringify(writer, v_); });
 }
 
 template <class Property, class Writer, class T>

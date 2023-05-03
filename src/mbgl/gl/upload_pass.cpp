@@ -17,70 +17,65 @@ namespace gl {
 using namespace platform;
 
 UploadPass::UploadPass(gl::CommandEncoder& commandEncoder_, const char* name)
-    : commandEncoder(commandEncoder_), debugGroup(commandEncoder.createDebugGroup(name)) {
-}
+    : commandEncoder(commandEncoder_),
+      debugGroup(commandEncoder.createDebugGroup(name)) {}
 
-std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(
-    const void* data, std::size_t size, const gfx::BufferUsageType usage) {
+std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(const void* data,
+                                                                                  std::size_t size,
+                                                                                  const gfx::BufferUsageType usage) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     commandEncoder.context.renderingStats().numBuffers++;
     commandEncoder.context.renderingStats().memVertexBuffers += static_cast<int>(size);
     // NOLINTNEXTLINE(performance-move-const-arg)
-    UniqueBuffer result{ std::move(id), { commandEncoder.context } };
+    UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.vertexBuffer = result;
-    MBGL_CHECK_ERROR(
-        glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
+    MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
     return std::make_unique<gl::VertexBufferResource>(std::move(result), static_cast<int>(size));
 }
 
-void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource,
-                                            const void* data,
-                                            std::size_t size) {
+void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
     commandEncoder.context.vertexBuffer = static_cast<gl::VertexBufferResource&>(resource).buffer;
     MBGL_CHECK_ERROR(glBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
 }
 
-std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
-    const void* data, std::size_t size, const gfx::BufferUsageType usage) {
+std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
+                                                                                std::size_t size,
+                                                                                const gfx::BufferUsageType usage) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     commandEncoder.context.renderingStats().numBuffers++;
     commandEncoder.context.renderingStats().memIndexBuffers += static_cast<int>(size);
     // NOLINTNEXTLINE(performance-move-const-arg)
-    UniqueBuffer result{ std::move(id), { commandEncoder.context } };
+    UniqueBuffer result{std::move(id), {commandEncoder.context}};
     commandEncoder.context.bindVertexArray = 0;
     commandEncoder.context.globalVertexArrayState.indexBuffer = result;
-    MBGL_CHECK_ERROR(
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
+    MBGL_CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
     return std::make_unique<gl::IndexBufferResource>(std::move(result), static_cast<int>(size));
 }
 
-void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource,
-                                           const void* data,
-                                           std::size_t size) {
-    // Be sure to unbind any existing vertex array object before binding the index buffer
-    // so that we don't mess up another VAO
+void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
+    // Be sure to unbind any existing vertex array object before binding the
+    // index buffer so that we don't mess up another VAO
     commandEncoder.context.bindVertexArray = 0;
-    commandEncoder.context.globalVertexArrayState.indexBuffer =
-        static_cast<gl::IndexBufferResource&>(resource).buffer;
+    commandEncoder.context.globalVertexArrayState.indexBuffer = static_cast<gl::IndexBufferResource&>(resource).buffer;
     MBGL_CHECK_ERROR(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, data));
 }
 
-std::unique_ptr<gfx::TextureResource>
-UploadPass::createTextureResource(const Size size,
-                                  const void* data,
-                                  gfx::TexturePixelType format,
-                                  gfx::TextureChannelDataType type) {
+std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size size,
+                                                                        const void* data,
+                                                                        gfx::TexturePixelType format,
+                                                                        gfx::TextureChannelDataType type) {
     auto obj = commandEncoder.context.createUniqueTexture();
     int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
     commandEncoder.context.renderingStats().memTextures += textureByteSize;
-    std::unique_ptr<gfx::TextureResource> resource =
-        std::make_unique<gl::TextureResource>(std::move(obj), textureByteSize);
-    commandEncoder.context.pixelStoreUnpack = { 1 };
+    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj),
+                                                                                           textureByteSize);
+    commandEncoder.context.pixelStoreUnpack = {1};
     updateTextureResource(*resource, size, data, format, type);
-    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT on NPOT textures.
-    // We use those when the pixelRatio isn't a power of two, e.g. on iPhone 6 Plus.
+    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
+    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
+    // e.g. on iPhone 6 Plus.
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
@@ -96,10 +91,15 @@ void UploadPass::updateTextureResource(gfx::TextureResource& resource,
     // Always use texture unit 0 for manipulating it.
     commandEncoder.context.activeTextureUnit = 0;
     commandEncoder.context.texture[0] = static_cast<gl::TextureResource&>(resource).texture;
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D, 0, Enum<gfx::TexturePixelType>::to(format),
-                                  size.width, size.height, 0,
+    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
+                                  0,
                                   Enum<gfx::TexturePixelType>::to(format),
-                                  Enum<gfx::TextureChannelDataType>::to(type), data));
+                                  size.width,
+                                  size.height,
+                                  0,
+                                  Enum<gfx::TexturePixelType>::to(format),
+                                  Enum<gfx::TextureChannelDataType>::to(type),
+                                  data));
 }
 
 void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
@@ -112,9 +112,15 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
     // Always use texture unit 0 for manipulating it.
     commandEncoder.context.activeTextureUnit = 0;
     commandEncoder.context.texture[0] = static_cast<const gl::TextureResource&>(resource).texture;
-    MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, size.width, size.height,
+    MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
+                                     0,
+                                     xOffset,
+                                     yOffset,
+                                     size.width,
+                                     size.height,
                                      Enum<gfx::TexturePixelType>::to(format),
-                                     Enum<gfx::TextureChannelDataType>::to(type), data));
+                                     Enum<gfx::TextureChannelDataType>::to(type),
+                                     data));
 }
 
 static std::size_t padSize(std::size_t size, std::size_t padding) {
@@ -126,12 +132,11 @@ static void pad(std::vector<T>& vector, std::size_t size, T value) {
 }
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
-        const std::size_t vertexCount,
-        const gfx::VertexAttributeArray& defaults,
-        const gfx::VertexAttributeArray& overrides,
-        const gfx::BufferUsageType usage,
-        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) {
-    
+    const std::size_t vertexCount,
+    const gfx::VertexAttributeArray& defaults,
+    const gfx::VertexAttributeArray& overrides,
+    const gfx::BufferUsageType usage,
+    /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) {
     AttributeBindingArray bindings;
     bindings.resize(defaults.size());
 
@@ -142,55 +147,55 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     allData.reserve(defaults.getTotalSize() * vertexCount);
 
     // For each attribute in the program, with the corresponding default and optional override...
-    defaults.resolve(overrides, [&](const std::string& name,
-                                    const gfx::VertexAttribute& defaultAttr,
-                                    const gfx::VertexAttribute* overrideAttr)->void {
+    defaults.resolve(overrides,
+                     [&](const std::string& name,
+                         const gfx::VertexAttribute& defaultAttr,
+                         const gfx::VertexAttribute* overrideAttr) -> void {
+                         const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
+                         const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
+                         const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
+                         const auto stride = defaultAttr.getStride();
+                         const auto offset = static_cast<uint8_t>(allData.size());
 
-        const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
-        const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
-        const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
-        const auto stride = defaultAttr.getStride();
-        const auto offset = static_cast<uint8_t>(allData.size());
+                         // Get the raw data for the values in the desired format
+                         const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
 
-        // Get the raw data for the values in the desired format
-        const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
+                         if (rawData.size() == stride * vertexCount) {
+                             // The override provided a value for each vertex, append it as-is
+                             allData.insert(allData.end(), rawData.begin(), rawData.end());
+                         } else if (rawData.size() == stride) {
+                             // We only have one value, append a copy for each vertex
+                             for (std::size_t i = 0; i < vertexCount; ++i) {
+                                 allData.insert(allData.end(), rawData.begin(), rawData.end());
+                             }
+                         } else {
+                             // something else, the binding is invalid
+                             // TODO: throw?
+                             Log::Warning(Event::General,
+                                          "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name +
+                                              "' (" + util::toString(defaultGL.getIndex()) + "), expected " +
+                                              util::toString(stride) + " or " + util::toString(stride * vertexCount));
+                             return;
+                         }
 
-        if (rawData.size() == stride * vertexCount) {
-            // The override provided a value for each vertex, append it as-is
-            allData.insert(allData.end(), rawData.begin(), rawData.end());
-        } else if (rawData.size() == stride) {
-            // We only have one value, append a copy for each vertex
-            for (std::size_t i = 0; i < vertexCount; ++i) {
-                allData.insert(allData.end(), rawData.begin(), rawData.end());
-            }
-        } else {
-            // something else, the binding is invalid
-            // TODO: throw?
-            Log::Warning(Event::General,
-                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name +
-                         "' (" + util::toString(defaultGL.getIndex()) + "), expected " +
-                         util::toString(stride) + " or " + util::toString(stride * vertexCount));
-            return;
-        }
+                         bindings[defaultGL.getIndex()] = {
+                             /*.attribute = */ {defaultAttr.getDataType(), offset},
+                             /*.vertexStride = */ static_cast<uint8_t>(stride),
+                             /*.vertexBufferResource = */ nullptr, // buffer pointer established later
+                             /*.vertexOffset = */ 0,
+                         };
 
-        bindings[defaultGL.getIndex()] = {
-            /*.attribute = */           { defaultAttr.getDataType(), offset },
-            /*.vertexStride = */        static_cast<uint8_t>(stride),
-            /*.vertexBufferResource = */nullptr,    // buffer pointer established later
-            /*.vertexOffset = */        0,
-        };
-
-        pad(allData, align, padding);
-    });
+                         pad(allData, align, padding);
+                     });
 
     auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage);
 
     // Go back and fill in the newly-allocated buffer in each binding that was generated
     std::for_each(bindings.begin(), bindings.end(), [&](auto& b) {
-            if (b) {
-                b->vertexBufferResource = vertBuf.get();
-            }
-        });
+        if (b) {
+            b->vertexBufferResource = vertBuf.get();
+        }
+    });
 
     outBuffer = std::move(vertBuf);
     return bindings;

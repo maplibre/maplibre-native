@@ -24,7 +24,7 @@ using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
  */
 class DrawableBuilder {
 protected:
-    DrawableBuilder();
+    DrawableBuilder(std::string name);
 
 public:
     virtual ~DrawableBuilder();
@@ -48,10 +48,13 @@ public:
     /// Get the ID of the drawable we're currently working on, if any
     util::SimpleIdentity getDrawableId();
 
-    /// Get the draw priority assigned to generated drawables
+    /// The draw priority assigned to generated drawables
     DrawPriority getDrawPriority() const;
-    /// Set the draw priority assigned to generated drawables
     void setDrawPriority(DrawPriority);
+
+    /// The layer index assigned to generated drawables
+    int32_t getLayerIndex() const { return layerIndex; }
+    void setLayerIndex(int32_t value) { layerIndex = value; }
 
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);
@@ -59,6 +62,14 @@ public:
     /// The color used for emitted vertexes
     const Color& getColor() const;
     void setColor(const Color& value);
+
+    enum class ColorMode {
+        PerDrawable,
+        PerVertex
+    };
+    /// Set how the color value is used
+    /// This should not be changed while a build is in progress
+    void setColorMode(ColorMode mode) { colorMode = mode; }
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
@@ -70,6 +81,10 @@ public:
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
 
+    /// Set the name given to new drawables
+    void setDrawableName(std::string value) { drawableName = std::move(value); }
+
+    /// Set the matrix applied to new drawables
     void setMatrix(mat4 value) { matrix = value; }
 
     /// Add a triangle
@@ -91,13 +106,17 @@ protected:
     virtual void init() = 0;
 
 protected:
+    std::string name;
+    std::string drawableName;
     DrawPriority drawPriority = 0;
+    int32_t layerIndex = -1;
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;
     mat4 matrix;
     DrawablePtr currentDrawable;
     std::vector<DrawablePtr> drawables;
     std::vector<DrawableTweakerPtr> tweakers;
+    ColorMode colorMode = ColorMode::PerVertex;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

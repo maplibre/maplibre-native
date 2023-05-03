@@ -13,7 +13,7 @@ Timer::Impl::Impl() {
     connect(&timer, &QTimer::timeout, this, &Timer::Impl::timerFired);
 }
 
-void Timer::Impl::start(uint64_t timeout, uint64_t repeat_, std::function<void ()>&& cb) {
+void Timer::Impl::start(uint64_t timeout, uint64_t repeat_, std::function<void()>&& cb) {
     repeat = repeat_;
     callback = std::move(cb);
 
@@ -43,8 +43,7 @@ void Timer::Impl::timerFired() {
 }
 
 Timer::Timer()
-    : impl(std::make_unique<Impl>()) {
-}
+    : impl(std::make_unique<Impl>()) {}
 
 Timer::~Timer() = default;
 
@@ -58,5 +57,5 @@ void Timer::stop() {
     impl->stop();
 }
 
-}
-}
+} // namespace util
+} // namespace mbgl

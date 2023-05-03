@@ -5,18 +5,17 @@
 namespace mbgl {
 namespace gl {
 
-DrawableGL::DrawableGL()
-    : impl(std::make_unique<Impl>()) {
-}
+DrawableGL::DrawableGL(std::string name_)
+    : Drawable(std::move(name_)),
+      impl(std::make_unique<Impl>()) {}
 
 DrawableGL::~DrawableGL() {
-    impl->vertexArray =  { { nullptr, false } };
-    impl->indexBuffer = { 0, nullptr };
+    impl->vertexArray = {{nullptr, false}};
+    impl->indexBuffer = {0, nullptr};
     impl->attributeBuffer.reset();
 }
 
-void DrawableGL::draw(const PaintParameters &parameters) const
-{
+void DrawableGL::draw(const PaintParameters& parameters) const {
     impl->draw(parameters);
 }
 
@@ -66,6 +65,13 @@ void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
     impl->attributeBuffer = std::move(attributeBuffer_);
     impl->attributeOffset = 0;
     impl->indexBuffer = std::move(indexBuffer_);
+}
+
+void DrawableGL::resetColor(const Color& newColor) {
+    if (auto* colorAttr = impl->vertexAttributes.get("a_color")) {
+        colorAttr->clear();
+        colorAttr->set(0, colorAttrValue(newColor));
+    }
 }
 
 } // namespace gl

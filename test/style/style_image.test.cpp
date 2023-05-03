@@ -8,7 +8,7 @@ using namespace mbgl;
 
 TEST(StyleImage, ZeroWidth) {
     try {
-        style::Image("test", PremultipliedImage({ 0, 16 }), 2.0f);
+        style::Image("test", PremultipliedImage({0, 16}), 2.0f);
         FAIL() << "Expected exception";
     } catch (util::StyleImageException& ex) {
         EXPECT_STREQ("dimensions may not be zero", ex.what());
@@ -17,7 +17,7 @@ TEST(StyleImage, ZeroWidth) {
 
 TEST(StyleImage, ZeroHeight) {
     try {
-        style::Image("test", PremultipliedImage({ 16, 0 }), 2.0f);
+        style::Image("test", PremultipliedImage({16, 0}), 2.0f);
         FAIL() << "Expected exception";
     } catch (util::StyleImageException& ex) {
         EXPECT_STREQ("dimensions may not be zero", ex.what());
@@ -26,7 +26,7 @@ TEST(StyleImage, ZeroHeight) {
 
 TEST(StyleImage, ZeroRatio) {
     try {
-        style::Image("test", PremultipliedImage({ 16, 16 }), 0.0f);
+        style::Image("test", PremultipliedImage({16, 16}), 0.0f);
         FAIL() << "Expected exception";
     } catch (util::StyleImageException& ex) {
         EXPECT_STREQ("pixelRatio may not be <= 0", ex.what());
@@ -34,14 +34,14 @@ TEST(StyleImage, ZeroRatio) {
 }
 
 TEST(StyleImage, Retina) {
-    style::Image image("test", PremultipliedImage({ 32, 24 }), 2.0f);
+    style::Image image("test", PremultipliedImage({32, 24}), 2.0f);
     EXPECT_EQ(32u, image.getImage().size.width);
     EXPECT_EQ(24u, image.getImage().size.height);
     EXPECT_EQ(2, image.getPixelRatio());
 }
 
 TEST(StyleImage, FractionalRatio) {
-    style::Image image("test", PremultipliedImage({ 20, 12 }), 1.5f);
+    style::Image image("test", PremultipliedImage({20, 12}), 1.5f);
     EXPECT_EQ(20u, image.getImage().size.width);
     EXPECT_EQ(12u, image.getImage().size.height);
     EXPECT_EQ(1.5, image.getPixelRatio());
@@ -110,8 +110,12 @@ TEST(StyleImage, InvalidContent) {
 }
 
 TEST(StyleImage, StretchContent) {
-    style::Image image(
-        "test", PremultipliedImage({16, 16}), 1, {{2.0f, 14.0f}}, {{0.0f, 4.0f}, {12.0f, 16.0f}}, style::ImageContent{2, 2, 14, 14});
+    style::Image image("test",
+                       PremultipliedImage({16, 16}),
+                       1,
+                       {{2.0f, 14.0f}},
+                       {{0.0f, 4.0f}, {12.0f, 16.0f}},
+                       style::ImageContent{2, 2, 14, 14});
     EXPECT_EQ(16u, image.getImage().size.width);
     EXPECT_EQ(16u, image.getImage().size.height);
     EXPECT_EQ(1.0, image.getPixelRatio());

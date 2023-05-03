@@ -35,28 +35,24 @@ class CrossTileSymbolIndex;
 class RenderTree;
 
 namespace gfx {
-    class Drawable;
-    class ShaderRegistry;
+class Drawable;
+class ShaderRegistry;
 
-    using DrawablePtr = std::shared_ptr<Drawable>;
-}   // namespace gfx
+using DrawablePtr = std::shared_ptr<Drawable>;
+} // namespace gfx
 
 namespace style {
-    class LayerProperties;
+class LayerProperties;
 } // namespace style
 
 using ImmutableLayer = Immutable<style::Layer::Impl>;
 
-class RenderOrchestrator final : public GlyphManagerObserver,
-                                 public ImageManagerObserver,
-                                 public RenderSourceObserver {
+class RenderOrchestrator final : public GlyphManagerObserver, public ImageManagerObserver, public RenderSourceObserver {
 public:
     RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
-    void markContextLost() {
-        contextLost = true;
-    };
+    void markContextLost() { contextLost = true; };
     // TODO: Introduce RenderOrchestratorObserver.
     void setObserver(RendererObserver*);
 
@@ -72,14 +68,20 @@ public:
                                                  const std::string& extensionField,
                                                  const std::optional<std::map<std::string, Value>>& args) const;
 
-    void setFeatureState(const std::string& sourceID, const std::optional<std::string>& layerID,
-                         const std::string& featureID, const FeatureState& state);
+    void setFeatureState(const std::string& sourceID,
+                         const std::optional<std::string>& layerID,
+                         const std::string& featureID,
+                         const FeatureState& state);
 
-    void getFeatureState(FeatureState& state, const std::string& sourceID, const std::optional<std::string>& layerID,
+    void getFeatureState(FeatureState& state,
+                         const std::string& sourceID,
+                         const std::optional<std::string>& layerID,
                          const std::string& featureID) const;
 
-    void removeFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
-                            const std::optional<std::string>& featureID, const std::optional<std::string>& stateKey);
+    void removeFeatureState(const std::string& sourceID,
+                            const std::optional<std::string>& sourceLayerID,
+                            const std::optional<std::string>& featureID,
+                            const std::optional<std::string>& stateKey);
 
     void reduceMemoryUse();
     void dumpDebugLogs();
@@ -95,9 +97,12 @@ public:
     void addDrawable(gfx::DrawablePtr);
     void removeDrawable(const util::SimpleIdentity& drawableId);
 
+    const gfx::DrawablePtr& getDrawable(const util::SimpleIdentity&);
+
     void updateLayers(gfx::ShaderRegistry&,
+                      gfx::Context&,
                       const TransformState&,
-                      const PropertyEvaluationParameters&);
+                      const std::shared_ptr<UpdateParameters>&);
 
     void processChanges();
 
@@ -109,15 +114,17 @@ private:
 
     RenderSource* getRenderSource(const std::string& id) const;
 
-          RenderLayer* getRenderLayer(const std::string& id);
+    RenderLayer* getRenderLayer(const std::string& id);
     const RenderLayer* getRenderLayer(const std::string& id) const;
-              
+
     void queryRenderedSymbols(std::unordered_map<std::string, std::vector<Feature>>& resultsByLayer,
                               const ScreenLineString& geometry,
                               const std::unordered_map<std::string, const RenderLayer*>& layers,
                               const RenderedQueryOptions& options) const;
-    
-    std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions&, const std::unordered_map<std::string, const RenderLayer*>&) const;
+
+    std::vector<Feature> queryRenderedFeatures(const ScreenLineString&,
+                                               const RenderedQueryOptions&,
+                                               const std::unordered_map<std::string, const RenderLayer*>&) const;
 
     // GlyphManagerObserver implementation.
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) override;
@@ -162,8 +169,8 @@ private:
     bool contextLost = false;
     bool placedSymbolDataCollected = false;
 
-    // Vectors with reserved capacity of layerImpls->size() to avoid reallocation
-    // on each frame.
+    // Vectors with reserved capacity of layerImpls->size() to avoid
+    // reallocation on each frame.
     std::vector<Immutable<style::LayerProperties>> filteredLayersForSource;
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;

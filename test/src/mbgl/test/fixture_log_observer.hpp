@@ -17,10 +17,10 @@ public:
 
         bool matches(const Message& rhs, bool substring = false) const;
 
-        const EventSeverity severity {};
-        const Event event {};
-        const int64_t code {};
-        const std::string msg {};
+        const EventSeverity severity{};
+        const Event event{};
+        const int64_t code{};
+        const std::string msg{};
 
         mutable bool checked = false;
     };
@@ -33,10 +33,7 @@ public:
         ~Observer() override;
 
         // Log::Observer implementation
-        bool onRecord(EventSeverity severity,
-                              Event event,
-                              int64_t code,
-                              const std::string& msg) override;
+        bool onRecord(EventSeverity severity, Event event, int64_t code, const std::string& msg) override;
 
         bool empty() const;
         size_t uncheckedCount() const;
@@ -61,9 +58,8 @@ private:
     Observer* observer;
 };
 
-::std::ostream &operator<<(::std::ostream &os,
-                           const std::vector<FixtureLog::Observer::LogMessage> &messages);
-::std::ostream &operator<<(::std::ostream &os, const FixtureLog::Observer::LogMessage &message);
+::std::ostream& operator<<(::std::ostream& os, const std::vector<FixtureLog::Observer::LogMessage>& messages);
+::std::ostream& operator<<(::std::ostream& os, const FixtureLog::Observer::LogMessage& message);
 
 using FixtureLogObserver = FixtureLog::Observer;
 

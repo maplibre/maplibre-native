@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(
 // the attribute conveying progress along a line is scaled to [0, 2^15)
 #define MAX_LINE_DISTANCE 32767.0

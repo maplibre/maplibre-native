@@ -33,8 +33,12 @@ using matf4 = std::array<float, 16>;
 namespace matrix {
 
 void identity(mat4& out);
-constexpr mat4  identity4()  { return { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 }; }
-constexpr matf4 identity4f() { return { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 }; }
+constexpr mat4 identity4() {
+    return {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+}
+constexpr matf4 identity4f() {
+    return {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+}
 
 bool invert(mat4& out, const mat4& a);
 void ortho(mat4& out, double left, double right, double bottom, double top, double near, double far);

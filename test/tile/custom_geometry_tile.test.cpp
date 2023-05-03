@@ -26,7 +26,7 @@ public:
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};
-    AnnotationManager annotationManager { style };
+    AnnotationManager annotationManager{style};
     ImageManager imageManager;
     GlyphManager glyphManager;
 
@@ -47,16 +47,16 @@ TEST(CustomGeometryTile, InvokeFetchTile) {
     CircleLayer layer("circle", "source");
 
     mapbox::feature::feature_collection<double> features;
-    features.push_back(mapbox::feature::feature<double> {
-        mapbox::geometry::point<double>(0, 0)
-    });
-    CustomTileLoader loader([&](const CanonicalTileID& tileId) {
-        EXPECT_EQ(tileId, CanonicalTileID(0,0,0));
-        test.loop.stop();
-    }, [&](const CanonicalTileID&) {
+    features.push_back(mapbox::feature::feature<double>{mapbox::geometry::point<double>(0, 0)});
+    CustomTileLoader loader(
+        [&](const CanonicalTileID& tileId) {
+            EXPECT_EQ(tileId, CanonicalTileID(0, 0, 0));
+            test.loop.stop();
+        },
+        [&](const CanonicalTileID&) {
 
-    });
-    auto mb =std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+        });
+    auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
     ActorRef<CustomTileLoader> loaderActor(loader, mb);
 
     CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
@@ -76,15 +76,14 @@ TEST(CustomGeometryTile, InvokeCancelTile) {
     CircleLayer layer("circle", "source");
 
     mapbox::feature::feature_collection<double> features;
-    features.push_back(mapbox::feature::feature<double> {
-        mapbox::geometry::point<double>(0, 0)
-    });
+    features.push_back(mapbox::feature::feature<double>{mapbox::geometry::point<double>(0, 0)});
 
-    CustomTileLoader loader([&](const CanonicalTileID&) { }, [&](const CanonicalTileID& tileId) {
-        EXPECT_EQ(tileId, CanonicalTileID(0,0,0));
-        test.loop.stop();
-    });
-    auto mb =std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+    CustomTileLoader loader([&](const CanonicalTileID&) {},
+                            [&](const CanonicalTileID& tileId) {
+                                EXPECT_EQ(tileId, CanonicalTileID(0, 0, 0));
+                                test.loop.stop();
+                            });
+    auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
     ActorRef<CustomTileLoader> loaderActor(loader, mb);
 
     CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
@@ -104,12 +103,10 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
     CircleLayer layer("circle", "source");
 
     mapbox::feature::feature_collection<double> features;
-    features.push_back(mapbox::feature::feature<double> {
-        mapbox::geometry::point<double>(0, 0)
-    });
+    features.push_back(mapbox::feature::feature<double>{mapbox::geometry::point<double>(0, 0)});
 
     CustomTileLoader loader(nullptr, nullptr);
-    auto mb =std::make_shared<Mailbox>(*Scheduler::GetCurrent());
+    auto mb = std::make_shared<Mailbox>(*Scheduler::GetCurrent());
     ActorRef<CustomTileLoader> loaderActor(loader, mb);
 
     CustomGeometryTile tile(OverscaledTileID(0, 0, 0),
@@ -118,15 +115,16 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
                             makeMutable<CustomGeometrySource::TileOptions>(),
                             loaderActor);
 
-    Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
     StubTileObserver observer;
-    observer.tileChanged = [&] (const Tile&) {
+    observer.tileChanged = [&](const Tile&) {
         // Once present, the bucket should never "disappear", which would cause
         // flickering.
         ASSERT_TRUE(tile.layerPropertiesUpdated(layerProperties));
     };
 
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
     tile.setLayers(layers);
     tile.setObserver(&observer);
     tile.setTileData(features);

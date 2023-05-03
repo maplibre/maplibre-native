@@ -23,6 +23,7 @@ public:
     std::array<LatLng, 4> getCoordinates() const;
 
     std::optional<std::string> getAttribution() const final;
+
 private:
     std::array<LatLng, 4> coords;
     std::shared_ptr<PremultipliedImage> image;

@@ -21,23 +21,22 @@ namespace mbgl {
 
 class AssetFileSource::Impl {
 public:
-    Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_):
-        root (resourceOptions_.assetPath()),
-        resourceOptions (resourceOptions_.clone()),
-        clientOptions (clientOptions_.clone()) {}
+    Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+        : root(resourceOptions_.assetPath()),
+          resourceOptions(resourceOptions_.clone()),
+          clientOptions(clientOptions_.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
             Response response;
-            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                                                               "Invalid asset URL");
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid asset URL");
             req.invoke(&FileSourceRequest::setResponse, response);
             return;
         }
 
         // Cut off the protocol and prefix with path.
-        const auto path =
-            root + "/" + mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(util::ASSET_PROTOCOL)));
+        const auto path = root + "/" +
+                          mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(util::ASSET_PROTOCOL)));
         requestLocalFile(path, req);
     }
 
@@ -70,9 +69,11 @@ private:
 };
 
 AssetFileSource::AssetFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
-        : impl(std::make_unique<util::Thread<Impl>>(
-        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "AssetFileSource", resourceOptions.clone(), clientOptions.clone())) {}
-
+    : impl(std::make_unique<util::Thread<Impl>>(
+          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
+          "AssetFileSource",
+          resourceOptions.clone(),
+          clientOptions.clone())) {}
 
 AssetFileSource::~AssetFileSource() = default;
 
@@ -111,6 +112,5 @@ void AssetFileSource::setClientOptions(ClientOptions options) {
 ClientOptions AssetFileSource::getClientOptions() {
     return impl->actor().ask(&Impl::getClientOptions).get();
 }
-
 
 } // namespace mbgl

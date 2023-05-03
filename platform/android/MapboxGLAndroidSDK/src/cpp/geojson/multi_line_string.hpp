@@ -22,7 +22,8 @@ public:
 
     static mapbox::geojson::multi_line_string convert(jni::JNIEnv&, const jni::Object<MultiLineString>&);
 
-    static mapbox::geojson::multi_line_string convert(jni::JNIEnv&, const jni::Object<java::util::List/*<java::util::List<Point>>*/>&);
+    static mapbox::geojson::multi_line_string convert(
+        jni::JNIEnv&, const jni::Object<java::util::List /*<java::util::List<Point>>*/>&);
 
     static jni::Local<jni::Object<java::util::List>> coordinates(jni::JNIEnv&, const jni::Object<MultiLineString>&);
 

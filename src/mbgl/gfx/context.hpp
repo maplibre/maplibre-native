@@ -9,6 +9,9 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
+#include <memory>
+#include <string>
+
 namespace mbgl {
 
 class PaintParameters;
@@ -17,17 +20,21 @@ class ProgramParameters;
 namespace gfx {
 
 class Drawable;
+class DrawableBuilder;
+class DrawableTweaker;
 class OffscreenTexture;
 class ShaderProgramBase;
+class ShaderRegistry;
 
+using DrawablePtr = std::shared_ptr<Drawable>;
+using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
+using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
-
 
 class Context {
 protected:
     Context(uint32_t maximumVertexBindingCount_)
-        : maximumVertexBindingCount(maximumVertexBindingCount_) {
-    }
+        : maximumVertexBindingCount(maximumVertexBindingCount_) {}
 
 public:
     static constexpr const uint32_t minimumRequiredVertexBindingCount = 8;
@@ -55,28 +62,23 @@ public:
     Texture createTexture(const Size size,
                           TexturePixelType format = TexturePixelType::RGBA,
                           TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        return { size, createTextureResource(size, format, type) };
+        return {size, createTextureResource(size, format, type)};
     }
 
 protected:
-    virtual std::unique_ptr<TextureResource>
-        createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
+    virtual std::unique_ptr<TextureResource> createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
 
 public:
     template <RenderbufferPixelType pixelType>
-    Renderbuffer<pixelType>
-    createRenderbuffer(const Size size) {
-        return { size, createRenderbufferResource(pixelType, size) };
+    Renderbuffer<pixelType> createRenderbuffer(const Size size) {
+        return {size, createRenderbufferResource(pixelType, size)};
     }
 
 protected:
-    virtual std::unique_ptr<RenderbufferResource>
-    createRenderbufferResource(RenderbufferPixelType, Size) = 0;
+    virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
 
 public:
-    DrawScope createDrawScope() {
-        return DrawScope{ createDrawScopeResource() };
-    }
+    DrawScope createDrawScope() { return DrawScope{createDrawScopeResource()}; }
 
 protected:
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
@@ -93,11 +95,19 @@ public:
 #endif
 
     virtual void clearStencilBuffer(int32_t) = 0;
-    
-    
+
 public:
     /// Activate the shader, vertex attributes, etc., specified by the drawable
     virtual bool setupDraw(const PaintParameters&, const gfx::Drawable&) = 0;
+
+    /// Create a new drawable builder
+    virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
+
+    /// Create a new drawable tweaker
+    virtual DrawableTweakerPtr createDrawableTweaker() = 0;
+
+    /// Get the generic shader with the specified name
+    virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
 };
 
 } // namespace gfx

@@ -55,7 +55,10 @@ private:
     void addGeometry(const GeometryCoordinates&, const GeometryTileFeature&, const CanonicalTileID&);
 
     struct TriangleElement {
-        TriangleElement(uint16_t a_, uint16_t b_, uint16_t c_) : a(a_), b(b_), c(c_) {}
+        TriangleElement(uint16_t a_, uint16_t b_, uint16_t c_)
+            : a(a_),
+              b(b_),
+              c(c_) {}
         uint16_t a, b, c;
     };
 
@@ -70,10 +73,13 @@ private:
                           std::vector<LineBucket::TriangleElement>& triangleStore,
                           std::optional<Distances> distances);
 
-    void addPieSliceVertex(const GeometryCoordinate& currentVertex, double distance,
-            const Point<double>& extrude, bool lineTurnsLeft, std::size_t startVertex,
-            std::vector<TriangleElement>& triangleStore,
-            std::optional<Distances> distances);
+    void addPieSliceVertex(const GeometryCoordinate& currentVertex,
+                           double distance,
+                           const Point<double>& extrude,
+                           bool lineTurnsLeft,
+                           std::size_t startVertex,
+                           std::vector<TriangleElement>& triangleStore,
+                           std::optional<Distances> distances);
 
     std::ptrdiff_t e1;
     std::ptrdiff_t e2;

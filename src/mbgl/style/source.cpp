@@ -10,8 +10,7 @@ static SourceObserver nullObserver;
 
 Source::Source(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
-      observer(&nullObserver) {
-}
+      observer(&nullObserver) {}
 
 Source::~Source() = default;
 
