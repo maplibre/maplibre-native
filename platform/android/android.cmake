@@ -176,7 +176,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
-    ${PROJECT_SOURCE_DIR}/platform/android/src/test/http_file_source_test_stub.cpp
+    ${PROJECT_SOURCE_DIR}/platform/android/MapboxGLAndroidSDK/src/cpp/http_file_source.cpp
 )
 
 target_include_directories(
@@ -225,7 +225,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
-    ${PROJECT_SOURCE_DIR}/platform/android/src/test/http_file_source_test_stub.cpp
+    ${PROJECT_SOURCE_DIR}/platform/android/MapboxGLAndroidSDK/src/cpp/http_file_source.cpp
 )
 
 target_include_directories(
