@@ -38,7 +38,7 @@ struct Converter<jni::Local<jni::Object<>>, double> {
  * All integrals. java is limited to 64 bit signed, so...
  * TODO: use BigDecimal for > 64 / unsigned?
  */
-template<typename T>
+template <typename T>
 struct Converter<jni::Local<jni::Object<>>, T, typename std::enable_if<std::is_integral<T>::value>::type> {
     Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const T& value) const {
         return jni::Box(env, jni::jlong(value));

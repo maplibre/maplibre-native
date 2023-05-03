@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,14 +7,15 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::SymbolSDFIconProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::SymbolSDFIconProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 
-attribute vec4 a_pos_offset;
-attribute vec4 a_data;
-attribute vec4 a_pixeloffset;
-attribute vec3 a_projected_pos;
-attribute float a_fade_opacity;
+layout (location = 0) in vec4 a_pos_offset;
+layout (location = 1) in vec4 a_data;
+layout (location = 2) in vec4 a_pixeloffset;
+layout (location = 3) in vec3 a_projected_pos;
+layout (location = 4) in float a_fade_opacity;
 
 // contents of a_size vary based on the type of property value
 // used for {text,icon}-size.
@@ -39,41 +40,41 @@ uniform highp float u_camera_to_center_distance;
 uniform float u_fade_change;
 uniform vec2 u_texsize;
 
-varying vec2 v_data0;
-varying vec3 v_data1;
+out vec2 v_data0;
+out vec3 v_data1;
 
 #ifndef HAS_UNIFORM_u_fill_color
 uniform lowp float u_fill_color_t;
-attribute highp vec4 a_fill_color;
-varying highp vec4 fill_color;
+layout (location = 5) in highp vec4 a_fill_color;
+out highp vec4 fill_color;
 #else
 uniform highp vec4 u_fill_color;
 #endif
 #ifndef HAS_UNIFORM_u_halo_color
 uniform lowp float u_halo_color_t;
-attribute highp vec4 a_halo_color;
-varying highp vec4 halo_color;
+layout (location = 6) in highp vec4 a_halo_color;
+out highp vec4 halo_color;
 #else
 uniform highp vec4 u_halo_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 7) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_halo_width
 uniform lowp float u_halo_width_t;
-attribute lowp vec2 a_halo_width;
-varying lowp float halo_width;
+layout (location = 8) in lowp vec2 a_halo_width;
+out lowp float halo_width;
 #else
 uniform lowp float u_halo_width;
 #endif
 #ifndef HAS_UNIFORM_u_halo_blur
 uniform lowp float u_halo_blur_t;
-attribute lowp vec2 a_halo_blur;
-varying lowp float halo_blur;
+layout (location = 9) in lowp vec2 a_halo_blur;
+out lowp float halo_blur;
 #else
 uniform lowp float u_halo_blur;
 #endif
@@ -182,31 +183,31 @@ uniform highp float u_gamma_scale;
 uniform lowp float u_device_pixel_ratio;
 uniform bool u_is_text;
 
-varying vec2 v_data0;
-varying vec3 v_data1;
+in vec2 v_data0;
+in vec3 v_data1;
 
 #ifndef HAS_UNIFORM_u_fill_color
-varying highp vec4 fill_color;
+in highp vec4 fill_color;
 #else
 uniform highp vec4 u_fill_color;
 #endif
 #ifndef HAS_UNIFORM_u_halo_color
-varying highp vec4 halo_color;
+in highp vec4 halo_color;
 #else
 uniform highp vec4 u_halo_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_halo_width
-varying lowp float halo_width;
+in lowp float halo_width;
 #else
 uniform lowp float u_halo_width;
 #endif
 #ifndef HAS_UNIFORM_u_halo_blur
-varying lowp float halo_blur;
+in lowp float halo_blur;
 #else
 uniform lowp float u_halo_blur;
 #endif
@@ -246,14 +247,14 @@ lowp float halo_blur = u_halo_blur;
         buff = (6.0 - halo_width / fontScale) / SDF_PX;
     }
 
-    lowp float dist = texture2D(u_texture, tex).a;
+    lowp float dist = texture(u_texture, tex).a;
     highp float gamma_scaled = gamma * gamma_scale;
     highp float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 
-    gl_FragColor = color * (alpha * opacity * fade_opacity);
+    fragColor = color * (alpha * opacity * fade_opacity);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

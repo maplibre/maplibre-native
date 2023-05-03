@@ -8,14 +8,14 @@
 using namespace mbgl;
 
 TEST(Projection, Boundaries) {
-    LatLng sw { -90.0, -180.0 };
-    LatLng ne { 90.0, 180.0 };
+    LatLng sw{-90.0, -180.0};
+    LatLng ne{90.0, 180.0};
 
     const double minScale = std::pow(2, 0);
     const double maxScale = std::pow(2, util::DEFAULT_MAX_ZOOM);
 
-    Point<double> projected {};
-    LatLng unprojected {};
+    Point<double> projected{};
+    LatLng unprojected{};
 
     projected = Projection::project(sw, minScale);
     EXPECT_DOUBLE_EQ(projected.x, 0.0);
@@ -78,27 +78,27 @@ TEST(Projection, MetersPerPixelAtLatitude) {
 }
 
 TEST(Projection, ProjectedMeters) {
-    auto latLng = LatLng {};
+    auto latLng = LatLng{};
     auto projectedMeters = Projection::projectedMetersForLatLng(latLng);
     EXPECT_EQ(projectedMeters.northing(), projectedMeters.easting());
     EXPECT_EQ(latLng, Projection::latLngForProjectedMeters(projectedMeters));
 
-    const auto southWest = LatLng { -util::LATITUDE_MAX, -util::LONGITUDE_MAX };
+    const auto southWest = LatLng{-util::LATITUDE_MAX, -util::LONGITUDE_MAX};
     projectedMeters = Projection::projectedMetersForLatLng(southWest);
     EXPECT_DOUBLE_EQ(projectedMeters.northing(), -20037508.342789274);
     EXPECT_DOUBLE_EQ(projectedMeters.easting(), -20037508.342789244);
 
-    const auto northEast = LatLng { util::LATITUDE_MAX, util::LONGITUDE_MAX };
+    const auto northEast = LatLng{util::LATITUDE_MAX, util::LONGITUDE_MAX};
     projectedMeters = Projection::projectedMetersForLatLng(northEast);
     EXPECT_DOUBLE_EQ(projectedMeters.northing(), 20037508.342789274);
     EXPECT_DOUBLE_EQ(projectedMeters.easting(), 20037508.342789244);
 
-    projectedMeters = ProjectedMeters { std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest() };
+    projectedMeters = ProjectedMeters{std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest()};
     latLng = Projection::latLngForProjectedMeters(projectedMeters);
     EXPECT_EQ(latLng.latitude(), -util::LATITUDE_MAX);
     EXPECT_EQ(latLng.longitude(), -util::LONGITUDE_MAX);
 
-    projectedMeters = ProjectedMeters { std::numeric_limits<double>::max(), std::numeric_limits<double>::max() };
+    projectedMeters = ProjectedMeters{std::numeric_limits<double>::max(), std::numeric_limits<double>::max()};
     latLng = Projection::latLngForProjectedMeters(projectedMeters);
     EXPECT_EQ(latLng.latitude(), util::LATITUDE_MAX);
     EXPECT_EQ(latLng.longitude(), util::LONGITUDE_MAX);
@@ -106,13 +106,13 @@ TEST(Projection, ProjectedMeters) {
 
 TEST(Projection, InvalidProjectedMeters) {
     try {
-        ProjectedMeters { NAN };
+        ProjectedMeters{NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "northing must not be NaN");
     }
     try {
-        ProjectedMeters { 0, NAN };
+        ProjectedMeters{0, NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "easting must not be NaN");

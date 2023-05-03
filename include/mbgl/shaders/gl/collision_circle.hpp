@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,22 +7,22 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::CollisionCircleProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* vertex = R"(attribute vec2 a_pos;
-attribute vec2 a_anchor_pos;
-attribute vec2 a_extrude;
-attribute vec2 a_placed;
+template <>
+struct ShaderSource<BuiltIn::CollisionCircleProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+layout (location = 1) in vec2 a_anchor_pos;
+layout (location = 2) in vec2 a_extrude;
+layout (location = 3) in vec2 a_placed;
 
 uniform mat4 u_matrix;
 uniform vec2 u_extrude_scale;
 uniform float u_camera_to_center_distance;
 
-varying float v_placed;
-varying float v_notUsed;
-varying float v_radius;
-
-varying vec2 v_extrude;
-varying vec2 v_extrude_scale;
+out float v_placed;
+out float v_notUsed;
+out float v_radius;
+out vec2 v_extrude;
+out vec2 v_extrude_scale;
 
 void main() {
     vec4 projectedPoint = u_matrix * vec4(a_anchor_pos, 0, 1);
@@ -47,11 +47,11 @@ void main() {
 )";
     static constexpr const char* fragment = R"(uniform float u_overscale_factor;
 
-varying float v_placed;
-varying float v_notUsed;
-varying float v_radius;
-varying vec2 v_extrude;
-varying vec2 v_extrude_scale;
+in float v_placed;
+in float v_notUsed;
+in float v_radius;
+in vec2 v_extrude;
+in vec2 v_extrude_scale;
 
 void main() {
     float alpha = 0.5;
@@ -77,7 +77,7 @@ void main() {
     float distance_to_edge = abs(extrude_length - radius);
     float opacity_t = smoothstep(-stroke_width, 0.0, -distance_to_edge);
 
-    gl_FragColor = opacity_t * color;
+    fragColor = opacity_t * color;
 }
 )";
 };

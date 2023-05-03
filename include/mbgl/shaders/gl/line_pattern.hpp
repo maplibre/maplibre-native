@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::LinePatternProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::LinePatternProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but
@@ -20,62 +21,62 @@ template <> struct ShaderSource<BuiltIn::LinePatternProgram, gfx::Backend::Type:
 // long distances for long segments. Use this value to unscale the distance.
 #define LINE_DISTANCE_SCALE 2.0
 
-attribute vec2 a_pos_normal;
-attribute vec4 a_data;
+layout (location = 0) in vec2 a_pos_normal;
+layout (location = 1) in vec4 a_data;
 
 uniform mat4 u_matrix;
 uniform vec2 u_units_to_pixels;
 uniform mediump float u_ratio;
 uniform lowp float u_device_pixel_ratio;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying float v_linesofar;
-varying float v_gamma_scale;
+out vec2 v_normal;
+out vec2 v_width2;
+out float v_linesofar;
+out float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_blur
 uniform lowp float u_blur_t;
-attribute lowp vec2 a_blur;
-varying lowp float blur;
+layout (location = 2) in lowp vec2 a_blur;
+out lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 3) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_offset
 uniform lowp float u_offset_t;
-attribute lowp vec2 a_offset;
+layout (location = 4) in lowp vec2 a_offset;
 #else
 uniform lowp float u_offset;
 #endif
 #ifndef HAS_UNIFORM_u_gapwidth
 uniform lowp float u_gapwidth_t;
-attribute mediump vec2 a_gapwidth;
+layout (location = 5) in mediump vec2 a_gapwidth;
 #else
 uniform mediump float u_gapwidth;
 #endif
 #ifndef HAS_UNIFORM_u_width
 uniform lowp float u_width_t;
-attribute mediump vec2 a_width;
+layout (location = 6) in mediump vec2 a_width;
 #else
 uniform mediump float u_width;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
-attribute lowp vec4 a_pattern_from;
-varying lowp vec4 pattern_from;
+layout (location = 7) in lowp vec4 a_pattern_from;
+out lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
-attribute lowp vec4 a_pattern_to;
-varying lowp vec4 pattern_to;
+layout (location = 8) in lowp vec4 a_pattern_to;
+out lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
@@ -174,28 +175,28 @@ uniform mediump vec4 u_scale;
 
 uniform sampler2D u_image;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying float v_linesofar;
-varying float v_gamma_scale;
+in vec2 v_normal;
+in vec2 v_width2;
+in float v_linesofar;
+in float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_pattern_from
-varying lowp vec4 pattern_from;
+in lowp vec4 pattern_from;
 #else
 uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-varying lowp vec4 pattern_to;
+in lowp vec4 pattern_to;
 #else
 uniform lowp vec4 u_pattern_to;
 #endif
 #ifndef HAS_UNIFORM_u_blur
-varying lowp float blur;
+in lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
@@ -253,12 +254,12 @@ lowp float opacity = u_opacity;
     vec2 pos_a = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, vec2(x_a, y_a));
     vec2 pos_b = mix(pattern_tl_b / u_texsize, pattern_br_b / u_texsize, vec2(x_b, y_b));
 
-    vec4 color = mix(texture2D(u_image, pos_a), texture2D(u_image, pos_b), u_fade);
+    vec4 color = mix(texture(u_image, pos_a), texture(u_image, pos_b), u_fade);
 
-    gl_FragColor = color * alpha * opacity;
+    fragColor = color * alpha * opacity;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

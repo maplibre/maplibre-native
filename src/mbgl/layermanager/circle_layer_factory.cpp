@@ -12,7 +12,8 @@ const style::LayerTypeInfo* CircleLayerFactory::getTypeInfo() const noexcept {
     return style::CircleLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> CircleLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible& value) noexcept {
+std::unique_ptr<style::Layer> CircleLayerFactory::createLayer(const std::string& id,
+                                                              const style::conversion::Convertible& value) noexcept {
     auto const source = getSource(value);
     if (!source) {
         return nullptr;

@@ -38,8 +38,9 @@ class DashPatternTexture {
 public:
     DashPatternTexture(const std::vector<float>& from, const std::vector<float>& to, LinePatternCap);
 
-    // Uploads the texture to the GPU to be available when we need it. This is a lazy operation;
-    // the texture is only bound when the data is uploaded for the first time.
+    // Uploads the texture to the GPU to be available when we need it. This is a
+    // lazy operation; the texture is only bound when the data is uploaded for
+    // the first time.
     void upload(gfx::UploadPass&);
 
     // Binds the atlas texture to the GPU, and uploads data if it is out of date.

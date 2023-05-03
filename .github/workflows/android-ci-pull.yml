@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - CMakeLists.txt
       - 'platform/android/**'
       - ".github/workflows/android-ci.yml"
       - "bin/**"
@@ -36,7 +37,7 @@ jobs:
       JOBS: 8
       BUILDTYPE: Debug
       IS_LOCAL_DEVELOPMENT: false
-      MBGL_ANDROID_STL: c++_static
+      MLN_ANDROID_STL: c++_static
     steps:
 
       - uses: actions/checkout@v3

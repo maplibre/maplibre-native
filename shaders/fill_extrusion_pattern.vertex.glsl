@@ -10,12 +10,12 @@ uniform vec3 u_lightcolor;
 uniform lowp vec3 u_lightpos;
 uniform lowp float u_lightintensity;
 
-attribute vec2 a_pos;
-attribute vec4 a_normal_ed;
+layout (location = 0) in vec2 a_pos;
+layout (location = 1) in vec4 a_normal_ed;
 
-varying vec2 v_pos_a;
-varying vec2 v_pos_b;
-varying vec4 v_lighting;
+out vec2 v_pos_a;
+out vec2 v_pos_b;
+out vec4 v_lighting;
 
 #pragma mapbox: define lowp float base
 #pragma mapbox: define lowp float height

@@ -1,5 +1,16 @@
 # Developing
 
+
+## Pre-commit hooks
+
+Install [pre-commit](https://pre-commit.com/) and run
+
+```
+pre-commit install
+```
+
+to install the pre-commit hooks configured in `.pre-commit-config.yml`.
+
 ## Render Tests
 
 To check that the output of the rendering is correct, we compare actual rendered PNGs for simple styles with expected PNGs. The content of the tests is stored in the MapLibre GL JS submodule which means that GL JS and Native are in fact quasi pixel-identical in their rendering.
@@ -74,6 +85,11 @@ or any of the platform make files:
 
 * Android developers can use [Android Studio](https://developer.android.com/studio/debug) or [`ndk-gdb`](https://developer.android.com/ndk/guides/ndk-gdb)
 * iOS developers can use [Xcode](https://developer.apple.com/support/debugging/).  See also [Advanced Debugging with Xcode and LLDB](https://developer.apple.com/videos/play/wwdc2018/412/).
+
+## Static Analysis
+
+We use [`clang-tidy`](https://clang.llvm.org/extra/clang-tidy/) for static analysis and run it on CI for each pull request. If you want to run it locally use `-DMLN_WITH_CLANG_TIDY=ON` CMake option and just run regular build. For the list of enabled checks please see:
+ [`.clang-tidy`](.clang-tidy) and [`test/.clang-tidy`](test/.clang-tidy)(for tests we are less strict and use different set of checks).
 
 ## Logging in C++
 
@@ -162,3 +178,6 @@ autoload -Uz compinit && compinit
 ### Kotlin and Java compatibility
 
 We are moving the Android SDK to Kotlin, which is backward compatible with Java, but if you need a Java version of the Android SDK there is a `before-kotlin-port` tag available.
+
+
+

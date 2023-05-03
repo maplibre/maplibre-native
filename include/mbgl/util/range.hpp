@@ -8,7 +8,8 @@ template <class T>
 class Range {
 public:
     constexpr Range(T min_, T max_)
-        : min(std::move(min_)), max(std::move(max_)) {}
+        : min(std::move(min_)),
+          max(std::move(max_)) {}
 
     T min;
     T max;

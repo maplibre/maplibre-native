@@ -18,28 +18,30 @@
 using namespace mbgl;
 using namespace mbgl::style;
 
-
 TEST(API, RecycleMapUpdateImages) {
     util::RunLoop loop;
 
-    HeadlessFrontend frontend { 1 };
-    auto map = std::make_unique<MapAdapter>(frontend, MapObserver::nullObserver(),
-                                         std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions()),
-                                         MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
+    HeadlessFrontend frontend{1};
+    auto map = std::make_unique<MapAdapter>(
+        frontend,
+        MapObserver::nullObserver(),
+        std::make_shared<StubFileSource>(ResourceOptions::Default(), ClientOptions()),
+        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
 
     EXPECT_TRUE(map);
 
     auto loadStyle = [&](auto markerName, auto markerPath) {
         auto source = std::make_unique<GeoJSONSource>("geometry");
-        source->setGeoJSON( Geometry<double>{ Point<double>{ 0, 0 } } );
+        source->setGeoJSON(Geometry<double>{Point<double>{0, 0}});
 
         auto layer = std::make_unique<SymbolLayer>("geometry", "geometry");
-        layer->setIconImage({ markerName });
+        layer->setIconImage({markerName});
 
         map->getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
         map->getStyle().addSource(std::move(source));
         map->getStyle().addLayer(std::move(layer));
-        map->getStyle().addImage(std::make_unique<style::Image>(markerName, decodeImage(util::read_file(markerPath)), 1.0f));
+        map->getStyle().addImage(
+            std::make_unique<style::Image>(markerName, decodeImage(util::read_file(markerPath)), 1.0f));
     };
 
     // default marker

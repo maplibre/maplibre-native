@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(
 // the attribute conveying progress along a line is scaled to [0, 2^15)
 #define MAX_LINE_DISTANCE 32767.0
@@ -20,48 +21,48 @@ template <> struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type
 // #define scale 63.0
 #define scale 0.015873016
 
-attribute vec2 a_pos_normal;
-attribute vec4 a_data;
+layout (location = 0) in vec2 a_pos_normal;
+layout (location = 1) in vec4 a_data;
 
 uniform mat4 u_matrix;
 uniform mediump float u_ratio;
 uniform lowp float u_device_pixel_ratio;
 uniform vec2 u_units_to_pixels;
 
-varying vec2 v_normal;
-varying vec2 v_width2;
-varying float v_gamma_scale;
-varying highp float v_lineprogress;
+out vec2 v_normal;
+out vec2 v_width2;
+out float v_gamma_scale;
+out highp float v_lineprogress;
 
 #ifndef HAS_UNIFORM_u_blur
 uniform lowp float u_blur_t;
-attribute lowp vec2 a_blur;
-varying lowp float blur;
+layout (location = 2) in lowp vec2 a_blur;
+out lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 3) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_gapwidth
 uniform lowp float u_gapwidth_t;
-attribute mediump vec2 a_gapwidth;
+layout (location = 4) in mediump vec2 a_gapwidth;
 #else
 uniform mediump float u_gapwidth;
 #endif
 #ifndef HAS_UNIFORM_u_offset
 uniform lowp float u_offset_t;
-attribute lowp vec2 a_offset;
+layout (location = 5) in lowp vec2 a_offset;
 #else
 uniform lowp float u_offset;
 #endif
 #ifndef HAS_UNIFORM_u_width
 uniform lowp float u_width_t;
-attribute mediump vec2 a_width;
+layout (location = 6) in mediump vec2 a_width;
 #else
 uniform mediump float u_width;
 #endif
@@ -146,18 +147,18 @@ mediump float width = u_width;
     static constexpr const char* fragment = R"(uniform lowp float u_device_pixel_ratio;
 uniform sampler2D u_image;
 
-varying vec2 v_width2;
-varying vec2 v_normal;
-varying float v_gamma_scale;
-varying highp float v_lineprogress;
+in vec2 v_width2;
+in vec2 v_normal;
+in float v_gamma_scale;
+in highp float v_lineprogress;
 
 #ifndef HAS_UNIFORM_u_blur
-varying lowp float blur;
+in lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
@@ -181,12 +182,12 @@ lowp float opacity = u_opacity;
 
     // For gradient lines, v_lineprogress is the ratio along the entire line,
     // scaled to [0, 2^15), and the gradient ramp is stored in a texture.
-    vec4 color = texture2D(u_image, vec2(v_lineprogress, 0.5));
+    vec4 color = texture(u_image, vec2(v_lineprogress, 0.5));
 
-    gl_FragColor = color * (alpha * opacity);
+    fragColor = color * (alpha * opacity);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

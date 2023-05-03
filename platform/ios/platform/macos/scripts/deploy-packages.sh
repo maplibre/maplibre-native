@@ -77,7 +77,7 @@ publish() {
 }
 
 export GITHUB_USER=maplibre
-export GITHUB_REPO=maplibre-gl-native
+export GITHUB_REPO=maplibre-native
 export BUILDTYPE=Release
 
 

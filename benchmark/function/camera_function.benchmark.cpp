@@ -21,13 +21,14 @@ static std::string createFunctionJSON(size_t stopCount) {
 
 static void Parse_CameraFunction(benchmark::State& state) {
     size_t stopCount = state.range(0);
-    
+
     while (state.KeepRunning()) {
         conversion::Error error;
         state.PauseTiming();
         auto doc = createFunctionJSON(stopCount);
         state.ResumeTiming();
-        std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(doc, error, false, false);
+        std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(
+            doc, error, false, false);
         if (!result) {
             state.SkipWithError(error.message.c_str());
         }
@@ -39,23 +40,20 @@ static void Evaluate_CameraFunction(benchmark::State& state) {
     size_t stopCount = state.range(0);
     auto doc = createFunctionJSON(stopCount);
     conversion::Error error;
-    std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(doc, error, false, false);
+    std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(
+        doc, error, false, false);
     if (!function) {
         state.SkipWithError(error.message.c_str());
     }
-    
-    while(state.KeepRunning()) {
+
+    while (state.KeepRunning()) {
         float z = 24.0f * static_cast<float>(rand() % 100) / 100;
         function->asExpression().evaluate(z);
     }
-    
+
     state.SetLabel(std::to_string(stopCount).c_str());
 }
 
-BENCHMARK(Parse_CameraFunction)
-    ->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);
+BENCHMARK(Parse_CameraFunction)->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);
 
-BENCHMARK(Evaluate_CameraFunction)
-    ->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);
-
-
+BENCHMARK(Evaluate_CameraFunction)->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);

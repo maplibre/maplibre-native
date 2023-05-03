@@ -1,15 +1,15 @@
-attribute vec2 a_pos;
-attribute vec2 a_anchor_pos;
-attribute vec2 a_extrude;
-attribute vec2 a_placed;
-attribute vec2 a_shift;
+layout (location = 0) in vec2 a_pos;
+layout (location = 1) in vec2 a_anchor_pos;
+layout (location = 2) in vec2 a_extrude;
+layout (location = 3) in vec2 a_placed;
+layout (location = 4) in vec2 a_shift;
 
 uniform mat4 u_matrix;
 uniform vec2 u_extrude_scale;
 uniform float u_camera_to_center_distance;
 
-varying float v_placed;
-varying float v_notUsed;
+out float v_placed;
+out float v_notUsed;
 
 void main() {
     vec4 projectedPoint = u_matrix * vec4(a_anchor_pos, 0, 1);

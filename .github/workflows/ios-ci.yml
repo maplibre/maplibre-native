@@ -8,6 +8,7 @@ on:
     tags:
       - 'ios-*'
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"
@@ -28,6 +29,7 @@ on:
     branches:
       - main
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"

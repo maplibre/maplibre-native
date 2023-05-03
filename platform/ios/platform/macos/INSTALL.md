@@ -38,8 +38,8 @@ To build the SDK from source:
 
 1. Clone the git repository:
    ```bash
-   git clone https://github.com/maplibre/maplibre-gl-native.git
-   cd maplibre-gl-native
+   git clone https://github.com/maplibre/maplibre-native.git
+   cd maplibre-native
    ```
    Note that this repository uses Git submodules. They'll be automatically checked out when you first run a `make` command,
    but are not updated automatically. We recommended that you run `git submodule update` after pulling down new commits to

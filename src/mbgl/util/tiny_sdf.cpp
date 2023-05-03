@@ -12,11 +12,8 @@ namespace tinysdf {
 static const double INF = 1e20;
 
 // 1D squared distance transform
-void edt1d(std::vector<double>& f,
-           std::vector<double>& d,
-           std::vector<int16_t>& v,
-           std::vector<double>& z,
-           uint32_t n) {
+void edt1d(
+    std::vector<double>& f, std::vector<double>& d, std::vector<int16_t>& v, std::vector<double>& z, uint32_t n) {
     v[0] = 0;
     z[0] = -INF;
     z[1] = +INF;
@@ -38,7 +35,6 @@ void edt1d(std::vector<double>& f,
         d[q] = (static_cast<double>(q) - v[k]) * (static_cast<double>(q) - v[k]) + f[v[k]];
     }
 }
-
 
 // 2D Euclidean distance transform by Felzenszwalb & Huttenlocher https://cs.brown.edu/~pff/dt/
 void edt(std::vector<double>& data,
@@ -73,9 +69,9 @@ void edt(std::vector<double>& data,
 AlphaImage transformRasterToSDF(const AlphaImage& rasterInput, double radius, double cutoff) {
     uint32_t size = rasterInput.size.width * rasterInput.size.height;
     uint32_t maxDimension = std::max(rasterInput.size.width, rasterInput.size.height);
-    
+
     AlphaImage sdf(rasterInput.size);
-    
+
     // temporary arrays for the distance transform
     std::vector<double> gridOuter(size);
     std::vector<double> gridInner(size);
@@ -83,7 +79,7 @@ AlphaImage transformRasterToSDF(const AlphaImage& rasterInput, double radius, do
     std::vector<double> d(maxDimension);
     std::vector<double> z(maxDimension + 1);
     std::vector<int16_t> v(maxDimension);
-    
+
     for (uint32_t i = 0; i < size; i++) {
         double a = static_cast<double>(rasterInput.data[i]) / 255; // alpha value
         gridOuter[i] = a == 1.0 ? 0.0 : a == 0.0 ? tinysdf::INF : std::pow(std::max(0.0, 0.5 - a), 2.0);
@@ -95,7 +91,8 @@ AlphaImage transformRasterToSDF(const AlphaImage& rasterInput, double radius, do
 
     for (uint32_t i = 0; i < size; i++) {
         double distance = gridOuter[i] - gridInner[i];
-        sdf.data[i] = static_cast<uint8_t>(std::max(0l, std::min(255l, ::lround(255.0 - 255.0 * (distance / radius + cutoff)))));
+        sdf.data[i] = static_cast<uint8_t>(
+            std::max(0l, std::min(255l, ::lround(255.0 - 255.0 * (distance / radius + cutoff)))));
     }
 
     return sdf;

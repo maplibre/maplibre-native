@@ -24,7 +24,7 @@ public:
     void bind() override {
         context.bindFramebuffer = framebuffer.framebuffer;
         context.scissorTest = false;
-        context.viewport = { 0, 0, framebuffer.size };
+        context.viewport = {0, 0, framebuffer.size};
     }
 
     void swap() override { backend.swap(); }
@@ -39,13 +39,15 @@ public:
 HeadlessBackend::HeadlessBackend(const Size size_,
                                  gfx::HeadlessBackend::SwapBehaviour swapBehaviour_,
                                  const gfx::ContextMode contextMode_)
-    : mbgl::gl::RendererBackend(contextMode_), mbgl::gfx::HeadlessBackend(size_), swapBehaviour(swapBehaviour_) {}
+    : mbgl::gl::RendererBackend(contextMode_),
+      mbgl::gfx::HeadlessBackend(size_),
+      swapBehaviour(swapBehaviour_) {}
 
 HeadlessBackend::~HeadlessBackend() {
-    gfx::BackendScope guard{ *this, gfx::BackendScope::ScopeType::Implicit };
+    gfx::BackendScope guard{*this, gfx::BackendScope::ScopeType::Implicit};
     resource.reset();
-    // Explicitly reset the context so that it is destructed and cleaned up before we destruct
-    // the impl object.
+    // Explicitly reset the context so that it is destructed and cleaned up
+    // before we destruct the impl object.
     context.reset();
 }
 

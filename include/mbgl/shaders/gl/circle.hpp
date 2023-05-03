@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::CircleProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::CircleProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform bool u_scale_with_map;
 uniform bool u_pitch_with_map;
@@ -15,56 +16,55 @@ uniform vec2 u_extrude_scale;
 uniform lowp float u_device_pixel_ratio;
 uniform highp float u_camera_to_center_distance;
 
-attribute vec2 a_pos;
-
-varying vec3 v_data;
+layout (location = 0) in vec2 a_pos;
+out vec3 v_data;
 
 #ifndef HAS_UNIFORM_u_color
 uniform lowp float u_color_t;
-attribute highp vec4 a_color;
-varying highp vec4 color;
+layout (location = 1) in highp vec4 a_color;
+out highp vec4 color;
 #else
 uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_radius
 uniform lowp float u_radius_t;
-attribute mediump vec2 a_radius;
-varying mediump float radius;
+layout (location = 2) in mediump vec2 a_radius;
+out mediump float radius;
 #else
 uniform mediump float u_radius;
 #endif
 #ifndef HAS_UNIFORM_u_blur
 uniform lowp float u_blur_t;
-attribute lowp vec2 a_blur;
-varying lowp float blur;
+layout (location = 3) in lowp vec2 a_blur;
+out lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 4) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_stroke_color
 uniform lowp float u_stroke_color_t;
-attribute highp vec4 a_stroke_color;
-varying highp vec4 stroke_color;
+layout (location = 5) in highp vec4 a_stroke_color;
+out highp vec4 stroke_color;
 #else
 uniform highp vec4 u_stroke_color;
 #endif
 #ifndef HAS_UNIFORM_u_stroke_width
 uniform lowp float u_stroke_width_t;
-attribute mediump vec2 a_stroke_width;
-varying mediump float stroke_width;
+layout (location = 6) in mediump vec2 a_stroke_width;
+out mediump float stroke_width;
 #else
 uniform mediump float u_stroke_width;
 #endif
 #ifndef HAS_UNIFORM_u_stroke_opacity
 uniform lowp float u_stroke_opacity_t;
-attribute lowp vec2 a_stroke_opacity;
-varying lowp float stroke_opacity;
+layout (location = 7) in lowp vec2 a_stroke_opacity;
+out lowp float stroke_opacity;
 #else
 uniform lowp float u_stroke_opacity;
 #endif
@@ -143,40 +143,40 @@ lowp float stroke_opacity = u_stroke_opacity;
     v_data = vec3(extrude.x, extrude.y, antialiasblur);
 }
 )";
-    static constexpr const char* fragment = R"(varying vec3 v_data;
+    static constexpr const char* fragment = R"(in vec3 v_data;
 
 #ifndef HAS_UNIFORM_u_color
-varying highp vec4 color;
+in highp vec4 color;
 #else
 uniform highp vec4 u_color;
 #endif
 #ifndef HAS_UNIFORM_u_radius
-varying mediump float radius;
+in mediump float radius;
 #else
 uniform mediump float u_radius;
 #endif
 #ifndef HAS_UNIFORM_u_blur
-varying lowp float blur;
+in lowp float blur;
 #else
 uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_stroke_color
-varying highp vec4 stroke_color;
+in highp vec4 stroke_color;
 #else
 uniform highp vec4 u_stroke_color;
 #endif
 #ifndef HAS_UNIFORM_u_stroke_width
-varying mediump float stroke_width;
+in mediump float stroke_width;
 #else
 uniform mediump float u_stroke_width;
 #endif
 #ifndef HAS_UNIFORM_u_stroke_opacity
-varying lowp float stroke_opacity;
+in lowp float stroke_opacity;
 #else
 uniform lowp float u_stroke_opacity;
 #endif
@@ -218,10 +218,10 @@ lowp float stroke_opacity = u_stroke_opacity;
         extrude_length - radius / (radius + stroke_width)
     );
 
-    gl_FragColor = opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
+    fragColor = opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

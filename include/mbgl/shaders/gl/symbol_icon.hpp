@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-04T01:24:40.539Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,14 +7,15 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::SymbolIconProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::SymbolIconProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 
-attribute vec4 a_pos_offset;
-attribute vec4 a_data;
-attribute vec4 a_pixeloffset;
-attribute vec3 a_projected_pos;
-attribute float a_fade_opacity;
+layout (location = 0) in vec4 a_pos_offset;
+layout (location = 1) in vec4 a_data;
+layout (location = 2) in vec4 a_pixeloffset;
+layout (location = 3) in vec3 a_projected_pos;
+layout (location = 4) in float a_fade_opacity;
 
 uniform bool u_is_size_zoom_constant;
 uniform bool u_is_size_feature_constant;
@@ -35,13 +36,13 @@ uniform bool u_pitch_with_map;
 
 uniform vec2 u_texsize;
 
-varying vec2 v_tex;
-varying float v_fade_opacity;
+out vec2 v_tex;
+out float v_fade_opacity;
 
 #ifndef HAS_UNIFORM_u_opacity
 uniform lowp float u_opacity_t;
-attribute lowp vec2 a_opacity;
-varying lowp float opacity;
+layout (location = 5) in lowp vec2 a_opacity;
+out lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
@@ -115,11 +116,11 @@ lowp float opacity = u_opacity;
 )";
     static constexpr const char* fragment = R"(uniform sampler2D u_texture;
 
-varying vec2 v_tex;
-varying float v_fade_opacity;
+in vec2 v_tex;
+in float v_fade_opacity;
 
 #ifndef HAS_UNIFORM_u_opacity
-varying lowp float opacity;
+in lowp float opacity;
 #else
 uniform lowp float u_opacity;
 #endif
@@ -130,10 +131,10 @@ lowp float opacity = u_opacity;
 #endif
 
     lowp float alpha = opacity * v_fade_opacity;
-    gl_FragColor = texture2D(u_texture, v_tex) * alpha;
+    fragColor = texture(u_texture, v_tex) * alpha;
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
 )";

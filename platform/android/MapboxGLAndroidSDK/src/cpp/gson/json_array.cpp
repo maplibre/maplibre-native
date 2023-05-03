@@ -5,14 +5,14 @@ namespace mbgl {
 namespace android {
 namespace gson {
 
-jni::Local<jni::Object<JsonArray>> JsonArray::New(jni::JNIEnv& env, const std::vector<mbgl::Value>& values){
+jni::Local<jni::Object<JsonArray>> JsonArray::New(jni::JNIEnv& env, const std::vector<mbgl::Value>& values) {
     static auto& javaClass = jni::Class<JsonArray>::Singleton(env);
     static auto constructor = javaClass.GetConstructor(env);
-    static auto addMethod = javaClass.GetMethod<void (jni::Object<JsonElement>)>(env, "add");
+    static auto addMethod = javaClass.GetMethod<void(jni::Object<JsonElement>)>(env, "add");
 
     auto jsonArray = javaClass.New(env, constructor);
 
-    for (const auto &v : values) {
+    for (const auto& v : values) {
         jsonArray.Call(env, addMethod, JsonElement::New(env, v));
     }
 
@@ -24,8 +24,8 @@ std::vector<mbgl::Value> JsonArray::convert(jni::JNIEnv& env, const jni::Object<
 
     if (jsonArray) {
         static auto& javaClass = jni::Class<JsonArray>::Singleton(env);
-        static auto getMethod = javaClass.GetMethod<jni::Object<JsonElement> (jni::jint)>(env, "get");
-        static auto sizeMethod = javaClass.GetMethod<jni::jint ()>(env, "size");
+        static auto getMethod = javaClass.GetMethod<jni::Object<JsonElement>(jni::jint)>(env, "get");
+        static auto sizeMethod = javaClass.GetMethod<jni::jint()>(env, "size");
 
         int size = jsonArray.Call(env, sizeMethod);
         values.reserve(uint(size));

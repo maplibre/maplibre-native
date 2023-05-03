@@ -39,6 +39,5 @@ private:
 
 class ManifestParser {
 public:
-    static std::optional<Manifest> parseManifest(const std::string& manifestPath,
-                                                  std::string testFilter);
+    static std::optional<Manifest> parseManifest(const std::string& manifestPath, std::string testFilter);
 };

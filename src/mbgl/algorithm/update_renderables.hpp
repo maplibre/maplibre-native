@@ -38,7 +38,7 @@ void updateRenderables(GetTileFn getTile,
             tile = createTile(idealDataTileID);
             // For source types where TileJSON.bounds is set, tiles outside the
             // bounds are not created
-            if(tile == nullptr) {
+            if (tile == nullptr) {
                 continue;
             }
         }
@@ -75,8 +75,8 @@ void updateRenderables(GetTileFn getTile,
                         retainTile(*tile, TileNecessity::Optional);
                         renderTile(childDataTileID.toUnwrapped(), *tile);
                     } else {
-                        // At least one child tile doesn't exist, so we are going to look for
-                        // parents as well.
+                        // At least one child tile doesn't exist, so we are
+                        // going to look for parents as well.
                         covered = false;
                     }
                 }
@@ -87,15 +87,16 @@ void updateRenderables(GetTileFn getTile,
                 for (overscaledZ = idealDataTileID.overscaledZ - 1; overscaledZ >= zoomRange.min; --overscaledZ) {
                     const auto parentDataTileID = idealDataTileID.scaledTo(overscaledZ);
 
-                    // Request / render parent tile only if it's overscale factor is less than defined maximum.
+                    // Request / render parent tile only if it's overscale
+                    // factor is less than defined maximum.
                     if (maxParentOverscaleFactor &&
                         (idealDataTileID.overscaledZ - overscaledZ) > *maxParentOverscaleFactor) {
                         break;
                     }
 
                     if (checked.find(parentDataTileID) != checked.end()) {
-                        // Break parent tile ascent, this route has been checked by another child
-                        // tile before.
+                        // Break parent tile ascent, this route has been checked
+                        // by another child tile before.
                         break;
                     } else {
                         checked.emplace(parentDataTileID);
@@ -108,17 +109,19 @@ void updateRenderables(GetTileFn getTile,
 
                     if (tile) {
                         if (!parentIsLoaded) {
-                            // We haven't completed loading the child, so we only do an optional
-                            // (cache) request in an attempt to quickly load data that we can show.
+                            // We haven't completed loading the child, so we
+                            // only do an optional (cache) request in an attempt
+                            // to quickly load data that we can show.
                             retainTile(*tile, TileNecessity::Optional);
                         } else {
-                            // Now that we've checked the child and know for sure that we can't load
-                            // it, we attempt to load the parent from the network.
+                            // Now that we've checked the child and know for
+                            // sure that we can't load it, we attempt to load
+                            // the parent from the network.
                             retainTile(*tile, TileNecessity::Required);
                         }
 
-                        // Save the current values, since they're the parent of the next iteration
-                        // of the parent tile ascent loop.
+                        // Save the current values, since they're the parent of
+                        // the next iteration of the parent tile ascent loop.
                         parentHasTriedOptional = tile->hasTriedCache();
                         parentIsLoaded = tile->isLoaded();
 

@@ -19,15 +19,15 @@ public:
     // When this object is empty, the response was successful.
     std::unique_ptr<const Error> error;
 
-    // This is set to true for 204 Not Modified responses, and, for backward compatibility,
-    // for 404 Not Found responses for tiles.
+    // This is set to true for 204 Not Modified responses, and, for backward
+    // compatibility, for 404 Not Found responses for tiles.
     bool noContent = false;
 
     // This is set to true for 304 Not Modified responses.
     bool notModified = false;
 
-    // This is set to true when the server requested that no expired resources be used by
-    // specifying "Cache-Control: must-revalidate".
+    // This is set to true when the server requested that no expired resources
+    // be used by specifying "Cache-Control: must-revalidate".
     bool mustRevalidate = false;
 
     // The actual data of the response. Present only for non-error, non-notModified responses.
@@ -37,15 +37,11 @@ public:
     std::optional<Timestamp> expires;
     std::optional<std::string> etag;
 
-    bool isFresh() const {
-        return expires ? *expires > util::now() : !error;
-    }
+    bool isFresh() const { return expires ? *expires > util::now() : !error; }
 
-    // Indicates whether we are allowed to use this response according to HTTP caching rules.
-    // It may or may not be stale.
-    bool isUsable() const {
-        return !mustRevalidate || (expires && *expires > util::now());
-    }
+    // Indicates whether we are allowed to use this response according to HTTP
+    // caching rules. It may or may not be stale.
+    bool isUsable() const { return !mustRevalidate || (expires && *expires > util::now()); }
 };
 
 class Response::Error {
@@ -59,8 +55,8 @@ public:
         Other = 6,
     } reason = Reason::Other;
 
-    // An error message from the request handler, e.g. a server message or a system message
-    // informing the user about the reason for the failure.
+    // An error message from the request handler, e.g. a server message or a
+    // system message informing the user about the reason for the failure.
     std::string message;
 
     std::optional<Timestamp> retryAfter;

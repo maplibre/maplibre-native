@@ -17,7 +17,7 @@ std::optional<std::string> LayerFactory::getSource(const style::conversion::Conv
         return std::nullopt;
     }
 
-    auto const source = toString(*sourceValue);
+    auto source = toString(*sourceValue);
     if (!source) {
         return std::nullopt;
     }
@@ -25,7 +25,8 @@ std::optional<std::string> LayerFactory::getSource(const style::conversion::Conv
     return source;
 }
 
-std::unique_ptr<Bucket> LayerFactory::createBucket(const BucketParameters&, const std::vector<Immutable<style::LayerProperties>>&) noexcept {
+std::unique_ptr<Bucket> LayerFactory::createBucket(const BucketParameters&,
+                                                   const std::vector<Immutable<style::LayerProperties>>&) noexcept {
     assert(false);
     return nullptr;
 }

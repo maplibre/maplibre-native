@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -z ${1+x} ]]; then
-  echo "Error: Pass the path to maplibre-gl-native as first argument" 1>&2
+  echo "Error: Pass the path to maplibre-native as first argument" 1>&2
   exit 1
 fi
 
@@ -14,7 +14,7 @@ cmake "$1" \
   -G Ninja \
   -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
   -DCMAKE_OSX_DEPLOYMENT_TARGET="10.13" \
-  -DMBGL_WITH_QT=ON \
-  -DMBGL_QT_STATIC=ON \
-  -DMBGL_QT_LIBRARY_ONLY=ON \
+  -DMLN_WITH_QT=ON \
+  -DMLN_QT_STATIC=ON \
+  -DMLN_QT_LIBRARY_ONLY=ON \
   -DCMAKE_INSTALL_PREFIX="$2"

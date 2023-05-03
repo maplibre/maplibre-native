@@ -1,6 +1,6 @@
-# Developing the Maplibre GL Native Node.js module
+# Developing the MapLibre Native Node.js module
 
-This document explains how to build the [Node.js](https://nodejs.org/) bindings for [Maplibre GL Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
+This document explains how to build the [Node.js](https://nodejs.org/) bindings for [MapLibre Native](../../README.md) for contributing to the development of the bindings themselves. If you just want to use the module, you can simply install it via `npm`; see [README.md](README.md) for installation and usage instructions.
 
 ## Building
 
@@ -48,13 +48,13 @@ To compile the Node.js bindings and install module dependencies, from the reposi
 #### MacOS
 
 ```bash
-cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_COVERAGE=ON
+cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_COVERAGE=ON
 ```
 
 #### Linux
 
 ```bash
-cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
 ```
 
 ### Building
@@ -87,8 +87,6 @@ npm test
 To clean up your pull request and prepare it for merging, update your local `main` branch, then run `git rebase -i main` from your pull request branch to squash/fixup commits as needed. When your work is ready to be merged, you can run `git merge --ff-only YOUR_BRANCH` from `main` or click the green merge button in the GitHub UI, which will automatically squash your branch down into a single commit before merging it.
 
 ## Publishing
-
-We aim to publish the `@mapbox/mapbox-gl-native` package on the same four-week cadence as the iOS, Android, and JavaScript SDKs, including a beta release one week prior to the final release. Responsibility for publishing rotates between team members.
 
 To publish a new version of the package:
 - [ ] make a commit in the release branch which includes:

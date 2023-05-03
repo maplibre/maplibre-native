@@ -1,6 +1,6 @@
-if(MBGL_WITH_EGL)
+if(MLN_WITH_EGL)
     set(_RENDERER EGL)
-elseif(MBGL_WITH_OSMESA)
+elseif(MLN_WITH_OSMESA)
     set(_RENDERER OSMesa)
 else()
     set(_RENDERER OpenGL)
@@ -9,7 +9,7 @@ endif()
 execute_process(COMMAND powershell -ExecutionPolicy Bypass -File ${CMAKE_CURRENT_LIST_DIR}/Get-VendorPackages.ps1 -Triplet ${VCPKG_TARGET_TRIPLET} -Renderer ${_RENDERER})
 unset(_RENDERER)
 
-add_compile_definitions(NOMINMAX _USE_MATH_DEFINES GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
+add_compile_definitions(NOMINMAX GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE)
 
 target_compile_options(
     mbgl-compiler-options
@@ -40,7 +40,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        $<$<BOOL:${MBGL_PUBLIC_BUILD}>:${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
@@ -72,11 +72,9 @@ target_compile_definitions(
     mbgl-core
     PRIVATE
         CURL_STATICLIB
-    PUBLIC
-        MBGL_USE_GLES2
 )
 
-if(MBGL_WITH_EGL)
+if(MLN_WITH_EGL)
     find_package(unofficial-angle CONFIG REQUIRED)
     target_sources(
         mbgl-core
@@ -95,7 +93,7 @@ if(MBGL_WITH_EGL)
             unofficial::angle::libEGL
             unofficial::angle::libGLESv2
     )
-elseif(MBGL_WITH_OSMESA)
+elseif(MLN_WITH_OSMESA)
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
     list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/vendor/mesa3d)
 
@@ -155,7 +153,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
 if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0)
     message(STATUS "ICU not found or too old, using builtin.")
 
-    set(MBGL_USE_BUILTIN_ICU TRUE)
+    set(MLN_USE_BUILTIN_ICU TRUE)
     include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 
     set_source_files_properties(
@@ -173,10 +171,10 @@ target_link_libraries(
         ${JPEG_LIBRARIES}
         ${LIBUV_LIBRARIES}
 		dlfcn-win32::dl
-        $<$<NOT:$<BOOL:${MBGL_USE_BUILTIN_ICU}>>:ICU::data>
-        $<$<NOT:$<BOOL:${MBGL_USE_BUILTIN_ICU}>>:ICU::i18n>
-        $<$<NOT:$<BOOL:${MBGL_USE_BUILTIN_ICU}>>:ICU::uc>
-        $<$<BOOL:${MBGL_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
+        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
+        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
+        $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
+        $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
         mbgl-vendor-nunicode
         mbgl-vendor-sqlite
@@ -185,7 +183,9 @@ target_link_libraries(
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+if(MLN_WITH_NODE)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
+endif()
 
 add_executable(
     mbgl-test-runner

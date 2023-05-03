@@ -42,7 +42,8 @@ void runServer(std::unique_ptr<httplib::Server>& server) {
 
     std::atomic_int cacheCounter(0);
     server->Get("/cache", [&](const Request&, Response& res) {
-        res.set_header("Cache-Control", "max-age=30"); // Allow caching for 30 seconds
+        res.set_header("Cache-Control",
+                       "max-age=30"); // Allow caching for 30 seconds
         res.set_content("Response " + std::to_string(++cacheCounter), "text/plain");
     });
 
@@ -204,7 +205,6 @@ HttpServer::~HttpServer() {
     server->stop();
     serverThread.join();
 }
-
 
 } // namespace test
 } // namespace mbgl

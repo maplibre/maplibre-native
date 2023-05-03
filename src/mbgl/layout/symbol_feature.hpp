@@ -23,16 +23,14 @@ public:
     FeatureIdentifier getID() const override { return feature->getID(); };
     const GeometryCollection& getGeometries() const override { return feature->getGeometries(); }
 
-    friend bool operator < (const SymbolFeature& lhs, const SymbolFeature& rhs) {
-        return lhs.sortKey <  rhs.sortKey;
-    }
+    friend bool operator<(const SymbolFeature& lhs, const SymbolFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
 
     std::unique_ptr<GeometryTileFeature> feature;
     GeometryCollection geometry;
     std::optional<TaggedString> formattedText;
     std::optional<style::expression::Image> icon;
     float sortKey = 0.0f;
-    std::size_t index;
+    std::size_t index = 0;
     bool allowsVerticalWritingMode = false;
 };
 

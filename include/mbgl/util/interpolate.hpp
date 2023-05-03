@@ -32,16 +32,12 @@ T interpolate(const T& a, const T& b, const float t) {
 
 template <class T, class Enabled>
 struct Interpolator {
-    T operator()(const T& a, const T& b, const double t) const {
-        return a * (1.0 - t) + b * t;
-    }
+    T operator()(const T& a, const T& b, const double t) const { return a * (1.0 - t) + b * t; }
 };
 
 template <>
 struct Interpolator<float> {
-    float operator()(const float& a, const float& b, const float t) const {
-        return a * (1.0f - t) + b * t;
-    }
+    float operator()(const float& a, const float& b, const float t) const { return a * (1.0f - t) + b * t; }
 
     float operator()(const float& a, const float& b, const double t) const {
         return static_cast<float>(a * (1.0 - t) + b * t);
@@ -55,7 +51,7 @@ private:
 
     template <std::size_t... I>
     Array operator()(const Array& a, const Array& b, const double t, std::index_sequence<I...>) {
-        return {{ interpolate(a[I], b[I], t)... }};
+        return {{interpolate(a[I], b[I], t)...}};
     }
 
 public:
@@ -71,7 +67,7 @@ private:
 
     template <std::size_t... I>
     Array operator()(const Array& a, const Array& b, const float t, std::index_sequence<I...>) {
-        return {{ interpolate(a[I], b[I], t)... }};
+        return {{interpolate(a[I], b[I], t)...}};
     }
 
 public:
@@ -79,7 +75,6 @@ public:
         return operator()(a, b, t, std::make_index_sequence<N>());
     }
 };
-
 
 /// In order to accept Array<Number, N> as an output value for Curve
 /// expressions, we need to have an interpolatable std::vector type.
@@ -89,21 +84,18 @@ public:
 /// asserting that (a) the vectors are the same size, and (b) they contain
 /// only numeric values.  (These invariants should be relatively safe,
 /// being enforced by the expression type system.)
-template<>
+template <>
 struct Interpolator<std::vector<style::expression::Value>> {
     std::vector<style::expression::Value> operator()(const std::vector<style::expression::Value>& a,
-                                  const std::vector<style::expression::Value>& b,
-                                  const double t) const {
+                                                     const std::vector<style::expression::Value>& b,
+                                                     const double t) const {
         assert(a.size() == b.size());
         if (a.empty()) return {};
         std::vector<style::expression::Value> result;
         for (std::size_t i = 0; i < a.size(); i++) {
             assert(a[i].template is<double>());
             assert(b[i].template is<double>());
-            style::expression::Value item = interpolate(
-                a[i].template get<double>(),
-                b[i].template get<double>(),
-                t);
+            style::expression::Value item = interpolate(a[i].template get<double>(), b[i].template get<double>(), t);
             result.push_back(item);
         }
         return result;
@@ -117,7 +109,7 @@ public:
         auto pos = style::Position();
         auto interpolated = interpolate(a.getCartesian(), b.getCartesian(), t);
         pos.setCartesian(interpolated);
-        return { pos };
+        return {pos};
     }
 };
 
@@ -125,21 +117,11 @@ template <>
 struct Interpolator<Color> {
 public:
     Color operator()(const Color& a, const Color& b, const float t) {
-        return {
-            interpolate(a.r, b.r, t),
-            interpolate(a.g, b.g, t),
-            interpolate(a.b, b.b, t),
-            interpolate(a.a, b.a, t)
-        };
+        return {interpolate(a.r, b.r, t), interpolate(a.g, b.g, t), interpolate(a.b, b.b, t), interpolate(a.a, b.a, t)};
     }
 
     Color operator()(const Color& a, const Color& b, const double t) {
-        return {
-            interpolate(a.r, b.r, t),
-            interpolate(a.g, b.g, t),
-            interpolate(a.b, b.b, t),
-            interpolate(a.a, b.a, t)
-        };
+        return {interpolate(a.r, b.r, t), interpolate(a.g, b.g, t), interpolate(a.b, b.b, t), interpolate(a.a, b.a, t)};
     }
 };
 
@@ -172,29 +154,20 @@ struct Uninterpolated {
 };
 
 template <>
-struct Interpolator<bool>
-    : Uninterpolated {};
+struct Interpolator<bool> : Uninterpolated {};
 
 template <class T>
-struct Interpolator<T, typename std::enable_if_t<std::is_enum_v<T>>>
-    : Uninterpolated {};
+struct Interpolator<T, typename std::enable_if_t<std::is_enum_v<T>>> : Uninterpolated {};
 
 template <>
-struct Interpolator<std::string>
-    : Uninterpolated {};
+struct Interpolator<std::string> : Uninterpolated {};
 
 template <class T>
-struct Interpolator<std::vector<T>>
-    : Uninterpolated {};
+struct Interpolator<std::vector<T>> : Uninterpolated {};
 
 template <class T>
 struct Interpolatable
-    : std::conditional_t<
-      !std::is_base_of_v<Uninterpolated, Interpolator<T>>,
-      std::true_type,
-      std::false_type> {};
-
-
+    : std::conditional_t<!std::is_base_of_v<Uninterpolated, Interpolator<T>>, std::true_type, std::false_type> {};
 
 } // namespace util
 } // namespace mbgl

@@ -4,8 +4,7 @@ namespace mbgl {
 
 RenderLight::RenderLight(Immutable<style::Light::Impl> impl_)
     : impl(std::move(impl_)),
-      transitioning(impl->properties.untransitioned()) {
-}
+      transitioning(impl->properties.untransitioned()) {}
 
 void RenderLight::transition(const TransitionParameters& parameters) {
     transitioning = impl->properties.transitioned(parameters, std::move(transitioning));

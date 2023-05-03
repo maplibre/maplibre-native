@@ -22,8 +22,8 @@ TEST(LineAtlas, Random) {
             for (size_t i = 0; i < count; i++) {
                 dasharray.push_back(lengthDistribution(generator));
             }
-            const LinePatternCap patternCap =
-                capStyleDistribution(generator) > 0 ? LinePatternCap::Round : LinePatternCap::Square;
+            const LinePatternCap patternCap = capStyleDistribution(generator) > 0 ? LinePatternCap::Round
+                                                                                  : LinePatternCap::Square;
 
             atlas.getDashPatternTexture(dasharray, dasharray, patternCap);
         }
