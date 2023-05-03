@@ -34,8 +34,6 @@ void DrawableGLBuilder::init() {
             std::size_t index = 0;
             colorAttr->reserve(impl->colors.size());
             for (const auto& color : impl->colors) {
-                auto x = util::convert<float>(color.toArray());
-                colorAttr->set(index, gfx::VertexAttribute::float4{x[0], x[1], x[2], x[3]});
                 colorAttr->set(index++, DrawableGL::colorAttrValue(color));
             }
         }
