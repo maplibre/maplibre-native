@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::SymbolTextAndIconProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::SymbolTextAndIconProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 
 layout (location = 0) in vec4 a_pos_offset;

@@ -6,11 +6,15 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-Image::Image(std::string imageID_, bool available_) : imageID(std::move(imageID_)), available(available_) {}
+Image::Image(std::string imageID_, bool available_)
+    : imageID(std::move(imageID_)),
+      available(available_) {}
 
-Image::Image(std::string imageID_) : Image(std::move(imageID_), false) {}
+Image::Image(std::string imageID_)
+    : Image(std::move(imageID_), false) {}
 
-Image::Image(const char* imageID_) : Image(std::string(imageID_)) {
+Image::Image(const char* imageID_)
+    : Image(std::string(imageID_)) {
     assert(imageID_);
 }
 

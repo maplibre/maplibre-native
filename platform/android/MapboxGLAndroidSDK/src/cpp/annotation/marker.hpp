@@ -12,7 +12,6 @@ namespace android {
 
 class Marker : private mbgl::util::noncopyable {
 public:
-
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/annotations/Marker"; };
 
     static mbgl::Point<double> getPosition(jni::JNIEnv&, const jni::Object<Marker>&);
@@ -20,9 +19,7 @@ public:
     static std::string getIconId(jni::JNIEnv&, const jni::Object<Marker>&);
 
     static void registerNative(jni::JNIEnv&);
-
 };
-
 
 } // namespace android
 } // namespace mbgl

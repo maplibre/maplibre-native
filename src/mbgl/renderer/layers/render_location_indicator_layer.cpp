@@ -40,7 +40,8 @@ namespace mbgl {
 
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
-    explicit LocationIndicatorRenderParameters(const TransformParameters& tp) : state(&tp.state) {}
+    explicit LocationIndicatorRenderParameters(const TransformParameters& tp)
+        : state(&tp.state) {}
     LocationIndicatorRenderParameters(const LocationIndicatorRenderParameters& o) = default;
     LocationIndicatorRenderParameters& operator=(const LocationIndicatorRenderParameters& o) = default;
 
@@ -76,9 +77,13 @@ protected:
         GLfloat x = 0.0f;
         GLfloat y = 0.0f;
 
-        vec2(GLfloat x_, GLfloat y_) : x(x_), y(y_) {}
+        vec2(GLfloat x_, GLfloat y_)
+            : x(x_),
+              y(y_) {}
         vec2() = default;
-        explicit vec2(const Point<double>& p) : x(static_cast<GLfloat>(p.x)), y(static_cast<GLfloat>(p.y)) {}
+        explicit vec2(const Point<double>& p)
+            : x(static_cast<GLfloat>(p.x)),
+              y(static_cast<GLfloat>(p.y)) {}
         vec2(const vec2& o) = default;
         vec2(vec2&& o) = default;
         vec2& operator=(vec2&& o) = default;
@@ -103,7 +108,8 @@ protected:
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::rad2degf(util::wrap<float>(static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)));
+            return util::rad2degf(util::wrap<float>(
+                static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)));
         }
         Point<double> toPoint() const { return {x, y}; }
 
@@ -148,8 +154,8 @@ protected:
     };
 
     struct SimpleShader : public Shader {
-        // Note that custom layers need to draw geometry with a z value of 1 to take advantage of
-        // depth-based fragment culling.
+        // Note that custom layers need to draw geometry with a z value of 1 to
+        // take advantage of depth-based fragment culling.
         const GLchar* vertexShaderSource = R"MBGL_SHADER(
 #ifdef GL_ES
 precision highp float;
@@ -282,7 +288,8 @@ public:
             image = nullptr;
         }
         /*
-            Assign can be called any time. Conversely, upload must be called with a bound gl context.
+            Assign can be called any time. Conversely, upload must be called
+           with a bound gl context.
         */
         void assign(const Immutable<style::Image::Impl>* img) {
             imageDirty = true;
@@ -361,8 +368,8 @@ public:
     static bool hasAnisotropicFiltering() {
         const auto* extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
         GLenum error = glGetError();
-        if (error != GL_NO_ERROR) { // glGetString(GL_EXTENSIONS) is deprecated in OpenGL Desktop 3.0+. But OpenGL 3.0+
-                                    // has anisotropic filtering.
+        if (error != GL_NO_ERROR) { // glGetString(GL_EXTENSIONS) is deprecated in OpenGL
+                                    // Desktop 3.0+. But OpenGL 3.0+ has anisotropic filtering.
             return true;
         } else {
             if (strstr(extensions, "GL_EXT_texture_filter_anisotropic") != nullptr) return true;
@@ -448,8 +455,8 @@ public:
         featureEnvelope->clear();
         if (!texPuck || !texPuck->isValid()) return;
 
-        feature->geometry =
-            mapbox::geometry::point<double>{oldParams.puckPosition.latitude(), oldParams.puckPosition.longitude()};
+        feature->geometry = mapbox::geometry::point<double>{oldParams.puckPosition.latitude(),
+                                                            oldParams.puckPosition.longitude()};
         mapbox::geometry::linear_ring<int64_t> border;
         for (const auto& v : puckGeometry) {
             vec4 p{{v.x, v.y, 0, 1}};
@@ -484,7 +491,8 @@ protected:
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         const auto numVtxCircumference = static_cast<unsigned long>(circle.size() - 1);
-        const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1); // first and last points are the same
+        const float bearingStep = 360.0f /
+                                  static_cast<float>(numVtxCircumference - 1); // first and last points are the same
         const mapbox::cheap_ruler::point centerPoint(params.puckPosition.longitude(), params.puckPosition.latitude());
         Point<double> center = project(params.puckPosition, s);
         circle[0] = {0, 0};
@@ -556,29 +564,36 @@ protected:
 
     void updatePuckPerspective(const mbgl::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
-        projectionPuck = projectionCircle; // Duplicated as it might change, depending on what puck style is chosen.
+        projectionPuck = projectionCircle; // Duplicated as it might change, depending
+                                           // on what puck style is chosen.
         const mapbox::cheap_ruler::point centerPoint(params.puckPosition.longitude(), params.puckPosition.latitude());
         static constexpr float bearings[]{
             225.0f, 315.0f, 45.0f, 135.0f}; // Quads will be drawn as triangle fans. so bl, tl, tr, br
 #ifndef M_SQRT2
         static constexpr const float M_SQRT2 = std::sqrt(2.0f);
 #endif
-        // The puck has to stay square at all zoom levels. CheapRuler::destination does not guarantee this at low zoom
-        // levels, so the extent has to be produced in mercator space
+        // The puck has to stay square at all zoom levels. CheapRuler::destination
+        // does not guarantee this at low zoom levels, so the extent has to be produced in mercator space
         const double tilt = s.getPitch();
 
-        // Point<double> verticalShiftAtCenter { float(std::sin(util::DEG2RAD_D * util::wrap<float>(-t.getBearing() *
-        // util::RAD2DEG, 0.0f, 360.0f) )),
-        //                                      -float(std::cos(util::DEG2RAD_D * util::wrap<float>(-t.getBearing() *
-        //                                      util::RAD2DEG_D, 0.0f, 360.0f))) };
-        // would be correct only in the vertical center of the map. As soon as position goes away from that line,
-        // the shift direction is skewed by the perspective projection.
-        // So the way to have a shift aligned to the screen vertical axis is to find this direction in screen space, and
-        // convert it back to map space. This would yield an always straight up shift. However, going further (= the
-        // opposite direction of where the lines are converging in the projection) might produce an even more realistic
-        // effect. But in this case, it empirically seems that the largest shift that look acceptable is what is
-        // obtained at the bottom of the window, avoiding the wider converging lines that pass by the edge of the screen
-        // going toward the top.
+        // Point<double> verticalShiftAtCenter { float(std::sin(util::DEG2RAD_D
+        // * util::wrap<float>(-t.getBearing() * util::RAD2DEG, 0.0f, 360.0f)
+        // )),
+        //                                      -float(std::cos(util::DEG2RAD_D
+        //                                      * util::wrap<float>(-t.getBearing() *
+        //                                      util::RAD2DEG_D, 0.0f, 360.0f)))
+        //                                      };
+        // would be correct only in the vertical center of the map. As soon as
+        // position goes away from that line, the shift direction is skewed by
+        // the perspective projection. So the way to have a shift aligned to the
+        // screen vertical axis is to find this direction in screen space, and
+        // convert it back to map space. This would yield an always straight up
+        // shift. However, going further (= the opposite direction of where the
+        // lines are converging in the projection) might produce an even more
+        // realistic effect. But in this case, it empirically seems that the
+        // largest shift that look acceptable is what is obtained at the bottom
+        // of the window, avoiding the wider converging lines that pass by the
+        // edge of the screen going toward the top.
 
         Point<double> verticalShift = hatShadowShiftVector(params.puckPosition, params);
         const float horizontalScaleFactor =
@@ -586,9 +601,10 @@ protected:
             util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 100.1f) *
                 params.perspectiveCompensation; // Compensation factor for the perspective deformation
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
-        const double shadowRadius =
-            ((texShadow) ? texShadow->width / texShadow->pixelRatio : 0.0) * params.puckShadowScale * M_SQRT2 * 0.5 *
-            horizontalScaleFactor; // Technically it's not the radius, but the half diagonal of the quad.
+        const double shadowRadius = ((texShadow) ? texShadow->width / texShadow->pixelRatio : 0.0) *
+                                    params.puckShadowScale * M_SQRT2 * 0.5 *
+                                    horizontalScaleFactor; // Technically it's not the radius, but
+                                                           // the half diagonal of the quad.
         const double puckRadius = ((texPuck) ? texPuck->width / texPuck->pixelRatio : 0.0) * params.puckScale *
                                   M_SQRT2 * 0.5 * horizontalScaleFactor;
         const double hatRadius = ((texPuckHat) ? texPuckHat->width / texPuckHat->pixelRatio : 0.0) *
@@ -597,18 +613,17 @@ protected:
         for (unsigned long i = 0; i < 4; ++i) {
             const auto b = util::wrap<float>(static_cast<float>(params.puckBearing) + bearings[i], 0.0f, 360.0f);
 
-            const Point<double> cornerDirection{std::sin(util::deg2rad(b)),
-                                                -std::cos(util::deg2rad(b))};
+            const Point<double> cornerDirection{std::sin(util::deg2rad(b)), -std::cos(util::deg2rad(b))};
 
             Point<double> shadowOffset = cornerDirection * shadowRadius;
             Point<double> puckOffset = cornerDirection * puckRadius;
             Point<double> hatOffset = cornerDirection * hatRadius;
 
-            shadowGeometry[i] =
-                vec2(shadowOffset + (verticalShift * (tilt * -params.puckLayersDisplacement * horizontalScaleFactor)));
+            shadowGeometry[i] = vec2(shadowOffset +
+                                     (verticalShift * (tilt * -params.puckLayersDisplacement * horizontalScaleFactor)));
             puckGeometry[i] = vec2(puckOffset);
-            hatGeometry[i] =
-                vec2(hatOffset + (verticalShift * (tilt * params.puckLayersDisplacement * horizontalScaleFactor)));
+            hatGeometry[i] = vec2(hatOffset +
+                                  (verticalShift * (tilt * params.puckLayersDisplacement * horizontalScaleFactor)));
         }
     }
 
@@ -838,8 +853,8 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 
     MBGL_CHECK_ERROR(renderImpl->render(renderImpl->parameters));
 
-    // Reset the view back to our original one, just in case the CustomLayer changed
-    // the viewport or Framebuffer.
+    // Reset the view back to our original one, just in case the CustomLayer
+    // changed the viewport or Framebuffer.
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
     glContext.setDirtyState();
 }

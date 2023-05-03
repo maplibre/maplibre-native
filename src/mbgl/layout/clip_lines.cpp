@@ -5,15 +5,12 @@
 namespace mbgl {
 namespace util {
 
-GeometryCollection clipLines(const GeometryCollection &lines,
-        const int16_t x1, const int16_t y1, const int16_t x2, const int16_t y2) {
-
+GeometryCollection clipLines(
+    const GeometryCollection& lines, const int16_t x1, const int16_t y1, const int16_t x2, const int16_t y2) {
     GeometryCollection clippedLines;
 
     for (auto& line : lines) {
-
-        if (line.empty())
-            continue;
+        if (line.empty()) continue;
 
         auto end = line.end() - 1;
         for (auto it = line.begin(); it != end; it++) {

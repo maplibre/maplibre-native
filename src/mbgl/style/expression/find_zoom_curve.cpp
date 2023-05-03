@@ -14,65 +14,64 @@ namespace expression {
 
 std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression* e) {
     std::optional<variant<const Interpolate*, const Step*, ParsingError>> result;
-    
+
     switch (e->getKind()) {
-    case Kind::Let: {
-        auto let = static_cast<const Let*>(e);
-        result = findZoomCurve(let->getResult());
-        break;
-    }
-    case Kind::Coalesce: {
-        auto coalesce = static_cast<const Coalesce*>(e);
-        std::size_t length = coalesce->getLength();
-        for (std::size_t i = 0; i < length; i++) {
-            result = findZoomCurve(coalesce->getChild(i));
-            if (result) {
-                break;
-            }
+        case Kind::Let: {
+            auto let = static_cast<const Let*>(e);
+            result = findZoomCurve(let->getResult());
+            break;
         }
-        break;
-    }
-    case Kind::Interpolate: {
-        auto curve = static_cast<const Interpolate*>(e);
-        if (curve->getInput()->getKind() == Kind::CompoundExpression) {
-            auto z = static_cast<CompoundExpression*>(curve->getInput().get());
-            if (z && z->getOperator() == "zoom") {
-                result = {curve};
+        case Kind::Coalesce: {
+            auto coalesce = static_cast<const Coalesce*>(e);
+            std::size_t length = coalesce->getLength();
+            for (std::size_t i = 0; i < length; i++) {
+                result = findZoomCurve(coalesce->getChild(i));
+                if (result) {
+                    break;
+                }
             }
+            break;
         }
-        break;
-    }
-    case Kind::Step: {
-        auto step = static_cast<const Step*>(e);
-        if (step->getInput()->getKind() == Kind::CompoundExpression) {
-            auto z = static_cast<CompoundExpression*>(step->getInput().get());
-            if (z && z->getOperator() == "zoom") {
-                result = {step};
+        case Kind::Interpolate: {
+            auto curve = static_cast<const Interpolate*>(e);
+            if (curve->getInput()->getKind() == Kind::CompoundExpression) {
+                auto z = static_cast<CompoundExpression*>(curve->getInput().get());
+                if (z && z->getOperator() == "zoom") {
+                    result = {curve};
+                }
             }
+            break;
         }
-        break;
+        case Kind::Step: {
+            auto step = static_cast<const Step*>(e);
+            if (step->getInput()->getKind() == Kind::CompoundExpression) {
+                auto z = static_cast<CompoundExpression*>(step->getInput().get());
+                if (z && z->getOperator() == "zoom") {
+                    result = {step};
+                }
+            }
+            break;
+        }
+        default:
+            break;
     }
-    default:
-        break;
-    }
-    
+
     if (result && result->is<ParsingError>()) {
         return result;
     }
-    
+
     e->eachChild([&](const Expression& child) {
         std::optional<variant<const Interpolate*, const Step*, ParsingError>> childResult(findZoomCurve(&child));
         if (childResult) {
             if (childResult->is<ParsingError>()) {
                 result = childResult;
             } else if (!result && childResult) {
-                result = {ParsingError {
-                    R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)", ""
-                }};
+                result = {ParsingError{
+                    R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)",
+                    ""}};
             } else if (result && childResult && result != childResult) {
-                result = {ParsingError {
-                    R"(Only one zoom-based "step" or "interpolate" subexpression may be used in an expression.)", ""
-                }};
+                result = {ParsingError{
+                    R"(Only one zoom-based "step" or "interpolate" subexpression may be used in an expression.)", ""}};
             }
         }
     });
@@ -89,10 +88,7 @@ variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(co
             assert(false);
             return nullptr;
         },
-        [](auto zoomCurve) -> variant<std::nullptr_t, const Interpolate*, const Step*> {
-            return zoomCurve;
-        }
-    );
+        [](auto zoomCurve) -> variant<std::nullptr_t, const Interpolate*, const Step*> { return zoomCurve; });
 }
 
 } // namespace expression

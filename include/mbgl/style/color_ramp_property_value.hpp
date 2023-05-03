@@ -24,14 +24,18 @@ private:
     }
 
 public:
-    ColorRampPropertyValue() : value(nullptr) {}
-    ColorRampPropertyValue(std::shared_ptr<expression::Expression> value_) : value(std::move(value_)) {}
+    ColorRampPropertyValue()
+        : value(nullptr) {}
+    ColorRampPropertyValue(std::shared_ptr<expression::Expression> value_)
+        : value(std::move(value_)) {}
 
     bool isUndefined() const { return value == nullptr; }
 
     // noop, needed for batch evaluation of paint property values to compile
     template <typename Evaluator>
-    Color evaluate(const Evaluator&, TimePoint = {}) const { return {}; }
+    Color evaluate(const Evaluator&, TimePoint = {}) const {
+        return {};
+    }
 
     Color evaluate(double rampEvaluationParameter) const {
         const auto result = value->evaluate(expression::EvaluationContext({}, nullptr, {rampEvaluationParameter}));
@@ -43,7 +47,6 @@ public:
 
     const expression::Expression& getExpression() const { return *value; }
 };
-
 
 } // namespace style
 } // namespace mbgl

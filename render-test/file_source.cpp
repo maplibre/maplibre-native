@@ -16,15 +16,19 @@ std::atomic_size_t transferredSize{0};
 std::atomic_bool active{false};
 std::atomic_bool offline{true};
 
-ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoader_, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
+ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoader_,
+                                 const ResourceOptions& resourceOptions_,
+                                 const ClientOptions& clientOptions_)
     : defaultResourceLoader(std::move(defaultResourceLoader_)),
-      resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {
+      resourceOptions(resourceOptions_.clone()),
+      clientOptions(clientOptions_.clone()) {
     assert(defaultResourceLoader);
     if (offline) {
-        std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions_, clientOptions_);
+        std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+            FileSourceType::Database, resourceOptions_, clientOptions_);
         dbfs->setProperty(READ_ONLY_MODE_KEY, true);
     }
-} 
+}
 
 ProxyFileSource::~ProxyFileSource() = default;
 
@@ -59,10 +63,9 @@ std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource,
     return defaultResourceLoader->request(transformed, [=](Response response) {
         if (transformed.loadingMethod == Resource::LoadingMethod::CacheOnly && response.noContent) {
             if (transformed.kind == Resource::Kind::Tile && transformed.tileData) {
-                mbgl::Log::Info(mbgl::Event::Database,
-                                "Resource not found in cache: " +
-                                transformed.url + "(" +
-                                transformed.tileData->urlTemplate + ")");
+                mbgl::Log::Info(
+                    mbgl::Event::Database,
+                    "Resource not found in cache: " + transformed.url + "(" + transformed.tileData->urlTemplate + ")");
             } else {
                 mbgl::Log::Info(mbgl::Event::Database, "Resource not found in cache: " + transformed.url);
             }
@@ -78,7 +81,7 @@ std::unique_ptr<AsyncRequest> ProxyFileSource::request(const Resource& resource,
 }
 
 void ProxyFileSource::setResourceOptions(ResourceOptions options) {
-   resourceOptions = options;
+    resourceOptions = options;
 }
 
 ResourceOptions ProxyFileSource::getResourceOptions() {
@@ -86,13 +89,12 @@ ResourceOptions ProxyFileSource::getResourceOptions() {
 }
 
 void ProxyFileSource::setClientOptions(ClientOptions options) {
-   clientOptions = options;
+    clientOptions = options;
 }
 
 ClientOptions ProxyFileSource::getClientOptions() {
     return clientOptions.clone();
 }
-
 
 // static
 void ProxyFileSource::setOffline(bool status) {

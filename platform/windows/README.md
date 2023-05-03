@@ -16,7 +16,7 @@ Open `x64 Native Tools Command Prompt for VS 2022` and then clone the repository
 
 ```cmd
 git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.git
-cd maplibre-gl-native
+cd maplibre-native
 ```
 
 ## Configuring
@@ -43,7 +43,7 @@ To configure build with OSMesa (software rendering), use the following command:
 cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DMLN_WITH_OSMESA=ON
 ```
 
-**WARNING:** as OSMesa doesn't have static libraries, it's necessary to copy `libglapi.dll`, `libGLESv3.dll` and `osmesa.dll` from `platform\windows\vendor\mesa3d\<arch>` to executable/dll directory you want to use, otherwise it won't run.
+**WARNING:** as OSMesa doesn't have static libraries, it's necessary to copy `libglapi.dll`, `libGLESv2.dll` and `osmesa.dll` from `platform\windows\vendor\mesa3d\<arch>` to executable/dll directory you want to use, otherwise it won't run.
 
 ## Building
 
@@ -75,7 +75,7 @@ Once configure is done, open the file `build\Mapbox GL Native.sln`. Build the ta
 
 ## Testing
 
-If all went well and target `mbgl-render` or `ALL_BUILD` was chosen, there should now be a `maplibre-gl-native\build\bin\mbgl-render.exe` binary that you can run to generate map tile images. To test that it is working properly, run the following command.
+If all went well and target `mbgl-render` or `ALL_BUILD` was chosen, there should now be a `maplibre-native\build\bin\mbgl-render.exe` binary that you can run to generate map tile images. To test that it is working properly, run the following command.
 
 ```cmd
 .\build\bin\mbgl-render.exe --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
@@ -172,7 +172,7 @@ For the purposes of this exercise, you can use the `zurich_switzerland.mbtiles` 
 
 Note that this style is totally inadequate for any real use beyond testing your custom setup. Don't forget to replace the source URL `"mbtiles:///path/to/zurich_switzerland.mbtiles"` with the actual path to your mbtiles file.
 
-From your `maplibre-gl-native/` dir, run the following command.
+From your `maplibre-native/` dir, run the following command.
 
 ```cmd
 .\build\bin\mbgl-render --style path\to\style.json --output out.png

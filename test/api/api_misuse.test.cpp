@@ -13,15 +13,15 @@
 
 using namespace mbgl;
 
-
 TEST(API, RenderWithoutCallback) {
     FixtureLog log;
 
     util::RunLoop loop;
 
-    HeadlessFrontend frontend { 1 };
+    HeadlessFrontend frontend{1};
 
-    auto map = std::make_unique<MapAdapter>(frontend, MapObserver::nullObserver(),
+    auto map = std::make_unique<MapAdapter>(frontend,
+                                            MapObserver::nullObserver(),
                                             std::make_shared<StubFileSource>(),
                                             MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
     map->renderStill(nullptr);
@@ -29,7 +29,7 @@ TEST(API, RenderWithoutCallback) {
     // Force Map thread to join.
     map.reset();
 
-    const FixtureLogObserver::LogMessage logMessage {
+    const FixtureLogObserver::LogMessage logMessage{
         EventSeverity::Error,
         Event::General,
         int64_t(-1),

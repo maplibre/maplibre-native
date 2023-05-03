@@ -34,9 +34,7 @@ public:
     void upload(gfx::UploadPass&);
     Size getPixelSize() const;
 
-    const PremultipliedImage& getAtlasImageForTests() const {
-        return atlasImage;
-    }
+    const PremultipliedImage& getAtlasImageForTests() const { return atlasImage; }
 
     bool isEmpty() const { return patterns.empty(); }
 
@@ -51,5 +49,5 @@ private:
     std::optional<gfx::Texture> atlasTexture;
     bool dirty = true;
 };
- 
+
 } // namespace mbgl

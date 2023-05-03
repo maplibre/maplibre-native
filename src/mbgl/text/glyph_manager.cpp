@@ -14,18 +14,18 @@ static GlyphManagerObserver nullObserver;
 
 GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer_)
     : observer(&nullObserver),
-      localGlyphRasterizer(std::move(localGlyphRasterizer_)) {
-}
+      localGlyphRasterizer(std::move(localGlyphRasterizer_)) {}
 
 GlyphManager::~GlyphManager() = default;
 
 void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphDependencies, FileSource& fileSource) {
     auto dependencies = std::make_shared<GlyphDependencies>(std::move(glyphDependencies));
 
-    // Figure out which glyph ranges need to be fetched. For each range that does need to
-    // be fetched, record an entry mapping the requestor to a shared pointer containing the
-    // dependencies. When the shared pointer becomes unique, we know that all the dependencies
-    // for that requestor have been fetched, and can notify it of completion.
+    // Figure out which glyph ranges need to be fetched. For each range that
+    // does need to be fetched, record an entry mapping the requestor to a
+    // shared pointer containing the dependencies. When the shared pointer
+    // becomes unique, we know that all the dependencies for that requestor have
+    // been fetched, and can notify it of completion.
     for (const auto& dependency : *dependencies) {
         const FontStack& fontStack = dependency.first;
         Entry& entry = entries[fontStack];
@@ -52,8 +52,8 @@ void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphD
         }
     }
 
-    // If the shared dependencies pointer is already unique, then all dependent glyph ranges
-    // have already been loaded. Send a notification immediately.
+    // If the shared dependencies pointer is already unique, then all dependent
+    // glyph ranges have already been loaded. Send a notification immediately.
     if (dependencies.unique()) {
         notify(requestor, *dependencies);
     }
@@ -65,14 +65,17 @@ Glyph GlyphManager::generateLocalSDF(const FontStack& fontStack, GlyphID glyphID
     return local;
 }
 
-void GlyphManager::requestRange(GlyphRequest& request, const FontStack& fontStack, const GlyphRange& range, FileSource& fileSource) {
+void GlyphManager::requestRange(GlyphRequest& request,
+                                const FontStack& fontStack,
+                                const GlyphRange& range,
+                                FileSource& fileSource) {
     if (request.req) {
         return;
     }
 
-    request.req =
-        fileSource.request(Resource::glyphs(glyphURL, fontStack, range),
-                           [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
+    request.req = fileSource.request(
+        Resource::glyphs(glyphURL, fontStack, range),
+        [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
 }
 
 void GlyphManager::processResponse(const Response& res, const FontStack& fontStack, const GlyphRange& range) {
@@ -158,9 +161,7 @@ void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
 }
 
 void GlyphManager::evict(const std::set<FontStack>& keep) {
-    util::erase_if(entries, [&] (const auto& entry) {
-        return keep.count(entry.first) == 0;
-    });
+    util::erase_if(entries, [&](const auto& entry) { return keep.count(entry.first) == 0; });
 }
 
 } // namespace mbgl

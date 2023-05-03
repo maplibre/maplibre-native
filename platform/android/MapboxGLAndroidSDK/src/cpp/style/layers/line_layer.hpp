@@ -78,7 +78,7 @@ public:
 
 }; // class LineLayer
 
-class LineJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::LineLayerFactory {
+class LineJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::LineLayerFactory {
 public:
     ~LineJavaLayerPeerFactory() override;
 
@@ -90,7 +90,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class LineJavaLayerPeerFactory
+}; // class LineJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

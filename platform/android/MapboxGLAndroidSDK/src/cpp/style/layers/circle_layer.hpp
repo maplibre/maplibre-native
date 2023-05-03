@@ -68,7 +68,7 @@ public:
 
 }; // class CircleLayer
 
-class CircleJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::CircleLayerFactory {
+class CircleJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::CircleLayerFactory {
 public:
     ~CircleJavaLayerPeerFactory() override;
 
@@ -80,7 +80,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class CircleJavaLayerPeerFactory
+}; // class CircleJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

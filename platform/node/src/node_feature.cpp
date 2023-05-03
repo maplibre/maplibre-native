@@ -14,37 +14,21 @@ using Properties = mbgl::PropertyMap;
 template <class T>
 struct ToType {
 public:
-    v8::Local<v8::String> operator()(const empty&) {
-        return type("Empty");
-    }
+    v8::Local<v8::String> operator()(const empty&) { return type("Empty"); }
 
-    v8::Local<v8::String> operator()(const point<T>&) {
-        return type("Point");
-    }
+    v8::Local<v8::String> operator()(const point<T>&) { return type("Point"); }
 
-    v8::Local<v8::String> operator()(const line_string<T>&) {
-        return type("LineString");
-    }
+    v8::Local<v8::String> operator()(const line_string<T>&) { return type("LineString"); }
 
-    v8::Local<v8::String> operator()(const polygon<T>&) {
-        return type("Polygon");
-    }
+    v8::Local<v8::String> operator()(const polygon<T>&) { return type("Polygon"); }
 
-    v8::Local<v8::String> operator()(const multi_point<T>&) {
-        return type("MultiPoint");
-    }
+    v8::Local<v8::String> operator()(const multi_point<T>&) { return type("MultiPoint"); }
 
-    v8::Local<v8::String> operator()(const multi_line_string<T>&) {
-        return type("MultiLineString");
-    }
+    v8::Local<v8::String> operator()(const multi_line_string<T>&) { return type("MultiLineString"); }
 
-    v8::Local<v8::String> operator()(const multi_polygon<T>&) {
-        return type("MultiPolygon");
-    }
+    v8::Local<v8::String> operator()(const multi_polygon<T>&) { return type("MultiPolygon"); }
 
-    v8::Local<v8::String> operator()(const geometry_collection<T>&) {
-        return type("GeometryCollection");
-    }
+    v8::Local<v8::String> operator()(const geometry_collection<T>&) { return type("GeometryCollection"); }
 
 private:
     v8::Local<v8::String> type(const char* type_) {
@@ -56,7 +40,8 @@ private:
 template <class T>
 struct ToCoordinatesOrGeometries {
 public:
-    // Handles line_string, polygon, multi_point, multi_line_string, multi_polygon, and geometry_collection.
+    // Handles line_string, polygon, multi_point, multi_line_string,
+    // multi_polygon, and geometry_collection.
     template <class E>
     v8::Local<v8::Object> operator()(const std::vector<E>& vector) {
         Nan::EscapableHandleScope scope;
@@ -75,9 +60,7 @@ public:
         return scope.Escape(result);
     }
 
-    v8::Local<v8::Object> operator()(const geometry<T>& geometry) {
-        return toJS(geometry);
-    }
+    v8::Local<v8::Object> operator()(const geometry<T>& geometry) { return toJS(geometry); }
 };
 
 struct ToValue {
@@ -91,13 +74,9 @@ struct ToValue {
         return scope.Escape(Nan::New(t));
     }
 
-    v8::Local<v8::Value> operator()(int64_t t) {
-        return operator()(static_cast<double>(t));
-    }
+    v8::Local<v8::Value> operator()(int64_t t) { return operator()(static_cast<double>(t)); }
 
-    v8::Local<v8::Value> operator()(uint64_t t) {
-        return operator()(static_cast<double>(t));
-    }
+    v8::Local<v8::Value> operator()(uint64_t t) { return operator()(static_cast<double>(t)); }
 
     v8::Local<v8::Value> operator()(double t) {
         Nan::EscapableHandleScope scope;
@@ -118,9 +97,7 @@ struct ToValue {
         return scope.Escape(result);
     }
 
-    v8::Local<v8::Value> operator()(const std::unordered_map<std::string, mbgl::Value>& map) {
-        return toJS(map);
-    }
+    v8::Local<v8::Value> operator()(const std::unordered_map<std::string, mbgl::Value>& map) { return toJS(map); }
 };
 
 v8::Local<v8::Object> toJS(const Geometry& geometry) {
@@ -128,13 +105,11 @@ v8::Local<v8::Object> toJS(const Geometry& geometry) {
 
     v8::Local<v8::Object> result = Nan::New<v8::Object>();
 
-    Nan::Set(result,
-        Nan::New("type").ToLocalChecked(),
-        Geometry::visit(geometry, ToType<double>()));
+    Nan::Set(result, Nan::New("type").ToLocalChecked(), Geometry::visit(geometry, ToType<double>()));
 
     Nan::Set(result,
-        Nan::New(geometry.is<GeometryCollection>() ? "geometries" : "coordinates").ToLocalChecked(),
-        Geometry::visit(geometry, ToCoordinatesOrGeometries<double>()));
+             Nan::New(geometry.is<GeometryCollection>() ? "geometries" : "coordinates").ToLocalChecked(),
+             Geometry::visit(geometry, ToCoordinatesOrGeometries<double>()));
 
     return scope.Escape(result);
 }

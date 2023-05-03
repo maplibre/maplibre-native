@@ -28,17 +28,19 @@ public:
     static FileSourceManager* get() noexcept;
 
     // Returns shared instance of a file source for (type, options) tuple.
-    // Creates new instance via registered factory if needed. If new instance cannot be
-    // created, nullptr would be returned.
-    [[nodiscard]] std::shared_ptr<FileSource> getFileSource(FileSourceType, const ResourceOptions&, const ClientOptions& = ClientOptions()) noexcept;
+    // Creates new instance via registered factory if needed. If new instance
+    // cannot be created, nullptr would be returned.
+    [[nodiscard]] std::shared_ptr<FileSource> getFileSource(FileSourceType,
+                                                            const ResourceOptions&,
+                                                            const ClientOptions& = ClientOptions()) noexcept;
 
-    // Registers file source factory for a provided FileSourceType type. If factory for the
-    // same type was already registered, will unregister previously registered factory.
-    // Provided factory must not be null.
+    // Registers file source factory for a provided FileSourceType type. If
+    // factory for the same type was already registered, will unregister
+    // previously registered factory. Provided factory must not be null.
     virtual void registerFileSourceFactory(FileSourceType, FileSourceFactory&&) noexcept;
 
-    // Unregisters file source factory. If there are no registered factories for a FileSourceType
-    // invocation has no effect.
+    // Unregisters file source factory. If there are no registered factories for
+    // a FileSourceType invocation has no effect.
     virtual FileSourceFactory unRegisterFileSourceFactory(FileSourceType) noexcept;
 
 protected:

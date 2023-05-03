@@ -17,7 +17,8 @@ namespace conversion {
 template <typename T>
 class PropertyValueEvaluator {
 public:
-    PropertyValueEvaluator(jni::JNIEnv& _env) : env(_env) {}
+    PropertyValueEvaluator(jni::JNIEnv& _env)
+        : env(_env) {}
 
     jni::Local<jni::Object<>> operator()(const mbgl::style::Undefined) const {
         return jni::Local<jni::Object<>>(env, nullptr);
@@ -51,7 +52,8 @@ struct Converter<jni::Local<jni::Object<>>, mbgl::style::PropertyValue<T>> {
  */
 template <>
 struct Converter<jni::Local<jni::Object<>>, mbgl::style::ColorRampPropertyValue> {
-    Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const mbgl::style::ColorRampPropertyValue& value) const {
+    Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env,
+                                                 const mbgl::style::ColorRampPropertyValue& value) const {
         PropertyValueEvaluator<mbgl::style::ColorRampPropertyValue> evaluator(env);
         return std::move(*convert<jni::Local<jni::Object<>>>(env, value.evaluate(evaluator)));
     }

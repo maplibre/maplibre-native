@@ -22,13 +22,13 @@ namespace mbgl {
 class LocalFileSource::Impl {
 public:
     explicit Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
-        : resourceOptions (resourceOptions_.clone()), clientOptions (clientOptions_.clone()) {}
+        : resourceOptions(resourceOptions_.clone()),
+          clientOptions(clientOptions_.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
         if (!acceptsURL(url)) {
             Response response;
-            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                                                               "Invalid file URL");
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid file URL");
             req.invoke(&FileSourceRequest::setResponse, response);
             return;
         }
@@ -58,7 +58,6 @@ public:
         return clientOptions.clone();
     }
 
-
 private:
     mutable std::mutex resourceOptionsMutex;
     mutable std::mutex clientOptionsMutex;
@@ -66,9 +65,12 @@ private:
     ClientOptions clientOptions;
 };
 
-LocalFileSource::LocalFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions):
-    impl(std::make_unique<util::Thread<Impl>>(
-          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "LocalFileSource", resourceOptions.clone(), clientOptions.clone())) {}
+LocalFileSource::LocalFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : impl(std::make_unique<util::Thread<Impl>>(
+          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
+          "LocalFileSource",
+          resourceOptions.clone(),
+          clientOptions.clone())) {}
 
 LocalFileSource::~LocalFileSource() = default;
 
@@ -107,6 +109,5 @@ void LocalFileSource::setClientOptions(ClientOptions options) {
 ClientOptions LocalFileSource::getClientOptions() {
     return impl->actor().ask(&Impl::getClientOptions).get();
 }
-
 
 } // namespace mbgl

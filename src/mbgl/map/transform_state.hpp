@@ -276,8 +276,8 @@ private:
     double scale = 1;
     // This fov value is somewhat arbitrary. The altitude of the camera used
     // to be defined as 1.5 screen heights above the ground, which was an
-    // arbitrary choice. This is the fov equivalent to that value calculated with:
-    // `fov = 2 * arctan((height / 2) / (height * 1.5))`
+    // arbitrary choice. This is the fov equivalent to that value calculated
+    // with: `fov = 2 * arctan((height / 2) / (height * 1.5))`
     double fov = 0.6435011087932844;
     double pitch = 0.0;
     double xSkew = 0.0;

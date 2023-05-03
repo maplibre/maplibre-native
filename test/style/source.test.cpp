@@ -61,7 +61,7 @@ public:
     Transform transform;
     TransformState transformState;
     Style style{fileSource, 1};
-    AnnotationManager annotationManager { style };
+    AnnotationManager annotationManager{style};
     ImageManager imageManager;
     GlyphManager glyphManager;
 
@@ -81,34 +81,28 @@ public:
         // Squelch logging.
         Log::setObserver(std::make_unique<Log::NullObserver>());
 
-        transform.resize({ 512, 512 });
+        transform.resize({512, 512});
         transform.jumpTo(CameraOptions().withCenter(LatLng()).withZoom(0.0));
 
         transformState = transform.getState();
     }
 
-    void run() {
-        loop.run();
-    }
+    void run() { loop.run(); }
 
-    void end() {
-        loop.stop();
-    }
+    void end() { loop.stop(); }
 };
 
 TEST(Source, LoadingFail) {
     SourceTest test;
 
-    test.fileSource->sourceResponse = [&] (const Resource& resource) {
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("url", resource.url);
         Response response;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::Other,
-            "Failed by the test case");
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Failed by the test case");
         return response;
     };
 
-    test.styleObserver.sourceError = [&] (Source& source, std::exception_ptr error) {
+    test.styleObserver.sourceError = [&](Source& source, std::exception_ptr error) {
         EXPECT_EQ("source", source.getID());
         EXPECT_EQ("Failed by the test case", util::toString(error));
         test.end();
@@ -124,14 +118,14 @@ TEST(Source, LoadingFail) {
 TEST(Source, LoadingCorrupt) {
     SourceTest test;
 
-    test.fileSource->sourceResponse = [&] (const Resource& resource) {
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("url", resource.url);
         Response response;
         response.data = std::make_unique<std::string>("CORRUPTED");
         return response;
     };
 
-    test.styleObserver.sourceError = [&] (Source& source, std::exception_ptr error) {
+    test.styleObserver.sourceError = [&](Source& source, std::exception_ptr error) {
         EXPECT_EQ("source", source.getID());
         EXPECT_EQ("Invalid value. at offset 0", util::toString(error));
         test.end();
@@ -147,28 +141,29 @@ TEST(Source, LoadingCorrupt) {
 TEST(Source, RasterTileEmpty) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.noContent = true;
         return response;
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileChanged = [&] (RenderSource& source_, const OverscaledTileID&) {
+    test.renderSourceObserver.tileChanged = [&](RenderSource& source_, const OverscaledTileID&) {
         EXPECT_EQ("source", source_.baseImpl->id);
         test.end();
     };
 
-    test.renderSourceObserver.tileError = [&] (RenderSource&, const OverscaledTileID&, std::exception_ptr) {
+    test.renderSourceObserver.tileError = [&](RenderSource&, const OverscaledTileID&, std::exception_ptr) {
         FAIL() << "Should never be called";
     };
 
@@ -182,28 +177,29 @@ TEST(Source, RasterTileEmpty) {
 TEST(Source, RasterDEMTileEmpty) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.noContent = true;
         return response;
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterDEMSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileChanged = [&] (RenderSource& source_, const OverscaledTileID&) {
+    test.renderSourceObserver.tileChanged = [&](RenderSource& source_, const OverscaledTileID&) {
         EXPECT_EQ("source", source_.baseImpl->id);
         test.end();
     };
 
-    test.renderSourceObserver.tileError = [&] (RenderSource&, const OverscaledTileID&, std::exception_ptr) {
+    test.renderSourceObserver.tileError = [&](RenderSource&, const OverscaledTileID&, std::exception_ptr) {
         FAIL() << "Should never be called";
     };
 
@@ -217,7 +213,7 @@ TEST(Source, RasterDEMTileEmpty) {
 TEST(Source, VectorTileEmpty) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.noContent = true;
         return response;
@@ -226,21 +222,22 @@ TEST(Source, VectorTileEmpty) {
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     VectorSource source("source", tileset);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileChanged = [&] (RenderSource& source_, const OverscaledTileID&) {
+    test.renderSourceObserver.tileChanged = [&](RenderSource& source_, const OverscaledTileID&) {
         EXPECT_EQ("source", source_.baseImpl->id);
         test.end();
     };
 
-    test.renderSourceObserver.tileError = [&] (RenderSource&, const OverscaledTileID&, std::exception_ptr) {
+    test.renderSourceObserver.tileError = [&](RenderSource&, const OverscaledTileID&, std::exception_ptr) {
         FAIL() << "Should never be called";
     };
 
@@ -254,30 +251,30 @@ TEST(Source, VectorTileEmpty) {
 TEST(Source, RasterTileFail) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::Other,
-            "Failed by the test case");
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Failed by the test case");
         return response;
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(SourceType::Raster, source_.baseImpl->type);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ("Failed by the test case", util::toString(error));
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(SourceType::Raster, source_.baseImpl->type);
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ("Failed by the test case", util::toString(error));
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -289,30 +286,30 @@ TEST(Source, RasterTileFail) {
 TEST(Source, RasterDEMTileFail) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::Other,
-            "Failed by the test case");
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Failed by the test case");
         return response;
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterDEMSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(SourceType::RasterDEM, source_.baseImpl->type);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ("Failed by the test case", util::toString(error));
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(SourceType::RasterDEM, source_.baseImpl->type);
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ("Failed by the test case", util::toString(error));
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -324,32 +321,32 @@ TEST(Source, RasterDEMTileFail) {
 TEST(Source, VectorTileFail) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::Other,
-            "Failed by the test case");
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Failed by the test case");
         return response;
     };
 
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     VectorSource source("source", tileset);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(SourceType::Vector, source_.baseImpl->type);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ("Failed by the test case", util::toString(error));
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(SourceType::Vector, source_.baseImpl->type);
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ("Failed by the test case", util::toString(error));
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -361,29 +358,31 @@ TEST(Source, VectorTileFail) {
 TEST(Source, RasterTileCorrupt) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.data = std::make_unique<std::string>("CORRUPTED");
         return response;
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(source_.baseImpl->type, SourceType::Raster);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_TRUE(bool(error));
-        // Not asserting on platform-specific error text.
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(source_.baseImpl->type, SourceType::Raster);
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_TRUE(bool(error));
+            // Not asserting on platform-specific error text.
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -395,29 +394,32 @@ TEST(Source, RasterTileCorrupt) {
 TEST(Source, RasterDEMTileCorrupt) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.data = std::make_unique<std::string>("CORRUPTED");
         return response;
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };;
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+    ;
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterDEMSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(source_.baseImpl->type, SourceType::RasterDEM);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_TRUE(bool(error));
-        // Not asserting on platform-specific error text.
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(source_.baseImpl->type, SourceType::RasterDEM);
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_TRUE(bool(error));
+            // Not asserting on platform-specific error text.
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -429,7 +431,7 @@ TEST(Source, RasterDEMTileCorrupt) {
 TEST(Source, VectorTileCorrupt) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.data = std::make_unique<std::string>("CORRUPTED");
         return response;
@@ -438,21 +440,23 @@ TEST(Source, VectorTileCorrupt) {
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     VectorSource source("source", tileset);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileError = [&] (RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
-        EXPECT_EQ(source_.baseImpl->type, SourceType::Vector);
-        EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
-        EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
-        test.end();
-    };
+    test.renderSourceObserver.tileError =
+        [&](RenderSource& source_, const OverscaledTileID& tileID, std::exception_ptr error) {
+            EXPECT_EQ(source_.baseImpl->type, SourceType::Vector);
+            EXPECT_EQ(OverscaledTileID(0, 0, 0), tileID);
+            EXPECT_EQ(util::toString(error), "unknown pbf field type exception");
+            test.end();
+        };
 
     auto renderSource = RenderSource::create(source.baseImpl);
     renderSource->setObserver(&test.renderSourceObserver);
@@ -464,26 +468,27 @@ TEST(Source, VectorTileCorrupt) {
 TEST(Source, RasterTileCancel) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         test.end();
         return std::optional<Response>();
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileChanged = [&] (RenderSource&, const OverscaledTileID&) {
+    test.renderSourceObserver.tileChanged = [&](RenderSource&, const OverscaledTileID&) {
         FAIL() << "Should never be called";
     };
 
-    test.renderSourceObserver.tileError = [&] (RenderSource&, const OverscaledTileID&, std::exception_ptr) {
+    test.renderSourceObserver.tileError = [&](RenderSource&, const OverscaledTileID&, std::exception_ptr) {
         FAIL() << "Should never be called";
     };
 
@@ -497,26 +502,27 @@ TEST(Source, RasterTileCancel) {
 TEST(Source, RasterDEMTileCancel) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         test.end();
         return std::optional<Response>();
     };
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     RasterDEMSource source("source", tileset, 512);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileChanged = [&] (RenderSource&, const OverscaledTileID&) {
+    test.renderSourceObserver.tileChanged = [&](RenderSource&, const OverscaledTileID&) {
         FAIL() << "Should never be called";
     };
 
-    test.renderSourceObserver.tileError = [&] (RenderSource&, const OverscaledTileID&, std::exception_ptr) {
+    test.renderSourceObserver.tileError = [&](RenderSource&, const OverscaledTileID&, std::exception_ptr) {
         FAIL() << "Should never be called";
     };
 
@@ -530,7 +536,7 @@ TEST(Source, RasterDEMTileCancel) {
 TEST(Source, VectorTileCancel) {
     SourceTest test;
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         test.end();
         return std::optional<Response>();
     };
@@ -538,20 +544,21 @@ TEST(Source, VectorTileCancel) {
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
 
-    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;
-    tileset.tiles = { "tiles" };
+    tileset.tiles = {"tiles"};
 
     VectorSource source("source", tileset);
     source.loadDescription(*test.fileSource);
 
-    test.renderSourceObserver.tileChanged = [&] (RenderSource&, const OverscaledTileID&) {
+    test.renderSourceObserver.tileChanged = [&](RenderSource&, const OverscaledTileID&) {
         FAIL() << "Should never be called";
     };
 
-    test.renderSourceObserver.tileError = [&] (RenderSource&, const OverscaledTileID&, std::exception_ptr) {
+    test.renderSourceObserver.tileError = [&](RenderSource&, const OverscaledTileID&, std::exception_ptr) {
         FAIL() << "Should never be called";
     };
 
@@ -566,28 +573,31 @@ TEST(Source, RasterTileAttribution) {
     SourceTest test;
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
-    std::string mapboxOSM = ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox</a> "
-                             "<a href='http://www.openstreetmap.org/about/' target='_blank'>©️ OpenStreetMap</a>");
+    std::string mapboxOSM =
+        ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; "
+         "Mapbox</a> "
+         "<a href='http://www.openstreetmap.org/about/' target='_blank'>©️ "
+         "OpenStreetMap</a>");
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.noContent = true;
         return response;
     };
 
-    test.fileSource->sourceResponse = [&] (const Resource& resource) {
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("url", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(R"TILEJSON({ "tilejson": "2.1.0", "attribution": ")TILEJSON" +
-                                                      mapboxOSM +
-                                                      R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON");
+                                                      mapboxOSM + R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON");
         return response;
     };
 
-    test.styleObserver.sourceChanged = [&] (Source& source) {
+    test.styleObserver.sourceChanged = [&](Source& source) {
         EXPECT_EQ(mapboxOSM, source.getAttribution());
         EXPECT_FALSE(mapboxOSM.find("©️ OpenStreetMap") == std::string::npos);
         test.end();
@@ -607,27 +617,29 @@ TEST(Source, RasterDEMTileAttribution) {
     SourceTest test;
 
     HillshadeLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
-    std::string mapbox = ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; Mapbox</a> ");
+    std::string mapbox =
+        ("<a href='https://www.mapbox.com/about/maps/' target='_blank'>&copy; "
+         "Mapbox</a> ");
 
-    test.fileSource->tileResponse = [&] (const Resource&) {
+    test.fileSource->tileResponse = [&](const Resource&) {
         Response response;
         response.noContent = true;
         return response;
     };
 
-    test.fileSource->sourceResponse = [&] (const Resource& resource) {
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("url", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(R"TILEJSON({ "tilejson": "2.1.0", "attribution": ")TILEJSON" +
-                                                      mapbox +
-                                                      R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON");
+                                                      mapbox + R"TILEJSON(", "tiles": [ "tiles" ] })TILEJSON");
         return response;
     };
 
-    test.styleObserver.sourceChanged = [&] (Source& source) {
+    test.styleObserver.sourceChanged = [&](Source& source) {
         EXPECT_EQ(mapbox, source.getAttribution());
         test.end();
     };
@@ -645,14 +657,15 @@ TEST(Source, RasterDEMTileAttribution) {
 TEST(Source, GeoJSonSourceUrlUpdate) {
     SourceTest test;
 
-    test.fileSource->sourceResponse = [&] (const Resource& resource) {
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
         EXPECT_EQ("url", resource.url);
         Response response;
-        response.data = std::make_unique<std::string>(R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})");
+        response.data = std::make_unique<std::string>(
+            R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})");
         return response;
     };
 
-    test.styleObserver.sourceDescriptionChanged = [&] (Source&) {
+    test.styleObserver.sourceDescriptionChanged = [&](Source&) {
         // Should be called (test will hang if it doesn't)
         test.end();
     };
@@ -664,7 +677,7 @@ TEST(Source, GeoJSonSourceUrlUpdate) {
     source.loadDescription(*test.fileSource);
 
     // Schedule an update
-    test.loop.invoke([&] () {
+    test.loop.invoke([&]() {
         // Update the url
         source.setURL(std::string("http://source-url.ext"));
     });
@@ -675,13 +688,13 @@ TEST(Source, GeoJSonSourceUrlUpdate) {
 TEST(Source, ImageSourceImageUpdate) {
     SourceTest test;
 
-    test.fileSource->response = [&] (const Resource& resource) {
+    test.fileSource->response = [&](const Resource& resource) {
         EXPECT_EQ("http://url", resource.url);
         Response response;
         response.data = std::make_unique<std::string>(util::read_file("test/fixtures/image/no_profile.png"));
         return response;
     };
-    test.styleObserver.sourceChanged = [&] (Source&) {
+    test.styleObserver.sourceChanged = [&](Source&) {
         // Should be called (test will hang if it doesn't)
         test.end();
     };
@@ -693,14 +706,14 @@ TEST(Source, ImageSourceImageUpdate) {
 
     // Load initial, so the source state will be loaded=true
     source.loadDescription(*test.fileSource);
-    PremultipliedImage rgba({ 1, 1 });
+    PremultipliedImage rgba({1, 1});
     rgba.data[0] = 255;
     rgba.data[1] = 254;
     rgba.data[2] = 253;
     rgba.data[3] = 0;
 
     // Schedule an update
-    test.loop.invoke([&] () {
+    test.loop.invoke([&]() {
         // Update the url
         source.setImage(std::move(rgba));
     });
@@ -715,15 +728,16 @@ TEST(Source, CustomGeometrySourceSetTileData) {
 
     LineLayer layer("id", "source");
     layer.setSourceLayer("water");
-    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
-    test.renderSourceObserver.tileChanged = [&] (RenderSource& source_, const OverscaledTileID&) {
+    test.renderSourceObserver.tileChanged = [&](RenderSource& source_, const OverscaledTileID&) {
         EXPECT_EQ("source", source_.baseImpl->id);
         test.end();
     };
 
-    test.renderSourceObserver.tileError = [&] (RenderSource&, const OverscaledTileID&, std::exception_ptr) {
+    test.renderSourceObserver.tileError = [&](RenderSource&, const OverscaledTileID&, std::exception_ptr) {
         FAIL() << "Should never be called";
     };
 
@@ -731,9 +745,9 @@ TEST(Source, CustomGeometrySourceSetTileData) {
     renderSource->setObserver(&test.renderSourceObserver);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
 
-    test.loop.invoke([&] () {
+    test.loop.invoke([&]() {
         // Set Tile Data
-        source.setTileData(CanonicalTileID(0, 0, 0), GeoJSON{ FeatureCollection{} });
+        source.setTileData(CanonicalTileID(0, 0, 0), GeoJSON{FeatureCollection{}});
     });
 
     test.run();
@@ -745,7 +759,8 @@ class FakeTileSource;
 class FakeTile : public Tile {
 public:
     FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID)
-        : Tile(Tile::Kind::Geometry, tileID), source(source_) {
+        : Tile(Tile::Kind::Geometry, tileID),
+          source(source_) {
         renderable = true;
     }
     void setNecessity(TileNecessity necessity) override;
@@ -763,7 +778,8 @@ public:
     MOCK_METHOD1(tileSetNecessity, void(TileNecessity));
     MOCK_METHOD1(tileSetMinimumUpdateInterval, void(Duration));
 
-    explicit FakeTileSource(Immutable<style::Source::Impl> impl_) : RenderTileSetSource(std::move(impl_)) {}
+    explicit FakeTileSource(Immutable<style::Source::Impl> impl_)
+        : RenderTileSetSource(std::move(impl_)) {}
     void updateInternal(const Tileset& tileset,
                         const std::vector<Immutable<style::LayerProperties>>& layers,
                         const bool needsRendering,
@@ -803,8 +819,8 @@ TEST(Source, InvisibleSourcesTileNecessity) {
     FakeTileSource renderTilesetSource{initialized.baseImpl};
     RenderSource* renderSource = &renderTilesetSource;
     LineLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
     EXPECT_CALL(renderTilesetSource, tileSetNecessity(TileNecessity::Required)).Times(1);
     renderSource->update(initialized.baseImpl, layers, true, true, test.tileParameters());
@@ -826,8 +842,8 @@ TEST(Source, SourceMinimumUpdateInterval) {
     FakeTileSource renderTilesetSource{initialized.baseImpl};
     RenderSource* renderSource = &renderTilesetSource;
     LineLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Duration minimumTileUpdateInterval = initialized.getMinimumTileUpdateInterval();
@@ -873,7 +889,9 @@ TEST(Source, RenderTileSetSourceUpdate) {
 
         void updateInternal(const Tileset&,
                             const std::vector<Immutable<style::LayerProperties>>&,
-                            const bool, const bool, const TileParameters&) override {
+                            const bool,
+                            const bool,
+                            const TileParameters&) override {
             mockedUpdateInternal();
         }
 
@@ -882,14 +900,15 @@ TEST(Source, RenderTileSetSourceUpdate) {
         }
     };
 
-    VectorSource initialized("source", Tileset{ {"tiles"} });
+    VectorSource initialized("source", Tileset{{"tiles"}});
     initialized.loadDescription(*test.fileSource);
 
-    FakeRenderTileSetSource renderTilesetSource { initialized.baseImpl };
+    FakeRenderTileSetSource renderTilesetSource{initialized.baseImpl};
 
     LineLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
-    std::vector<Immutable<LayerProperties>> layers { layerProperties };
+    Immutable<LayerProperties> layerProperties = makeMutable<LineLayerProperties>(
+        staticImmutableCast<LineLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     // Check that `updateInternal()` is called even if the updated source has not yet loaded description.
     EXPECT_CALL(renderTilesetSource, mockedUpdateInternal()).Times(2);
@@ -909,12 +928,13 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     RenderGeoJSONSource renderSource{staticImmutableCast<GeoJSONSource::Impl>(source.baseImpl)};
 
     CircleLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());
-    EXPECT_FALSE(renderSource.isLoaded()); // loaded == false, means that the source contains pending tiles.
+    EXPECT_FALSE(renderSource.isLoaded()); // loaded == false, means that the
+                                           // source contains pending tiles.
 
     source.setGeoJSONData(nullptr);
     static_cast<RenderSource&>(renderSource).update(source.baseImpl, layers, true, true, test.tileParameters());
@@ -949,8 +969,8 @@ TEST(Source, SetMaxParentOverscaleFactor) {
     };
 
     RasterLayer layer("id", "source");
-    Immutable<LayerProperties> layerProperties =
-        makeMutable<RasterLayerProperties>(staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
+    Immutable<LayerProperties> layerProperties = makeMutable<RasterLayerProperties>(
+        staticImmutableCast<RasterLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
 
     Tileset tileset;

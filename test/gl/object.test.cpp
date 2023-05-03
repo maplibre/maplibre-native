@@ -18,7 +18,10 @@ static bool setFlag = false;
 struct MockGLObject {
     using Type = bool;
     static const Type Default;
-    static Type Get() { getFlag = true; return true; }
+    static Type Get() {
+        getFlag = true;
+        return true;
+    }
     static void Set(const Type&) { setFlag = true; }
 };
 
@@ -45,10 +48,10 @@ TEST(GLObject, Value) {
 }
 
 TEST(GLObject, Store) {
-    gl::HeadlessBackend backend { { 256, 256 } };
-    gfx::BackendScope scope { backend };
+    gl::HeadlessBackend backend{{256, 256}};
+    gfx::BackendScope scope{backend};
 
-    gl::Context context{ backend };
+    gl::Context context{backend};
     EXPECT_TRUE(context.empty());
 
     gl::UniqueTexture texture = context.createUniqueTexture();

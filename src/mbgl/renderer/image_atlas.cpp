@@ -15,45 +15,37 @@ ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& i
       stretchY(image.stretchY),
       content(image.content) {}
 
-const mapbox::Bin& _packImage(mapbox::ShelfPack& pack, const style::Image::Impl& image, ImageAtlas& resultImage, ImageType imageType) {
-    const mapbox::Bin& bin = *pack.packOne(-1,
-        image.image.size.width + 2 * padding,
-        image.image.size.height + 2 * padding);
+const mapbox::Bin& _packImage(mapbox::ShelfPack& pack,
+                              const style::Image::Impl& image,
+                              ImageAtlas& resultImage,
+                              ImageType imageType) {
+    const mapbox::Bin& bin = *pack.packOne(
+        -1, image.image.size.width + 2 * padding, image.image.size.height + 2 * padding);
 
-    resultImage.image.resize({
-        static_cast<uint32_t>(pack.width()),
-        static_cast<uint32_t>(pack.height())
-    });
+    resultImage.image.resize({static_cast<uint32_t>(pack.width()), static_cast<uint32_t>(pack.height())});
 
-    PremultipliedImage::copy(image.image,
-                             resultImage.image,
-                             { 0, 0 },
-                             {
-                                bin.x + padding,
-                                bin.y + padding
-                             },
-                             image.image.size);
+    PremultipliedImage::copy(
+        image.image, resultImage.image, {0, 0}, {bin.x + padding, bin.y + padding}, image.image.size);
     uint32_t x = bin.x + padding;
     uint32_t y = bin.y + padding;
     uint32_t w = image.image.size.width;
     uint32_t h = image.image.size.height;
 
     if (imageType == ImageType::Pattern) {
-            // Add 1 pixel wrapped padding on each side of the image.
-        PremultipliedImage::copy(image.image, resultImage.image, { 0, h - 1 }, { x, y - 1 }, { w, 1 }); // T
-        PremultipliedImage::copy(image.image, resultImage.image, { 0,     0 }, { x, y + h }, { w, 1 }); // B
-        PremultipliedImage::copy(image.image, resultImage.image, { w - 1, 0 }, { x - 1, y }, { 1, h }); // L
-        PremultipliedImage::copy(image.image, resultImage.image, { 0,     0 }, { x + w, y }, { 1, h }); // R
+        // Add 1 pixel wrapped padding on each side of the image.
+        PremultipliedImage::copy(image.image, resultImage.image, {0, h - 1}, {x, y - 1}, {w, 1}); // T
+        PremultipliedImage::copy(image.image, resultImage.image, {0, 0}, {x, y + h}, {w, 1});     // B
+        PremultipliedImage::copy(image.image, resultImage.image, {w - 1, 0}, {x - 1, y}, {1, h}); // L
+        PremultipliedImage::copy(image.image, resultImage.image, {0, 0}, {x + w, y}, {1, h});     // R
     }
     return bin;
 }
 
 namespace {
 
-void populateImagePatches(
-    ImagePositions& imagePositions, 
-    const ImageManager& imageManager,
-    std::vector<ImagePatch>& /*out*/ patches) {
+void populateImagePatches(ImagePositions& imagePositions,
+                          const ImageManager& imageManager,
+                          std::vector<ImagePatch>& /*out*/ patches) {
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
         const std::string& name = updatedImageVersion.first;
         const uint32_t version = updatedImageVersion.second;
@@ -80,7 +72,9 @@ std::vector<ImagePatch> ImageAtlas::getImagePatchesAndUpdateVersions(const Image
     return imagePatches;
 }
 
-ImageAtlas makeImageAtlas(const ImageMap& icons, const ImageMap& patterns, const std::unordered_map<std::string, uint32_t>& versionMap) {
+ImageAtlas makeImageAtlas(const ImageMap& icons,
+                          const ImageMap& patterns,
+                          const std::unordered_map<std::string, uint32_t>& versionMap) {
     ImageAtlas result;
 
     mapbox::ShelfPack::ShelfPackOptions options;
@@ -92,7 +86,7 @@ ImageAtlas makeImageAtlas(const ImageMap& icons, const ImageMap& patterns, const
         const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Icon);
         auto it = versionMap.find(entry.first);
         auto version = it != versionMap.end() ? it->second : 0;
-        result.iconPositions.emplace(image.id, ImagePosition { bin, image, version });
+        result.iconPositions.emplace(image.id, ImagePosition{bin, image, version});
     }
 
     for (const auto& entry : patterns) {
@@ -100,14 +94,11 @@ ImageAtlas makeImageAtlas(const ImageMap& icons, const ImageMap& patterns, const
         const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Pattern);
         auto it = versionMap.find(entry.first);
         auto version = it != versionMap.end() ? it->second : 0;
-        result.patternPositions.emplace(image.id, ImagePosition { bin, image, version });
+        result.patternPositions.emplace(image.id, ImagePosition{bin, image, version});
     }
 
     pack.shrink();
-    result.image.resize({
-        static_cast<uint32_t>(pack.width()),
-        static_cast<uint32_t>(pack.height())
-    });
+    result.image.resize({static_cast<uint32_t>(pack.width()), static_cast<uint32_t>(pack.height())});
 
     return result;
 }

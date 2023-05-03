@@ -220,8 +220,9 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                 // The request for this image has been already delivered
                 // to the client, so we do not treat it as pending.
                 existingRequestors.emplace(requestorPtr);
-                // TODO: we could `continue;` here, but we need to call `observer->onStyleImageMissing`,
-                // so that rendering is re-launched from the handler at Map::Impl.
+                // TODO: we could `continue;` here, but we need to call
+                // `observer->onStyleImageMissing`, so that rendering is
+                // re-launched from the handler at Map::Impl.
             } else {
                 requestedImages[missingImage].emplace(requestorPtr);
                 requestor.addPendingRequest(missingImage);
@@ -277,8 +278,8 @@ void ImageManager::dumpDebugLogs() const {
     Log::Info(Event::General, ss.str());
 }
 
-ImageRequestor::ImageRequestor(ImageManager& imageManager_) : imageManager(imageManager_) {
-}
+ImageRequestor::ImageRequestor(ImageManager& imageManager_)
+    : imageManager(imageManager_) {}
 
 ImageRequestor::~ImageRequestor() {
     imageManager.removeRequestor(*this);

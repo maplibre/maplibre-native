@@ -8,20 +8,17 @@ namespace mbgl {
 class HTTPFileSource::Impl {};
 
 HTTPFileSource::HTTPFileSource(const ResourceOptions& /*resourceOptions*/, const ClientOptions& /*clientOptions*/)
-    : impl(std::make_unique<Impl>()) {
-}
+    : impl(std::make_unique<Impl>()) {}
 
 HTTPFileSource::~HTTPFileSource() = default;
 
-void HTTPFileSource::setResourceOptions(ResourceOptions /*options*/) {
-}
+void HTTPFileSource::setResourceOptions(ResourceOptions /*options*/) {}
 
 ResourceOptions HTTPFileSource::getResourceOptions() {
     return ResourceOptions::Default();
 }
 
-void HTTPFileSource::setClientOptions(ClientOptions /*options*/) {
-}
+void HTTPFileSource::setClientOptions(ClientOptions /*options*/) {}
 
 ClientOptions HTTPFileSource::getClientOptions() {
     return ClientOptions();

@@ -9,8 +9,9 @@ namespace mbgl {
 namespace util {
 namespace impl {
 
-// QThreadStorage tries to be smart and take ownership of the data, which we don't want. So we're
-// wrapping it in another type which doesn't own the pointer it contains.
+// QThreadStorage tries to be smart and take ownership of the data, which we
+// don't want. So we're wrapping it in another type which doesn't own the
+// pointer it contains.
 using StorageType = QThreadStorage<std::array<void*, 1>>;
 
 ThreadLocalBase::ThreadLocalBase() {
@@ -20,8 +21,8 @@ ThreadLocalBase::ThreadLocalBase() {
 }
 
 ThreadLocalBase::~ThreadLocalBase() {
-    // ThreadLocal will not take ownership of the pointer it is managing. The pointer
-    // needs to be explicitly cleared before we destroy this object.
+    // ThreadLocal will not take ownership of the pointer it is managing. The
+    // pointer needs to be explicitly cleared before we destroy this object.
     assert(!get());
     reinterpret_cast<StorageType&>(storage).~QThreadStorage();
 }
@@ -31,7 +32,7 @@ void* ThreadLocalBase::get() {
 }
 
 void ThreadLocalBase::set(void* ptr) {
-    reinterpret_cast<StorageType&>(storage).setLocalData({{ ptr }});
+    reinterpret_cast<StorageType&>(storage).setLocalData({{ptr}});
 }
 
 } // namespace impl

@@ -30,7 +30,8 @@ public:
         db.clearAmbientCache();
 
         for (unsigned i = 0; i < tileCount; ++i) {
-            const Resource ambient = Resource::tile("mapbox://tile_ambient" + util::toString(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+            const Resource ambient = Resource::tile(
+                "mapbox://tile_ambient" + util::toString(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
             db.put(ambient, response);
         }
     }
@@ -43,14 +44,16 @@ public:
             db.deleteRegion(std::move(regions[0]));
         }
 
-        OfflineTilePyramidRegionDefinition definition{ "mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-        OfflineRegionMetadata metadata{{ 1, 2, 3 }};
+        OfflineTilePyramidRegionDefinition definition{
+            "mapbox://style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+        OfflineRegionMetadata metadata{{1, 2, 3}};
 
         auto region = db.createRegion(definition, metadata);
         regionID = region->getID();
 
         for (unsigned i = 0; i < tileCount; ++i) {
-            const Resource offline = Resource::tile("mapbox://tile_offline_region" + util::toString(i), 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
+            const Resource offline = Resource::tile(
+                "mapbox://tile_offline_region" + util::toString(i), 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
             db.putRegionResource(regionID, offline, response);
         }
     }
@@ -78,8 +81,8 @@ BENCHMARK_F(OfflineDatabase, InsertTileRegion)(benchmark::State& state) {
     using namespace mbgl;
 
     while (state.KeepRunning()) {
-        const Resource offline = Resource::tile("mapbox://InsertTileRegion" +
-                util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource offline = Resource::tile(
+            "mapbox://InsertTileRegion" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.putRegionResource(regionID, offline, response);
     }
 }
@@ -99,8 +102,8 @@ BENCHMARK_F(OfflineDatabase, InsertTileCache)(benchmark::State& state) {
     using namespace mbgl;
 
     while (state.KeepRunning()) {
-        const Resource ambient = Resource::tile("mapbox://InsertTileCache" +
-                util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource ambient = Resource::tile(
+            "mapbox://InsertTileCache" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, response);
     }
 }
@@ -112,8 +115,8 @@ BENCHMARK_F(OfflineDatabase, InsertBigTileCache)(benchmark::State& state) {
     big.data = std::make_shared<std::string>(util::DEFAULT_MAX_CACHE_SIZE / 100, 0);
 
     while (state.KeepRunning()) {
-        const Resource ambient = Resource::tile("mapbox://InsertTileCache" +
-                util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource ambient = Resource::tile(
+            "mapbox://InsertTileCache" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, big);
     }
 }
@@ -126,7 +129,8 @@ BENCHMARK_F(OfflineDatabase, GetTile)(benchmark::State& state) {
     std::uniform_int_distribution<> dis(0, tileCount - 1);
 
     while (state.KeepRunning()) {
-        auto res = db.get(Resource::tile("mapbox://tile_ambient" + util::toString(dis(gen)), 1, 0, 0, 0, Tileset::Scheme::XYZ));
+        auto res = db.get(
+            Resource::tile("mapbox://tile_ambient" + util::toString(dis(gen)), 1, 0, 0, 0, Tileset::Scheme::XYZ));
         assert(res != std::nullopt);
     }
 }
@@ -138,15 +142,16 @@ BENCHMARK_F(OfflineDatabase, AddTilesToFullDatabase)(benchmark::State& state) {
     db.setMaximumAmbientCacheSize(50 * 1024 * 5);
 
     while (state.KeepRunning()) {
-        const Resource ambient = Resource::tile("mapbox://AddTilesToFullDatabase" +
-                util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource ambient = Resource::tile(
+            "mapbox://AddTilesToFullDatabase" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, response);
     }
 
     Log::removeObserver();
 }
 
-BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)(benchmark::State& state) {
+BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)
+(benchmark::State& state) {
     using namespace mbgl;
 
     auto regions = db.listRegions().value();
@@ -158,13 +163,14 @@ BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)(benchmark::State& state
     db.setMaximumAmbientCacheSize(0);
 
     while (state.KeepRunning()) {
-        const Resource ambient = Resource::tile("mapbox://AddTilesToFullDatabase" +
-                util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource ambient = Resource::tile(
+            "mapbox://AddTilesToFullDatabase" + util::toString(state.iterations()), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambient, response);
     }
 }
 
-BENCHMARK_F(OfflineDatabase, GetTileFromDisabledDatabase)(benchmark::State& state) {
+BENCHMARK_F(OfflineDatabase, GetTileFromDisabledDatabase)
+(benchmark::State& state) {
     using namespace mbgl;
 
     auto regions = db.listRegions().value();

@@ -5,7 +5,8 @@ namespace style {
 namespace expression {
 
 Range<float> getCoveringStops(const std::map<double, std::unique_ptr<Expression>>& stops,
-                              const double lower, const double upper) {
+                              const double lower,
+                              const double upper) {
     assert(!stops.empty());
     auto minIt = stops.lower_bound(lower);
     auto maxIt = stops.lower_bound(upper);
@@ -15,10 +16,8 @@ Range<float> getCoveringStops(const std::map<double, std::unique_ptr<Expression>
     if (minIt != stops.begin() && minIt != stops.end() && minIt->first > lower) {
         minIt--;
     }
-    return Range<float> {
-        static_cast<float>(minIt == stops.end() ? stops.rbegin()->first : minIt->first),
-        static_cast<float>(maxIt == stops.end() ? stops.rbegin()->first : maxIt->first)
-    };
+    return Range<float>{static_cast<float>(minIt == stops.end() ? stops.rbegin()->first : minIt->first),
+                        static_cast<float>(maxIt == stops.end() ? stops.rbegin()->first : maxIt->first)};
 }
 
 } // namespace expression

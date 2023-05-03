@@ -21,8 +21,7 @@ template <typename T>
 bool Match<T>::operator==(const Expression& e) const {
     if (e.getKind() == Kind::Match) {
         auto rhs = static_cast<const Match*>(&e);
-        return (*input == *(rhs->input) &&
-                *otherwise == *(rhs->otherwise) &&
+        return (*input == *(rhs->input) && *otherwise == *(rhs->otherwise) &&
                 Expression::childrenEqual(branches, rhs->branches));
     }
     return false;
@@ -47,12 +46,13 @@ mbgl::Value Match<T>::serialize() const {
     std::vector<mbgl::Value> serialized;
     serialized.emplace_back(getOperator());
     serialized.emplace_back(input->serialize());
-    
-    // Sort so serialization has an arbitrary defined order, even though branch order doesn't affect evaluation
+
+    // Sort so serialization has an arbitrary defined order, even though branch
+    // order doesn't affect evaluation
     std::map<T, std::shared_ptr<Expression>> sortedBranches(branches.begin(), branches.end());
 
-    // Group branches by unique match expression to support condensed serializations
-    // of the form [case1, case2, ...] -> matchExpression
+    // Group branches by unique match expression to support condensed
+    // serializations of the form [case1, case2, ...] -> matchExpression
     std::map<Expression*, size_t> outputLookup;
     std::vector<std::pair<Expression*, std::vector<mbgl::Value>>> groupedByOutput;
     for (auto& entry : sortedBranches) {
@@ -66,20 +66,20 @@ mbgl::Value Match<T>::serialize() const {
             groupedByOutput[outputIndex->second].second.emplace_back(entry.first);
         }
     };
-    
+
     for (auto& entry : groupedByOutput) {
         entry.second.size() == 1
-            ? serialized.emplace_back(entry.second[0])       // Only a single label matches this output expression
-            : serialized.emplace_back(entry.second);         // Array of literal labels pointing to this output expression
-        serialized.emplace_back(entry.first->serialize());   // The output expression itself
+            ? serialized.emplace_back(entry.second[0])     // Only a single label matches this output expression
+            : serialized.emplace_back(entry.second);       // Array of literal labels pointing to this output expression
+        serialized.emplace_back(entry.first->serialize()); // The output expression itself
     }
-    
+
     serialized.emplace_back(otherwise->serialize());
     return serialized;
 }
-    
 
-template<> EvaluationResult Match<std::string>::evaluate(const EvaluationContext& params) const {
+template <>
+EvaluationResult Match<std::string>::evaluate(const EvaluationContext& params) const {
     const EvaluationResult inputValue = input->evaluate(params);
     if (!inputValue) {
         return inputValue.error();
@@ -97,7 +97,8 @@ template<> EvaluationResult Match<std::string>::evaluate(const EvaluationContext
     return otherwise->evaluate(params);
 }
 
-template<> EvaluationResult Match<int64_t>::evaluate(const EvaluationContext& params) const {
+template <>
+EvaluationResult Match<int64_t>::evaluate(const EvaluationContext& params) const {
     const EvaluationResult inputValue = input->evaluate(params);
     if (!inputValue) {
         return inputValue.error();
@@ -115,7 +116,7 @@ template<> EvaluationResult Match<int64_t>::evaluate(const EvaluationContext& pa
             return (*it).second->evaluate(params);
         }
     }
-    
+
     return otherwise->evaluate(params);
 }
 
@@ -125,7 +126,10 @@ template class Match<std::string>;
 using InputType = variant<int64_t, std::string>;
 
 using namespace mbgl::style::conversion;
-std::optional<InputType> parseInputValue(const Convertible& input, ParsingContext& parentContext, std::size_t index, std::optional<type::Type>& inputType) {
+std::optional<InputType> parseInputValue(const Convertible& input,
+                                         ParsingContext& parentContext,
+                                         std::size_t index,
+                                         std::optional<type::Type>& inputType) {
     using namespace mbgl::style::conversion;
     std::optional<InputType> result;
     std::optional<type::Type> type;
@@ -134,25 +138,31 @@ std::optional<InputType> parseInputValue(const Convertible& input, ParsingContex
 
     if (value) {
         value->match(
-            [&] (uint64_t n) {
+            [&](uint64_t n) {
                 if (!Value::isSafeInteger(n)) {
-                    parentContext.error("Branch labels must be integers no larger than " + util::toString(Value::maxSafeInteger()) + ".", index);
+                    parentContext.error("Branch labels must be integers no larger than " +
+                                            util::toString(Value::maxSafeInteger()) + ".",
+                                        index);
                 } else {
                     type = {type::Number};
                     result = std::optional<InputType>{static_cast<int64_t>(n)};
                 }
             },
-            [&] (int64_t n) {
+            [&](int64_t n) {
                 if (!Value::isSafeInteger(n)) {
-                    parentContext.error("Branch labels must be integers no larger than " + util::toString(Value::maxSafeInteger()) + ".", index);
+                    parentContext.error("Branch labels must be integers no larger than " +
+                                            util::toString(Value::maxSafeInteger()) + ".",
+                                        index);
                 } else {
                     type = {type::Number};
                     result = std::optional<InputType>{n};
                 }
             },
-            [&] (double n) {
+            [&](double n) {
                 if (!Value::isSafeInteger(n)) {
-                    parentContext.error("Branch labels must be integers no larger than " + util::toString(Value::maxSafeInteger()) + ".", index);
+                    parentContext.error("Branch labels must be integers no larger than " +
+                                            util::toString(Value::maxSafeInteger()) + ".",
+                                        index);
                 } else if (n != std::floor(n)) {
                     parentContext.error("Numeric branch labels must be integer values.", index);
                 } else {
@@ -160,14 +170,11 @@ std::optional<InputType> parseInputValue(const Convertible& input, ParsingContex
                     result = std::optional<InputType>{static_cast<int64_t>(n)};
                 }
             },
-            [&] (const std::string& s) {
+            [&](const std::string& s) {
                 type = {type::String};
                 result = {s};
             },
-            [&] (const auto&) {
-                parentContext.error("Branch labels must be numbers or strings.", index);
-            }
-        );
+            [&](const auto&) { parentContext.error("Branch labels must be numbers or strings.", index); });
     } else {
         parentContext.error("Branch labels must be numbers or strings.", index);
     }
@@ -191,18 +198,16 @@ std::optional<InputType> parseInputValue(const Convertible& input, ParsingContex
 
 template <typename T>
 static ParseResult create(type::Type outputType,
-                          std::unique_ptr<Expression>input,
-                          std::vector<std::pair<std::vector<InputType>,
-                                                std::unique_ptr<Expression>>> branches,
+                          std::unique_ptr<Expression> input,
+                          std::vector<std::pair<std::vector<InputType>, std::unique_ptr<Expression>>> branches,
                           std::unique_ptr<Expression> otherwise,
                           ParsingContext& ctx) {
     typename Match<T>::Branches typedBranches;
-    
+
     std::size_t index = 2;
 
     typedBranches.reserve(branches.size());
-    for (std::pair<std::vector<InputType>,
-                   std::unique_ptr<Expression>>& pair : branches) {
+    for (std::pair<std::vector<InputType>, std::unique_ptr<Expression>>& pair : branches) {
         std::shared_ptr<Expression> result = std::move(pair.second);
         for (const InputType& label : pair.first) {
             const auto& typedLabel = label.template get<T>();
@@ -212,24 +217,18 @@ static ParseResult create(type::Type outputType,
             }
             typedBranches.emplace(typedLabel, result);
         }
-        
+
         index += 2;
     }
-    return ParseResult(std::make_unique<Match<T>>(
-        outputType,
-        std::move(input),
-        std::move(typedBranches),
-        std::move(otherwise)
-    ));
+    return ParseResult(
+        std::make_unique<Match<T>>(outputType, std::move(input), std::move(typedBranches), std::move(otherwise)));
 }
 
 ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
     auto length = arrayLength(value);
     if (length < 5) {
-        ctx.error(
-            "Expected at least 4 arguments, but found only " + util::toString(length - 1) + "."
-        );
+        ctx.error("Expected at least 4 arguments, but found only " + util::toString(length - 1) + ".");
         return ParseResult();
     }
 
@@ -245,8 +244,7 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
         outputType = ctx.getExpected();
     }
 
-    std::vector<std::pair<std::vector<InputType>,
-                          std::unique_ptr<Expression>>> branches;
+    std::vector<std::pair<std::vector<InputType>, std::unique_ptr<Expression>>> branches;
 
     branches.reserve((length - 3) / 2);
     for (size_t i = 2; i + 1 < length; i += 2) {
@@ -261,7 +259,7 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
                 ctx.error("Expected at least one branch label.", i);
                 return ParseResult();
             }
-            
+
             labels.reserve(groupLength);
             for (size_t j = 0; j < groupLength; j++) {
                 const std::optional<InputType> inputValue = parseInputValue(arrayMember(label, j), ctx, i, inputType);
@@ -277,16 +275,16 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
             }
             labels.push_back(*inputValue);
         }
-        
+
         ParseResult output = ctx.parse(arrayMember(value, i + 1), i + 1, outputType);
         if (!output) {
             return ParseResult();
         }
-        
+
         if (!outputType) {
             outputType = (*output)->getType();
         }
-        
+
         branches.emplace_back(std::move(labels), std::move(*output));
     }
 
@@ -321,8 +319,7 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
             // accepts string and (integer) numeric values.
             assert(false);
             return ParseResult();
-        }
-    );
+        });
 }
 
 } // namespace expression

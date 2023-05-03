@@ -39,25 +39,21 @@ public:
             visit(stop.first, *stop.second);
         }
     }
-    
+
     // Return the smallest range of stops that covers the interval [lower, upper]
     Range<float> getCoveringStops(const double lower, const double upper) const {
         return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
     }
-    
+
     double interpolationFactor(const Range<double>& inputLevels, const double inputValue) const {
         return interpolator.match(
-            [&](const auto& interp) { return interp.interpolationFactor(inputLevels, inputValue); }
-        );
+            [&](const auto& interp) { return interp.interpolationFactor(inputLevels, inputValue); });
     }
 
     bool operator==(const Expression& e) const override {
         if (e.getKind() == Kind::Interpolate) {
             auto rhs = static_cast<const Interpolate*>(&e);
-            if (interpolator != rhs->interpolator ||
-                *input != *(rhs->input) ||
-                stops.size() != rhs->stops.size())
-            {
+            if (interpolator != rhs->interpolator || *input != *(rhs->input) || stops.size() != rhs->stops.size()) {
                 return false;
             }
 
