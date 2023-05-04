@@ -1,8 +1,11 @@
 #pragma once
 
+#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/filter.hpp>
+#include <mbgl/renderer/change_request.hpp>
+#include <mbgl/util/suppress_copies.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
@@ -66,13 +69,11 @@ public:
     virtual void update(int32_t /*layerIndex*/,
                         gfx::Context&,
                         const TransformState&,
-                        const PropertyEvaluationParameters&,
                         UniqueChangeRequestVec&) const {}
 
     virtual void layerAdded(gfx::ShaderRegistry&,
                             gfx::Context&,
                             const TransformState&,
-                            const PropertyEvaluationParameters&,
                             UniqueChangeRequestVec&) const {}
     virtual void layerRemoved(UniqueChangeRequestVec&) const {}
 
@@ -86,6 +87,27 @@ public:
 
 protected:
     Impl(const Impl&) = default;
+    
+    // Add a deletion change request for each drawable in a collection
+    template <typename T>
+    static void removeDrawables(T beg,
+                                const T end,
+                                UniqueChangeRequestVec& changes,
+                                std::function<util::SimpleIdentity(const T&)> f) {
+        for (; beg != end; ++beg) {
+            changes.emplace_back(std::make_unique<RemoveDrawableRequest>(f(beg)));
+        }
+    }
+
+    mutable util::SuppressCopies<std::mutex> mutex;
+    mutable gfx::ShaderProgramBasePtr shader;
+    mutable std::unordered_map<OverscaledTileID, gfx::DrawablePtr> tileDrawables;
+
+    mutable struct Stats {
+        size_t propertyEvaluations = 0;
+        size_t tileDrawablesAdded = 0;
+        size_t tileDrawablesRemoved = 0;
+    } stats;
 };
 
 // To be used in the inherited classes.
