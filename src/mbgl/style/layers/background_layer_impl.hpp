@@ -1,7 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
@@ -36,7 +34,6 @@ public:
     void layerAdded(gfx::ShaderRegistry&,
                     gfx::Context&,
                     const TransformState&,
-                    const PropertyEvaluationParameters&,
                     UniqueChangeRequestVec&) const override;
     void layerRemoved(UniqueChangeRequestVec&) const override;
 
@@ -44,33 +41,23 @@ public:
     void update(int32_t layerIndex,
                 gfx::Context&,
                 const TransformState&,
-                const PropertyEvaluationParameters&,
                 UniqueChangeRequestVec&) const override;
 
-private:
-    // Add a deletion change request for each drawable in a collection
-    template <typename T>
-    static void removeDrawables(T beg,
-                                const T end,
-                                UniqueChangeRequestVec& changes,
-                                std::function<util::SimpleIdentity(const T&)> f) {
-        for (; beg != end; ++beg) {
-            changes.emplace_back(std::make_unique<RemoveDrawableRequest>(f(beg)));
-        }
+    void setUnevaluated(BackgroundPaintProperties::Unevaluated value) {
+        unevaluatedProperties = value;
+    }
+    void setEvaluated(Immutable<BackgroundPaintProperties::PossiblyEvaluated> value) {
+        evaluatedProperties = std::move(value);
+        ++stats.propertyEvaluations;
     }
 
-    mutable std::mutex mutex;
-    mutable gfx::ShaderProgramBasePtr shader;
-    mutable std::unordered_map<OverscaledTileID, gfx::DrawablePtr> tileDrawables;
+private:
     mutable std::optional<Color> lastColor;
     mutable int32_t lastLayerIndex = -1;
 
-    mutable struct Stats {
-        size_t tileDrawablesAdded = 0;
-        size_t tileDrawablesRemoved = 0;
-    } stats;
-
-    mutable std::optional<BackgroundPaintProperties::Unevaluated> unevaluated;
+    std::optional<BackgroundPaintProperties::Unevaluated> unevaluatedProperties;
+    // Latest evaluated properties.
+    std::optional<Immutable<BackgroundPaintProperties::PossiblyEvaluated>> evaluatedProperties;
 
 public:
     BackgroundPaintProperties::Transitionable paint;

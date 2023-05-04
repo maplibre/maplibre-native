@@ -19,7 +19,6 @@ namespace style {
 
 BackgroundLayer::Impl::Impl(const Impl& other)
     : Layer::Impl(other),
-      tileDrawables(other.tileDrawables),
       lastColor(other.lastColor),
       paint(other.paint) {}
 
@@ -32,7 +31,6 @@ constexpr auto shaderName = "background_generic";
 void BackgroundLayer::Impl::layerAdded(gfx::ShaderRegistry& shaders,
                                        gfx::Context& context,
                                        const TransformState&,
-                                       const PropertyEvaluationParameters&,
                                        UniqueChangeRequestVec&) const {
     {
         std::unique_lock<std::mutex> guard(mutex);
@@ -59,14 +57,14 @@ void BackgroundLayer::Impl::layerRemoved(UniqueChangeRequestVec& changes) const 
 void BackgroundLayer::Impl::update(const int32_t layerIndex,
                                    gfx::Context& context,
                                    const TransformState& state,
-                                   const PropertyEvaluationParameters& evalParameters,
                                    UniqueChangeRequestVec& changes) const {
     std::unique_lock<std::mutex> guard(mutex);
 
-    if (!unevaluated) {
-        unevaluated = paint.untransitioned();
+    if (!unevaluatedProperties || !evaluatedProperties) {
+        // not evaluated yet, we can't update
+        return;
     }
-    const auto evaluated = unevaluated->evaluate(evalParameters);
+    const auto& evaluated = **evaluatedProperties;
 
     // TODO: If background is solid, we can skip drawables and rely on the clear color
     // const auto passes = eval.get<style::BackgroundOpacity>() == 0.0f
