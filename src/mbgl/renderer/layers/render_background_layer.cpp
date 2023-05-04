@@ -40,9 +40,8 @@ void RenderBackgroundLayer::transition(const TransitionParameters& parameters) {
 
 void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto evaluated = unevaluated.evaluate(parameters);
-    auto properties = makeMutable<BackgroundLayerProperties>(staticImmutableCast<BackgroundLayer::Impl>(baseImpl),
-                                                             parameters.getCrossfadeParameters(),
-                                                             evaluated);
+    auto properties = makeMutable<BackgroundLayerProperties>(
+        staticImmutableCast<BackgroundLayer::Impl>(baseImpl), parameters.getCrossfadeParameters(), evaluated);
 
     passes = properties->evaluated.get<style::BackgroundOpacity>() == 0.0f ? RenderPass::None
              : (!unevaluated.get<style::BackgroundPattern>().isUndefined() ||
@@ -56,7 +55,8 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     // Store a copy in the layer for layer::update.
     // TODO: This whole method should eventually move to BackgroundLayer
     const_cast<BackgroundLayer::Impl&>(impl_cast(baseImpl)).setUnevaluated(unevaluated);
-    const_cast<BackgroundLayer::Impl&>(impl_cast(baseImpl)).setEvaluated(makeMutable<BackgroundPaintProperties::PossiblyEvaluated>(evaluated));
+    const_cast<BackgroundLayer::Impl&>(impl_cast(baseImpl))
+        .setEvaluated(makeMutable<BackgroundPaintProperties::PossiblyEvaluated>(evaluated));
 
     evaluatedProperties = std::move(properties);
 }

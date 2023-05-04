@@ -31,21 +31,13 @@ public:
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
-    void layerAdded(gfx::ShaderRegistry&,
-                    gfx::Context&,
-                    const TransformState&,
-                    UniqueChangeRequestVec&) const override;
+    void layerAdded(gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) const override;
     void layerRemoved(UniqueChangeRequestVec&) const override;
 
     /// Generate any changes needed by the layer
-    void update(int32_t layerIndex,
-                gfx::Context&,
-                const TransformState&,
-                UniqueChangeRequestVec&) const override;
+    void update(int32_t layerIndex, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) const override;
 
-    void setUnevaluated(BackgroundPaintProperties::Unevaluated value) {
-        unevaluatedProperties = value;
-    }
+    void setUnevaluated(BackgroundPaintProperties::Unevaluated value) { unevaluatedProperties = value; }
     void setEvaluated(Immutable<BackgroundPaintProperties::PossiblyEvaluated> value) {
         evaluatedProperties = std::move(value);
         ++stats.propertyEvaluations;
