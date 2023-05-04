@@ -66,15 +66,10 @@ public:
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 
     /// Generate any changes needed by the layer
-    virtual void update(int32_t /*layerIndex*/,
-                        gfx::Context&,
-                        const TransformState&,
-                        UniqueChangeRequestVec&) const {}
+    virtual void update(int32_t /*layerIndex*/, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) const {}
 
-    virtual void layerAdded(gfx::ShaderRegistry&,
-                            gfx::Context&,
-                            const TransformState&,
-                            UniqueChangeRequestVec&) const {}
+    virtual void layerAdded(gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) const {
+    }
     virtual void layerRemoved(UniqueChangeRequestVec&) const {}
 
     std::string id;
@@ -87,7 +82,7 @@ public:
 
 protected:
     Impl(const Impl&) = default;
-    
+
     // Add a deletion change request for each drawable in a collection
     template <typename T>
     static void removeDrawables(T beg,
