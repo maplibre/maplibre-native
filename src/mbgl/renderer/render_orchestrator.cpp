@@ -794,7 +794,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         kv.second->layerRemoved(changes);
     }
     for (auto& kv : layersAdded) {
-        kv.second->layerAdded(shaders, context, state, evalParameters, changes);
+        kv.second->layerAdded(shaders, context, state, changes);
     }
 
     // Layer index, similar but not identical to `layerRenderItems` index in render_impl
@@ -803,7 +803,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     auto index = static_cast<int32_t>(layerImpls->size()) - 1;
 
     for (auto& impl : *layerImpls) {
-        impl->update(index--, context, state, evalParameters, changes);
+        impl->update(index--, context, state, changes);
     }
 
     addChanges(changes);
