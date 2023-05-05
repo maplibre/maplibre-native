@@ -275,11 +275,11 @@ void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
         localDrawables.cbegin(), localDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
 }
 
-void RenderFillLayer::update(const int32_t layerIndex,
+void RenderFillLayer::update(const int32_t /*layerIndex*/,
                              gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& state,
-                             UniqueChangeRequestVec& changes) {
+                             const TransformState& /*state*/,
+                             UniqueChangeRequestVec& /*changes*/) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {
