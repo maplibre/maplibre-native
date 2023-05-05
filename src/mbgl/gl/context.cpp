@@ -463,7 +463,15 @@ bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& 
     }
 
     setDepthMode(parameters.depthModeForSublayer(0, drawable.getDepthType()));
-    setStencilMode(gfx::StencilMode::disabled());
+    
+    if (auto tileID = drawable.getTileID()) {
+        // Doesn't work until the clipping masks are generated
+        //parameters.stencilModeForClipping(tileID->toUnwrapped());
+        setStencilMode(gfx::StencilMode::disabled());
+    } else {
+        setStencilMode(gfx::StencilMode::disabled());
+    }
+
     setColorMode(gfx::ColorMode::alphaBlended());
     setCullFaceMode(gfx::CullFaceMode::disabled());
 

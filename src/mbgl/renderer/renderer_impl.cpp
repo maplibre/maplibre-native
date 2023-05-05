@@ -210,6 +210,11 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables"));
 
+        // TODO: Render tile masks
+        //for (auto& layer : renderLayers) {
+        //    parameters.renderTileClippingMasks(renderTiles);
+        //}
+
         for (const auto& drawPtr : drawables) {
             auto& drawable = *drawPtr;
 

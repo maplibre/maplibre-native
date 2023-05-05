@@ -1,5 +1,6 @@
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
@@ -275,11 +276,11 @@ void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
         localDrawables.cbegin(), localDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
 }
 
-void RenderFillLayer::update(const int32_t /*layerIndex*/,
+void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& /*state*/,
-                             UniqueChangeRequestVec& /*changes*/) {
+                             UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {
@@ -387,17 +388,72 @@ void RenderFillLayer::update(const int32_t /*layerIndex*/,
     //        }
     //    }
 
+    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
+    std::transform(renderTiles->begin(), renderTiles->end(),
+                   std::inserter(newTileIDs, newTileIDs.begin()),
+                   [](const auto& renderTile)->OverscaledTileID{ return renderTile.get().getOverscaledTileID(); });
+
+    // For each existing tile drawable...
+    for (auto iter = tileDrawables.begin(); iter != tileDrawables.end();) {
+        const auto& drawable = iter->second;
+
+        // Has this tile dropped out of the cover set?
+        if (newTileIDs.find(iter->first) == newTileIDs.end()) {
+            // remove it
+            if (drawable) {
+                changes.emplace_back(std::make_unique<RemoveDrawableRequest>(drawable->getId()));
+            }
+            // Log::Warning(Event::General, "Removing drawable for " + util::toString(iter->first) + " total " +
+            // std::to_string(stats.tileDrawablesRemoved+1));
+            iter = tileDrawables.erase(iter);
+            ++stats.tileDrawablesRemoved;
+            continue;
+        }
+        ++iter;
+
+        // update...
+    }
+
+    std::unique_ptr<gfx::DrawableBuilder> builder;
+
     if (unevaluated.get<FillPattern>().isUndefined()) {
         //        parameters.renderTileClippingMasks(renderTiles);
         for (const RenderTile& tile : *renderTiles) {
+            const auto& tileID = tile.getOverscaledTileID();
+            
+            const auto result = tileDrawables.insert(std::make_pair(tileID, gfx::DrawablePtr()));
+            if (!result.second) {
+                // Already present
+                continue;
+            }
+
             const auto renderPass = RenderPass::Translucent;
             const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
             if (!renderData) {
                 continue;
             }
-            // auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-            // const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+            auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+            //const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
 
+            if (!builder) {
+                builder = context.createDrawableBuilder("fill");
+                builder->setShader(shader);
+                builder->addTweaker(context.createDrawableTweaker());
+                //builder->setColor(color);
+                builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
+                builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                builder->setLayerIndex(layerIndex);
+            }
+
+            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>& verts = bucket.vertices.vector();
+            std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
+            std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x){ return x.a1; });
+            
+            for (const auto& seg : bucket.triangleSegments) {
+                builder->addTriangles(rawVerts, seg.vertexOffset, seg.vertexLength,
+                                      bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
+            }
+            
             //            evaluated.get<FillTranslate>(),
             //            evaluated.get<FillTranslateAnchor>(),
             //            parameters.stencilModeForClipping(tile.id),
@@ -427,6 +483,20 @@ void RenderFillLayer::update(const int32_t /*layerIndex*/,
             //                     bucket.lineSegments,
             //                     FillOutlineProgram::TextureBindings{});
             //            }
+
+            builder->flush();
+    
+            auto drawables = builder->clearDrawables();
+            if (!drawables.empty()) {
+                auto& drawable = drawables[0];
+                drawable->setTileID(tileID);
+                result.first->second = drawable;
+                changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
+                ++stats.tileDrawablesAdded;
+                // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
+                // std::to_string(stats.tileDrawablesAdded+1));
+            }
+
         }
     } else {
         //        if (parameters.pass != RenderPass::Translucent) {
