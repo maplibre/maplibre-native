@@ -138,8 +138,6 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const std::shared_ptr<UpdateParameters>& updateParameters) {
-    layersAdded.clear();
-    layersRemoved.clear();
 
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     if (!isMapModeContinuous) {
@@ -221,14 +219,22 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     imageManager->notifyIfMissingImageAdded();
     imageManager->setLoaded(updateParameters->spriteLoaded);
 
-    LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
+    const LayerDifference layerDiff = diffLayers(layerImpls, updateParameters->layers);
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
+    std::vector<std::unique_ptr<ChangeRequest>> changes;
+
     // Remove render layers for removed layers.
     for (const auto& entry : layerDiff.removed) {
-        renderLayers.erase(entry.first);
+        const auto hit = renderLayers.find(entry.first);
+        if (hit != renderLayers.end()) {
+            hit->second->layerRemoved(changes);
+            renderLayers.erase(hit);
+        }
     }
+
+    addChanges(changes);
 
     // Create render layers for newly added layers.
     for (const auto& entry : layerDiff.added) {
@@ -455,9 +461,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             sourceRenderItems.emplace_back(entry.second->createRenderItem());
         }
     }
-
-    layersAdded = std::move(layerDiff.added);
-    layersRemoved = std::move(layerDiff.removed);
 
     return std::make_unique<RenderTreeImpl>(std::move(renderTreeParameters),
                                             std::move(layerRenderItems),
@@ -790,20 +793,13 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
 
     std::vector<std::unique_ptr<ChangeRequest>> changes;
 
-    for (auto& kv : layersRemoved) {
-        kv.second->layerRemoved(changes);
-    }
-    for (auto& kv : layersAdded) {
-        kv.second->layerAdded(shaders, context, state, changes);
-    }
-
     // Layer index, similar but not identical to `layerRenderItems` index in render_impl
     // int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
     // for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
-    auto index = static_cast<int32_t>(layerImpls->size()) - 1;
+    auto index = static_cast<int32_t>(renderLayers.size()) - 1;
 
-    for (auto& impl : *layerImpls) {
-        impl->update(index--, context, state, changes);
+    for (auto& kv : renderLayers) {
+        kv.second->update(index--, shaders, context, state, changes);
     }
 
     addChanges(changes);
