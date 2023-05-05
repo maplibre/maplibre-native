@@ -1,15 +1,15 @@
 # Architectural Problems & Recommendations
 
-Up until now, this document focused solely on the state of MapLibre GL
+Up until now, this document focused solely on the state of MapLibre
 Native at the time of writing. This section speaks of possible future
 improvements for MapLibre Native from an architectural point of view.
-Before that, let's look into the architectural challenges MapLibre GL
+Before that, let's look into the architectural challenges MapLibre
 Native is facing[^18]:
 
 ## Renderer coupled with OpenGL
 
 The renderer component is tightly coupled to OpenGL ES. It uses OpenGL
-ES as its only preferred rendering backend. Furthermore, MapLibre GL
+ES as its only preferred rendering backend. Furthermore, MapLibre
 Native does not have a clear separation between the following:
 
 1.  The logical responsibility of rendering a map tile. This involves
@@ -58,15 +58,16 @@ mitigated:
     uses WebGL through completely different implementations for Map,
     Style, Layers, Glyph, and TileWorker.
 
-3.  MapLibre Rust is an initiative to port MapLibre GL capability
-    through usage of *WebGPU*. At the time of writing, *WebGPU* is a
-    young platform that exposes modern computer graphics capabilities,
-    especially Direct3D 12, Metal, and Vulkan through a shared API. It
-    has promise, but the API at the time of writing only supports
-    ChromeOS, macOS, and Windows 10. Technically, it can be used with
-    Android and iOS but these platforms do not provide out of the box
-    support for it. This also has created a divergent experience for
-    customers when it comes to using MapLibre Native.
+3.  MapLibre Rust is an experimental initiative to create a new MapLibre
+    implementation in Rust, entirely based on *WebGPU*. At the time of
+    writing, *WebGPU* is a young platform that exposes modern computer
+    graphics capabilities, especially Direct3D 12, Metal, and Vulkan
+    through a shared API. It has promise, but the API at the time of
+    writing only supports ChromeOS, macOS, and Windows 10. Technically,
+    it can be used with Android and iOS but these platforms do not
+    provide out of the box support for it. This also has created a
+    divergent experience for customers when it comes to using MapLibre
+    Native.
 
 ## Lack of documentation
 
@@ -78,7 +79,7 @@ for future improvement. This document intends to address the first.
 ## Recommendations
 
 This document proposes the following component architecture for MapLibre
-GL Native to address the architectural shortcomings.
+Native to address the architectural shortcomings.
 
 ![](media/proposed-architecture-of-maplibre-gl.png)    
 *Figure 4: Proposed Architecture of MapLibre Native*
@@ -116,15 +117,14 @@ of a flat 3D plane. At the time of writing MapLibre Native supports
 2.5D extrusion for buildings and terrain tiles. Supporting confidential
 datums like *GCJ-02* can also be achieved through this.
 
-#### Future Convergence with MapLibre Rust
+#### Future Convergence with WebGPU
 
-This document acknowledges the value proposition MapLibre Rust
-initiative brings. At the time of writing, MapLibre Native GL core is
-written in C++. Albeit written in C++, MapLibre Native GL code relies on
-immutable message passing between renderer and tile workers. Private
-functions also follow the *C++ move semantics*. This means, each private
-function takes ownership of the arguments passed to the function by
-copying it to a new memory.
+This document acknowledges the value proposition Rust brings. At the
+time of writing, MapLibre Native Core is written in C++. Albeit written
+in C++, MapLibre Native code relies on immutable message passing between
+renderer and tile workers. Private functions also follow the *C++ move
+semantics*. This means, each private function takes ownership of the
+arguments passed to the function by copying it to a new memory.
 
 Rust as a programming language enforces such intentions through compile
 time safety checks. Provided Rust Foreign Function[^19] Interface allows
@@ -134,11 +134,11 @@ done in sequence:
 1.  At first, this document proposes to implement ***Modularized
     Rendering*** in C++ for MapLibre Native. This document also
     proposes that Unified Rendering Interface will keep the door open
-    for a *WebGPU* backed renderer in MapLibre Rust. This will address
-    the divergence of web and native platforms in the future. The Rust
-    renderer can be compiled to WebAssembly and enable WebGPU powered
-    rendering for browsers. This paves the path forward for a single
-    unified renderer implementation for web and mobile devices.
+    for a *WebGPU* backed renderer in MapLibre Native. This could address
+    the divergence of web and native platforms in the future. The WebGPU
+    renderer might be possible to compiled to WebAssembly and enable
+    WebGPU powered rendering for browsers. This paves the path forward for
+    a single unified renderer implementation for web and mobile devices.
 
 2.  After the delivery of ***Modularized Rendering***, this document
     proposes to eventually migrate *Style, Layers, Text, Glyphs,

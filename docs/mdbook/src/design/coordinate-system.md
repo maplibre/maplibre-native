@@ -14,7 +14,7 @@ geometries defined by WGS84 longitude, latitude pair coordinates to a
 map tile.
 
 Instead of translating a full geometry, in the following subsections, we
-will project a WGS 84 point to a map tile rendered in MapLibre GL
+will project a WGS 84 point to a map tile rendered in MapLibre
 Native.
 
 #### World vs Earth
@@ -177,7 +177,7 @@ components to integers, we get `(585/783/11)`. This marks an individual
 tile's X, Y, and Z.
 
 To reach our goal of translating a location to a coordinate inside a
-tile, we need to know what is the *extent* of the tile. MapLibre GL
+tile, we need to know what is the *extent* of the tile. MapLibre
 Native follows Mapbox Vector Tile (MVT) spec. Following said spec,
 MapLibre Native internally normalizes each tile to an *extent* of
 8192. Tile extent describes the width and height of the tile in integer
