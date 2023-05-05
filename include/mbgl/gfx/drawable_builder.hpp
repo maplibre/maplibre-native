@@ -97,11 +97,13 @@ public:
     void addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
     /// Add already-set-up triangles directly
-    
-    void addTriangles(const std::vector<std::array<int16_t,2>>& vertices,
-                      std::size_t vertexOffset, std::size_t vertexLength,
+
+    void addTriangles(const std::vector<std::array<int16_t, 2>>& vertices,
+                      std::size_t vertexOffset,
+                      std::size_t vertexLength,
                       const std::vector<uint16_t>& indexes,
-                      std::size_t indexOffset, std::size_t indexLength);
+                      std::size_t indexOffset,
+                      std::size_t indexLength);
 
     /// Add a tweaker to be attached to each emitted drawable
     void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
