@@ -158,7 +158,7 @@ WGS84 is used as the canonical datum. Our goal is to represent
 geometries defined by WGS84 longitude, latitude pair coordinates to a
 map tile.</p>
 <p>Instead of translating a full geometry, in the following subsections, we
-will project a WGS 84 point to a map tile rendered in MapLibre GL
+will project a WGS 84 point to a map tile rendered in MapLibre
 Native.</p>
 <h4 id="world-vs-earth"><a class="header" href="#world-vs-earth">World vs Earth</a></h4>
 <p>This document uses the word <em>Earth</em> when it refers to the planet in
@@ -298,7 +298,7 @@ coordinates. This helps in drawing a tile. If we now <em>floor</em> the
 components to integers, we get <code>(585/783/11)</code>. This marks an individual
 tile's X, Y, and Z.</p>
 <p>To reach our goal of translating a location to a coordinate inside a
-tile, we need to know what is the <em>extent</em> of the tile. MapLibre GL
+tile, we need to know what is the <em>extent</em> of the tile. MapLibre
 Native follows Mapbox Vector Tile (MVT) spec. Following said spec,
 MapLibre Native internally normalizes each tile to an <em>extent</em> of
 8192. Tile extent describes the width and height of the tile in integer
