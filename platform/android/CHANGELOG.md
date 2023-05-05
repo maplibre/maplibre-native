@@ -11,6 +11,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ### 🐞 Bug fixes
 
 * Fix regression in CameraUpdateFactory#zoomOut ([#1035](https://github.com/maplibre/maplibre-native/pull/1035))
+* * `AndroidLocationEngineImpl` made public to create custom `LocationEngineProvider`([#850](https://github.com/maplibre/maplibre-native/pull/850))
 
 ### ⛵ Dependencies
 
