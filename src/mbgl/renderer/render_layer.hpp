@@ -1,29 +1,39 @@
 #pragma once
-#include <list>
+#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/layout/layout.hpp>
+#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/mat4.hpp>
+
+#include <list>
 #include <memory>
 #include <string>
 
 namespace mbgl {
-
 class Bucket;
 class ChangeRequest;
-class TransitionParameters;
-class PropertyEvaluationParameters;
-class UploadParameters;
-class PaintParameters;
-class RenderTile;
-class TransformState;
-class PatternAtlas;
-class LineAtlas;
-class SymbolBucket;
 class DynamicFeatureIndex;
+class LineAtlas;
+class PropertyEvaluationParameters;
+class PaintParameters;
+class PatternAtlas;
+class RenderTile;
+class SymbolBucket;
+class TransformState;
+class TransitionParameters;
+class UploadParameters;
+
+using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
+using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
+
+namespace gfx {
+class Context;
+class ShaderRegistry;
+} // namespace gfx
 
 class LayerRenderData {
 public:
@@ -130,6 +140,11 @@ public:
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;
 
+    /// Generate any changes needed by the layer
+    virtual void update(int32_t /*layerIndex*/, gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) {}
+
+    virtual void layerRemoved(UniqueChangeRequestVec&) {}
+
 protected:
     // Checks whether the current hardware can render this layer. If it can't,
     // we'll show a warning in the console to inform the developer.
@@ -138,6 +153,17 @@ protected:
     void addRenderPassesFromTiles();
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
+
+    // Add a deletion change request for each drawable in a collection
+    template <typename T>
+    static void removeDrawables(T beg,
+                                const T end,
+                                UniqueChangeRequestVec& changes,
+                                std::function<util::SimpleIdentity(const T&)> f) {
+        for (; beg != end; ++beg) {
+            changes.emplace_back(std::make_unique<RemoveDrawableRequest>(f(beg)));
+        }
+    }
 
 protected:
     // Stores current set of tiles to be rendered for this layer.
@@ -150,6 +176,18 @@ protected:
     LayerPlacementData placementData;
 
     gfx::DrawablePtr drawables;
+
+    std::mutex mutex;
+    gfx::ShaderProgramBasePtr shader;
+    std::unordered_map<OverscaledTileID, gfx::DrawablePtr> tileDrawables;
+    std::optional<Color> lastColor;
+    int32_t lastLayerIndex = -1;
+
+    struct Stats {
+        size_t propertyEvaluations = 0;
+        size_t tileDrawablesAdded = 0;
+        size_t tileDrawablesRemoved = 0;
+    } stats;
 
 private:
     // Some layers may not render correctly on some hardware when the vertex
