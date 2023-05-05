@@ -438,7 +438,6 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
         Log::Error(Event::General, std::string("Cannot load test data from '" + path.string() + "': " + ex.what()));
         return std::nullopt;
     }
-
 }
 
 std::string toJSON(const Value& value, unsigned indent, bool singleLine) {
