@@ -141,7 +141,8 @@ public:
     virtual std::optional<Color> getSolidBackground() const;
 
     /// Generate any changes needed by the layer
-    virtual void update(int32_t /*layerIndex*/, gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) {}
+    virtual void update(
+        int32_t /*layerIndex*/, gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) {}
 
     virtual void layerRemoved(UniqueChangeRequestVec&) {}
 
