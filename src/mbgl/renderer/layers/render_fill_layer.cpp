@@ -492,9 +492,9 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
             builder->flush();
 
-            auto drawables = builder->clearDrawables();
-            if (!drawables.empty()) {
-                auto& drawable = drawables[0];
+            auto newDrawables = builder->clearDrawables();
+            if (!newDrawables.empty()) {
+                auto& drawable = newDrawables[0];
                 drawable->setTileID(tileID);
                 result.first->second = drawable;
                 changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
