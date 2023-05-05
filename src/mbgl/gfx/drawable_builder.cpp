@@ -89,5 +89,25 @@ void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     appendTriangle(x1, y1);
 }
 
+void DrawableBuilder::addTriangles(const std::vector<std::array<int16_t,2>>& vertices,
+                                   std::size_t vertexOffset, std::size_t vertexLength,
+                                   const std::vector<uint16_t>& indexes,
+                                   std::size_t indexOffset, std::size_t indexLength) {
+    // TODO: bulk add in `gfx::VertexVector`... or use vector directly?
+    //impl->vertices.insert(impl->vertices.end(),
+    //                      std::next(vertices.begin(), vertexOffset),
+    //                      std::next(vertices.begin(), vertexOffset + vertexLength));
+    //impl->indexes.insert(impl->indexes.end(),
+    //                     std::next(indexes.begin(), indexOffset),
+    //                     std::next(indexes.begin(), indexOffset + indexLength));
+
+    std::for_each(std::next(vertices.begin(), vertexOffset),
+                  std::next(vertices.begin(), vertexOffset + vertexLength),
+                  [&](const std::array<int16_t,2>& x){ impl->vertices.emplace_back(Impl::VT({{x}})); });
+    for (auto i = std::next(indexes.begin(), indexOffset); i != std::next(indexes.begin(), indexOffset + indexLength); ) {
+        impl->indexes.emplace_back(*i++, *i++, *i++);
+    }
+}
+
 } // namespace gfx
 } // namespace mbgl
