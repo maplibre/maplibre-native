@@ -389,9 +389,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
     //    }
 
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(), renderTiles->end(),
+    std::transform(renderTiles->begin(),
+                   renderTiles->end(),
                    std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile)->OverscaledTileID{ return renderTile.get().getOverscaledTileID(); });
+                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
 
     // For each existing tile drawable...
     for (auto iter = tileDrawables.begin(); iter != tileDrawables.end();) {
@@ -420,7 +421,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
         //        parameters.renderTileClippingMasks(renderTiles);
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
-            
+
             const auto result = tileDrawables.insert(std::make_pair(tileID, gfx::DrawablePtr()));
             if (!result.second) {
                 // Already present
@@ -433,27 +434,32 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 continue;
             }
             auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-            //const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+            // const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
 
             if (!builder) {
                 builder = context.createDrawableBuilder("fill");
                 builder->setShader(shader);
                 builder->addTweaker(context.createDrawableTweaker());
-                //builder->setColor(color);
+                // builder->setColor(color);
                 builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                 builder->setLayerIndex(layerIndex);
             }
 
-            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>& verts = bucket.vertices.vector();
+            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
+                verts = bucket.vertices.vector();
             std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
-            std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x){ return x.a1; });
-            
+            std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+
             for (const auto& seg : bucket.triangleSegments) {
-                builder->addTriangles(rawVerts, seg.vertexOffset, seg.vertexLength,
-                                      bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
+                builder->addTriangles(rawVerts,
+                                      seg.vertexOffset,
+                                      seg.vertexLength,
+                                      bucket.triangles.vector(),
+                                      seg.indexOffset,
+                                      seg.indexLength);
             }
-            
+
             //            evaluated.get<FillTranslate>(),
             //            evaluated.get<FillTranslateAnchor>(),
             //            parameters.stencilModeForClipping(tile.id),
@@ -485,7 +491,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
             //            }
 
             builder->flush();
-    
+
             auto drawables = builder->clearDrawables();
             if (!drawables.empty()) {
                 auto& drawable = drawables[0];
@@ -496,7 +502,6 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
                 // std::to_string(stats.tileDrawablesAdded+1));
             }
-
         }
     } else {
         //        if (parameters.pass != RenderPass::Translucent) {

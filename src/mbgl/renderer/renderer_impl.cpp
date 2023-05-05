@@ -211,7 +211,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables"));
 
         // TODO: Render tile masks
-        //for (auto& layer : renderLayers) {
+        // for (auto& layer : renderLayers) {
         //    parameters.renderTileClippingMasks(renderTiles);
         //}
 
