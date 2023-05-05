@@ -1,4 +1,4 @@
-@import Mapbox;
+#include <Mapbox.h>
 
 #import "MBXOfflinePacksTableViewController.h"
 

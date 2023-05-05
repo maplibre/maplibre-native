@@ -1,4 +1,4 @@
-#import <Mapbox/Mapbox.h>
+#include <Mapbox.h>
 
 @interface LimeGreenStyleLayer : MLNOpenGLStyleLayer
 
