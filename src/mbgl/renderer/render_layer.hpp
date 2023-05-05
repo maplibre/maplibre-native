@@ -1,6 +1,5 @@
 #pragma once
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/drawable.hpp>
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_pass.hpp>
