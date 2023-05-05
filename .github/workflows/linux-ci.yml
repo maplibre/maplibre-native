@@ -51,6 +51,8 @@ jobs:
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
 
+      - run: ls -R
+
       - name: Archive mbgl-test-runner
         uses: actions/upload-artifact@v3
         with:
@@ -69,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: mbgl-expression-test
-          path: build/mbgl-expression-test
+          path: build/expression-test/mbgl-expression-test
           retention-days: 1
   
   test:
