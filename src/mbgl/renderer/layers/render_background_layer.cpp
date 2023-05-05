@@ -322,9 +322,9 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
 
         builder->flush();
 
-        auto tileDrawables = builder->clearDrawables();
-        if (!tileDrawables.empty()) {
-            auto& drawable = tileDrawables[0];
+        auto newDrawables = builder->clearDrawables();
+        if (!newDrawables.empty()) {
+            auto& drawable = newDrawables[0];
             drawable->setTileID(tileID);
             result.first->second = drawable;
             changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
