@@ -158,10 +158,6 @@ private:
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
 
-    // Layers added and removed in the last update
-    std::unordered_map<std::string, ImmutableLayer> layersAdded;
-    std::unordered_map<std::string, ImmutableLayer> layersRemoved;
-
     CrossTileSymbolIndex crossTileSymbolIndex;
     PlacementController placementController;
 
