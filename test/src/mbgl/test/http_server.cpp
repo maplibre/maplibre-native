@@ -205,6 +205,5 @@ HttpServer::~HttpServer() {
     serverThread.join();
 }
 
-
 } // namespace test
 } // namespace mbgl

@@ -33,9 +33,13 @@ Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3&
 
 namespace util {
 
-AABB::AABB() : min({{0, 0, 0}}), max({{0, 0, 0}}) {}
+AABB::AABB()
+    : min({{0, 0, 0}}),
+      max({{0, 0, 0}}) {}
 
-AABB::AABB(const vec3& min_, const vec3& max_) : min(min_), max(max_) {}
+AABB::AABB(const vec3& min_, const vec3& max_)
+    : min(min_),
+      max(max_) {}
 
 vec3 AABB::closestPoint(const vec3& point) const {
     return {{std::max(std::min(max[0], point[0]), min[0]),
@@ -102,7 +106,8 @@ enum {
 };
 
 Frustum::Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& planes_)
-    : points(points_), planes(planes_) {
+    : points(points_),
+      planes(planes_) {
     const Point<double> xBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{1, 0, 0}});
     const Point<double> yBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{0, 1, 0}});
     const Point<double> zBounds = ProjectPointsToAxis(points, {{0, 0, 0}}, {{0, 0, 1}});

@@ -7,8 +7,8 @@ namespace mbgl {
 namespace android {
 
 Light::Light(mbgl::Map& coreMap, mbgl::style::Light& coreLight)
-    : light(coreLight) , map(&coreMap) {
-}
+    : light(coreLight),
+      map(&coreMap) {}
 
 static Light* initializeLightPeer(mbgl::Map& map, mbgl::style::Light& coreLight) {
     return new Light(map, coreLight);
@@ -58,16 +58,16 @@ jni::Local<jni::Object<Position>> Light::getPosition(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> Light::getPositionTransition(jni::JNIEnv& env) {
-   using namespace mbgl::android::conversion;
-   mbgl::style::TransitionOptions options = light.getPositionTransition();
-   return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+    using namespace mbgl::android::conversion;
+    mbgl::style::TransitionOptions options = light.getPositionTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void Light::setPositionTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-   mbgl::style::TransitionOptions options;
-   options.duration.emplace(mbgl::Milliseconds(duration));
-   options.delay.emplace(mbgl::Milliseconds(delay));
-   light.setPositionTransition(options);
+    mbgl::style::TransitionOptions options;
+    options.duration.emplace(mbgl::Milliseconds(duration));
+    options.delay.emplace(mbgl::Milliseconds(delay));
+    light.setPositionTransition(options);
 }
 
 void Light::setColor(jni::JNIEnv& env, const jni::String& property) {
@@ -77,22 +77,22 @@ void Light::setColor(jni::JNIEnv& env, const jni::String& property) {
     }
 }
 
-jni::Local<jni::String> Light::getColor(jni::JNIEnv &env) {
+jni::Local<jni::String> Light::getColor(jni::JNIEnv& env) {
     auto color = light.getColor().asConstant();
     return jni::Make<jni::String>(env, color.stringify());
 }
 
 jni::Local<jni::Object<TransitionOptions>> Light::getColorTransition(jni::JNIEnv& env) {
-   using namespace mbgl::android::conversion;
-   mbgl::style::TransitionOptions options = light.getColorTransition();
-   return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+    using namespace mbgl::android::conversion;
+    mbgl::style::TransitionOptions options = light.getColorTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void Light::setColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-   mbgl::style::TransitionOptions options;
-   options.duration.emplace(mbgl::Milliseconds(duration));
-   options.delay.emplace(mbgl::Milliseconds(delay));
-   light.setColorTransition(options);
+    mbgl::style::TransitionOptions options;
+    options.duration.emplace(mbgl::Milliseconds(duration));
+    options.delay.emplace(mbgl::Milliseconds(delay));
+    light.setColorTransition(options);
 }
 
 void Light::setIntensity(jni::JNIEnv&, jni::jfloat property) {
@@ -104,16 +104,16 @@ jni::jfloat Light::getIntensity(jni::JNIEnv&) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> Light::getIntensityTransition(jni::JNIEnv& env) {
-   using namespace mbgl::android::conversion;
-   mbgl::style::TransitionOptions options = light.getIntensityTransition();
-   return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+    using namespace mbgl::android::conversion;
+    mbgl::style::TransitionOptions options = light.getIntensityTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void Light::setIntensityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-   mbgl::style::TransitionOptions options;
-   options.duration.emplace(mbgl::Milliseconds(duration));
-   options.delay.emplace(mbgl::Milliseconds(delay));
-   light.setIntensityTransition(options);
+    mbgl::style::TransitionOptions options;
+    options.duration.emplace(mbgl::Milliseconds(duration));
+    options.delay.emplace(mbgl::Milliseconds(delay));
+    light.setIntensityTransition(options);
 }
 
 void Light::registerNative(jni::JNIEnv& env) {
@@ -122,22 +122,24 @@ void Light::registerNative(jni::JNIEnv& env) {
 
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
     // Register the peer
-    jni::RegisterNativePeer<Light>(env, javaClass, "nativePtr",
-    METHOD(&Light::getAnchor, "nativeGetAnchor"),
-    METHOD(&Light::setAnchor, "nativeSetAnchor"),
-    METHOD(&Light::getPositionTransition, "nativeGetPositionTransition"),
-    METHOD(&Light::setPositionTransition, "nativeSetPositionTransition"),
-    METHOD(&Light::getPosition, "nativeGetPosition"),
-    METHOD(&Light::setPosition, "nativeSetPosition"),
-    METHOD(&Light::getColorTransition, "nativeGetColorTransition"),
-    METHOD(&Light::setColorTransition, "nativeSetColorTransition"),
-    METHOD(&Light::getColor, "nativeGetColor"),
-    METHOD(&Light::setColor, "nativeSetColor"),
-    METHOD(&Light::getIntensityTransition, "nativeGetIntensityTransition"),
-    METHOD(&Light::setIntensityTransition, "nativeSetIntensityTransition"),
-    METHOD(&Light::getIntensity, "nativeGetIntensity"),
-    METHOD(&Light::setIntensity, "nativeSetIntensity"));
+    jni::RegisterNativePeer<Light>(env,
+                                   javaClass,
+                                   "nativePtr",
+                                   METHOD(&Light::getAnchor, "nativeGetAnchor"),
+                                   METHOD(&Light::setAnchor, "nativeSetAnchor"),
+                                   METHOD(&Light::getPositionTransition, "nativeGetPositionTransition"),
+                                   METHOD(&Light::setPositionTransition, "nativeSetPositionTransition"),
+                                   METHOD(&Light::getPosition, "nativeGetPosition"),
+                                   METHOD(&Light::setPosition, "nativeSetPosition"),
+                                   METHOD(&Light::getColorTransition, "nativeGetColorTransition"),
+                                   METHOD(&Light::setColorTransition, "nativeSetColorTransition"),
+                                   METHOD(&Light::getColor, "nativeGetColor"),
+                                   METHOD(&Light::setColor, "nativeSetColor"),
+                                   METHOD(&Light::getIntensityTransition, "nativeGetIntensityTransition"),
+                                   METHOD(&Light::setIntensityTransition, "nativeSetIntensityTransition"),
+                                   METHOD(&Light::getIntensity, "nativeGetIntensity"),
+                                   METHOD(&Light::setIntensity, "nativeSetIntensity"));
 }
 
 } // namespace android
-} // namespace mb
+} // namespace mbgl

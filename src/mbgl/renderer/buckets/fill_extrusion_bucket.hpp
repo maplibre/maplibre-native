@@ -45,7 +45,7 @@ public:
 
     std::optional<gfx::VertexBuffer<FillExtrusionLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
-    
+
     std::unordered_map<std::string, FillExtrusionProgram::Binders> paintPropertyBinders;
 };
 

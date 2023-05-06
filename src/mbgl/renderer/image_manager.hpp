@@ -75,7 +75,10 @@ class ImageRequestor {
 public:
     explicit ImageRequestor(ImageManager&);
     virtual ~ImageRequestor();
-    virtual void onImagesAvailable(ImageMap icons, ImageMap patterns, ImageVersionMap versionMap, uint64_t imageCorrelationID) = 0;
+    virtual void onImagesAvailable(ImageMap icons,
+                                   ImageMap patterns,
+                                   ImageVersionMap versionMap,
+                                   uint64_t imageCorrelationID) = 0;
 
     void addPendingRequest(const std::string& imageId) { pendingRequests.insert(imageId); }
     bool hasPendingRequest(const std::string& imageId) const { return pendingRequests.count(imageId); }

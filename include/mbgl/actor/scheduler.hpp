@@ -94,7 +94,9 @@ protected:
         auto scheduled = [replyScheduler = std::move(replyScheduler), task, reply] {
             auto lock = replyScheduler.lock();
             if (!replyScheduler) return;
-            auto scheduledReply = [reply, result = task()] { reply(result); };
+            auto scheduledReply = [reply, result = task()] {
+                reply(result);
+            };
             replyScheduler->schedule(std::move(scheduledReply));
         };
 
@@ -102,4 +104,4 @@ protected:
     }
 };
 
-} /// namespace mbgl
+} // namespace mbgl

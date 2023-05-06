@@ -17,7 +17,7 @@ std::string lowercase(const std::string &string);
 std::string getCurrentThreadName();
 
 /// Set the name of the current thread, truncated at 15.
-void setCurrentThreadName(const std::string& name);
+void setCurrentThreadName(const std::string &name);
 
 /// Makes the current thread low priority.
 void makeThreadLowPriority();

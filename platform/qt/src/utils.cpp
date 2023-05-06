@@ -8,8 +8,11 @@
 #include <QOpenGLContext>
 
 // mbgl::NetworkStatus::Status
-static_assert(mbgl::underlying_type(QMapLibreGL::Online) == mbgl::underlying_type(mbgl::NetworkStatus::Status::Online), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Offline) == mbgl::underlying_type(mbgl::NetworkStatus::Status::Offline), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Online) == mbgl::underlying_type(mbgl::NetworkStatus::Status::Online),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Offline) ==
+                  mbgl::underlying_type(mbgl::NetworkStatus::Status::Offline),
+              "error");
 
 namespace QMapLibreGL {
 
@@ -27,8 +30,7 @@ namespace QMapLibreGL {
 
     Returns the current QMapLibreGL::NetworkMode.
 */
-NetworkMode networkMode()
-{
+NetworkMode networkMode() {
     return static_cast<NetworkMode>(mbgl::NetworkStatus::Get());
 }
 
@@ -40,34 +42,32 @@ NetworkMode networkMode()
     File source requests uses the available network when \a mode is set to \b
     Online, otherwise scoped to the local cache.
 */
-void setNetworkMode(NetworkMode mode)
-{
+void setNetworkMode(NetworkMode mode) {
     mbgl::NetworkStatus::Set(static_cast<mbgl::NetworkStatus::Status>(mode));
 }
 
 /*!
     Returns the amount of meters per pixel from a given \a latitude and \a zoom.
 */
-double metersPerPixelAtLatitude(double latitude, double zoom)
-{
+double metersPerPixelAtLatitude(double latitude, double zoom) {
     return mbgl::Projection::getMetersPerPixelAtLatitude(latitude, zoom);
 }
 
 /*!
     Return the projected meters for a given \a coordinate object.
 */
-ProjectedMeters projectedMetersForCoordinate(const Coordinate &coordinate)
-{
-    auto projectedMeters = mbgl::Projection::projectedMetersForLatLng(mbgl::LatLng { coordinate.first, coordinate.second });
+ProjectedMeters projectedMetersForCoordinate(const Coordinate &coordinate) {
+    auto projectedMeters = mbgl::Projection::projectedMetersForLatLng(
+        mbgl::LatLng{coordinate.first, coordinate.second});
     return ProjectedMeters(projectedMeters.northing(), projectedMeters.easting());
 }
 
 /*!
     Returns the coordinate for a given \a projectedMeters object.
 */
-Coordinate coordinateForProjectedMeters(const ProjectedMeters &projectedMeters)
-{
-    auto latLng = mbgl::Projection::latLngForProjectedMeters(mbgl::ProjectedMeters { projectedMeters.first, projectedMeters.second });
+Coordinate coordinateForProjectedMeters(const ProjectedMeters &projectedMeters) {
+    auto latLng = mbgl::Projection::latLngForProjectedMeters(
+        mbgl::ProjectedMeters{projectedMeters.first, projectedMeters.second});
     return Coordinate(latLng.latitude(), latLng.longitude());
 }
 

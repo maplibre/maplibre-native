@@ -42,30 +42,44 @@ template <class T>
 using Geometry = mapbox::geometry::geometry<T>;
 
 template <class S, class T>
-Point<S> convertPoint(const Point<T>& p) {
+Point<S> convertPoint(const Point<T> &p) {
     return Point<S>(static_cast<S>(p.x), static_cast<S>(p.y));
 }
 
 struct ToFeatureType {
-    FeatureType operator()(const EmptyGeometry&) const { return FeatureType::Unknown; }
+    FeatureType operator()(const EmptyGeometry &) const { return FeatureType::Unknown; }
     template <class T>
-    FeatureType operator()(const Point<T> &) const { return FeatureType::Point; }
+    FeatureType operator()(const Point<T> &) const {
+        return FeatureType::Point;
+    }
     template <class T>
-    FeatureType operator()(const MultiPoint<T> &) const { return FeatureType::Point; }
+    FeatureType operator()(const MultiPoint<T> &) const {
+        return FeatureType::Point;
+    }
     template <class T>
-    FeatureType operator()(const LineString<T> &) const { return FeatureType::LineString; }
+    FeatureType operator()(const LineString<T> &) const {
+        return FeatureType::LineString;
+    }
     template <class T>
-    FeatureType operator()(const MultiLineString<T> &) const { return FeatureType::LineString; }
+    FeatureType operator()(const MultiLineString<T> &) const {
+        return FeatureType::LineString;
+    }
     template <class T>
-    FeatureType operator()(const Polygon<T> &) const { return FeatureType::Polygon; }
+    FeatureType operator()(const Polygon<T> &) const {
+        return FeatureType::Polygon;
+    }
     template <class T>
-    FeatureType operator()(const MultiPolygon<T> &) const { return FeatureType::Polygon; }
+    FeatureType operator()(const MultiPolygon<T> &) const {
+        return FeatureType::Polygon;
+    }
     template <class T>
-    FeatureType operator()(const mapbox::geometry::geometry_collection<T> &) const { return FeatureType::Unknown; }
+    FeatureType operator()(const mapbox::geometry::geometry_collection<T> &) const {
+        return FeatureType::Unknown;
+    }
 };
 
 template <class T, typename F>
-auto forEachPoint(const Geometry<T>& g, F f) {
+auto forEachPoint(const Geometry<T> &g, F f) {
     mapbox::geometry::for_each_point(g, f);
 }
 

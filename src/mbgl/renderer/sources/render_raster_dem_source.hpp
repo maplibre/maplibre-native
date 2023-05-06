@@ -9,15 +9,14 @@ class RenderRasterDEMSource final : public RenderTileSetSource {
 public:
     explicit RenderRasterDEMSource(Immutable<style::RasterSource::Impl>);
 
-    std::unordered_map<std::string, std::vector<Feature>>
-    queryRenderedFeatures(const ScreenLineString& geometry,
-                          const TransformState& transformState,
-                          const std::unordered_map<std::string, const RenderLayer*>& layers,
-                          const RenderedQueryOptions& options,
-                          const mat4& projMatrix) const override;
+    std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
+        const ScreenLineString& geometry,
+        const TransformState& transformState,
+        const std::unordered_map<std::string, const RenderLayer*>& layers,
+        const RenderedQueryOptions& options,
+        const mat4& projMatrix) const override;
 
-    std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const override;
+    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const override;
 
 private:
     // RenderTileSetSource overrides

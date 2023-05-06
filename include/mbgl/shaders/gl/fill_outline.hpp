@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::FillOutlineProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::FillOutlineProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(attribute vec2 a_pos;
 
 uniform mat4 u_matrix;

@@ -30,7 +30,6 @@ public:
     const std::optional<Timestamp> expires;
     const MapDebugOptions debugMode;
 
-
     gfx::VertexVector<FillLayoutVertex> vertices;
     gfx::IndexVector<gfx::Lines> indices;
 

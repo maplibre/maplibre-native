@@ -15,9 +15,10 @@ namespace util {
 template <typename T>
 class AsyncQueue {
 public:
-    AsyncQueue(uv_loop_t *loop, std::function<void(T &)> fn) : callback(std::move(fn)) {
+    AsyncQueue(uv_loop_t *loop, std::function<void(T &)> fn)
+        : callback(std::move(fn)) {
         async.data = this;
-        uv_async_init(loop, &async, [](uv_async_t* handle) {
+        uv_async_init(loop, &async, [](uv_async_t *handle) {
             auto q = reinterpret_cast<AsyncQueue *>(handle->data);
             q->process();
         });

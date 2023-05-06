@@ -18,13 +18,16 @@ public:
 
 using PatternLayerMap = std::map<std::string, PatternDependency>;
 
-class PatternFeature  {
+class PatternFeature {
 public:
     PatternFeature(std::size_t i_,
                    std::unique_ptr<GeometryTileFeature> feature_,
                    PatternLayerMap patterns_,
                    float sortKey_ = 0.0f)
-        : i(i_), feature(std::move(feature_)), patterns(std::move(patterns_)), sortKey(sortKey_) {}
+        : i(i_),
+          feature(std::move(feature_)),
+          patterns(std::move(patterns_)),
+          sortKey(sortKey_) {}
 
     friend bool operator<(const PatternFeature& lhs, const PatternFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
 
@@ -171,7 +174,7 @@ public:
                       const bool /*showCollisionBoxes*/,
                       const CanonicalTileID& canonical) override {
         auto bucket = std::make_shared<BucketType>(layout, layerPropertiesMap, zoom, overscaling);
-        for (auto & patternFeature : features) {
+        for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
             std::unique_ptr<GeometryTileFeature> feature = std::move(patternFeature.feature);
             const PatternLayerMap& patterns = patternFeature.patterns;
@@ -182,7 +185,7 @@ public:
         }
         if (bucket->hasData()) {
             for (const auto& pair : layerPropertiesMap) {
-                renderData.emplace(pair.first, LayerRenderData {bucket, pair.second});
+                renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
             }
         }
     };

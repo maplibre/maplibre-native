@@ -196,8 +196,7 @@ TEST(Sprite, SpriteImageCreation1x) {
         EXPECT_EQ(18u, sprite->getImage().size.width);
         EXPECT_EQ(18u, sprite->getImage().size.height);
         EXPECT_EQ(1, sprite->getPixelRatio());
-        EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation1x-museum.png"),
-                  sprite->getImage());
+        EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation1x-museum.png"), sprite->getImage());
     }
 }
 
@@ -210,8 +209,7 @@ TEST(Sprite, SpriteImageCreation2x) {
     EXPECT_EQ(36u, sprite->getImage().size.width);
     EXPECT_EQ(36u, sprite->getImage().size.height);
     EXPECT_EQ(2, sprite->getPixelRatio());
-    EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation2x.png"),
-              sprite->getImage());
+    EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation2x.png"), sprite->getImage());
 }
 
 TEST(Sprite, SpriteImageCreation1_5x) {
@@ -223,8 +221,7 @@ TEST(Sprite, SpriteImageCreation1_5x) {
     EXPECT_EQ(36u, sprite->getImage().size.width);
     EXPECT_EQ(36u, sprite->getImage().size.height);
     EXPECT_EQ(1.5, sprite->getPixelRatio());
-    EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation1_5x-museum.png"),
-              sprite->getImage());
+    EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation1_5x-museum.png"), sprite->getImage());
 
     // "hospital_icon":{"x":314,"y":518,"width":36,"height":36,"pixelRatio":2,"sdf":false}
     const auto sprite2 = createStyleImage("test", image_2x, 314, 518, 35, 35, 1.5, false);
@@ -232,8 +229,7 @@ TEST(Sprite, SpriteImageCreation1_5x) {
     EXPECT_EQ(35u, sprite2->getImage().size.width);
     EXPECT_EQ(35u, sprite2->getImage().size.height);
     EXPECT_EQ(1.5, sprite2->getPixelRatio());
-    EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation1_5x-hospital.png"),
-              sprite2->getImage());
+    EXPECT_EQ(readImage("test/fixtures/annotations/result-spriteimagecreation1_5x-hospital.png"), sprite2->getImage());
 }
 
 TEST(Sprite, SpriteParsing) {
@@ -246,84 +242,84 @@ TEST(Sprite, SpriteParsing) {
     std::transform(
         images.begin(), images.end(), std::inserter(names, names.begin()), [](const auto& image) { return image->id; });
 
-    EXPECT_EQ(std::set<std::string>({ "airfield_icon",
-                                      "airport_icon",
-                                      "background",
-                                      "cemetery_icon",
-                                      "college_icon",
-                                      "default_1",
-                                      "default_2",
-                                      "default_3",
-                                      "default_4",
-                                      "default_5",
-                                      "default_6",
-                                      "default_marker",
-                                      "dlr",
-                                      "dlr.london-overground.london-underground.national-rail",
-                                      "dlr.london-underground",
-                                      "dlr.london-underground.national-rail",
-                                      "dlr.national-rail",
-                                      "dot",
-                                      "embassy_icon",
-                                      "fire-station_icon",
-                                      "generic-metro",
-                                      "generic-rail",
-                                      "generic_icon",
-                                      "golf_icon",
-                                      "government_icon",
-                                      "grass_pattern",
-                                      "harbor_icon",
-                                      "hospital_icon",
-                                      "hospital_striped",
-                                      "interstate_1",
-                                      "interstate_2",
-                                      "interstate_3",
-                                      "library_icon",
-                                      "london-overground",
-                                      "london-overground.london-underground",
-                                      "london-overground.london-underground.national-rail",
-                                      "london-overground.national-rail",
-                                      "london-underground",
-                                      "london-underground.national-rail",
-                                      "marker_icon",
-                                      "metro",
-                                      "metro.rer",
-                                      "monument_icon",
-                                      "moscow-metro",
-                                      "museum_icon",
-                                      "national-rail",
-                                      "oneway_motorway",
-                                      "oneway_road",
-                                      "park_icon",
-                                      "police_icon",
-                                      "post_icon",
-                                      "prison_icon",
-                                      "religious-christian_icon",
-                                      "religious-jewish_icon",
-                                      "religious-muslim_icon",
-                                      "rer",
-                                      "rer.transilien",
-                                      "s-bahn",
-                                      "s-bahn.u-bahn",
-                                      "sand_noise",
-                                      "school_icon",
-                                      "school_striped",
-                                      "secondary_marker",
-                                      "u-bahn",
-                                      "us_highway_1",
-                                      "us_highway_2",
-                                      "us_highway_3",
-                                      "us_state_1",
-                                      "us_state_2",
-                                      "us_state_3",
-                                      "washington-metro",
-                                      "wiener-linien",
-                                      "zoo_icon" }),
+    EXPECT_EQ(std::set<std::string>({"airfield_icon",
+                                     "airport_icon",
+                                     "background",
+                                     "cemetery_icon",
+                                     "college_icon",
+                                     "default_1",
+                                     "default_2",
+                                     "default_3",
+                                     "default_4",
+                                     "default_5",
+                                     "default_6",
+                                     "default_marker",
+                                     "dlr",
+                                     "dlr.london-overground.london-underground.national-rail",
+                                     "dlr.london-underground",
+                                     "dlr.london-underground.national-rail",
+                                     "dlr.national-rail",
+                                     "dot",
+                                     "embassy_icon",
+                                     "fire-station_icon",
+                                     "generic-metro",
+                                     "generic-rail",
+                                     "generic_icon",
+                                     "golf_icon",
+                                     "government_icon",
+                                     "grass_pattern",
+                                     "harbor_icon",
+                                     "hospital_icon",
+                                     "hospital_striped",
+                                     "interstate_1",
+                                     "interstate_2",
+                                     "interstate_3",
+                                     "library_icon",
+                                     "london-overground",
+                                     "london-overground.london-underground",
+                                     "london-overground.london-underground.national-rail",
+                                     "london-overground.national-rail",
+                                     "london-underground",
+                                     "london-underground.national-rail",
+                                     "marker_icon",
+                                     "metro",
+                                     "metro.rer",
+                                     "monument_icon",
+                                     "moscow-metro",
+                                     "museum_icon",
+                                     "national-rail",
+                                     "oneway_motorway",
+                                     "oneway_road",
+                                     "park_icon",
+                                     "police_icon",
+                                     "post_icon",
+                                     "prison_icon",
+                                     "religious-christian_icon",
+                                     "religious-jewish_icon",
+                                     "religious-muslim_icon",
+                                     "rer",
+                                     "rer.transilien",
+                                     "s-bahn",
+                                     "s-bahn.u-bahn",
+                                     "sand_noise",
+                                     "school_icon",
+                                     "school_striped",
+                                     "secondary_marker",
+                                     "u-bahn",
+                                     "us_highway_1",
+                                     "us_highway_2",
+                                     "us_highway_3",
+                                     "us_state_1",
+                                     "us_state_2",
+                                     "us_state_3",
+                                     "washington-metro",
+                                     "wiener-linien",
+                                     "zoo_icon"}),
               names);
 
     {
-        auto& sprite =
-            *std::find_if(images.begin(), images.end(), [](const auto& image) { return image->id == "generic-metro"; });
+        auto& sprite = *std::find_if(
+            images.begin(), images.end(), [](const auto& image) { return image->id == "generic-metro"; });
         EXPECT_EQ(18u, sprite->image.size.width);
         EXPECT_EQ(18u, sprite->image.size.height);
         EXPECT_EQ(1, sprite->pixelRatio);
@@ -339,9 +335,7 @@ TEST(Sprite, SpriteParsingInvalidJSON) {
         parseSprite(image_1x, json_1x);
         FAIL() << "Expected exception";
     } catch (std::runtime_error& err) {
-        EXPECT_STREQ(
-            "Failed to parse JSON: Missing a closing quotation mark in string. at offset 14",
-            err.what());
+        EXPECT_STREQ("Failed to parse JSON: Missing a closing quotation mark in string. at offset 14", err.what());
     }
 }
 

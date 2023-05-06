@@ -21,7 +21,7 @@ constexpr double kEpsilon = 1e-9;
 double roundForAccuracy(double x) {
     double round_x = std::round(x);
     double diff = std::abs(round_x - x);
-    if (diff < kEpsilon && diff > 0 ){
+    if (diff < kEpsilon && diff > 0) {
         return round_x;
     } else {
         return x;
@@ -30,7 +30,9 @@ double roundForAccuracy(double x) {
 } // namespace
 
 TransformState::TransformState(ConstrainMode constrainMode_, ViewportMode viewportMode_)
-    : bounds(LatLngBounds()), constrainMode(constrainMode_), viewportMode(viewportMode_) {}
+    : bounds(LatLngBounds()),
+      constrainMode(constrainMode_),
+      viewportMode(viewportMode_) {}
 
 void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.x) {
@@ -125,8 +127,8 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     updateCameraState();
 
     mat4 worldToCamera = camera.getWorldToCamera(scale, viewportMode == ViewportMode::FlippedY);
-    mat4 cameraToClip =
-        camera.getCameraToClipPerspective(getFieldOfView(), static_cast<double>(size.width) / size.height, nearZ, farZ);
+    mat4 cameraToClip = camera.getCameraToClipPerspective(
+        getFieldOfView(), static_cast<double>(size.width) / size.height, nearZ, farZ);
 
     // Move the center of perspective to center of specified edgeInsets.
     // Values are in range [-1, 1] where the upper and lower range values
@@ -811,10 +813,10 @@ float TransformState::maxPitchScaleFactor() const {
     if (size.isEmpty()) {
         return {};
     }
-    auto latLng = screenCoordinateToLatLng({ 0, static_cast<float>(getSize().height) });
+    auto latLng = screenCoordinateToLatLng({0, static_cast<float>(getSize().height)});
 
     Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
-    vec4 p = {{ pt.x, pt.y, 0, 1 }};
+    vec4 p = {{pt.x, pt.y, 0, 1}};
     vec4 topPoint;
     matrix::transformMat4(topPoint, p, getCoordMatrix());
     return static_cast<float>(topPoint[3]) / getCameraToCenterDistance();

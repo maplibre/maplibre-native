@@ -20,11 +20,10 @@ void SetThreadName(DWORD dwThreadID, const char* threadName) {
     info.dwFlags = 0;
 #pragma warning(push)
 
-#pragma warning(disable: 6320 6322)
+#pragma warning(disable : 6320 6322)
     __try {
         RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER){
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
     }
 #pragma warning(pop)
 }
@@ -50,24 +49,22 @@ namespace platform {
 std::string getCurrentThreadName() {
     THREAD_INFO* info = GetCurrentThreadInfo();
 
-    if (info && info->name)
-    {
+    if (info && info->name) {
         return std::string(info->name);
     }
-    
+
     return std::string();
 }
 
 void setCurrentThreadName(const std::string& name) {
     THREAD_INFO* info = GetCurrentThreadInfo();
 
-    if (info && info->name)
-    {
+    if (info && info->name) {
         free(info->name);
         info->name = new char[name.length() + 1];
         std::strcpy(info->name, name.c_str());
     }
-    
+
     SetThreadName(-1, name.c_str());
 }
 

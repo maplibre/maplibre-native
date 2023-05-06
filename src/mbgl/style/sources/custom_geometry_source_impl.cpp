@@ -11,7 +11,10 @@ CustomGeometrySource::Impl::Impl(std::string id_, const CustomGeometrySource::Op
       loaderRef({}) {}
 
 CustomGeometrySource::Impl::Impl(const Impl& impl, const ActorRef<CustomTileLoader>& loaderRef_)
-    : Source::Impl(impl), tileOptions(impl.tileOptions), zoomRange(impl.zoomRange), loaderRef(loaderRef_) {}
+    : Source::Impl(impl),
+      tileOptions(impl.tileOptions),
+      zoomRange(impl.zoomRange),
+      loaderRef(loaderRef_) {}
 
 bool CustomGeometrySource::Impl::operator!=(const Impl& other) const noexcept {
     return tileOptions != other.tileOptions || zoomRange != other.zoomRange || bool(loaderRef) != bool(other.loaderRef);

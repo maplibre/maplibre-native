@@ -12,7 +12,7 @@ Renderer::Renderer(gfx::RendererBackend& backend, float pixelRatio_, const std::
     : impl(std::make_unique<Impl>(backend, pixelRatio_, localFontFamily_)) {}
 
 Renderer::~Renderer() {
-    gfx::BackendScope guard { impl->backend };
+    gfx::BackendScope guard{impl->backend};
     impl.reset();
 }
 
@@ -33,25 +33,19 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
     }
 }
 
-std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenLineString& geometry, const RenderedQueryOptions& options) const {
+std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenLineString& geometry,
+                                                     const RenderedQueryOptions& options) const {
     return impl->orchestrator.queryRenderedFeatures(geometry, options);
 }
 
-std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenCoordinate& point, const RenderedQueryOptions& options) const {
-    return impl->orchestrator.queryRenderedFeatures({ point }, options);
+std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenCoordinate& point,
+                                                     const RenderedQueryOptions& options) const {
+    return impl->orchestrator.queryRenderedFeatures({point}, options);
 }
 
 std::vector<Feature> Renderer::queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options) const {
     return impl->orchestrator.queryRenderedFeatures(
-            {
-                    box.min,
-                    {box.max.x, box.min.y},
-                    box.max,
-                    {box.min.x, box.max.y},
-                    box.min
-            },
-            options
-    );
+        {box.min, {box.max.x, box.min.y}, box.max, {box.min.x, box.max.y}, box.min}, options);
 }
 
 AnnotationIDs Renderer::queryPointAnnotations(const ScreenBox& box) const {
@@ -59,7 +53,7 @@ AnnotationIDs Renderer::queryPointAnnotations(const ScreenBox& box) const {
         return {};
     }
     RenderedQueryOptions options;
-    options.layerIDs = {{ AnnotationManager::PointLayerID }};
+    options.layerIDs = {{AnnotationManager::PointLayerID}};
     auto features = queryRenderedFeatures(box, options);
     return getAnnotationIDs(features);
 }
@@ -68,22 +62,17 @@ AnnotationIDs Renderer::queryShapeAnnotations(const ScreenBox& box) const {
     if (!LayerManager::annotationsEnabled) {
         return {};
     }
-    auto features = impl->orchestrator.queryShapeAnnotations({
-        box.min,
-        {box.max.x, box.min.y},
-        box.max,
-        {box.min.x, box.max.y},
-        box.min
-    });
+    auto features = impl->orchestrator.queryShapeAnnotations(
+        {box.min, {box.max.x, box.min.y}, box.max, {box.min.x, box.max.y}, box.min});
     return getAnnotationIDs(features);
 }
-    
+
 AnnotationIDs Renderer::getAnnotationIDs(const std::vector<Feature>& features) const {
     if (!LayerManager::annotationsEnabled) {
         return {};
     }
     std::set<AnnotationID> set;
-    for (auto &feature : features) {
+    for (auto& feature : features) {
         assert(feature.id.is<uint64_t>());
         assert(feature.id.get<uint64_t>() <= std::numeric_limits<AnnotationID>::max());
         set.insert(static_cast<AnnotationID>(feature.id.get<uint64_t>()));
@@ -94,7 +83,8 @@ AnnotationIDs Renderer::getAnnotationIDs(const std::vector<Feature>& features) c
     return ids;
 }
 
-std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options) const {
+std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID,
+                                                   const SourceQueryOptions& options) const {
     return impl->orchestrator.querySourceFeatures(sourceID, options);
 }
 
@@ -106,18 +96,24 @@ FeatureExtensionValue Renderer::queryFeatureExtensions(const std::string& source
     return impl->orchestrator.queryFeatureExtensions(sourceID, feature, extension, extensionField, args);
 }
 
-void Renderer::setFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
-                               const std::string& featureID, const FeatureState& state) {
+void Renderer::setFeatureState(const std::string& sourceID,
+                               const std::optional<std::string>& sourceLayerID,
+                               const std::string& featureID,
+                               const FeatureState& state) {
     impl->orchestrator.setFeatureState(sourceID, sourceLayerID, featureID, state);
 }
 
-void Renderer::getFeatureState(FeatureState& state, const std::string& sourceID,
-                               const std::optional<std::string>& sourceLayerID, const std::string& featureID) const {
+void Renderer::getFeatureState(FeatureState& state,
+                               const std::string& sourceID,
+                               const std::optional<std::string>& sourceLayerID,
+                               const std::string& featureID) const {
     impl->orchestrator.getFeatureState(state, sourceID, sourceLayerID, featureID);
 }
 
-void Renderer::removeFeatureState(const std::string& sourceID, const std::optional<std::string>& sourceLayerID,
-                                  const std::optional<std::string>& featureID, const std::optional<std::string>& stateKey) {
+void Renderer::removeFeatureState(const std::string& sourceID,
+                                  const std::optional<std::string>& sourceLayerID,
+                                  const std::optional<std::string>& featureID,
+                                  const std::optional<std::string>& stateKey) {
     impl->orchestrator.removeFeatureState(sourceID, sourceLayerID, featureID, stateKey);
 }
 
@@ -134,7 +130,7 @@ const std::vector<PlacedSymbolData>& Renderer::getPlacedSymbolsData() const {
 }
 
 void Renderer::reduceMemoryUse() {
-    gfx::BackendScope guard { impl->backend };
+    gfx::BackendScope guard{impl->backend};
     impl->reduceMemoryUse();
     impl->orchestrator.reduceMemoryUse();
 }
