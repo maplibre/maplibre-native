@@ -27,9 +27,7 @@ public:
 
     void deactivateContext() { context.doneCurrent(); }
 
-    bool glNeedsActiveContextOnDestruction() const {
-        return true;
-    }
+    bool glNeedsActiveContextOnDestruction() const { return true; }
 
 private:
     QOpenGLContext context;
