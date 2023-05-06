@@ -11,8 +11,7 @@ class Texture;
 class OffscreenTexture : public gfx::Renderable {
 protected:
     OffscreenTexture(const Size size_, std::unique_ptr<RenderableResource> resource_)
-        : gfx::Renderable(size_, std::move(resource_)) {
-    }
+        : gfx::Renderable(size_, std::move(resource_)) {}
 
 public:
     ~OffscreenTexture() override = default;

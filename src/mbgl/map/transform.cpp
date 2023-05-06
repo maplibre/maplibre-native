@@ -17,9 +17,9 @@
 
 namespace mbgl {
 
-/** Converts the given angle (in radians) to be numerically close to the anchor angle, allowing it to be interpolated properly without sudden jumps. */
-static double _normalizeAngle(double angle, double anchorAngle)
-{
+/** Converts the given angle (in radians) to be numerically close to the anchor angle, allowing it to be interpolated
+ * properly without sudden jumps. */
+static double _normalizeAngle(double angle, double anchorAngle) {
     if (std::isnan(angle) || std::isnan(anchorAngle)) {
         return 0;
     }
@@ -37,11 +37,9 @@ static double _normalizeAngle(double angle, double anchorAngle)
     return angle;
 }
 
-Transform::Transform(MapObserver& observer_,
-                     ConstrainMode constrainMode,
-                     ViewportMode viewportMode)
-    : observer(observer_), state(constrainMode, viewportMode) {
-}
+Transform::Transform(MapObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
+    : observer(observer_),
+      state(constrainMode, viewportMode) {}
 
 // MARK: - Map View
 
@@ -259,19 +257,16 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
         Assumes an angular field of view of 2 arctan ½ ≈ 53°. */
     auto w = [=](double s) {
-        return (isClose ? std::exp((w1 < w0 ? -1 : 1) * rho * s)
-                : (std::cosh(r0) / std::cosh(r0 + rho * s)));
+        return (isClose ? std::exp((w1 < w0 ? -1 : 1) * rho * s) : (std::cosh(r0) / std::cosh(r0 + rho * s)));
     };
     /// u(s): Returns the distance along the flight path as projected onto the
     /// ground plane, measured in pixels from the world image origin at the
     /// initial scale.
     auto u = [=](double s) {
-        return (isClose ? 0.
-                : (w0 * (std::cosh(r0) * std::tanh(r0 + rho * s) - std::sinh(r0)) / rho2 / u1));
+        return (isClose ? 0. : (w0 * (std::cosh(r0) * std::tanh(r0 + rho * s) - std::sinh(r0)) / rho2 / u1));
     };
     /// S: Total length of the flight path, measured in ρ-screenfuls.
-    double S = (isClose ? (std::abs(std::log(w1 / w0)) / rho)
-                : ((r1 - r0) / rho));
+    double S = (isClose ? (std::abs(std::log(w1 / w0)) / rho) : ((r1 - r0) / rho));
 
     Duration duration;
     if (animation.duration) {
@@ -310,8 +305,8 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
             // Calculate the current point and zoom level along the flight path.
             Point<double> framePoint = util::interpolate(startPoint, endPoint, us);
-            double frameZoom =
-                linearZoomInterpolation ? util::interpolate(startZoom, zoom, k) : startZoom + state.scaleZoom(1 / w(s));
+            double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, k)
+                                                       : startZoom + state.scaleZoom(1 / w(s));
 
             // Zoom can be NaN if size is empty.
             if (std::isnan(frameZoom)) {
@@ -345,8 +340,8 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
 void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& animation) {
     ScreenCoordinate centerOffset = {offset.x, offset.y};
-    ScreenCoordinate pointOnScreen =
-        state.getEdgeInsets().getCenter(state.getSize().width, state.getSize().height) - centerOffset;
+    ScreenCoordinate pointOnScreen = state.getEdgeInsets().getCenter(state.getSize().width, state.getSize().height) -
+                                     centerOffset;
     // Use unwrapped LatLng to carry information about moveBy direction.
     easeTo(CameraOptions().withCenter(screenCoordinateToLatLng(pointOnScreen, LatLng::Unwrapped)), animation);
 }
@@ -384,8 +379,8 @@ void Transform::setMinPitch(const double minPitch) {
     if (std::isnan(minPitch)) return;
     if (minPitch * util::DEG2RAD_D < util::PITCH_MIN) {
         Log::Warning(Event::General,
-                     "Trying to set minimum pitch below the limit (" + std::to_string(util::PITCH_MIN * util::RAD2DEG_D) + 
-                     " degrees), the value will be clamped.");
+                     "Trying to set minimum pitch below the limit (" +
+                         std::to_string(util::PITCH_MIN * util::RAD2DEG_D) + " degrees), the value will be clamped.");
     }
     state.setMinPitch(minPitch * util::DEG2RAD_D);
 }
@@ -394,8 +389,8 @@ void Transform::setMaxPitch(const double maxPitch) {
     if (std::isnan(maxPitch)) return;
     if (maxPitch * util::DEG2RAD_D > util::PITCH_MAX) {
         Log::Warning(Event::General,
-                     "Trying to set maximum pitch above the limit (" + std::to_string(util::PITCH_MAX * util::RAD2DEG_D) +
-                     " degrees), the value will be clamped.");
+                     "Trying to set maximum pitch above the limit (" +
+                         std::to_string(util::PITCH_MAX * util::RAD2DEG_D) + " degrees), the value will be clamped.");
     }
     state.setMaxPitch(maxPitch * util::DEG2RAD_D);
 }
@@ -418,7 +413,8 @@ void Transform::rotateBy(const ScreenCoordinate& first,
         center.y = first.y + std::sin(rotateBearing) * heightOffset;
     }
 
-    const double bearing = -(state.getBearing() + util::angle_between(first - center, second - center)) * util::RAD2DEG_D;
+    const double bearing = -(state.getBearing() + util::angle_between(first - center, second - center)) *
+                           util::RAD2DEG_D;
     easeTo(CameraOptions().withBearing(bearing), animation);
 }
 
@@ -567,7 +563,6 @@ bool Transform::inTransition() const {
 }
 
 void Transform::updateTransitions(const TimePoint& now) {
-
     // Use a temporary function to ensure that the transitionFrameFn lambda is
     // called only once per update.
 

@@ -39,7 +39,8 @@ namespace mbgl {
 
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
-    explicit LocationIndicatorRenderParameters(const TransformParameters& tp) : state(&tp.state) {}
+    explicit LocationIndicatorRenderParameters(const TransformParameters& tp)
+        : state(&tp.state) {}
     LocationIndicatorRenderParameters(const LocationIndicatorRenderParameters& o) = default;
     LocationIndicatorRenderParameters& operator=(const LocationIndicatorRenderParameters& o) = default;
 
@@ -75,9 +76,13 @@ protected:
         GLfloat x = 0.0f;
         GLfloat y = 0.0f;
 
-        vec2(GLfloat x_, GLfloat y_) : x(x_), y(y_) {}
+        vec2(GLfloat x_, GLfloat y_)
+            : x(x_),
+              y(y_) {}
         vec2() = default;
-        explicit vec2(const Point<double>& p) : x(static_cast<GLfloat>(p.x)), y(static_cast<GLfloat>(p.y)) {}
+        explicit vec2(const Point<double>& p)
+            : x(static_cast<GLfloat>(p.x)),
+              y(static_cast<GLfloat>(p.y)) {}
         vec2(const vec2& o) = default;
         vec2(vec2&& o) = default;
         vec2& operator=(vec2&& o) = default;
@@ -102,7 +107,9 @@ protected:
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::wrap<float>(static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)) * util::RAD2DEG_F;
+            return util::wrap<float>(
+                       static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)) *
+                   util::RAD2DEG_F;
         }
         Point<double> toPoint() const { return {x, y}; }
 
@@ -447,8 +454,8 @@ public:
         featureEnvelope->clear();
         if (!texPuck || !texPuck->isValid()) return;
 
-        feature->geometry =
-            mapbox::geometry::point<double>{oldParams.puckPosition.latitude(), oldParams.puckPosition.longitude()};
+        feature->geometry = mapbox::geometry::point<double>{oldParams.puckPosition.latitude(),
+                                                            oldParams.puckPosition.longitude()};
         mapbox::geometry::linear_ring<int64_t> border;
         for (const auto& v : puckGeometry) {
             vec4 p{{v.x, v.y, 0, 1}};
@@ -483,12 +490,14 @@ protected:
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         const auto numVtxCircumference = static_cast<unsigned long>(circle.size() - 1);
-        const float bearingStep = 360.0f / static_cast<float>(numVtxCircumference - 1); // first and last points are the same
+        const float bearingStep = 360.0f /
+                                  static_cast<float>(numVtxCircumference - 1); // first and last points are the same
         const mapbox::cheap_ruler::point centerPoint(params.puckPosition.longitude(), params.puckPosition.latitude());
         Point<double> center = project(params.puckPosition, s);
         circle[0] = {0, 0};
 
-        const auto mapBearing = static_cast<float>(util::wrap(util::RAD2DEG_D * params.bearing, 0.0, util::DEGREES_MAX));
+        const auto mapBearing = static_cast<float>(
+            util::wrap(util::RAD2DEG_D * params.bearing, 0.0, util::DEGREES_MAX));
         for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
             const float bearing_ = static_cast<float>(i - 1) * bearingStep - mapBearing;
             Point<double> poc = ruler.destination(centerPoint, params.errorRadiusMeters, bearing_);
@@ -596,18 +605,17 @@ protected:
         for (unsigned long i = 0; i < 4; ++i) {
             const auto b = util::wrap<float>(static_cast<float>(params.puckBearing) + bearings[i], 0.0f, 360.0f);
 
-            const Point<double> cornerDirection{std::sin(util::DEG2RAD_D * b),
-                                                -std::cos(util::DEG2RAD_D * b)};
+            const Point<double> cornerDirection{std::sin(util::DEG2RAD_D * b), -std::cos(util::DEG2RAD_D * b)};
 
             Point<double> shadowOffset = cornerDirection * shadowRadius;
             Point<double> puckOffset = cornerDirection * puckRadius;
             Point<double> hatOffset = cornerDirection * hatRadius;
 
-            shadowGeometry[i] =
-                vec2(shadowOffset + (verticalShift * (tilt * -params.puckLayersDisplacement * horizontalScaleFactor)));
+            shadowGeometry[i] = vec2(shadowOffset +
+                                     (verticalShift * (tilt * -params.puckLayersDisplacement * horizontalScaleFactor)));
             puckGeometry[i] = vec2(puckOffset);
-            hatGeometry[i] =
-                vec2(hatOffset + (verticalShift * (tilt * params.puckLayersDisplacement * horizontalScaleFactor)));
+            hatGeometry[i] = vec2(hatOffset +
+                                  (verticalShift * (tilt * params.puckLayersDisplacement * horizontalScaleFactor)));
         }
     }
 

@@ -5,13 +5,13 @@
 namespace QMapLibreGL::GeoJSON {
 
 mbgl::Point<double> asPoint(const Coordinate &coordinate) {
-    return mbgl::Point<double> { coordinate.second, coordinate.first };
+    return mbgl::Point<double>{coordinate.second, coordinate.first};
 }
 
 mbgl::MultiPoint<double> asMultiPoint(const Coordinates &multiPoint) {
     mbgl::MultiPoint<double> mbglMultiPoint;
     mbglMultiPoint.reserve(multiPoint.size());
-    for (const auto &point: multiPoint) {
+    for (const auto &point : multiPoint) {
         mbglMultiPoint.emplace_back(asPoint(point));
     }
     return mbglMultiPoint;
@@ -41,7 +41,7 @@ mbgl::Polygon<double> asPolygon(const CoordinatesCollection &polygon) {
     for (const auto &linearRing : polygon) {
         mbgl::LinearRing<double> mbglLinearRing;
         mbglLinearRing.reserve(linearRing.size());
-        for (const auto &coordinate: linearRing) {
+        for (const auto &coordinate : linearRing) {
             mbglLinearRing.emplace_back(asPoint(coordinate));
         }
         mbglPolygon.emplace_back(std::move(mbglLinearRing));
@@ -62,7 +62,7 @@ mbgl::Value asPropertyValue(const QVariant &value) {
     auto valueList = [](const QVariantList &list) {
         std::vector<mbgl::Value> mbglList;
         mbglList.reserve(list.size());
-        for (const auto& listValue : list) {
+        for (const auto &listValue : list) {
             mbglList.emplace_back(asPropertyValue(listValue));
         }
         return mbglList;
@@ -82,25 +82,25 @@ mbgl::Value asPropertyValue(const QVariant &value) {
 #else
     switch (static_cast<QMetaType::Type>(value.type())) {
 #endif
-    case QMetaType::UnknownType:
-        return mbgl::NullValue {};
-    case QMetaType::Bool:
-        return { value.toBool() };
-    case QMetaType::ULongLong:
-        return { uint64_t(value.toULongLong()) };
-    case QMetaType::LongLong:
-        return { int64_t(value.toLongLong()) };
-    case QMetaType::Double:
-        return { value.toDouble() };
-    case QMetaType::QString:
-        return { value.toString().toStdString() };
-    case QMetaType::QVariantList:
-        return valueList(value.toList());
-    case QMetaType::QVariantMap:
-        return valueMap(value.toMap());
-    default:
-        qWarning() << "Unsupported feature property value:" << value;
-        return {};
+        case QMetaType::UnknownType:
+            return mbgl::NullValue{};
+        case QMetaType::Bool:
+            return {value.toBool()};
+        case QMetaType::ULongLong:
+            return {uint64_t(value.toULongLong())};
+        case QMetaType::LongLong:
+            return {int64_t(value.toLongLong())};
+        case QMetaType::Double:
+            return {value.toDouble()};
+        case QMetaType::QString:
+            return {value.toString().toStdString()};
+        case QMetaType::QVariantList:
+            return valueList(value.toList());
+        case QMetaType::QVariantMap:
+            return valueMap(value.toMap());
+        default:
+            qWarning() << "Unsupported feature property value:" << value;
+            return {};
     }
 }
 
@@ -110,19 +110,19 @@ mbgl::FeatureIdentifier asFeatureIdentifier(const QVariant &id) {
 #else
     switch (static_cast<QMetaType::Type>(id.type())) {
 #endif
-    case QMetaType::UnknownType:
-        return {};
-    case QMetaType::ULongLong:
-        return { uint64_t(id.toULongLong()) };
-    case QMetaType::LongLong:
-        return { int64_t(id.toLongLong()) };
-    case QMetaType::Double:
-        return { id.toDouble() };
-    case QMetaType::QString:
-        return { id.toString().toStdString() };
-    default:
-        qWarning() << "Unsupported feature identifier:" << id;
-        return {};
+        case QMetaType::UnknownType:
+            return {};
+        case QMetaType::ULongLong:
+            return {uint64_t(id.toULongLong())};
+        case QMetaType::LongLong:
+            return {int64_t(id.toLongLong())};
+        case QMetaType::Double:
+            return {id.toDouble()};
+        case QMetaType::QString:
+            return {id.toString().toStdString()};
+        default:
+            qWarning() << "Unsupported feature identifier:" << id;
+            return {};
     }
 }
 
@@ -138,23 +138,23 @@ mbgl::GeoJSONFeature asFeature(const Feature &feature) {
     if (feature.type == Feature::PointType) {
         const Coordinates &points = feature.geometry.first().first();
         if (points.size() == 1) {
-            return { asPoint(points.first()), std::move(properties), std::move(id) };
+            return {asPoint(points.first()), std::move(properties), std::move(id)};
         } else {
-            return { asMultiPoint(points), std::move(properties), std::move(id) };
+            return {asMultiPoint(points), std::move(properties), std::move(id)};
         }
     } else if (feature.type == Feature::LineStringType) {
         const CoordinatesCollection &lineStrings = feature.geometry.first();
         if (lineStrings.size() == 1) {
-            return { asLineString(lineStrings.first()), std::move(properties), std::move(id) };
+            return {asLineString(lineStrings.first()), std::move(properties), std::move(id)};
         } else {
-            return { asMultiLineString(lineStrings), std::move(properties), std::move(id) };
+            return {asMultiLineString(lineStrings), std::move(properties), std::move(id)};
         }
     } else { // PolygonType
         const CoordinatesCollections &polygons = feature.geometry;
         if (polygons.size() == 1) {
-            return { asPolygon(polygons.first()), std::move(properties), std::move(id) };
+            return {asPolygon(polygons.first()), std::move(properties), std::move(id)};
         } else {
-            return { asMultiPolygon(polygons), std::move(properties), std::move(id) };
+            return {asMultiPolygon(polygons), std::move(properties), std::move(id)};
         }
     }
 };

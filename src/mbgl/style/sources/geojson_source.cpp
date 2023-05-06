@@ -20,7 +20,8 @@ Immutable<GeoJSONOptions> GeoJSONOptions::defaultOptions() {
 }
 
 GeoJSONSource::GeoJSONSource(std::string id, Immutable<GeoJSONOptions> options)
-    : Source(makeMutable<Impl>(std::move(id), std::move(options))), threadPool(Scheduler::GetBackground()) {}
+    : Source(makeMutable<Impl>(std::move(id), std::move(options))),
+      threadPool(Scheduler::GetBackground()) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
 
@@ -81,13 +82,11 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
 
     req = fileSource.request(Resource::source(*url), [this](const Response& res) {
         if (res.error) {
-            observer->onSourceError(
-                *this, std::make_exception_ptr(std::runtime_error(res.error->message)));
+            observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
-            observer->onSourceError(
-                *this, std::make_exception_ptr(std::runtime_error("unexpectedly empty GeoJSON")));
+            observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error("unexpectedly empty GeoJSON")));
         } else {
             auto makeImplInBackground = [currentImpl = baseImpl, data = res.data]() -> Immutable<Source::Impl> {
                 assert(data);

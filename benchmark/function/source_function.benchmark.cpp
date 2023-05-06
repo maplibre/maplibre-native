@@ -28,7 +28,8 @@ static void Parse_SourceFunction(benchmark::State& state) {
         state.PauseTiming();
         auto doc = createFunctionJSON(stopCount);
         state.ResumeTiming();
-        std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(doc, error, true, false);
+        std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(
+            doc, error, true, false);
         if (!result) {
             state.SkipWithError(error.message.c_str());
         }
@@ -40,22 +41,20 @@ static void Evaluate_SourceFunction(benchmark::State& state) {
     size_t stopCount = state.range(0);
     auto doc = createFunctionJSON(stopCount);
     conversion::Error error;
-    std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(doc, error, true, false);
+    std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(
+        doc, error, true, false);
     if (!function) {
         state.SkipWithError(error.message.c_str());
     }
 
-    while(state.KeepRunning()) {
-        function->asExpression().evaluate(StubGeometryTileFeature(PropertyMap { { "x", static_cast<int64_t>(rand() % 100) } }), -1.0f);
+    while (state.KeepRunning()) {
+        function->asExpression().evaluate(
+            StubGeometryTileFeature(PropertyMap{{"x", static_cast<int64_t>(rand() % 100)}}), -1.0f);
     }
 
     state.SetLabel(std::to_string(stopCount).c_str());
 }
 
-BENCHMARK(Parse_SourceFunction)
-    ->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);
+BENCHMARK(Parse_SourceFunction)->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);
 
-BENCHMARK(Evaluate_SourceFunction)
-    ->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);
-
-
+BENCHMARK(Evaluate_SourceFunction)->Arg(1)->Arg(2)->Arg(4)->Arg(6)->Arg(8)->Arg(10)->Arg(12);

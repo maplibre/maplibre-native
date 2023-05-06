@@ -57,13 +57,12 @@ public:
 
     template <class... Args>
     Actor(std::shared_ptr<Scheduler> scheduler, Args&&... args)
-        : retainer(std::move(scheduler)), target(*retainer, parent, std::forward<Args>(args)...) {}
+        : retainer(std::move(scheduler)),
+          target(*retainer, parent, std::forward<Args>(args)...) {}
 
     Actor(const Actor&) = delete;
 
-    ActorRef<std::decay_t<Object>> self() {
-        return parent.self();
-    }
+    ActorRef<std::decay_t<Object>> self() { return parent.self(); }
 
 private:
     std::shared_ptr<Scheduler> retainer;

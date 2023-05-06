@@ -7,9 +7,7 @@
 namespace mbgl {
 
 template <class T, class Eq>
-StyleDifference<T> diff(const Immutable<std::vector<T>>& a,
-                        const Immutable<std::vector<T>>& b,
-                        const Eq& eq) {
+StyleDifference<T> diff(const Immutable<std::vector<T>>& a, const Immutable<std::vector<T>>& b, const Eq& eq) {
     StyleDifference<T> result;
 
     if (a == b) {
@@ -33,7 +31,7 @@ StyleDifference<T> diff(const Immutable<std::vector<T>>& a,
             bIt++;
         } else {
             if (aIt->get() != bIt->get()) {
-                result.changed.emplace((*bIt)->id, StyleChange<T> { *aIt, *bIt });
+                result.changed.emplace((*bIt)->id, StyleChange<T>{*aIt, *bIt});
             }
             aIt++;
             bIt++;
@@ -46,32 +44,27 @@ StyleDifference<T> diff(const Immutable<std::vector<T>>& a,
 
 ImageDifference diffImages(const Immutable<std::vector<ImmutableImage>>& a,
                            const Immutable<std::vector<ImmutableImage>>& b) {
-    return diff(a, b, [] (const ImmutableImage& lhs, const ImmutableImage& rhs) {
-        return lhs->id == rhs->id;
-    });
+    return diff(a, b, [](const ImmutableImage& lhs, const ImmutableImage& rhs) { return lhs->id == rhs->id; });
 }
 
 SourceDifference diffSources(const Immutable<std::vector<ImmutableSource>>& a,
                              const Immutable<std::vector<ImmutableSource>>& b) {
-    return diff(a, b, [] (const ImmutableSource& lhs, const ImmutableSource& rhs) {
-        return std::tie(lhs->id, lhs->type)
-            == std::tie(rhs->id, rhs->type);
+    return diff(a, b, [](const ImmutableSource& lhs, const ImmutableSource& rhs) {
+        return std::tie(lhs->id, lhs->type) == std::tie(rhs->id, rhs->type);
     });
 }
 
 LayerDifference diffLayers(const Immutable<std::vector<ImmutableLayer>>& a,
                            const Immutable<std::vector<ImmutableLayer>>& b) {
-    return diff(a, b, [] (const ImmutableLayer& lhs, const ImmutableLayer& rhs) {
+    return diff(a, b, [](const ImmutableLayer& lhs, const ImmutableLayer& rhs) {
         return (lhs->id == rhs->id) && (lhs->getTypeInfo() == rhs->getTypeInfo());
     });
 }
 
 bool hasLayoutDifference(const LayerDifference& layerDiff, const std::string& layerID) {
-    if (layerDiff.added.count(layerID))
-        return true;
+    if (layerDiff.added.count(layerID)) return true;
     const auto it = layerDiff.changed.find(layerID);
-    if (it == layerDiff.changed.end())
-        return false;
+    if (it == layerDiff.changed.end()) return false;
     return it->second.before->hasLayoutDifference(*it->second.after);
 }
 

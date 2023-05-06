@@ -5,8 +5,7 @@
 #include <sstream>
 #include <array>
 
-extern "C"
-{
+extern "C" {
 #include <jpeglib.h>
 }
 
@@ -38,13 +37,10 @@ static void skip(j_decompress_ptr cinfo, long count) {
     if (count <= 0) return; // A zero or negative skip count should be treated as a no-op.
     auto* wrap = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
 
-    if (wrap->manager.bytes_in_buffer > 0 && count < static_cast<long>(wrap->manager.bytes_in_buffer))
-    {
+    if (wrap->manager.bytes_in_buffer > 0 && count < static_cast<long>(wrap->manager.bytes_in_buffer)) {
         wrap->manager.bytes_in_buffer -= count;
         wrap->manager.next_input_byte = &wrap->buffer[BUF_SIZE - wrap->manager.bytes_in_buffer];
-    }
-    else
-    {
+    } else {
         wrap->stream->seekg(count - wrap->manager.bytes_in_buffer, std::ios_base::cur);
         // trigger buffer fill
         wrap->manager.next_input_byte = nullptr;
@@ -59,7 +55,7 @@ static void attach_stream(j_decompress_ptr cinfo, std::istream* in) {
         cinfo->src = static_cast<struct jpeg_source_mgr*>((*cinfo->mem->alloc_small)(
             reinterpret_cast<j_common_ptr>(cinfo), JPOOL_PERMANENT, sizeof(jpeg_stream_wrapper)));
     }
-    auto * src = reinterpret_cast<jpeg_stream_wrapper*> (cinfo->src);
+    auto* src = reinterpret_cast<jpeg_stream_wrapper*>(cinfo->src);
     src->manager.init_source = init_source;
     src->manager.fill_input_buffer = fill_input_buffer;
     src->manager.skip_input_data = skip;
@@ -79,17 +75,16 @@ static void on_error_message(j_common_ptr cinfo) {
 }
 
 struct jpeg_info_guard {
-    explicit jpeg_info_guard(jpeg_decompress_struct* cinfo) : i_(cinfo) {}
+    explicit jpeg_info_guard(jpeg_decompress_struct* cinfo)
+        : i_(cinfo) {}
 
-    ~jpeg_info_guard() {
-        jpeg_destroy_decompress(i_);
-    }
+    ~jpeg_info_guard() { jpeg_destroy_decompress(i_); }
 
     jpeg_decompress_struct* i_;
 };
 
 PremultipliedImage decodeJPEG(const uint8_t* data, size_t size) {
-    util::CharArrayBuffer dataBuffer { reinterpret_cast<const char*>(data), size };
+    util::CharArrayBuffer dataBuffer{reinterpret_cast<const char*>(data), size};
     std::istream stream(&dataBuffer);
 
     jpeg_decompress_struct cinfo;
@@ -102,8 +97,7 @@ PremultipliedImage decodeJPEG(const uint8_t* data, size_t size) {
     attach_stream(&cinfo, &stream);
 
     int ret = jpeg_read_header(&cinfo, TRUE);
-    if (ret != JPEG_HEADER_OK)
-        throw std::runtime_error("JPEG Reader: failed to read header");
+    if (ret != JPEG_HEADER_OK) throw std::runtime_error("JPEG Reader: failed to read header");
 
     jpeg_start_decompress(&cinfo);
 
@@ -118,10 +112,11 @@ PremultipliedImage decodeJPEG(const uint8_t* data, size_t size) {
     size_t components = cinfo.output_components;
     size_t rowStride = components * width;
 
-    PremultipliedImage image({ static_cast<uint32_t>(width), static_cast<uint32_t>(height) });
+    PremultipliedImage image({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
     uint8_t* dst = image.data.get();
 
-    JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)(reinterpret_cast<j_common_ptr>(&cinfo), JPOOL_IMAGE, static_cast<JDIMENSION>(rowStride), 1);
+    JSAMPARRAY buffer = (*cinfo.mem->alloc_sarray)(
+        reinterpret_cast<j_common_ptr>(&cinfo), JPOOL_IMAGE, static_cast<JDIMENSION>(rowStride), 1);
 
     while (cinfo.output_scanline < cinfo.output_height) {
         jpeg_read_scanlines(&cinfo, buffer, 1);

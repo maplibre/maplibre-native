@@ -16,7 +16,7 @@
     font loading code for whatever platform it runs on. Different platforms have
     different default fonts, so adding a new platform requires new "expected"
     fixtures.
- 
+
     At the time of writing, we don't run `mbgl-test` on iOS or Android, so the only
     supported test platform is macOS. Supporting Android would require adding a new
     test case (probably using the "Droid" font family). iOS should theoretically
@@ -38,10 +38,12 @@ public:
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
     HeadlessFrontend frontend;
-    MapAdapter map { frontend, MapObserver::nullObserver(), fileSource,
-                  MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+    MapAdapter map{frontend,
+                   MapObserver::nullObserver(),
+                   fileSource,
+                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
 
-    void checkRendering(const char * name, double imageMatchPixelsThreshold = 0.015, double pixelMatchThreshold = 0.1) {
+    void checkRendering(const char* name, double imageMatchPixelsThreshold = 0.015, double pixelMatchThreshold = 0.1) {
         test::checkImage(std::string("test/fixtures/local_glyphs/") + name,
                          frontend.render(map).image,
                          imageMatchPixelsThreshold,
@@ -57,7 +59,7 @@ public:
 TEST(LocalGlyphRasterizer, PingFang) {
     LocalGlyphRasterizerTest test(std::string("PingFang TC"));
 
-    test.fileSource->glyphsResponse = [&] (const Resource& resource) {
+    test.fileSource->glyphsResponse = [&](const Resource& resource) {
         EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
         Response response;
         response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
@@ -92,7 +94,7 @@ TEST(LocalGlyphRasterizer, PingFangSemibold) {
 TEST(LocalGlyphRasterizer, NotoSansCJK) {
     LocalGlyphRasterizerTest test(std::string("Noto Sans CJK KR Regular"));
 
-    test.fileSource->glyphsResponse = [&] (const Resource& resource) {
+    test.fileSource->glyphsResponse = [&](const Resource& resource) {
         EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
         Response response;
         response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
@@ -109,7 +111,7 @@ TEST(LocalGlyphRasterizer, NoLocal) {
     // the output should just contain basic latin characters.
     LocalGlyphRasterizerTest test({});
 
-    test.fileSource->glyphsResponse = [&] (const Resource& resource) {
+    test.fileSource->glyphsResponse = [&](const Resource& resource) {
         EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
         Response response;
         response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
@@ -125,7 +127,7 @@ TEST(LocalGlyphRasterizer, NoLocalWithContentInsets) {
     // with no offset.
     LocalGlyphRasterizerTest test({});
 
-    test.fileSource->glyphsResponse = [&] (const Resource& resource) {
+    test.fileSource->glyphsResponse = [&](const Resource& resource) {
         EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
         Response response;
         response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
@@ -138,7 +140,7 @@ TEST(LocalGlyphRasterizer, NoLocalWithContentInsets) {
     // with no pitch defined, should produce the same output.
     // test.map.moveBy({ viewSize.width * 0.25, 0 });
 
-    test.map.jumpTo(CameraOptions().withPadding(EdgeInsets { 0, viewSize.width * 0.25 * 2, 0, 0 }));
+    test.map.jumpTo(CameraOptions().withPadding(EdgeInsets{0, viewSize.width * 0.25 * 2, 0, 0}));
     test.checkRendering("no_local_with_content_insets", 0.001, 0.1);
 }
 
@@ -148,7 +150,7 @@ TEST(LocalGlyphRasterizer, NoLocalWithContentInsetsAndPitch) {
     // with no offset.
     LocalGlyphRasterizerTest test({});
 
-    test.fileSource->glyphsResponse = [&] (const Resource& resource) {
+    test.fileSource->glyphsResponse = [&](const Resource& resource) {
         EXPECT_EQ(Resource::Kind::Glyphs, resource.kind);
         Response response;
         response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
@@ -160,6 +162,6 @@ TEST(LocalGlyphRasterizer, NoLocalWithContentInsetsAndPitch) {
     // Expected image was verified using no-padding render, offsetted to right
     // using bitmap editor.
 
-    test.map.jumpTo(CameraOptions().withPitch(45).withPadding(EdgeInsets { 0, viewSize.width * 0.4, 0, 0 }));
+    test.map.jumpTo(CameraOptions().withPitch(45).withPadding(EdgeInsets{0, viewSize.width * 0.4, 0, 0}));
     test.checkRendering("no_local_with_content_insets_and_pitch", 0.001, 0.1);
 }

@@ -15,7 +15,6 @@ namespace android {
 
 class Layer {
 public:
-
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/Layer"; };
 
     static void registerNative(jni::JNIEnv&);
@@ -106,12 +105,11 @@ public:
 
     /**
      * @brief Get the corresponding layer factory.
-     * 
+     *
      * @return style::LayerFactory* must not be \c nullptr.
      */
     virtual LayerFactory* getLayerFactory() = 0;
 };
-
 
 } // namespace android
 } // namespace mbgl

@@ -505,8 +505,8 @@ double pointsToLineDistance(const mapbox::geometry::multi_point<double>& points,
                 mbgl::Log::Error(mbgl::Event::Style, "Index is out of range");
                 return InvalidDistance;
             }
-            auto subLine =
-                mapbox::geometry::multi_point<double>(line.begin() + rangeB.first, line.begin() + rangeB.second + 1);
+            auto subLine = mapbox::geometry::multi_point<double>(line.begin() + rangeB.first,
+                                                                 line.begin() + rangeB.second + 1);
             for (std::size_t i = rangeA.first; i <= rangeA.second; ++i) {
                 miniDist = std::min(miniDist, pointToLineDistance(points[i], subLine, ruler));
                 if (miniDist == 0.0) return 0.0;
@@ -743,7 +743,8 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
     return std::nullopt;
 }
 
-std::optional<Feature::geometry_type> getGeometry(const Feature& feature, mbgl::style::expression::ParsingContext& ctx) {
+std::optional<Feature::geometry_type> getGeometry(const Feature& feature,
+                                                  mbgl::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), feature.geometry);
     if (type == FeatureType::Point || type == FeatureType::LineString || type == FeatureType::Polygon) {
         return feature.geometry;
@@ -758,7 +759,9 @@ namespace style {
 namespace expression {
 
 Distance::Distance(GeoJSON geojson, Feature::geometry_type geometries_)
-    : Expression(Kind::Distance, type::Number), geoJSONSource(std::move(geojson)), geometries(std::move(geometries_)) {}
+    : Expression(Kind::Distance, type::Number),
+      geoJSONSource(std::move(geojson)),
+      geometries(std::move(geometries_)) {}
 
 Distance::~Distance() = default;
 
@@ -871,7 +874,7 @@ bool Distance::operator==(const Expression& e) const {
 }
 
 std::vector<std::optional<Value>> Distance::possibleOutputs() const {
-    return { std::nullopt };
+    return {std::nullopt};
 }
 
 std::string Distance::getOperator() const {

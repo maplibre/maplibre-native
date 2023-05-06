@@ -10,7 +10,8 @@ using namespace style;
 RasterBucket::RasterBucket(PremultipliedImage&& image_)
     : image(std::make_shared<PremultipliedImage>(std::move(image_))) {}
 
-RasterBucket::RasterBucket(std::shared_ptr<PremultipliedImage> image_) : image(std::move(image_)) {}
+RasterBucket::RasterBucket(std::shared_ptr<PremultipliedImage> image_)
+    : image(std::move(image_)) {}
 
 RasterBucket::~RasterBucket() = default;
 
@@ -54,7 +55,7 @@ void RasterBucket::setMask(TileMask&& mask_) {
     mask = std::move(mask_);
     clear();
 
-    if (mask == TileMask{ { 0, 0, 0 } }) {
+    if (mask == TileMask{{0, 0, 0}}) {
         // We want to render the full tile, and keeping the segments/vertices/indices empty means
         // using the global shared buffers for covering the entire tile.
         return;
@@ -71,24 +72,24 @@ void RasterBucket::setMask(TileMask&& mask_) {
         // Create a quad for every masked tile.
         const int32_t vertexExtent = util::EXTENT >> id.z;
 
-        const Point<int16_t> tlVertex = { static_cast<int16_t>(id.x * vertexExtent),
-                                          static_cast<int16_t>(id.y * vertexExtent) };
-        const Point<int16_t> brVertex = { static_cast<int16_t>(tlVertex.x + vertexExtent),
-                                          static_cast<int16_t>(tlVertex.y + vertexExtent) };
+        const Point<int16_t> tlVertex = {static_cast<int16_t>(id.x * vertexExtent),
+                                         static_cast<int16_t>(id.y * vertexExtent)};
+        const Point<int16_t> brVertex = {static_cast<int16_t>(tlVertex.x + vertexExtent),
+                                         static_cast<int16_t>(tlVertex.y + vertexExtent)};
 
         if (segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max()) {
             // Move to a new segments because the old one can't hold the geometry.
             segments.emplace_back(vertices.elements(), indices.elements());
         }
 
-        vertices.emplace_back(
-            RasterProgram::layoutVertex({ tlVertex.x, tlVertex.y }, { static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(tlVertex.y) }));
-        vertices.emplace_back(
-            RasterProgram::layoutVertex({ brVertex.x, tlVertex.y }, { static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(tlVertex.y) }));
-        vertices.emplace_back(
-            RasterProgram::layoutVertex({ tlVertex.x, brVertex.y }, { static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(brVertex.y) }));
-        vertices.emplace_back(
-            RasterProgram::layoutVertex({ brVertex.x, brVertex.y }, { static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(brVertex.y) }));
+        vertices.emplace_back(RasterProgram::layoutVertex(
+            {tlVertex.x, tlVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(tlVertex.y)}));
+        vertices.emplace_back(RasterProgram::layoutVertex(
+            {brVertex.x, tlVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(tlVertex.y)}));
+        vertices.emplace_back(RasterProgram::layoutVertex(
+            {tlVertex.x, brVertex.y}, {static_cast<uint16_t>(tlVertex.x), static_cast<uint16_t>(brVertex.y)}));
+        vertices.emplace_back(RasterProgram::layoutVertex(
+            {brVertex.x, brVertex.y}, {static_cast<uint16_t>(brVertex.x), static_cast<uint16_t>(brVertex.y)}));
 
         auto& segment = segments.back();
         assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
@@ -107,6 +108,5 @@ void RasterBucket::setMask(TileMask&& mask_) {
 bool RasterBucket::hasData() const {
     return !!image;
 }
-
 
 } // namespace mbgl

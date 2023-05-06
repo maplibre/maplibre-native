@@ -56,7 +56,7 @@ public:
 
 }; // class RasterLayer
 
-class RasterJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::RasterLayerFactory {
+class RasterJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::RasterLayerFactory {
 public:
     ~RasterJavaLayerPeerFactory() override;
 
@@ -68,7 +68,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class RasterJavaLayerPeerFactory
+}; // class RasterJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

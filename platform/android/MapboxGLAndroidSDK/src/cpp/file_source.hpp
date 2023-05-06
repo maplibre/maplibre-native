@@ -13,7 +13,8 @@
 
 namespace mbgl {
 
-template <typename T> class Actor;
+template <typename T>
+class Actor;
 
 namespace android {
 
@@ -23,25 +24,29 @@ namespace android {
  */
 class FileSource {
 public:
-
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/storage/FileSource"; };
 
     struct ResourceTransformCallback {
         static constexpr auto Name() { return "com/mapbox/mapboxsdk/storage/FileSource$ResourceTransformCallback"; }
 
-        static std::string onURL(jni::JNIEnv&, const jni::Object<FileSource::ResourceTransformCallback>&, int, std::string);
+        static std::string onURL(jni::JNIEnv&,
+                                 const jni::Object<FileSource::ResourceTransformCallback>&,
+                                 int,
+                                 std::string);
     };
 
     struct ResourcesCachePathChangeCallback {
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/storage/FileSource$ResourcesCachePathChangeCallback";}
+        static constexpr auto Name() {
+            return "com/mapbox/mapboxsdk/storage/FileSource$ResourcesCachePathChangeCallback";
+        }
 
         static void onSuccess(jni::JNIEnv&,
                               const jni::Object<FileSource::ResourcesCachePathChangeCallback>&,
                               const jni::String&);
 
         static void onError(jni::JNIEnv&,
-                              const jni::Object<FileSource::ResourcesCachePathChangeCallback>&,
-                              const jni::String&);
+                            const jni::Object<FileSource::ResourcesCachePathChangeCallback>&,
+                            const jni::String&);
     };
 
     FileSource(jni::JNIEnv&, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&);
@@ -60,7 +65,9 @@ public:
 
     void setResourceTransform(jni::JNIEnv&, const jni::Object<FileSource::ResourceTransformCallback>&);
 
-    void setResourceCachePath(jni::JNIEnv&, const jni::String&, const jni::Object<FileSource::ResourcesCachePathChangeCallback>&);
+    void setResourceCachePath(jni::JNIEnv&,
+                              const jni::String&,
+                              const jni::Object<FileSource::ResourcesCachePathChangeCallback>&);
 
     void resume(jni::JNIEnv&);
 

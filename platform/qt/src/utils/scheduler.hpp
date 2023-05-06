@@ -11,8 +11,7 @@
 
 namespace QMapLibreGL {
 
-class Scheduler : public QObject, public mbgl::Scheduler
-{
+class Scheduler : public QObject, public mbgl::Scheduler {
     Q_OBJECT
 
 public:
@@ -36,4 +35,4 @@ private:
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
 };
 
-} // namepace QMapLibreGL
+} // namespace QMapLibreGL

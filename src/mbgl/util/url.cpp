@@ -73,15 +73,15 @@ URL::URL(const std::string& str)
           const auto hashPos = str.find('#');
           const auto queryPos = str.find('?');
           if (queryPos == std::string::npos || hashPos < queryPos) {
-              return { hashPos != std::string::npos ? hashPos : str.size(), 0 };
+              return {hashPos != std::string::npos ? hashPos : str.size(), 0};
           }
-          return { queryPos, (hashPos != std::string::npos ? hashPos : str.size()) - queryPos };
+          return {queryPos, (hashPos != std::string::npos ? hashPos : str.size()) - queryPos};
       }()),
       scheme([&]() -> Segment {
-          if (str.empty() || !isAlphaCharacter(str.front())) return { 0, 0 };
+          if (str.empty() || !isAlphaCharacter(str.front())) return {0, 0};
           size_t schemeEnd = 0;
           while (schemeEnd < query.first && isSchemeCharacter(str[schemeEnd])) ++schemeEnd;
-          return { 0, str[schemeEnd] == ':' ? schemeEnd : 0 };
+          return {0, str[schemeEnd] == ':' ? schemeEnd : 0};
       }()),
       domain([&]() -> Segment {
           auto domainPos = scheme.first + scheme.second;
@@ -90,7 +90,7 @@ URL::URL(const std::string& str)
           }
           const bool isData = str.compare(scheme.first, scheme.second, "data") == 0;
           const auto endPos = str.find(isData ? ',' : '/', domainPos);
-          return { domainPos, std::min(query.first, endPos) - domainPos };
+          return {domainPos, std::min(query.first, endPos) - domainPos};
       }()),
       path([&]() -> Segment {
           auto pathPos = domain.first + domain.second;
@@ -99,16 +99,15 @@ URL::URL(const std::string& str)
               // Skip comma
               pathPos++;
           }
-          return { pathPos, query.first - pathPos };
-      }()) {
-}
+          return {pathPos, query.first - pathPos};
+      }()) {}
 
 Path::Path(const std::string& str, const size_t pos, const size_t count)
     : directory([&]() -> Segment {
           // Finds the string between pos and the first /, if it exists
           const auto endPos = count == std::string::npos ? str.size() : pos + count;
           const auto slashPos = str.rfind('/', endPos);
-          return { pos, slashPos == std::string::npos || slashPos < pos ? 0 : slashPos + 1 - pos };
+          return {pos, slashPos == std::string::npos || slashPos < pos ? 0 : slashPos + 1 - pos};
       }()),
       extension([&]() -> Segment {
           auto dotPos = str.rfind('.', pos + count);
@@ -116,20 +115,18 @@ Path::Path(const std::string& str, const size_t pos, const size_t count)
           // Count a preceding @2x to the file extension as well.
           const char* factor = "@2x";
           const size_t factorLen = strlen(factor);
-          if (dotPos >= factorLen && dotPos < endPos &&
-              str.compare(dotPos - factorLen, factorLen, factor) == 0) {
+          if (dotPos >= factorLen && dotPos < endPos && str.compare(dotPos - factorLen, factorLen, factor) == 0) {
               dotPos -= factorLen;
           }
           if (dotPos == std::string::npos || dotPos < directory.first + directory.second) {
-              return { endPos, 0 };
+              return {endPos, 0};
           }
-          return { dotPos, endPos - dotPos };
+          return {dotPos, endPos - dotPos};
       }()),
       filename([&]() -> Segment {
           const auto filePos = directory.first + directory.second;
-          return { filePos, extension.first - filePos };
-      }()) {
-}
+          return {filePos, extension.first - filePos};
+      }()) {}
 
 std::string transformURL(const std::string& tpl, const std::string& str, const URL& url) {
     auto result = util::replaceTokens(tpl, [&](const std::string& token) -> std::optional<std::string> {

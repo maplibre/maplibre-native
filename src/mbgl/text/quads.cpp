@@ -115,22 +115,22 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     }
 
     auto makeBox = [&](Cut left, Cut top, Cut right, Cut bottom) {
-        const float leftEm =
-            getEmOffset(left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
+        const float leftEm = getEmOffset(
+            left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
         const float leftPx = getPxOffset(left.fixed - fixedOffsetX, fixedContentWidth, left.stretch, stretchWidth);
 
-        const float topEm =
-            getEmOffset(top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
+        const float topEm = getEmOffset(
+            top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
         const float topPx = getPxOffset(top.fixed - fixedOffsetY, fixedContentHeight, top.stretch, stretchHeight);
 
-        const float rightEm =
-            getEmOffset(right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
+        const float rightEm = getEmOffset(
+            right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
         const float rightPx = getPxOffset(right.fixed - fixedOffsetX, fixedContentWidth, right.stretch, stretchWidth);
 
-        const float bottomEm =
-            getEmOffset(bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
-        const float bottomPx =
-            getPxOffset(bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight);
+        const float bottomEm = getEmOffset(
+            bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
+        const float bottomPx = getPxOffset(
+            bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight);
 
         Point<float> tl(leftEm, topEm);
         Point<float> tr(rightEm, topEm);
@@ -201,7 +201,8 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                           const ImageMap& imageMap,
                           bool allowVerticalPlacement) {
     const float textRotate = layout.get<TextRotate>() * util::DEG2RAD_F;
-    const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map && placement != SymbolPlacementType::Point;
+    const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map &&
+                           placement != SymbolPlacementType::Point;
 
     SymbolQuads quads;
 
@@ -236,8 +237,9 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 isSDF = image->second->sdf;
             }
 
-            const Point<float> glyphOffset =
-                alongLine ? Point<float>{positionedGlyph.x + halfAdvance, positionedGlyph.y} : Point<float>{0.0f, 0.0f};
+            const Point<float> glyphOffset = alongLine
+                                                 ? Point<float>{positionedGlyph.x + halfAdvance, positionedGlyph.y}
+                                                 : Point<float>{0.0f, 0.0f};
 
             Point<float> builtInOffset = alongLine ? Point<float>{0.0f, 0.0f}
                                                    : Point<float>{positionedGlyph.x + halfAdvance + textOffset[0],
@@ -252,8 +254,8 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 builtInOffset = {0.0f, 0.0f};
             }
 
-            const float x1 =
-                (positionedGlyph.metrics.left - rectBuffer) * positionedGlyph.scale - halfAdvance + builtInOffset.x;
+            const float x1 = (positionedGlyph.metrics.left - rectBuffer) * positionedGlyph.scale - halfAdvance +
+                             builtInOffset.x;
             const float y1 = (-positionedGlyph.metrics.top - rectBuffer) * positionedGlyph.scale + builtInOffset.y;
             const float x2 = x1 + rect.w * positionedGlyph.scale / pixelRatio;
             const float y2 = y1 + rect.h * positionedGlyph.scale / pixelRatio;

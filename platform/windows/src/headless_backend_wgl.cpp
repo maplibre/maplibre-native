@@ -21,9 +21,11 @@ namespace gl {
 class WGLDisplayConfig {
 private:
     // Key for singleton construction.
-    struct Key { explicit Key() = default; };
+    struct Key {
+        explicit Key() = default;
+    };
 
-    WNDCLASSEXA helperWindowClass = { sizeof(WNDCLASSEXA) };
+    WNDCLASSEXA helperWindowClass = {sizeof(WNDCLASSEXA)};
     HWND helperWindowHandle = NULL;
     HDC helperWindowDeviceContext = NULL;
     HGLRC helperWindowRenderingContext = NULL;
@@ -33,7 +35,9 @@ private:
         MSG message;
 
         helperWindowClass.style = CS_OWNDC;
-        helperWindowClass.lpfnWndProc = [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) { return DefWindowProc(hWnd, uMsg, wParam, lParam); };
+        helperWindowClass.lpfnWndProc = [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+        };
         helperWindowClass.lpszClassName = "WGL Helper Window";
         GetModuleHandleExA(0, NULL, &helperWindowClass.hInstance);
 
@@ -42,17 +46,18 @@ private:
             throw std::runtime_error("Failed to register helper window class");
         }
 
-        helperWindowHandle = CreateWindowExA(
-            0,
-            helperWindowClass.lpszClassName,
-            "WGL Helper Window",
-            WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-            0, 0, 1, 1,
-            NULL,
-            NULL,
-            helperWindowClass.hInstance,
-            NULL
-        );
+        helperWindowHandle = CreateWindowExA(0,
+                                             helperWindowClass.lpszClassName,
+                                             "WGL Helper Window",
+                                             WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                             0,
+                                             0,
+                                             1,
+                                             1,
+                                             NULL,
+                                             NULL,
+                                             helperWindowClass.hInstance,
+                                             NULL);
 
         if (!helperWindowHandle) {
             Log::Error(Event::OpenGL, "Failed to create helper window");
@@ -79,18 +84,16 @@ private:
     bool StringInExtensionString(const char* string, const char* extensions) {
         const char* start = extensions;
 
-        while(true) {
+        while (true) {
             const char* where;
             const char* terminator;
 
             where = strstr(start, string);
-            if (!where)
-                return false;
+            if (!where) return false;
 
             terminator = where + strlen(string);
             if (where == start || *(where - 1) == ' ') {
-                if (*terminator == ' ' || *terminator == '\0')
-                    break;
+                if (*terminator == ' ' || *terminator == '\0') break;
             }
 
             start = terminator;
@@ -104,23 +107,23 @@ private:
 
         extensions = mbgl::platform::wglGetExtensionsStringARB(wglGetCurrentDC());
 
-        if(!extensions || !StringInExtensionString(extension, extensions))
+        if (!extensions || !StringInExtensionString(extension, extensions))
             extensions = mbgl::platform::wglGetExtensionsStringEXT();
 
-        if(!extensions || !StringInExtensionString(extension, extensions))
-            extensions = (const char *)wgl_glGetString(GL_EXTENSIONS);
+        if (!extensions || !StringInExtensionString(extension, extensions))
+            extensions = (const char*)wgl_glGetString(GL_EXTENSIONS);
 
-        if (!extensions)
-            return false;
+        if (!extensions) return false;
 
         return StringInExtensionString(extension, extensions);
     }
+
 public:
     explicit WGLDisplayConfig(Key) {
         HDC dummyDC, previousDC;
         HGLRC dummyRC, previousRC;
         PIXELFORMATDESCRIPTOR pfd;
-        
+
         CreateHelperWindow();
 
         dummyDC = GetDC(helperWindowHandle);
@@ -171,7 +174,8 @@ public:
         ARB_pixel_format = extensionSupportedWGL("WGL_ARB_pixel_format");
         ARB_ES2_compatibility = extensionSupportedWGL("GL_ARB_ES2_compatibility");
 
-        if (!ARB_create_context || !ARB_create_context_profile || !(EXT_create_context_es2_profile || ARB_ES2_compatibility)) {
+        if (!ARB_create_context || !ARB_create_context_profile ||
+            !(EXT_create_context_es2_profile || ARB_ES2_compatibility)) {
             Log::Error(Event::OpenGL, "OpenGL ES 2.0 is unavailable");
             throw std::runtime_error("OpenGL ES 2.0 is unavailable");
         }
@@ -179,7 +183,9 @@ public:
         DestroyHelperWindow();
 
         renderingWindowClass.style = CS_OWNDC;
-        renderingWindowClass.lpfnWndProc = [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) { return DefWindowProc(hWnd, uMsg, wParam, lParam); };
+        renderingWindowClass.lpfnWndProc = [](HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+        };
         renderingWindowClass.lpszClassName = "WGL Rendering Window";
         GetModuleHandleExA(0, NULL, &renderingWindowClass.hInstance);
 
@@ -189,20 +195,19 @@ public:
         }
     }
 
-    ~WGLDisplayConfig() {
-        UnregisterClassA(renderingWindowClass.lpszClassName, renderingWindowClass.hInstance);
-    }
+    ~WGLDisplayConfig() { UnregisterClassA(renderingWindowClass.lpszClassName, renderingWindowClass.hInstance); }
 
     static std::shared_ptr<WGLDisplayConfig> create() {
         static std::weak_ptr<WGLDisplayConfig> instance;
         auto shared = instance.lock();
-        
+
         if (!shared) {
             instance = shared = std::make_shared<WGLDisplayConfig>(Key{});
         }
-        
+
         return shared;
     }
+
 public:
     bool ARB_multisample = false;
     bool ARB_create_context = false;
@@ -211,7 +216,7 @@ public:
     bool EXT_colorspace = false;
     bool ARB_pixel_format = false;
     bool ARB_ES2_compatibility = false;
-    WNDCLASSEXA renderingWindowClass = { sizeof(WNDCLASSEXA) };
+    WNDCLASSEXA renderingWindowClass = {sizeof(WNDCLASSEXA)};
 };
 
 class WGLBackendImpl final : public HeadlessBackend::Impl {
@@ -221,21 +226,23 @@ private:
     HWND renderingWindowHandle = NULL;
     HDC renderingWindowDeviceContext = NULL;
     HGLRC renderingWindowRenderingContext = NULL;
+
 private:
     void CreateRenderingWindow() {
         MSG message;
 
-        renderingWindowHandle = CreateWindowExA(
-            0,
-            wglDisplayConfig->renderingWindowClass.lpszClassName,
-            "WGL Render Window",
-            WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-            0, 0, 1, 1,
-            NULL,
-            NULL,
-            wglDisplayConfig->renderingWindowClass.hInstance,
-            NULL
-        );
+        renderingWindowHandle = CreateWindowExA(0,
+                                                wglDisplayConfig->renderingWindowClass.lpszClassName,
+                                                "WGL Render Window",
+                                                WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                                0,
+                                                0,
+                                                1,
+                                                1,
+                                                NULL,
+                                                NULL,
+                                                wglDisplayConfig->renderingWindowClass.hInstance,
+                                                NULL);
 
         if (!renderingWindowHandle) {
             Log::Error(Event::OpenGL, "Failed to create helper window");
@@ -284,17 +291,29 @@ private:
             renderingWindowDeviceContext = GetDC(renderingWindowHandle);
         }
 
-        if (!mbgl::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext, std::initializer_list<GLint>({
-            WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-            WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-            WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-            WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
-            WGL_COLOR_BITS_ARB, 24,
-            WGL_ALPHA_BITS_ARB, 8,
-            WGL_DEPTH_BITS_ARB, 24,
-            WGL_STENCIL_BITS_ARB, 8,
-            NULL
-            }).begin(), NULL, 1, &pixelFormat, &numFormats)) {
+        if (!mbgl::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext,
+                                                     std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
+                                                                                   GL_TRUE,
+                                                                                   WGL_DOUBLE_BUFFER_ARB,
+                                                                                   GL_TRUE,
+                                                                                   WGL_ACCELERATION_ARB,
+                                                                                   WGL_FULL_ACCELERATION_ARB,
+                                                                                   WGL_PIXEL_TYPE_ARB,
+                                                                                   WGL_TYPE_RGBA_ARB,
+                                                                                   WGL_COLOR_BITS_ARB,
+                                                                                   24,
+                                                                                   WGL_ALPHA_BITS_ARB,
+                                                                                   8,
+                                                                                   WGL_DEPTH_BITS_ARB,
+                                                                                   24,
+                                                                                   WGL_STENCIL_BITS_ARB,
+                                                                                   8,
+                                                                                   NULL})
+                                                         .begin(),
+                                                     NULL,
+                                                     1,
+                                                     &pixelFormat,
+                                                     &numFormats)) {
             Log::Error(Event::OpenGL, "Failed to choose pixel format for context");
             throw std::runtime_error("Failed to choose pixel format for context");
         }
@@ -314,13 +333,17 @@ private:
         }
 
         if (wglDisplayConfig->ARB_create_context) {
-            renderingWindowRenderingContext = mbgl::platform::wglCreateContextAttribsARB(renderingWindowDeviceContext, NULL,
-                std::initializer_list<int>({
-                    WGL_CONTEXT_MAJOR_VERSION_ARB, 2,
-                    WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-                    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
-                    NULL
-                    }).begin());
+            renderingWindowRenderingContext = mbgl::platform::wglCreateContextAttribsARB(
+                renderingWindowDeviceContext,
+                NULL,
+                std::initializer_list<int>({WGL_CONTEXT_MAJOR_VERSION_ARB,
+                                            2,
+                                            WGL_CONTEXT_MINOR_VERSION_ARB,
+                                            0,
+                                            WGL_CONTEXT_PROFILE_MASK_ARB,
+                                            WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+                                            NULL})
+                    .begin());
 
             if (!renderingWindowRenderingContext) {
                 const DWORD error = GetLastError();
@@ -328,24 +351,20 @@ private:
                 if (error == (0xc0070000 | ERROR_INVALID_VERSION_ARB)) {
                     Log::Error(Event::OpenGL, "Driver does not support OpenGL ES version 2.0");
                     throw std::runtime_error("Driver does not support OpenGL ES version 2.0");
-                }
-                else if (error == (0xc0070000 | ERROR_INVALID_PROFILE_ARB)) {
+                } else if (error == (0xc0070000 | ERROR_INVALID_PROFILE_ARB)) {
                     Log::Error(Event::OpenGL, "Driver does not support the requested OpenGL profile");
                     throw std::runtime_error("Driver does not support the requested OpenGL profile");
-                }
-                else if (error == (0xc0070000 | ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB)) {
+                } else if (error == (0xc0070000 | ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB)) {
                     Log::Error(Event::OpenGL, "The share context is not compatible with the requested context");
                     throw std::runtime_error("The share context is not compatible with the requested context");
-                }
-                else {
+                } else {
                     Log::Error(Event::OpenGL, "Failed to create OpenGL ES context");
                     throw std::runtime_error("Failed to create OpenGL ES context");
                 }
 
                 return false;
             }
-        }
-        else {
+        } else {
             renderingWindowRenderingContext = wglCreateContext(renderingWindowDeviceContext);
 
             if (!renderingWindowRenderingContext) {
@@ -367,13 +386,13 @@ private:
     bool DestroyRenderingContext() {
         if (renderingWindowRenderingContext && !wglMakeCurrent(renderingWindowDeviceContext, NULL)) {
             Log::Error(Event::OpenGL, "Failed to make context current");
-            //throw std::runtime_error("Failed to make context current");
+            // throw std::runtime_error("Failed to make context current");
             return false;
         }
 
         if (renderingWindowRenderingContext && !wglDeleteContext(renderingWindowRenderingContext)) {
             Log::Error(Event::OpenGL, "Failed to delete current context");
-            //throw std::runtime_error("Failed to delete current context");
+            // throw std::runtime_error("Failed to delete current context");
             return false;
         }
 
@@ -383,9 +402,7 @@ private:
     }
 
 public:
-    WGLBackendImpl() {
-        auto renderingContext = GetContext();
-    }
+    WGLBackendImpl() { auto renderingContext = GetContext(); }
 
     ~WGLBackendImpl() final {
         if (renderingWindowRenderingContext) {
@@ -400,16 +417,17 @@ public:
     }
 
     void activateContext() final {
-        if (renderingWindowRenderingContext && !wglMakeCurrent(renderingWindowDeviceContext, renderingWindowRenderingContext)) {
+        if (renderingWindowRenderingContext &&
+            !wglMakeCurrent(renderingWindowDeviceContext, renderingWindowRenderingContext)) {
             Log::Error(Event::OpenGL, "Switching OpenGL context failed");
-            //throw std::runtime_error("Switching OpenGL context failed");
+            // throw std::runtime_error("Switching OpenGL context failed");
         }
     }
 
     void deactivateContext() final {
         if (renderingWindowRenderingContext && !wglMakeCurrent(NULL, NULL)) {
             Log::Error(Event::OpenGL, "Removing OpenGL context failed");
-            //throw std::runtime_error("Removing OpenGL context failed");
+            // throw std::runtime_error("Removing OpenGL context failed");
         }
     }
 };

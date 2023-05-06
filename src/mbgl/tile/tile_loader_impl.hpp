@@ -21,14 +21,13 @@ TileLoader<T>::TileLoader(T& tile_,
                           const Tileset& tileset)
     : tile(tile_),
       necessity(TileNecessity::Optional),
-      resource(Resource::tile(
-        tileset.tiles.at(0),
-        parameters.pixelRatio,
-        id.canonical.x,
-        id.canonical.y,
-        id.canonical.z,
-        tileset.scheme,
-        Resource::LoadingMethod::CacheOnly)),
+      resource(Resource::tile(tileset.tiles.at(0),
+                              parameters.pixelRatio,
+                              id.canonical.x,
+                              id.canonical.y,
+                              id.canonical.z,
+                              tileset.scheme,
+                              Resource::LoadingMethod::CacheOnly)),
       fileSource(parameters.fileSource) {
     assert(!request);
     if (!fileSource) {
@@ -160,8 +159,8 @@ void TileLoader<T>::loadFromNetwork() {
     // NetworkOnly request.
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
     resource.minimumUpdateInterval = updateParameters.minimumUpdateInterval;
-    resource.storagePolicy =
-        updateParameters.isVolatile ? Resource::StoragePolicy::Volatile : Resource::StoragePolicy::Permanent;
+    resource.storagePolicy = updateParameters.isVolatile ? Resource::StoragePolicy::Volatile
+                                                         : Resource::StoragePolicy::Permanent;
     request = fileSource->request(resource, [this](const Response& res) { loadedData(res); });
 }
 

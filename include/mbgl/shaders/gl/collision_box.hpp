@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::CollisionBoxProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::CollisionBoxProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(attribute vec2 a_pos;
 attribute vec2 a_anchor_pos;
 attribute vec2 a_extrude;

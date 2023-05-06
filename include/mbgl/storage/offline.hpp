@@ -52,7 +52,12 @@ public:
  */
 class OfflineGeometryRegionDefinition {
 public:
-    OfflineGeometryRegionDefinition(std::string styleURL, Geometry<double>, double minZoom, double maxZoom, float pixelRatio, bool includeIdeographs);
+    OfflineGeometryRegionDefinition(std::string styleURL,
+                                    Geometry<double>,
+                                    double minZoom,
+                                    double maxZoom,
+                                    float pixelRatio,
+                                    bool includeIdeographs);
 
     /* Private */
     std::string styleURL;
@@ -156,9 +161,7 @@ public:
      */
     bool requiredResourceCountIsPrecise = false;
 
-    bool complete() const {
-        return completedResourceCount >= requiredResourceCount;
-    }
+    bool complete() const { return completedResourceCount >= requiredResourceCount; }
 };
 
 /*
@@ -220,9 +223,7 @@ public:
 private:
     friend class OfflineDatabase;
 
-    OfflineRegion(int64_t id,
-                  OfflineRegionDefinition,
-                  OfflineRegionMetadata);
+    OfflineRegion(int64_t id, OfflineRegionDefinition, OfflineRegionMetadata);
 
     int64_t id;
     OfflineRegionDefinition definition;

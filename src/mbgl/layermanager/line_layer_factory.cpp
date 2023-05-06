@@ -11,7 +11,8 @@ const style::LayerTypeInfo* LineLayerFactory::getTypeInfo() const noexcept {
     return style::LineLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> LineLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible& value) noexcept {
+std::unique_ptr<style::Layer> LineLayerFactory::createLayer(const std::string& id,
+                                                            const style::conversion::Convertible& value) noexcept {
     auto const source = getSource(value);
     if (!source) {
         return nullptr;
@@ -19,9 +20,10 @@ std::unique_ptr<style::Layer> LineLayerFactory::createLayer(const std::string& i
     return std::unique_ptr<style::Layer>(new style::LineLayer(id, *source));
 }
 
-std::unique_ptr<Layout> LineLayerFactory::createLayout(const LayoutParameters& parameters,
-                                                       std::unique_ptr<GeometryTileLayer> layer,
-                                                       const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
+std::unique_ptr<Layout> LineLayerFactory::createLayout(
+    const LayoutParameters& parameters,
+    std::unique_ptr<GeometryTileLayer> layer,
+    const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
     using namespace style;
     using LayoutTypeUnsorted = PatternLayout<LineBucket, LineLayerProperties, LinePattern, LineLayoutProperties>;
     using LayoutTypeSorted =

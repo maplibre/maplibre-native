@@ -31,9 +31,7 @@ public:
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
-    mapbox::base::WeakPtr<Source> makeWeakPtr() override {
-        return weakFactory.makeWeakPtr();
-    }
+    mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
@@ -41,7 +39,7 @@ protected:
 private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
-    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
+    mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
 
 template <>

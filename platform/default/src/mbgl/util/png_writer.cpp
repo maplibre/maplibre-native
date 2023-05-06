@@ -19,8 +19,8 @@ void addChunk(std::string& png, const char* type, const char* data = "", const u
     checksum.process_bytes(type, 4);
     checksum.process_bytes(data, size);
 
-    const char length[4] = { NETWORK_BYTE_UINT32(size) };
-    const char crc[4] = { NETWORK_BYTE_UINT32(checksum.checksum()) };
+    const char length[4] = {NETWORK_BYTE_UINT32(size)};
+    const char crc[4] = {NETWORK_BYTE_UINT32(checksum.checksum())};
 
     png.reserve(png.size() + 4 /* length */ + 4 /* type */ + size + 4 /* CRC */);
     png.append(length, 4);
@@ -39,7 +39,7 @@ std::string encodePNG(const PremultipliedImage& pre) {
     const auto src = util::unpremultiply(pre.clone());
 
     // PNG magic bytes
-    const char preamble[8] = { char(0x89), 'P', 'N', 'G', '\r', '\n', 0x1a, '\n' };
+    const char preamble[8] = {char(0x89), 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'};
 
     // IHDR chunk for our RGBA image.
     const char ihdr[13] = {
@@ -64,8 +64,7 @@ std::string encodePNG(const PremultipliedImage& pre) {
 
     // Assemble the PNG.
     std::string png;
-    png.reserve((8 /* preamble */) + (12 + 13 /* IHDR */) +
-                (12 + idat.size() /* IDAT */) + (12 /* IEND */));
+    png.reserve((8 /* preamble */) + (12 + 13 /* IHDR */) + (12 + idat.size() /* IDAT */) + (12 /* IEND */));
     png.append(preamble, 8);
     addChunk(png, "IHDR", ihdr, 13);
     addChunk(png, "IDAT", idat.data(), static_cast<uint32_t>(idat.size()));

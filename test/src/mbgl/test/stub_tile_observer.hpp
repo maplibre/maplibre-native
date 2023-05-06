@@ -17,6 +17,6 @@ public:
         if (tileError) tileError(tile, error);
     }
 
-    std::function<void (Tile&)> tileChanged;
-    std::function<void (Tile&, std::exception_ptr)> tileError;
+    std::function<void(Tile&)> tileChanged;
+    std::function<void(Tile&, std::exception_ptr)> tileError;
 };

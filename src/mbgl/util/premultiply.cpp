@@ -9,7 +9,7 @@ PremultipliedImage premultiply(UnassociatedImage&& src) {
     PremultipliedImage dst;
 
     dst.size = src.size;
-    src.size = { 0, 0 };
+    src.size = {0, 0};
     dst.data = std::move(src.data);
 
     uint8_t* data = dst.data.get();
@@ -30,7 +30,7 @@ UnassociatedImage unpremultiply(PremultipliedImage&& src) {
     UnassociatedImage dst;
 
     dst.size = src.size;
-    src.size = { 0, 0 };
+    src.size = {0, 0};
     dst.data = std::move(src.data);
 
     uint8_t* data = dst.data.get();

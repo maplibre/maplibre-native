@@ -13,9 +13,7 @@ TEST(RunLoop, Stop) {
     RunLoop loop(RunLoop::Type::New);
 
     Timer timer;
-    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] {
-        loop.stop();
-    });
+    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] { loop.stop(); });
 
     loop.run();
 }
@@ -38,9 +36,7 @@ TEST(RunLoop, MultipleRun) {
     RunLoop loop(RunLoop::Type::New);
 
     Timer timer;
-    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] {
-        loop.stop();
-    });
+    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] { loop.stop(); });
 
     loop.run();
 
@@ -66,7 +62,7 @@ TEST(RunLoop, Priorities) {
     loop.invoke(RunLoop::Priority::Default, [&] { loop.stop(); });
     loop.run();
 
-    EXPECT_EQ((std::vector<int>{ 2, 4, 1, 3 }), order);
+    EXPECT_EQ((std::vector<int>{2, 4, 1, 3}), order);
 }
 
 TEST(RunLoop, PlatformIntegration) {
