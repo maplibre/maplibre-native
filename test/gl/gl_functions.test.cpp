@@ -251,10 +251,10 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glGetProgramBinary, nullptr);
     EXPECT_NE(glProgramBinary, nullptr);
     EXPECT_NE(glProgramParameteri, nullptr);
-    #if !defined(TARGET_OS_MAC)
+#if !defined(TARGET_OS_MAC)
     EXPECT_NE(glInvalidateFramebuffer, nullptr);
     EXPECT_NE(glInvalidateSubFramebuffer, nullptr);
-    #endif
+#endif
     EXPECT_NE(glTexStorage2D, nullptr);
     EXPECT_NE(glTexStorage3D, nullptr);
     EXPECT_NE(glGetInternalformativ, nullptr);
