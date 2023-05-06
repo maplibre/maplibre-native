@@ -108,9 +108,9 @@ static void populateNames(std::vector<std::string>& names) {
         FindClose(hFind);
     }
 #else
-    DIR *dir = opendir(style_directory.c_str());
+    DIR* dir = opendir(style_directory.c_str());
     if (dir != nullptr) {
-        for (dirent *dp = nullptr; (dp = readdir(dir)) != nullptr;) {
+        for (dirent* dp = nullptr; (dp = readdir(dir)) != nullptr;) {
             const std::string name = dp->d_name;
             testName(name);
         }

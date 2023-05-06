@@ -984,7 +984,7 @@ void (*const glViewport)(GLint, GLint, GLsizei, GLsizei) = [](GLint x, GLint y, 
     ::wgl_glViewport(x, y, width, height);
 };
 
-BOOL (*const wglChoosePixelFormatARB)
+BOOL(*const wglChoosePixelFormatARB)
 (HDC, const int*, const FLOAT*, UINT, int*, UINT*) = [](HDC hdc,
                                                         const int* piAttribIList,
                                                         const FLOAT* pfAttribFList,
@@ -994,7 +994,7 @@ BOOL (*const wglChoosePixelFormatARB)
     if (!opengl32) loadWGL();
     return ::wgl_wglChoosePixelFormatARB(hdc, piAttribIList, pfAttribFList, nMaxFormats, piFormats, nNumFormats);
 };
-HGLRC (*const wglCreateContextAttribsARB)
+HGLRC(*const wglCreateContextAttribsARB)
 (HDC, HGLRC, const int*) = [](HDC hDC, HGLRC hShareContext, const int* attribList) {
     if (!opengl32) loadWGL();
     return ::wgl_wglCreateContextAttribsARB(hDC, hShareContext, attribList);
