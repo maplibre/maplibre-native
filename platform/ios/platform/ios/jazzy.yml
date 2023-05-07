@@ -1,7 +1,7 @@
 module: MapLibre
 author: MapLibre Contributors
 author_url: https://maplibre.org/
-github_url: https://github.com/maplibre/maplibre-gl-native
+github_url: https://github.com/maplibre/maplibre-native
 copyright: '[License](https://github.com/maplibre/maplibre-native/blob/main/platform/ios/LICENSE.md)'
 
 head: |

@@ -35,7 +35,7 @@ First, clone the repository. This repository uses git submodules, which are also
 
 ```bash
 git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.git
-cd maplibre-gl-native
+cd maplibre-native
 ```
 
 To create the build, run the following commands.
@@ -45,7 +45,7 @@ cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILE
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
 
-If all went well, there should now be a `maplibre-gl-native/build/bin/mbgl-render` binary that you can run to generate map tile images. To test that it is working properly, run the following command.
+If all went well, there should now be a `maplibre-native/build/bin/mbgl-render` binary that you can run to generate map tile images. To test that it is working properly, run the following command.
 
 ```bash
 ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
@@ -150,7 +150,7 @@ For the purposes of this exercise, you can use the `zurich_switzerland.mbtiles` 
 
 Note that this style is totally inadequate for any real use beyond testing your custom setup. Don't forget to replace the source URL `"mbtiles:///path/to/zurich_switzerland.mbtiles"` with the actual path to your mbtiles file.
 
-From your `maplibre-gl-native/` dir, run the following command.
+From your `maplibre-native/` dir, run the following command.
 
 ```bash
 ./build/bin/mbgl-render --style /path/to/style.json --output out.png
