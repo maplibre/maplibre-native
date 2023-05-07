@@ -30,14 +30,16 @@ EvaluationResult IndexOf::evaluate(const EvaluationContext &params) const {
     return EvaluationError{"Expected first argument to be of type boolean, string, number or null, but found " + toString(typeOf(*evaluatedKeyword))  +   " instead."};
   }
 
-  int fromIndexValue = 0;
+  size_t fromIndexValue = 0;
   if (fromIndex) {
       const EvaluationResult evaluatedFromIndex = fromIndex->evaluate(params);
     if (!evaluatedFromIndex) {
         return evaluatedFromIndex.error();
     }
-    fromIndexValue = evaluatedFromIndex->is<NullValue>() ? 0 : static_cast<int>(evaluatedFromIndex->get<double>());
-
+    if (!evaluatedFromIndex->is<double>()) {
+        return EvaluationError{"Expected third argument to be of type number, but found " + toString(typeOf(*evaluatedFromIndex))  + " instead."};
+    }
+    fromIndexValue = static_cast<size_t>(evaluatedFromIndex->get<double>());
   }
 
   return evaluatedInput->match(
@@ -51,31 +53,11 @@ EvaluationResult IndexOf::evaluate(const EvaluationContext &params) const {
         });
 }
 
-bool IndexOf::validateFromIndex(int fromIndexValue, size_t maxIndex,
-                                std::string *error) const {
-  assert(error);
-  if (fromIndexValue < 0) {
-    *error = "Array index out of bounds: " + util::toString(fromIndexValue) +
-             " < 0.";
-    return false;
-  }
-  if (static_cast<size_t>(fromIndexValue) > maxIndex) {
-    *error = "Array index out of bounds: " + util::toString(fromIndexValue) +
-             " > " + util::toString(maxIndex) + ".";
-    return false;
-  }
-  return true;
-}
 
 EvaluationResult IndexOf::evaluateForArrayInput(const std::vector<Value> &array,
                                                 const Value &keywordValue,
-                                                int fromIndexValue) const {
-  std::string error;
-  if (!validateFromIndex(fromIndexValue, array.size() - 1, &error)) {
-    return EvaluationError{std::move(error)};
-  }
-
-  for (size_t index = static_cast<size_t>(fromIndexValue); index < array.size();
+                                                size_t fromIndexValue) const {
+  for (size_t index = fromIndexValue; index < array.size();
        ++index) {
     if (array[index] == keywordValue) {
       return static_cast<double>(index);
@@ -86,12 +68,7 @@ EvaluationResult IndexOf::evaluateForArrayInput(const std::vector<Value> &array,
 
 EvaluationResult IndexOf::evaluateForStringInput(const std::string &string,
                                                  const Value &keywordValue,
-                                                 int fromIndexValue) const {
-  std::string error;
-  if (!validateFromIndex(fromIndexValue, string.size() - 1, &error)) {
-    return EvaluationError{std::move(error)};
-  }
-
+                                                 size_t fromIndexValue) const {
   std::string keywordString = keywordValue.match(
     [](const std::string& s){
         return s;

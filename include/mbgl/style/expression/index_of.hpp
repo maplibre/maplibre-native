@@ -22,10 +22,8 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override;
     std::string getOperator() const override;
 private:
-    EvaluationResult evaluateForArrayInput(const std::vector<Value>& array, const Value& keyword, int fromIndex) const;
-    EvaluationResult evaluateForStringInput(const std::string& string, const Value& keyword, int fromIndex) const;
-    
-    bool validateFromIndex(int fromIndex, size_t maxIndex, std::string* error) const;
+    EvaluationResult evaluateForArrayInput(const std::vector<Value>& array, const Value& keyword, size_t fromIndex) const;
+    EvaluationResult evaluateForStringInput(const std::string& string, const Value& keyword, size_t fromIndex) const;
 private:
     std::unique_ptr<Expression> keyword;
     std::unique_ptr<Expression> input;
