@@ -224,13 +224,13 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
 
     // TODO: If background is solid, we can skip drawables and rely on the clear color
-     const auto passes = evaluated.get<style::BackgroundOpacity>() == 0.0f
-        ? RenderPass::None
-        : (!unevaluated.get<style::BackgroundPattern>().isUndefined()
-           || evaluated.get<style::BackgroundOpacity>() < 1.0f
-           || evaluated.get<style::BackgroundColor>().a < 1.0f)
-        ? RenderPass::Translucent
-        : RenderPass::Opaque | RenderPass::Translucent;   // evaluated based on opaquePassCutoff in render()
+    const auto passes = evaluated.get<style::BackgroundOpacity>() == 0.0f ? RenderPass::None
+                        : (!unevaluated.get<style::BackgroundPattern>().isUndefined() ||
+                           evaluated.get<style::BackgroundOpacity>() < 1.0f ||
+                           evaluated.get<style::BackgroundColor>().a < 1.0f)
+                            ? RenderPass::Translucent
+                            : RenderPass::Opaque |
+                                  RenderPass::Translucent; // evaluated based on opaquePassCutoff in render()
 
     // unevaluated.hasTransition();
     // getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
