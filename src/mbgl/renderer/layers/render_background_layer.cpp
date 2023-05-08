@@ -8,11 +8,12 @@
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/change_request.hpp>
-#include <mbgl/renderer/upload_parameters.hpp>
+#include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
-#include <mbgl/renderer/image_manager.hpp>
+#include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/renderer/upload_parameters.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/tile_cover.hpp>
@@ -223,13 +224,13 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
 
     // TODO: If background is solid, we can skip drawables and rely on the clear color
-    // const auto passes = eval.get<style::BackgroundOpacity>() == 0.0f
-    //    ? RenderPass::None
-    //    : (!uneval.get<style::BackgroundPattern>().isUndefined()
-    //       || eval.get<style::BackgroundOpacity>() < 1.0f
-    //       || eval.get<style::BackgroundColor>().a < 1.0f)
-    //    ? RenderPass::Translucent
-    //    : RenderPass::Opaque | RenderPass::Translucent;   // evaluated based on opaquePassCutoff in render()
+     const auto passes = evaluated.get<style::BackgroundOpacity>() == 0.0f
+        ? RenderPass::None
+        : (!unevaluated.get<style::BackgroundPattern>().isUndefined()
+           || evaluated.get<style::BackgroundOpacity>() < 1.0f
+           || evaluated.get<style::BackgroundColor>().a < 1.0f)
+        ? RenderPass::Translucent
+        : RenderPass::Opaque | RenderPass::Translucent;   // evaluated based on opaquePassCutoff in render()
 
     // unevaluated.hasTransition();
     // getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
@@ -289,6 +290,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         if (layerChange) {
             drawable->setLayerIndex(layerIndex);
         }
+        // TODO: does render pass change dynamically?
     }
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
@@ -306,6 +308,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         // We actually need to build things, so set up a builder if we haven't already
         if (!builder) {
             builder = context.createDrawableBuilder("background");
+            builder->setRenderPass(passes);
             builder->setShader(shader);
             builder->addTweaker(context.createDrawableTweaker());
             builder->setColor(*color);
