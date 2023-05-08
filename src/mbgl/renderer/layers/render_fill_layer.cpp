@@ -514,7 +514,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 drawable->setTileID(tileID);
 
                 // Track it.
-                const auto result = tileDrawables.insert(std::make_pair(tileID, drawable));
+#if !defined(NDEBUG)
+                const auto result =
+#endif
+                tileDrawables.insert(std::make_pair(tileID, drawable));
                 // This should always insert because we checked previously.
                 assert(result.second);
 
