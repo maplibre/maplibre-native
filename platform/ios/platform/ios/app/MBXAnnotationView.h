@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import "Mapbox.h"
 
 @interface MBXAnnotationView : MLNAnnotationView
 @end
