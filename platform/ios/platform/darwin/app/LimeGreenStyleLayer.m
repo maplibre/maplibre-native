@@ -1,5 +1,5 @@
 #import "LimeGreenStyleLayer.h"
-@import GLKit;
+#import <GLKit/GLKit.h>
 
 @implementation LimeGreenStyleLayer {
     GLuint _program;
