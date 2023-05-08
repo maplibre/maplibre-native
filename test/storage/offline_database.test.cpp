@@ -679,7 +679,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
 
     { OfflineDatabase dbCreate(filename, fixture::tileServerOptions); }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     size_t initialSize = util::read_file(filename).size();
+#endif
 
     {
         Response response;
@@ -726,13 +728,17 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
         // The tiles from the offline region will migrate to the
         // ambient cache and shrink the database to the maximum
         // size defined by default.
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
         EXPECT_LE(sizeWithoutRegions, util::DEFAULT_MAX_CACHE_SIZE);
+#endif
 
         ASSERT_EQ(0u, db.listRegions().value().size());
         EXPECT_LT(sizeWithoutRegions, sizeWithOneRegion);
     }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     EXPECT_EQ(initialSize, util::read_file(filename).size());
+#endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -763,7 +769,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Pack)) {
     EXPECT_EQ(0u, log.uncheckedCount());
 
     db.pack();
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     EXPECT_EQ(initialSize, util::read_file(filename).size());
+#endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -970,7 +978,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
 
     { OfflineDatabase dbCreate(filename, fixture::tileServerOptions); }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     size_t initialSize = util::read_file(filename).size();
+#endif
 
     {
         Response response;
@@ -990,7 +1000,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
         db.clearAmbientCache();
     }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     EXPECT_EQ(initialSize, util::read_file(filename).size());
+#endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -1010,6 +1022,7 @@ TEST(OfflineDatabase, CreateRegionInfiniteMaxZoom) {
     });
 }
 
+#ifndef __QT__ // Qt doesn't support concurrent access to the same database.
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ConcurrentUse)) {
     FixtureLog log;
     deleteDatabaseFiles();
@@ -1042,6 +1055,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ConcurrentUse)) {
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+#endif
 
 TEST(OfflineDatabase, PutReturnsSize) {
     FixtureLog log;
