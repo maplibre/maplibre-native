@@ -1553,6 +1553,31 @@ public class Expression {
   }
 
   /**
+   * Returns the first position at which a `needle` can be found in a `haystack`. 
+   *
+   * @param needle   the item expression
+   * @param haystack the array or string expression
+   * @return position in the array or string or -1 if not found.
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#index-of">Style specification</a>
+   */
+  public static Expression indexOf(@NonNull Expression keyword, @NonNull Expression input) {
+    return new Expression("index-of", keyword, input);
+  }
+
+  /**
+   * Returns the first position at which a `needle` can be found in a `haystack`. 
+   *
+   * @param needle   the item expression
+   * @param haystack the array or string expression
+   * @param fromIndex the index to start searching from
+   * @return position in the array or string or -1 if not found.
+   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#index-of">Style specification</a>
+   */
+  public static Expression indexOf(@NonNull Expression keyword, @NonNull Expression input, @NonNull Expression fromIndex) {
+    return new Expression("index-of", keyword, input, fromIndex);
+  }
+
+  /**
    * Retrieves whether an item exists in an array or a substring exists in a string.
    *
    * @param needle   the item expression
