@@ -458,8 +458,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
             const auto fillRenderPass = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
                                          evaluated.get<FillOpacity>().constantOr(0) >= 1.0f
                                          /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
-                                        ? RenderPass::Opaque
-                                        : RenderPass::Translucent;
+                                            ? RenderPass::Opaque
+                                            : RenderPass::Translucent;
             builder->setRenderPass(fillRenderPass);
 
             const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
