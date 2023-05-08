@@ -13,6 +13,7 @@ namespace mbgl {
 
 class Color;
 class PaintParameters;
+enum class RenderPass : uint8_t;
 
 namespace gfx {
 
@@ -44,6 +45,17 @@ public:
     /// Which shader to use when rendering this drawable
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
+
+    /// The pass on which we'll be rendered
+    mbgl::RenderPass getRenderPass() const { return renderPass; }
+    void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
+
+    /// Test whether to draw this drawable in a given render pass.
+    /// If multiple render pass bits are set, all must be present.
+    bool hasRenderPass(mbgl::RenderPass value) const {
+        using T = std::underlying_type<mbgl::RenderPass>::type;
+        return (static_cast<T>(renderPass) & static_cast<T>(value)) == static_cast<T>(value);
+    }
 
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
@@ -89,6 +101,7 @@ protected:
     std::string name;
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
+    mbgl::RenderPass renderPass;
     mat4 matrix; //= matrix::identity4();
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
