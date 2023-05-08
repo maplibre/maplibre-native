@@ -422,17 +422,27 @@ void RenderFillLayer::update(const int32_t layerIndex,
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
 
-            const auto result = tileDrawables.insert(std::make_pair(tileID, gfx::DrawablePtr()));
-            if (!result.second) {
-                // Already present
-                continue;
-            }
+            const auto hit = tileDrawables.find(tileID);
 
             const auto renderPass = RenderPass::Translucent;
             const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
             if (!renderData) {
+                // Remove the tile if it was previously present
+                if (hit != tileDrawables.end()) {
+                    if (hit->second) {
+                        changes.emplace_back(std::make_unique<RemoveDrawableRequest>(hit->second->getId()));
+                    }
+                    tileDrawables.erase(hit);
+                    ++stats.tileDrawablesRemoved;
+                }
                 continue;
             }
+
+            if (hit != tileDrawables.end()) {
+                // already present
+                continue;
+            }
+
             auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
             // const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
 
@@ -496,7 +506,12 @@ void RenderFillLayer::update(const int32_t layerIndex,
             if (!newDrawables.empty()) {
                 auto& drawable = newDrawables[0];
                 drawable->setTileID(tileID);
-                result.first->second = drawable;
+
+                // Track it.
+                const auto result = tileDrawables.insert(std::make_pair(tileID, drawable));
+                // This should always insert because we checked previously.
+                assert(result.second);
+
                 changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
                 ++stats.tileDrawablesAdded;
                 // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
