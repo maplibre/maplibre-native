@@ -49,6 +49,10 @@ public:
     /// Get the ID of the drawable we're currently working on, if any
     util::SimpleIdentity getDrawableId();
 
+    /// The pass on which we'll be rendered
+    mbgl::RenderPass getRenderPass() const { return renderPass; }
+    void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
+
     /// The draw priority assigned to generated drawables
     DrawPriority getDrawPriority() const;
     void setDrawPriority(DrawPriority);
@@ -118,6 +122,7 @@ protected:
 protected:
     std::string name;
     std::string drawableName;
+    mbgl::RenderPass renderPass;
     DrawPriority drawPriority = 0;
     int32_t layerIndex = -1;
     DepthMaskType depthType = DepthMaskType::ReadOnly;

@@ -1,11 +1,13 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_builder_impl.hpp>
+#include <mbgl/renderer/render_pass.hpp>
 
 namespace mbgl {
 namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
+      renderPass(RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
 DrawableBuilder::~DrawableBuilder() = default;
@@ -27,6 +29,7 @@ DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
         auto draw = getCurrentDrawable(/*createIfNone=*/true);
+        currentDrawable->setRenderPass(renderPass);
         currentDrawable->setDrawPriority(drawPriority);
         currentDrawable->setLayerIndex(layerIndex);
         currentDrawable->setDepthType(depthType);
