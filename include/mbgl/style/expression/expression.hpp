@@ -178,7 +178,8 @@ enum class Kind : int32_t {
     ImageExpression,
     In,
     Within,
-    Distance
+    Distance,
+    IndexOf
 };
 
 class Expression {
