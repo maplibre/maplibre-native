@@ -7,6 +7,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ### ✨ Features and improvements
 
 * Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
+* Add support for [index-of expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
 
 ### 🐞 Bug fixes
 
