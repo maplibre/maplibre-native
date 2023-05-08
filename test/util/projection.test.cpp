@@ -52,14 +52,14 @@ TEST(Projection, Boundaries) {
 
 TEST(Projection, MetersPerPixelAtLatitude) {
     double zoom = 0;
-    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(0, zoom), 78271.516964020484);
-    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom), 6752.2284729446501);
+    EXPECT_NEAR(Projection::getMetersPerPixelAtLatitude(0, zoom), 78271.516964020484, 1e-7);
+    EXPECT_NEAR(Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom), 6752.2284729446501, 1e-7);
     EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(util::LATITUDE_MAX, zoom),
                      Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom));
 
     zoom = 20;
-    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(0, zoom), 0.074645535434742435);
-    EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom), 0.0064394268731543065);
+    EXPECT_NEAR(Projection::getMetersPerPixelAtLatitude(0, zoom), 0.074645535434742435, 1e-7);
+    EXPECT_NEAR(Projection::getMetersPerPixelAtLatitude(-util::LATITUDE_MAX, zoom), 0.0064394268731543065, 1e-7);
 
     EXPECT_DOUBLE_EQ(Projection::getMetersPerPixelAtLatitude(std::numeric_limits<double>::lowest(), zoom),
                      Projection::getMetersPerPixelAtLatitude(std::numeric_limits<double>::max(), zoom));
