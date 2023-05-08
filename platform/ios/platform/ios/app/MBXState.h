@@ -1,4 +1,4 @@
-#include <Mapbox.h>
+#import <Mapbox.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
