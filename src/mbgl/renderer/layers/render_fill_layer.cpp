@@ -263,8 +263,6 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 constexpr auto shaderName = "background_generic";
 
 void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // TODO: This isn't happening on style change, so old tile drawables are being left active
-
     // Remove everything
     decltype(tileDrawables) localDrawables;
     {
@@ -344,49 +342,6 @@ void RenderFillLayer::update(const int32_t layerIndex,
     //            drawable->setLayerIndex(layerIndex);
     //        }
     //    }
-    //
-    //    std::unique_ptr<gfx::DrawableBuilder> builder;
-    //
-    //    // For each tile in the cover set, add a tile drawable if one doesn't already exist.
-    //    // We currently assume only one drawable per tile.
-    //    for (const auto& tileID : tileCover) {
-    //        const auto result = tileDrawables.insert(std::make_pair(tileID, gfx::DrawablePtr()));
-    //        if (!result.second) {
-    //            // Already present
-    //            // TODO: Update matrix here or in the tweaker?
-    //            continue;
-    //        }
-    //
-    //        // We actually need to build things, so set up a builder if we haven't already
-    //        if (!builder) {
-    //            builder = context.createDrawableBuilder("background");
-    //            builder->setShader(shader);
-    //            builder->addTweaker(context.createDrawableTweaker());
-    //            builder->setColor(*color);
-    //            builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
-    //            builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-    //            builder->setLayerIndex(layerIndex);
-    //        }
-    //
-    //        // Tile coordinates are fixed...
-    //        builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
-    //
-    //        // ... they're placed with the matrix in the uniforms, which changes with the view
-    //        builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
-    //
-    //        builder->flush();
-    //
-    //        auto drawables = builder->clearDrawables();
-    //        if (!drawables.empty()) {
-    //            auto& drawable = drawables[0];
-    //            drawable->setTileID(tileID);
-    //            result.first->second = drawable;
-    //            changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
-    //            ++stats.tileDrawablesAdded;
-    //            // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
-    //            // std::to_string(stats.tileDrawablesAdded+1));
-    //        }
-    //    }
 
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
     std::transform(renderTiles->begin(),
@@ -450,16 +405,21 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 builder = context.createDrawableBuilder("fill");
                 builder->setShader(shader);
                 builder->addTweaker(context.createDrawableTweaker());
-                builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
+                builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerVertex);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                 builder->setLayerIndex(layerIndex);
             }
 
-            const auto fillRenderPass = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
-                                         evaluated.get<FillOpacity>().constantOr(0) >= 1.0f
+            // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state)
+
+            const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
+            const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
+            const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
+            builder->setColor(fillColor);
+
+            const auto fillRenderPass = (evalColor.a >= 1.0f && fillOpacity >= 1.0f
                                          /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
-                                            ? RenderPass::Opaque
-                                            : RenderPass::Translucent;
+                                            ? RenderPass::Opaque : RenderPass::Translucent;
             builder->setRenderPass(fillRenderPass);
 
             const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
