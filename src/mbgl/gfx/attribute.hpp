@@ -98,7 +98,7 @@ public:
 
 struct AttributeDescriptor {
     AttributeDataType dataType;
-    uint8_t offset;
+    uint32_t offset;
 };
 
 inline bool operator==(const AttributeDescriptor& lhs, const AttributeDescriptor& rhs) {

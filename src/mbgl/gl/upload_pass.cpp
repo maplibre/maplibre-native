@@ -155,7 +155,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                          const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
                          const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
                          const auto stride = defaultAttr.getStride();
-                         const auto offset = static_cast<uint8_t>(allData.size());
+                         const auto offset = static_cast<uint32_t>(allData.size());
 
                          // Get the raw data for the values in the desired format
                          const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
