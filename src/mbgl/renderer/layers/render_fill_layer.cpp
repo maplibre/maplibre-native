@@ -410,7 +410,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 builder->setLayerIndex(layerIndex);
             }
 
-            // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state)
+            // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
+            // parameters.state)
 
             const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
             const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
@@ -419,7 +420,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
             const auto fillRenderPass = (evalColor.a >= 1.0f && fillOpacity >= 1.0f
                                          /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
-                                            ? RenderPass::Opaque : RenderPass::Translucent;
+                                            ? RenderPass::Opaque
+                                            : RenderPass::Translucent;
             builder->setRenderPass(fillRenderPass);
 
             const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
