@@ -130,10 +130,10 @@ apple_xcframework(
 
 ios_framework(
     name = "MapLibre.link",
-    bundle_id = "org.maplibre.link",
+    bundle_id = "com.maplibre.link",
     families = ["iphone"],
     infoplists = ["build/Info.plist"],
-    linkopts = ["-all_load"],
+    linkopts = [""],
     minimum_os_version = "12.0",
     deps = ["sdk"],
 )
@@ -416,7 +416,7 @@ objc_library(
     ],
     deps = [
         "sdk-headers"
-    ]
+    ],
 )
 
 _IOS_APPLICATION_RESOURCES = [
@@ -433,12 +433,12 @@ _IOS_APPLICATION_RESOURCES = [
         "platform/ios/app/Assets.xcassets",
         "platform/darwin/test/amsterdam.geojson"
     ] + glob([
-        "platform/ios/app/*.lproj/**"
+        "platform/ios/app/*.lproj/**",
     ])
 
 ios_application(
     name = "App",
-    bundle_id = "org.maplibre.app",
+    bundle_id = "com.maplibre.app",
     families = ["iphone", "ipad"],
     infoplists = ["platform/ios/app/Info.plist"],
     minimum_os_version = "12.0",
@@ -452,7 +452,7 @@ ios_application(
 
 ios_application(
     name = "ProvisionedApp",
-    bundle_id = "org.maplibre.app",
+    bundle_id = "com.maplibre.app",
     families = ["iphone", "ipad"],
     infoplists = ["platform/ios/app/Info.plist"],
     minimum_os_version = "12.0",
@@ -465,6 +465,21 @@ ios_application(
     ],
     resources = _IOS_APPLICATION_RESOURCES,
     provisioning_profile = "MapLibre.mobileprovision"
+)
+
+# Outputs a file with the size of MapLibre as a dynamic library in bytes
+genrule(
+    name = "size",
+    srcs = [
+        "ProvisionedApp"
+    ],
+    outs = [
+        "size-out"
+    ],
+    cmd = """
+        unzip $(location ProvisionedApp)
+        stat -f%z ./Payload/ProvisionedApp.app/Frameworks/MapLibre.link.framework/MapLibre.link > $@
+    """,
 )
 
 xcodeproj(
