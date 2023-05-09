@@ -128,11 +128,9 @@ apple_xcframework(
     deps = ["sdk-dynamic"],
 )
 
-# This target allows you to link the SDK to emulate linking it in the app
-# This should help us find issues with missing symbols sooner.
 ios_framework(
-    name = "Mapbox.link",
-    bundle_id = "com.maplibre.link",
+    name = "MapLibre.link",
+    bundle_id = "org.maplibre.link",
     families = ["iphone"],
     infoplists = ["build/Info.plist"],
     linkopts = ["-all_load"],
@@ -368,6 +366,11 @@ objc_library(
 )
 
 objc_library(
+    name = "sdk-headers",
+    hdrs = ["platform/ios/src/Mapbox.h"] + _PUBLIC_HEADERS,
+)
+
+objc_library(
     name = "iosapp",
     srcs = [
         "platform/ios/app/MBXAppDelegate.m",
@@ -385,7 +388,8 @@ objc_library(
         "platform/ios/app/MBXOrnamentsViewController.m",
         "platform/ios/app/MBXStateManager.m",
         "platform/darwin/app/LimeGreenStyleLayer.m",
-        "platform/darwin/app/LimeGreenStyleLayer.h"
+        "platform/darwin/app/LimeGreenStyleLayer.h",
+        "platform/ios/app/MBXCustomCalloutView.h",
     ],
     hdrs = [
         "platform/ios/app/MBXAppDelegate.h",
@@ -393,7 +397,6 @@ objc_library(
         "platform/ios/app/MBXCustomLocationViewController.h",
         "platform/ios/app/MBXSnapshotsViewController.h",
         "platform/ios/app/MBXFrameTimeGraphView.h",
-        "platform/ios/app/MBXCustomCalloutView.h",
         "platform/ios/app/MBXViewController.h",
         "platform/ios/app/MBXUserLocationAnnotationView.h",
         "platform/ios/app/MBXAnnotationView.h",
@@ -404,28 +407,19 @@ objc_library(
         "platform/ios/app/MLNMapView_Experimental.h"
     ],
     includes = [
-        "platform/darwin/app"
-    ],
-    deps = [
-        "sdk"
+        "platform/darwin/app",
+        "platform/ios/src",
+        "platform/darwin/src"
     ],
     sdk_frameworks = [
         "GLKit" # needed for LimeGreenStyleLayer
+    ],
+    deps = [
+        "sdk-headers"
     ]
 )
 
-
-ios_application(
-    name = "App",
-    bundle_id = "com.maplibre.app",
-    families = ["iphone", "ipad"],
-    infoplists = ["platform/ios/app/Info.plist"],
-    minimum_os_version = "12.0",
-    visibility = ["//visibility:public"],
-    deps = [
-        "iosapp",
-    ],
-    resources = [
+_IOS_APPLICATION_RESOURCES = [
         "platform/ios/app/numeric_filter_style.json",
         "platform/ios/app/missing_icon.json",
         "platform/ios/app/points.geojson",
@@ -441,6 +435,36 @@ ios_application(
     ] + glob([
         "platform/ios/app/*.lproj/**"
     ])
+
+ios_application(
+    name = "App",
+    bundle_id = "org.maplibre.app",
+    families = ["iphone", "ipad"],
+    infoplists = ["platform/ios/app/Info.plist"],
+    minimum_os_version = "12.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        "sdk",
+        "iosapp",
+    ],
+    resources = _IOS_APPLICATION_RESOURCES
+)
+
+ios_application(
+    name = "ProvisionedApp",
+    bundle_id = "org.maplibre.app",
+    families = ["iphone", "ipad"],
+    infoplists = ["platform/ios/app/Info.plist"],
+    minimum_os_version = "12.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        "iosapp",
+    ],
+    frameworks = [
+        "MapLibre.link"
+    ],
+    resources = _IOS_APPLICATION_RESOURCES,
+    provisioning_profile = "MapLibre.mobileprovision"
 )
 
 xcodeproj(
