@@ -41,7 +41,7 @@ EvaluationResult IndexOf::evaluate(const EvaluationContext &params) const {
             return EvaluationError{"Expected third argument to be of type number, but found " +
                                    toString(typeOf(*evaluatedFromIndex)) + " instead."};
         }
-        fromIndexValue = static_cast<size_t>(evaluatedFromIndex->get<double>());
+        fromIndexValue = static_cast<size_t>(std::max(evaluatedFromIndex->get<double>(), 0.0));
     }
 
     return evaluatedInput->match(
