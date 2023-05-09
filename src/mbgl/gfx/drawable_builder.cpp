@@ -112,7 +112,9 @@ void DrawableBuilder::addTriangles(const std::vector<std::array<int16_t, 2>>& ve
                   [&](const std::array<int16_t, 2>& x) { impl->vertices.emplace_back(Impl::VT({{x}})); });
     for (auto i = std::next(indexes.begin(), indexOffset);
          i != std::next(indexes.begin(), indexOffset + indexLength);) {
-        impl->indexes.emplace_back(*i++ + baseIndex, *i++ + baseIndex, *i++ + baseIndex);
+        impl->indexes.emplace_back(static_cast<uint16_t>(*i++ + baseIndex),
+                                   static_cast<uint16_t>(*i++ + baseIndex),
+                                   static_cast<uint16_t>(*i++ + baseIndex));
     }
     if (colorMode == ColorMode::PerVertex) {
         for (size_t i = 0; i < vertexLength; ++i) {
