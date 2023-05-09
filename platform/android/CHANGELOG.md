@@ -12,6 +12,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## 10.1.0 - May 9, 2023
 
+> **Warning**
+> Due to the switch to OpenGL ES 3.0 this is a breaking release💥.
+> Please see the related discussion [here](https://github.com/maplibre/maplibre-native/discussions/923).
+> We will be more careful to follow semantic versioning in the future.
+
 ### ✨ Features and improvements
 
 * Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
