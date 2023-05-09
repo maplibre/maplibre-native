@@ -10,7 +10,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ⛵ Dependencies
 
-## 10.1.0
+## 10.1.0 - May 9, 2023
 
 ### ✨ Features and improvements
 
