@@ -115,7 +115,7 @@ info_plist(
 info_plist(
     name = "info_static_plist",
     out = "Info-static.plist",
-    base_info_plist = "platform/ios/platform/ios/framework/Info-static.plist"
+    base_info_plist = "platform/ios/framework/Info-static.plist"
 )
 
 apple_xcframework(
