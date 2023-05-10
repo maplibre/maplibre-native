@@ -10,6 +10,28 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ⛵ Dependencies
 
+## 11.0.0 - May 10, 2023
+
+> **Warning**
+> Due to the switch to OpenGL ES 3.0 this is a breaking release💥.
+> Please see the related discussion [here](https://github.com/maplibre/maplibre-native/discussions/923).
+
+### ✨ Features and improvements
+
+* Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
+* Add support for the [`index-of` expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
+
+### 🐞 Bug fixes
+
+* Fix regression in CameraUpdateFactory#zoomOut ([#1035](https://github.com/maplibre/maplibre-native/pull/1035))
+* `AndroidLocationEngineImpl` made public to create custom `LocationEngineProvider`([#850](https://github.com/maplibre/maplibre-native/pull/850))
+
+## 10.2.0 - May 10, 2023
+
+Revert changes of 10.1.0, which was a breaking release by accident.
+
+This version is identical to 10.0.2.
+
 ## 10.1.0 - May 9, 2023
 
 ### ✨ Features and improvements
