@@ -121,6 +121,20 @@ jobs:
         run: |
           echo $PR_NUMBER > ./pr_number
 
+      - name: Check debug symbols
+        run: make darwin-check-public-symbols
+
+      - name: Lint plist files
+        run: make ios-lint-plist
+
+      - name: Running ios unit tests
+        run: make ios-test
+
+      - name: Running ios UI tests
+        run: make ios-uitest
+
+      # size test
+
       - name: Copy provisioning profile
         run: cp ~/MapLibre.mobileprovision .
 
@@ -137,18 +151,8 @@ jobs:
           path: |
             ${{ env.size_outfile }}
             platform/ios/pr_number
-
-      - name: Check debug symbols
-        run: make darwin-check-public-symbols
-
-      - name: Lint plist files
-        run: make ios-lint-plist
-
-      - name: Running ios unit tests
-        run: make ios-test
-
-      - name: Running ios UI tests
-        run: make ios-uitest
+      
+      # ---
 
       - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
         run: make ios-sanitize
