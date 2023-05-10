@@ -125,7 +125,7 @@ jobs:
         run: cp ~/MapLibre.mobileprovision .
 
       - name: Build app for size test & output size 
-        working-directory: /
+        working-directory: ./
         run: | 
           bazelisk build --compilation_mode=opt //platform/ios:size --ios_multi_cpus=arm64
           echo "size_outfile"=$(bazel cquery --output=files //platform/ios:size) >> $GITHUB_ENV
