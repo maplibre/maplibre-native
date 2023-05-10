@@ -236,7 +236,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
 
     // unevaluated.hasTransition();
     // getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
-    
+
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (!evaluated.get<BackgroundPattern>().from.empty() || evaluated.get<style::BackgroundOpacity>() <= 0.0f) {
         removeDrawables<decltype(tileDrawables)::const_iterator>(

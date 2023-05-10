@@ -13,9 +13,9 @@ public:
         : UniformBuffer(other) {}
     UniformBufferGL(UniformBufferGL&& other)
         : UniformBuffer(std::move(other)) {}
-    
+
     BufferID getID() const { return id; }
-    
+
 protected:
     BufferID id = 0;
 };

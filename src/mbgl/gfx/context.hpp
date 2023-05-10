@@ -107,7 +107,7 @@ public:
 
     /// Create a new drawable tweaker
     virtual DrawableTweakerPtr createDrawableTweaker() = 0;
-    
+
     /// Create a new uniform buffer
     virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) = 0;
 

@@ -18,7 +18,7 @@ public:
     virtual ~UniformBuffer() = default;
 
     std::size_t getSize() const { return size; }
-    
+
 protected:
     UniformBuffer& operator=(const UniformBuffer&) = default;
     UniformBuffer& operator=(UniformBuffer&& other) {
@@ -43,14 +43,13 @@ public:
 
     /// Number of elements
     std::size_t size() const { return uniformBufferMap.size(); }
-    
+
     /// Get an uniform buffer element.
     /// Returns a pointer to the element on success, or null if the uniform buffer doesn't exists.
     UniformBuffer* get(const std::string& name) const;
 
     /// Add a new uniform buffer element or replace the existing one.
-    UniformBuffer* addOrReplace(std::string name,
-                                const std::shared_ptr<UniformBuffer>& uniformBuffer);
+    UniformBuffer* addOrReplace(std::string name, const std::shared_ptr<UniformBuffer>& uniformBuffer);
 
     UniformBufferArray& operator=(UniformBufferArray&&);
     UniformBufferArray& operator=(const UniformBufferArray&);

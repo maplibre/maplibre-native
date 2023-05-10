@@ -12,7 +12,7 @@ class UniformBlockGL final : public gfx::UniformBlock {
     // Can only be created by UniformBlockArrayGL
 private:
     friend UniformBlockArrayGL;
-    
+
     UniformBlockGL(int index_, std::size_t size_)
         : UniformBlock(index_, size_) {}
     UniformBlockGL(const UniformBlockGL& other)

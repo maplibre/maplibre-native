@@ -27,7 +27,7 @@ public:
 
     virtual void bindBuffer(const UniformBuffer& uniformBuffer) = 0;
     virtual void unbindBuffer() = 0;
-    
+
 protected:
     UniformBlock& operator=(const UniformBlock&) = default;
     UniformBlock& operator=(UniformBlock&& other) {
@@ -53,8 +53,8 @@ public:
     virtual ~UniformBlockArray() = default;
 
     /// Get map of elements.
-    const UniformBlockMap& getMap() const  { return uniformBlockMap; }
-    
+    const UniformBlockMap& getMap() const { return uniformBlockMap; }
+
     /// Number of elements
     std::size_t size() const { return uniformBlockMap.size(); }
 
@@ -64,9 +64,7 @@ public:
 
     /// Add a new uniform block element.
     /// Returns a pointer to the new element on success, or null if the uniform block already exists.
-    UniformBlock* add(std::string name,
-                      int index,
-                      std::size_t size);
+    UniformBlock* add(std::string name, int index, std::size_t size);
 
     UniformBlockArray& operator=(UniformBlockArray&&);
     UniformBlockArray& operator=(const UniformBlockArray&);

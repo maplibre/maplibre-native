@@ -98,7 +98,7 @@ public:
     /// Get the uniform buffers attached to this drawable
     virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
-    
+
     // Reset a single color attribute for all vertexes
     virtual void resetColor(const Color&) = 0;
 

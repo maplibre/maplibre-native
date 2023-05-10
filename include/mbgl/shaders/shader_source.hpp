@@ -38,7 +38,7 @@ enum class BuiltIn {
     SymbolSDFTextProgram,
     SymbolSDFIconProgram,
     SymbolTextAndIconProgram,
-    
+
     BackgroundProgramUBO
 };
 

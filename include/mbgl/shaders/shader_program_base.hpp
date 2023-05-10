@@ -34,7 +34,7 @@ public:
 
     /// Get the available vertex attributes and their default values
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
-    
+
     template <typename T>
     bool setAttribute(const std::string& name, std::size_t i, T value) {
         return set(mutableVertexAttributes(), name, i, value);

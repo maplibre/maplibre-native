@@ -49,7 +49,7 @@ public:
     gfx::UniqueVertexBufferResource attributeBuffer;
 
     UniformBufferArrayGL uniformBuffers;
-    
+
     std::size_t indexOffset = 0;
     std::size_t indexLength = 0;
     std::size_t attributeOffset = 0;

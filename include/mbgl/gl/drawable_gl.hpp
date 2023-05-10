@@ -44,7 +44,7 @@ public:
 
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
-    
+
     /// Reset a single color attribute for all vertexes
     void resetColor(const Color&) override;
 
