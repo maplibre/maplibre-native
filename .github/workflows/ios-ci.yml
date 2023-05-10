@@ -136,7 +136,7 @@ jobs:
       # size test
 
       - name: Copy provisioning profile
-        run: cp ~/MapLibre.mobileprovision .
+        run: cp ~/secrets/MapLibre.mobileprovision .
 
       - name: Build app for size test & output size 
         working-directory: ./
