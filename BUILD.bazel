@@ -47,12 +47,11 @@ cc_library(
 
 genrule(
     name = "git_hash",
-    srcs = [".git/HEAD"] + glob(['.git/refs/**']),
+    local = True,
     outs = ["hash"],
     visibility = ["//visibility:public"],
     cmd = """
-        head=.git/$$(cat $(location .git/HEAD) | awk '{ print $$2 }')
-        cat $$head > $@
+        git rev-parse HEAD > $@
     """
 )
 
