@@ -260,7 +260,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
-constexpr auto shaderName = "background_generic";
+constexpr auto shaderName = "BackgroundProgramUBO";
 
 void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // TODO: This isn't happening on style change, so old tile drawables are being left active

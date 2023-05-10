@@ -169,57 +169,5 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(platform::GLenum type
     return rawData;
 }
 
-namespace {
-template <typename T>
-void applyUniform(GLint, const T&);
-template <>
-void applyUniform(GLint, const std::int32_t&) {}
-template <>
-void applyUniform(GLint, const gfx::VertexAttribute::int2&) {}
-template <>
-void applyUniform(GLint, const gfx::VertexAttribute::int3&) {}
-template <>
-void applyUniform(GLint, const gfx::VertexAttribute::int4&) {}
-template <>
-void applyUniform(GLint, const float&) {}
-template <>
-void applyUniform(GLint, const gfx::VertexAttribute::float2&) {}
-template <>
-void applyUniform(GLint, const gfx::VertexAttribute::float3&) {}
-template <>
-void applyUniform(GLint, const gfx::VertexAttribute::float4&) {}
-template <>
-void applyUniform(GLint, const gfx::VertexAttribute::matf3&) {}
-template <>
-void applyUniform(GLint location, const gfx::VertexAttribute::matf4& value) {
-    MBGL_CHECK_ERROR(glUniformMatrix4fv(location, 1, GL_FALSE, value.data()));
-}
-} // namespace
-
-struct ApplyUniform {
-    GLint location;
-    template <typename T>
-    void operator()(const T& value) {
-        applyUniform(location, value);
-    }
-};
-
-void VertexAttributeArrayGL::applyUniforms(const gfx::ShaderProgramBase& shader) {
-    const auto& glShader = static_cast<const ShaderProgramGL&>(shader);
-    const auto program = glShader.getGLProgramID();
-
-    for (auto& kv : attrs) {
-        const auto& name = kv.first;
-        auto& uniform = kv.second;
-
-        if (uniform->getIndex() < 0) {
-            const auto index = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.c_str()));
-            Log::Warning(Event::General, "Uniform '" + name + "' = " + std::to_string(index));
-            uniform->setIndex(index);
-        }
-        std::visit(ApplyUniform{uniform->getIndex()}, uniform->get(0));
-    }
-}
-
 } // namespace gl
 } // namespace mbgl

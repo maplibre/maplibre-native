@@ -7,6 +7,7 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/program.hpp>
+#include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -47,6 +48,8 @@ public:
     gfx::IndexBuffer indexBuffer = {0, nullptr};
     gfx::UniqueVertexBufferResource attributeBuffer;
 
+    UniformBufferArrayGL uniformBuffers;
+    
     std::size_t indexOffset = 0;
     std::size_t indexLength = 0;
     std::size_t attributeOffset = 0;

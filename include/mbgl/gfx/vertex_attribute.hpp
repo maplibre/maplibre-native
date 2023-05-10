@@ -186,9 +186,6 @@ public:
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
-    /// Apply to the active program
-    virtual void applyUniforms(const ShaderProgramBase&) = 0;
-
     VertexAttributeArray& operator=(VertexAttributeArray&&);
     VertexAttributeArray& operator=(const VertexAttributeArray&);
 
