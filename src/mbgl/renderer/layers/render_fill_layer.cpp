@@ -343,6 +343,16 @@ void RenderFillLayer::update(const int32_t layerIndex,
     //        }
     //    }
 
+    if (!renderTiles || renderTiles->empty()) {
+        if (!tileDrawables.empty()) {
+            removeDrawables<decltype(tileDrawables)::const_iterator>(
+                tileDrawables.cbegin(), tileDrawables.cend(), changes,
+                [](auto& ii) { return ii->second->getId(); });
+            tileDrawables.clear();
+        }
+        return;
+    }
+
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
     std::transform(renderTiles->begin(),
                    renderTiles->end(),
