@@ -45,4 +45,15 @@ cc_library(
     ],
 )
 
+genrule(
+    name = "git_hash",
+    srcs = [".git/HEAD"] + glob(['.git/refs/**']),
+    outs = ["hash"],
+    visibility = ["//visibility:public"],
+    cmd = """
+        head=.git/$$(cat $(location .git/HEAD) | awk '{ print $$2 }')
+        cat $$head > $@
+    """
+)
+
 exports_files(["LICENSE.md"], visibility = ["//visibility:public"])

@@ -105,6 +105,25 @@ apple_static_xcframework(
     deps = ["sdk"],
 )
 
+genrule(
+    name = "info_plist",
+    srcs = [
+        "platform/ios/framework/Info.plist",
+        "//:git_hash"
+    ],
+    outs = [
+        "Info.plist"
+    ],
+    cmd = """
+        cp $(location platform/ios/framework/Info.plist) $@
+        plutil -replace MLNCommitHash -string $$(cat $(location //:git_hash)) $@
+        
+        # TODO: move to file
+        sem_version=0.0.0
+        plutil -replace MLNSemanticVersionString -string $$sem_version $@
+    """,
+)
+
 apple_xcframework(
     name = "Mapbox.dynamic",
     bundle_id = "com.maplibre.mapbox",
@@ -113,7 +132,7 @@ apple_xcframework(
         "platform/ios/resources/*.lproj/**",
         "platform/ios/resources/*.xcassets/**",
     ]),
-    infoplists = ["build/Info.plist"],
+    infoplists = ["info_plist"],
     ios = {
         "simulator": [
             "x86_64",
@@ -132,7 +151,7 @@ ios_framework(
     name = "MapLibre.link",
     bundle_id = "com.maplibre.link",
     families = ["iphone"],
-    infoplists = ["build/Info.plist"],
+    infoplists = ["info_plist"],
     linkopts = [""],
     minimum_os_version = "12.0",
     deps = ["sdk"],
