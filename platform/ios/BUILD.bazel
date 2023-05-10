@@ -7,6 +7,7 @@ load(
     "top_level_target",
     "xcodeproj",
 )
+load("bazel/macros.bzl", "info_plist")
 
 # This list of public headers is from what Mapbox vendors with their dynamic framework
 # If we forget one the build will fail, and if we add too many there will be a warning
@@ -105,23 +106,16 @@ apple_static_xcframework(
     deps = ["sdk"],
 )
 
-genrule(
+info_plist(
     name = "info_plist",
-    srcs = [
-        "platform/ios/framework/Info.plist",
-        "//:git_hash"
-    ],
-    outs = [
-        "Info.plist"
-    ],
-    cmd = """
-        cp $(location platform/ios/framework/Info.plist) $@
-        plutil -replace MLNCommitHash -string $$(cat $(location //:git_hash)) $@
-        
-        # TODO: move to file
-        sem_version=0.0.0
-        plutil -replace MLNSemanticVersionString -string $$sem_version $@
-    """,
+    out = "Info.plist",
+    base_info_plist = "platform/ios/framework/Info.plist",
+)
+
+info_plist(
+    name = "info_static_plist",
+    out = "Info-static.plist",
+    base_info_plist = "platform/ios/platform/ios/framework/Info-static.plist"
 )
 
 apple_xcframework(
@@ -204,7 +198,7 @@ apple_resource_bundle(
     name = "resources",
     bundle_id = "com.maplibre.mapbox",
     bundle_name = "Mapbox",
-    infoplists = ["build/Info-static.plist"],
+    infoplists = ["info_static_plist"],
     resources = glob([
         "platform/ios/resources/*.lproj/**",
         "platform/ios/resources/*.xcassets/**",
