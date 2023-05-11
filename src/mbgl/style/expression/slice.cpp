@@ -20,14 +20,12 @@ int normalizeIndex(int index, int length) {
 } // namespace
 
 Slice::Slice(std::unique_ptr<Expression> input_,
-                 std::unique_ptr<Expression> fromIndex_,
-                 std::unique_ptr<Expression> toIndex_
-                 )
+             std::unique_ptr<Expression> fromIndex_,
+             std::unique_ptr<Expression> toIndex_)
     : Expression(Kind::Slice, input_->getType()),
       input(std::move(input_)),
       fromIndex(std::move(fromIndex_)),
-      toIndex(std::move(toIndex_))
-       {}
+      toIndex(std::move(toIndex_)) {}
 
 EvaluationResult Slice::evaluate(const EvaluationContext &params) const {
     const EvaluationResult evaluatedInput = input->evaluate(params);
@@ -68,8 +66,8 @@ EvaluationResult Slice::evaluate(const EvaluationContext &params) const {
 }
 
 EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
-                                                int fromIndexValue,
-                                                int toIndexValue) const {
+                                              int fromIndexValue,
+                                              int toIndexValue) const {
     int length = static_cast<int>(array.size());
     if (toIndexValue == std::numeric_limits<int>::max()) {
         toIndexValue = length;
@@ -82,7 +80,6 @@ EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
     }
     toIndexValue = std::min(toIndexValue, length);
 
-
     std::vector<Value> result;
     result.reserve(toIndexValue - fromIndexValue);
     for (int index = fromIndexValue; index < toIndexValue; ++index) {
@@ -91,9 +88,7 @@ EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
     return result;
 }
 
-EvaluationResult Slice::evaluateForStringInput(const std::string &string,
-                                                int fromIndexValue,
-                                                int toIndexValue) const {
+EvaluationResult Slice::evaluateForStringInput(const std::string &string, int fromIndexValue, int toIndexValue) const {
     int length = static_cast<int>(string.size());
     if (toIndexValue == std::numeric_limits<int>::max()) {
         toIndexValue = length;
@@ -142,7 +137,7 @@ bool Slice::operator==(const Expression &e) const {
     if (e.getKind() == Kind::Slice) {
         auto rhs = static_cast<const Slice *>(&e);
         const auto toIndexEqual = (toIndex && rhs->toIndex && *toIndex == *(rhs->toIndex)) ||
-                                    (!toIndex && !rhs->toIndex);
+                                  (!toIndex && !rhs->toIndex);
         return *input == *(rhs->input) && *fromIndex == *(rhs->fromIndex) && toIndexEqual;
     }
     return false;

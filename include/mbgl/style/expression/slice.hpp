@@ -23,9 +23,11 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
     std::string getOperator() const override;
+
 private:
     EvaluationResult evaluateForStringInput(const std::string& input, int fromIndexValue, int toIndexValue) const;
     EvaluationResult evaluateForArrayInput(const std::vector<Value>& input, int fromIndexValue, int toIndexValue) const;
+
 private:
     std::unique_ptr<Expression> input;
     std::unique_ptr<Expression> fromIndex;
