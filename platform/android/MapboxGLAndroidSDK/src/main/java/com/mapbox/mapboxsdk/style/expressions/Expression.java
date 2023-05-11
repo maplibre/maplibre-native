@@ -1558,10 +1558,37 @@ public class Expression {
    * @param needle   the item expression
    * @param haystack the array or string expression
    * @return position in the array or string or -1 if not found.
-   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#index-of">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#index-of">Style specification</a>
    */
   public static Expression indexOf(@NonNull Expression keyword, @NonNull Expression input) {
     return new Expression("index-of", keyword, input);
+  }
+
+  /**
+   * Returns items from an array or a substring from a string from a specified start index. 
+   * The return value is inclusive of the start index.
+   *
+   * @param needle   the item expression
+   * @param haystack the array or string expression
+   * @param fromIndex the index to start searching from
+   * @return array or string
+   * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#index-of">Style specification</a>
+   */
+  public static Expression indexOf(@NonNull Expression keyword, @NonNull Expression input, @NonNull Expression fromIndex) {
+    return new Expression("index-of", input, fromIndex);
+  }
+
+  /**
+   * Returns items from an array or a substring from a string between a start index and an end index if set. 
+   * The return value is inclusive of the start index, but not of the end index.
+   *
+   * @param input the array or string expression
+   * @param fromIndex the index to start slice from
+   * @return array or string
+   * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#slice">Style specification</a>
+   */
+  public static Expression slice(@NonNull Expression input, @NonNull Expression fromIndex) {
+    return new Expression("slice", input, fromIndex, toIndex);
   }
 
   /**
@@ -1571,9 +1598,9 @@ public class Expression {
    * @param haystack the array or string expression
    * @param fromIndex the index to start searching from
    * @return position in the array or string or -1 if not found.
-   * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#index-of">Style specification</a>
+   * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#slice">Style specification</a>
    */
-  public static Expression indexOf(@NonNull Expression keyword, @NonNull Expression input, @NonNull Expression fromIndex) {
+  public static Expression indexOf(@NonNull Expression input, @NonNull Expression fromIndex, @NonNull Expression toIndex) {
     return new Expression("index-of", keyword, input, fromIndex);
   }
 

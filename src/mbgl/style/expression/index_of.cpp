@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/index_of.hpp>
 #include <mbgl/util/string.hpp>
-#include <iostream>
+
 namespace mbgl {
 namespace style {
 namespace expression {

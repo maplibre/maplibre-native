@@ -478,6 +478,26 @@ class ExpressionTest {
 
     @Test
     @Throws(Exception::class)
+    fun testSlice() {
+        val expected = arrayOf<Any>("slice", arrayOf<Any>("literal", arrayOf<Any>(1f, 2f, 3f)), 1f)
+        val actual =
+            Expression.slice(Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f))
+                .toArray()
+        Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun testSliceWithToIndex() {
+        val expected = arrayOf<Any>("slice", arrayOf<Any>("literal", arrayOf<Any>(1f, 2f, 3f)), 1f, 3f)
+        val actual =
+            Expression.slice(Expression.literal(arrayOf<Any>(1f, 2f, 3f)), Expression.literal(1f), Expression.literal(3f))
+                .toArray()
+        Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testInNumber() {
         val expected = arrayOf<Any>("in", 1f, arrayOf<Any>("literal", arrayOf<Any>(1f, 2f)))
         val actual =
