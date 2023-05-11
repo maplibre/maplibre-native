@@ -116,6 +116,7 @@ jobs:
 
       - name: Save PR number
         if: github.event_name == 'pull_request'
+        working-directory: ./
         env:
           PR_NUMBER: ${{ github.event.number }}
         run: |
@@ -139,15 +140,15 @@ jobs:
         working-directory: ./
         run: | 
           bazelisk build --compilation_mode=opt //platform/ios:size
-          echo "size_outfile"=$(bazel cquery --compilation_mode=opt --output=files //platform/ios:size) >> $GITHUB_ENV
+          cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size) ./size
 
       - name: Upload size test result
         uses: actions/upload-artifact@v3
         with:
           name: size-test-result
           path: |
-            ${{ env.size_outfile }}
-            platform/ios/pr_number
+            ./size
+            ./pr_number
       
       # ---
 
