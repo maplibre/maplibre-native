@@ -776,6 +776,64 @@ const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdenti
     return (hit != drawables.end()) ? hit->second : noDrawable;
 }
 
+void RenderOrchestrator::onRemoveLayerGroup(LayerGroup&) {
+    
+}
+
+bool RenderOrchestrator::addLayerGroup(UniqueLayerGroup&& layerGroup, const bool replace) {
+    const auto index = layerGroup->getLayerIndex();
+    const auto result = layerGroupsByLayerIndex.insert(std::make_pair(index, UniqueLayerGroup{}));
+    if (result.second) {
+        // added
+        result.first->second = std::move(layerGroup);
+        return true;
+    } else {
+        // not added
+        if (replace) {
+            onRemoveLayerGroup(*result.first->second);
+            result.first->second = std::move(layerGroup);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
+    const auto hit = layerGroupsByLayerIndex.find(layerIndex);
+    if (hit != layerGroupsByLayerIndex.end()) {
+        onRemoveLayerGroup(*hit->second);
+        layerGroupsByLayerIndex.erase(hit);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static const UniqueLayerGroup no_group;
+
+const UniqueLayerGroup& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
+    const auto hit = layerGroupsByLayerIndex.find(layerIndex);
+    return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
+}
+
+void RenderOrchestrator::observeLayerGroups(std::function<void(LayerGroup&)> f) {
+    for (auto& pair : layerGroupsByLayerIndex) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
+void RenderOrchestrator::observeLayerGroups(std::function<void(const LayerGroup&)> f) const {
+    for (const auto& pair : layerGroupsByLayerIndex) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
+
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
