@@ -330,7 +330,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
             auto& drawable = newDrawables[0];
             drawable->setTileID(tileID);
             drawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
-            result.first->second = drawable;
+            result.first->second = std::move(drawable);
             changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
             ++stats.tileDrawablesAdded;
             // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +

@@ -103,9 +103,9 @@ public:
 
     const gfx::DrawablePtr& getDrawable(const util::SimpleIdentity&);
 
-    bool addLayerGroup(UniqueLayerGroup&&, bool replace);
+    bool addLayerGroup(LayerGroupPtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
-    const UniqueLayerGroup& getLayerGroup(const int32_t layerIndex) const;
+    const LayerGroupPtr& getLayerGroup(const int32_t layerIndex) const;
     void observeLayerGroups(std::function<void(LayerGroup&)>);
     void observeLayerGroups(std::function<void(const LayerGroup&)>) const;
 
@@ -186,7 +186,7 @@ private:
     DrawableMap drawables;
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
-    using LayerGroupMap = std::map<int32_t, UniqueLayerGroup>;
+    using LayerGroupMap = std::map<int32_t, LayerGroupPtr>;
     LayerGroupMap layerGroupsByLayerIndex;
 };
 

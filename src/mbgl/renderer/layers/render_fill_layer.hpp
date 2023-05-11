@@ -5,6 +5,8 @@
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
 
+#include <memory>
+
 namespace mbgl {
 
 class FillBucket;
@@ -12,6 +14,8 @@ class FillProgram;
 class FillPatternProgram;
 class FillOutlineProgram;
 class FillOutlinePatternProgram;
+class TileLayerGroup;
+using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 
 class RenderFillLayer final : public RenderLayer {
 public:
@@ -50,6 +54,8 @@ private:
     std::shared_ptr<FillPatternProgram> fillPatternProgram;
     std::shared_ptr<FillOutlineProgram> fillOutlineProgram;
     std::shared_ptr<FillOutlinePatternProgram> fillOutlinePatternProgram;
+    
+    TileLayerGroupPtr tileLayerGroup;
 };
 
 } // namespace mbgl
