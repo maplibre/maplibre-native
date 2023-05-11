@@ -70,16 +70,17 @@ EvaluationResult Slice::evaluate(const EvaluationContext &params) const {
 EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
                                                 int fromIndexValue,
                                                 int toIndexValue) const {
+    int length = static_cast<int>(array.size());
     if (toIndexValue == std::numeric_limits<int>::max()) {
-        toIndexValue = array.size();
+        toIndexValue = length;
     }
-    fromIndexValue = normalizeIndex(fromIndexValue, array.size());
-    toIndexValue = normalizeIndex(toIndexValue, array.size());
+    fromIndexValue = normalizeIndex(fromIndexValue, length);
+    toIndexValue = normalizeIndex(toIndexValue, length);
 
     if (fromIndexValue >= toIndexValue) {
         return std::vector<Value>{};
     }
-    toIndexValue = std::min(toIndexValue, static_cast<int>(array.size()));
+    toIndexValue = std::min(toIndexValue, length);
 
 
     std::vector<Value> result;
@@ -93,12 +94,13 @@ EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
 EvaluationResult Slice::evaluateForStringInput(const std::string &string,
                                                 int fromIndexValue,
                                                 int toIndexValue) const {
+    int length = static_cast<int>(string.size());
     if (toIndexValue == std::numeric_limits<int>::max()) {
-        toIndexValue = string.size();
+        toIndexValue = length;
     }
-    fromIndexValue = normalizeIndex(fromIndexValue, string.size());
-    toIndexValue = normalizeIndex(toIndexValue, string.size());
-    if (fromIndexValue >= static_cast<int>(string.size())) {
+    fromIndexValue = normalizeIndex(fromIndexValue, length);
+    toIndexValue = normalizeIndex(toIndexValue, length);
+    if (fromIndexValue >= length) {
         return std::string{};
     }
 
