@@ -3,6 +3,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/extension.hpp>
+#include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -66,33 +67,14 @@ void RendererBackend::setScissorTest(bool enabled) {
 RendererBackend::~RendererBackend() = default;
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
-    constexpr auto shaderName = "background_generic";
+    constexpr auto shaderName = "BackgroundProgramUBO";
 
     gl::Context& glContext = static_cast<gl::Context&>(*context);
 
     auto shader = shaders.get<gl::ShaderProgramGL>(shaderName);
     if (!shader) {
-        constexpr auto vert = R"(#version 300 es
-            precision highp float;
-            
-            uniform mat4 u_matrix;
-            layout (location = 0) in vec2 a_pos;
-            layout (location = 1) in vec4 a_color;
-            out vec4 v_color;
-
-            void main() {
-                v_color = a_color;
-                gl_Position = u_matrix * vec4(a_pos, 0, 1);
-            })";
-        constexpr auto frag = R"(#version 300 es
-            precision highp float;
-            in vec4 v_color;
-            out vec4 fragColor;
-
-            void main() {
-                fragColor = v_color;
-            })";
-
+        auto vert = shaders::ShaderSource<shaders::BuiltIn::BackgroundProgramUBO, gfx::Backend::Type::OpenGL>::vertex;
+        auto frag = shaders::ShaderSource<shaders::BuiltIn::BackgroundProgramUBO, gfx::Backend::Type::OpenGL>::fragment;
         try {
             // Compile
             shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);

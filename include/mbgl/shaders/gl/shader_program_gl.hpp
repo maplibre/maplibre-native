@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gl/context.hpp>
+#include <mbgl/gl/uniform_block_gl.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 
@@ -10,7 +11,7 @@ namespace gl {
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
     ShaderProgramGL(UniqueProgram&& glProgram_);
-    ShaderProgramGL(UniqueProgram&&, VertexAttributeArrayGL&& uniforms, VertexAttributeArrayGL&& attributes);
+    ShaderProgramGL(UniqueProgram&&, UniformBlockArrayGL&& uniformBlocks, VertexAttributeArrayGL&& attributes);
     ShaderProgramGL(ShaderProgramGL&& other);
     ~ShaderProgramGL() noexcept override = default;
 
@@ -22,21 +23,21 @@ public:
                                                    std::string_view vertexSource,
                                                    std::string_view fragmentSource) noexcept(false);
 
-    const gfx::VertexAttributeArray& getUniforms() const override { return uniforms; }
+    const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
     ProgramID getGLProgramID() const { return glProgram; }
 
 protected:
-    gfx::VertexAttributeArray& mutableUniforms() override { return uniforms; }
+    gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
 
     gfx::VertexAttributeArray& mutableVertexAttributes() override { return vertexAttributes; }
 
 protected:
     UniqueProgram glProgram;
 
-    VertexAttributeArrayGL uniforms;
+    UniformBlockArrayGL uniformBlocks;
     VertexAttributeArrayGL vertexAttributes;
 };
 

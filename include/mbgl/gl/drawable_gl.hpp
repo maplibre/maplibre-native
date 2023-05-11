@@ -42,6 +42,9 @@ public:
     const gfx::UniqueVertexBufferResource& getBuffer() const;
     const gfx::IndexBuffer& getIndexBuffer() const;
 
+    const gfx::UniformBufferArray& getUniformBuffers() const override;
+    gfx::UniformBufferArray& mutableUniformBuffers() override;
+
     /// Reset a single color attribute for all vertexes
     void resetColor(const Color&) override;
 
@@ -61,6 +64,8 @@ protected:
     DrawableGL(std::unique_ptr<Impl>);
 
 private:
+    void bindUniformBuffers() const;
+    void unbindUniformBuffers() const;
 };
 
 } // namespace gl

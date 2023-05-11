@@ -7,6 +7,8 @@
 namespace mbgl {
 namespace gfx {
 
+std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
+
 VertexAttributeArray::VertexAttributeArray(int initCapacity)
     : attrs(initCapacity) {}
 
@@ -26,23 +28,23 @@ VertexAttributeArray& VertexAttributeArray::operator=(const VertexAttributeArray
     return *this;
 }
 
-VertexAttribute* VertexAttributeArray::get(const std::string& name) const {
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const std::string& name) const {
     const auto result = attrs.find(name);
-    return (result != attrs.end()) ? result->second.get() : nullptr;
+    return (result != attrs.end()) ? result->second : nullref;
 }
 
-VertexAttribute* VertexAttributeArray::add(
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(
     std::string name, int index, AttributeDataType dataType, int size, std::size_t count) {
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = create(index, dataType, size, count);
-        return result.first->second.get();
+        return result.first->second;
     } else {
-        return nullptr;
+        return nullref;
     }
 }
 
-VertexAttribute* VertexAttributeArray::getOrAdd(
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(
     std::string name, int index, AttributeDataType dataType, int size, std::size_t count) {
     // attrs.emplace_back(std::make_unique<VertexAttribute>(dataType, count));
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
@@ -50,9 +52,9 @@ VertexAttribute* VertexAttributeArray::getOrAdd(
         result.first->second = create(index, dataType, size, count);
     } else if (result.first->second->getDataType() != dataType ||
                result.first->second->getSize() != (std::size_t)size || result.first->second->getCount() != count) {
-        return nullptr;
+        return nullref;
     }
-    return result.first->second.get();
+    return result.first->second;
 }
 
 std::size_t VertexAttributeArray::getTotalSize() const {

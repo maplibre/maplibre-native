@@ -32,4 +32,6 @@
 #include <mbgl/shaders/gl/symbol_sdf_text.hpp>
 #include <mbgl/shaders/gl/symbol_sdf_icon.hpp>
 #include <mbgl/shaders/gl/symbol_text_and_icon.hpp>
+
+#include <mbgl/shaders/gl/background_ubo.hpp>
 #endif

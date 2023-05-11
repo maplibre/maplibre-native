@@ -82,17 +82,17 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
       glProgram(std::move(glProgram_)) {}
 
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
-                                 VertexAttributeArrayGL&& uniforms_,
+                                 UniformBlockArrayGL&& uniformBlocks_,
                                  VertexAttributeArrayGL&& attributes_)
     : ShaderProgramBase(),
       glProgram(std::move(program)),
-      uniforms(std::move(uniforms_)),
+      uniformBlocks(std::move(uniformBlocks_)),
       vertexAttributes(std::move(attributes_)) {}
 
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
       glProgram(std::move(other.glProgram)),
-      uniforms(std::move(other.uniforms)),
+      uniformBlocks(std::move(other.uniformBlocks)),
       vertexAttributes(std::move(other.vertexAttributes)) {}
 
 using namespace platform;
@@ -102,8 +102,8 @@ static void addAttr(
     const auto elementType = mapType(glType);
     const auto elementCount = mapCount(glType); // number of `elementType`, hopefully temporary
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-        if (auto newAttr = attrs.add(name, index, elementType, elementCount, count)) {
-            auto* glAttr = static_cast<VertexAttributeGL*>(newAttr);
+        if (const auto& newAttr = attrs.add(name, index, elementType, elementCount, count)) {
+            const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
             glAttr->setGLType(glType);
         }
     }
@@ -125,21 +125,23 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
     // GLint numAttribs;
     // glGetProgramInterfaceiv(program, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
 
-    VertexAttributeArrayGL uniforms;
+    UniformBlockArrayGL uniformBlocks;
 
     GLint count = 0;
     GLint maxLength = 0;
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count));
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
+    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCKS, &count));
+    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxLength));
 
     auto name = std::vector<GLchar>(maxLength);
     for (GLint index = 0; index < count; ++index) {
         GLsizei length = 0;
         GLint size = 0;
-        GLenum glType = 0;
-        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &length, &size, &glType, name.data()));
-        const GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.data()));
-        addAttr(uniforms, name.data(), location, length, size, glType);
+        GLint binding = index;
+        MBGL_CHECK_ERROR(glGetActiveUniformBlockName(program, index, maxLength, &length, name.data()));
+        MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
+        assert(length > 0 && size > 0);
+        MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
+        uniformBlocks.add(name.data(), index, size);
     }
 
     VertexAttributeArrayGL attrs;
@@ -160,7 +162,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         addAttr(attrs, name.data(), location, length, size, glType);
     }
 
-    return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniforms), std::move(attrs));
+    return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniformBlocks), std::move(attrs));
 }
 
 } // namespace gl
