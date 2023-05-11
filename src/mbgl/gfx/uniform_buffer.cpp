@@ -3,6 +3,8 @@
 namespace mbgl {
 namespace gfx {
 
+std::shared_ptr<UniformBuffer> UniformBufferArray::nullref = nullptr;
+
 UniformBufferArray::UniformBufferArray(int initCapacity)
     : uniformBufferMap(initCapacity) {}
 
@@ -22,15 +24,15 @@ UniformBufferArray& UniformBufferArray::operator=(const UniformBufferArray& othe
     return *this;
 }
 
-UniformBuffer* UniformBufferArray::get(const std::string& name) const {
+const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const std::string& name) const {
     const auto result = uniformBufferMap.find(name);
-    return (result != uniformBufferMap.end()) ? result->second.get() : nullptr;
+    return (result != uniformBufferMap.end()) ? result->second : nullref;
 }
 
-UniformBuffer* UniformBufferArray::addOrReplace(std::string name, const std::shared_ptr<UniformBuffer>& uniformBuffer) {
+const std::shared_ptr<UniformBuffer>& UniformBufferArray::addOrReplace(std::string name, const std::shared_ptr<UniformBuffer>& uniformBuffer) {
     const auto result = uniformBufferMap.insert(std::make_pair(std::move(name), std::shared_ptr<UniformBuffer>()));
     result.first->second = std::move(uniformBuffer);
-    return result.first->second.get();
+    return result.first->second;
 }
 
 } // namespace gfx

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include <string>
+#include <memory>
 #include <unordered_map>
 
 namespace mbgl {
@@ -62,23 +62,23 @@ public:
 
     /// Get an uniform block element.
     /// Returns a pointer to the element on success, or null if the uniform block doesn't exists.
-    UniformBlock* get(const std::string& name) const;
+    const std::unique_ptr<UniformBlock>& get(const std::string& name) const;
 
     /// Add a new uniform block element.
     /// Returns a pointer to the new element on success, or null if the uniform block already exists.
-    UniformBlock* add(std::string name, int index, std::size_t size);
+    const std::unique_ptr<UniformBlock>& add(std::string name, int index, std::size_t size);
 
     UniformBlockArray& operator=(UniformBlockArray&&);
     UniformBlockArray& operator=(const UniformBlockArray&);
 
 protected:
-    UniformBlock* add(std::string name, std::unique_ptr<UniformBlock>&& uniformBlock) {
+    const std::unique_ptr<UniformBlock>& add(std::string name, std::unique_ptr<UniformBlock>&& uniformBlock) {
         const auto result = uniformBlockMap.insert(std::make_pair(std::move(name), std::unique_ptr<UniformBlock>()));
         if (result.second) {
             result.first->second = std::move(uniformBlock);
-            return result.first->second.get();
+            return result.first->second;
         } else {
-            return nullptr;
+            return nullref;
         }
     }
 
@@ -87,6 +87,7 @@ protected:
 
 protected:
     UniformBlockMap uniformBlockMap;
+    static std::unique_ptr<UniformBlock> nullref;
 };
 
 } // namespace gfx

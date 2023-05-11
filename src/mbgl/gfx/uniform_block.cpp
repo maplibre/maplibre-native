@@ -3,6 +3,8 @@
 namespace mbgl {
 namespace gfx {
 
+std::unique_ptr<UniformBlock> UniformBlockArray::nullref = nullptr;
+
 UniformBlockArray::UniformBlockArray(int initCapacity)
     : uniformBlockMap(initCapacity) {}
 
@@ -22,18 +24,18 @@ UniformBlockArray& UniformBlockArray::operator=(const UniformBlockArray& other) 
     return *this;
 }
 
-UniformBlock* UniformBlockArray::get(const std::string& name) const {
+const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const std::string& name) const {
     const auto result = uniformBlockMap.find(name);
-    return (result != uniformBlockMap.end()) ? result->second.get() : nullptr;
+    return (result != uniformBlockMap.end()) ? result->second : nullref;
 }
 
-UniformBlock* UniformBlockArray::add(std::string name, int index, std::size_t size) {
+const std::unique_ptr<UniformBlock>& UniformBlockArray::add(std::string name, int index, std::size_t size) {
     const auto result = uniformBlockMap.insert(std::make_pair(std::move(name), std::unique_ptr<UniformBlock>()));
     if (result.second) {
         result.first->second = create(index, size);
-        return result.first->second.get();
+        return result.first->second;
     } else {
-        return nullptr;
+        return nullref;
     }
 }
 

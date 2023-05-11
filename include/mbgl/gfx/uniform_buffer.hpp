@@ -48,22 +48,22 @@ public:
 
     /// Get an uniform buffer element.
     /// Returns a pointer to the element on success, or null if the uniform buffer doesn't exists.
-    UniformBuffer* get(const std::string& name) const;
+    const std::shared_ptr<UniformBuffer>& get(const std::string& name) const;
 
     /// Add a new uniform buffer element or replace the existing one.
-    UniformBuffer* addOrReplace(std::string name, const std::shared_ptr<UniformBuffer>& uniformBuffer);
+    const std::shared_ptr<UniformBuffer>& addOrReplace(std::string name, const std::shared_ptr<UniformBuffer>& uniformBuffer);
 
     UniformBufferArray& operator=(UniformBufferArray&&);
     UniformBufferArray& operator=(const UniformBufferArray&);
 
 protected:
-    UniformBuffer* add(std::string name, std::shared_ptr<UniformBuffer>&& uniformBuffer) {
+    const std::shared_ptr<UniformBuffer>& add(std::string name, std::shared_ptr<UniformBuffer>&& uniformBuffer) {
         const auto result = uniformBufferMap.insert(std::make_pair(std::move(name), std::shared_ptr<UniformBuffer>()));
         if (result.second) {
             result.first->second = std::move(uniformBuffer);
-            return result.first->second.get();
+            return result.first->second;
         } else {
-            return nullptr;
+            return nullref;
         }
     }
 
@@ -71,6 +71,7 @@ protected:
 
 protected:
     UniformBufferMap uniformBufferMap;
+    static std::shared_ptr<UniformBuffer> nullref;
 };
 
 } // namespace gfx
