@@ -17,13 +17,12 @@ void ResetColorRequest::execute(RenderOrchestrator &orchestrator) {
     }
 }
 
-AddLayerGroupRequest::AddLayerGroupRequest(UniqueLayerGroup&& layerGroup_, bool canReplace)
-    : layerGroup(std::move(layerGroup_)), replace(canReplace) {
-}
+AddLayerGroupRequest::AddLayerGroupRequest(UniqueLayerGroup &&layerGroup_, bool canReplace)
+    : layerGroup(std::move(layerGroup_)),
+      replace(canReplace) {}
 
-AddLayerGroupRequest::AddLayerGroupRequest(AddLayerGroupRequest&& other)
-    : layerGroup(std::move(other.layerGroup)) {
-}
+AddLayerGroupRequest::AddLayerGroupRequest(AddLayerGroupRequest &&other)
+    : layerGroup(std::move(other.layerGroup)) {}
 
 void AddLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
     orchestrator.addLayerGroup(std::move(layerGroup), replace);

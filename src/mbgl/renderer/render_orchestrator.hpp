@@ -183,10 +183,9 @@ private:
 
     DrawableMap drawables;
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
-    
+
     using LayerGroupMap = std::map<int32_t, UniqueLayerGroup>;
     LayerGroupMap layerGroupsByLayerIndex;
-
 };
 
 } // namespace mbgl
