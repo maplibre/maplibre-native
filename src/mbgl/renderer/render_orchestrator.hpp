@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
@@ -13,6 +14,7 @@
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/text/placement.hpp>
 
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -101,6 +103,12 @@ public:
 
     const gfx::DrawablePtr& getDrawable(const util::SimpleIdentity&);
 
+    bool addLayerGroup(UniqueLayerGroup&&, bool replace);
+    bool removeLayerGroup(const int32_t layerIndex);
+    const UniqueLayerGroup& getLayerGroup(const int32_t layerIndex) const;
+    void observeLayerGroups(std::function<void(LayerGroup&)>);
+    void observeLayerGroups(std::function<void(const LayerGroup&)>) const;
+
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
                       const TransformState&,
@@ -142,6 +150,8 @@ private:
     /// Move changes into the pending set, clearing the provided collection
     void addChanges(UniqueChangeRequestVec&);
 
+    void onRemoveLayerGroup(LayerGroup&);
+
     RendererObserver* observer;
 
     ZoomHistory zoomHistory;
@@ -173,9 +183,12 @@ private:
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
 
-protected:
     DrawableMap drawables;
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
+    
+    using LayerGroupMap = std::map<int32_t, UniqueLayerGroup>;
+    LayerGroupMap layerGroupsByLayerIndex;
+
 };
 
 } // namespace mbgl
