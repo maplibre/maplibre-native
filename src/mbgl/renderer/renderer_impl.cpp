@@ -106,6 +106,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
+    // Give the layers a chance to do setup
+    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters); });
+
     // Sort the drawables
     std::sort(drawables.begin(), drawables.end(), gfx::DrawablePtrLessByLayer(/*descending=*/true));
 
@@ -158,6 +161,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 drawableGL.setVertexArray(std::move(vertexArray), std::move(vertexBuffer), std::move(indexBuffer));
             }
         }
+
+        // Give the layers a chance to upload
+        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(context, *uploadPass); });
     }
 
     // - 3D PASS
@@ -238,13 +244,16 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             }
 
             gfx::DrawableUBO drawableUBO;
-            drawableUBO.matrix = util::convert<float>(matrix);
+            drawableUBO.matrix = util::cast<float>(matrix);
             auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
             drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
 
             drawable.draw(parameters);
         }
     };
+
+    // draw layer groups, opaque pass
+    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
 
     parameters.pass = RenderPass::Opaque;
     parameters.currentLayer = 0;
@@ -278,6 +287,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     parameters.currentLayer = 1;
     parameters.opaquePassCutoff = 1;
     drawDrawables(parameters.pass);
+
+    // draw layer groups, translucent pass
+    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
 
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
 
@@ -321,6 +333,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.context.visualizeDepthBuffer(parameters.depthRangeSize);
     }
 #endif
+
+    // Give the layers a chance to do cleanup
+    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 
     // Ends the RenderPass
     parameters.renderPass.reset();

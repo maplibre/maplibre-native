@@ -7,8 +7,14 @@
 #include <vector>
 
 namespace mbgl {
-
+class ChangeRequest;
+class LayerGroup;
 class RenderOrchestrator;
+
+using ChangeRequestPtr = std::shared_ptr<ChangeRequest>;
+using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
+using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
+using UniqueLayerGroup = std::unique_ptr<LayerGroup>;
 
 namespace gfx {
 class Drawable;
@@ -30,20 +36,16 @@ public:
 protected:
 };
 
-using ChangeRequestPtr = std::shared_ptr<ChangeRequest>;
-using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
-using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
-
 /**
-    Base for drawable-related change requests
+    Base for change requests based on an ID reference
  */
-class DrawableRefChangeRequest : public ChangeRequest {
+class RefChangeRequest : public ChangeRequest {
 protected:
-    DrawableRefChangeRequest(util::SimpleIdentity id)
-        : drawableID(id) {}
-    DrawableRefChangeRequest(const DrawableRefChangeRequest &) = default;
+    RefChangeRequest(util::SimpleIdentity id_)
+        : id(id_) {}
+    RefChangeRequest(const RefChangeRequest &) = default;
 
-    util::SimpleIdentity drawableID;
+    util::SimpleIdentity id;
 };
 
 /**
@@ -65,10 +67,10 @@ protected:
 /**
     Remove a drawable from the scene
  */
-class RemoveDrawableRequest : public DrawableRefChangeRequest {
+class RemoveDrawableRequest : public RefChangeRequest {
 public:
-    RemoveDrawableRequest(util::SimpleIdentity id)
-        : DrawableRefChangeRequest(id) {}
+    RemoveDrawableRequest(util::SimpleIdentity id_)
+        : RefChangeRequest(id_) {}
     RemoveDrawableRequest(const RemoveDrawableRequest &) = default;
 
     void execute(RenderOrchestrator &) override;
@@ -77,10 +79,10 @@ public:
 /**
     Change the color of all vertexes
  */
-class ResetColorRequest : public DrawableRefChangeRequest {
+class ResetColorRequest : public RefChangeRequest {
 public:
-    ResetColorRequest(util::SimpleIdentity id, Color color)
-        : DrawableRefChangeRequest(id),
+    ResetColorRequest(util::SimpleIdentity id_, Color color)
+        : RefChangeRequest(id_),
           newColor(color) {}
     ResetColorRequest(const ResetColorRequest &other) = default;
 
@@ -88,6 +90,33 @@ public:
 
 protected:
     Color newColor;
+};
+
+/**
+    Add a new layer group to the scene
+ */
+class AddLayerGroupRequest : public ChangeRequest {
+public:
+    AddLayerGroupRequest(UniqueLayerGroup &&layerGroup_, bool canReplace);
+    AddLayerGroupRequest(AddLayerGroupRequest &&other);
+
+    void execute(RenderOrchestrator &) override;
+
+protected:
+    UniqueLayerGroup layerGroup;
+    bool replace;
+};
+
+/**
+    Remove a layer group from the scene
+ */
+class RemoveLayerGroupRequest : public RefChangeRequest {
+public:
+    RemoveLayerGroupRequest(util::SimpleIdentity id_)
+        : RefChangeRequest(id_) {}
+    RemoveLayerGroupRequest(const RemoveLayerGroupRequest &) = default;
+
+    void execute(RenderOrchestrator &) override;
 };
 
 } // namespace mbgl
