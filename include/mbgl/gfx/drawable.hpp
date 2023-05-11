@@ -117,6 +117,7 @@ protected:
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;
+using UniqueDrawable = std::unique_ptr<Drawable>;
 
 /// Comparator for sorting drawable pointers primarily by layer index
 struct DrawablePtrLessByLayer {

@@ -8,6 +8,7 @@
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
@@ -343,6 +344,11 @@ void RenderFillLayer::update(const int32_t layerIndex,
     //        }
     //    }
 
+    if (!tileLayerGroup) {
+        tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, /*initialCapacity=*/64);
+        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
+    }
+
     if (!renderTiles || renderTiles->empty()) {
         if (!tileDrawables.empty()) {
             removeDrawables<decltype(tileDrawables)::const_iterator>(
@@ -380,211 +386,212 @@ void RenderFillLayer::update(const int32_t layerIndex,
     }
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
+    std::vector<gfx::DrawablePtr> newTiles;
 
-    if (unevaluated.get<FillPattern>().isUndefined()) {
-        //        parameters.renderTileClippingMasks(renderTiles);
-        for (const RenderTile& tile : *renderTiles) {
-            const auto& tileID = tile.getOverscaledTileID();
+    for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
+        if (unevaluated.get<FillPattern>().isUndefined()) {
+            //        parameters.renderTileClippingMasks(renderTiles);
+            for (const RenderTile& tile : *renderTiles) {
+                const auto& tileID = tile.getOverscaledTileID();
 
-            const auto hit = tileDrawables.find(tileID);
+                auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
 
-            const auto renderPass = RenderPass::Translucent;
-            const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-            if (!renderData) {
-                // Remove the tile if it was previously present
-                if (hit != tileDrawables.end()) {
-                    if (hit->second) {
-                        changes.emplace_back(std::make_unique<RemoveDrawableRequest>(hit->second->getId()));
+                const auto removeTile = [&](){
+                    if (tileDrawable) {
+                        changes.emplace_back(std::make_unique<RemoveDrawableRequest>(tileDrawable->getId()));
+                        tileLayerGroup->removeDrawable(renderPass, tileID);
+                        ++stats.tileDrawablesRemoved;
                     }
-                    tileDrawables.erase(hit);
-                    ++stats.tileDrawablesRemoved;
+                };
+
+                const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+                if (!renderData) {
+                    removeTile();
+                    continue;
                 }
-                continue;
+                
+                auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+                const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+                const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
+                const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
+                const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
+
+                const auto fillRenderPass = (evalColor.a >= 1.0f && fillOpacity >= 1.0f
+                                             /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
+                                                ? RenderPass::Opaque
+                                                : RenderPass::Translucent;
+
+                if (fillRenderPass != renderPass) {
+                    removeTile();
+                    continue;
+                }
+
+                if (tileDrawable) {
+                    // needed and already present, update?
+                    continue;
+                }
+
+                if (!builder) {
+                    builder = context.createDrawableBuilder("fill");
+                    builder->setShader(shader);
+                    builder->addTweaker(context.createDrawableTweaker());
+                    builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerVertex);
+                    builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                    builder->setLayerIndex(layerIndex);
+                }
+
+                // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
+                // parameters.state)
+
+                builder->setColor(fillColor);
+                builder->setRenderPass(renderPass);
+
+                const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
+                    verts = bucket.vertices.vector();
+                std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
+                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+
+                for (const auto& seg : bucket.triangleSegments) {
+                    builder->addTriangles(rawVerts,
+                                          seg.vertexOffset,
+                                          seg.vertexLength,
+                                          bucket.triangles.vector(),
+                                          seg.indexOffset,
+                                          seg.indexLength);
+                }
+
+                //            evaluated.get<FillTranslate>(),
+                //            evaluated.get<FillTranslateAnchor>(),
+                //            parameters.stencilModeForClipping(tile.id),
+                //            parameters.colorModeForRenderPass(),
+                //            gfx::CullFaceMode::disabled(),
+                //
+                //            const auto isOpaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
+                //                                   evaluated.get<FillOpacity>().constantOr(0) >= 1.0f
+                //                                   );// && layerIndex >= parameters.opaquePassCutoff);
+                //            const auto fillRenderPass = isOpaque ? RenderPass::Opaque : RenderPass::Translucent;
+                //
+                //            if (renderPass == fillRenderPass) {
+                //            }
+
+                // const auto depthMask = (renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                //                                                           : gfx::DepthMaskType::ReadOnly;
+
+                //            const auto depthMode = parameters.depthModeForSublayer(1, depthMask);
+
+                //            if (evaluated.get<FillAntialias>() && parameters.pass == RenderPass::Translucent) {
+                //                draw(*fillOutlineProgram,
+                //                     gfx::Lines{2.0f},
+                //                     parameters.depthModeForSublayer(unevaluated.get<FillOutlineColor>().isUndefined() ? 2
+                //                     : 0,
+                //                                                     gfx::DepthMaskType::ReadOnly),
+                //                     *bucket.lineIndexBuffer,
+                //                     bucket.lineSegments,
+                //                     FillOutlineProgram::TextureBindings{});
+                //            }
+
+                builder->flush();
+
+                auto newDrawables = builder->clearDrawables();
+                if (!newDrawables.empty()) {
+                    auto& drawable = newDrawables[0];
+                    drawable->setTileID(tileID);
+
+                    // Track it.
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.tileDrawablesAdded;
+                    // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
+                    // std::to_string(stats.tileDrawablesAdded+1));
+                }
             }
-
-            if (hit != tileDrawables.end()) {
-                // already present
-                continue;
-            }
-
-            auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-            const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
-
-            if (!builder) {
-                builder = context.createDrawableBuilder("fill");
-                builder->setShader(shader);
-                builder->addTweaker(context.createDrawableTweaker());
-                builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerVertex);
-                builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setLayerIndex(layerIndex);
-            }
-
-            // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
-            // parameters.state)
-
-            const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
-            const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
-            const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
-            builder->setColor(fillColor);
-
-            const auto fillRenderPass = (evalColor.a >= 1.0f && fillOpacity >= 1.0f
-                                         /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
-                                            ? RenderPass::Opaque
-                                            : RenderPass::Translucent;
-            builder->setRenderPass(fillRenderPass);
-
-            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
-                verts = bucket.vertices.vector();
-            std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
-            std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-
-            for (const auto& seg : bucket.triangleSegments) {
-                builder->addTriangles(rawVerts,
-                                      seg.vertexOffset,
-                                      seg.vertexLength,
-                                      bucket.triangles.vector(),
-                                      seg.indexOffset,
-                                      seg.indexLength);
-            }
-
-            //            evaluated.get<FillTranslate>(),
-            //            evaluated.get<FillTranslateAnchor>(),
-            //            parameters.stencilModeForClipping(tile.id),
-            //            parameters.colorModeForRenderPass(),
-            //            gfx::CullFaceMode::disabled(),
+        } else {
+            //        if (parameters.pass != RenderPass::Translucent) {
+            //            return;
+            //        }
             //
-            //            const auto isOpaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
-            //                                   evaluated.get<FillOpacity>().constantOr(0) >= 1.0f
-            //                                   );// && layerIndex >= parameters.opaquePassCutoff);
-            //            const auto fillRenderPass = isOpaque ? RenderPass::Opaque : RenderPass::Translucent;
+            //        parameters.renderTileClippingMasks(renderTiles);
             //
-            //            if (renderPass == fillRenderPass) {
+            //        for (const RenderTile& tile : *renderTiles) {
+            //            const LayerRenderData* renderData = getRenderDataForPass(tile, parameters.pass);
+            //            if (!renderData) {
+            //                continue;
             //            }
-
-            // const auto depthMask = (renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-            //                                                           : gfx::DepthMaskType::ReadOnly;
-
-            //            const auto depthMode = parameters.depthModeForSublayer(1, depthMask);
-
-            //            if (evaluated.get<FillAntialias>() && parameters.pass == RenderPass::Translucent) {
-            //                draw(*fillOutlineProgram,
+            //            auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+            //            const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+            //            const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
+            //
+            //            const auto& fillPatternValue =
+            //            evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
+            //            std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
+            //            std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
+            //
+            //            auto draw = [&](auto& programInstance,
+            //                            const auto& drawMode,
+            //                            const auto& depthMode,
+            //                            const auto& indexBuffer,
+            //                            const auto& segments,
+            //                            auto&& textureBindings) {
+            //                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+            //                paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
+            //
+            //                const auto allUniformValues = programInstance.computeAllUniformValues(
+            //                    FillPatternProgram::layoutUniformValues(
+            //                        tile.translatedMatrix(
+            //                            evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
+            //                            parameters.state),
+            //                        parameters.backend.getDefaultRenderable().getSize(),
+            //                        tile.getIconAtlasTexture().size,
+            //                        crossfade,
+            //                        tile.id,
+            //                        parameters.state,
+            //                        parameters.pixelRatio),
+            //                    paintPropertyBinders,
+            //                    evaluated,
+            //                    static_cast<float>(parameters.state.getZoom()));
+            //                const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
+            //                    *bucket.vertexBuffer, paintPropertyBinders, evaluated);
+            //
+            //                checkRenderability(parameters, programInstance.activeBindingCount(allAttributeBindings));
+            //
+            //                programInstance.draw(parameters.context,
+            //                                     *parameters.renderPass,
+            //                                     drawMode,
+            //                                     depthMode,
+            //                                     parameters.stencilModeForClipping(tile.id),
+            //                                     parameters.colorModeForRenderPass(),
+            //                                     gfx::CullFaceMode::disabled(),
+            //                                     indexBuffer,
+            //                                     segments,
+            //                                     allUniformValues,
+            //                                     allAttributeBindings,
+            //                                     std::forward<decltype(textureBindings)>(textureBindings),
+            //                                     getID());
+            //            };
+            //
+            //            if (bucket.triangleIndexBuffer) {
+            //                draw(*fillPatternProgram,
+            //                     gfx::Triangles(),
+            //                     parameters.depthModeForSublayer(1, gfx::DepthMaskType::ReadWrite),
+            //                     *bucket.triangleIndexBuffer,
+            //                     bucket.triangleSegments,
+            //                     FillPatternProgram::TextureBindings{
+            //                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
+            //                                                gfx::TextureFilterType::Linear},
+            //                     });
+            //            }
+            //            if (evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined()) {
+            //                draw(*fillOutlinePatternProgram,
             //                     gfx::Lines{2.0f},
-            //                     parameters.depthModeForSublayer(unevaluated.get<FillOutlineColor>().isUndefined() ? 2
-            //                     : 0,
-            //                                                     gfx::DepthMaskType::ReadOnly),
+            //                     parameters.depthModeForSublayer(2, gfx::DepthMaskType::ReadOnly),
             //                     *bucket.lineIndexBuffer,
             //                     bucket.lineSegments,
-            //                     FillOutlineProgram::TextureBindings{});
+            //                     FillOutlinePatternProgram::TextureBindings{
+            //                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
+            //                                                gfx::TextureFilterType::Linear},
+            //                     });
             //            }
-
-            builder->flush();
-
-            auto newDrawables = builder->clearDrawables();
-            if (!newDrawables.empty()) {
-                auto& drawable = newDrawables[0];
-                drawable->setTileID(tileID);
-
-                // Track it.
-#if !defined(NDEBUG)
-                const auto result =
-#endif
-                    tileDrawables.insert(std::make_pair(tileID, drawable));
-                // This should always insert because we checked previously.
-                assert(result.second);
-
-                changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
-                ++stats.tileDrawablesAdded;
-                // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
-                // std::to_string(stats.tileDrawablesAdded+1));
-            }
+            //        }
         }
-    } else {
-        //        if (parameters.pass != RenderPass::Translucent) {
-        //            return;
-        //        }
-        //
-        //        parameters.renderTileClippingMasks(renderTiles);
-        //
-        //        for (const RenderTile& tile : *renderTiles) {
-        //            const LayerRenderData* renderData = getRenderDataForPass(tile, parameters.pass);
-        //            if (!renderData) {
-        //                continue;
-        //            }
-        //            auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-        //            const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
-        //            const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
-        //
-        //            const auto& fillPatternValue =
-        //            evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
-        //            std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
-        //            std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
-        //
-        //            auto draw = [&](auto& programInstance,
-        //                            const auto& drawMode,
-        //                            const auto& depthMode,
-        //                            const auto& indexBuffer,
-        //                            const auto& segments,
-        //                            auto&& textureBindings) {
-        //                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
-        //                paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
-        //
-        //                const auto allUniformValues = programInstance.computeAllUniformValues(
-        //                    FillPatternProgram::layoutUniformValues(
-        //                        tile.translatedMatrix(
-        //                            evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
-        //                            parameters.state),
-        //                        parameters.backend.getDefaultRenderable().getSize(),
-        //                        tile.getIconAtlasTexture().size,
-        //                        crossfade,
-        //                        tile.id,
-        //                        parameters.state,
-        //                        parameters.pixelRatio),
-        //                    paintPropertyBinders,
-        //                    evaluated,
-        //                    static_cast<float>(parameters.state.getZoom()));
-        //                const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
-        //                    *bucket.vertexBuffer, paintPropertyBinders, evaluated);
-        //
-        //                checkRenderability(parameters, programInstance.activeBindingCount(allAttributeBindings));
-        //
-        //                programInstance.draw(parameters.context,
-        //                                     *parameters.renderPass,
-        //                                     drawMode,
-        //                                     depthMode,
-        //                                     parameters.stencilModeForClipping(tile.id),
-        //                                     parameters.colorModeForRenderPass(),
-        //                                     gfx::CullFaceMode::disabled(),
-        //                                     indexBuffer,
-        //                                     segments,
-        //                                     allUniformValues,
-        //                                     allAttributeBindings,
-        //                                     std::forward<decltype(textureBindings)>(textureBindings),
-        //                                     getID());
-        //            };
-        //
-        //            if (bucket.triangleIndexBuffer) {
-        //                draw(*fillPatternProgram,
-        //                     gfx::Triangles(),
-        //                     parameters.depthModeForSublayer(1, gfx::DepthMaskType::ReadWrite),
-        //                     *bucket.triangleIndexBuffer,
-        //                     bucket.triangleSegments,
-        //                     FillPatternProgram::TextureBindings{
-        //                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
-        //                                                gfx::TextureFilterType::Linear},
-        //                     });
-        //            }
-        //            if (evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined()) {
-        //                draw(*fillOutlinePatternProgram,
-        //                     gfx::Lines{2.0f},
-        //                     parameters.depthModeForSublayer(2, gfx::DepthMaskType::ReadOnly),
-        //                     *bucket.lineIndexBuffer,
-        //                     bucket.lineSegments,
-        //                     FillOutlinePatternProgram::TextureBindings{
-        //                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
-        //                                                gfx::TextureFilterType::Linear},
-        //                     });
-        //            }
-        //        }
     }
 }
 

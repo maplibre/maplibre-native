@@ -778,9 +778,9 @@ const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdenti
 
 void RenderOrchestrator::onRemoveLayerGroup(LayerGroup&) {}
 
-bool RenderOrchestrator::addLayerGroup(UniqueLayerGroup&& layerGroup, const bool replace) {
+bool RenderOrchestrator::addLayerGroup(LayerGroupPtr layerGroup, const bool replace) {
     const auto index = layerGroup->getLayerIndex();
-    const auto result = layerGroupsByLayerIndex.insert(std::make_pair(index, UniqueLayerGroup{}));
+    const auto result = layerGroupsByLayerIndex.insert(std::make_pair(index, LayerGroupPtr{}));
     if (result.second) {
         // added
         result.first->second = std::move(layerGroup);
@@ -808,9 +808,9 @@ bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
     }
 }
 
-static const UniqueLayerGroup no_group;
+static const LayerGroupPtr no_group;
 
-const UniqueLayerGroup& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
+const LayerGroupPtr& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
     const auto hit = layerGroupsByLayerIndex.find(layerIndex);
     return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }

@@ -14,7 +14,7 @@ class RenderOrchestrator;
 using ChangeRequestPtr = std::shared_ptr<ChangeRequest>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
-using UniqueLayerGroup = std::unique_ptr<LayerGroup>;
+using LayerGroupPtr = std::shared_ptr<LayerGroup>;
 
 namespace gfx {
 class Drawable;
@@ -97,13 +97,13 @@ protected:
  */
 class AddLayerGroupRequest : public ChangeRequest {
 public:
-    AddLayerGroupRequest(UniqueLayerGroup &&layerGroup_, bool canReplace);
+    AddLayerGroupRequest(LayerGroupPtr layerGroup_, bool canReplace);
     AddLayerGroupRequest(AddLayerGroupRequest &&other);
 
     void execute(RenderOrchestrator &) override;
 
 protected:
-    UniqueLayerGroup layerGroup;
+    LayerGroupPtr layerGroup;
     bool replace;
 };
 
