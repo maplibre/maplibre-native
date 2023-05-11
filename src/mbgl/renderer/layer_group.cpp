@@ -56,7 +56,8 @@ gfx::UniqueDrawable TileLayerGroup::removeDrawable(mbgl::RenderPass pass, const 
 }
 
 bool TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& id, gfx::UniqueDrawable&& drawable) {
-    const auto result = impl->tileDrawables.insert(std::make_pair(TileLayerGroupTileKey{pass, id}, gfx::UniqueDrawable()));
+    const auto result = impl->tileDrawables.insert(
+        std::make_pair(TileLayerGroupTileKey{pass, id}, gfx::UniqueDrawable()));
     if (result.second) {
         return false;
     } else {
@@ -66,7 +67,6 @@ bool TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& 
 }
 
 void TileLayerGroup::render([[maybe_unused]] RenderOrchestrator& orchestrator,
-                            [[maybe_unused]] PaintParameters& parameters) {
-}
+                            [[maybe_unused]] PaintParameters& parameters) {}
 
 } // namespace mbgl
