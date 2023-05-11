@@ -30,11 +30,10 @@ using UniqueDrawable = std::unique_ptr<Drawable>;
 class LayerGroup : public util::SimpleIdentifiable {
 protected:
     LayerGroup(int32_t layerIndex);
-    LayerGroup(const LayerGroup&) = delete;
-    LayerGroup& operator=(const LayerGroup&) = delete;
 
 public:
-    virtual ~LayerGroup() = default;
+    LayerGroup(const LayerGroup&) = delete;
+    LayerGroup& operator=(const LayerGroup&) = delete;
 
     int32_t getLayerIndex() const { return layerIndex; }
 
