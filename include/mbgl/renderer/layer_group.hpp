@@ -39,13 +39,13 @@ public:
     int32_t getLayerIndex() const { return layerIndex; }
 
     /// Called before starting each frame
-    virtual void preRender(RenderOrchestrator&, PaintParameters&) { }
+    virtual void preRender(RenderOrchestrator&, PaintParameters&) {}
     /// Called during the upload pass
-    virtual void upload(gfx::Context&, gfx::UploadPass&) { }
+    virtual void upload(gfx::Context&, gfx::UploadPass&) {}
     /// Called during each render pass
-    virtual void render(RenderOrchestrator&, PaintParameters&) { }
+    virtual void render(RenderOrchestrator&, PaintParameters&) {}
     /// Called at the end of each frame
-    virtual void postRender(RenderOrchestrator&, PaintParameters&) { }
+    virtual void postRender(RenderOrchestrator&, PaintParameters&) {}
 
 protected:
     int32_t layerIndex;
@@ -65,6 +65,5 @@ protected:
     struct Impl;
     std::unique_ptr<Impl> impl;
 };
-
 
 } // namespace mbgl
