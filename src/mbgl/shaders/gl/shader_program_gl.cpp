@@ -102,8 +102,8 @@ static void addAttr(
     const auto elementType = mapType(glType);
     const auto elementCount = mapCount(glType); // number of `elementType`, hopefully temporary
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-        if (auto newAttr = attrs.add(name, index, elementType, elementCount, count)) {
-            auto* glAttr = static_cast<VertexAttributeGL*>(newAttr);
+        if (const auto& newAttr = attrs.add(name, index, elementType, elementCount, count)) {
+            const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
             glAttr->setGLType(glType);
         }
     }

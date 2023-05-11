@@ -149,8 +149,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     // For each attribute in the program, with the corresponding default and optional override...
     defaults.resolve(overrides,
                      [&](const std::string& name,
-                         const gfx::VertexAttribute& defaultAttr,
-                         const gfx::VertexAttribute* overrideAttr) -> void {
+                         const auto& defaultAttr,
+                         const auto& overrideAttr) -> void {
                          const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
                          const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
                          const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);

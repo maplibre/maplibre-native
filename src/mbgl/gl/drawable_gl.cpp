@@ -80,7 +80,7 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
 }
 
 void DrawableGL::resetColor(const Color& newColor) {
-    if (auto* colorAttr = impl->vertexAttributes.get("a_color")) {
+    if (const auto& colorAttr = impl->vertexAttributes.get("a_color")) {
         colorAttr->clear();
         colorAttr->set(0, colorAttrValue(newColor));
     }

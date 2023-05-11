@@ -15,13 +15,13 @@ void DrawableGLBuilder::init() {
     auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
 
     auto& attrs = drawableGL.mutableVertexAttributes();
-    if (auto posAttr = attrs.getOrAdd("a_pos")) {
+    if (const auto& posAttr = attrs.getOrAdd("a_pos")) {
         std::size_t index = 0;
         for (const auto& vert : impl->vertices.vector()) {
             posAttr->set(index++, gfx::VertexAttribute::int2{vert.a1[0], vert.a1[1]});
         }
     }
-    if (auto colorAttr = attrs.getOrAdd("a_color")) {
+    if (const auto& colorAttr = attrs.getOrAdd("a_color")) {
         // We should have either a single color or one per vertex.  Otherwise,
         // the color mode was probably changed after vertexes were added.
         if (impl->colors.size() > 1 && impl->colors.size() != impl->vertices.elements()) {

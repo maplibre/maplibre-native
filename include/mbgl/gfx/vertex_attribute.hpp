@@ -147,12 +147,12 @@ public:
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* get(const std::string& name) const;
+    const std::unique_ptr<VertexAttribute>& get(const std::string& name) const;
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* add(std::string name,
+    const std::unique_ptr<VertexAttribute>& add(std::string name,
                          int index = -1,
                          AttributeDataType = AttributeDataType::Invalid,
                          int size = 1,
@@ -161,7 +161,7 @@ public:
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
     /// The result is valid only until the next non-const method call on this class.
-    VertexAttribute* getOrAdd(std::string name,
+    const std::unique_ptr<VertexAttribute>& getOrAdd(std::string name,
                               int index = -1,
                               AttributeDataType = AttributeDataType::Invalid,
                               int size = 1,
@@ -170,7 +170,7 @@ public:
     // Set a value if the element is present
     template <typename T>
     bool set(const std::string& name, std::size_t i, T value) {
-        if (auto* item = get(name)) {
+        if (const auto& item = get(name)) {
             return item->set(i, value);
         }
         return false;
@@ -182,7 +182,7 @@ public:
             attrs.begin(), attrs.end(), [](const auto& kv) { return kv.second && kv.second->isDirty(); });
     }
 
-    using ResolveDelegate = std::function<void(const std::string&, const VertexAttribute&, const VertexAttribute*)>;
+    using ResolveDelegate = std::function<void(const std::string&, const VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
@@ -190,13 +190,13 @@ public:
     VertexAttributeArray& operator=(const VertexAttributeArray&);
 
 protected:
-    VertexAttribute* add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
+    const std::unique_ptr<VertexAttribute>& add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
         const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
         if (result.second) {
             result.first->second = std::move(attr);
-            return result.first->second.get();
+            return result.first->second;
         } else {
-            return nullptr;
+            return nullref;
         }
     }
 
@@ -208,6 +208,7 @@ protected:
 
 protected:
     AttributeMap attrs;
+    static std::unique_ptr<VertexAttribute> nullref;
 };
 
 } // namespace gfx

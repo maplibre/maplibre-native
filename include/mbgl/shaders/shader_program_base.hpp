@@ -18,7 +18,7 @@ protected:
 
     template <typename T>
     bool set(gfx::VertexAttributeArray& attrs, const std::string& name, std::size_t i, T value) {
-        auto* item = attrs.get(name);
+        const auto& item = attrs.get(name);
         if (item && i < item->getCount()) {
             item->set(i, value);
             return true;
