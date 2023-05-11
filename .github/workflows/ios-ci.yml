@@ -139,7 +139,7 @@ jobs:
         working-directory: ./
         run: | 
           bazelisk build --compilation_mode=opt //platform/ios:size
-          echo "size_outfile"=$(bazel cquery --output=files //platform/ios:size) >> $GITHUB_ENV
+          echo "size_outfile"=$(bazel cquery --compilation_mode=opt --output=files //platform/ios:size) >> $GITHUB_ENV
 
       - name: Upload size test result
         uses: actions/upload-artifact@v3
