@@ -62,11 +62,13 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
         // Initialize legacy shader programs
         staticData->programs.registerWith(*staticData->shaders);
-        observer->onRegisterShaders(*staticData->shaders);
 
         // Initialize shaders for drawables
         const auto programParameters = ProgramParameters{pixelRatio, false};
         backend.initShaders(*staticData->shaders, programParameters);
+
+        // Notify post-shader registration
+        observer->onRegisterShaders(*staticData->shaders);
     }
     staticData->has3D = renderTreeParameters.has3D;
 
