@@ -234,10 +234,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 matrix = tileMat;
             }
 
-            if (auto& shader = drawable.getShader()) {
-                shader->setUniform("u_matrix", 0, util::convert<float>(matrix));
-                shader->updateUniforms();
-            }
+            gfx::DrawableUBO drawableUBO;
+            drawableUBO.matrix = util::convert<float>(matrix);
+            auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
+            drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
 
             drawable.draw(parameters);
         }
@@ -261,7 +261,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         for (auto it = layerRenderItems.rbegin(); it != layerRenderItems.rend(); ++it, ++i) {
             parameters.currentLayer = i;
             const RenderItem& renderItem = it->get();
-            if (renderItem.getName() == "background") { // Replaced by drawables, above
+            if (renderItem.getName() == "background") {
                 continue;
             }
             if (renderItem.hasRenderPass(parameters.pass)) {

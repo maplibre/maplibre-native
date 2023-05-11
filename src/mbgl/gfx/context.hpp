@@ -6,6 +6,7 @@
 #include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
+#include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
@@ -29,6 +30,7 @@ class ShaderRegistry;
 using DrawablePtr = std::shared_ptr<Drawable>;
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 
 class Context {
@@ -105,6 +107,9 @@ public:
 
     /// Create a new drawable tweaker
     virtual DrawableTweakerPtr createDrawableTweaker() = 0;
+
+    /// Create a new uniform buffer
+    virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) = 0;
 
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;

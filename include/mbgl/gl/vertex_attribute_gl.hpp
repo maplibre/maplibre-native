@@ -62,8 +62,6 @@ public:
         return *this;
     }
 
-    void applyUniforms(const gfx::ShaderProgramBase&) override;
-
 private:
     std::unique_ptr<gfx::VertexAttribute> create(int index,
                                                  gfx::AttributeDataType dataType,
