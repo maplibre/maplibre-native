@@ -234,12 +234,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 matrix = tileMat;
             }
 
-            if (auto& shader = drawable.getShader()) {
-                gfx::DrawableUBO drawableUBO;
-                drawableUBO.matrix = util::convert<float>(matrix);
-                auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-                drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
-            }
+            gfx::DrawableUBO drawableUBO;
+            drawableUBO.matrix = util::convert<float>(matrix);
+            auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
+            drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
 
             drawable.draw(parameters);
         }

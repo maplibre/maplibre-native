@@ -87,7 +87,7 @@ void DrawableGL::resetColor(const Color& newColor) {
 }
 
 void DrawableGL::bindUniformBuffers() const {
-    if (const auto& shader = getShader()) {
+    if (shader) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
         for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
@@ -100,7 +100,7 @@ void DrawableGL::bindUniformBuffers() const {
 }
 
 void DrawableGL::unbindUniformBuffers() const {
-    if (const auto& shader = getShader()) {
+    if (shader) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
         for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
             element.second->unbindBuffer();

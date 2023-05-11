@@ -4,6 +4,8 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
+#include <cassert>
+
 namespace mbgl {
 namespace gl {
 
