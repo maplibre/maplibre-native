@@ -153,19 +153,19 @@ public:
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
     const std::unique_ptr<VertexAttribute>& add(std::string name,
-                         int index = -1,
-                         AttributeDataType = AttributeDataType::Invalid,
-                         int size = 1,
-                         std::size_t count = 1);
+                                                int index = -1,
+                                                AttributeDataType = AttributeDataType::Invalid,
+                                                int size = 1,
+                                                std::size_t count = 1);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
     /// The result is valid only until the next non-const method call on this class.
     const std::unique_ptr<VertexAttribute>& getOrAdd(std::string name,
-                              int index = -1,
-                              AttributeDataType = AttributeDataType::Invalid,
-                              int size = 1,
-                              std::size_t count = 1);
+                                                     int index = -1,
+                                                     AttributeDataType = AttributeDataType::Invalid,
+                                                     int size = 1,
+                                                     std::size_t count = 1);
 
     // Set a value if the element is present
     template <typename T>
@@ -182,7 +182,8 @@ public:
             attrs.begin(), attrs.end(), [](const auto& kv) { return kv.second && kv.second->isDirty(); });
     }
 
-    using ResolveDelegate = std::function<void(const std::string&, const VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
+    using ResolveDelegate =
+        std::function<void(const std::string&, const VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
