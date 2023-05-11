@@ -38,12 +38,35 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity)
 
 TileLayerGroup::~TileLayerGroup() {}
 
+static const gfx::UniqueDrawable no_tile;
+
+const gfx::UniqueDrawable& TileLayerGroup::getDrawable(mbgl::RenderPass pass, const OverscaledTileID& id) const {
+    const auto hit = impl->tileDrawables.find({pass, id});
+    return (hit == impl->tileDrawables.end()) ? no_tile : hit->second;
+}
+
+gfx::UniqueDrawable TileLayerGroup::removeDrawable(mbgl::RenderPass pass, const OverscaledTileID& id) {
+    const auto hit = impl->tileDrawables.find({pass, id});
+    if (hit == impl->tileDrawables.end()) {
+        return {};
+    }
+    auto drawable = std::move(hit->second);
+    impl->tileDrawables.erase(hit);
+    return drawable;
+}
+
+bool TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& id, gfx::UniqueDrawable&& drawable) {
+    const auto result = impl->tileDrawables.insert(std::make_pair(TileLayerGroupTileKey{pass, id}, gfx::UniqueDrawable()));
+    if (result.second) {
+        return false;
+    } else {
+        result.first->second = std::move(drawable);
+        return true;
+    }
+}
+
 void TileLayerGroup::render([[maybe_unused]] RenderOrchestrator& orchestrator,
                             [[maybe_unused]] PaintParameters& parameters) {
-    auto pass = mbgl::RenderPass::Opaque;
-    auto id = OverscaledTileID{0, 0, 0, 0, 0};
-    auto key = TileLayerGroupTileKey{pass, id};
-    impl->tileDrawables.insert(std::make_pair(key, gfx::UniqueDrawable()));
 }
 
 } // namespace mbgl

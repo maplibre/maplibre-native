@@ -60,6 +60,10 @@ public:
 
     void render(RenderOrchestrator&, PaintParameters&) override;
 
+    const gfx::UniqueDrawable& getDrawable(mbgl::RenderPass, const OverscaledTileID&) const;
+    gfx::UniqueDrawable removeDrawable(mbgl::RenderPass, const OverscaledTileID&);
+    bool addDrawable(mbgl::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
+
 protected:
     struct Impl;
     std::unique_ptr<Impl> impl;
