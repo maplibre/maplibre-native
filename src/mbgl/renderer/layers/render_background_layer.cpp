@@ -196,8 +196,6 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     }
 }
 
-constexpr auto shaderName = "BackgroundProgramUBO";
-
 void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // TODO: This isn't happening on style change, so old tile drawables are being left active
 
@@ -220,7 +218,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {
-        shader = context.getGenericShader(shaders, shaderName);
+        shader = context.getGenericShader(shaders, "BackgroundDrawable");
     }
 
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);

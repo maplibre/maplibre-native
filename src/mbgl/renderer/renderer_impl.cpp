@@ -53,21 +53,22 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     observer->onWillStartRenderingFrame();
     const auto& renderTreeParameters = renderTree.getParameters();
 
-    if (!staticData) {
-        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
-        staticData->programs.registerWith(*staticData->shaders);
-        observer->onRegisterShaders(*staticData->shaders);
-    }
-    staticData->has3D = renderTreeParameters.has3D;
-
     auto& context = backend.getContext();
-
-    // Now that the shader registry is set up, do one-time shader init.
-    // TODO: Both should be done earlier.
-    backend.initShaders(*staticData->shaders);
-
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
+
+    if (!staticData) {
+        staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
+
+        // Initialize legacy shader programs
+        staticData->programs.registerWith(*staticData->shaders);
+        observer->onRegisterShaders(*staticData->shaders);
+
+        // Initialize shaders for drawables
+        const auto programParameters = ProgramParameters{pixelRatio, false};
+        backend.initShaders(*staticData->shaders, programParameters);
+    }
+    staticData->has3D = renderTreeParameters.has3D;
 
     PaintParameters parameters{context,
                                pixelRatio,

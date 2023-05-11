@@ -260,8 +260,6 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
-constexpr auto shaderName = "BackgroundProgramUBO";
-
 void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
     decltype(tileDrawables) localDrawables;
@@ -282,7 +280,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {
-        shader = context.getGenericShader(shaders, shaderName);
+        shader = context.getGenericShader(shaders, "FillDrawable");
     }
 
     // const auto& evaluated = getEvaluated<FillLayerProperties>(evaluatedProperties);
