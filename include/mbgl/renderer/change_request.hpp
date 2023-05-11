@@ -69,8 +69,8 @@ protected:
  */
 class RemoveDrawableRequest : public RefChangeRequest {
 public:
-    RemoveDrawableRequest(util::SimpleIdentity id)
-        : RefChangeRequest(id) {}
+    RemoveDrawableRequest(util::SimpleIdentity id_)
+        : RefChangeRequest(id_) {}
     RemoveDrawableRequest(const RemoveDrawableRequest &) = default;
 
     void execute(RenderOrchestrator &) override;
@@ -81,8 +81,8 @@ public:
  */
 class ResetColorRequest : public RefChangeRequest {
 public:
-    ResetColorRequest(util::SimpleIdentity id, Color color)
-        : RefChangeRequest(id),
+    ResetColorRequest(util::SimpleIdentity id_, Color color)
+        : RefChangeRequest(id_),
           newColor(color) {}
     ResetColorRequest(const ResetColorRequest &other) = default;
 
@@ -112,8 +112,8 @@ protected:
  */
 class RemoveLayerGroupRequest : public RefChangeRequest {
 public:
-    RemoveLayerGroupRequest(util::SimpleIdentity id)
-        : RefChangeRequest(id) {}
+    RemoveLayerGroupRequest(util::SimpleIdentity id_)
+        : RefChangeRequest(id_) {}
     RemoveLayerGroupRequest(const RemoveLayerGroupRequest &) = default;
 
     void execute(RenderOrchestrator &) override;
