@@ -180,8 +180,9 @@ protected:
     std::mutex mutex;
     gfx::ShaderProgramBasePtr shader;
     std::unordered_map<OverscaledTileID, gfx::DrawablePtr> tileDrawables;
-    std::optional<Color> lastColor;
     int32_t lastLayerIndex = -1;
+    bool evaluatedPropertiesChange = false;
+    gfx::UniformBufferPtr uniformBuffer = nullptr;
 
     struct Stats {
         size_t propertyEvaluations = 0;

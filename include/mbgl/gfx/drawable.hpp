@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/identity.hpp>
@@ -22,7 +23,7 @@ enum class DepthMaskType : bool;
 class DrawableTweaker;
 class ShaderProgramBase;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
-
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
@@ -94,6 +95,10 @@ public:
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
 
+    /// Get the uniform buffers attached to this drawable
+    virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
+    virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
+
     // Reset a single color attribute for all vertexes
     virtual void resetColor(const Color&) = 0;
 
@@ -135,6 +140,10 @@ struct DrawablePtrLessByLayer {
 
 private:
     bool desc;
+};
+
+struct alignas(16) DrawableUBO {
+    std::array<float, 4 * 4> matrix;
 };
 
 } // namespace gfx

@@ -10,6 +10,7 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
+#include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
@@ -495,6 +496,10 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 
 gfx::DrawableTweakerPtr Context::createDrawableTweaker() {
     return std::make_shared<gl::DrawableGLTweaker>();
+}
+
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
+    return std::make_shared<gl::UniformBufferGL>(data, size);
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {

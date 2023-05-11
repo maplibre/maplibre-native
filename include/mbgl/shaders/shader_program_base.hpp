@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/shader.hpp>
+#include <mbgl/gfx/uniform_block.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/util/identity.hpp>
 
@@ -17,7 +18,7 @@ protected:
 
     template <typename T>
     bool set(gfx::VertexAttributeArray& attrs, const std::string& name, std::size_t i, T value) {
-        auto* item = attrs.get(name);
+        const auto& item = attrs.get(name);
         if (item && i < item->getCount()) {
             item->set(i, value);
             return true;
@@ -28,26 +29,19 @@ protected:
 public:
     const util::SimpleIdentity& getID() const { return shaderProgramID; }
 
-    /// Get the available vertex attributes and their default values
-    virtual const gfx::VertexAttributeArray& getUniforms() const = 0;
+    /// Get the available uniform blocks attached to this shader
+    virtual const gfx::UniformBlockArray& getUniformBlocks() const = 0;
 
     /// Get the available vertex attributes and their default values
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
 
-    // Set a value if the element is present
-    template <typename T>
-    bool setUniform(const std::string& name, std::size_t i, T value) {
-        return set(mutableUniforms(), name, i, value);
-    }
     template <typename T>
     bool setAttribute(const std::string& name, std::size_t i, T value) {
         return set(mutableVertexAttributes(), name, i, value);
     }
 
-    void updateUniforms() { mutableUniforms().applyUniforms(*this); }
-
 protected:
-    virtual gfx::VertexAttributeArray& mutableUniforms() = 0;
+    virtual gfx::UniformBlockArray& mutableUniformBlocks() = 0;
     virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
 
 protected:

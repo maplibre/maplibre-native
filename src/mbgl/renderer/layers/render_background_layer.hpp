@@ -50,4 +50,26 @@ private:
     std::shared_ptr<BackgroundPatternProgram> backgroundPatternProgram;
 };
 
+struct alignas(16) BackgroundLayerUBO {
+    Color color;
+    float opacity;
+};
+
+struct alignas(16) BackgroundPatternLayerUBO {
+    std::array<float, 2> pattern_tl_a;
+    std::array<float, 2> pattern_br_a;
+    std::array<float, 2> pattern_tl_b;
+    std::array<float, 2> pattern_br_b;
+    std::array<float, 2> texsize;
+    std::array<float, 2> pattern_size_a;
+    std::array<float, 2> pattern_size_b;
+    std::array<float, 2> pixel_coord_upper;
+    std::array<float, 2> pixel_coord_lower;
+    float tile_units_to_pixels;
+    float scale_a;
+    float scale_b;
+    float mix;
+    float opacity;
+};
+
 } // namespace mbgl

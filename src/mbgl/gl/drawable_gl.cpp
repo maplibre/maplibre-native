@@ -2,6 +2,8 @@
 #include <mbgl/gl/drawable_gl_impl.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
+
 namespace mbgl {
 namespace gl {
 
@@ -16,7 +18,9 @@ DrawableGL::~DrawableGL() {
 }
 
 void DrawableGL::draw(const PaintParameters& parameters) const {
+    bindUniformBuffers();
     impl->draw(parameters);
+    unbindUniformBuffers();
 }
 
 void DrawableGL::setIndexData(std::vector<std::uint16_t> indexes,
@@ -67,10 +71,40 @@ void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
     impl->indexBuffer = std::move(indexBuffer_);
 }
 
+const gfx::UniformBufferArray& DrawableGL::getUniformBuffers() const {
+    return impl->uniformBuffers;
+}
+
+gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
+    return impl->uniformBuffers;
+}
+
 void DrawableGL::resetColor(const Color& newColor) {
-    if (auto* colorAttr = impl->vertexAttributes.get("a_color")) {
+    if (const auto& colorAttr = impl->vertexAttributes.get("a_color")) {
         colorAttr->clear();
         colorAttr->set(0, colorAttrValue(newColor));
+    }
+}
+
+void DrawableGL::bindUniformBuffers() const {
+    if (shader) {
+        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
+        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
+            const auto& uniformBuffer = getUniformBuffers().get(element.first);
+            if (!uniformBuffer) {
+                continue;
+            }
+            element.second->bindBuffer(*uniformBuffer);
+        }
+    }
+}
+
+void DrawableGL::unbindUniformBuffers() const {
+    if (shader) {
+        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
+        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
+            element.second->unbindBuffer();
+        }
     }
 }
 

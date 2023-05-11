@@ -18,6 +18,7 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <unordered_set>
@@ -60,6 +61,7 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     properties->renderPasses = mbgl::underlying_type(passes);
 
     evaluatedProperties = std::move(properties);
+    evaluatedPropertiesChange = true;
 }
 
 bool RenderBackgroundLayer::hasTransition() const {
@@ -194,7 +196,7 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     }
 }
 
-constexpr auto shaderName = "background_generic";
+constexpr auto shaderName = "BackgroundProgramUBO";
 
 void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // TODO: This isn't happening on style change, so old tile drawables are being left active
@@ -235,25 +237,23 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     // unevaluated.hasTransition();
     // getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 
-    std::optional<Color> color;
-    if (evaluated.get<BackgroundPattern>().from.empty()) {
-        const auto opacity = evaluated.get<style::BackgroundOpacity>();
-        if (opacity > 0.0f) {
-            color = evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>();
-        }
-    }
-
     // If the result is transparent or missing, just remove any existing drawables and stop
-    if (!color) {
+    if (!evaluated.get<BackgroundPattern>().from.empty() || evaluated.get<style::BackgroundOpacity>() <= 0.0f) {
         removeDrawables<decltype(tileDrawables)::const_iterator>(
             tileDrawables.cbegin(), tileDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
         tileDrawables.clear();
         return;
     }
 
-    const bool colorChange = (color != lastColor);
+    if (evaluatedPropertiesChange) {
+        BackgroundLayerUBO backgroundLayerUBO;
+        backgroundLayerUBO.color = evaluated.get<BackgroundColor>();
+        backgroundLayerUBO.opacity = evaluated.get<BackgroundOpacity>();
+        uniformBuffer = context.createUniformBuffer(&backgroundLayerUBO, sizeof(backgroundLayerUBO));
+        evaluatedPropertiesChange = false;
+    }
+
     const bool layerChange = (layerIndex != lastLayerIndex);
-    lastColor = color;
     lastLayerIndex = layerIndex;
 
     const auto zoom = state.getIntegerZoom();
@@ -283,10 +283,6 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         }
         ++iter;
 
-        // If the color evaluated to a new value, update all vertexes of the drawable to the new color
-        if (colorChange) {
-            drawable->resetColor(*color);
-        }
         if (layerChange) {
             drawable->setLayerIndex(layerIndex);
         }
@@ -302,6 +298,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         if (!result.second) {
             // Already present
             // TODO: Update matrix here or in the tweaker?
+            result.first->second->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
             continue;
         }
 
@@ -311,7 +308,6 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
             builder->setRenderPass(drawPasses);
             builder->setShader(shader);
             builder->addTweaker(context.createDrawableTweaker());
-            builder->setColor(*color);
             builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
             builder->setLayerIndex(layerIndex);
@@ -329,6 +325,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         if (!newDrawables.empty()) {
             auto& drawable = newDrawables[0];
             drawable->setTileID(tileID);
+            drawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
             result.first->second = drawable;
             changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
             ++stats.tileDrawablesAdded;
