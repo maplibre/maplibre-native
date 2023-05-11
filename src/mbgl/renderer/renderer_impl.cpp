@@ -241,7 +241,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             }
 
             gfx::DrawableUBO drawableUBO;
-            drawableUBO.matrix = util::convert<float>(matrix);
+            drawableUBO.matrix = util::cast<float>(matrix);
             auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
             drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
 
