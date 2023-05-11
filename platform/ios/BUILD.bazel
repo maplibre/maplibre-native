@@ -464,7 +464,7 @@ ios_application(
 )
 
 ios_application(
-    name = "ProvisionedApp",
+    name = "AppDynamicLib",
     bundle_id = "com.maplibre.app",
     families = ["iphone", "ipad"],
     infoplists = ["platform/ios/app/Info.plist"],
@@ -476,22 +476,21 @@ ios_application(
     frameworks = [
         "MapLibre.link"
     ],
-    resources = _IOS_APPLICATION_RESOURCES,
-    provisioning_profile = "MapLibre.mobileprovision"
+    resources = _IOS_APPLICATION_RESOURCES
 )
 
 # Outputs a file with the size of MapLibre as a dynamic library in bytes
 genrule(
     name = "size",
     srcs = [
-        "ProvisionedApp"
+        "AppDynamicLib"
     ],
     outs = [
         "size-out"
     ],
     cmd = """
-        unzip $(location ProvisionedApp)
-        stat -f%z ./Payload/ProvisionedApp.app/Frameworks/MapLibre.link.framework/MapLibre.link > $@
+        unzip $(location AppDynamicLib)
+        stat -f%z ./Payload/AppDynamicLib.app/Frameworks/MapLibre.link.framework/MapLibre.link > $@
     """,
 )
 

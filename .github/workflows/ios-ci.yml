@@ -135,13 +135,10 @@ jobs:
 
       # size test
 
-      - name: Copy provisioning profile
-        run: cp ~/secrets/MapLibre.mobileprovision .
-
       - name: Build app for size test & output size 
         working-directory: ./
         run: | 
-          bazelisk build --compilation_mode=opt //platform/ios:size --ios_multi_cpus=arm64
+          bazelisk build --compilation_mode=opt //platform/ios:size
           echo "size_outfile"=$(bazel cquery --output=files //platform/ios:size) >> $GITHUB_ENV
 
       - name: Upload size test result
