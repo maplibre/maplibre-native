@@ -396,7 +396,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
                 auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
 
-                const auto removeTile = [&](){
+                const auto removeTile = [&]() {
                     if (tileDrawable) {
                         changes.emplace_back(std::make_unique<RemoveDrawableRequest>(tileDrawable->getId()));
                         tileLayerGroup->removeDrawable(renderPass, tileID);
@@ -409,7 +409,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     removeTile();
                     continue;
                 }
-                
+
                 auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
                 const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
@@ -482,8 +482,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 //            if (evaluated.get<FillAntialias>() && parameters.pass == RenderPass::Translucent) {
                 //                draw(*fillOutlineProgram,
                 //                     gfx::Lines{2.0f},
-                //                     parameters.depthModeForSublayer(unevaluated.get<FillOutlineColor>().isUndefined() ? 2
-                //                     : 0,
+                //                     parameters.depthModeForSublayer(unevaluated.get<FillOutlineColor>().isUndefined()
+                //                     ? 2 : 0,
                 //                                                     gfx::DepthMaskType::ReadOnly),
                 //                     *bucket.lineIndexBuffer,
                 //                     bucket.lineSegments,
