@@ -224,7 +224,8 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         shader = context.getGenericShader(shaders, shaderName);
     }
 
-    changes.emplace_back(std::make_unique<AddLayerGroupRequest>(std::make_unique<TileLayerGroup>(layerIndex, 10), /*replace*/true));
+    changes.emplace_back(
+        std::make_unique<AddLayerGroupRequest>(std::make_unique<TileLayerGroup>(layerIndex, 10), /*replace*/ true));
 
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
 

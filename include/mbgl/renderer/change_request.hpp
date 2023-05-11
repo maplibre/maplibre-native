@@ -41,8 +41,9 @@ protected:
  */
 class RefChangeRequest : public ChangeRequest {
 protected:
-    RefChangeRequest(util::SimpleIdentity id_) : id(id_) {}
-    RefChangeRequest(const RefChangeRequest&) = default;
+    RefChangeRequest(util::SimpleIdentity id_)
+        : id(id_) {}
+    RefChangeRequest(const RefChangeRequest &) = default;
 
     util::SimpleIdentity id;
 };
@@ -57,7 +58,7 @@ public:
     AddDrawableRequest(AddDrawableRequest &&other)
         : drawable(std::move(other.drawable)) {}
 
-    void execute(RenderOrchestrator&) override;
+    void execute(RenderOrchestrator &) override;
 
 protected:
     gfx::DrawablePtr drawable;
@@ -72,7 +73,7 @@ public:
         : RefChangeRequest(id) {}
     RemoveDrawableRequest(const RemoveDrawableRequest &) = default;
 
-    void execute(RenderOrchestrator&) override;
+    void execute(RenderOrchestrator &) override;
 };
 
 /**
@@ -85,22 +86,21 @@ public:
           newColor(color) {}
     ResetColorRequest(const ResetColorRequest &other) = default;
 
-    void execute(RenderOrchestrator&) override;
+    void execute(RenderOrchestrator &) override;
 
 protected:
     Color newColor;
 };
-
 
 /**
     Add a new layer group to the scene
  */
 class AddLayerGroupRequest : public ChangeRequest {
 public:
-    AddLayerGroupRequest(UniqueLayerGroup&& layerGroup_, bool canReplace);
-    AddLayerGroupRequest(AddLayerGroupRequest&& other);
+    AddLayerGroupRequest(UniqueLayerGroup &&layerGroup_, bool canReplace);
+    AddLayerGroupRequest(AddLayerGroupRequest &&other);
 
-    void execute(RenderOrchestrator&) override;
+    void execute(RenderOrchestrator &) override;
 
 protected:
     UniqueLayerGroup layerGroup;
@@ -116,8 +116,7 @@ public:
         : RefChangeRequest(id) {}
     RemoveLayerGroupRequest(const RemoveLayerGroupRequest &) = default;
 
-    void execute(RenderOrchestrator&) override;
+    void execute(RenderOrchestrator &) override;
 };
-
 
 } // namespace mbgl

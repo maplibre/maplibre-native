@@ -776,9 +776,7 @@ const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdenti
     return (hit != drawables.end()) ? hit->second : noDrawable;
 }
 
-void RenderOrchestrator::onRemoveLayerGroup(LayerGroup&) {
-    
-}
+void RenderOrchestrator::onRemoveLayerGroup(LayerGroup&) {}
 
 bool RenderOrchestrator::addLayerGroup(UniqueLayerGroup&& layerGroup, const bool replace) {
     const auto index = layerGroup->getLayerIndex();
@@ -832,7 +830,6 @@ void RenderOrchestrator::observeLayerGroups(std::function<void(const LayerGroup&
         }
     }
 }
-
 
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
