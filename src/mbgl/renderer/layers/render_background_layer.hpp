@@ -53,7 +53,9 @@ private:
 struct alignas(16) BackgroundLayerUBO {
     Color color;
     float opacity;
+    float padding[3];
 };
+static_assert(sizeof(BackgroundLayerUBO) % 16 == 0);
 
 struct alignas(16) BackgroundPatternLayerUBO {
     std::array<float, 2> pattern_tl_a;
@@ -71,5 +73,6 @@ struct alignas(16) BackgroundPatternLayerUBO {
     float mix;
     float opacity;
 };
+static_assert(sizeof(BackgroundPatternLayerUBO) % 16 == 0);
 
 } // namespace mbgl
