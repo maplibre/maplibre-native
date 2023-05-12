@@ -7,6 +7,7 @@ load(
     "top_level_target",
     "xcodeproj",
 )
+load("bazel/macros.bzl", "info_plist")
 
 # This list of public headers is from what Mapbox vendors with their dynamic framework
 # If we forget one the build will fail, and if we add too many there will be a warning
@@ -105,6 +106,18 @@ apple_static_xcframework(
     deps = ["sdk"],
 )
 
+info_plist(
+    name = "info_plist",
+    out = "Info.plist",
+    base_info_plist = "platform/ios/framework/Info.plist",
+)
+
+info_plist(
+    name = "info_static_plist",
+    out = "Info-static.plist",
+    base_info_plist = "platform/ios/framework/Info-static.plist"
+)
+
 apple_xcframework(
     name = "Mapbox.dynamic",
     bundle_id = "com.maplibre.mapbox",
@@ -113,7 +126,7 @@ apple_xcframework(
         "platform/ios/resources/*.lproj/**",
         "platform/ios/resources/*.xcassets/**",
     ]),
-    infoplists = ["build/Info.plist"],
+    infoplists = ["info_plist"],
     ios = {
         "simulator": [
             "x86_64",
@@ -128,14 +141,12 @@ apple_xcframework(
     deps = ["sdk-dynamic"],
 )
 
-# This target allows you to link the SDK to emulate linking it in the app
-# This should help us find issues with missing symbols sooner.
 ios_framework(
-    name = "Mapbox.link",
+    name = "MapLibre.link",
     bundle_id = "com.maplibre.link",
     families = ["iphone"],
-    infoplists = ["build/Info.plist"],
-    linkopts = ["-all_load"],
+    infoplists = ["info_plist"],
+    linkopts = [""],
     minimum_os_version = "12.0",
     deps = ["sdk"],
 )
@@ -187,7 +198,7 @@ apple_resource_bundle(
     name = "resources",
     bundle_id = "com.maplibre.mapbox",
     bundle_name = "Mapbox",
-    infoplists = ["build/Info-static.plist"],
+    infoplists = ["info_static_plist"],
     resources = glob([
         "platform/ios/resources/*.lproj/**",
         "platform/ios/resources/*.xcassets/**",
@@ -368,6 +379,11 @@ objc_library(
 )
 
 objc_library(
+    name = "sdk-headers",
+    hdrs = ["platform/ios/src/Mapbox.h"] + _PUBLIC_HEADERS,
+)
+
+objc_library(
     name = "iosapp",
     srcs = [
         "platform/ios/app/MBXAppDelegate.m",
@@ -385,7 +401,8 @@ objc_library(
         "platform/ios/app/MBXOrnamentsViewController.m",
         "platform/ios/app/MBXStateManager.m",
         "platform/darwin/app/LimeGreenStyleLayer.m",
-        "platform/darwin/app/LimeGreenStyleLayer.h"
+        "platform/darwin/app/LimeGreenStyleLayer.h",
+        "platform/ios/app/MBXCustomCalloutView.h",
     ],
     hdrs = [
         "platform/ios/app/MBXAppDelegate.h",
@@ -393,7 +410,6 @@ objc_library(
         "platform/ios/app/MBXCustomLocationViewController.h",
         "platform/ios/app/MBXSnapshotsViewController.h",
         "platform/ios/app/MBXFrameTimeGraphView.h",
-        "platform/ios/app/MBXCustomCalloutView.h",
         "platform/ios/app/MBXViewController.h",
         "platform/ios/app/MBXUserLocationAnnotationView.h",
         "platform/ios/app/MBXAnnotationView.h",
@@ -404,28 +420,19 @@ objc_library(
         "platform/ios/app/MLNMapView_Experimental.h"
     ],
     includes = [
-        "platform/darwin/app"
-    ],
-    deps = [
-        "sdk"
+        "platform/darwin/app",
+        "platform/ios/src",
+        "platform/darwin/src"
     ],
     sdk_frameworks = [
         "GLKit" # needed for LimeGreenStyleLayer
-    ]
+    ],
+    deps = [
+        "sdk-headers"
+    ],
 )
 
-
-ios_application(
-    name = "App",
-    bundle_id = "com.maplibre.app",
-    families = ["iphone", "ipad"],
-    infoplists = ["platform/ios/app/Info.plist"],
-    minimum_os_version = "12.0",
-    visibility = ["//visibility:public"],
-    deps = [
-        "iosapp",
-    ],
-    resources = [
+_IOS_APPLICATION_RESOURCES = [
         "platform/ios/app/numeric_filter_style.json",
         "platform/ios/app/missing_icon.json",
         "platform/ios/app/points.geojson",
@@ -439,8 +446,52 @@ ios_application(
         "platform/ios/app/Assets.xcassets",
         "platform/darwin/test/amsterdam.geojson"
     ] + glob([
-        "platform/ios/app/*.lproj/**"
+        "platform/ios/app/*.lproj/**",
     ])
+
+ios_application(
+    name = "App",
+    bundle_id = "com.maplibre.app",
+    families = ["iphone", "ipad"],
+    infoplists = ["platform/ios/app/Info.plist"],
+    minimum_os_version = "12.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        "sdk",
+        "iosapp",
+    ],
+    resources = _IOS_APPLICATION_RESOURCES
+)
+
+ios_application(
+    name = "AppDynamicLib",
+    bundle_id = "com.maplibre.app",
+    families = ["iphone", "ipad"],
+    infoplists = ["platform/ios/app/Info.plist"],
+    minimum_os_version = "12.0",
+    visibility = ["//visibility:public"],
+    deps = [
+        "iosapp",
+    ],
+    frameworks = [
+        "MapLibre.link"
+    ],
+    resources = _IOS_APPLICATION_RESOURCES
+)
+
+# Outputs a file with the size of MapLibre as a dynamic library in bytes
+genrule(
+    name = "size",
+    srcs = [
+        "AppDynamicLib"
+    ],
+    outs = [
+        "size-out"
+    ],
+    cmd = """
+        unzip $(location AppDynamicLib)
+        stat -f%z ./Payload/AppDynamicLib.app/Frameworks/MapLibre.link.framework/MapLibre.link > $@
+    """,
 )
 
 xcodeproj(
