@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-11T18:11:44.911Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -9,6 +9,7 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::CircleProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "CircleProgram";
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform bool u_scale_with_map;
 uniform bool u_pitch_with_map;
