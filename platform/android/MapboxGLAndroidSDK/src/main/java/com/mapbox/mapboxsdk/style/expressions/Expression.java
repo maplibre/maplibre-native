@@ -1588,7 +1588,7 @@ public class Expression {
    * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#slice">Style specification</a>
    */
   public static Expression slice(@NonNull Expression input, @NonNull Expression fromIndex) {
-    return new Expression("slice", input, fromIndex, toIndex);
+    return new Expression("slice", input, fromIndex);
   }
 
   /**
@@ -1601,7 +1601,7 @@ public class Expression {
    * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#slice">Style specification</a>
    */
   public static Expression indexOf(@NonNull Expression input, @NonNull Expression fromIndex, @NonNull Expression toIndex) {
-    return new Expression("index-of", keyword, input, fromIndex);
+    return new Expression("index-of", keyword, input, fromIndex, toIndex);
   }
 
   /**
