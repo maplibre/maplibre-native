@@ -213,7 +213,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {
-        shader = context.getGenericShader(shaders, "BackgroundDrawable");
+        shader = context.getGenericShader(shaders, "BackgroundShader");
     }
 
     const auto removeAll = [&](){

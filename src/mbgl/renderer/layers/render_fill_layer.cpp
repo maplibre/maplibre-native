@@ -277,10 +277,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {
-        shader = context.getGenericShader(shaders, "FillDrawable");
+        shader = context.getGenericShader(shaders, "FillShader");
     }
 
-    if (!renderTiles || renderTiles->empty()) {
+    if (!shader || !renderTiles || renderTiles->empty()) {
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
