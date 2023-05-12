@@ -1,5 +1,10 @@
 #pragma once
 
+#include <mbgl/gfx/texture.hpp>
+#include <mbgl/gfx/draw_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
+#include <mbgl/gfx/stencil_mode.hpp>
+#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gl/object.hpp>
 #include <mbgl/gl/state.hpp>
@@ -7,17 +12,12 @@
 #include <mbgl/gl/framebuffer.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/gfx/texture.hpp>
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/gfx/depth_mode.hpp>
-#include <mbgl/gfx/stencil_mode.hpp>
-#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
+#include <array>
 #include <functional>
 #include <vector>
-#include <array>
 
 namespace mbgl {
 namespace gl {
@@ -109,6 +109,8 @@ public:
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
+
+    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) override;
 
 private:
     RendererBackend& backend;

@@ -8,6 +8,7 @@
 #include <mbgl/gl/drawable_gl_tweaker.hpp>
 #include <mbgl/gl/draw_scope_resource.hpp>
 #include <mbgl/gl/enum.hpp>
+#include <mbgl/gl/layer_group_gl.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
@@ -504,6 +505,10 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
     return shaders.get<gl::ShaderProgramGL>(name);
+}
+
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) {
+    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity);
 }
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {

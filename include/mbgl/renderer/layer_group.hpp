@@ -4,6 +4,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/identity.hpp>
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -46,23 +47,36 @@ public:
     /// Called at the end of each frame
     virtual void postRender(RenderOrchestrator&, PaintParameters&) {}
 
+    /// Call the provided function for each drawable in undefined order
+    virtual void observeDrawables(std::function<void(gfx::Drawable&)>) = 0;
+    virtual void observeDrawables(std::function<void(const gfx::Drawable&)>) const = 0;
+
+    /// Call the provided function for each drawable in undefined order, allowing ownership to be taken.
+    virtual void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) = 0;
+
 protected:
     int32_t layerIndex;
 };
 
 /**
-    A layer group for tile-based drawables
+    A layer group for tile-based drawables.
  */
 class TileLayerGroup : public LayerGroup {
 public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity);
     ~TileLayerGroup() override;
 
-    void render(RenderOrchestrator&, PaintParameters&) override;
+    std::size_t getDrawableCount() const;
 
     const gfx::UniqueDrawable& getDrawable(mbgl::RenderPass, const OverscaledTileID&) const;
     gfx::UniqueDrawable removeDrawable(mbgl::RenderPass, const OverscaledTileID&);
     bool addDrawable(mbgl::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
+
+    void observeDrawables(std::function<void(gfx::Drawable&)>) override;
+    void observeDrawables(std::function<void(const gfx::Drawable&)>) const override;
+    void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) override;
+    
+    void clearDrawables();
 
 protected:
     struct Impl;

@@ -54,8 +54,6 @@ private:
     std::shared_ptr<FillPatternProgram> fillPatternProgram;
     std::shared_ptr<FillOutlineProgram> fillOutlineProgram;
     std::shared_ptr<FillOutlinePatternProgram> fillOutlinePatternProgram;
-
-    TileLayerGroupPtr tileLayerGroup;
 };
 
 } // namespace mbgl

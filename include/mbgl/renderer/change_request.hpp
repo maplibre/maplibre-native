@@ -32,8 +32,6 @@ public:
     virtual ~ChangeRequest() = default;
 
     virtual void execute(RenderOrchestrator &) = 0;
-
-protected:
 };
 
 /**
@@ -46,50 +44,6 @@ protected:
     RefChangeRequest(const RefChangeRequest &) = default;
 
     util::SimpleIdentity id;
-};
-
-/**
-    Add a new drawable to the scene
- */
-class AddDrawableRequest : public ChangeRequest {
-public:
-    AddDrawableRequest(gfx::DrawablePtr drawable_)
-        : drawable(std::move(drawable_)) {}
-    AddDrawableRequest(AddDrawableRequest &&other)
-        : drawable(std::move(other.drawable)) {}
-
-    void execute(RenderOrchestrator &) override;
-
-protected:
-    gfx::DrawablePtr drawable;
-};
-
-/**
-    Remove a drawable from the scene
- */
-class RemoveDrawableRequest : public RefChangeRequest {
-public:
-    RemoveDrawableRequest(util::SimpleIdentity id_)
-        : RefChangeRequest(id_) {}
-    RemoveDrawableRequest(const RemoveDrawableRequest &) = default;
-
-    void execute(RenderOrchestrator &) override;
-};
-
-/**
-    Change the color of all vertexes
- */
-class ResetColorRequest : public RefChangeRequest {
-public:
-    ResetColorRequest(util::SimpleIdentity id_, Color color)
-        : RefChangeRequest(id_),
-          newColor(color) {}
-    ResetColorRequest(const ResetColorRequest &other) = default;
-
-    void execute(RenderOrchestrator &) override;
-
-protected:
-    Color newColor;
 };
 
 /**
@@ -110,13 +64,16 @@ protected:
 /**
     Remove a layer group from the scene
  */
-class RemoveLayerGroupRequest : public RefChangeRequest {
+class RemoveLayerGroupRequest : public ChangeRequest {
 public:
-    RemoveLayerGroupRequest(util::SimpleIdentity id_)
-        : RefChangeRequest(id_) {}
+    RemoveLayerGroupRequest(int32_t layerIndex_)
+        : layerIndex(layerIndex_) {}
     RemoveLayerGroupRequest(const RemoveLayerGroupRequest &) = default;
 
     void execute(RenderOrchestrator &) override;
+    
+protected:
+    int32_t layerIndex;
 };
 
 } // namespace mbgl
