@@ -4,6 +4,8 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/programs/program_parameters.hpp>
+#include <mbgl/shaders/shader_manifest.hpp>
 
 #include <cstring>
 #include <utility>
@@ -110,15 +112,29 @@ static void addAttr(
 }
 
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
-                                                         std::string_view /*name*/,
-                                                         std::string_view vertexSource,
-                                                         std::string_view fragmentSource) noexcept(false) {
+                                                         const ProgramParameters& programParameters,
+                                                         const std::string& /*name*/,
+                                                         const std::string& vertexSource,
+                                                         const std::string& fragmentSource,
+                                                         const std::string& additionalDefines) noexcept(false) {
     const auto firstAttrib = "a_pos";
 
     // throws on compile error
-    auto vertProg = context.createShader(ShaderType::Vertex, std::initializer_list<const char*>{vertexSource.data()});
-    auto fragProg = context.createShader(ShaderType::Fragment,
-                                         std::initializer_list<const char*>{fragmentSource.data()});
+    auto vertProg = context.createShader(
+        ShaderType::Vertex,
+        std::initializer_list<const char*>{
+            "#version 300 es\n",
+            programParameters.getDefines().c_str(),
+            additionalDefines.c_str(),
+            shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::vertex,
+            vertexSource.c_str()});
+    auto fragProg = context.createShader(
+        ShaderType::Fragment,
+        {"#version 300 es\n",
+         programParameters.getDefines().c_str(),
+         additionalDefines.c_str(),
+         shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
+         fragmentSource.c_str()});
     auto program = context.createProgram(vertProg, fragProg, firstAttrib);
 
     // GLES3.1

@@ -6,6 +6,9 @@
 #include <mbgl/util/util.hpp>
 
 namespace mbgl {
+
+class ProgramParameters;
+
 namespace gl {
 
 using ProcAddress = void (*)();
@@ -20,7 +23,7 @@ public:
     virtual void updateAssumedState() = 0;
 
     /// One-time shader initialization
-    void initShaders(gfx::ShaderRegistry&) override;
+    void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;

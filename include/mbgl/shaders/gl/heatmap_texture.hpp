@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-11T18:11:44.911Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -9,6 +9,7 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::HeatmapTextureProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "HeatmapTextureProgram";
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_world;
 layout (location = 0) in vec2 a_pos;

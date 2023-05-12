@@ -6,6 +6,9 @@
 #include <mutex>
 
 namespace mbgl {
+
+class ProgramParameters;
+
 namespace gfx {
 
 class BackendScope;
@@ -42,7 +45,7 @@ public:
     virtual Renderable& getDefaultRenderable() = 0;
 
     /// One-time shader initialization
-    virtual void initShaders(gfx::ShaderRegistry&) = 0;
+    virtual void initShaders(gfx::ShaderRegistry&, const ProgramParameters&) = 0;
 
 protected:
     virtual std::unique_ptr<Context> createContext() = 0;
