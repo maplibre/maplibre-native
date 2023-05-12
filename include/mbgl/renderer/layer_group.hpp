@@ -75,7 +75,7 @@ public:
     void observeDrawables(std::function<void(gfx::Drawable&)>) override;
     void observeDrawables(std::function<void(const gfx::Drawable&)>) const override;
     void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) override;
-    
+
     void clearDrawables();
 
 protected:

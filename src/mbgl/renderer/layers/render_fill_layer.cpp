@@ -425,7 +425,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     drawable->setTileID(tileID);
 
                     // Track it.
-                    //tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.tileDrawablesAdded;
                     // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
                     // std::to_string(stats.tileDrawablesAdded+1));
