@@ -146,6 +146,7 @@ private:
 struct alignas(16) DrawableUBO {
     std::array<float, 4 * 4> matrix;
 };
+static_assert(sizeof(DrawableUBO) % 16 == 0);
 
 } // namespace gfx
 } // namespace mbgl
