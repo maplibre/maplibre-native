@@ -243,11 +243,6 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
             ? pragmaMapConvertOnlyVertexArrays(vertexSource, pragmaMap, attribMap, "vertex")
             : pragmaMapConvert(vertexSource, pragmaMap, attribMap, "vertex");
 
-        const glRoot = path.join(outputRoot, "gl");
-        if (!fs.existsSync(glRoot)) {
-            fs.mkdirSync(glRoot, {recursive: true}); // Ensure target directory is available
-        }
-
         fs.writeFileSync(
             path.join(glRoot, elem.header + ".hpp"),
             `${generatedHeader}
@@ -257,8 +252,7 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
 namespace mbgl {
 namespace shaders {
 
-template <>
-struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
+template <> struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "${elem.name}";
     static constexpr const char* vertex = R"(${args.strip ? strip(vert) : vert})";
     static constexpr const char* fragment = R"(${args.strip ? strip(frag) : frag})";
@@ -308,8 +302,7 @@ template <BuiltIn T, gfx::Backend::Type>
 struct ShaderSource;
 
 /// @brief A specialization of the ShaderSource template for no shader code.
-template <>
-struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
+template <> struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "";
     static constexpr const char* vertex = "";
     static constexpr const char* fragment = "";

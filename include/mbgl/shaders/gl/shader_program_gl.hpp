@@ -6,6 +6,9 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 
 namespace mbgl {
+
+class ProgramParameters;
+
 namespace gl {
 
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
@@ -19,9 +22,11 @@ public:
     const std::string_view typeName() const noexcept override { return Name; }
 
     static std::shared_ptr<ShaderProgramGL> create(Context&,
-                                                   std::string_view name,
-                                                   std::string_view vertexSource,
-                                                   std::string_view fragmentSource) noexcept(false);
+                                                   const ProgramParameters& programParameters,
+                                                   const std::string& name,
+                                                   const std::string& vertexSource,
+                                                   const std::string& fragmentSource,
+                                                   const std::string& additionalDefines = "") noexcept(false);
 
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
 

@@ -1,5 +1,20 @@
 [
     {
+        "name": "BackgroundShader",
+        "header": "drawable_background",
+        "glsl_vert": "drawable.background.vertex.glsl",
+        "glsl_frag": "drawable.background.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillShader",
+        "header": "drawable_fill",
+        "glsl_vert": "drawable.fill.vertex.glsl",
+        "glsl_frag": "drawable.fill.fragment.glsl",
+        "uses_ubos": true
+    },
+
+    {
         "name": "Prelude",
         "header": "prelude",
         "glsl_vert": "_prelude.vertex.glsl",
