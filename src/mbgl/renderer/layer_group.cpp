@@ -76,8 +76,6 @@ void TileLayerGroup::observeDrawables(std::function<void(gfx::Drawable&)> f) {
     for (auto& pair : impl->tileDrawables) {
         if (pair.second) {
             f(*pair.second);
-        } else {
-            printf("");
         }
     }
 }
@@ -86,8 +84,6 @@ void TileLayerGroup::observeDrawables(std::function<void(const gfx::Drawable&)> 
     for (const auto& pair : impl->tileDrawables) {
         if (pair.second) {
             f(*pair.second);
-        } else {
-            printf("");
         }
     }
 }
@@ -97,15 +93,12 @@ void TileLayerGroup::observeDrawables(std::function<void(gfx::UniqueDrawable&)> 
         auto& drawable = i->second;
         if (drawable) {
             f(drawable);
-            if (drawable) {
-                // Not removed, keep going
-                ++i;
-            } else {
-                // Removed, take it out of the map
-                i = impl->tileDrawables.erase(i);
-            }
+        }
+        if (drawable) {
+            // Not removed, keep going
+            ++i;
         } else {
-            // it was already null, this isn't supposed to happen
+            // Removed, take it out of the map
             i = impl->tileDrawables.erase(i);
         }
     }
