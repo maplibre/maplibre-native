@@ -12,8 +12,8 @@
 namespace mbgl {
 namespace gl {
 
-TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex, std::size_t initialCapacity)
-    : TileLayerGroup(layerIndex, initialCapacity) {}
+TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity)
+    : TileLayerGroup(layerIndex_, initialCapacity) {}
 
 void TileLayerGroupGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
     observeDrawables([&](gfx::Drawable& drawable) {
