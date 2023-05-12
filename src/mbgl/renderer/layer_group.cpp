@@ -38,6 +38,10 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity)
 
 TileLayerGroup::~TileLayerGroup() {}
 
+std::size_t TileLayerGroup::getDrawableCount() const {
+    return impl->tileDrawables.size();
+}
+
 static const gfx::UniqueDrawable no_tile;
 
 const gfx::UniqueDrawable& TileLayerGroup::getDrawable(mbgl::RenderPass pass, const OverscaledTileID& id) const {
@@ -59,14 +63,56 @@ bool TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& 
     const auto result = impl->tileDrawables.insert(
         std::make_pair(TileLayerGroupTileKey{pass, id}, gfx::UniqueDrawable()));
     if (result.second) {
-        return false;
-    } else {
+        // New item inserted, move the drawable into it
         result.first->second = std::move(drawable);
         return true;
+    } else {
+        // Not inserted
+        return false;
     }
 }
 
-void TileLayerGroup::render([[maybe_unused]] RenderOrchestrator& orchestrator,
-                            [[maybe_unused]] PaintParameters& parameters) {}
+void TileLayerGroup::observeDrawables(std::function<void(gfx::Drawable&)> f) {
+    for (auto& pair : impl->tileDrawables) {
+        if (pair.second) {
+            f(*pair.second);
+        } else {
+            printf("");
+        }
+    }
+}
+
+void TileLayerGroup::observeDrawables(std::function<void(const gfx::Drawable&)> f) const {
+    for (const auto& pair : impl->tileDrawables) {
+        if (pair.second) {
+            f(*pair.second);
+        } else {
+            printf("");
+        }
+    }
+}
+
+void TileLayerGroup::observeDrawables(std::function<void(gfx::UniqueDrawable&)> f) {
+    for (auto i = impl->tileDrawables.begin(); i != impl->tileDrawables.end(); ) {
+        auto& drawable = i->second;
+        if (drawable) {
+            f(drawable);
+            if (drawable) {
+                // Not removed, keep going
+                ++i;
+            } else {
+                // Removed, take it out of the map
+                i = impl->tileDrawables.erase(i);
+            }
+        } else {
+            // it was already null, this isn't supposed to happen
+            i = impl->tileDrawables.erase(i);
+        }
+    }
+}
+
+void TileLayerGroup::clearDrawables() {
+    impl->tileDrawables.clear();
+}
 
 } // namespace mbgl

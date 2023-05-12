@@ -198,17 +198,11 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
 }
 
 void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // TODO: This isn't happening on style change, so old tile drawables are being left active
-
     // Remove everything
-    decltype(tileDrawables) localDrawables;
-    {
-        std::unique_lock<std::mutex> guard(mutex);
-        localDrawables = std::move(tileDrawables);
+    if (tileLayerGroup) {
+        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
+        tileLayerGroup.reset();
     }
-
-    removeDrawables<decltype(localDrawables)::const_iterator>(
-        localDrawables.cbegin(), localDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
 }
 
 void RenderBackgroundLayer::update(const int32_t layerIndex,
@@ -222,8 +216,22 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         shader = context.getGenericShader(shaders, "BackgroundDrawable");
     }
 
-    changes.emplace_back(
-        std::make_unique<AddLayerGroupRequest>(std::make_unique<TileLayerGroup>(layerIndex, 10), /*replace*/ true));
+    const auto removeAll = [&](){
+        if (tileLayerGroup) {
+            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
+            tileLayerGroup->clearDrawables();
+        }
+    };
+
+    const auto zoom = state.getIntegerZoom();
+    const auto tileCover = util::tileCover(state, zoom);
+
+    // renderTiles is always empty, we use tileCover instead
+    //if (!renderTiles || renderTiles->empty()) {
+    if (tileCover.empty()) {
+        removeAll();
+        return;
+    }
 
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
 
@@ -240,10 +248,8 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     // getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 
     // If the result is transparent or missing, just remove any existing drawables and stop
-    if (!evaluated.get<BackgroundPattern>().from.empty() || evaluated.get<style::BackgroundOpacity>() <= 0.0f) {
-        removeDrawables<decltype(tileDrawables)::const_iterator>(
-            tileDrawables.cbegin(), tileDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
-        tileDrawables.clear();
+    if (drawPasses == RenderPass::None) {
+        removeAll();
         return;
     }
 
@@ -255,11 +261,13 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         evaluatedPropertiesChange = false;
     }
 
-    const bool layerChange = (layerIndex != lastLayerIndex);
-    lastLayerIndex = layerIndex;
-
-    const auto zoom = state.getIntegerZoom();
-    const auto tileCover = util::tileCover(state, zoom);
+    if (!tileLayerGroup) {
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        if (!tileLayerGroup) {
+            return;
+        }
+        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
+    }
 
     // Drawables per overscaled or canonical tile?
     // const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
@@ -269,70 +277,68 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     // If it's returned in a well-defined order, we might not even need to sort.
     const std::unordered_set<OverscaledTileID> newTileIDs(tileCover.begin(), tileCover.end());
 
-    // For each existing tile drawable...
-    for (auto iter = tileDrawables.begin(); iter != tileDrawables.end();) {
-        const auto& drawable = iter->second;
-
-        // Has this tile dropped out of the cover set?
-        if (newTileIDs.find(iter->first) == newTileIDs.end()) {
-            // remove it
-            changes.emplace_back(std::make_unique<RemoveDrawableRequest>(drawable->getId()));
-            // Log::Warning(Event::General, "Removing drawable for " + util::toString(iter->first) + " total " +
-            // std::to_string(stats.tileDrawablesRemoved+1));
-            iter = tileDrawables.erase(iter);
-            ++stats.tileDrawablesRemoved;
-            continue;
-        }
-        ++iter;
-
-        if (layerChange) {
-            drawable->setLayerIndex(layerIndex);
-        }
-        // TODO: does render pass change dynamically?
-    }
-
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
-    // For each tile in the cover set, add a tile drawable if one doesn't already exist.
-    // We currently assume only one drawable per tile.
-    for (const auto& tileID : tileCover) {
-        const auto result = tileDrawables.insert(std::make_pair(tileID, gfx::DrawablePtr()));
-        if (!result.second) {
-            // Already present
-            // TODO: Update matrix here or in the tweaker?
-            result.first->second->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
-            continue;
-        }
+    for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
+        tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+            // Has this tile dropped out of the cover set?
+            const auto tileID = drawable->getTileID();
+            if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
+                drawable.reset();
+                ++stats.tileDrawablesRemoved;
+                return;
+            }
+        });
 
-        // We actually need to build things, so set up a builder if we haven't already
-        if (!builder) {
-            builder = context.createDrawableBuilder("background");
-            builder->setRenderPass(drawPasses);
-            builder->setShader(shader);
-            builder->addTweaker(context.createDrawableTweaker());
-            builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
-            builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-            builder->setLayerIndex(layerIndex);
-        }
+        // For each tile in the cover set, add a tile drawable if one doesn't already exist.
+        // We currently assume only one drawable per tile.
+        for (const auto& tileID : tileCover) {
+            auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
 
-        // Tile coordinates are fixed...
-        builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
+            if (!(renderPass & drawPasses)) {
+                // Not in this pass
+                if (tileDrawable) {
+                    tileLayerGroup->removeDrawable(renderPass, tileID);
+                    ++stats.tileDrawablesRemoved;
+                }
+                continue;
+            }
 
-        // ... they're placed with the matrix in the uniforms, which changes with the view
-        builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
-
-        builder->flush();
-
-        auto newDrawables = builder->clearDrawables();
-        if (!newDrawables.empty()) {
-            auto& drawable = newDrawables[0];
-            drawable->setTileID(tileID);
-            drawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
-            result.first->second = std::move(drawable);
-            changes.emplace_back(std::make_unique<AddDrawableRequest>(std::move(drawable)));
-            ++stats.tileDrawablesAdded;
-            // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
-            // std::to_string(stats.tileDrawablesAdded+1));
+            if (tileDrawable) {
+                // Already created, update it.
+                tileDrawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
+                continue;
+            }
+            
+            // We actually need to build things, so set up a builder if we haven't already
+            if (!builder) {
+                builder = context.createDrawableBuilder("background");
+                builder->setRenderPass(drawPasses);
+                builder->setShader(shader);
+                builder->addTweaker(context.createDrawableTweaker());
+                builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
+                builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                builder->setLayerIndex(layerIndex);
+            }
+            
+            // Tile coordinates are fixed...
+            builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
+            
+            // ... they're placed with the matrix in the uniforms, which changes with the view
+            builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
+            
+            builder->flush();
+            
+            auto newDrawables = builder->clearDrawables();
+            if (!newDrawables.empty()) {
+                auto& drawable = newDrawables[0];
+                drawable->setTileID(tileID);
+                drawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
+                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                ++stats.tileDrawablesAdded;
+                // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
+                // std::to_string(stats.tileDrawablesAdded+1));
+            }
         }
     }
 }

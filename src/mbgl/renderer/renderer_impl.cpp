@@ -128,40 +128,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
 
-        for (const auto& drawPtr : drawables) {
-            auto& drawable = *drawPtr;
-
-            auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
-            auto& shader = drawable.getShader();
-
-            // Generate a vertex array object for the drawable state, if necessary
-            if (shader && (!drawableGL.getVertexArray().isValid() || drawableGL.getVertexAttributes().isDirty())) {
-                const auto usage = gfx::BufferUsageType::StaticDraw;
-
-                // Build index buffer
-                const auto& indexData = drawable.getIndexData();
-                auto indexBuffer = gfx::IndexBuffer{
-                    indexData.size(),
-                    uploadPass->createIndexBufferResource(
-                        indexData.data(), indexData.size() * sizeof(indexData[0]), usage)};
-
-                // Apply drawable values to shader defaults
-                const auto& defaults = shader->getVertexAttributes();
-                const auto& overrides = drawable.getVertexAttributes();
-                const auto vertexCount = drawable.getVertexCount();
-                std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
-                auto bindings = uploadPass->buildAttributeBindings(
-                    vertexCount, defaults, overrides, usage, vertexBuffer);
-
-                auto& glContext = static_cast<gl::Context&>(context);
-                auto vertexArray = glContext.createVertexArray();
-                vertexArray.bind(glContext, indexBuffer, bindings);
-                glContext.bindVertexArray = gl::value::BindVertexArray::Default;
-
-                drawableGL.setVertexArray(std::move(vertexArray), std::move(vertexBuffer), std::move(indexBuffer));
-            }
-        }
-
         // Give the layers a chance to upload
         orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(context, *uploadPass); });
     }
@@ -210,55 +176,16 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
     }
 
-    // Draw Drawables
-    const auto drawDrawables = [&](const mbgl::RenderPass renderPass) {
-        // TODO: figure out how to make drawables participate in the depth system
-        // Maybe make it a function mapping draw priority to the depth range (always (0,1)?)
-        parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
-        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables"));
+    {
+        parameters.pass = RenderPass::Opaque;
+        parameters.currentLayer = 0;
+        parameters.opaquePassCutoff = 1;
+        
+        // draw layer groups, opaque pass
+        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
 
-        // TODO: Render tile masks
-        // for (auto& layer : renderLayers) {
-        //    parameters.renderTileClippingMasks(renderTiles);
-        //}
-
-        for (const auto& drawPtr : drawables) {
-            auto& drawable = *drawPtr;
-
-            if (!drawable.hasRenderPass(renderPass)) {
-                continue;
-            }
-            if (drawable.hasRenderPass(RenderPass::Opaque) && parameters.currentLayer >= parameters.opaquePassCutoff) {
-                continue;
-            }
-            if (!context.setupDraw(parameters, drawable)) {
-                continue;
-            }
-
-            mat4 matrix = drawable.getMatrix();
-            if (drawable.getTileID()) {
-                const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-                const auto tileMat = parameters.matrixForTile(tileID);
-                matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-                matrix = tileMat;
-            }
-
-            gfx::DrawableUBO drawableUBO;
-            drawableUBO.matrix = util::cast<float>(matrix);
-            auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-            drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
-
-            drawable.draw(parameters);
-        }
-    };
-
-    // draw layer groups, opaque pass
-    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
-
-    parameters.pass = RenderPass::Opaque;
-    parameters.currentLayer = 0;
-    parameters.opaquePassCutoff = 1;
-    drawDrawables(parameters.pass);
+        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
+    }
 
     // Actually render the layers
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -283,15 +210,18 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    parameters.pass = RenderPass::Translucent;
-    parameters.currentLayer = 1;
-    parameters.opaquePassCutoff = 1;
-    drawDrawables(parameters.pass);
-
-    // draw layer groups, translucent pass
-    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
-
-    parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
+    {
+        parameters.pass = RenderPass::Translucent;
+        parameters.currentLayer = 1;
+        parameters.opaquePassCutoff = 1;
+        
+        // draw layer groups, translucent pass
+        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
+        
+        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
+        
+        parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
+    }
 
     // - TRANSLUCENT PASS --------------------------------------------------------------------------
     // Make a second pass, rendering translucent objects. This time, we render bottom-to-top.
