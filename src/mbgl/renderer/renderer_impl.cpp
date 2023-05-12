@@ -180,7 +180,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.pass = RenderPass::Opaque;
         parameters.currentLayer = 0;
         parameters.opaquePassCutoff = 1;
-        
+
         // draw layer groups, opaque pass
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
 
@@ -214,12 +214,12 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.pass = RenderPass::Translucent;
         parameters.currentLayer = 1;
         parameters.opaquePassCutoff = 1;
-        
+
         // draw layer groups, translucent pass
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
-        
+
         orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
-        
+
         parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
     }
 

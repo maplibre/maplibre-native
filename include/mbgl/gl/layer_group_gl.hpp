@@ -11,14 +11,13 @@ namespace gl {
 class TileLayerGroupGL : public TileLayerGroup {
 public:
     TileLayerGroupGL(int32_t layerIndex, std::size_t initialCapacity);
-    ~TileLayerGroupGL() override { }
-    
+    ~TileLayerGroupGL() override {}
+
     void upload(gfx::Context&, gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;
-    
+
 protected:
 };
 
 } // namespace gl
 } // namespace mbgl
-

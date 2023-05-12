@@ -71,7 +71,7 @@ public:
     RemoveLayerGroupRequest(const RemoveLayerGroupRequest &) = default;
 
     void execute(RenderOrchestrator &) override;
-    
+
 protected:
     int32_t layerIndex;
 };
