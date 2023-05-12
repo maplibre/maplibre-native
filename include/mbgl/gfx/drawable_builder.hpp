@@ -42,6 +42,7 @@ public:
     /// Get all the completed drawables and release ownership
     std::vector<UniqueDrawable> clearDrawables() {
         std::vector<UniqueDrawable> v = std::move(drawables);
+        drawables = std::vector<UniqueDrawable>{};
         return v;
     }
 
