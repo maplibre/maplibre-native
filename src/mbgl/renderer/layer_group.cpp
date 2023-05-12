@@ -93,7 +93,7 @@ void TileLayerGroup::observeDrawables(std::function<void(const gfx::Drawable&)> 
 }
 
 void TileLayerGroup::observeDrawables(std::function<void(gfx::UniqueDrawable&)> f) {
-    for (auto i = impl->tileDrawables.begin(); i != impl->tileDrawables.end(); ) {
+    for (auto i = impl->tileDrawables.begin(); i != impl->tileDrawables.end();) {
         auto& drawable = i->second;
         if (drawable) {
             f(drawable);

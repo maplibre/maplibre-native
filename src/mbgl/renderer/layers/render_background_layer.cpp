@@ -216,7 +216,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         shader = context.getGenericShader(shaders, "BackgroundShader");
     }
 
-    const auto removeAll = [&](){
+    const auto removeAll = [&]() {
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
@@ -227,7 +227,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     const auto tileCover = util::tileCover(state, zoom);
 
     // renderTiles is always empty, we use tileCover instead
-    //if (!renderTiles || renderTiles->empty()) {
+    // if (!renderTiles || renderTiles->empty()) {
     if (tileCover.empty()) {
         removeAll();
         return;
@@ -309,7 +309,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
                 tileDrawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
                 continue;
             }
-            
+
             // We actually need to build things, so set up a builder if we haven't already
             if (!builder) {
                 builder = context.createDrawableBuilder("background");
@@ -320,15 +320,15 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                 builder->setLayerIndex(layerIndex);
             }
-            
+
             // Tile coordinates are fixed...
             builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
-            
+
             // ... they're placed with the matrix in the uniforms, which changes with the view
             builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
-            
+
             builder->flush();
-            
+
             auto newDrawables = builder->clearDrawables();
             if (!newDrawables.empty()) {
                 auto& drawable = newDrawables[0];
