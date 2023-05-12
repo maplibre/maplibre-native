@@ -31,18 +31,17 @@ public:
     virtual ~DrawableBuilder();
 
     /// Get the drawable we're currently working on, if any
-    DrawablePtr getCurrentDrawable(bool createIfNone);
+    const UniqueDrawable& getCurrentDrawable(bool createIfNone);
 
     /// Close the current drawable, using a new one for any further work
     void flush();
 
     /// Get all the completed drawables
-    const std::vector<DrawablePtr>& getDrawables() const { return drawables; }
+    const std::vector<UniqueDrawable>& getDrawables() const { return drawables; }
 
     /// Get all the completed drawables and release ownership
-    std::vector<DrawablePtr> clearDrawables() {
-        std::vector<DrawablePtr> v = std::move(drawables);
-        drawables = {};
+    std::vector<UniqueDrawable> clearDrawables() {
+        std::vector<UniqueDrawable> v = std::move(drawables);
         return v;
     }
 
@@ -114,7 +113,7 @@ public:
 
 protected:
     /// Create an instance of the appropriate drawable type
-    virtual DrawablePtr createDrawable() const = 0;
+    virtual UniqueDrawable createDrawable() const = 0;
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
@@ -128,8 +127,8 @@ protected:
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;
     mat4 matrix;
-    DrawablePtr currentDrawable;
-    std::vector<DrawablePtr> drawables;
+    UniqueDrawable currentDrawable;
+    std::vector<UniqueDrawable> drawables;
     std::vector<DrawableTweakerPtr> tweakers;
     ColorMode colorMode = ColorMode::PerVertex;
 

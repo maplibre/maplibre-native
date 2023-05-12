@@ -19,7 +19,7 @@ void DrawableBuilder::setColor(const Color& value) {
     impl->currentColor = value;
 }
 
-DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
+const UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
         currentDrawable = createDrawable();
     }
@@ -28,20 +28,19 @@ DrawablePtr DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 
 void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
-        auto draw = getCurrentDrawable(/*createIfNone=*/true);
-        currentDrawable->setRenderPass(renderPass);
-        currentDrawable->setDrawPriority(drawPriority);
-        currentDrawable->setLayerIndex(layerIndex);
-        currentDrawable->setDepthType(depthType);
-        currentDrawable->setShader(shader);
-        currentDrawable->setMatrix(matrix);
-        currentDrawable->setVertexAttributes(getVertexAttributes());
-        currentDrawable->addTweakers(tweakers.begin(), tweakers.end());
+        const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
+        draw->setRenderPass(renderPass);
+        draw->setDrawPriority(drawPriority);
+        draw->setLayerIndex(layerIndex);
+        draw->setDepthType(depthType);
+        draw->setShader(shader);
+        draw->setMatrix(matrix);
+        draw->setVertexAttributes(getVertexAttributes());
+        draw->addTweakers(tweakers.begin(), tweakers.end());
         init();
     }
     if (currentDrawable) {
-        drawables.push_back(currentDrawable);
-        currentDrawable.reset();
+        drawables.emplace_back(std::move(currentDrawable));
     }
 }
 

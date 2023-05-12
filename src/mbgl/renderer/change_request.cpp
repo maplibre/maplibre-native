@@ -17,7 +17,7 @@ void ResetColorRequest::execute(RenderOrchestrator &orchestrator) {
     }
 }
 
-AddLayerGroupRequest::AddLayerGroupRequest(UniqueLayerGroup &&layerGroup_, bool canReplace)
+AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupPtr layerGroup_, bool canReplace)
     : layerGroup(std::move(layerGroup_)),
       replace(canReplace) {}
 

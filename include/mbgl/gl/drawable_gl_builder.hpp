@@ -20,7 +20,7 @@ public:
     void setVertexAttributes(VertexAttributeArrayGL&& value) { vertexAttributes = std::move(value); }
 
 protected:
-    gfx::DrawablePtr createDrawable() const override;
+    gfx::UniqueDrawable createDrawable() const override;
 
     /// Setup the SDK-specific aspects after all the values are present
     void init() override;
