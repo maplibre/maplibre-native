@@ -17,6 +17,8 @@ namespace mbgl {
 
 class PaintParameters;
 class ProgramParameters;
+class TileLayerGroup;
+using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 
 namespace gfx {
 
@@ -113,6 +115,9 @@ public:
 
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
+    
+    /// Create a layer group implementation
+    virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) = 0;
 };
 
 } // namespace gfx

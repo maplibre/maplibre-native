@@ -3,20 +3,6 @@
 
 namespace mbgl {
 
-void AddDrawableRequest::execute(RenderOrchestrator &orchestrator) {
-    orchestrator.addDrawable(std::move(drawable));
-}
-
-void RemoveDrawableRequest::execute(RenderOrchestrator &orchestrator) {
-    orchestrator.removeDrawable(id);
-}
-
-void ResetColorRequest::execute(RenderOrchestrator &orchestrator) {
-    if (auto &drawable = orchestrator.getDrawable(id)) {
-        drawable->resetColor(newColor);
-    }
-}
-
 AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupPtr layerGroup_, bool canReplace)
     : layerGroup(std::move(layerGroup_)),
       replace(canReplace) {}
@@ -29,7 +15,7 @@ void AddLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
 }
 
 void RemoveLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
-    orchestrator.removeLayerGroup(id);
+    orchestrator.removeLayerGroup(layerIndex);
 }
 
 } // namespace mbgl
