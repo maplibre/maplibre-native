@@ -263,14 +263,10 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
-    decltype(tileDrawables) localDrawables;
-    {
-        std::unique_lock<std::mutex> guard(mutex);
-        localDrawables = std::move(tileDrawables);
+    if (tileLayerGroup) {
+        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
+        tileLayerGroup.reset();
     }
-
-    removeDrawables<decltype(localDrawables)::const_iterator>(
-        localDrawables.cbegin(), localDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
 }
 
 void RenderFillLayer::update(const int32_t layerIndex,
@@ -284,76 +280,21 @@ void RenderFillLayer::update(const int32_t layerIndex,
         shader = context.getGenericShader(shaders, "FillDrawable");
     }
 
-    // const auto& evaluated = getEvaluated<FillLayerProperties>(evaluatedProperties);
-    //    std::optional<Color> color;
-    //    if (evaluated.get<FillPattern>().from.empty()) {
-    //        const auto opacity = evaluated.get<style::FillOpacity>();
-    //        if (opacity > 0.0f) {
-    //            color = evaluated.get<FillColor>() * evaluated.get<FillOpacity>();
-    //        }
-    //    }
-    //
-    //    // If the result is transparent or missing, just remove any existing drawables and stop
-    //    if (!color) {
-    //        removeDrawables<decltype(tileDrawables)::const_iterator>(
-    //            tileDrawables.cbegin(), tileDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
-    //        tileDrawables.clear();
-    //        return;
-    //    }
-    //
-    //    const bool colorChange = (color != lastColor);
-    //    const bool layerChange = (layerIndex != lastLayerIndex);
-    //    lastColor = color;
-    //    lastLayerIndex = layerIndex;
-    //
-    //    const auto zoom = state.getIntegerZoom();
-    //    const auto tileCover = util::tileCover(state, zoom);
-    //
-    //    // Drawables per overscaled or canonical tile?
-    //    // const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
-    //
-    //    // Put the tile cover into a searchable form.
-    //    // TODO: Likely better to sort and `std::binary_search` the vector.
-    //    // If it's returned in a well-defined order, we might not even need to sort.
-    //    const std::unordered_set<OverscaledTileID> newTileIDs(tileCover.begin(), tileCover.end());
-    //
-    //    // For each existing tile drawable...
-    //    for (auto iter = tileDrawables.begin(); iter != tileDrawables.end();) {
-    //        const auto& drawable = iter->second;
-    //
-    //        // Has this tile dropped out of the cover set?
-    //        if (newTileIDs.find(iter->first) == newTileIDs.end()) {
-    //            // remove it
-    //            changes.emplace_back(std::make_unique<RemoveDrawableRequest>(drawable->getId()));
-    //            // Log::Warning(Event::General, "Removing drawable for " + util::toString(iter->first) + " total " +
-    //            // std::to_string(stats.tileDrawablesRemoved+1));
-    //            iter = tileDrawables.erase(iter);
-    //            ++stats.tileDrawablesRemoved;
-    //            continue;
-    //        }
-    //        ++iter;
-    //
-    //        // If the color evaluated to a new value, update all vertexes of the drawable to the new color
-    //        if (colorChange) {
-    //            drawable->resetColor(*color);
-    //        }
-    //        if (layerChange) {
-    //            drawable->setLayerIndex(layerIndex);
-    //        }
-    //    }
-
-    if (!tileLayerGroup) {
-        tileLayerGroup = std::make_shared<TileLayerGroup>(layerIndex, /*initialCapacity=*/64);
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
-    }
-
     if (!renderTiles || renderTiles->empty()) {
-        if (!tileDrawables.empty()) {
-            removeDrawables<decltype(tileDrawables)::const_iterator>(
-                tileDrawables.cbegin(), tileDrawables.cend(), changes, [](auto& ii) { return ii->second->getId(); });
-            tileDrawables.clear();
+        if (tileLayerGroup) {
+            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
+            tileLayerGroup->clearDrawables();
         }
         return;
+    }
+
+    // Set up a layer group
+    if (!tileLayerGroup) {
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        if (!tileLayerGroup) {
+            return;
+        }
+        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
@@ -362,33 +303,22 @@ void RenderFillLayer::update(const int32_t layerIndex,
                    std::inserter(newTileIDs, newTileIDs.begin()),
                    [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
 
-    // For each existing tile drawable...
-    for (auto iter = tileDrawables.begin(); iter != tileDrawables.end();) {
-        const auto& drawable = iter->second;
-
-        // Has this tile dropped out of the cover set?
-        if (newTileIDs.find(iter->first) == newTileIDs.end()) {
-            // remove it
-            if (drawable) {
-                changes.emplace_back(std::make_unique<RemoveDrawableRequest>(drawable->getId()));
-            }
-            // Log::Warning(Event::General, "Removing drawable for " + util::toString(iter->first) + " total " +
-            // std::to_string(stats.tileDrawablesRemoved+1));
-            iter = tileDrawables.erase(iter);
-            ++stats.tileDrawablesRemoved;
-            continue;
-        }
-        ++iter;
-
-        // update...
-    }
-
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::vector<gfx::DrawablePtr> newTiles;
 
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
+        tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+            // Has this tile dropped out of the cover set?
+            const auto tileID = drawable->getTileID();
+            if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
+                // remove it
+                drawable.reset();
+                ++stats.tileDrawablesRemoved;
+            }
+        });
+
         if (unevaluated.get<FillPattern>().isUndefined()) {
-            //        parameters.renderTileClippingMasks(renderTiles);
+            // parameters.renderTileClippingMasks(renderTiles);
             for (const RenderTile& tile : *renderTiles) {
                 const auto& tileID = tile.getOverscaledTileID();
 
@@ -396,7 +326,6 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
                 const auto removeTile = [&]() {
                     if (tileDrawable) {
-                        changes.emplace_back(std::make_unique<RemoveDrawableRequest>(tileDrawable->getId()));
                         tileLayerGroup->removeDrawable(renderPass, tileID);
                         ++stats.tileDrawablesRemoved;
                     }
@@ -496,7 +425,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     drawable->setTileID(tileID);
 
                     // Track it.
-                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    //tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.tileDrawablesAdded;
                     // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
                     // std::to_string(stats.tileDrawablesAdded+1));

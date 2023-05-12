@@ -22,10 +22,12 @@ class PaintParameters;
 class PatternAtlas;
 class RenderTile;
 class SymbolBucket;
+class TileLayerGroup;
 class TransformState;
 class TransitionParameters;
 class UploadParameters;
 
+using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
 
@@ -154,17 +156,6 @@ protected:
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
-    // Add a deletion change request for each drawable in a collection
-    template <typename T>
-    static void removeDrawables(T beg,
-                                const T end,
-                                UniqueChangeRequestVec& changes,
-                                std::function<util::SimpleIdentity(const T&)> f) {
-        for (; beg != end; ++beg) {
-            changes.emplace_back(std::make_unique<RemoveDrawableRequest>(f(beg)));
-        }
-    }
-
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
@@ -175,12 +166,10 @@ protected:
 
     LayerPlacementData placementData;
 
-    gfx::DrawablePtr drawables;
+    TileLayerGroupPtr tileLayerGroup;
 
     std::mutex mutex;
     gfx::ShaderProgramBasePtr shader;
-    std::unordered_map<OverscaledTileID, gfx::DrawablePtr> tileDrawables;
-    int32_t lastLayerIndex = -1;
     bool evaluatedPropertiesChange = false;
     gfx::UniformBufferPtr uniformBuffer = nullptr;
 

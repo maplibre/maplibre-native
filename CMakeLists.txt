@@ -914,6 +914,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
@@ -981,6 +982,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/framebuffer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/index_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/index_buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/object.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/object.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.cpp
