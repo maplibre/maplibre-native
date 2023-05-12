@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-11T18:11:44.911Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -9,6 +9,7 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::SymbolTextAndIconProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "SymbolTextAndIconProgram";
     static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 
 layout (location = 0) in vec4 a_pos_offset;

@@ -1,10 +1,12 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-11T18:11:44.911Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
 #ifdef MBGL_RENDER_BACKEND_OPENGL
+#include <mbgl/shaders/gl/drawable_background.hpp>
+#include <mbgl/shaders/gl/drawable_fill.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
 #include <mbgl/shaders/gl/background_pattern.hpp>
@@ -32,6 +34,4 @@
 #include <mbgl/shaders/gl/symbol_sdf_text.hpp>
 #include <mbgl/shaders/gl/symbol_sdf_icon.hpp>
 #include <mbgl/shaders/gl/symbol_text_and_icon.hpp>
-
-#include <mbgl/shaders/gl/background_ubo.hpp>
 #endif

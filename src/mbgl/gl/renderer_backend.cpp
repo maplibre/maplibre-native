@@ -66,36 +66,35 @@ void RendererBackend::setScissorTest(bool enabled) {
 
 RendererBackend::~RendererBackend() = default;
 
-void RendererBackend::initShaders(gfx::ShaderRegistry& shaders) {
-    constexpr auto shaderName = "BackgroundProgramUBO";
+/// @brief Register a list of types with a shader registry instance
+/// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
+/// @param registry A shader registry instance
+/// @param glContext The GL context instance
+/// @param programParameters ProgramParameters used to initialize each instance
+template <shaders::BuiltIn... ShaderID>
+void registerTypes(gfx::ShaderRegistry& registry, gl::Context& glContext, const ProgramParameters& programParameters) {
+    /// The following fold expression will create a shader for every type
+    /// in the parameter pack and register it with the shader registry.
 
-    gl::Context& glContext = static_cast<gl::Context&>(*context);
-
-    auto shader = shaders.get<gl::ShaderProgramGL>(shaderName);
-    if (!shader) {
-        auto vert = shaders::ShaderSource<shaders::BuiltIn::BackgroundProgramUBO, gfx::Backend::Type::OpenGL>::vertex;
-        auto frag = shaders::ShaderSource<shaders::BuiltIn::BackgroundProgramUBO, gfx::Backend::Type::OpenGL>::fragment;
-        try {
-            // Compile
-            shader = gl::ShaderProgramGL::create(glContext, shaderName, vert, frag);
-            if (shader) {
-                // Set default values
-                // shader->setAttribute("a_color", gfx::VertexAttribute::matf4{ 1.0f, 1.0f, 1.0f, 1.0f });
-
-                // Add to the registry
-                if (!shaders.registerShader(shader, shaderName)) {
-                    Log::Warning(Event::General, "Shader conflict - " + std::string(shaderName));
-                    return;
-                }
-            } else {
-                Log::Warning(Event::General, "Shader create failed - " + std::string(shaderName));
-                return;
+    /// Registration calls are wrapped in a lambda that throws on registration
+    /// failure, we shouldn't expect registration to faill unless the shader
+    /// registry instance provided already has conflicting programs present.
+    (
+        [&](const std::string& name, const std::string& vert, const std::string& frag) {
+            using Ty = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>;
+            if (!registry.registerShader(gl::ShaderProgramGL::create(glContext, programParameters, name, vert, frag),
+                                         name)) {
+                throw std::runtime_error("Failed to register " + std::string(Ty::name) + " with shader registry!");
             }
-        } catch (const std::runtime_error& ex) {
-            Log::Warning(Event::General, "Shader create exception - " + std::string(ex.what()));
-            return;
-        }
-    }
+        }(shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name,
+          shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex,
+          shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::fragment),
+        ...);
+}
+
+void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
+    registerTypes<shaders::BuiltIn::BackgroundShader, shaders::BuiltIn::FillShader>(
+        shaders, static_cast<gl::Context&>(*context), programParameters);
 }
 
 } // namespace gl
