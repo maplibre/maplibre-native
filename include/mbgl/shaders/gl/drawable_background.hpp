@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-11T18:11:44.911Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-12T17:51:34.322Z by mwilsnd using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -21,11 +21,11 @@ void main() {
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform BackgroundLayerUBO {
     vec4 u_color;
-    float u_opacity;
+    vec4 u_opacity_pad3;
 };
 
 void main() {
-    fragColor = u_color * u_opacity;
+    fragColor = u_color * u_opacity_pad3.x;
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
 #endif
