@@ -34,7 +34,6 @@ cc_library(
         "//vendor:csscolorparser",
         "//vendor:earcut.hpp",
         "//vendor:eternal",
-        "//vendor:icu",
         "//vendor:mapbox-base",
         "//vendor:parsedate",
         "//vendor:polylabel",
@@ -42,7 +41,12 @@ cc_library(
         "//vendor:unique_resource",
         "//vendor:vector-tile",
         "//vendor:wagyu",
-    ],
+    ] + select({
+        "@platforms//os:ios": [
+            "//vendor:icu",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 genrule(
