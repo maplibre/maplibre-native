@@ -5,3 +5,7 @@ repos:
   - id: clang-format
     files: '.*\.(hpp|cpp|h)'
     exclude: '(vendor/.*|platform/(ios|darwin)/.*|test/ios/.*|render-test/ios/.*|benchmark/ios/.*)'
+- repo: https://github.com/keith/pre-commit-buildifier
+  rev: 6.1.0
+  hooks:
+    - id: buildifier

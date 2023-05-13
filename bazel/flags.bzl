@@ -27,7 +27,7 @@ CPP_FLAGS = WARNING_FLAGS + [
     "-fexceptions",
     "-fno-rtti",
     "-ftemplate-depth=1024",
-    "-std=c++17"
+    "-std=c++17",
 ]
 """
 Compilation flags related to the Maplibre codebase. Relevant for all .cpp .mm and .m code
