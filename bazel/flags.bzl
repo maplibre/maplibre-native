@@ -8,8 +8,6 @@ WARNING_FLAGS = [
     "-Wall",
     "-Werror",
     "-Wextra",
-    "-Wno-gnu-anonymous-struct",
-    "-Wno-tautological-constant-compare",
     "-Wno-unused-parameter",
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
@@ -19,6 +17,8 @@ WARNING_FLAGS = [
         "-Wno-nested-anon-types",
         "-Wno-c++11-narrowing",
         "-Wno-pointer-to-int-cast",
+        "-Wno-tautological-constant-compare",
+        "-Wno-gnu-anonymous-struct",
     ],
     "//conditions:default": [],
 })
