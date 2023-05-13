@@ -9,3 +9,6 @@ repos:
   rev: 6.1.0
   hooks:
     - id: buildifier
+ci:
+  # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
+  skip: [buildifier]
