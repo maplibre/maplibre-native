@@ -59,6 +59,7 @@ jobs:
       - name: 'Leave comment on PR with test results'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
+          header: render-test-result
           number: ${{ env.pr_number }}
           hide_and_recreate: true
           hide_classify: "OUTDATED"
