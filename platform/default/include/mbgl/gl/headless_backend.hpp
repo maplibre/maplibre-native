@@ -24,6 +24,7 @@ public:
     class Impl {
     public:
         virtual ~Impl() = default;
+        virtual bool glNeedsActiveContextOnDestruction() const { return false; }
         virtual gl::ProcAddress getExtensionFunctionPointer(const char*) = 0;
         virtual void activateContext() = 0;
         virtual void deactivateContext() {}

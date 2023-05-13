@@ -47,7 +47,11 @@ int main(int argc, char** argv) try {
         }
 
         if (!testRun) {
-            stats.errored.emplace_back(id);
+            if (shouldIgnore) {
+                stats.ignoreFailed.emplace_back(TestRunOutput{id});
+            } else {
+                stats.errored.emplace_back(id);
+            }
             printf(ANSI_COLOR_RED "* ERROR can't parse '%s' test" ANSI_COLOR_RESET "\n", id.c_str());
             continue;
         }

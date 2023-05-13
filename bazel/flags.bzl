@@ -25,11 +25,10 @@ Compilation flags used for all .cpp and .mm targets.
 
 CPP_FLAGS = WARNING_FLAGS + [
     "-fexceptions",
-    "-frtti",
+    "-fno-rtti",
     "-ftemplate-depth=1024",
     "-std=c++17",
 ]
-
 """
 Compilation flags related to the Maplibre codebase. Relevant for all .cpp .mm and .m code
  - src/*

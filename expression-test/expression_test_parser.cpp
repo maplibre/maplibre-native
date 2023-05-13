@@ -402,37 +402,42 @@ Ignores parseExpressionIgnores() {
 }
 
 std::optional<TestData> parseTestData(const filesystem::path& path) {
-    TestData data;
-    auto maybeJson = readJson(path.string());
-    if (!maybeJson.is<JSDocument>()) { // NOLINT
-        mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
+    try {
+        TestData data;
+        auto maybeJson = readJson(path.string());
+        if (!maybeJson.is<JSDocument>()) { // NOLINT
+            mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
+            return std::nullopt;
+        }
+
+        data.document = std::move(maybeJson.get<JSDocument>());
+
+        // Check that mandatory test data members are present.
+        if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {
+            Log::Error(Event::General, "Test fixture '" + path.string() + "' does not contain required data.");
+            return std::nullopt;
+        }
+
+        // Parse propertySpec
+        if (data.document.HasMember("propertySpec")) {
+            assert(data.document["propertySpec"].IsObject());
+            parsePropertySpec(data.document["propertySpec"], data);
+        }
+
+        // Parse expected
+        parseExpected(data.document["expected"], data);
+
+        // Parse inputs
+        if (data.document.HasMember("inputs") && !parseInputs(data.document["inputs"], data)) {
+            Log::Error(Event::General, std::string("Can't convert inputs value for '") + path.string() + "'");
+            return std::nullopt;
+        }
+
+        return {std::move(data)};
+    } catch (const std::exception& ex) {
+        Log::Error(Event::General, std::string("Cannot load test data from '" + path.string() + "': " + ex.what()));
         return std::nullopt;
     }
-
-    data.document = std::move(maybeJson.get<JSDocument>());
-
-    // Check that mandatory test data members are present.
-    if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {
-        Log::Error(Event::General, "Test fixture '" + path.string() + "' does not contain required data.");
-        return std::nullopt;
-    }
-
-    // Parse propertySpec
-    if (data.document.HasMember("propertySpec")) {
-        assert(data.document["propertySpec"].IsObject());
-        parsePropertySpec(data.document["propertySpec"], data);
-    }
-
-    // Parse expected
-    parseExpected(data.document["expected"], data);
-
-    // Parse inputs
-    if (data.document.HasMember("inputs") && !parseInputs(data.document["inputs"], data)) {
-        Log::Error(Event::General, std::string("Can't convert inputs value for '") + path.string() + "'");
-        return std::nullopt;
-    }
-
-    return {std::move(data)};
 }
 
 std::string toJSON(const Value& value, unsigned indent, bool singleLine) {
