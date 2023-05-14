@@ -6,6 +6,9 @@ cc_library(
         "include/mbgl/test/util.hpp",
     ],
     strip_include_prefix = "include",
+    deps = [
+        "//vendor/googletest:gtest",
+    ],
 )
 
 cc_library(
