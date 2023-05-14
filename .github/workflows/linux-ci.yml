@@ -168,13 +168,13 @@ jobs:
             libpng-dev \
             libglfw3-dev
     
-    - name: Generate coverage report
-      run: | 
-        bazelisk coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core
-        echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
+      - name: Generate coverage report
+        run: | 
+          bazelisk coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core
+          echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
 
-    - name: Upload coverage report
-      uses: codecov/codecov-action@v3
-      with:
-        files: ${{ env.coverage_report }}
-        verbose: true
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ${{ env.coverage_report }}
+          verbose: true
