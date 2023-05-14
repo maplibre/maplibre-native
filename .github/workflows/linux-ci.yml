@@ -190,4 +190,5 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           files: ${{ env.coverage_report }}
+          fail_ci_if_error: true
           verbose: true
