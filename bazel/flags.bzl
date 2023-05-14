@@ -20,7 +20,7 @@ WARNING_FLAGS = [
         "-Wno-tautological-constant-compare",
         "-Wno-gnu-anonymous-struct",
     ],
-    "//conditions:default": [],
+    "@platforms//os:linux": [],
 })
 
 """

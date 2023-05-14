@@ -42,10 +42,10 @@ cc_library(
         "//vendor:vector-tile",
         "//vendor:wagyu",
     ] + select({
-        "@platforms//os:ios": [
+        "//:ios": [
             "//vendor:icu",
         ],
-        "//conditions:default": [],
+        "//:linux": [],
     }),
 )
 
@@ -57,6 +57,20 @@ genrule(
     """,
     local = True,
     visibility = ["//visibility:public"],
+)
+
+platform(
+    name = "ios",
+    constraint_values = [
+        "@platforms//os:ios",
+    ],
+)
+
+platform(
+    name = "linux",
+    constraint_values = [
+        "@platforms//os:linux",
+    ],
 )
 
 exports_files(
