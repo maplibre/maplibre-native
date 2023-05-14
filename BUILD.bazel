@@ -1,5 +1,4 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
-load("//bazel:hello.bzl", "CMD")
 
 # This is defined by both
 # platform/default/filesource-files.json
@@ -72,12 +71,6 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
     ],
-)
-
-genrule(
-    name = "myrule",
-    outs = ["out"],
-    cmd = CMD,
 )
 
 exports_files(
