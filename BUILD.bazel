@@ -1,4 +1,5 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+load("//bazel:hello.bzl", "CMD")
 
 # This is defined by both
 # platform/default/filesource-files.json
@@ -42,10 +43,10 @@ cc_library(
         "//vendor:vector-tile",
         "//vendor:wagyu",
     ] + select({
-        "//:ios": [
+        "@platforms//os:ios": [
             "//vendor:icu",
         ],
-        "//:linux": [],
+        "@platforms//os:linux": [],
     }),
 )
 
@@ -71,6 +72,12 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
     ],
+)
+
+genrule(
+    name = "myrule",
+    outs = ["out"],
+    cmd = CMD,
 )
 
 exports_files(

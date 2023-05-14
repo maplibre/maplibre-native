@@ -42,7 +42,7 @@ cc_library(
         "src/mbgl/util/thread_local.cpp",
         "src/mbgl/util/utf.cpp",
     ] + select({
-        "//:linux": [
+        "@platforms//os:linux": [
             "src/mbgl/i18n/number_format.cpp",
             "src/mbgl/layermanager/layer_manager.cpp",
             "src/mbgl/storage/http_file_source.cpp",
@@ -57,7 +57,7 @@ cc_library(
             "src/mbgl/util/thread.cpp",
             "src/mbgl/util/timer.cpp",
         ],
-        "//:ios": [],
+        "@platforms//os:ios": [],
     }),
     hdrs = [
         "include/mbgl/gfx/headless_backend.hpp",
@@ -85,10 +85,10 @@ cc_library(
     deps = [
         "//:mbgl-core",
     ] + select({
-        "//:ios": [
+        "@platforms//os:ios": [
             "//platform/darwin:darwin-loop",
         ],
-        "//:linux": [
+        "@platforms//os:linux": [
             "default-collator",
         ],
     }),
