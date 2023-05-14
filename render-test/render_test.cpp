@@ -94,8 +94,8 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
         exit(2);
     }
 
-    mbgl::filesystem::path manifestPath = args::get(testPathValue);
-    if (!mbgl::filesystem::exists(manifestPath) || !manifestPath.has_filename()) {
+    std::filesystem::path manifestPath = args::get(testPathValue);
+    if (!std::filesystem::exists(manifestPath) || !manifestPath.has_filename()) {
         mbgl::Log::Error(mbgl::Event::General,
                          "Provided test manifest file path '" + manifestPath.string() + "' does not exist");
         exit(3);
@@ -245,7 +245,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         }
     }
 
-    const std::string manifestName = mbgl::filesystem::path(manifestPath).stem();
+    const std::string manifestName = std::filesystem::path(manifestPath).stem();
     const std::string resultPath = manifest.getResultPath() + "/" + manifestName + ".html";
     std::string resultsHTML = createResultPage(stats, metadatas, shuffle, seed);
     mbgl::util::write_file(resultPath, resultsHTML);
@@ -279,7 +279,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                100.0 * stats.erroredTests / count);
     }
 
-    printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).c_str());
+    printf("Results at: %s\n", std::filesystem::canonical(resultPath).c_str());
 
     return returnCode;
 }

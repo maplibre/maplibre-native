@@ -27,7 +27,6 @@ target_link_libraries(
     PRIVATE
         Mapbox::Base
         Mapbox::Base::Extras::args
-        Mapbox::Base::Extras::filesystem
         mbgl-core
         mbgl-compiler-options
 )

@@ -6,7 +6,6 @@ add_library(
     ${PROJECT_SOURCE_DIR}/render-test/allocation_index.hpp
     ${PROJECT_SOURCE_DIR}/render-test/file_source.cpp
     ${PROJECT_SOURCE_DIR}/render-test/file_source.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/filesystem.hpp
     ${PROJECT_SOURCE_DIR}/render-test/include/mbgl/render_test.hpp
     ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.cpp
     ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.hpp
@@ -52,7 +51,6 @@ target_link_libraries(
     mbgl-render-test
     PRIVATE
         Mapbox::Base::Extras::args
-        Mapbox::Base::Extras::filesystem
         Mapbox::Base::pixelmatch-cpp
         mbgl-compiler-options
         mbgl-vendor-boost

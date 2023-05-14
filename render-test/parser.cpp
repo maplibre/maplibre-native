@@ -2,7 +2,7 @@
 
 #include "allocation_index.hpp"
 #include "file_source.hpp"
-#include "filesystem.hpp"
+#include <filesystem>
 #include "metadata.hpp"
 #include "runner.hpp"
 
@@ -169,7 +169,7 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
     return buffer.GetString();
 }
 
-JSONReply readJson(const mbgl::filesystem::path& jsonPath) {
+JSONReply readJson(const std::filesystem::path& jsonPath) {
     auto maybeJSON = mbgl::util::readFile(jsonPath);
     if (!maybeJSON) {
         return {std::string("Unable to open file ") + jsonPath.string()};
@@ -295,9 +295,9 @@ std::string serializeMetrics(const TestMetrics& metrics) {
 }
 
 namespace {
-std::vector<std::string> readExpectedEntries(const std::regex& regex, const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedEntries(const std::regex& regex, const std::filesystem::path& base) {
     std::vector<std::string> expectedEntries;
-    for (const auto& entry : mbgl::filesystem::directory_iterator(base)) {
+    for (const auto& entry : std::filesystem::directory_iterator(base)) {
         if (entry.is_regular_file()) {
             const std::string path = entry.path().string();
             if (std::regex_match(path, regex)) {
@@ -309,22 +309,22 @@ std::vector<std::string> readExpectedEntries(const std::regex& regex, const mbgl
 }
 } // namespace
 
-std::vector<std::string> readExpectedImageEntries(const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedImageEntries(const std::filesystem::path& base) {
     static const std::regex regex(".*/expected.*.png");
     return readExpectedEntries(regex, base);
 }
 
-std::vector<std::string> readExpectedMetricEntries(const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedMetricEntries(const std::filesystem::path& base) {
     static const std::regex regex(".*/metrics.json");
     return readExpectedEntries(regex, base);
 }
 
-std::vector<std::string> readExpectedJSONEntries(const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedJSONEntries(const std::filesystem::path& base) {
     static const std::regex regex(".*/expected.*.json");
     return readExpectedEntries(regex, base);
 }
 
-TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
+TestMetrics readExpectedMetrics(const std::filesystem::path& path) {
     TestMetrics result;
 
     auto maybeJson = readJson(path.string());
@@ -940,7 +940,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(!path.empty());
 
             float tolerance = static_cast<float>(operationArray[3].GetDouble());
-            mbgl::filesystem::path filePath(path);
+            std::filesystem::path filePath(path);
 
             bool compressed = false;
             if (operationArray.Size() == 5) {
@@ -953,7 +953,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 filePath = metadata.paths.defaultExpectations() / filePath;
             }
             result.emplace_back([filePath, path, mark, tolerance, compressed](TestContext& ctx) {
-                if (!mbgl::filesystem::exists(filePath)) {
+                if (!std::filesystem::exists(filePath)) {
                     ctx.getMetadata().errorMessage = std::string("File not found: ") + path;
                     return false;
                 }
@@ -961,7 +961,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 if (compressed) {
                     size = mbgl::util::compress(*mbgl::util::readFile(filePath)).size();
                 } else {
-                    size = mbgl::filesystem::file_size(filePath);
+                    size = std::filesystem::file_size(filePath);
                 }
 
                 ctx.getMetadata().metrics.fileSize.emplace(std::piecewise_construct,

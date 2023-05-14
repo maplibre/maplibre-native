@@ -7,8 +7,8 @@
 
 int main(int argc, char** argv) try {
     // Parse args
-    std::vector<mbgl::filesystem::path> testPaths;
-    mbgl::filesystem::path rootPath;
+    std::vector<std::filesystem::path> testPaths;
+    std::filesystem::path rootPath;
     bool shuffle;
     uint32_t seed;
     std::tie(rootPath, testPaths, shuffle, seed) = parseArguments(argc, argv);

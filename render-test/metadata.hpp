@@ -7,7 +7,7 @@
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/size.hpp>
 
-#include "filesystem.hpp"
+#include <filesystem>
 
 #include <list>
 #include <map>
@@ -34,16 +34,16 @@ struct TestStatistics {
 
 struct TestPaths {
     TestPaths() = default;
-    TestPaths(mbgl::filesystem::path stylePath_,
-              std::vector<mbgl::filesystem::path> expectations_,
-              std::vector<mbgl::filesystem::path> expectedMetrics_)
+    TestPaths(std::filesystem::path stylePath_,
+              std::vector<std::filesystem::path> expectations_,
+              std::vector<std::filesystem::path> expectedMetrics_)
         : stylePath(std::move(stylePath_)),
           expectations(std::move(expectations_)),
           expectedMetrics(std::move(expectedMetrics_)) {}
 
-    mbgl::filesystem::path stylePath;
-    std::vector<mbgl::filesystem::path> expectations;
-    std::vector<mbgl::filesystem::path> expectedMetrics;
+    std::filesystem::path stylePath;
+    std::vector<std::filesystem::path> expectations;
+    std::vector<std::filesystem::path> expectedMetrics;
 
     std::string defaultExpectations() const {
         assert(!expectations.empty());

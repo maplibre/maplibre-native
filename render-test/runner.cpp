@@ -125,7 +125,7 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
                                        std::vector<mbgl::Feature>&& features,
                                        TestMetadata& metadata) {
     const std::string& base = metadata.paths.defaultExpectations();
-    const std::vector<mbgl::filesystem::path>& expectations = metadata.paths.expectations;
+    const std::vector<std::filesystem::path>& expectations = metadata.paths.expectations;
 
     metadata.actual = mbgl::encodePNG(actualImage);
 
@@ -144,7 +144,7 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
     }
 
     if (updateResults == UpdateResults::PLATFORM) {
-        mbgl::filesystem::create_directories(expectations.back());
+        std::filesystem::create_directories(expectations.back());
         mbgl::util::write_file(expectations.back().string() + "/expected.json", metadata.actualJson);
         metadata.renderErrored++;
         return;
@@ -157,9 +157,9 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
     mbgl::util::write_file(base + "/actual.json", metadata.actualJson);
 
     std::vector<std::string> expectedJsonPaths;
-    mbgl::filesystem::path expectedMetricsPath;
+    std::filesystem::path expectedMetricsPath;
     for (auto rit = expectations.rbegin(); rit != expectations.rend(); ++rit) {
-        if (mbgl::filesystem::exists(*rit)) {
+        if (std::filesystem::exists(*rit)) {
             expectedJsonPaths = readExpectedJSONEntries(*rit);
             if (!expectedJsonPaths.empty()) break;
         }
@@ -205,7 +205,7 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
 
 void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, TestMetadata& metadata) {
     const std::string& base = metadata.paths.defaultExpectations();
-    const std::vector<mbgl::filesystem::path>& expectations = metadata.paths.expectations;
+    const std::vector<std::filesystem::path>& expectations = metadata.paths.expectations;
 
     if (metadata.outputsImage) {
         metadata.actual = mbgl::encodePNG(actualImage);
@@ -217,7 +217,7 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
         }
 
         if (updateResults == UpdateResults::PLATFORM) {
-            mbgl::filesystem::create_directories(expectations.back());
+            std::filesystem::create_directories(expectations.back());
             mbgl::util::write_file(expectations.back().string() + "/expected.png", mbgl::encodePNG(actualImage));
             metadata.renderErrored++;
             return;
@@ -235,7 +235,7 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
         double pixels = 0.0;
         std::vector<std::string> expectedImagesPaths;
         for (auto rit = expectations.rbegin(); rit != expectations.rend(); ++rit) {
-            if (mbgl::filesystem::exists(*rit)) {
+            if (std::filesystem::exists(*rit)) {
                 expectedImagesPaths = readExpectedImageEntries(*rit);
                 if (!expectedImagesPaths.empty()) break;
             }
@@ -285,14 +285,14 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
 
 void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     if (resultMetadata.metrics.isEmpty()) return;
-    const auto writeMetrics = [&resultMetadata](const mbgl::filesystem::path& path,
+    const auto writeMetrics = [&resultMetadata](const std::filesystem::path& path,
                                                 const std::string& message = std::string()) {
-        mbgl::filesystem::create_directories(path);
+        std::filesystem::create_directories(path);
         mbgl::util::write_file(path / "metrics.json", serializeMetrics(resultMetadata.metrics));
         resultMetadata.errorMessage += message;
     };
 
-    const std::vector<mbgl::filesystem::path>& expectedMetrics = resultMetadata.paths.expectedMetrics;
+    const std::vector<std::filesystem::path>& expectedMetrics = resultMetadata.paths.expectedMetrics;
     if (updateResults == UpdateResults::METRICS) {
         writeMetrics(expectedMetrics.back(), " Updated expected metrics.");
         resultMetadata.metricsErrored++;
@@ -303,7 +303,7 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     // the test style will only be checked in the very end.
     std::vector<std::string> expectedMetricsPaths;
     for (auto rit = expectedMetrics.rbegin(); rit != expectedMetrics.rend(); ++rit) {
-        if (mbgl::filesystem::exists(*rit)) {
+        if (std::filesystem::exists(*rit)) {
             expectedMetricsPaths = readExpectedMetricEntries(*rit);
             if (!expectedMetricsPaths.empty()) break;
         }

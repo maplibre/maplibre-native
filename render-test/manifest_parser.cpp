@@ -1,5 +1,5 @@
 #include "manifest_parser.hpp"
-#include "filesystem.hpp"
+#include <filesystem>
 #include "parser.hpp"
 
 #include <mbgl/util/logging.hpp>
@@ -55,7 +55,7 @@ void Manifest::doShuffle(uint32_t seed) {
 }
 
 namespace {
-std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<mbgl::filesystem::path>& ignoresPaths) {
+std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<std::filesystem::path>& ignoresPaths) {
     std::vector<std::pair<std::string, std::string>> ignores;
     for (const auto& path : ignoresPaths) {
         auto maybeIgnores = readJson(path);
@@ -75,34 +75,34 @@ std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<
 // defaultExpectationPath: absolute path that constains the style.json file for testing
 // testId: Test case id that used for composing expectation path
 // expectatedPaths: absolute paths that constain possible expected.png/metrics.json files for result checking
-std::vector<mbgl::filesystem::path> getTestExpectations(const mbgl::filesystem::path& defaultExpectationPath,
+std::vector<std::filesystem::path> getTestExpectations(const std::filesystem::path& defaultExpectationPath,
                                                         const std::string& testId,
-                                                        std::vector<mbgl::filesystem::path> expectatedPaths) {
-    std::vector<mbgl::filesystem::path> expectations{defaultExpectationPath};
+                                                        std::vector<std::filesystem::path> expectatedPaths) {
+    std::vector<std::filesystem::path> expectations{defaultExpectationPath};
     for (const auto& expectedPath : expectatedPaths) {
         expectations.emplace_back(expectedPath / testId);
     }
     return expectations;
 }
 
-mbgl::filesystem::path getValidPath(const std::string& manifestPath, const std::string& path) {
-    const static mbgl::filesystem::path BasePath{manifestPath};
-    mbgl::filesystem::path result{path};
+std::filesystem::path getValidPath(const std::string& manifestPath, const std::string& path) {
+    const static std::filesystem::path BasePath{manifestPath};
+    std::filesystem::path result{path};
     if (result.is_relative()) {
         result = BasePath / result;
     }
-    if (mbgl::filesystem::exists(result)) {
+    if (std::filesystem::exists(result)) {
         return result.lexically_normal();
     }
     mbgl::Log::Warning(mbgl::Event::General, "Invalid path is provided inside the manifest file: " + path);
-    return mbgl::filesystem::path{};
+    return std::filesystem::path{};
 }
 
 } // namespace
 
 std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifestPath, std::string testFilter) {
     Manifest manifest;
-    const auto filePath = mbgl::filesystem::path(manifestPath);
+    const auto filePath = std::filesystem::path(manifestPath);
     manifest.manifestPath = manifestPath.substr(0, manifestPath.find(filePath.filename()));
 
     auto contents = readJson(filePath);
@@ -150,7 +150,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
             return std::nullopt;
         }
     }
-    mbgl::filesystem::path baseTestPath;
+    std::filesystem::path baseTestPath;
     if (document.HasMember("base_test_path")) {
         const auto& testPathValue = document["base_test_path"];
         if (!testPathValue.IsString()) {
@@ -165,7 +165,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
             return std::nullopt;
         }
     }
-    mbgl::filesystem::path expectedMetricPath;
+    std::filesystem::path expectedMetricPath;
     if (document.HasMember("metric_path")) {
         const auto& metricPathValue = document["metric_path"];
         if (!metricPathValue.IsString()) {
@@ -178,7 +178,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
             return std::nullopt;
         }
     }
-    std::vector<mbgl::filesystem::path> expectationPaths{};
+    std::vector<std::filesystem::path> expectationPaths{};
     if (document.HasMember("expectation_paths")) {
         const auto& expectationPathValue = document["expectation_paths"];
         if (!expectationPathValue.IsArray()) {
@@ -202,7 +202,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
             }
         }
     }
-    std::vector<mbgl::filesystem::path> ignorePaths{};
+    std::vector<std::filesystem::path> ignorePaths{};
     if (document.HasMember("ignore_paths")) {
         const auto& ignorePathValue = document["ignore_paths"];
         if (!ignorePathValue.IsArray()) {
@@ -274,19 +274,19 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     auto& path = manifest.testRootPath;
     auto& testPaths = manifest.testPaths;
 
-    for (auto& testPath : mbgl::filesystem::recursive_directory_iterator(path)) {
+    for (auto& testPath : std::filesystem::recursive_directory_iterator(path)) {
         // Skip paths that fail regexp search.
         if (!testFilter.empty() && !std::regex_search(testPath.path().string(), std::regex(testFilter))) {
             continue;
         }
 
         if (testPath.path().filename() == "style.json") {
-            const auto defaultExpectationPath{std::move(mbgl::filesystem::path(testPath).remove_filename())};
+            const auto defaultExpectationPath{std::move(std::filesystem::path(testPath).remove_filename())};
             const auto rootLength = manifest.testRootPath.length();
             auto testId = defaultExpectationPath.string();
             testId = testId.substr(rootLength + 1, testId.length() - rootLength - 1);
 
-            std::vector<mbgl::filesystem::path> expectedMetricPaths{expectedMetricPath};
+            std::vector<std::filesystem::path> expectedMetricPaths{expectedMetricPath};
 #if defined(__ANDROID__)
             expectedMetricPaths.emplace_back("/sdcard/baselines/");
 #elif defined(__APPLE__)

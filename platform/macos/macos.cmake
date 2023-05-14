@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893

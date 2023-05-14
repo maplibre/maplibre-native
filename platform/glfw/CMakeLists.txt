@@ -87,7 +87,6 @@ target_link_libraries(
     mbgl-glfw
     PRIVATE
         Mapbox::Base::Extras::args
-        Mapbox::Base::Extras::filesystem
         Mapbox::Base::Extras::rapidjson
         Mapbox::Map
         mbgl-compiler-options

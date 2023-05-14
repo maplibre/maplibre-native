@@ -1,6 +1,6 @@
 #pragma once
 
-#include "filesystem.hpp"
+#include <filesystem>
 
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/util/feature.hpp>
@@ -79,12 +79,12 @@ struct Ignore {
     std::string reason;
 };
 
-using Arguments = std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t>;
+using Arguments = std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint32_t>;
 Arguments parseArguments(int argc, char** argv);
 
 using Ignores = std::vector<Ignore>;
 Ignores parseExpressionIgnores();
-std::optional<TestData> parseTestData(const filesystem::path&);
+std::optional<TestData> parseTestData(const std::filesystem::path&);
 
 std::string toJSON(const Value& value, unsigned indent = 0, bool singleLine = false);
 JSDocument toDocument(const Value&);

@@ -3,7 +3,7 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
-#include <ghc/filesystem.hpp>
+#include <filesystem>
 
 #include <cmath>
 #include <fstream>
@@ -117,7 +117,7 @@ TestWriter& TestWriter::withInitialSize(const mbgl::Size& size) {
 }
 
 bool TestWriter::write(const std::string& dir) const {
-    namespace fs = ghc::filesystem;
+    namespace fs = std::filesystem;
 
     fs::path rootDir(dir);
     if (!fs::exists(rootDir)) {

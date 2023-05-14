@@ -14,15 +14,15 @@ class Manifest;
 using ErrorMessage = std::string;
 using JSONReply = mbgl::variant<mbgl::JSDocument, ErrorMessage>;
 
-JSONReply readJson(const mbgl::filesystem::path&);
+JSONReply readJson(const std::filesystem::path&);
 std::string serializeJsonValue(const mbgl::JSValue&);
 std::string serializeMetrics(const TestMetrics&);
 
-std::vector<std::string> readExpectedImageEntries(const mbgl::filesystem::path& base);
-std::vector<std::string> readExpectedMetricEntries(const mbgl::filesystem::path& base);
-std::vector<std::string> readExpectedJSONEntries(const mbgl::filesystem::path& base);
+std::vector<std::string> readExpectedImageEntries(const std::filesystem::path& base);
+std::vector<std::string> readExpectedMetricEntries(const std::filesystem::path& base);
+std::vector<std::string> readExpectedJSONEntries(const std::filesystem::path& base);
 
-TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path);
+TestMetrics readExpectedMetrics(const std::filesystem::path& path);
 
 TestMetadata parseTestMetadata(const TestPaths& paths);
 TestOperations parseTestOperations(TestMetadata& metadata);
