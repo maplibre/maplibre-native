@@ -158,6 +158,11 @@ jobs:
   coverage:
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
       - name: Install dependencies
         run: |
           sudo apt-get update
