@@ -114,11 +114,13 @@ jobs:
           ccache --max-size=2G
           ccache --show-stats
 
-      - name: Install iOS packaging dependencies
-        run: |
-          ./platform/ios/scripts/install-packaging-dependencies.sh
+      - name: Save PR number
+        if: github.event_name == 'pull_request'
+        working-directory: ./
         env:
-          CILAUNCH: true
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          echo $PR_NUMBER > ./pr_number
 
       - name: Check debug symbols
         run: make darwin-check-public-symbols
@@ -131,6 +133,24 @@ jobs:
 
       - name: Running ios UI tests
         run: make ios-uitest
+
+      # size test
+
+      - name: Build app for size test & output size 
+        working-directory: ./
+        run: | 
+          bazelisk build --compilation_mode=opt //platform/ios:size
+          cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size) ./size
+
+      - name: Upload size test result
+        uses: actions/upload-artifact@v3
+        with:
+          name: size-test-result
+          path: |
+            ./size
+            ./pr_number
+      
+      # ---
 
       - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
         run: make ios-sanitize

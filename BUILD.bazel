@@ -45,4 +45,17 @@ cc_library(
     ],
 )
 
-exports_files(["LICENSE.md"], visibility = ["//visibility:public"])
+genrule(
+    name = "git_hash",
+    outs = ["hash"],
+    cmd = """
+        git rev-parse HEAD > $@
+    """,
+    local = True,
+    visibility = ["//visibility:public"],
+)
+
+exports_files(
+    ["LICENSE.md"],
+    visibility = ["//visibility:public"],
+)
