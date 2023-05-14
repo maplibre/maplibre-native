@@ -154,3 +154,27 @@ jobs:
           path: |
             metrics/linux-gcc8-release-style.html
             ./pr_number
+
+  coverage:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libuv1-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libglfw3-dev
+    
+    - name: Generate coverage report
+      run: | 
+        bazelisk coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core
+        echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
+
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: ${{ env.coverage_report }}
+        verbose: true

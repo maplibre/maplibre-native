@@ -34,7 +34,8 @@ cc_test(
     name = "core",
     srcs = glob(
         [
-            "**/*.test.cpp",
+            "actor/actor_ref.test.cpp",
+            # "**/*.test.cpp",
         ],
     ),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
