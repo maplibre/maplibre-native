@@ -172,6 +172,14 @@ jobs:
             libjpeg-dev \
             libpng-dev \
             libglfw3-dev
+
+      - name: Cache Bazel
+        uses: actions/cache@v2
+        key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+        restore-keys: |
+          ${{ runner.os }}-bazel-
+        with:
+          path: ~/.cache/bazel
     
       - name: Generate coverage report
         run: | 
