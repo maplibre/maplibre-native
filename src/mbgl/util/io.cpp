@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 
 #ifdef __GNUC__
 #define MBGL_FOPEN_MODE_WBE "wbe"
@@ -39,6 +40,10 @@ std::string read_file(const std::string &filename) {
     } else {
         throw std::runtime_error(std::string("Cannot read file ") + filename);
     }
+}
+
+std::optional<std::string> readFile(const std::filesystem::path &filename) {
+    return readFile(filename.string());
 }
 
 std::optional<std::string> readFile(const std::string &filename) {
