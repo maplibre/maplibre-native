@@ -1597,6 +1597,7 @@ public class Expression {
    *
    * @param input the array or string expression
    * @param fromIndex the index to start slice from
+   * @param toIndex the index to end slice at
    * @return array or string
    * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#slice">Style specification</a>
    */
