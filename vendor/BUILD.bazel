@@ -15,7 +15,6 @@ cc_library(
             "mapbox-base/deps/supercluster.hpp/include/*.hpp",
             "mapbox-base/deps/variant/include/mapbox/*.hpp",
             "mapbox-base/extras/expected-lite/include/**/*.hpp",
-            "mapbox-base/extras/filesystem/include/ghc/*.hpp",
             "mapbox-base/extras/kdbush.hpp/include/*.hpp",
             "mapbox-base/extras/rapidjson/include/**/*.h",
             "mapbox-base/include/mapbox/**/*.hpp",
