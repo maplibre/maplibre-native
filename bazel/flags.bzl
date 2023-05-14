@@ -12,7 +12,7 @@ WARNING_FLAGS = [
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
 ] + select({
-    "@platforms//os:ios": [
+    "//:ios": [
         "-Wno-newline-eof",
         "-Wno-nested-anon-types",
         "-Wno-c++11-narrowing",
@@ -20,7 +20,7 @@ WARNING_FLAGS = [
         "-Wno-tautological-constant-compare",
         "-Wno-gnu-anonymous-struct",
     ],
-    "@platforms//os:linux": [],
+    "//:linux": [],
 })
 
 """
