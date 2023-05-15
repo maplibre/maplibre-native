@@ -85,8 +85,7 @@ public:
         }
         return items[i] = value;
     }
-    template <>
-    const ElementType& set(std::size_t i, const ElementType& value) {
+    const ElementType& setVariant(std::size_t i, const ElementType& value) {
         if (items.size() < i + 1) {
             items.resize(std::max(items.size(), i + 1));
         }
