@@ -12,6 +12,10 @@ std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
 VertexAttributeArray::VertexAttributeArray(int initCapacity)
     : attrs(initCapacity) {}
 
+VertexAttributeArray::VertexAttributeArray(const VertexAttributeArray& other) {
+    operator=(other);
+}
+
 VertexAttributeArray::VertexAttributeArray(VertexAttributeArray&& other)
     : attrs(std::move(other.attrs)) {}
 
