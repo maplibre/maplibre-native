@@ -2,6 +2,20 @@ name: linux-ci
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "test/**"
+      - "render-test/**"
+      - "expression-test/**"
+      - "include/**"
+      - ".github/workflows/linux-ci.yml"
+      - "vendor/**"
+      - "CMakeLists.txt"
+      - metrics/linux-gcc8-release-style.json
+
   pull_request:
     branches:
       - main
