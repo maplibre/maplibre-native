@@ -48,6 +48,7 @@ cc_test(
     ),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     data = glob(["fixtures/**/*"]),
+    local = True,
     deps = [
         "testlib",
         "testutils",
