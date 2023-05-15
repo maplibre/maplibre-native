@@ -69,6 +69,7 @@ public:
     void setColor(const Color& value);
 
     enum class ColorMode {
+        None,
         PerDrawable,
         PerVertex
     };
@@ -89,6 +90,10 @@ public:
     /// Set the name given to new drawables
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
+    /// The attribute names for automatic attributes (vertex/position and color, if color mode is not `None`)
+    void setVertexAttrName(std::string value) { vertexAttrName = std::move(value); }
+    void setColorAttrName(std::string value) { colorAttrName = std::move(value); }
+
     /// Set the matrix applied to new drawables
     void setMatrix(mat4 value) { matrix = value; }
 
@@ -100,8 +105,11 @@ public:
     /// Add a rectangle consisting of two triangles
     void addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
-    /// Add already-set-up triangles directly
+    /// A set of attribute values to be added for each vertex
+    void setVertexAttributes(const VertexAttributeArray&);
+    void setVertexAttributes(VertexAttributeArray&&);
 
+    /// Add already-set-up triangles directly
     void addTriangles(const std::vector<std::array<int16_t, 2>>& vertices,
                       std::size_t vertexOffset,
                       std::size_t vertexLength,
@@ -122,6 +130,8 @@ protected:
 protected:
     std::string name;
     std::string drawableName;
+    std::string vertexAttrName;
+    std::string colorAttrName;
     mbgl::RenderPass renderPass;
     DrawPriority drawPriority = 0;
     int32_t layerIndex = -1;
@@ -132,6 +142,7 @@ protected:
     std::vector<UniqueDrawable> drawables;
     std::vector<DrawableTweakerPtr> tweakers;
     ColorMode colorMode = ColorMode::PerVertex;
+    VertexAttributeArray vertexAttrs;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
