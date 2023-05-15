@@ -180,6 +180,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
+      
+      - name: Start server
+        run: |
+          npm install --ignore-scripts
+          node test/storage/server.js &
     
       - name: Generate coverage report
         run: | 
