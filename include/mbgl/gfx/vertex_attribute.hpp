@@ -193,11 +193,17 @@ public:
     /// Do something with each attribute
     void observeAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
-            if (kv.second) { f(kv.first, *kv.second); }});
+            if (kv.second) {
+                f(kv.first, *kv.second);
+            }
+        });
     }
     void observeAttributes(const std::function<void(const std::string&, const VertexAttribute&)>& f) const {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
-            if (kv.second) { f(kv.first, *kv.second); }});
+            if (kv.second) {
+                f(kv.first, *kv.second);
+            }
+        });
     }
 
     using ResolveDelegate =
@@ -227,7 +233,7 @@ protected:
                                                     AttributeDataType dataType,
                                                     int size,
                                                     std::size_t count) const {
-        return std::make_unique<VertexAttribute>(index, dataType, size, count, size*count);
+        return std::make_unique<VertexAttribute>(index, dataType, size, count, size * count);
     }
     virtual std::unique_ptr<VertexAttribute> copy(const gfx::VertexAttribute& attr) const {
         return std::make_unique<VertexAttribute>(attr);

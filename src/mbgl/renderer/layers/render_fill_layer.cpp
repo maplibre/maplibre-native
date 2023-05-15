@@ -343,7 +343,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
                 const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(1);
-                //const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
+                // const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
 
                 const auto fillRenderPass = (evalColor.a >= 1.0f && fillOpacity >= 1.0f
                                              /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
@@ -360,19 +360,19 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     attr->set(0, util::cast<float>(evalColor.toArray()));
                 }
                 if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
-                    attr->set<gfx::VertexAttribute::float2>(0, { fillOpacity, fillOpacity });
+                    attr->set<gfx::VertexAttribute::float2>(0, {fillOpacity, fillOpacity});
                 }
 
                 if (evaluatedPropertiesChange) {
-                    //FillLayerUBO fillLayerUBO;
-                    //fillLayerUBO.color = evaluated.get<FillColor>();
-                    //fillLayerUBO.opacity = evaluated.get<FillOpacity>();
-                    //uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
+                    // FillLayerUBO fillLayerUBO;
+                    // fillLayerUBO.color = evaluated.get<FillColor>();
+                    // fillLayerUBO.opacity = evaluated.get<FillOpacity>();
+                    // uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
                     evaluatedPropertiesChange = false;
                 }
 
                 if (tileDrawable) {
-                    //tileDrawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
+                    // tileDrawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
                     continue;
                 }
 
@@ -441,7 +441,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 if (!newDrawables.empty()) {
                     auto& drawable = newDrawables[0];
                     drawable->setTileID(tileID);
-                    //drawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
+                    // drawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
 
                     // Track it.
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
