@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-12T17:51:34.322Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-15T19:13:14.508Z by stefan using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-template <>
-struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::OpenGL> {
+template <> struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "LineSDFProgram";
     static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is

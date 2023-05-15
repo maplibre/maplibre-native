@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-12T17:51:34.322Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-15T18:53:10.259Z by stefan using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -8,6 +8,10 @@
 #include <mbgl/shaders/gl/drawable_background.hpp>
 #include <mbgl/shaders/gl/drawable_fill.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline.hpp>
+#include <mbgl/shaders/gl/drawable_line_gradient.hpp>
+#include <mbgl/shaders/gl/drawable_line_pattern.hpp>
+#include <mbgl/shaders/gl/drawable_line_sdf.hpp>
+#include <mbgl/shaders/gl/drawable_line.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
 #include <mbgl/shaders/gl/background_pattern.hpp>

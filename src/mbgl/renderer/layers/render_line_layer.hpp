@@ -20,6 +20,15 @@ public:
     explicit RenderLineLayer(Immutable<style::LineLayer::Impl>);
     ~RenderLineLayer() override;
 
+    void layerRemoved(UniqueChangeRequestVec&) override;
+
+    /// Generate any changes needed by the layer
+    void update(int32_t layerIndex,
+                gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                UniqueChangeRequestVec&) override;
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;

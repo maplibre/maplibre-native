@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-12T17:51:34.322Z by mwilsnd using shaders/generate_shader_code.js
+// Generated on 2023-05-15T19:13:14.508Z by stefan using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-template <>
-struct ShaderSource<BuiltIn::FillExtrusionProgram, gfx::Backend::Type::OpenGL> {
+template <> struct ShaderSource<BuiltIn::FillExtrusionProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillExtrusionProgram";
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec3 u_lightcolor;
