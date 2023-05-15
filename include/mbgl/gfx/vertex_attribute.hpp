@@ -137,7 +137,7 @@ public:
     VertexAttributeArray(int initCapacity = 10);
     VertexAttributeArray(VertexAttributeArray&&);
     // Would need to use the virtual assignment operator
-    VertexAttributeArray(const VertexAttributeArray&);
+    VertexAttributeArray(const VertexAttributeArray&) = delete;
     virtual ~VertexAttributeArray() = default;
 
     /// Number of elements
@@ -214,7 +214,9 @@ public:
     VertexAttributeArray& operator=(const VertexAttributeArray&);
 
     virtual std::unique_ptr<VertexAttributeArray> clone() const {
-        return std::make_unique<VertexAttributeArray>(*this);
+        auto newAttrs = std::make_unique<VertexAttributeArray>();
+        newAttrs->copy(*this);
+        return newAttrs;
     }
 
 protected:
@@ -234,6 +236,15 @@ protected:
                                                     std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, size, count, size * count);
     }
+    
+    virtual void copy(const VertexAttributeArray& other) {
+        for (const auto& kv : other.attrs) {
+            if (kv.second) {
+                attrs.insert(std::make_pair(kv.first, copy(*kv.second)));
+            }
+        }
+    }
+
     virtual std::unique_ptr<VertexAttribute> copy(const gfx::VertexAttribute& attr) const {
         return std::make_unique<VertexAttribute>(attr);
     }
