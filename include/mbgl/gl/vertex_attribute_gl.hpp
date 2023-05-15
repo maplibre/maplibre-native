@@ -51,8 +51,6 @@ public:
         : VertexAttributeArray(initCapacity) {}
     VertexAttributeArrayGL(VertexAttributeArrayGL&& other)
         : VertexAttributeArray(std::move(other)) {}
-    VertexAttributeArrayGL(const VertexAttributeArrayGL& other)
-        : VertexAttributeArray(other) {}
 
     VertexAttributeArrayGL& operator=(VertexAttributeArrayGL&& other) {
         VertexAttributeArray::operator=(std::move(other));
@@ -64,7 +62,9 @@ public:
     }
 
     std::unique_ptr<VertexAttributeArray> clone() const override {
-        return std::make_unique<VertexAttributeArrayGL>(*this);
+        auto newAttrs = std::make_unique<VertexAttributeArrayGL>();
+        newAttrs->copy(*this);
+        return newAttrs;
     }
 
 private:
@@ -74,6 +74,7 @@ private:
                                                  std::size_t count) const override {
         return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(index, dataType, size, count));
     }
+    using gfx::VertexAttributeArray::copy;
     std::unique_ptr<gfx::VertexAttribute> copy(const gfx::VertexAttribute& attr) const override {
         return std::unique_ptr<gfx::VertexAttribute>(
             new VertexAttributeGL(static_cast<const VertexAttributeGL&>(attr)));
