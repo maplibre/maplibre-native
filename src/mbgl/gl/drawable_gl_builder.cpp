@@ -28,7 +28,7 @@ void DrawableGLBuilder::init() {
             if (impl->colors.size() > 1 && impl->colors.size() != impl->vertices.elements()) {
                 impl->colors.clear();
             }
-            
+
             if (impl->colors.empty()) {
                 colorAttr->set(0, DrawableGL::colorAttrValue(getColor()));
             } else {

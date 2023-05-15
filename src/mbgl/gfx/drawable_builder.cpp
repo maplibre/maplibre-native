@@ -38,9 +38,8 @@ void DrawableBuilder::flush() {
         draw->setShader(shader);
         draw->setMatrix(matrix);
         draw->addTweakers(tweakers.begin(), tweakers.end());
-        
-        if (auto drawAttrs = getVertexAttributes().clone()) {
 
+        if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
                 if (auto& drawAttr = drawAttrs->getOrAdd(iName)) {
                     for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
