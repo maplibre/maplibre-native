@@ -17,6 +17,7 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
@@ -305,6 +306,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::vector<gfx::DrawablePtr> newTiles;
+    gfx::VertexAttributeArray vertexAttrs;
 
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
         tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
@@ -340,8 +342,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
                 const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
-                const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
-                const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
+                const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(1);
+                //const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
 
                 const auto fillRenderPass = (evalColor.a >= 1.0f && fillOpacity >= 1.0f
                                              /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
@@ -353,8 +355,24 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     continue;
                 }
 
+                vertexAttrs.clear();
+                if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
+                    attr->set(0, util::cast<float>(evalColor.toArray()));
+                }
+                if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
+                    attr->set<gfx::VertexAttribute::float2>(0, { fillOpacity, fillOpacity });
+                }
+
+                if (evaluatedPropertiesChange) {
+                    //FillLayerUBO fillLayerUBO;
+                    //fillLayerUBO.color = evaluated.get<FillColor>();
+                    //fillLayerUBO.opacity = evaluated.get<FillOpacity>();
+                    //uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
+                    evaluatedPropertiesChange = false;
+                }
+
                 if (tileDrawable) {
-                    // needed and already present, update?
+                    //tileDrawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
                     continue;
                 }
 
@@ -362,7 +380,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     builder = context.createDrawableBuilder("fill");
                     builder->setShader(shader);
                     builder->addTweaker(context.createDrawableTweaker());
-                    builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerVertex);
+                    builder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     builder->setLayerIndex(layerIndex);
                 }
@@ -370,8 +388,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
                 // parameters.state)
 
-                builder->setColor(fillColor);
                 builder->setRenderPass(renderPass);
+                builder->setVertexAttributes(vertexAttrs);
 
                 const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
                     verts = bucket.vertices.vector();
@@ -423,9 +441,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 if (!newDrawables.empty()) {
                     auto& drawable = newDrawables[0];
                     drawable->setTileID(tileID);
+                    //drawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
 
                     // Track it.
-                    // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.tileDrawablesAdded;
                     // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
                     // std::to_string(stats.tileDrawablesAdded+1));
