@@ -28,6 +28,5 @@ cc_library(
     deps = [
         "//:mbgl-core",
         "//platform/default:mbgl-default",
-        # "//:headers"
     ],
 )
