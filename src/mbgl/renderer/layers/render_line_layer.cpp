@@ -328,27 +328,28 @@ void RenderLineLayer::update(const int32_t layerIndex,
                              const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-    
-    std::unique_ptr<gfx::DrawableBuilder> builderLine {context.createDrawableBuilder("line")};
+
+    std::unique_ptr<gfx::DrawableBuilder> builderLine{context.createDrawableBuilder("line")};
     builderLine->setShader(context.getGenericShader(shaders, "LineShader"));
-    
-    std::unique_ptr<gfx::DrawableBuilder> builderGradientLine {context.createDrawableBuilder("lineGradient")};
+
+    std::unique_ptr<gfx::DrawableBuilder> builderGradientLine{context.createDrawableBuilder("lineGradient")};
     builderGradientLine->setShader(context.getGenericShader(shaders, "LineGradientShader"));
 
-    std::unique_ptr<gfx::DrawableBuilder> builderSDFLine {context.createDrawableBuilder("lineSDF")};
+    std::unique_ptr<gfx::DrawableBuilder> builderSDFLine{context.createDrawableBuilder("lineSDF")};
     builderLine->setShader(context.getGenericShader(shaders, "LineSDFShader"));
 
-    std::unique_ptr<gfx::DrawableBuilder> builderPatternLine {context.createDrawableBuilder("linePattern")};
+    std::unique_ptr<gfx::DrawableBuilder> builderPatternLine{context.createDrawableBuilder("linePattern")};
     builderLine->setShader(context.getGenericShader(shaders, "LinePatternShader"));
 
-    if (!builderLine || !builderGradientLine || !builderSDFLine || !builderPatternLine || !renderTiles || renderTiles->empty()) {
+    if (!builderLine || !builderGradientLine || !builderSDFLine || !builderPatternLine || !renderTiles ||
+        renderTiles->empty()) {
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
         }
         return;
     }
-    
+
     // Set up a layer group
     if (!tileLayerGroup) {
         tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
@@ -357,13 +358,13 @@ void RenderLineLayer::update(const int32_t layerIndex,
         }
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
-    
+
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
     std::transform(renderTiles->begin(),
                    renderTiles->end(),
                    std::inserter(newTileIDs, newTileIDs.begin()),
                    [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-    
+
     std::vector<gfx::DrawablePtr> newTiles;
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
@@ -376,9 +377,9 @@ void RenderLineLayer::update(const int32_t layerIndex,
         }
     });
 
-//    parameters.renderTileClippingMasks(renderTiles);
-    
-    const auto renderPass {RenderPass::Translucent};
+    //    parameters.renderTileClippingMasks(renderTiles);
+
+    const auto renderPass{RenderPass::Translucent};
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -390,7 +391,7 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 ++stats.tileDrawablesRemoved;
             }
         };
-        
+
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData) {
             removeTile();
@@ -399,77 +400,78 @@ void RenderLineLayer::update(const int32_t layerIndex,
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
-//        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
+        //        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
             builderSDFLine->setRenderPass(renderPass);
 
-//            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
-//                                                                                          : LinePatternCap::Square;
-//            const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
-//                evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
-//
-//            draw(*lineSDFProgram,
-//                 LineSDFProgram::layoutUniformValues(evaluated,
-//                                                     parameters.pixelRatio,
-//                                                     tile,
-//                                                     parameters.state,
-//                                                     parameters.pixelsToGLUnits,
-//                                                     dashPatternTexture.getFrom(),
-//                                                     dashPatternTexture.getTo(),
-//                                                     crossfade,
-//                                                     static_cast<float>(dashPatternTexture.getSize().width)),
-//                 {},
-//                 {},
-//                 LineSDFProgram::TextureBindings{
-//                     dashPatternTexture.textureBinding(),
-//                 });
+            //            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ?
+            //            LinePatternCap::Round
+            //                                                                                          :
+            //                                                                                          LinePatternCap::Square;
+            //            const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
+            //                evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
+            //
+            //            draw(*lineSDFProgram,
+            //                 LineSDFProgram::layoutUniformValues(evaluated,
+            //                                                     parameters.pixelRatio,
+            //                                                     tile,
+            //                                                     parameters.state,
+            //                                                     parameters.pixelsToGLUnits,
+            //                                                     dashPatternTexture.getFrom(),
+            //                                                     dashPatternTexture.getTo(),
+            //                                                     crossfade,
+            //                                                     static_cast<float>(dashPatternTexture.getSize().width)),
+            //                 {},
+            //                 {},
+            //                 LineSDFProgram::TextureBindings{
+            //                     dashPatternTexture.textureBinding(),
+            //                 });
 
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
             const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-//            const Size& texsize = tile.getIconAtlasTexture().size;
+            //            const Size& texsize = tile.getIconAtlasTexture().size;
 
             std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
             std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
 
             builderPatternLine->setRenderPass(renderPass);
-//            draw(*linePatternProgram,
-//                 LinePatternProgram::layoutUniformValues(evaluated,
-//                                                         tile,
-//                                                         parameters.state,
-//                                                         parameters.pixelsToGLUnits,
-//                                                         parameters.pixelRatio,
-//                                                         texsize,
-//                                                         crossfade),
-//                 posA,
-//                 posB,
-//                 LinePatternProgram::TextureBindings{
-//                     textures::image::Value{tile.getIconAtlasTexture().getResource(), gfx::TextureFilterType::Linear},
-//                 });
+            //            draw(*linePatternProgram,
+            //                 LinePatternProgram::layoutUniformValues(evaluated,
+            //                                                         tile,
+            //                                                         parameters.state,
+            //                                                         parameters.pixelsToGLUnits,
+            //                                                         parameters.pixelRatio,
+            //                                                         texsize,
+            //                                                         crossfade),
+            //                 posA,
+            //                 posB,
+            //                 LinePatternProgram::TextureBindings{
+            //                     textures::image::Value{tile.getIconAtlasTexture().getResource(),
+            //                     gfx::TextureFilterType::Linear},
+            //                 });
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             assert(colorRampTexture);
 
             builderGradientLine->setRenderPass(renderPass);
-//            draw(*lineGradientProgram,
-//                 LineGradientProgram::layoutUniformValues(
-//                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits, parameters.pixelRatio),
-//                 {},
-//                 {},
-//                 LineGradientProgram::TextureBindings{
-//                     textures::image::Value{colorRampTexture->getResource(), gfx::TextureFilterType::Linear},
-//                 });
+            //            draw(*lineGradientProgram,
+            //                 LineGradientProgram::layoutUniformValues(
+            //                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits,
+            //                     parameters.pixelRatio),
+            //                 {},
+            //                 {},
+            //                 LineGradientProgram::TextureBindings{
+            //                     textures::image::Value{colorRampTexture->getResource(),
+            //                     gfx::TextureFilterType::Linear},
+            //                 });
         } else {
             auto& builder = builderLine;
             builder->setRenderPass(renderPass);
             const auto& verts = bucket.vertices.vector();
             std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
             std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-            builder->addTriangles(rawVerts,
-                                  0,
-                                  rawVerts.size(),
-                                  bucket.triangles.vector(),
-                                  0,
-                                  bucket.triangles.elements());
+            builder->addTriangles(
+                rawVerts, 0, rawVerts.size(), bucket.triangles.vector(), 0, bucket.triangles.elements());
             builder->flush();
             auto newDrawables = builder->clearDrawables();
             if (!newDrawables.empty()) {
@@ -477,11 +479,11 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 drawable->setTileID(tileID);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
-                Log::Warning(Event::General, "Adding Line drawable for " + util::toString(tileID) + " total "
-                             + std::to_string(stats.tileDrawablesAdded + 1));
+                Log::Warning(Event::General,
+                             "Adding Line drawable for " + util::toString(tileID) + " total " +
+                                 std::to_string(stats.tileDrawablesAdded + 1));
             }
         }
-        
     }
 }
 
