@@ -43,7 +43,7 @@ void DrawableBuilder::flush() {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
                 if (auto& drawAttr = drawAttrs->getOrAdd(iName)) {
                     for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
-                        drawAttr->set<const VertexAttribute::ElementType&>(i, iAttr.get(0));
+                        drawAttr->setVariant(i, iAttr.get(0));
                     }
                 }
             });
