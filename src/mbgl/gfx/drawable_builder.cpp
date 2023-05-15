@@ -7,6 +7,8 @@ namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
+      vertexAttrName("a_pos"),
+      colorAttrName("a_color"),
       renderPass(RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
@@ -35,8 +37,21 @@ void DrawableBuilder::flush() {
         draw->setDepthType(depthType);
         draw->setShader(shader);
         draw->setMatrix(matrix);
-        draw->setVertexAttributes(getVertexAttributes());
         draw->addTweakers(tweakers.begin(), tweakers.end());
+        
+        if (auto drawAttrs = getVertexAttributes().clone()) {
+
+            vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
+                if (auto& drawAttr = drawAttrs->getOrAdd(iName)) {
+                    for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
+                        drawAttr->set<const VertexAttribute::ElementType&>(i, iAttr.get(0));
+                    }
+                }
+            });
+
+            draw->setVertexAttributes(std::move(*drawAttrs));
+        }
+
         init();
     }
     if (currentDrawable) {
@@ -89,6 +104,14 @@ void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
 void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     addTriangle(x0, y0, x1, y0, x0, y1);
     appendTriangle(x1, y1);
+}
+
+void DrawableBuilder::setVertexAttributes(const VertexAttributeArray& attrs) {
+    vertexAttrs = attrs;
+}
+
+void DrawableBuilder::setVertexAttributes(VertexAttributeArray&& attrs) {
+    vertexAttrs = attrs;
 }
 
 void DrawableBuilder::addTriangles(const std::vector<std::array<int16_t, 2>>& vertices,

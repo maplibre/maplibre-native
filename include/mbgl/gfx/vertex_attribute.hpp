@@ -36,8 +36,6 @@ public:
 
     using ElementType = std::variant<std::int32_t, int2, int3, int4, float, float2, float3, float4, matf3, matf4>;
 
-    // Can only be created by VertexAttributeArray implementations
-protected:
     VertexAttribute(int index_, AttributeDataType dataType_, int size_, std::size_t count_, std::size_t stride_)
         : index(index_),
           size(size_),
@@ -87,6 +85,14 @@ public:
         }
         return items[i] = value;
     }
+    template <>
+    const ElementType& set(std::size_t i, const ElementType& value) {
+        if (items.size() < i + 1) {
+            items.resize(std::max(items.size(), i + 1));
+        }
+        setDirty();
+        return items[i] = value;
+    }
 
     void clear() {
         if (!items.empty()) {
@@ -132,7 +138,7 @@ public:
     VertexAttributeArray(int initCapacity = 10);
     VertexAttributeArray(VertexAttributeArray&&);
     // Would need to use the virtual assignment operator
-    VertexAttributeArray(const VertexAttributeArray&) = delete;
+    VertexAttributeArray(const VertexAttributeArray&);
     virtual ~VertexAttributeArray() = default;
 
     /// Number of elements
@@ -182,6 +188,18 @@ public:
             attrs.begin(), attrs.end(), [](const auto& kv) { return kv.second && kv.second->isDirty(); });
     }
 
+    void clear();
+
+    /// Do something with each attribute
+    void observeAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
+        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
+            if (kv.second) { f(kv.first, *kv.second); }});
+    }
+    void observeAttributes(const std::function<void(const std::string&, const VertexAttribute&)>& f) const {
+        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
+            if (kv.second) { f(kv.first, *kv.second); }});
+    }
+
     using ResolveDelegate =
         std::function<void(const std::string&, const VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
@@ -189,6 +207,10 @@ public:
 
     VertexAttributeArray& operator=(VertexAttributeArray&&);
     VertexAttributeArray& operator=(const VertexAttributeArray&);
+
+    virtual std::unique_ptr<VertexAttributeArray> clone() const {
+        return std::make_unique<VertexAttributeArray>(*this);
+    }
 
 protected:
     const std::unique_ptr<VertexAttribute>& add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
@@ -204,8 +226,12 @@ protected:
     virtual std::unique_ptr<VertexAttribute> create(int index,
                                                     AttributeDataType dataType,
                                                     int size,
-                                                    std::size_t count) = 0;
-    virtual std::unique_ptr<VertexAttribute> copy(const VertexAttribute& attr) = 0;
+                                                    std::size_t count) const {
+        return std::make_unique<VertexAttribute>(index, dataType, size, count, size*count);
+    }
+    virtual std::unique_ptr<VertexAttribute> copy(const gfx::VertexAttribute& attr) const {
+        return std::make_unique<VertexAttribute>(attr);
+    }
 
 protected:
     AttributeMap attrs;

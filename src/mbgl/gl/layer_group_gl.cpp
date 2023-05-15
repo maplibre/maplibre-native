@@ -70,6 +70,13 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             return;
         }
 
+        std::string label;
+        if (const auto& tileID = drawable.getTileID()) {
+            label = drawable.getName() + "/" + util::toString(*tileID);
+        }
+        const auto labelPtr = (label.empty() ? drawable.getName() : label).c_str();
+        const auto debugGroup = parameters.encoder->createDebugGroup(labelPtr);
+
         mat4 matrix = drawable.getMatrix();
         if (drawable.getTileID()) {
             const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();

@@ -1,10 +1,12 @@
-layout (std140) uniform BackgroundLayerUBO {
-    vec4 u_color;
-    float u_opacity;
-};
+#pragma mapbox: define highp vec4 color
+#pragma mapbox: define lowp float opacity
 
 void main() {
-    fragColor = u_color * u_opacity;
+    #pragma mapbox: initialize highp vec4 color
+    #pragma mapbox: initialize lowp float opacity
+
+    fragColor = color * opacity;
+
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);
 #endif

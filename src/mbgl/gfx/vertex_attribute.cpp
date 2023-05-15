@@ -12,6 +12,10 @@ std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
 VertexAttributeArray::VertexAttributeArray(int initCapacity)
     : attrs(initCapacity) {}
 
+VertexAttributeArray::VertexAttributeArray(const VertexAttributeArray& other) {
+    operator=(other);
+}
+
 VertexAttributeArray::VertexAttributeArray(VertexAttributeArray&& other)
     : attrs(std::move(other.attrs)) {}
 
@@ -23,7 +27,9 @@ VertexAttributeArray& VertexAttributeArray::operator=(VertexAttributeArray&& oth
 VertexAttributeArray& VertexAttributeArray::operator=(const VertexAttributeArray& other) {
     attrs.clear();
     for (const auto& kv : other.attrs) {
-        add(kv.first, copy(*kv.second));
+        if (kv.second) {
+            add(kv.first, copy(*kv.second));
+        }
     }
     return *this;
 }
@@ -67,6 +73,10 @@ std::size_t VertexAttributeArray::getMaxCount() const {
     return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& kv) {
         return std::max(acc, kv.second->getCount());
     });
+}
+
+void VertexAttributeArray::clear() {
+    attrs.clear();
 }
 
 void VertexAttributeArray::resolve(const VertexAttributeArray& overrides, ResolveDelegate delegate) const {
