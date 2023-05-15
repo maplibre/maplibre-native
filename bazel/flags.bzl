@@ -8,16 +8,20 @@ WARNING_FLAGS = [
     "-Wall",
     "-Werror",
     "-Wextra",
-    "-Wno-c++11-narrowing",
-    "-Wno-gnu-anonymous-struct",
-    "-Wno-pointer-to-int-cast",
-    "-Wno-tautological-constant-compare",
     "-Wno-unused-parameter",
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
-    "-Wno-nested-anon-types",
-    "-Wno-newline-eof",
-]
+] + select({
+    "//:ios": [
+        "-Wno-newline-eof",
+        "-Wno-nested-anon-types",
+        "-Wno-c++11-narrowing",
+        "-Wno-pointer-to-int-cast",
+        "-Wno-tautological-constant-compare",
+        "-Wno-gnu-anonymous-struct",
+    ],
+    "//:linux": [],
+})
 
 """
 Compilation flags used for all .cpp and .mm targets.
