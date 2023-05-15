@@ -1,0 +1,59 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+cc_library(
+    name = "testutils",
+    hdrs = [
+        "include/mbgl/test/util.hpp",
+    ],
+    strip_include_prefix = "include",
+    deps = [
+        "//vendor/googletest:gtest",
+    ],
+)
+
+cc_library(
+    name = "testlib",
+    srcs = glob(
+        [
+            "src/mbgl/test/*.cpp",
+        ],
+        exclude = [
+            "src/mbgl/test/test.cpp",
+            "src/mbgl/test/http_server.cpp",
+        ],
+    ),
+    hdrs = glob([
+        "src/mbgl/test/*.hpp",
+    ]),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    strip_include_prefix = "src",
+    deps = [
+        "testutils",
+        "//:mbgl-core",
+    ],
+)
+
+cc_test(
+    name = "core",
+    srcs = glob(
+        [
+            "**/*.test.cpp",
+        ],
+        exclude = [
+            "storage/sync_file_source.test.cpp",
+            "util/timer.test.cpp",
+            "style/expression/expression.test.cpp",
+            "map/map.test.cpp",
+        ],
+    ),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = glob(["fixtures/**/*"]),
+    local = True,
+    deps = [
+        "testlib",
+        "testutils",
+        "//:mbgl-core",
+        "//platform/linux:impl",
+        "//vendor/googletest:gtest_main",
+    ],
+)
