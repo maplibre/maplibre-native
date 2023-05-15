@@ -236,7 +236,7 @@ protected:
                                                     std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, size, count, size * count);
     }
-    
+
     virtual void copy(const VertexAttributeArray& other) {
         for (const auto& kv : other.attrs) {
             if (kv.second) {
