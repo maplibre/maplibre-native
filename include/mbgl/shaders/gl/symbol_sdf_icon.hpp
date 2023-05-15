@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconProgram, gfx::Backend::Type::OpenGL> {
+template <> struct ShaderSource<BuiltIn::SymbolSDFIconProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "SymbolSDFIconProgram";
     static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 

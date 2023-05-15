@@ -328,6 +328,7 @@ void RenderLineLayer::update(const int32_t layerIndex,
                              const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
+<<<<<<< HEAD
 
     std::unique_ptr<gfx::DrawableBuilder> builderLine{context.createDrawableBuilder("line")};
     builderLine->setShader(context.getGenericShader(shaders, "LineShader"));
@@ -343,13 +344,33 @@ void RenderLineLayer::update(const int32_t layerIndex,
 
     if (!builderLine || !builderGradientLine || !builderSDFLine || !builderPatternLine || !renderTiles ||
         renderTiles->empty()) {
+=======
+    
+    std::unique_ptr<gfx::DrawableBuilder> builderLine {context.createDrawableBuilder("line")};
+    builderLine->setShader(context.getGenericShader(shaders, "LineShader"));
+    
+    std::unique_ptr<gfx::DrawableBuilder> builderGradientLine {context.createDrawableBuilder("lineGradient")};
+    builderGradientLine->setShader(context.getGenericShader(shaders, "LineGradientShader"));
+
+    std::unique_ptr<gfx::DrawableBuilder> builderSDFLine {context.createDrawableBuilder("lineSDF")};
+    builderLine->setShader(context.getGenericShader(shaders, "LineSDFShader"));
+
+    std::unique_ptr<gfx::DrawableBuilder> builderPatternLine {context.createDrawableBuilder("linePattern")};
+    builderLine->setShader(context.getGenericShader(shaders, "LinePatternShader"));
+
+    if (!builderLine || !builderGradientLine || !builderSDFLine || !builderPatternLine || !renderTiles || renderTiles->empty()) {
+>>>>>>> 50aac8980 (pull topic/drawable)
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
         }
         return;
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 50aac8980 (pull topic/drawable)
     // Set up a layer group
     if (!tileLayerGroup) {
         tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
@@ -358,13 +379,21 @@ void RenderLineLayer::update(const int32_t layerIndex,
         }
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 50aac8980 (pull topic/drawable)
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
     std::transform(renderTiles->begin(),
                    renderTiles->end(),
                    std::inserter(newTileIDs, newTileIDs.begin()),
                    [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 50aac8980 (pull topic/drawable)
     std::vector<gfx::DrawablePtr> newTiles;
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
@@ -377,9 +406,15 @@ void RenderLineLayer::update(const int32_t layerIndex,
         }
     });
 
+<<<<<<< HEAD
     //    parameters.renderTileClippingMasks(renderTiles);
 
     const auto renderPass{RenderPass::Translucent};
+=======
+//    parameters.renderTileClippingMasks(renderTiles);
+    
+    const auto renderPass {RenderPass::Translucent};
+>>>>>>> 50aac8980 (pull topic/drawable)
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -391,7 +426,11 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 ++stats.tileDrawablesRemoved;
             }
         };
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 50aac8980 (pull topic/drawable)
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData) {
             removeTile();
@@ -400,11 +439,16 @@ void RenderLineLayer::update(const int32_t layerIndex,
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
+<<<<<<< HEAD
         //        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
+=======
+//        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
+>>>>>>> 50aac8980 (pull topic/drawable)
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
             builderSDFLine->setRenderPass(renderPass);
 
+<<<<<<< HEAD
             //            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ?
             //            LinePatternCap::Round
             //                                                                                          :
@@ -431,11 +475,38 @@ void RenderLineLayer::update(const int32_t layerIndex,
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
             const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
             //            const Size& texsize = tile.getIconAtlasTexture().size;
+=======
+//            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
+//                                                                                          : LinePatternCap::Square;
+//            const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
+//                evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
+//
+//            draw(*lineSDFProgram,
+//                 LineSDFProgram::layoutUniformValues(evaluated,
+//                                                     parameters.pixelRatio,
+//                                                     tile,
+//                                                     parameters.state,
+//                                                     parameters.pixelsToGLUnits,
+//                                                     dashPatternTexture.getFrom(),
+//                                                     dashPatternTexture.getTo(),
+//                                                     crossfade,
+//                                                     static_cast<float>(dashPatternTexture.getSize().width)),
+//                 {},
+//                 {},
+//                 LineSDFProgram::TextureBindings{
+//                     dashPatternTexture.textureBinding(),
+//                 });
+
+        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
+            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
+//            const Size& texsize = tile.getIconAtlasTexture().size;
+>>>>>>> 50aac8980 (pull topic/drawable)
 
             std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
             std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
 
             builderPatternLine->setRenderPass(renderPass);
+<<<<<<< HEAD
             //            draw(*linePatternProgram,
             //                 LinePatternProgram::layoutUniformValues(evaluated,
             //                                                         tile,
@@ -450,10 +521,26 @@ void RenderLineLayer::update(const int32_t layerIndex,
             //                     textures::image::Value{tile.getIconAtlasTexture().getResource(),
             //                     gfx::TextureFilterType::Linear},
             //                 });
+=======
+//            draw(*linePatternProgram,
+//                 LinePatternProgram::layoutUniformValues(evaluated,
+//                                                         tile,
+//                                                         parameters.state,
+//                                                         parameters.pixelsToGLUnits,
+//                                                         parameters.pixelRatio,
+//                                                         texsize,
+//                                                         crossfade),
+//                 posA,
+//                 posB,
+//                 LinePatternProgram::TextureBindings{
+//                     textures::image::Value{tile.getIconAtlasTexture().getResource(), gfx::TextureFilterType::Linear},
+//                 });
+>>>>>>> 50aac8980 (pull topic/drawable)
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             assert(colorRampTexture);
 
             builderGradientLine->setRenderPass(renderPass);
+<<<<<<< HEAD
             //            draw(*lineGradientProgram,
             //                 LineGradientProgram::layoutUniformValues(
             //                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits,
@@ -464,14 +551,33 @@ void RenderLineLayer::update(const int32_t layerIndex,
             //                     textures::image::Value{colorRampTexture->getResource(),
             //                     gfx::TextureFilterType::Linear},
             //                 });
+=======
+//            draw(*lineGradientProgram,
+//                 LineGradientProgram::layoutUniformValues(
+//                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits, parameters.pixelRatio),
+//                 {},
+//                 {},
+//                 LineGradientProgram::TextureBindings{
+//                     textures::image::Value{colorRampTexture->getResource(), gfx::TextureFilterType::Linear},
+//                 });
+>>>>>>> 50aac8980 (pull topic/drawable)
         } else {
             auto& builder = builderLine;
             builder->setRenderPass(renderPass);
             const auto& verts = bucket.vertices.vector();
             std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
             std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+<<<<<<< HEAD
             builder->addTriangles(
                 rawVerts, 0, rawVerts.size(), bucket.triangles.vector(), 0, bucket.triangles.elements());
+=======
+            builder->addTriangles(rawVerts,
+                                  0,
+                                  rawVerts.size(),
+                                  bucket.triangles.vector(),
+                                  0,
+                                  bucket.triangles.elements());
+>>>>>>> 50aac8980 (pull topic/drawable)
             builder->flush();
             auto newDrawables = builder->clearDrawables();
             if (!newDrawables.empty()) {
@@ -479,11 +585,19 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 drawable->setTileID(tileID);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
+<<<<<<< HEAD
                 Log::Warning(Event::General,
                              "Adding Line drawable for " + util::toString(tileID) + " total " +
                                  std::to_string(stats.tileDrawablesAdded + 1));
             }
         }
+=======
+                Log::Warning(Event::General, "Adding Line drawable for " + util::toString(tileID) + " total "
+                             + std::to_string(stats.tileDrawablesAdded + 1));
+            }
+        }
+        
+>>>>>>> 50aac8980 (pull topic/drawable)
     }
 }
 
