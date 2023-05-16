@@ -343,21 +343,21 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
                 const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(1);
-                // const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
+                const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
 
-                const auto fillRenderPass = (evalColor.a >= 1.0f && fillOpacity >= 1.0f
+                const auto fillRenderPass = (fillColor.a >= 1.0f
                                              /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
                                                 ? RenderPass::Opaque
                                                 : RenderPass::Translucent;
 
-                if (fillRenderPass != renderPass) {
+                if (fillRenderPass != renderPass || fillColor.a <= 0.0f) {
                     removeTile();
                     continue;
                 }
 
                 vertexAttrs.clear();
                 if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
-                    attr->set(0, util::cast<float>(evalColor.toArray()));
+                    attr->set(0, gfx::Drawable::colorAttrRGBA(evalColor));
                 }
                 if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
                     attr->set<gfx::VertexAttribute::float2>(0, {fillOpacity, fillOpacity});

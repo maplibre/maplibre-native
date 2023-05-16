@@ -30,12 +30,12 @@ void DrawableGLBuilder::init() {
             }
 
             if (impl->colors.empty()) {
-                colorAttr->set(0, DrawableGL::colorAttrValue(getColor()));
+                colorAttr->set(0, gfx::Drawable::colorAttrRGBA(getColor()));
             } else {
                 std::size_t index = 0;
                 colorAttr->reserve(impl->colors.size());
                 for (const auto& color : impl->colors) {
-                    colorAttr->set(index++, DrawableGL::colorAttrValue(color));
+                    colorAttr->set(index++, gfx::Drawable::colorAttrRGBA(color));
                 }
             }
         }
