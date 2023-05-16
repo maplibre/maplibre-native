@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-15T19:13:14.508Z by stefan using shaders/generate_shader_code.js
+// Generated on 2023-05-16T12:04:47.554Z by stefan using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,17 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-template <>
-struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
-=======
 template <> struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-template <>
-struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
     static constexpr const char* name = "LineShader";
     static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is

@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-15T19:13:14.508Z by stefan using shaders/generate_shader_code.js
+// Generated on 2023-05-16T12:04:47.554Z by stefan using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -7,8 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-template <>
-struct ShaderSource<BuiltIn::SymbolIconProgram, gfx::Backend::Type::OpenGL> {
+template <> struct ShaderSource<BuiltIn::SymbolIconProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "SymbolIconProgram";
     static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
 

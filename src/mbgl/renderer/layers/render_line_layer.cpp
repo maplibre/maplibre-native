@@ -328,9 +328,6 @@ void RenderLineLayer::update(const int32_t layerIndex,
                              const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-<<<<<<< HEAD
-<<<<<<< HEAD
-
     std::unique_ptr<gfx::DrawableBuilder> builderLine{context.createDrawableBuilder("line")};
     builderLine->setShader(context.getGenericShader(shaders, "LineShader"));
 
@@ -345,46 +342,12 @@ void RenderLineLayer::update(const int32_t layerIndex,
 
     if (!builderLine || !builderGradientLine || !builderSDFLine || !builderPatternLine || !renderTiles ||
         renderTiles->empty()) {
-=======
-    
-    std::unique_ptr<gfx::DrawableBuilder> builderLine {context.createDrawableBuilder("line")};
-=======
-
-    std::unique_ptr<gfx::DrawableBuilder> builderLine{context.createDrawableBuilder("line")};
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
-    builderLine->setShader(context.getGenericShader(shaders, "LineShader"));
-
-    std::unique_ptr<gfx::DrawableBuilder> builderGradientLine{context.createDrawableBuilder("lineGradient")};
-    builderGradientLine->setShader(context.getGenericShader(shaders, "LineGradientShader"));
-
-    std::unique_ptr<gfx::DrawableBuilder> builderSDFLine{context.createDrawableBuilder("lineSDF")};
-    builderLine->setShader(context.getGenericShader(shaders, "LineSDFShader"));
-
-    std::unique_ptr<gfx::DrawableBuilder> builderPatternLine{context.createDrawableBuilder("linePattern")};
-    builderLine->setShader(context.getGenericShader(shaders, "LinePatternShader"));
-
-<<<<<<< HEAD
-    if (!builderLine || !builderGradientLine || !builderSDFLine || !builderPatternLine || !renderTiles || renderTiles->empty()) {
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-    if (!builderLine || !builderGradientLine || !builderSDFLine || !builderPatternLine || !renderTiles ||
-        renderTiles->empty()) {
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
         }
         return;
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
     // Set up a layer group
     if (!tileLayerGroup) {
         tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
@@ -393,29 +356,11 @@ void RenderLineLayer::update(const int32_t layerIndex,
         }
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
     std::transform(renderTiles->begin(),
                    renderTiles->end(),
                    std::inserter(newTileIDs, newTileIDs.begin()),
                    [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
     std::vector<gfx::DrawablePtr> newTiles;
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
@@ -428,21 +373,8 @@ void RenderLineLayer::update(const int32_t layerIndex,
         }
     });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     //    parameters.renderTileClippingMasks(renderTiles);
-
     const auto renderPass{RenderPass::Translucent};
-=======
-//    parameters.renderTileClippingMasks(renderTiles);
-    
-    const auto renderPass {RenderPass::Translucent};
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-    //    parameters.renderTileClippingMasks(renderTiles);
-
-    const auto renderPass{RenderPass::Translucent};
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -454,15 +386,6 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 ++stats.tileDrawablesRemoved;
             }
         };
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData) {
             removeTile();
@@ -471,176 +394,28 @@ void RenderLineLayer::update(const int32_t layerIndex,
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        //        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
-=======
-//        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-        //        const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
             builderSDFLine->setRenderPass(renderPass);
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
-            //            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ?
-            //            LinePatternCap::Round
-            //                                                                                          :
-            //                                                                                          LinePatternCap::Square;
-            //            const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
-            //                evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
-            //
-            //            draw(*lineSDFProgram,
-            //                 LineSDFProgram::layoutUniformValues(evaluated,
-            //                                                     parameters.pixelRatio,
-            //                                                     tile,
-            //                                                     parameters.state,
-            //                                                     parameters.pixelsToGLUnits,
-            //                                                     dashPatternTexture.getFrom(),
-            //                                                     dashPatternTexture.getTo(),
-            //                                                     crossfade,
-            //                                                     static_cast<float>(dashPatternTexture.getSize().width)),
-            //                 {},
-            //                 {},
-            //                 LineSDFProgram::TextureBindings{
-            //                     dashPatternTexture.textureBinding(),
-            //                 });
-<<<<<<< HEAD
+        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
+            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
+        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
+            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
 
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
             const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-            //            const Size& texsize = tile.getIconAtlasTexture().size;
-=======
-//            const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
-//                                                                                          : LinePatternCap::Square;
-//            const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
-//                evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
-//
-//            draw(*lineSDFProgram,
-//                 LineSDFProgram::layoutUniformValues(evaluated,
-//                                                     parameters.pixelRatio,
-//                                                     tile,
-//                                                     parameters.state,
-//                                                     parameters.pixelsToGLUnits,
-//                                                     dashPatternTexture.getFrom(),
-//                                                     dashPatternTexture.getTo(),
-//                                                     crossfade,
-//                                                     static_cast<float>(dashPatternTexture.getSize().width)),
-//                 {},
-//                 {},
-//                 LineSDFProgram::TextureBindings{
-//                     dashPatternTexture.textureBinding(),
-//                 });
-
-        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
-            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-//            const Size& texsize = tile.getIconAtlasTexture().size;
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-
-        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
-            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-            //            const Size& texsize = tile.getIconAtlasTexture().size;
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
-
             std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
             std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
-
             builderPatternLine->setRenderPass(renderPass);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
-            //            draw(*linePatternProgram,
-            //                 LinePatternProgram::layoutUniformValues(evaluated,
-            //                                                         tile,
-            //                                                         parameters.state,
-            //                                                         parameters.pixelsToGLUnits,
-            //                                                         parameters.pixelRatio,
-            //                                                         texsize,
-            //                                                         crossfade),
-            //                 posA,
-            //                 posB,
-            //                 LinePatternProgram::TextureBindings{
-            //                     textures::image::Value{tile.getIconAtlasTexture().getResource(),
-            //                     gfx::TextureFilterType::Linear},
-            //                 });
-<<<<<<< HEAD
-=======
-//            draw(*linePatternProgram,
-//                 LinePatternProgram::layoutUniformValues(evaluated,
-//                                                         tile,
-//                                                         parameters.state,
-//                                                         parameters.pixelsToGLUnits,
-//                                                         parameters.pixelRatio,
-//                                                         texsize,
-//                                                         crossfade),
-//                 posA,
-//                 posB,
-//                 LinePatternProgram::TextureBindings{
-//                     textures::image::Value{tile.getIconAtlasTexture().getResource(), gfx::TextureFilterType::Linear},
-//                 });
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
-            assert(colorRampTexture);
-
-            builderGradientLine->setRenderPass(renderPass);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
-            //            draw(*lineGradientProgram,
-            //                 LineGradientProgram::layoutUniformValues(
-            //                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits,
-            //                     parameters.pixelRatio),
-            //                 {},
-            //                 {},
-            //                 LineGradientProgram::TextureBindings{
-            //                     textures::image::Value{colorRampTexture->getResource(),
-            //                     gfx::TextureFilterType::Linear},
-            //                 });
-<<<<<<< HEAD
-=======
-//            draw(*lineGradientProgram,
-//                 LineGradientProgram::layoutUniformValues(
-//                     evaluated, tile, parameters.state, parameters.pixelsToGLUnits, parameters.pixelRatio),
-//                 {},
-//                 {},
-//                 LineGradientProgram::TextureBindings{
-//                     textures::image::Value{colorRampTexture->getResource(), gfx::TextureFilterType::Linear},
-//                 });
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
         } else {
             auto& builder = builderLine;
             builder->setRenderPass(renderPass);
             const auto& verts = bucket.vertices.vector();
             std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
             std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-<<<<<<< HEAD
-<<<<<<< HEAD
             builder->addTriangles(
                 rawVerts, 0, rawVerts.size(), bucket.triangles.vector(), 0, bucket.triangles.elements());
-=======
-            builder->addTriangles(rawVerts,
-                                  0,
-                                  rawVerts.size(),
-                                  bucket.triangles.vector(),
-                                  0,
-                                  bucket.triangles.elements());
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-            builder->addTriangles(
-                rawVerts, 0, rawVerts.size(), bucket.triangles.vector(), 0, bucket.triangles.elements());
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
             builder->flush();
             auto newDrawables = builder->clearDrawables();
             if (!newDrawables.empty()) {
@@ -648,27 +423,11 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 drawable->setTileID(tileID);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
-<<<<<<< HEAD
-<<<<<<< HEAD
                 Log::Warning(Event::General,
                              "Adding Line drawable for " + util::toString(tileID) + " total " +
                                  std::to_string(stats.tileDrawablesAdded + 1));
             }
         }
-=======
-                Log::Warning(Event::General, "Adding Line drawable for " + util::toString(tileID) + " total "
-                             + std::to_string(stats.tileDrawablesAdded + 1));
-            }
-        }
-        
->>>>>>> 50aac8980 (pull topic/drawable)
-=======
-                Log::Warning(Event::General,
-                             "Adding Line drawable for " + util::toString(tileID) + " total " +
-                                 std::to_string(stats.tileDrawablesAdded + 1));
-            }
-        }
->>>>>>> bc16cfff7 ([pre-commit.ci] auto fixes from pre-commit.com hooks)
     }
 }
 
