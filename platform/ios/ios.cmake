@@ -2,7 +2,7 @@ option(MLN_WITH_IOS_CCACHE "Enable ccache for iOS" OFF)
 option(MLN_IOS_RENDER_TEST "Include render tests" ON)
 
 if(NOT DEFINED IOS_DEPLOYMENT_TARGET)
-    set(IOS_DEPLOYMENT_TARGET "12.0")
+    set(IOS_DEPLOYMENT_TARGET "13.0")
 endif()
 
 # Override default CMake NATIVE_ARCH_ACTUAL
