@@ -129,7 +129,8 @@ public:
         const PossiblyEvaluatedType& currentValue) const = 0;
 
     virtual std::size_t getVertexCount() const = 0;
-    virtual const /*std::tuple<ExpandToType<As, UniformValueType>...>&*/ void* getVertexValue(std::size_t index) const = 0;
+    virtual const /*std::tuple<ExpandToType<As, UniformValueType>...>&*/ void* getVertexValue(
+        std::size_t index) const = 0;
 
     static std::unique_ptr<PaintPropertyBinder> create(const PossiblyEvaluatedType& value, float zoom, T defaultValue);
 
@@ -167,9 +168,7 @@ public:
     }
 
     std::size_t getVertexCount() const override { return 1; }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
-        return &constant;
-    }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override { return &constant; }
 
 private:
     T constant;
@@ -559,9 +558,7 @@ public:
     }
 
     std::size_t getVertexCount() const override { return 0; }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
-        return nullptr;
-    }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override { return nullptr; }
 
 private:
     style::PropertyExpression<T> expression;
