@@ -76,8 +76,8 @@ std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<
 // testId: Test case id that used for composing expectation path
 // expectatedPaths: absolute paths that constain possible expected.png/metrics.json files for result checking
 std::vector<std::filesystem::path> getTestExpectations(const std::filesystem::path& defaultExpectationPath,
-                                                        const std::string& testId,
-                                                        std::vector<std::filesystem::path> expectatedPaths) {
+                                                       const std::string& testId,
+                                                       std::vector<std::filesystem::path> expectatedPaths) {
     std::vector<std::filesystem::path> expectations{defaultExpectationPath};
     for (const auto& expectedPath : expectatedPaths) {
         expectations.emplace_back(expectedPath / testId);

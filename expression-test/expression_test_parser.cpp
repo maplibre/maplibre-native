@@ -309,7 +309,8 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
 
 } // namespace
 
-std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint32_t> parseArguments(int argc, char** argv) {
+std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint32_t> parseArguments(int argc,
+                                                                                                     char** argv) {
     args::ArgumentParser argumentParser("Mapbox GL Expression Test Runner");
 
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
@@ -382,7 +383,8 @@ std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint
 
 Ignores parseExpressionIgnores() {
     Ignores ignores;
-    const auto mainIgnoresPath = std::filesystem::path(TEST_RUNNER_ROOT_PATH).append("metrics/ignores/platform-all.json");
+    const auto mainIgnoresPath =
+        std::filesystem::path(TEST_RUNNER_ROOT_PATH).append("metrics/ignores/platform-all.json");
     auto maybeIgnores = readJson(mainIgnoresPath);
     if (!maybeIgnores.is<JSDocument>()) { // NOLINT
         return {};
