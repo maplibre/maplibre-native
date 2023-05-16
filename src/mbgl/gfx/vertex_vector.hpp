@@ -22,6 +22,10 @@ public:
         assert(n < v.size());
         return v.at(n);
     }
+    const Vertex& at(std::size_t n) const {
+        assert(n < v.size());
+        return v.at(n);
+    }
 
     std::size_t elements() const { return v.size(); }
 

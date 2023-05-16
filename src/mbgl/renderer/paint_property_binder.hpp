@@ -306,7 +306,7 @@ public:
         }
     }
 
-private:
+//private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     gfx::VertexVector<BaseVertex> vertexVector;
@@ -425,7 +425,7 @@ public:
         }
     }
 
-private:
+//private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
@@ -696,6 +696,11 @@ public:
             binders.template get<Ps>()->interpolationFactor(currentZoom)...,
             // uniform values
             binders.template get<Ps>()->uniformValue(currentProperties.template get<Ps>())...));
+    }
+
+    template <class P>
+    const auto& get() const {
+        return binders.template get<P>();
     }
 
     template <class P>

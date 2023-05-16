@@ -1,6 +1,8 @@
 #include <mbgl/gfx/drawable_builder.hpp>
+
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 #include <mbgl/renderer/render_pass.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -42,8 +44,18 @@ void DrawableBuilder::flush() {
         if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
                 if (auto& drawAttr = drawAttrs->getOrAdd(iName)) {
-                    for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
-                        drawAttr->setVariant(i, iAttr.get(0));
+                    if (iAttr.getCount() == 1) {
+                        // Apply the value to all vertexes
+                        for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
+                            drawAttr->setVariant(i, iAttr.get(0));
+                        }
+                    } else if (iAttr.getCount() == impl->vertices.elements()) {
+                        for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
+                            drawAttr->setVariant(i, iAttr.get(i));
+                        }
+                    } else {
+                        // throw?
+                        Log::Warning(Event::General, "Invalid attribute count");
                     }
                 }
             });

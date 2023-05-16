@@ -64,6 +64,8 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     }
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+    
+    evaluatedPropertiesChange = true;
 }
 
 bool RenderFillLayer::hasTransition() const {
@@ -273,7 +275,7 @@ void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& /*state*/,
+                             const TransformState& state,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
@@ -309,6 +311,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
     gfx::VertexAttributeArray vertexAttrs;
 
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
+        if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+            continue;
+        }
+            
         tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
             // Has this tile dropped out of the cover set?
             const auto tileID = drawable->getTileID();
@@ -342,7 +348,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
                 const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
-                const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(1);
+                const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
                 const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
 
                 const auto fillRenderPass = (fillColor.a >= 1.0f
@@ -350,17 +356,35 @@ void RenderFillLayer::update(const int32_t layerIndex,
                                                 ? RenderPass::Opaque
                                                 : RenderPass::Translucent;
 
-                if (fillRenderPass != renderPass || fillColor.a <= 0.0f) {
+                if (fillRenderPass != renderPass) {
                     removeTile();
                     continue;
                 }
 
                 vertexAttrs.clear();
-                if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
-                    attr->set(0, gfx::Drawable::colorAttrRGBA(evalColor));
+
+                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+
+                if (auto& p1 = paintPropertyBinders.get<FillColor>()) {
+                    auto& p2 = reinterpret_cast<mbgl::SourceFunctionPaintPropertyBinder<mbgl::Color, gfx::AttributeType<float, 2>>&>(*p1);
+                    // check that vertexVector.elements() == sum(segments.vertexLength)
+                    if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
+                        for (std::size_t i = 0; i < p2.vertexVector.elements(); ++i) {
+                            const auto& packed = p2.vertexVector.at(i).a1;
+                            attr->set<gfx::VertexAttribute::float4>(i, { packed[0], packed[1], packed[0], packed[1] });
+                        }
+                    }
                 }
-                if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
-                    attr->set<gfx::VertexAttribute::float2>(0, {fillOpacity, fillOpacity});
+                if (auto& p1 = paintPropertyBinders.get<FillOpacity>()) {
+                    //auto& p2 = reinterpret_cast<mbgl::CompositeFunctionPaintPropertyBinder<float, gfx::AttributeType<float, 1>>&>(*p1);
+                    if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
+                    //    for (std::size_t i = 0; i < p2.vertexVector.elements(); ++i) {
+                    //        attr->set(i, p2.vertexVector.at(i).a1[0]);
+                    //    }
+                    //    if (!p2.vertexVector.elements()) {
+                        attr->set<gfx::VertexAttribute::float2>(0, { fillOpacity, fillOpacity});
+                    //    }
+                    }
                 }
 
                 if (evaluatedPropertiesChange) {
