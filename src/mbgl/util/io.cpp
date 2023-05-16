@@ -6,7 +6,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <filesystem>
 
 #ifdef __GNUC__
 #define MBGL_FOPEN_MODE_WBE "wbe"
