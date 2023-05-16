@@ -834,7 +834,8 @@ void RenderOrchestrator::observeLayerGroups(std::function<void(const LayerGroup&
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
-                                      const std::shared_ptr<UpdateParameters>& updateParameters) {
+                                      const std::shared_ptr<UpdateParameters>& updateParameters,
+                                      const RenderItems& layerRenderItems) {
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
                                                        : style::TransitionOptions();
@@ -852,10 +853,14 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     // for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
     auto index = static_cast<int32_t>(renderLayers.size()) - 1;
 
-    for (auto& kv : renderLayers) {
-        kv.second->update(index--, shaders, context, state, changes);
+//    for (auto& kv : renderLayers) {
+//        kv.second->update(index--, shaders, context, state, changes);
+//    }
+    for (auto& renderItem : layerRenderItems)
+    {
+        RenderLayer& renderLayer = static_cast<const LayerRenderItem&>(renderItem.get()).layer;
+        renderLayer.update(index--, shaders, context, state, changes);
     }
-
     addChanges(changes);
 }
 

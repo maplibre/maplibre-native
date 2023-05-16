@@ -13,6 +13,7 @@
 #include <mbgl/text/glyph_manager_observer.hpp>
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/text/placement.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 
 #include <map>
 #include <memory>
@@ -110,7 +111,8 @@ public:
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
                       const TransformState&,
-                      const std::shared_ptr<UpdateParameters>&);
+                      const std::shared_ptr<UpdateParameters>&,
+                      const RenderItems& layerRenderItems);
 
     void processChanges();
 
