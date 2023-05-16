@@ -3,6 +3,7 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/color.hpp>
 #include <mbgl/util/identity.hpp>
 
 #include <cstdint>
@@ -101,6 +102,15 @@ public:
 
     // Reset a single color attribute for all vertexes
     virtual void resetColor(const Color&) = 0;
+
+    /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized RGBA.
+    static gfx::VertexAttribute::float4 colorAttrRGBA(const Color& color) {
+        const auto components = color.toArray();
+        return {static_cast<float>(components[0] / 255.0),
+                static_cast<float>(components[1] / 255.0),
+                static_cast<float>(components[2] / 255.0),
+                static_cast<float>(components[3])};
+    }
 
 protected:
     std::string name;
