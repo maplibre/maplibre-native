@@ -366,24 +366,22 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
                 if (auto& p1 = paintPropertyBinders.get<FillColor>()) {
-                    auto& p2 = reinterpret_cast<mbgl::SourceFunctionPaintPropertyBinder<mbgl::Color, gfx::AttributeType<float, 2>>&>(*p1);
+                    const auto count = p1->getVertexCount();
                     // check that vertexVector.elements() == sum(segments.vertexLength)
                     if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
-                        for (std::size_t i = 0; i < p2.vertexVector.elements(); ++i) {
-                            const auto& packed = p2.vertexVector.at(i).a1;
+                        for (std::size_t i = 0; i < count; ++i) {
+                            const auto& packed = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(p1->getVertexValue(i))->a1;
                             attr->set<gfx::VertexAttribute::float4>(i, { packed[0], packed[1], packed[0], packed[1] });
                         }
                     }
                 }
                 if (auto& p1 = paintPropertyBinders.get<FillOpacity>()) {
-                    //auto& p2 = reinterpret_cast<mbgl::CompositeFunctionPaintPropertyBinder<float, gfx::AttributeType<float, 1>>&>(*p1);
+                    const auto count = p1->getVertexCount();
                     if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
-                    //    for (std::size_t i = 0; i < p2.vertexVector.elements(); ++i) {
-                    //        attr->set(i, p2.vertexVector.at(i).a1[0]);
-                    //    }
-                    //    if (!p2.vertexVector.elements()) {
-                        attr->set<gfx::VertexAttribute::float2>(0, { fillOpacity, fillOpacity});
-                    //    }
+                        for (std::size_t i = 0; i < count; ++i) {
+                            const auto& opacity = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(p1->getVertexValue(i))->a1;
+                            attr->set<gfx::VertexAttribute::float2>(i, { opacity[0], opacity[0] });
+                        }
                     }
                 }
 

@@ -128,6 +128,9 @@ public:
     virtual std::tuple<ExpandToType<As, UniformValueType>...> uniformValue(
         const PossiblyEvaluatedType& currentValue) const = 0;
 
+    virtual std::size_t getVertexCount() const = 0;
+    virtual const /*std::tuple<ExpandToType<As, UniformValueType>...>&*/ void* getVertexValue(std::size_t index) const = 0;
+
     static std::unique_ptr<PaintPropertyBinder> create(const PossiblyEvaluatedType& value, float zoom, T defaultValue);
 
     PaintPropertyStatistics<T> statistics;
@@ -161,6 +164,11 @@ public:
 
     std::tuple<T> uniformValue(const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
         return std::tuple<T>{currentValue.constantOr(constant)};
+    }
+
+    std::size_t getVertexCount() const override { return 1; }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
+        return &constant;
     }
 
 private:
@@ -206,6 +214,11 @@ public:
     std::tuple<std::array<uint16_t, 4>, std::array<uint16_t, 4>> uniformValue(
         const PossiblyEvaluatedPropertyValue<Faded<T>>&) const override {
         return constantPatternPositions;
+    }
+
+    std::size_t getVertexCount() const override { return 0; }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
+        return nullptr; // ?
     }
 
 private:
@@ -306,7 +319,12 @@ public:
         }
     }
 
-//private:
+    std::size_t getVertexCount() const override { return vertexVector.elements(); }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t index) const override {
+        return &vertexVector.at(index);
+    }
+
+private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     gfx::VertexVector<BaseVertex> vertexVector;
@@ -425,7 +443,12 @@ public:
         }
     }
 
-//private:
+    std::size_t getVertexCount() const override { return vertexVector.elements(); }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t index) const override {
+        return &vertexVector.at(index);
+    }
+
+private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
@@ -533,6 +556,11 @@ public:
         const PossiblyEvaluatedPropertyValue<Faded<T>>&) const override {
         // Uniform values for vertex attribute arrays are unused.
         return {};
+    }
+
+    std::size_t getVertexCount() const override { return 0; }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
+        return nullptr;
     }
 
 private:
