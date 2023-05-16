@@ -853,11 +853,10 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     // for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
     auto index = static_cast<int32_t>(renderLayers.size()) - 1;
 
-//    for (auto& kv : renderLayers) {
-//        kv.second->update(index--, shaders, context, state, changes);
-//    }
-    for (auto& renderItem : layerRenderItems)
-    {
+    //    for (auto& kv : renderLayers) {
+    //        kv.second->update(index--, shaders, context, state, changes);
+    //    }
+    for (auto& renderItem : layerRenderItems) {
         RenderLayer& renderLayer = static_cast<const LayerRenderItem&>(renderItem.get()).layer;
         renderLayer.update(index--, shaders, context, state, changes);
     }
