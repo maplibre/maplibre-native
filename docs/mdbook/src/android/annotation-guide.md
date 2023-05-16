@@ -1,35 +1,35 @@
 # Annotation Plugin
 
-In Maplibre Native, class `Marker` is deprecated in 7.0.0. Instead, we use
-Annotation Plugin for more customizable features, including adding point,
-circle, polyline, or polygon into map. For each type, there is a coresponding
-annotation manager to handle a bunch of annotations. You may use a manager
-to create and customize appearance/behavior for the cooresponding annotation type.
+This guide will show how to use the [Annotations Plugin](https://github.com/maplibre/maplibre-plugins-android/tree/master/plugin-annotation). Using this plugin is preferred way to add annotations over the now deprecated `Marker` class. 
+
+It is possible to add points, circles, polylines and polygons. For each type of  there is a coresponding
+annotation manager to handle a group of annotations. You may use a manager
+to create and customize the appearance and behavior for the corresponding annotation type.
 
 Here we continue the code from [Quickstart], and use `SymbolManager` for the showcase:
 
-1. In your module Gradle file(usually `<project>/<app-module>/build.gradle`), add
-   Annotation Plugin as dependencies. Replace `<version>` with the latest version
+1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add the
+   Annotation Plugin as a dependency. Replace `<version>` with the latest version
    (e.g.: `1.0.0`). Visit [https:
    //mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9][mvn] to
    view the version history.
 
-   Here we also add `okhttp` and `lifecycle` for http request.
+   Here we also add `okhttp` and `lifecycle` to be able to make HTTP requests.
 
 
     ```gradle
     dependencies {
         ...
-        implementation 'org.maplibre.gl:android-plugin-annotation-v9:<version>'
+        implementation 'org.maplibre.gl:android-plugin-annotation-v9:1.0.0'
         implementation 'com.squareup.okhttp3:okhttp:4.10.0'
         implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
         ...
     }
     ```
 
-2. Sync your Android project with Gradle files.
+2. Sync your Android project the with Gradle files.
 
-3. In `MainActivity`, here we add variables for `MapboxMap` and `SymbolManager`.
+3. In `MainActivity` we add variables for `MapboxMap` and `SymbolManager`.
    They are used for adding annotations.
 
     ```kotlin
@@ -38,10 +38,10 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
     ```
 
 4. Rewrite `mapview.getMapSync()`. Here we assign values for `mapboxMap` and `SymbolManager`.
-   After style is loaded, add image into style for each symbol(id is `marker`),
+   After the style is loaded, add an image into the style for each symbol (id is `marker`),
    fetch data, then add Symbols.
 
-   For more information about `LifecycleScope` usage, please visit [Android Developer Documentation].
+   For more information about `LifecycleScope` usage, please visit the [Android Developer Documentation].
 
     ```kotlin
     mapView.getMapAsync { map ->
@@ -63,7 +63,7 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
     }
     ```
 
-5. Here we define an time-consuming function to fetch GeoJSON data from public API
+5. Here we define a time-consuming function to fetch GeoJSON data from a public API:
 
    ```kotlin
     // Get Earthquake data from usgs.gov: https://earthquake.usgs.gov/fdsnws/event/1/
@@ -86,7 +86,7 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
     }
    ```
 
-6. Now, time to use `SymbolManager` to add annotations:
+6. Now it is time to use `SymbolManager` to add annotations:
 
     ```kotlin
     private fun addMarkers(data: FeatureCollection?) {
@@ -128,8 +128,7 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
     }
     ```
 
-7. Here is the final result of build and `MainActivity`. Camera should be re-position to annotions
-   after data is fetched. Click each annotion, then further information should be displayed.
+7. Here is the final result after building and running `MainActivity`. The camera should be re-positioned to view the annocations after the data is fetched. Click each annotion, then more information should be displayed in a pop-up.
 
     <div style="align: center">
         <img src="https://github.com/maplibre/maplibre-native/assets/19887090/ce73a2f3-13a5-46fb-8c7b-70143b019e6c" alt="Screenshot with the map in demotile style">
