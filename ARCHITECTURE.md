@@ -28,7 +28,7 @@ Code and build scripts belonging to platform SDKs are contained in the `platform
   - iOS SDK runs benchmark test through a separate app named `BenchmarkApp`.
   - Android SDK does not have benchmark test.
 - `bin` contains the code for tools like `mbgl-cache`, `mbgl-offline`, and `mbgl-render`.
-- `expression-test` contains tests for the expression feature in the map style (see more details about expression [here](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/).
+- `expression-test` contains tests for the expression feature in the map style (see more details about expression [here](https://maplibre.org/maplibre-style-spec/expressions/).
 - `metrics` contains test manifest files and ground truth for graphic comparison based render test.
 - `misc` contains protobuf for style, vector tile, and glyphs. It also icons and pictures used in documents.
 - `render-test` contains image diff based render tests. These tests verify if the rendering results match with expectations by capturing the rendering results and compare with the groundtruth images in the `metrics` directory.

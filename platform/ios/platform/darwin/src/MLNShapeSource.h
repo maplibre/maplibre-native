@@ -139,7 +139,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionSimp
  The default value is `NO`.
  
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#sources-geojson-lineMetrics"><code>lineMetrics</code></a>
+ <a href="https://maplibre.org/maplibre-style-spec/sources/#geojson-lineMetrics"><code>lineMetrics</code></a>
  source property in the Mapbox Style Specification.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionLineDistanceMetrics;

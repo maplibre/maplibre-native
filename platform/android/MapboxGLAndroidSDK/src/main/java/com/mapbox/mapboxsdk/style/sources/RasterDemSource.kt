@@ -8,7 +8,7 @@ import java.net.URL
 /**
  * A raster DEM source.
  *
- * @see [The style specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/.sources-raster-dem)
+ * @see [The style specification](https://maplibre.org/maplibre-style-spec/.sources-raster-dem)
  */
 
 @UiThread

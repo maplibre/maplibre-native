@@ -1098,7 +1098,7 @@ void Map::removeImage(const QString &id) {
 
 /*!
     Adds a \a filter to a style \a layer using the format described in the \l
-    {https://maplibre.org/maplibre-gl-js-docs/style-spec/#other-filter}{Mapbox
+    {https://maplibre.org/maplibre-style-spec/deprecations/#other-filter}{Mapbox
    style specification}.
 
     Given a layer \c marker from an arbitrary GeoJSON source containing features
@@ -1168,7 +1168,7 @@ QVariant QVariantFromValue(const mbgl::Value &value) {
     \layer, if any.
 
     Filter value types are described in the
-   {https://maplibre.org/maplibre-gl-js-docs/style-spec/#types}{Mapbox style
+   {https://maplibre.org/maplibre-style-spec/types/}{Mapbox style
    specification}.
 */
 QVariant Map::getFilter(const QString &layer) const {

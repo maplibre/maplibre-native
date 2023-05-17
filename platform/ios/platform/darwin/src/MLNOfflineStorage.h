@@ -159,19 +159,19 @@ typedef NS_ENUM(NSUInteger, MLNResourceKind) {
     MLNResourceKindUnknown,
     /** Style sheet JSON file */
     MLNResourceKindStyle,
-    /** TileJSON file as specified in https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-sources */
+    /** TileJSON file as specified in https://maplibre.org/maplibre-style-spec/root/#sources */
     MLNResourceKindSource,
     /** A vector or raster tile as described in the style sheet at
-        https://maplibre.org/maplibre-gl-js-docs/style-spec/#sources */
+        https://maplibre.org/maplibre-style-spec/sources/ */
     MLNResourceKindTile,
     /** Signed distance field glyphs for text rendering. These are the URLs specified in the style
-        in https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-glyphs */
+        in https://maplibre.org/maplibre-style-spec/root/#glyphs */
     MLNResourceKindGlyphs,
     /** Image part of a sprite sheet. It is constructed of the prefix in
-        https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-sprite and a PNG file extension. */
+        https://maplibre.org/maplibre-style-spec/root/#sprite and a PNG file extension. */
     MLNResourceKindSpriteImage,
     /** JSON part of a sprite sheet. It is constructed of the prefix in
-        https://maplibre.org/maplibre-gl-js-docs/style-spec/#root-sprite and a JSON file extension. */
+        https://maplibre.org/maplibre-style-spec/root/#sprite and a JSON file extension. */
     MLNResourceKindSpriteJSON,
     /** Image data for a georeferenced image source. **/
     MLNResourceKindImage,
