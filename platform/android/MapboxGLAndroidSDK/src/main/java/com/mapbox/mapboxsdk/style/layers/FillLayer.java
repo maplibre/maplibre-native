@@ -16,7 +16,7 @@ import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 /**
  * A filled polygon with an optional stroked border.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-fill">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-fill">The online documentation</a>
  */
 @UiThread
 public class FillLayer extends Layer {

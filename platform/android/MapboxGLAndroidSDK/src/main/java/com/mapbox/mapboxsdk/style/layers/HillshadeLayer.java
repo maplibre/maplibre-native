@@ -12,7 +12,7 @@ import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 /**
  * Client-side hillshading visualization based on DEM data. Currently, the implementation only supports Mapbox Terrain RGB and Mapzen Terrarium tiles.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-hillshade">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-hillshade">The online documentation</a>
  */
 @UiThread
 public class HillshadeLayer extends Layer {

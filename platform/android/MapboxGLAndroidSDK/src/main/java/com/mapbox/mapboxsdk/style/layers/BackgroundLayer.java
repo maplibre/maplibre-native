@@ -12,7 +12,7 @@ import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 /**
  * The background color or pattern of the map.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-background">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-background">The online documentation</a>
  */
 @UiThread
 public class BackgroundLayer extends Layer {

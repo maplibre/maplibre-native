@@ -5,7 +5,7 @@
 - (mbgl::Color)mgl_color {
     CGFloat r, g, b, a;
 
-    // The Mapbox Style Specification does not specify a color space, but it is
+    // The MapLibre Style Spec does not specify a color space, but it is
     // assumed to be sRGB for consistency with CSS.
     NSColor *srgbColor = self;
     if ([NSColor redColor].colorSpaceName == NSCalibratedRGBColorSpace) {
@@ -24,7 +24,7 @@
 - (mbgl::Color)mgl_colorForPremultipliedValue {
     CGFloat r, g, b, a;
 
-    // The Mapbox Style Specification does not specify a color space, but it is
+    // The MapLibre Style Spec does not specify a color space, but it is
     // assumed to be sRGB for consistency with CSS.
     NSColor *srgbColor = self;
     if ([NSColor redColor].colorSpaceName == NSCalibratedRGBColorSpace) {
@@ -130,7 +130,7 @@
                                           blue:components[2]
                                          alpha:components[3]];
     }
-    // The Mapbox Style Specification does not specify a color space, but it is
+    // The MapLibre Style Spec does not specify a color space, but it is
     // assumed to be sRGB for consistency with CSS.
     return [NSColor colorWithColorSpace:[NSColorSpace sRGBColorSpace]
                              components:&components[0]

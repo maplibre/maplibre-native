@@ -13,7 +13,7 @@ import kotlin.collections.ArrayList
 /**
  * Vector source, allows the use of vector tiles.
  *
- * @see [the style specification](https://www.mapbox.com/mapbox-gl-style-spec/.sources-vector)
+ * @see [the style specification](https://maplibre.org/maplibre-style-spec/.sources-vector)
  */
 @UiThread
 class VectorSource : Source {

@@ -7,7 +7,7 @@ import java.net.URL
 /**
  * Raster source, allows using raster tiles as source.
  *
- * @see [The style specification](https://www.mapbox.com/mapbox-gl-style-spec/.sources-raster)
+ * @see [The style specification](https://maplibre.org/maplibre-style-spec/.sources-raster)
  */
 class RasterSource : Source {
     /**

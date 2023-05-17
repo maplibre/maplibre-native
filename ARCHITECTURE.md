@@ -77,7 +77,7 @@ See the relevant platform-specific `README.md` / `INSTALL.md` for details.
 ## Map
 ## Style
 
-The "Style" component of MapLibre Native contains an implementation of the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/), defining what data to draw, the order to draw it in, and how to style the data when drawing it.
+The "Style" component of MapLibre Native contains an implementation of the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/), defining what data to draw, the order to draw it in, and how to style the data when drawing it.
 
 In addition to supporting styles loaded from a URL, MapLibre Native includes a runtime styling API, which allows users to dynamically modify the current style: add and remove layers, modify layer properties, and so on. As appropriate for a C++ API, the runtime styling API API is _strongly typed_: there are subclasses for each layer type, with correctly-typed accessors for each style property. This results in a large API surface area. Fortunately, this is automated, by generating the API – and the regular portion of the implementation – from the style specification.
 

@@ -18,7 +18,7 @@ import java.net.URL
  * The geographic location of the raster image content, supplied with `LatLngQuad`,
  * can be non-axis aligned.
  *
- * * @see [the style specification](https://www.mapbox.com/mapbox-gl-style-spec/#sources-image)
+ * * @see [the style specification](https://maplibre.org/maplibre-style-spec/#sources-image)
  */
 @UiThread
 class ImageSource : Source {

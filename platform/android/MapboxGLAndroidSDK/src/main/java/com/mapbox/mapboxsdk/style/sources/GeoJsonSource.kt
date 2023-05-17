@@ -13,7 +13,7 @@ import java.util.*
 /**
  * GeoJson source, allows using FeatureCollections from Json.
  *
- * @see [the style specification](https://www.mapbox.com/mapbox-gl-style-spec/.sources-geojson)
+ * @see [the style specification](https://maplibre.org/maplibre-style-spec/.sources-geojson)
  */
 @UiThread
 class GeoJsonSource : Source {

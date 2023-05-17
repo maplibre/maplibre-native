@@ -105,7 +105,7 @@ public:
     CTFontDescriptorRef createFontDescriptor(const FontStack& fontStack) {
         NSMutableArray *fontNames = [NSMutableArray arrayWithCapacity:fontStack.size() + fallbackFontNames.count];
         for (auto& fontName : fontStack) {
-            // Per the Mapbox Style Specification, the text-font property comes
+            // Per the MapLibre Style Spec, the text-font property comes
             // with these last resort fonts by default, but they shouldn’t take
             // precedence over any application or system fallback font that may
             // be more appropriate to the current device.

@@ -27,7 +27,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionDEMEnc
  appearance of content supplied by the raster DEM source.
 
  Each
- <a href="https://www.mapbox.com/mapbox-gl-style-spec/#sources-raster-dem"><code>raster-dem</code></a>
+ <a href="https://maplibre.org/maplibre-style-spec/#sources-raster-dem"><code>raster-dem</code></a>
  source defined by the style JSON file is represented at runtime by an
  `MLNRasterDEMSource` object that you can use to initialize new style layers.
  You can also add and remove sources dynamically using methods such as

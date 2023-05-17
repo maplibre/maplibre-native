@@ -16,7 +16,7 @@ import static com.mapbox.mapboxsdk.utils.ColorUtils.rgbaToColor;
 /**
  * A filled circle.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-circle">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-circle">The online documentation</a>
  */
 @UiThread
 public class CircleLayer extends Layer {
