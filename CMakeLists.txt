@@ -927,6 +927,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp

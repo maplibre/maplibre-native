@@ -7,6 +7,13 @@
         "uses_ubos": true
     },
     {
+        "name": "CircleShader",
+        "header": "drawable_circle",
+        "glsl_vert": "drawable.circle.vertex.glsl",
+        "glsl_frag": "drawable.circle.fragment.glsl",
+        "uses_ubos": true 
+    },
+    {
         "name": "FillShader",
         "header": "drawable_fill",
         "glsl_vert": "drawable.fill.vertex.glsl",
