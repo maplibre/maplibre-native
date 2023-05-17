@@ -275,7 +275,7 @@ void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& state,
+                             const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
