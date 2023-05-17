@@ -9,20 +9,16 @@ to create and customize the appearance and behavior for the corresponding annota
 Here we continue the code from [Quickstart], and use `SymbolManager` for the showcase:
 
 1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add the
-   Annotation Plugin as a dependency. Replace `<version>` with the latest version
-   (e.g.: `1.0.0`). Visit [https:
-   //mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9][mvn] to
-   view the version history.
+   Annotation Plugin as a dependency. Replace `1.0.0` with the latest version.
+   Visit [Maven Repository] for the version history.
 
-   Here we also add `okhttp` and `lifecycle` to be able to make HTTP requests.
-
+   Here we also add `okhttp` to be able to make HTTP requests.
 
     ```gradle
     dependencies {
         ...
         implementation 'org.maplibre.gl:android-plugin-annotation-v9:1.0.0'
         implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-        implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
         ...
     }
     ```
@@ -49,25 +45,29 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
 
         map.setStyle("https://demotiles.maplibre.org/style.json") { style ->
             // Add image for symbol
-            val markerDrawable = this.resources
-                .getDrawable(com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default, null)
+            val markerDrawable = ResourcesCompat.getDrawable(
+                this@MainActivity.resources,
+                com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default,
+                null
+            )!!
             style.addImage("marker", markerDrawable)
 
+            // Build instance of SymbolManager from map components
             symbolManager = SymbolManager(mapView, map, style)
 
-            lifecycleScope.launch {
-                val data = withContext(Dispatchers.IO) { getEarthQuakeDataFromUSGS() } ?: return@launch
-                addMarkers(data)
-            }
+            // Fetch data from USGS
+            getEarthQuakeDataFromUSGS()
         }
     }
     ```
 
-5. Here we define a time-consuming function to fetch GeoJSON data from a public API:
+5. Define a time-consuming function to fetch GeoJSON data from a public API.
+   Then use `addMarkers()` in callback.
 
    ```kotlin
-    // Get Earthquake data from usgs.gov: https://earthquake.usgs.gov/fdsnws/event/1/
-    private fun getEarthQuakeDataFromUSGS(): FeatureCollection? {
+    // Get Earthquake data from usgs.gov:
+    // https://earthquake.usgs.gov/fdsnws/event/1/
+    private fun getEarthQuakeDataFromUSGS() {
         val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
             .addQueryParameter("format", "geojson")
             .addQueryParameter("starttime", "2022-01-01")
@@ -78,11 +78,18 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
             .addQueryParameter("maxradius", "1.5")
             .build()
         val request: Request = Request.Builder().url(url).build()
-        val data = OkHttpClient().newCall(request).execute().use { response ->
-            response.body?.string() ?: return null
-        }
 
-        return FeatureCollection.fromJson(data)
+        OkHttpClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Toast.makeText(this@MainActivity, "Fail to fetch data", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                // If data is fetched, add annotations on the map
+                val featureCollection = response.body?.string()?.let(FeatureCollection::fromJson)
+                runOnUiThread { addMarkers(featureCollection) }
+            }
+        })
     }
    ```
 
@@ -128,19 +135,20 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
     }
     ```
 
-7. Here is the final result after building and running `MainActivity`. The camera should be re-positioned to view the annocations after the data is fetched. Click each annotion, then more information should be displayed in a pop-up.
+7. The following is the final result after building and running `MainActivity`. The camera should be re-positioned to view the annocations after the data is fetched. Click each annotion, then more information should be displayed in a pop-up.
 
     <div style="align: center">
         <img src="https://github.com/maplibre/maplibre-native/assets/19887090/ce73a2f3-13a5-46fb-8c7b-70143b019e6c" alt="Screenshot with the map in demotile style">
     </div>
 
    ```kotlin
-    import android.app.AlertDialog
-    import com.mapbox.geojson.FeatureCollection
+   import android.app.AlertDialog
     import android.os.Bundle
     import android.view.LayoutInflater
-    import androidx.activity.ComponentActivity
-    import androidx.lifecycle.lifecycleScope
+    import android.widget.Toast
+    import androidx.appcompat.app.AppCompatActivity
+    import androidx.core.content.res.ResourcesCompat
+    import com.mapbox.geojson.FeatureCollection
     import com.mapbox.geojson.Point
     import com.mapbox.mapboxsdk.Mapbox
     import com.mapbox.mapboxsdk.camera.CameraPosition
@@ -150,15 +158,16 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
     import com.mapbox.mapboxsdk.maps.MapboxMap
     import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
     import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
-    import kotlinx.coroutines.Dispatchers
-    import kotlinx.coroutines.launch
-    import kotlinx.coroutines.withContext
+    import okhttp3.Call
+    import okhttp3.Callback
     import okhttp3.HttpUrl.Companion.toHttpUrl
     import okhttp3.OkHttpClient
     import okhttp3.Request
+    import okhttp3.Response
+    import java.io.IOException
 
 
-    class MainActivity : ComponentActivity() {
+    class MainActivity : AppCompatActivity() {
 
         // Declare a variable for MapView
         private lateinit var mapView: MapView
@@ -182,16 +191,18 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
 
                 map.setStyle("https://demotiles.maplibre.org/style.json") { style ->
                     // Add image for symbol
-                    val markerDrawable = this.resources
-                        .getDrawable(com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default, null)
+                    val markerDrawable = ResourcesCompat.getDrawable(
+                        this@MainActivity.resources,
+                        com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default,
+                        null
+                    )!!
                     style.addImage("marker", markerDrawable)
 
+                    // Build instance of SymbolManager from map components
                     symbolManager = SymbolManager(mapView, map, style)
 
-                    lifecycleScope.launch {
-                        val data = withContext(Dispatchers.IO) { getEarthQuakeDataFromUSGS() } ?: return@launch
-                        addMarkers(data)
-                    }
+                    // Fetch data from USGS
+                    getEarthQuakeDataFromUSGS()
                 }
             }
         }
@@ -234,8 +245,9 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
             }
         }
 
-        // Get Earthquake data from usgs.gov: https://earthquake.usgs.gov/fdsnws/event/1/
-        private fun getEarthQuakeDataFromUSGS(): FeatureCollection? {
+        // Get Earthquake data from usgs.gov, read API doc at:
+        // https://earthquake.usgs.gov/fdsnws/event/1/
+        private fun getEarthQuakeDataFromUSGS() {
             val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
                 .addQueryParameter("format", "geojson")
                 .addQueryParameter("starttime", "2022-01-01")
@@ -246,15 +258,24 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
                 .addQueryParameter("maxradius", "1.5")
                 .build()
             val request: Request = Request.Builder().url(url).build()
-            val data = OkHttpClient().newCall(request).execute().use { response ->
-                response.body?.string() ?: return null
-            }
+            OkHttpClient().newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Toast.makeText(this@MainActivity, "Fail to fetch data", Toast.LENGTH_SHORT).show()
+                }
 
-            return FeatureCollection.fromJson(data)
+                override fun onResponse(call: Call, response: Response) {
+                    val featureCollection = response.body?.string()?.let(FeatureCollection::fromJson)
+                    runOnUiThread { addMarkers(featureCollection) }
+                }
+            })
         }
-    }
+
+        override fun onStart() {
+        ...
+        override fun onResume() {
+        ...
    ```
 
 [Quickstart]: ./getting-started-guide.md
-[mvn]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
+[Maven Repository]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
 [Android Developer Documentation]: https://developer.android.com/topic/libraries/architecture/coroutines
