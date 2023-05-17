@@ -653,7 +653,7 @@ void Map::removeAnnotation(AnnotationID id) {
 
     \table
     \header
-        \li Mapbox style type
+        \li MapLibre style type
         \li Qt type
     \row
         \li Enum
@@ -700,7 +700,7 @@ bool Map::setLayoutProperty(const QString &layer, const QString &propertyName, c
 
     \table
     \header
-        \li Mapbox style type
+        \li MapLibre style type
         \li Qt type
     \row
         \li Color

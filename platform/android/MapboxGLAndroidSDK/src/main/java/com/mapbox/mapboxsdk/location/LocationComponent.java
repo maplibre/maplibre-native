@@ -158,7 +158,7 @@ public final class LocationComponent {
 
   /**
    * Indicates if Mapbox components are ready to be interacted with. This can differ from {@link #isComponentStarted}
-   * if the Mapbox style is being reloaded.
+   * if the MapLibre style is being reloaded.
    */
   private boolean isLayerReady;
 
