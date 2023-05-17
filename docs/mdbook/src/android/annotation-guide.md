@@ -141,8 +141,8 @@ In this demo, we continue the code from [Quickstart], and use `SymbolManager` fo
         <img src="https://github.com/maplibre/maplibre-native/assets/19887090/ce73a2f3-13a5-46fb-8c7b-70143b019e6c" alt="Screenshot with the map in demotile style">
     </div>
 
-   ```kotlin
-   import android.app.AlertDialog
+    ```kotlin
+    import android.app.AlertDialog
     import android.os.Bundle
     import android.view.LayoutInflater
     import android.widget.Toast
@@ -169,112 +169,112 @@ In this demo, we continue the code from [Quickstart], and use `SymbolManager` fo
 
     class MainActivity : AppCompatActivity() {
 
-        // Declare a variable for MapView
-        private lateinit var mapView: MapView
-        private lateinit var mapboxMap: MapboxMap
-        private lateinit var symbolManager: SymbolManager
+       // Declare a variable for MapView
+       private lateinit var mapView: MapView
+       private lateinit var mapboxMap: MapboxMap
+       private lateinit var symbolManager: SymbolManager
 
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            // Init MapLibre
-            Mapbox.getInstance(this)
+       override fun onCreate(savedInstanceState: Bundle?) {
+           super.onCreate(savedInstanceState)
+           // Init MapLibre
+           Mapbox.getInstance(this)
 
-            // Init layout view
-            val inflater = LayoutInflater.from(this)
-            val rootView = inflater.inflate(R.layout.activity_main, null)
-            setContentView(rootView)
+           // Init layout view
+           val inflater = LayoutInflater.from(this)
+           val rootView = inflater.inflate(R.layout.activity_main, null)
+           setContentView(rootView)
 
-            // Init the MapView
-            mapView = rootView.findViewById(R.id.mapView)
-            mapView.getMapAsync { map ->
-                mapboxMap = map
+           // Init the MapView
+           mapView = rootView.findViewById(R.id.mapView)
+           mapView.getMapAsync { map ->
+               mapboxMap = map
 
-                map.setStyle("https://demotiles.maplibre.org/style.json") { style ->
-                    // Add image for symbol
-                    val markerDrawable = ResourcesCompat.getDrawable(
-                        this@MainActivity.resources,
-                        com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default,
-                        null
-                    )!!
-                    style.addImage("marker", markerDrawable)
+               map.setStyle("https://demotiles.maplibre.org/style.json") { style ->
+                   // Add image for symbol
+                   val markerDrawable = ResourcesCompat.getDrawable(
+                       this@MainActivity.resources,
+                       com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default,
+                       null
+                   )!!
+                   style.addImage("marker", markerDrawable)
 
-                    // Build instance of SymbolManager from map components
-                    symbolManager = SymbolManager(mapView, map, style)
+                   // Build instance of SymbolManager from map components
+                   symbolManager = SymbolManager(mapView, map, style)
 
-                    // Fetch data from USGS
-                    getEarthQuakeDataFromUSGS()
-                }
-            }
-        }
+                   // Fetch data from USGS
+                   getEarthQuakeDataFromUSGS()
+               }
+           }
+       }
 
-        private fun addMarkers(data: FeatureCollection?) {
-            val bounds = mutableListOf<LatLng>()
+       private fun addMarkers(data: FeatureCollection?) {
+           val bounds = mutableListOf<LatLng>()
 
-            // Add symbol for each point feature
-            data?.features()?.forEach { feature ->
-                val geometry = feature.geometry()?.toJson() ?: return@forEach
-                val point = Point.fromJson(geometry) ?: return@forEach
-                val latLng = LatLng(point.latitude(), point.longitude())
-                bounds.add(latLng)
+           // Add symbol for each point feature
+           data?.features()?.forEach { feature ->
+               val geometry = feature.geometry()?.toJson() ?: return@forEach
+               val point = Point.fromJson(geometry) ?: return@forEach
+               val latLng = LatLng(point.latitude(), point.longitude())
+               bounds.add(latLng)
 
-                val options = SymbolOptions()
-                    .withLatLng(latLng)
-                    .withIconImage("marker")
-                    .withTextOffset(arrayOf(50f, 50f))
-                    .withData(feature.properties())
-                symbolManager.create(options)
-            }
+               val options = SymbolOptions()
+                   .withLatLng(latLng)
+                   .withIconImage("marker")
+                   .withTextOffset(arrayOf(50f, 50f))
+                   .withData(feature.properties())
+               symbolManager.create(options)
+           }
 
-            // Move camera to newly added annotations
-            mapboxMap.getCameraForLatLngBounds(LatLngBounds.fromLatLngs(bounds))?.let {
-                val newCameraPosition = CameraPosition.Builder()
-                    .target(it.target)
-                    .zoom(it.zoom - 0.5)
-                    .build()
-                mapboxMap.cameraPosition = newCameraPosition
-            }
+           // Move camera to newly added annotations
+           mapboxMap.getCameraForLatLngBounds(LatLngBounds.fromLatLngs(bounds))?.let {
+               val newCameraPosition = CameraPosition.Builder()
+                   .target(it.target)
+                   .zoom(it.zoom - 0.5)
+                   .build()
+               mapboxMap.cameraPosition = newCameraPosition
+           }
 
-            // Pop up alert dialog when click
-            symbolManager.addClickListener {
-                val title = it.data?.asJsonObject?.get("title")?.asString
-                val magnitude = it.data?.asJsonObject?.get("mag")?.asString
-                val msg = "$title\nMagnitude: $magnitude"
+           // Pop up alert dialog when click
+           symbolManager.addClickListener {
+               val title = it.data?.asJsonObject?.get("title")?.asString
+               val magnitude = it.data?.asJsonObject?.get("mag")?.asString
+               val msg = "$title\nMagnitude: $magnitude"
 
-                AlertDialog.Builder(this@MainActivity).setMessage(msg).create().show()
-                true
-            }
-        }
+               AlertDialog.Builder(this@MainActivity).setMessage(msg).create().show()
+               true
+           }
+       }
 
-        // Get Earthquake data from usgs.gov, read API doc at:
-        // https://earthquake.usgs.gov/fdsnws/event/1/
-        private fun getEarthQuakeDataFromUSGS() {
-            val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
-                .addQueryParameter("format", "geojson")
-                .addQueryParameter("starttime", "2022-01-01")
-                .addQueryParameter("endtime", "2022-12-31")
-                .addQueryParameter("minmagnitude", "6")
-                .addQueryParameter("latitude", "24")
-                .addQueryParameter("longitude", "121")
-                .addQueryParameter("maxradius", "1.5")
-                .build()
-            val request: Request = Request.Builder().url(url).build()
-            OkHttpClient().newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    Toast.makeText(this@MainActivity, "Fail to fetch data", Toast.LENGTH_SHORT).show()
-                }
+       // Get Earthquake data from usgs.gov, read API doc at:
+       // https://earthquake.usgs.gov/fdsnws/event/1/
+       private fun getEarthQuakeDataFromUSGS() {
+           val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
+               .addQueryParameter("format", "geojson")
+               .addQueryParameter("starttime", "2022-01-01")
+               .addQueryParameter("endtime", "2022-12-31")
+               .addQueryParameter("minmagnitude", "6")
+               .addQueryParameter("latitude", "24")
+               .addQueryParameter("longitude", "121")
+               .addQueryParameter("maxradius", "1.5")
+               .build()
+           val request: Request = Request.Builder().url(url).build()
+           OkHttpClient().newCall(request).enqueue(object : Callback {
+               override fun onFailure(call: Call, e: IOException) {
+                   Toast.makeText(this@MainActivity, "Fail to fetch data", Toast.LENGTH_SHORT).show()
+               }
 
-                override fun onResponse(call: Call, response: Response) {
-                    val featureCollection = response.body?.string()?.let(FeatureCollection::fromJson)
-                    runOnUiThread { addMarkers(featureCollection) }
-                }
-            })
-        }
+               override fun onResponse(call: Call, response: Response) {
+                   val featureCollection = response.body?.string()?.let(FeatureCollection::fromJson)
+                   runOnUiThread { addMarkers(featureCollection) }
+               }
+           })
+       }
 
-        override fun onStart() {
-        ...
-        override fun onResume() {
-        ...
-   ```
+       override fun onStart() {
+       ...
+       override fun onResume() {
+       ...
+    ```
 
 [Quickstart]: ./getting-started-guide.md
 [Maven Repository]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
