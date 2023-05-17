@@ -2,11 +2,11 @@
 
 This guide will show how to use the [Annotations Plugin](https://github.com/maplibre/maplibre-plugins-android/tree/master/plugin-annotation). Using this plugin is preferred way to add annotations over the now deprecated `Marker` class. 
 
-It is possible to add points, circles, polylines and polygons. For each type of  there is a coresponding
+It is possible to add points, circles, polylines and polygons. For each type, there is a corresponding
 annotation manager to handle a group of annotations. You may use a manager
 to create and customize the appearance and behavior for the corresponding annotation type.
 
-Here we continue the code from [Quickstart], and use `SymbolManager` for the showcase:
+In this demo, we continue the code from [Quickstart], and use `SymbolManager` for the showcase:
 
 1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add the
    Annotation Plugin as a dependency. Replace `1.0.0` with the latest version.
@@ -35,7 +35,7 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
 
 4. Rewrite `mapview.getMapSync()`. Here we assign values for `mapboxMap` and `SymbolManager`.
    After the style is loaded, add an image into the style for each symbol (id is `marker`),
-   fetch data, then add Symbols.
+   fetch data, then add symbols.
 
    For more information about `LifecycleScope` usage, please visit the [Android Developer Documentation].
 
@@ -135,7 +135,7 @@ Here we continue the code from [Quickstart], and use `SymbolManager` for the sho
     }
     ```
 
-7. The following is the final result after building and running `MainActivity`. The camera should be re-positioned to view the annocations after the data is fetched. Click each annotion, then more information should be displayed in a pop-up.
+7. The following is the final result after building and running `MainActivity`. The camera should be re-positioned to view the annotations after the data is fetched. Click each annotation, then more information should be displayed in a pop-up.
 
     <div style="align: center">
         <img src="https://github.com/maplibre/maplibre-native/assets/19887090/ce73a2f3-13a5-46fb-8c7b-70143b019e6c" alt="Screenshot with the map in demotile style">
