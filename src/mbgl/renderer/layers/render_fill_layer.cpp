@@ -434,17 +434,13 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 builder->addVertices(rawVerts, 0, rawVerts.size());
 
                 for (const auto& seg : bucket.triangleSegments) {
-                    builder->addTriangles(bucket.triangles.vector(),
-                                          seg.indexOffset,
-                                          seg.indexLength);
+                    builder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
                 }
 
                 if (fillAA) {
                     // TODO: Different drawable?  Multiple concurrent builders?
                     for (const auto& seg : bucket.lineSegments) {
-                        builder->addLines(bucket.lines.vector(),
-                                          seg.indexOffset,
-                                          seg.indexLength);
+                        builder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
                     }
                 }
                 //            evaluated.get<FillTranslate>(),
@@ -488,8 +484,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     // Track it.
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.tileDrawablesAdded;
-                    //Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
-                    // std::to_string(stats.tileDrawablesAdded+1));
+                    // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
+                    //  std::to_string(stats.tileDrawablesAdded+1));
                 }
             }
         } else {

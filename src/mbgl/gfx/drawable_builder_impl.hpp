@@ -14,7 +14,7 @@ struct DrawableBuilder::Impl {
     gfx::VertexVector<VT> vertices;
     gfx::IndexVector<gfx::Triangles> triangleIndexes;
     gfx::IndexVector<gfx::Lines> lineIndexes;
-    //SegmentVector<TypeList<void>> segments;
+    // SegmentVector<TypeList<void>> segments;
     Color currentColor = Color::white();
     std::vector<Color> colors;
 };

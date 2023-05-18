@@ -26,7 +26,8 @@ void TileLayerGroupGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass
 
             // Build index buffer
             auto indexData = drawable.getLineIndexData();
-            indexData.insert(indexData.end(), drawable.getTriangleIndexData().begin(), drawable.getTriangleIndexData().end());
+            indexData.insert(
+                indexData.end(), drawable.getTriangleIndexData().begin(), drawable.getTriangleIndexData().end());
             auto indexBuffer = gfx::IndexBuffer{
                 indexData.size(),
                 uploadPass.createIndexBufferResource(indexData.data(), indexData.size() * sizeof(indexData[0]), usage)};

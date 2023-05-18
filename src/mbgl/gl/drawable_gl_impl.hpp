@@ -37,8 +37,8 @@ public:
         }
     }
 
-    //const gfx::Triangles drawMode;
-    // const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
+    // const gfx::Triangles drawMode;
+    //  const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
 
     // ShaderID shaderId;
     // RenderbufferID renderTarget;

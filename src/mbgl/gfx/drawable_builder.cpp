@@ -126,8 +126,8 @@ void DrawableBuilder::setVertexAttributes(VertexAttributeArray&& attrs) {
 }
 
 std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
-                                  std::size_t vertexOffset,
-                                  std::size_t vertexLength) {
+                                         std::size_t vertexOffset,
+                                         std::size_t vertexLength) {
     const auto baseIndex = impl->vertices.elements();
     std::for_each(std::next(vertices.begin(), vertexOffset),
                   std::next(vertices.begin(), vertexOffset + vertexLength),
