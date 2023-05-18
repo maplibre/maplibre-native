@@ -13,6 +13,7 @@ enum class BuiltIn {
     None,
     BackgroundShader,
     FillShader,
+    FillOutlineShader,
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,

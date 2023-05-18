@@ -285,11 +285,14 @@ void RenderFillLayer::update(const int32_t layerIndex,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
-    if (!shader) {
-        shader = context.getGenericShader(shaders, "FillShader");
+    if (!fillShader) {
+        fillShader = context.getGenericShader(shaders, "FillShader");
+    }
+    if (!outlineShader) {
+        outlineShader = context.getGenericShader(shaders, "FillOutlineShader");
     }
 
-    if (!shader || !renderTiles || renderTiles->empty()) {
+    if (!fillShader || !outlineShader || !renderTiles || renderTiles->empty()) {
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
@@ -413,7 +416,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
                 if (!builder) {
                     builder = context.createDrawableBuilder("fill");
-                    builder->setShader(shader);
+                    builder->setShader(fillShader);
                     builder->addTweaker(context.createDrawableTweaker());
                     builder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
