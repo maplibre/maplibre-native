@@ -48,7 +48,7 @@ private:
     // Programs
     std::shared_ptr<BackgroundProgram> backgroundProgram;
     std::shared_ptr<BackgroundPatternProgram> backgroundPatternProgram;
-    
+
     gfx::ShaderProgramBasePtr shader;
 };
 
