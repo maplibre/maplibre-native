@@ -76,8 +76,14 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
+static bool enableDefaultRender = false;
+
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
+
+    if (!enableDefaultRender) {
+        return;
+    }
 
     if (!parameters.shaders.populate(fillProgram)) return;
     if (!parameters.shaders.populate(fillPatternProgram)) return;
@@ -350,6 +356,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
                 const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
                 const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
+                const auto fillAA = evaluated.get<FillAntialias>();
 
                 const auto fillRenderPass = (fillColor.a >= 1.0f
                                              /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
@@ -424,15 +431,22 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
                 std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
 
+                builder->addVertices(rawVerts, 0, rawVerts.size());
+
                 for (const auto& seg : bucket.triangleSegments) {
-                    builder->addTriangles(rawVerts,
-                                          seg.vertexOffset,
-                                          seg.vertexLength,
-                                          bucket.triangles.vector(),
+                    builder->addTriangles(bucket.triangles.vector(),
                                           seg.indexOffset,
                                           seg.indexLength);
                 }
 
+                if (fillAA) {
+                    // TODO: Different drawable?  Multiple concurrent builders?
+                    for (const auto& seg : bucket.lineSegments) {
+                        builder->addLines(bucket.lines.vector(),
+                                          seg.indexOffset,
+                                          seg.indexLength);
+                    }
+                }
                 //            evaluated.get<FillTranslate>(),
                 //            evaluated.get<FillTranslateAnchor>(),
                 //            parameters.stencilModeForClipping(tile.id),
@@ -474,7 +488,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     // Track it.
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.tileDrawablesAdded;
-                    // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
+                    //Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
                     // std::to_string(stats.tileDrawablesAdded+1));
                 }
             }
