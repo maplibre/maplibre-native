@@ -1,6 +1,8 @@
 #include <mbgl/gfx/drawable_builder.hpp>
+
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 #include <mbgl/renderer/render_pass.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -42,8 +44,18 @@ void DrawableBuilder::flush() {
         if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
                 if (auto& drawAttr = drawAttrs->getOrAdd(iName)) {
-                    for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
-                        drawAttr->setVariant(i, iAttr.get(0));
+                    if (iAttr.getCount() == 1) {
+                        // Apply the value to all vertexes
+                        for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
+                            drawAttr->setVariant(i, iAttr.get(0));
+                        }
+                    } else if (iAttr.getCount() == impl->vertices.elements()) {
+                        for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
+                            drawAttr->setVariant(i, iAttr.get(i));
+                        }
+                    } else {
+                        // throw?
+                        Log::Warning(Event::General, "Invalid attribute count");
                     }
                 }
             });
@@ -85,7 +97,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
     impl->vertices.emplace_back(Impl::VT({{{x1, y1}}}));
     impl->vertices.emplace_back(Impl::VT({{{x2, y2}}}));
-    impl->indexes.emplace_back(n, n + 1, n + 2);
+    impl->triangleIndexes.emplace_back(n, n + 1, n + 2);
     if (colorMode == ColorMode::PerVertex) {
         impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
     }
@@ -94,7 +106,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
-    impl->indexes.emplace_back(n - 2, n - 1, n);
+    impl->triangleIndexes.emplace_back(n - 2, n - 1, n);
     if (colorMode == ColorMode::PerVertex) {
         impl->colors.emplace_back(impl->currentColor);
     }
@@ -113,6 +125,44 @@ void DrawableBuilder::setVertexAttributes(VertexAttributeArray&& attrs) {
     vertexAttrs = attrs;
 }
 
+std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
+                                         std::size_t vertexOffset,
+                                         std::size_t vertexLength) {
+    const auto baseIndex = impl->vertices.elements();
+    std::for_each(std::next(vertices.begin(), vertexOffset),
+                  std::next(vertices.begin(), vertexOffset + vertexLength),
+                  [&](const std::array<int16_t, 2>& x) { impl->vertices.emplace_back(Impl::VT({{x}})); });
+    if (colorMode == ColorMode::PerVertex) {
+        for (size_t i = 0; i < vertexLength; ++i) {
+            impl->colors.emplace_back(impl->currentColor);
+        }
+    }
+    return baseIndex;
+}
+
+void DrawableBuilder::addLines(const std::vector<uint16_t>& indexes,
+                               std::size_t indexOffset,
+                               std::size_t indexLength,
+                               std::size_t baseIndex) {
+    for (auto i = std::next(indexes.begin(), indexOffset);
+         i != std::next(indexes.begin(), indexOffset + indexLength);) {
+        impl->lineIndexes.emplace_back(static_cast<uint16_t>(*i++ + baseIndex),
+                                       static_cast<uint16_t>(*i++ + baseIndex));
+    }
+}
+
+void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
+                                   std::size_t indexOffset,
+                                   std::size_t indexLength,
+                                   std::size_t baseIndex) {
+    for (auto i = std::next(indexes.begin(), indexOffset);
+         i != std::next(indexes.begin(), indexOffset + indexLength);) {
+        impl->triangleIndexes.emplace_back(static_cast<uint16_t>(*i++ + baseIndex),
+                                           static_cast<uint16_t>(*i++ + baseIndex),
+                                           static_cast<uint16_t>(*i++ + baseIndex));
+    }
+}
+
 void DrawableBuilder::addTriangles(const std::vector<std::array<int16_t, 2>>& vertices,
                                    std::size_t vertexOffset,
                                    std::size_t vertexLength,
@@ -127,21 +177,8 @@ void DrawableBuilder::addTriangles(const std::vector<std::array<int16_t, 2>>& ve
     //                     std::next(indexes.begin(), indexOffset),
     //                     std::next(indexes.begin(), indexOffset + indexLength));
 
-    const auto baseIndex = impl->vertices.elements();
-    std::for_each(std::next(vertices.begin(), vertexOffset),
-                  std::next(vertices.begin(), vertexOffset + vertexLength),
-                  [&](const std::array<int16_t, 2>& x) { impl->vertices.emplace_back(Impl::VT({{x}})); });
-    for (auto i = std::next(indexes.begin(), indexOffset);
-         i != std::next(indexes.begin(), indexOffset + indexLength);) {
-        impl->indexes.emplace_back(static_cast<uint16_t>(*i++ + baseIndex),
-                                   static_cast<uint16_t>(*i++ + baseIndex),
-                                   static_cast<uint16_t>(*i++ + baseIndex));
-    }
-    if (colorMode == ColorMode::PerVertex) {
-        for (size_t i = 0; i < vertexLength; ++i) {
-            impl->colors.emplace_back(impl->currentColor);
-        }
-    }
+    const auto baseIndex = addVertices(vertices, vertexOffset, vertexLength);
+    addTriangles(indexes, indexOffset, indexLength, baseIndex);
 }
 
 } // namespace gfx
