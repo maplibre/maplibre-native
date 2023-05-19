@@ -26,8 +26,11 @@ public:
 
     void draw(const PaintParameters&) const override;
 
-    void setIndexData(std::vector<uint16_t> indexes, std::size_t indexOffset = 0, std::size_t indexLength = 0);
-    std::vector<std::uint16_t>& getIndexData() const override;
+    void setLineIndexData(std::vector<uint16_t> indexes);
+    void setTriangleIndexData(std::vector<uint16_t> indexes);
+
+    std::vector<std::uint16_t>& getLineIndexData() const override;
+    std::vector<std::uint16_t>& getTriangleIndexData() const override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override;
     void setVertexAttributes(const gfx::VertexAttributeArray& value) override;
