@@ -169,7 +169,6 @@ protected:
     TileLayerGroupPtr tileLayerGroup;
 
     std::mutex mutex;
-    gfx::ShaderProgramBasePtr shader;
     bool evaluatedPropertiesChange = false;
     gfx::UniformBufferPtr uniformBuffer = nullptr;
 

@@ -23,16 +23,20 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     unbindUniformBuffers();
 }
 
-void DrawableGL::setIndexData(std::vector<std::uint16_t> indexes,
-                              const std::size_t indexOffset,
-                              const std::size_t indexLength) {
-    impl->indexes = std::move(indexes);
-    impl->indexOffset = indexOffset;
-    impl->indexLength = indexLength;
+void DrawableGL::setLineIndexData(std::vector<std::uint16_t> indexes) {
+    impl->lineIndexes = std::move(indexes);
 }
 
-std::vector<std::uint16_t>& DrawableGL::getIndexData() const {
-    return impl->indexes;
+void DrawableGL::setTriangleIndexData(std::vector<std::uint16_t> indexes) {
+    impl->triangleIndexes = std::move(indexes);
+}
+
+std::vector<std::uint16_t>& DrawableGL::getLineIndexData() const {
+    return impl->lineIndexes;
+}
+
+std::vector<std::uint16_t>& DrawableGL::getTriangleIndexData() const {
+    return impl->triangleIndexes;
 }
 
 const gl::VertexArray& DrawableGL::getVertexArray() const {
@@ -67,7 +71,6 @@ void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
                                 gfx::IndexBuffer&& indexBuffer_) {
     impl->vertexArray = std::move(vertexArray_);
     impl->attributeBuffer = std::move(attributeBuffer_);
-    impl->attributeOffset = 0;
     impl->indexBuffer = std::move(indexBuffer_);
 }
 

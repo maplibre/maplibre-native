@@ -12,8 +12,8 @@ namespace gfx {
 struct DrawableBuilder::Impl {
     using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t, 2>>;
     gfx::VertexVector<VT> vertices;
-    gfx::IndexVector<gfx::Triangles> indexes;
-    SegmentVector<TypeList<void>> segments;
+    gfx::IndexVector<gfx::Triangles> triangleIndexes;
+    gfx::IndexVector<gfx::Lines> lineIndexes;
     Color currentColor = Color::white();
     std::vector<Color> colors;
 };

@@ -64,6 +64,8 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     }
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+    evaluatedPropertiesChange = true;
 }
 
 bool RenderFillLayer::hasTransition() const {
@@ -74,8 +76,14 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
+static bool enableDefaultRender = false;
+
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
+
+    if (!enableDefaultRender) {
+        return;
+    }
 
     if (!parameters.shaders.populate(fillProgram)) return;
     if (!parameters.shaders.populate(fillPatternProgram)) return;
@@ -277,11 +285,14 @@ void RenderFillLayer::update(const int32_t layerIndex,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
-    if (!shader) {
-        shader = context.getGenericShader(shaders, "FillShader");
+    if (!fillShader) {
+        fillShader = context.getGenericShader(shaders, "FillShader");
+    }
+    if (!outlineShader) {
+        outlineShader = context.getGenericShader(shaders, "FillOutlineShader");
     }
 
-    if (!shader || !renderTiles || renderTiles->empty()) {
+    if (!fillShader || !outlineShader || !renderTiles || renderTiles->empty()) {
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
@@ -309,6 +320,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
     gfx::VertexAttributeArray vertexAttrs;
 
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
+        if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+            continue;
+        }
+
         tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
             // Has this tile dropped out of the cover set?
             const auto tileID = drawable->getTileID();
@@ -342,25 +357,48 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
                 const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
-                const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(1);
+                const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
                 const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
+                const auto fillAA = evaluated.get<FillAntialias>();
 
                 const auto fillRenderPass = (fillColor.a >= 1.0f
                                              /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
                                                 ? RenderPass::Opaque
                                                 : RenderPass::Translucent;
 
-                if (fillRenderPass != renderPass || fillColor.a <= 0.0f) {
+                if (fillRenderPass != renderPass) {
                     removeTile();
                     continue;
                 }
 
                 vertexAttrs.clear();
-                if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
-                    attr->set(0, gfx::Drawable::colorAttrRGBA(evalColor));
+
+                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+
+                if (auto& p1 = paintPropertyBinders.get<FillColor>()) {
+                    const auto count = p1->getVertexCount();
+                    // check that vertexVector.elements() == sum(segments.vertexLength)
+                    if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
+                        for (std::size_t i = 0; i < count; ++i) {
+                            const auto& packed =
+                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
+                                    p1->getVertexValue(i))
+                                    ->a1;
+                            attr->set<gfx::VertexAttribute::float4>(i, {packed[0], packed[1], packed[0], packed[1]});
+                        }
+                    }
                 }
-                if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
-                    attr->set<gfx::VertexAttribute::float2>(0, {fillOpacity, fillOpacity});
+                if (auto& p1 = paintPropertyBinders.get<FillOpacity>()) {
+                    const auto count = p1->getVertexCount();
+                    if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
+                        for (std::size_t i = 0; i < count; ++i) {
+                            const auto& opacity =
+                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                    p1->getVertexValue(i))
+                                    ->a1;
+                            attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
+                        }
+                    }
                 }
 
                 if (evaluatedPropertiesChange) {
@@ -378,7 +416,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
                 if (!builder) {
                     builder = context.createDrawableBuilder("fill");
-                    builder->setShader(shader);
+                    builder->setShader(fillShader);
                     builder->addTweaker(context.createDrawableTweaker());
                     builder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
@@ -396,15 +434,18 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
                 std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
 
+                builder->addVertices(rawVerts, 0, rawVerts.size());
+
                 for (const auto& seg : bucket.triangleSegments) {
-                    builder->addTriangles(rawVerts,
-                                          seg.vertexOffset,
-                                          seg.vertexLength,
-                                          bucket.triangles.vector(),
-                                          seg.indexOffset,
-                                          seg.indexLength);
+                    builder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
                 }
 
+                if (fillAA) {
+                    // TODO: Different drawable?  Multiple concurrent builders?
+                    for (const auto& seg : bucket.lineSegments) {
+                        builder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
+                    }
+                }
                 //            evaluated.get<FillTranslate>(),
                 //            evaluated.get<FillTranslateAnchor>(),
                 //            parameters.stencilModeForClipping(tile.id),
@@ -447,7 +488,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.tileDrawablesAdded;
                     // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
-                    // std::to_string(stats.tileDrawablesAdded+1));
+                    //  std::to_string(stats.tileDrawablesAdded+1));
                 }
             }
         } else {
