@@ -13,6 +13,13 @@
         "glsl_frag": "drawable.fill.fragment.glsl",
         "uses_ubos": false 
     },
+    {
+        "name": "FillOutlineShader",
+        "header": "drawable_fill_outline",
+        "glsl_vert": "drawable.fill_outline.vertex.glsl",
+        "glsl_frag": "drawable.fill_outline.fragment.glsl",
+        "uses_ubos": false 
+    },
 
     {
         "name": "Prelude",

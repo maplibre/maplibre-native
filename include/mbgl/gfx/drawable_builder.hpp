@@ -109,6 +109,23 @@ public:
     void setVertexAttributes(const VertexAttributeArray&);
     void setVertexAttributes(VertexAttributeArray&&);
 
+    /// Add some vertex elements, returns the index of the first one added
+    std::size_t addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
+                            std::size_t vertexOffset,
+                            std::size_t vertexLength);
+
+    /// Add lines based on existing vertices
+    void addLines(const std::vector<uint16_t>& indexes,
+                  std::size_t indexOffset,
+                  std::size_t indexLength,
+                  std::size_t baseIndex = 0);
+
+    /// Add triangles based on existing vertices
+    void addTriangles(const std::vector<uint16_t>& indexes,
+                      std::size_t indexOffset,
+                      std::size_t indexLength,
+                      std::size_t baseIndex = 0);
+
     /// Add already-set-up triangles directly
     void addTriangles(const std::vector<std::array<int16_t, 2>>& vertices,
                       std::size_t vertexOffset,

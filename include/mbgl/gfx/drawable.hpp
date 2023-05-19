@@ -5,6 +5,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/identity.hpp>
+#include <mbgl/util/traits.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -54,9 +55,15 @@ public:
 
     /// Test whether to draw this drawable in a given render pass.
     /// If multiple render pass bits are set, all must be present.
-    bool hasRenderPass(mbgl::RenderPass value) const {
-        using T = std::underlying_type<mbgl::RenderPass>::type;
-        return (static_cast<T>(renderPass) & static_cast<T>(value)) == static_cast<T>(value);
+    bool hasRenderPass(const mbgl::RenderPass value) const {
+        return (mbgl::underlying_type(renderPass) & mbgl::underlying_type(value)) != 0;
+    }
+
+    /// Test whether to draw this drawable in a given render pass.
+    /// If multiple render pass bits are set, all must be present.
+    bool hasAllRenderPasses(const mbgl::RenderPass value) const {
+        const auto underlying_value = mbgl::underlying_type(value);
+        return (mbgl::underlying_type(renderPass) & underlying_value) == underlying_value;
     }
 
     /// not used for anything yet
@@ -84,7 +91,8 @@ public:
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
 
-    virtual std::vector<std::uint16_t>& getIndexData() const = 0;
+    virtual std::vector<std::uint16_t>& getLineIndexData() const = 0;
+    virtual std::vector<std::uint16_t>& getTriangleIndexData() const = 0;
 
     /// Attach a tweaker to be run on this drawable for each frame
     void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
