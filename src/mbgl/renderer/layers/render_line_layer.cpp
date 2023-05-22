@@ -414,30 +414,34 @@ void RenderLineLayer::update(const int32_t layerIndex,
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
             builder->setLayerIndex(layerIndex);
             builder->setVertexAttrName("a_pos_normal");
-            
+
             // vertices
             std::vector<std::array<int16_t, 2>> rawVerts(bucket.vertices.vector().size());
-            std::transform(bucket.vertices.vector().begin(), bucket.vertices.vector().end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+            std::transform(
+                bucket.vertices.vector().begin(), bucket.vertices.vector().end(), rawVerts.begin(), [](const auto& x) {
+                    return x.a1;
+                });
             builder->addVertices(rawVerts, 0, rawVerts.size());
-            
+
             // attributes
             gfx::VertexAttributeArray vertexAttrs;
-            if(auto& attr = vertexAttrs.getOrAdd("a_data", 1, gfx::AttributeDataType::Int4, 1, bucket.vertices.elements()))
-            {
+            if (auto& attr = vertexAttrs.getOrAdd(
+                    "a_data", 1, gfx::AttributeDataType::Int4, 1, bucket.vertices.elements())) {
                 size_t index{0};
-                for(const auto& vert: bucket.vertices.vector())
-                {
+                for (const auto& vert : bucket.vertices.vector()) {
                     attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
                 }
             }
             builder->setVertexAttributes(std::move(vertexAttrs));
-            
+
             // indexes
             for (const auto& seg : bucket.segments) {
                 builder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
             }
 
-            builder->setMatrix(/* tile.translatedMatrix(properties.get<LineTranslate>(), properties.get<LineTranslateAnchor>(), state) */ matrix::identity4());
+            builder->setMatrix(/* tile.translatedMatrix(properties.get<LineTranslate>(),
+                                  properties.get<LineTranslateAnchor>(), state) */
+                               matrix::identity4());
             builder->flush();
 
             // uniforms
@@ -446,10 +450,12 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 LineLayerUBO1 lineLayerUBO1Data;
                 lineLayerUBO1Data.ratio = 1.0f / tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
                 lineLayerUBO1Data.device_pixel_ratio = 2; // parameters.pixelRatio;
-                lineLayerUBO1Data.units_to_pixels = {{0.00243902439f, -0.00169491523f}}; // {{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}};
+                lineLayerUBO1Data.units_to_pixels = {
+                    {0.00243902439f, -0.00169491523f}}; // {{1.0f / parameters.pixelsToGLUnits[0], 1.0f /
+                                                        // parameters.pixelsToGLUnits[1]}};
                 lineLayerUBO1 = context.createUniformBuffer(&lineLayerUBO1Data, sizeof(lineLayerUBO1Data));
             }
-            
+
             auto newDrawables = builder->clearDrawables();
             if (!newDrawables.empty()) {
                 auto& drawable = newDrawables.front();
@@ -459,7 +465,8 @@ void RenderLineLayer::update(const int32_t layerIndex,
                 ++stats.tileDrawablesAdded;
                 Log::Warning(Event::General,
                              "Adding Line drawable for " + util::toString(tileID) + " total " +
-                                 std::to_string(stats.tileDrawablesAdded + 1) + " current " + std::to_string(tileLayerGroup->getDrawableCount()));
+                                 std::to_string(stats.tileDrawablesAdded + 1) + " current " +
+                                 std::to_string(tileLayerGroup->getDrawableCount()));
             }
         }
     }
