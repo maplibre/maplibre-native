@@ -17,7 +17,7 @@ layout (std140) uniform DrawableUBO {
     mat4 u_matrix;
 };
 
-layout (std140) uniform CircleLayerUBO1 {
+layout (std140) uniform CircleLayerVertexUBO {
     vec2 u_extrude_scale;
     highp float u_camera_to_center_distance;
     lowp float u_device_pixel_ratio;
@@ -25,7 +25,7 @@ layout (std140) uniform CircleLayerUBO1 {
     bool u_pitch_with_map;
 };
 
-layout (std140) uniform CircleLayerUBO2 {
+layout (std140) uniform CircleLayerFragmentUBO {
     highp vec4 u_color;
     mediump float u_radius;
     lowp float u_blur;
@@ -35,7 +35,7 @@ layout (std140) uniform CircleLayerUBO2 {
     lowp float u_stroke_opacity;
 };
 
-layout (std140) uniform CircleLayerUBO3 {
+layout (std140) uniform CircleLayerInterpolateUBO {
     lowp float u_color_t;
     lowp float u_radius_t;
     lowp float u_blur_t;
@@ -44,7 +44,6 @@ layout (std140) uniform CircleLayerUBO3 {
     lowp float u_stroke_width_t;
     lowp float u_stroke_opacity_t;
 };
-    
 
 #ifndef HAS_UNIFORM_u_color
 layout (location = 1) in highp vec4 a_color;
@@ -151,7 +150,7 @@ lowp float stroke_opacity = u_stroke_opacity;
 )";
     static constexpr const char* fragment = R"(in vec3 v_data;
 
-layout (std140) uniform CircleLayerUBO {
+layout (std140) uniform CircleLayerFragmentUBO {
     highp vec4 u_color;
     mediump float u_radius;
     lowp float u_blur;

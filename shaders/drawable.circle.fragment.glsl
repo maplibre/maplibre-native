@@ -1,6 +1,6 @@
 in vec3 v_data;
 
-layout (std140) uniform CircleLayerUBO {
+layout (std140) uniform CircleLayerFragmentUBO {
     highp vec4 u_color;
     mediump float u_radius;
     lowp float u_blur;
