@@ -8,6 +8,7 @@
 #include <mbgl/shaders/gl/drawable_background.hpp>
 #include <mbgl/shaders/gl/drawable_circle.hpp>
 #include <mbgl/shaders/gl/drawable_fill.hpp>
+#include <mbgl/shaders/gl/drawable_fill_outline.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
 #include <mbgl/shaders/gl/background_pattern.hpp>

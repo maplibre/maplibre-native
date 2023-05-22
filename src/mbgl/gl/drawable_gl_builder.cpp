@@ -41,11 +41,11 @@ void DrawableGLBuilder::init() {
         }
     }
 
-    constexpr auto indexOffset = 0;
-    const auto indexCount = impl->indexes.elements();
-    drawableGL.setIndexData(impl->indexes.vector(), indexOffset, indexCount);
+    drawableGL.setLineIndexData(impl->lineIndexes.vector());
+    drawableGL.setTriangleIndexData(impl->triangleIndexes.vector());
 
-    impl->indexes.clear();
+    impl->lineIndexes.clear();
+    impl->triangleIndexes.clear();
     impl->vertices.clear();
     impl->colors.clear();
 }

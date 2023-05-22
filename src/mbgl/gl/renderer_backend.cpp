@@ -93,8 +93,10 @@ void registerTypes(gfx::ShaderRegistry& registry, gl::Context& glContext, const 
 }
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
-    registerTypes<shaders::BuiltIn::BackgroundShader, shaders::BuiltIn::CircleShader, shaders::BuiltIn::FillShader>(
-        shaders, static_cast<gl::Context&>(*context), programParameters);
+    registerTypes<shaders::BuiltIn::BackgroundShader,
+                  shaders::BuiltIn::CircleShader,
+                  shaders::BuiltIn::FillShader,
+                  shaders::BuiltIn::FillOutlineShader>(shaders, static_cast<gl::Context&>(*context), programParameters);
 }
 
 } // namespace gl

@@ -29,18 +29,20 @@ public:
 
     void draw(const PaintParameters& parameters) const {
         auto& glContext = static_cast<gl::Context&>(parameters.context);
-        glContext.draw(drawMode, indexOffset, indexLength);
+        if (!triangleIndexes.empty()) {
+            glContext.draw(gfx::Triangles(), lineIndexes.size(), triangleIndexes.size());
+        }
+        if (!lineIndexes.empty()) {
+            glContext.draw(gfx::Lines(1), 0, lineIndexes.size());
+        }
     }
-
-    const gfx::Triangles drawMode;
-    // const gfx::DrawModeType type = gfx::DrawModeType::Triangles;
 
     // ShaderID shaderId;
     // RenderbufferID renderTarget;
     std::vector<TextureID> textures;
 
-    // std::vector<std::uint8_t> vertData;
-    std::vector<std::uint16_t> indexes;
+    std::vector<std::uint16_t> lineIndexes;
+    std::vector<std::uint16_t> triangleIndexes;
 
     VertexAttributeArrayGL vertexAttributes;
 
@@ -50,9 +52,6 @@ public:
 
     UniformBufferArrayGL uniformBuffers;
 
-    std::size_t indexOffset = 0;
-    std::size_t indexLength = 0;
-    std::size_t attributeOffset = 0;
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;
     gfx::ColorMode colorMode;
