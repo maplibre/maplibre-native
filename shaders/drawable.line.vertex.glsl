@@ -9,10 +9,33 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform mediump float u_ratio;
-uniform vec2 u_units_to_pixels;
-uniform lowp float u_device_pixel_ratio;
+layout (std140) uniform DrawableUBO {
+    mat4 u_matrix;
+};
+
+layout (std140) uniform LineLayerUBO1 {
+    vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+};
+
+layout (std140) uniform LineLayerUBO2 {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+};
+
+layout (std140) uniform LineLayerUBO3 {
+    lowp float u_color_t;
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;

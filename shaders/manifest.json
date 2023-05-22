@@ -42,7 +42,8 @@
         "name": "LineShader",
         "header": "drawable_line",
         "glsl_vert": "drawable.line.vertex.glsl",
-        "glsl_frag": "drawable.line.fragment.glsl"
+        "glsl_frag": "drawable.line.fragment.glsl",
+        "uses_ubos": true
     },
 
     {

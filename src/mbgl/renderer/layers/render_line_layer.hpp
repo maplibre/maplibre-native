@@ -26,7 +26,7 @@ public:
     void update(int32_t layerIndex,
                 gfx::ShaderRegistry&,
                 gfx::Context&,
-                const TransformState&,
+                const TransformState& state,
                 UniqueChangeRequestVec&) override;
 
 private:
@@ -61,5 +61,12 @@ private:
     std::shared_ptr<LineSDFProgram> lineSDFProgram;
     std::shared_ptr<LinePatternProgram> linePatternProgram;
 };
+
+struct alignas(16) LineLayerUBO1 {
+    std::array<float, 2> units_to_pixels;
+    float ratio;
+    float device_pixel_ratio;
+};
+static_assert(sizeof(LineLayerUBO1) % 16 == 0);
 
 } // namespace mbgl

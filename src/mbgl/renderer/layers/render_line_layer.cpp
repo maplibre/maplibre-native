@@ -92,6 +92,7 @@ void RenderLineLayer::upload(gfx::UploadPass& uploadPass) {
 }
 
 void RenderLineLayer::render(PaintParameters& parameters) {
+    return;
     assert(renderTiles);
     if (parameters.pass == RenderPass::Opaque) {
         return;
@@ -325,7 +326,7 @@ void RenderLineLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 void RenderLineLayer::update(const int32_t layerIndex,
                              gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& /*state*/,
+                             const TransformState& state,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
     std::unique_ptr<gfx::DrawableBuilder> builderLine{context.createDrawableBuilder("line")};
@@ -396,36 +397,69 @@ void RenderLineLayer::update(const int32_t layerIndex,
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
+            // TODO: dash array line
             builderSDFLine->setRenderPass(renderPass);
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
-            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
-            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-
-        } else if (!unevaluated.get<LinePattern>().isUndefined()) {
-            const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-            std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
-            std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
+            // TODO: pattern line
             builderPatternLine->setRenderPass(renderPass);
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
+            // TODO: gradient line
+            builderGradientLine->setRenderPass(renderPass);
         } else {
+            // simple line
             auto& builder = builderLine;
             builder->setRenderPass(renderPass);
-            const auto& verts = bucket.vertices.vector();
-            std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
-            std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-            builder->addTriangles(
-                rawVerts, 0, rawVerts.size(), bucket.triangles.vector(), 0, bucket.triangles.elements());
+            builder->addTweaker(context.createDrawableTweaker());
+            builder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
+            builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+            builder->setLayerIndex(layerIndex);
+            builder->setVertexAttrName("a_pos_normal");
+            
+            // vertices
+            std::vector<std::array<int16_t, 2>> rawVerts(bucket.vertices.vector().size());
+            std::transform(bucket.vertices.vector().begin(), bucket.vertices.vector().end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+            builder->addVertices(rawVerts, 0, rawVerts.size());
+            
+            // attributes
+            gfx::VertexAttributeArray vertexAttrs;
+            if(auto& attr = vertexAttrs.getOrAdd("a_data", 1, gfx::AttributeDataType::Int4, 1, bucket.vertices.elements()))
+            {
+                size_t index{0};
+                for(const auto& vert: bucket.vertices.vector())
+                {
+                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+                }
+            }
+            builder->setVertexAttributes(std::move(vertexAttrs));
+            
+            // indexes
+            for (const auto& seg : bucket.segments) {
+                builder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
+            }
+
+            builder->setMatrix(/* tile.translatedMatrix(properties.get<LineTranslate>(), properties.get<LineTranslateAnchor>(), state) */ matrix::identity4());
             builder->flush();
+
+            // uniforms
+            gfx::UniformBufferPtr lineLayerUBO1;
+            {
+                LineLayerUBO1 lineLayerUBO1Data;
+                lineLayerUBO1Data.ratio = 1.0f / tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
+                lineLayerUBO1Data.device_pixel_ratio = 2; // parameters.pixelRatio;
+                lineLayerUBO1Data.units_to_pixels = {{0.00243902439f, -0.00169491523f}}; // {{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}};
+                lineLayerUBO1 = context.createUniformBuffer(&lineLayerUBO1Data, sizeof(lineLayerUBO1Data));
+            }
+            
             auto newDrawables = builder->clearDrawables();
             if (!newDrawables.empty()) {
                 auto& drawable = newDrawables.front();
                 drawable->setTileID(tileID);
+                drawable->mutableUniformBuffers().addOrReplace("LineLayerUBO1", lineLayerUBO1);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
                 Log::Warning(Event::General,
                              "Adding Line drawable for " + util::toString(tileID) + " total " +
-                                 std::to_string(stats.tileDrawablesAdded + 1));
+                                 std::to_string(stats.tileDrawablesAdded + 1) + " current " + std::to_string(tileLayerGroup->getDrawableCount()));
             }
         }
     }
