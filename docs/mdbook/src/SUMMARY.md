@@ -12,4 +12,4 @@
 
 - [MapLibre Native for Android](./android/README.md)
     - [Quickstart](./android/getting-started-guide.md)
-    - [Annotation Plugin](./android/annotation-guide.md)
+    - [Annotation: Marker](./android/annotation-guide.md)

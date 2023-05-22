@@ -1,23 +1,36 @@
-# Annotation Plugin
+# Annotation: Marker
 
-This guide will show how to use the [Annotations Plugin](https://github.com/maplibre/maplibre-plugins-android/tree/master/plugin-annotation). Using this plugin is preferred way to add annotations over the now deprecated `Marker` class. 
+This guide will show you how to add Markers in the map.
 
-It is possible to add points, circles, polylines and polygons. For each type, there is a corresponding
-annotation manager to handle a group of annotations. You may use a manager
-to create and customize the appearance and behavior for the corresponding annotation type.
+`Annotation` is an overlay on top of a Map. In package
+`com.mapbox.mapboxsdk.annotations`, it has the following subclasses:
+1. [Marker]
+2. [Polyline]
+3. [Polygon]
 
-In this demo, we continue the code from [Quickstart], and use `SymbolManager` for the showcase:
+A Marker shows an icon image at a geographical location. By default, marker uses
+a provided image as its icon (User may find it in drawable folder from the package
+`com.comapbox.mapboxsdk`).
 
-1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add the
-   Annotation Plugin as a dependency. Replace `1.0.0` with the latest version.
-   Visit [Maven Repository] for the version history.
+![marker image]
 
-   Here we also add `okhttp` to be able to make HTTP requests.
+Or, the icon can be customized using [IconFactory] to generate an
+[Icon] using as provided image.
+
+For more customization, please read documentation about [MarkerOptions].
+
+In this showcase, we continue the code from [Quickstart],
+rename Activity into `JsonApiActivity`,
+and pull the GeoJSON data from a free and public API.
+Then add markers into map with GeoJSON:
+
+1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add
+   `okhttp` to simplify code about HTTP requests.
+
 
     ```gradle
     dependencies {
         ...
-        implementation 'org.maplibre.gl:android-plugin-annotation-v9:1.0.0'
         implementation 'com.squareup.okhttp3:okhttp:4.10.0'
         ...
     }
@@ -25,257 +38,51 @@ In this demo, we continue the code from [Quickstart], and use `SymbolManager` fo
 
 2. Sync your Android project the with Gradle files.
 
-3. In `MainActivity` we add variables for `MapboxMap` and `SymbolManager`.
-   They are used for adding annotations.
+3. In `JsonApiActivity` we add a new variable for `MapboxMap`.
+   It is used for map instance about adding annotations.
 
-    ```kotlin
-    private lateinit var mapboxMap: MapboxMap
-    private lateinit var symbolManager: SymbolManager
-    ```
+```kotlin
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:top}}
+```
 
-4. Rewrite `mapview.getMapSync()`. Here we assign values for `mapboxMap` and `SymbolManager`.
-   After the style is loaded, add an image into the style for each symbol (id is `marker`),
-   fetch data, then add symbols.
+4. Rewrite `mapview.getMapSync()`. Now we assign values for `mapboxMap`.
+   Also, call method `getEarthQuakeDataFromUSGS()` for HTTP request.
 
-   For more information about `LifecycleScope` usage, please visit the [Android Developer Documentation].
+```kotlin
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:mapAsync}}
+```
 
-    ```kotlin
-    mapView.getMapAsync { map ->
-        mapboxMap = map
+5. Define a function `getEarthQuakeDataFromUSGS()` to fetch GeoJSON data from a public API.
+   If we successfully get the response, call `addMarkersToMap()` on UI thread.
 
-        map.setStyle("https://demotiles.maplibre.org/style.json") { style ->
-            // Add image for symbol
-            val markerDrawable = ResourcesCompat.getDrawable(
-                this@MainActivity.resources,
-                com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default,
-                null
-            )!!
-            style.addImage("marker", markerDrawable)
+```kotlin
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes}}
+```
 
-            // Build instance of SymbolManager from map components
-            symbolManager = SymbolManager(mapView, map, style)
+6. Now it is time to add markers into the map.
+   - In method `addMarkersToMap()`, we define two types of bitmap for marker icon.
+   - For each feature in GeoJSON, add a marker with snippet about earthquake details.
+   - If the magnitude of an earthquake is bigger than 6.0, we use the red icon. Otherwise, use the blue one.
+   - Finally, move camera to bounds of newly added markers
 
-            // Fetch data from USGS
-            getEarthQuakeDataFromUSGS()
-        }
-    }
-    ```
+```kotlin
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
+```
 
-5. Define a time-consuming function to fetch GeoJSON data from a public API.
-   Then use `addMarkers()` in callback.
+7. Here is the final result. For the full content of `JsonApiActivity`, please visit source code of [Test APP]
 
-   ```kotlin
-    // Get Earthquake data from usgs.gov:
-    // https://earthquake.usgs.gov/fdsnws/event/1/
-    private fun getEarthQuakeDataFromUSGS() {
-        val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
-            .addQueryParameter("format", "geojson")
-            .addQueryParameter("starttime", "2022-01-01")
-            .addQueryParameter("endtime", "2022-12-31")
-            .addQueryParameter("minmagnitude", "6")
-            .addQueryParameter("latitude", "24")
-            .addQueryParameter("longitude", "121")
-            .addQueryParameter("maxradius", "1.5")
-            .build()
-        val request: Request = Request.Builder().url(url).build()
+<div style="align: center">
+  <img src="https://github.com/maplibre/maplibre-native/assets/19887090/00446249-9b19-4a48-8a46-00d4c5a2f981" alt="Screenshot with the map in demotile style">
+</div>
 
-        OkHttpClient().newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Toast.makeText(this@MainActivity, "Fail to fetch data", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                // If data is fetched, add annotations on the map
-                val featureCollection = response.body?.string()?.let(FeatureCollection::fromJson)
-                runOnUiThread { addMarkers(featureCollection) }
-            }
-        })
-    }
-   ```
-
-6. Now it is time to use `SymbolManager` to add annotations:
-
-    ```kotlin
-    private fun addMarkers(data: FeatureCollection?) {
-        val bounds = mutableListOf<LatLng>()
-
-        // Add symbol for each point feature
-        data?.features()?.forEach { feature ->
-            val geometry = feature.geometry()?.toJson() ?: return@forEach
-            val point = Point.fromJson(geometry) ?: return@forEach
-            val latLng = LatLng(point.latitude(), point.longitude())
-            bounds.add(latLng)
-
-            val options = SymbolOptions()
-                .withLatLng(latLng)
-                .withIconImage("marker")
-                .withTextOffset(arrayOf(50f, 50f))
-                .withData(feature.properties())
-            symbolManager.create(options)
-        }
-
-        // Move camera to newly added annotations
-        mapboxMap.getCameraForLatLngBounds(LatLngBounds.fromLatLngs(bounds))?.let {
-            val newCameraPosition = CameraPosition.Builder()
-                .target(it.target)
-                .zoom(it.zoom - 0.5)
-                .build()
-            mapboxMap.cameraPosition = newCameraPosition
-        }
-
-        // Show alert dialog when click
-        symbolManager.addClickListener {
-            val title = it.data?.asJsonObject?.get("title")?.asString
-            val magnitude = it.data?.asJsonObject?.get("mag")?.asString
-            val msg = "$title\nMagnitude: $magnitude"
-
-            AlertDialog.Builder(this@MainActivity).setMessage(msg).create().show()
-            return true
-        }
-    }
-    ```
-
-7. The following is the final result after building and running `MainActivity`. The camera should be re-positioned to view the annotations after the data is fetched. Click each annotation, then more information should be displayed in a pop-up.
-
-    <div style="align: center">
-        <img src="https://github.com/maplibre/maplibre-native/assets/19887090/ce73a2f3-13a5-46fb-8c7b-70143b019e6c" alt="Screenshot with the map in demotile style">
-    </div>
-
-    ```kotlin
-    import android.app.AlertDialog
-    import android.os.Bundle
-    import android.view.LayoutInflater
-    import android.widget.Toast
-    import androidx.appcompat.app.AppCompatActivity
-    import androidx.core.content.res.ResourcesCompat
-    import com.mapbox.geojson.FeatureCollection
-    import com.mapbox.geojson.Point
-    import com.mapbox.mapboxsdk.Mapbox
-    import com.mapbox.mapboxsdk.camera.CameraPosition
-    import com.mapbox.mapboxsdk.geometry.LatLng
-    import com.mapbox.mapboxsdk.geometry.LatLngBounds
-    import com.mapbox.mapboxsdk.maps.MapView
-    import com.mapbox.mapboxsdk.maps.MapboxMap
-    import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
-    import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
-    import okhttp3.Call
-    import okhttp3.Callback
-    import okhttp3.HttpUrl.Companion.toHttpUrl
-    import okhttp3.OkHttpClient
-    import okhttp3.Request
-    import okhttp3.Response
-    import java.io.IOException
-
-
-    class MainActivity : AppCompatActivity() {
-
-       // Declare a variable for MapView
-       private lateinit var mapView: MapView
-       private lateinit var mapboxMap: MapboxMap
-       private lateinit var symbolManager: SymbolManager
-
-       override fun onCreate(savedInstanceState: Bundle?) {
-           super.onCreate(savedInstanceState)
-           // Init MapLibre
-           Mapbox.getInstance(this)
-
-           // Init layout view
-           val inflater = LayoutInflater.from(this)
-           val rootView = inflater.inflate(R.layout.activity_main, null)
-           setContentView(rootView)
-
-           // Init the MapView
-           mapView = rootView.findViewById(R.id.mapView)
-           mapView.getMapAsync { map ->
-               mapboxMap = map
-
-               map.setStyle("https://demotiles.maplibre.org/style.json") { style ->
-                   // Add image for symbol
-                   val markerDrawable = ResourcesCompat.getDrawable(
-                       this@MainActivity.resources,
-                       com.mapbox.mapboxsdk.R.drawable.maplibre_marker_icon_default,
-                       null
-                   )!!
-                   style.addImage("marker", markerDrawable)
-
-                   // Build instance of SymbolManager from map components
-                   symbolManager = SymbolManager(mapView, map, style)
-
-                   // Fetch data from USGS
-                   getEarthQuakeDataFromUSGS()
-               }
-           }
-       }
-
-       private fun addMarkers(data: FeatureCollection?) {
-           val bounds = mutableListOf<LatLng>()
-
-           // Add symbol for each point feature
-           data?.features()?.forEach { feature ->
-               val geometry = feature.geometry()?.toJson() ?: return@forEach
-               val point = Point.fromJson(geometry) ?: return@forEach
-               val latLng = LatLng(point.latitude(), point.longitude())
-               bounds.add(latLng)
-
-               val options = SymbolOptions()
-                   .withLatLng(latLng)
-                   .withIconImage("marker")
-                   .withTextOffset(arrayOf(50f, 50f))
-                   .withData(feature.properties())
-               symbolManager.create(options)
-           }
-
-           // Move camera to newly added annotations
-           mapboxMap.getCameraForLatLngBounds(LatLngBounds.fromLatLngs(bounds))?.let {
-               val newCameraPosition = CameraPosition.Builder()
-                   .target(it.target)
-                   .zoom(it.zoom - 0.5)
-                   .build()
-               mapboxMap.cameraPosition = newCameraPosition
-           }
-
-           // Pop up alert dialog when click
-           symbolManager.addClickListener {
-               val title = it.data?.asJsonObject?.get("title")?.asString
-               val magnitude = it.data?.asJsonObject?.get("mag")?.asString
-               val msg = "$title\nMagnitude: $magnitude"
-
-               AlertDialog.Builder(this@MainActivity).setMessage(msg).create().show()
-               true
-           }
-       }
-
-       // Get Earthquake data from usgs.gov, read API doc at:
-       // https://earthquake.usgs.gov/fdsnws/event/1/
-       private fun getEarthQuakeDataFromUSGS() {
-           val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
-               .addQueryParameter("format", "geojson")
-               .addQueryParameter("starttime", "2022-01-01")
-               .addQueryParameter("endtime", "2022-12-31")
-               .addQueryParameter("minmagnitude", "6")
-               .addQueryParameter("latitude", "24")
-               .addQueryParameter("longitude", "121")
-               .addQueryParameter("maxradius", "1.5")
-               .build()
-           val request: Request = Request.Builder().url(url).build()
-           OkHttpClient().newCall(request).enqueue(object : Callback {
-               override fun onFailure(call: Call, e: IOException) {
-                   Toast.makeText(this@MainActivity, "Fail to fetch data", Toast.LENGTH_SHORT).show()
-               }
-
-               override fun onResponse(call: Call, response: Response) {
-                   val featureCollection = response.body?.string()?.let(FeatureCollection::fromJson)
-                   runOnUiThread { addMarkers(featureCollection) }
-               }
-           })
-       }
-
-       override fun onStart() {
-       ...
-       override fun onResume() {
-       ...
-    ```
-
+[Marker]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker/index.html
+[Polyline]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polyline/index.html
+[Polygon]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polygon/index.html
+[marker image]: ../../../../../maplibre-native/benchmark/fixtures/api/default_marker.png
+[IconFactory]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon-factory/index.html
+[Icon]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon/index.html
 [Quickstart]: ./getting-started-guide.md
-[Maven Repository]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
+[mvn]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
 [Android Developer Documentation]: https://developer.android.com/topic/libraries/architecture/coroutines
+[MarkerOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker-options/index.html
+[Test App]: https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt
