@@ -167,11 +167,18 @@ public:
         return std::tuple<T>{currentValue.constantOr(constant)};
     }
 
+    using BaseAttributeType = A;
+    using BaseVertex = gfx::VertexType<BaseAttributeType>;
+
     std::size_t getVertexCount() const override { return 1; }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override { return &constant; }
+    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
+        convertedValue = BaseVertex{attributeValue(constant)};
+        return &convertedValue;
+    }
 
 private:
     T constant;
+    mutable BaseVertex convertedValue;
 };
 
 template <class T, class... As>
