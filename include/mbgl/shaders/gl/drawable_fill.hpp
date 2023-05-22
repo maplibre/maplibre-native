@@ -14,6 +14,8 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
 
 layout (std140) uniform DrawableUBO {
     mat4 u_matrix;
+    vec2 u_world;
+    vec2 pad;
 };
 
 #ifndef HAS_UNIFORM_u_color

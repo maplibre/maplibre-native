@@ -1,6 +1,8 @@
 #include <mbgl/gl/layer_group_gl.hpp>
 
 #include <mbgl/gfx/render_pass.hpp>
+#include <mbgl/gfx/renderable.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/gl/vertex_array.hpp>
@@ -87,8 +89,11 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             matrix = tileMat;
         }
 
+        const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
+        
         gfx::DrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
+        drawableUBO.world = {(float)renderableSize.width, (float)renderableSize.height};
         auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
 
