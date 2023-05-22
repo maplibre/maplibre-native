@@ -66,6 +66,10 @@ public:
         return (mbgl::underlying_type(renderPass) & underlying_value) == underlying_value;
     }
 
+    /// Width for lines
+    int32_t getLineWidth() const { return lineWidth; }
+    void setLineWidth(int32_t value) { lineWidth = value; }
+
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
@@ -73,6 +77,10 @@ public:
     /// The layer index determines the drawing order
     int32_t getLayerIndex() const { return layerIndex; }
     void setLayerIndex(int32_t value) { layerIndex = value; }
+
+    /// Determines depth range within the layer
+    int32_t getSubLayerIndex() const { return subLayerIndex; }
+    void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
     std::optional<OverscaledTileID> getTileID() const { return tileID; }
     void setTileID(OverscaledTileID value) { tileID = value; }
@@ -129,7 +137,9 @@ protected:
     mat4 matrix; //= matrix::identity4();
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
+    int32_t lineWidth = 1;
     int32_t layerIndex = -1;
+    int32_t subLayerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
 
     std::vector<DrawableTweakerPtr> tweakers;

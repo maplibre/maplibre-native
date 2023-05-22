@@ -25,7 +25,7 @@ struct TileLayerGroup::Impl {
     Impl(std::size_t capacity)
         : tileDrawables(capacity) {}
 
-    using TileMap = std::unordered_map<TileLayerGroupTileKey, gfx::UniqueDrawable, TileLayerGroupTileKey::hash>;
+    using TileMap = std::unordered_multimap<TileLayerGroupTileKey, gfx::UniqueDrawable, TileLayerGroupTileKey::hash>;
     TileMap tileDrawables;
 };
 
@@ -49,27 +49,17 @@ const gfx::UniqueDrawable& TileLayerGroup::getDrawable(mbgl::RenderPass pass, co
     return (hit == impl->tileDrawables.end()) ? no_tile : hit->second;
 }
 
-gfx::UniqueDrawable TileLayerGroup::removeDrawable(mbgl::RenderPass pass, const OverscaledTileID& id) {
-    const auto hit = impl->tileDrawables.find({pass, id});
-    if (hit == impl->tileDrawables.end()) {
-        return {};
-    }
-    auto drawable = std::move(hit->second);
-    impl->tileDrawables.erase(hit);
-    return drawable;
+std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPass pass, const OverscaledTileID& id) {
+    const auto range = impl->tileDrawables.equal_range({pass, id});
+    std::vector<gfx::UniqueDrawable> result(std::distance(range.first, range.second));
+    std::transform(std::make_move_iterator(range.first), std::make_move_iterator(range.second),
+                   result.begin(), [](auto&& pair) { return std::move(pair.second); });
+    impl->tileDrawables.erase(range.first, range.second);
+    return result;
 }
 
-bool TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& id, gfx::UniqueDrawable&& drawable) {
-    const auto result = impl->tileDrawables.insert(
-        std::make_pair(TileLayerGroupTileKey{pass, id}, gfx::UniqueDrawable()));
-    if (result.second) {
-        // New item inserted, move the drawable into it
-        result.first->second = std::move(drawable);
-        return true;
-    } else {
-        // Not inserted
-        return false;
-    }
+void TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& id, gfx::UniqueDrawable&& drawable) {
+    impl->tileDrawables.insert(std::make_pair(TileLayerGroupTileKey{pass, id}, std::move(drawable)));
 }
 
 void TileLayerGroup::observeDrawables(std::function<void(gfx::Drawable&)> f) {

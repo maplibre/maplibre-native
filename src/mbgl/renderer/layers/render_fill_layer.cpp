@@ -315,9 +315,11 @@ void RenderFillLayer::update(const int32_t layerIndex,
                    std::inserter(newTileIDs, newTileIDs.begin()),
                    [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
 
-    std::unique_ptr<gfx::DrawableBuilder> builder;
+    std::unique_ptr<gfx::DrawableBuilder> fillBuilder;
+    std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
     std::vector<gfx::DrawablePtr> newTiles;
-    gfx::VertexAttributeArray vertexAttrs;
+    gfx::VertexAttributeArray fillVertexAttrs;
+    gfx::VertexAttributeArray outlineVertexAttrs;
 
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
         if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
@@ -343,7 +345,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
                 const auto removeTile = [&]() {
                     if (tileDrawable) {
-                        tileLayerGroup->removeDrawable(renderPass, tileID);
+                        // Remove and discard all drawables for the tile
+                        tileLayerGroup->removeDrawables(renderPass, tileID);
                         ++stats.tileDrawablesRemoved;
                     }
                 };
@@ -359,44 +362,63 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
                 const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
                 const auto fillColor = evalColor * (fillOpacity > 0.0f ? fillOpacity : 1.0f);
-                const auto fillAA = evaluated.get<FillAntialias>();
-
                 const auto fillRenderPass = (fillColor.a >= 1.0f
                                              /* && parameters.currentLayer >= parameters.opaquePassCutoff*/)
                                                 ? RenderPass::Opaque
                                                 : RenderPass::Translucent;
+                const auto doFill = fillRenderPass == renderPass;
+                const auto doOutline = evaluated.get<FillAntialias>() && renderPass == RenderPass::Translucent;
 
-                if (fillRenderPass != renderPass) {
+                if (!doFill && !doOutline) {
                     removeTile();
                     continue;
                 }
 
-                vertexAttrs.clear();
+                fillVertexAttrs.clear();
+                outlineVertexAttrs.clear();
 
                 const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
-                if (auto& p1 = paintPropertyBinders.get<FillColor>()) {
-                    const auto count = p1->getVertexCount();
-                    // check that vertexVector.elements() == sum(segments.vertexLength)
-                    if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
-                        for (std::size_t i = 0; i < count; ++i) {
-                            const auto& packed =
-                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
-                                    p1->getVertexValue(i))
-                                    ->a1;
-                            attr->set<gfx::VertexAttribute::float4>(i, {packed[0], packed[1], packed[0], packed[1]});
+                if (doFill) {
+                    if (auto& binder = paintPropertyBinders.get<FillColor>()) {
+                        const auto count = binder->getVertexCount();
+                        // check that vertexVector.elements() == sum(segments.vertexLength)
+                        if (auto& attr = fillVertexAttrs.getOrAdd("a_color")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& packed =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
+                                attr->set<gfx::VertexAttribute::float4>(i, {packed[0], packed[1], packed[0], packed[1]});
+                            }
                         }
                     }
                 }
-                if (auto& p1 = paintPropertyBinders.get<FillOpacity>()) {
-                    const auto count = p1->getVertexCount();
-                    if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
-                        for (std::size_t i = 0; i < count; ++i) {
-                            const auto& opacity =
-                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                    p1->getVertexValue(i))
-                                    ->a1;
-                            attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
+                if (doOutline) {
+                    if (auto& binder = paintPropertyBinders.get<FillOutlineColor>()) {
+                        const auto count = binder->getVertexCount();
+                        if (auto& attr = outlineVertexAttrs.getOrAdd("a_outline_color")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& packed =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
+                                attr->set<gfx::VertexAttribute::float4>(i, {packed[0], packed[1], packed[0], packed[1]});
+                            }
+                        }
+                    }
+                }
+                if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
+                    const auto count = binder->getVertexCount();
+                    for (auto& attrs : {std::reference_wrapper(fillVertexAttrs), std::reference_wrapper(outlineVertexAttrs)}) {
+                        if (auto& attr = attrs.get().getOrAdd("a_opacity")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& opacity =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
+                                attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
+                            }
                         }
                     }
                 }
@@ -414,56 +436,32 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     continue;
                 }
 
-                if (!builder) {
-                    builder = context.createDrawableBuilder("fill");
-                    builder->setShader(fillShader);
-                    builder->addTweaker(context.createDrawableTweaker());
-                    builder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
-                    builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                    builder->setLayerIndex(layerIndex);
+                if (doFill && !fillBuilder) {
+                    fillBuilder = context.createDrawableBuilder("fill");
+                    fillBuilder->setShader(fillShader);
+                    //fillBuilder->addTweaker(context.createDrawableTweaker());
+                    fillBuilder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
+                    fillBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
+                    fillBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                    fillBuilder->setLayerIndex(layerIndex);
+                }
+                if (doOutline && !outlineBuilder) {
+                    outlineBuilder = context.createDrawableBuilder("fill-outline");
+                    outlineBuilder->setShader(outlineShader);
+                    //outlineBuilder->addTweaker(context.createDrawableTweaker());
+                    outlineBuilder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
+                    outlineBuilder->setLineWidth(2);
+                    outlineBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                    outlineBuilder->setLayerIndex(layerIndex);
+                    outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                 }
 
-                // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
-                // parameters.state)
-
-                builder->setRenderPass(renderPass);
-                builder->setVertexAttributes(vertexAttrs);
-
-                const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
-                    verts = bucket.vertices.vector();
-                std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
-                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-
-                builder->addVertices(rawVerts, 0, rawVerts.size());
-
-                for (const auto& seg : bucket.triangleSegments) {
-                    builder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
-                }
-
-                if (fillAA) {
-                    // TODO: Different drawable?  Multiple concurrent builders?
-                    for (const auto& seg : bucket.lineSegments) {
-                        builder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
-                    }
-                }
                 //            evaluated.get<FillTranslate>(),
                 //            evaluated.get<FillTranslateAnchor>(),
                 //            parameters.stencilModeForClipping(tile.id),
                 //            parameters.colorModeForRenderPass(),
                 //            gfx::CullFaceMode::disabled(),
                 //
-                //            const auto isOpaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
-                //                                   evaluated.get<FillOpacity>().constantOr(0) >= 1.0f
-                //                                   );// && layerIndex >= parameters.opaquePassCutoff);
-                //            const auto fillRenderPass = isOpaque ? RenderPass::Opaque : RenderPass::Translucent;
-                //
-                //            if (renderPass == fillRenderPass) {
-                //            }
-
-                // const auto depthMask = (renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                //                                                           : gfx::DepthMaskType::ReadOnly;
-
-                //            const auto depthMode = parameters.depthModeForSublayer(1, depthMask);
 
                 //            if (evaluated.get<FillAntialias>() && parameters.pass == RenderPass::Translucent) {
                 //                draw(*fillOutlineProgram,
@@ -476,22 +474,57 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 //                     FillOutlineProgram::TextureBindings{});
                 //            }
 
-                builder->flush();
+                // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
+                // parameters.state)
 
-                auto newDrawables = builder->clearDrawables();
-                if (!newDrawables.empty()) {
-                    auto& drawable = newDrawables[0];
-                    drawable->setTileID(tileID);
-                    // drawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
+                if (fillBuilder) {
+                    fillBuilder->setRenderPass(renderPass);
+                    fillBuilder->setVertexAttributes(fillVertexAttrs);
+                }
+                if (outlineBuilder) {
+                    outlineBuilder->setRenderPass(renderPass);
+                    outlineBuilder->setVertexAttributes(outlineVertexAttrs);
+                }
 
-                    // Track it.
-                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.tileDrawablesAdded;
-                    // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
-                    //  std::to_string(stats.tileDrawablesAdded+1));
+                const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
+                    verts = bucket.vertices.vector();
+                std::vector<std::array<int16_t, 2>> rawVerts(verts.size());
+                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+
+                if (fillBuilder) {
+                    fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
+                    
+                    for (const auto& seg : bucket.triangleSegments) {
+                        fillBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
+                    }
+                    
+                    fillBuilder->flush();
+
+                    for (auto& drawable : fillBuilder->clearDrawables()) {
+                        drawable->setTileID(tileID);
+
+                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                        ++stats.tileDrawablesAdded;
+                    }
+                }
+                if (outlineBuilder) {
+                     outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
+ 
+                    for (const auto& seg : bucket.lineSegments) {
+                        outlineBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
+                    }
+                    
+                    outlineBuilder->flush();
+
+                    for (auto& drawable : outlineBuilder->clearDrawables()) {
+                        drawable->setTileID(tileID);
+
+                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                        ++stats.tileDrawablesAdded;
+                    }
                 }
             }
-        } else {
+        } else {    // FillPattern is defined
             //        if (parameters.pass != RenderPass::Translucent) {
             //            return;
             //        }

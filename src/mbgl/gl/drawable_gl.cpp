@@ -19,7 +19,7 @@ DrawableGL::~DrawableGL() {
 
 void DrawableGL::draw(const PaintParameters& parameters) const {
     bindUniformBuffers();
-    impl->draw(parameters);
+    impl->draw(parameters, lineWidth);
     unbindUniformBuffers();
 }
 

@@ -61,6 +61,10 @@ public:
     int32_t getLayerIndex() const { return layerIndex; }
     void setLayerIndex(int32_t value) { layerIndex = value; }
 
+    /// The layer index assigned to generated drawables
+    int32_t getSubLayerIndex() const { return subLayerIndex; }
+    void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
+
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);
 
@@ -76,6 +80,10 @@ public:
     /// Set how the color value is used
     /// This should not be changed while a build is in progress
     void setColorMode(ColorMode mode) { colorMode = mode; }
+
+    /// Width for lines
+    int32_t getLineWidth() const { return lineWidth; }
+    void setLineWidth(int32_t value) { lineWidth = value; }
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
@@ -150,8 +158,10 @@ protected:
     std::string vertexAttrName;
     std::string colorAttrName;
     mbgl::RenderPass renderPass;
+    int32_t lineWidth = 1;
     DrawPriority drawPriority = 0;
     int32_t layerIndex = -1;
+    int32_t subLayerIndex = 0;
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;
     mat4 matrix;
