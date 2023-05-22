@@ -52,8 +52,10 @@ const gfx::UniqueDrawable& TileLayerGroup::getDrawable(mbgl::RenderPass pass, co
 std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPass pass, const OverscaledTileID& id) {
     const auto range = impl->tileDrawables.equal_range({pass, id});
     std::vector<gfx::UniqueDrawable> result(std::distance(range.first, range.second));
-    std::transform(std::make_move_iterator(range.first), std::make_move_iterator(range.second),
-                   result.begin(), [](auto&& pair) { return std::move(pair.second); });
+    std::transform(
+        std::make_move_iterator(range.first), std::make_move_iterator(range.second), result.begin(), [](auto&& pair) {
+            return std::move(pair.second);
+        });
     impl->tileDrawables.erase(range.first, range.second);
     return result;
 }
