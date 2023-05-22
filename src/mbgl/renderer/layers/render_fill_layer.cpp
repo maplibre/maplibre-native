@@ -389,7 +389,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                                     static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
                                         binder->getVertexValue(i))
                                         ->a1;
-                                attr->set<gfx::VertexAttribute::float4>(i, {packed[0], packed[1], packed[0], packed[1]});
+                                attr->set<gfx::VertexAttribute::float4>(i,
+                                                                        {packed[0], packed[1], packed[0], packed[1]});
                             }
                         }
                     }
@@ -403,14 +404,16 @@ void RenderFillLayer::update(const int32_t layerIndex,
                                     static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
                                         binder->getVertexValue(i))
                                         ->a1;
-                                attr->set<gfx::VertexAttribute::float4>(i, {packed[0], packed[1], packed[0], packed[1]});
+                                attr->set<gfx::VertexAttribute::float4>(i,
+                                                                        {packed[0], packed[1], packed[0], packed[1]});
                             }
                         }
                     }
                 }
                 if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
                     const auto count = binder->getVertexCount();
-                    for (auto& attrs : {std::reference_wrapper(fillVertexAttrs), std::reference_wrapper(outlineVertexAttrs)}) {
+                    for (auto& attrs :
+                         {std::reference_wrapper(fillVertexAttrs), std::reference_wrapper(outlineVertexAttrs)}) {
                         if (auto& attr = attrs.get().getOrAdd("a_opacity")) {
                             for (std::size_t i = 0; i < count; ++i) {
                                 const auto& opacity =
@@ -439,16 +442,17 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 if (doFill && !fillBuilder) {
                     fillBuilder = context.createDrawableBuilder("fill");
                     fillBuilder->setShader(fillShader);
-                    //fillBuilder->addTweaker(context.createDrawableTweaker());
+                    // fillBuilder->addTweaker(context.createDrawableTweaker());
                     fillBuilder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
-                    fillBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
+                    fillBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                                 : gfx::DepthMaskType::ReadOnly);
                     fillBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     fillBuilder->setLayerIndex(layerIndex);
                 }
                 if (doOutline && !outlineBuilder) {
                     outlineBuilder = context.createDrawableBuilder("fill-outline");
                     outlineBuilder->setShader(outlineShader);
-                    //outlineBuilder->addTweaker(context.createDrawableTweaker());
+                    // outlineBuilder->addTweaker(context.createDrawableTweaker());
                     outlineBuilder->setColorMode(gfx::DrawableBuilder::ColorMode::None);
                     outlineBuilder->setLineWidth(2);
                     outlineBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
@@ -493,11 +497,11 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
                 if (fillBuilder) {
                     fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
-                    
+
                     for (const auto& seg : bucket.triangleSegments) {
                         fillBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
                     }
-                    
+
                     fillBuilder->flush();
 
                     for (auto& drawable : fillBuilder->clearDrawables()) {
@@ -508,12 +512,12 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     }
                 }
                 if (outlineBuilder) {
-                     outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
- 
+                    outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
+
                     for (const auto& seg : bucket.lineSegments) {
                         outlineBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
                     }
-                    
+
                     outlineBuilder->flush();
 
                     for (auto& drawable : outlineBuilder->clearDrawables()) {
@@ -524,7 +528,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     }
                 }
             }
-        } else {    // FillPattern is defined
+        } else { // FillPattern is defined
             //        if (parameters.pass != RenderPass::Translucent) {
             //            return;
             //        }
