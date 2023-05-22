@@ -467,7 +467,7 @@ bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& 
     setDepthMode(parameters.depthModeForSublayer(drawable.getSubLayerIndex(), drawable.getDepthType()));
 
     // force disable depth test for debugging
-    //setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
+    // setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
     if (auto tileID = drawable.getTileID()) {
         // Doesn't work until the clipping masks are generated
