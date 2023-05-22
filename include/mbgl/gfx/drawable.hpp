@@ -174,6 +174,8 @@ private:
 
 struct alignas(16) DrawableUBO {
     std::array<float, 4 * 4> matrix;
+    std::array<float, 2> world;
+    std::array<float, 2> padding;
 };
 static_assert(sizeof(DrawableUBO) % 16 == 0);
 

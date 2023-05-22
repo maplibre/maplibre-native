@@ -464,7 +464,10 @@ bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& 
         program = value::Program::Default;
     }
 
-    setDepthMode(parameters.depthModeForSublayer(0, drawable.getDepthType()));
+    setDepthMode(parameters.depthModeForSublayer(drawable.getSubLayerIndex(), drawable.getDepthType()));
+
+    // force disable depth test for debugging
+    //setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
     if (auto tileID = drawable.getTileID()) {
         // Doesn't work until the clipping masks are generated
@@ -477,13 +480,10 @@ bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& 
     setColorMode(gfx::ColorMode::alphaBlended());
     setCullFaceMode(gfx::CullFaceMode::disabled());
 
-    // uniformStates.bind(uniformValues);
-    // textureStates.bind(context, textureBindings);
-
     auto& drawableGL = static_cast<const DrawableGL&>(drawable);
     auto& vao = drawableGL.getVertexArray();
     if (vao.isValid()) {
-        bindVertexArray = vao.getID(); // glBindVertexArray
+        bindVertexArray = vao.getID();
         return true;
     } else {
         bindVertexArray = value::BindVertexArray::Default;

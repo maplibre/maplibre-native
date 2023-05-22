@@ -507,7 +507,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     for (auto& drawable : fillBuilder->clearDrawables()) {
                         drawable->setTileID(tileID);
 
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                        //tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                         ++stats.tileDrawablesAdded;
                     }
                 }
