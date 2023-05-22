@@ -90,7 +90,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         }
 
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
-        
+
         gfx::DrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
         drawableUBO.world = {(float)renderableSize.width, (float)renderableSize.height};
