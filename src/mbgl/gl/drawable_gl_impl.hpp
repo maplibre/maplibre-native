@@ -27,13 +27,13 @@ public:
     Impl() = default;
     ~Impl() = default;
 
-    void draw(const PaintParameters& parameters) const {
+    void draw(const PaintParameters& parameters, int32_t lineWidth) const {
         auto& glContext = static_cast<gl::Context&>(parameters.context);
         if (!triangleIndexes.empty()) {
             glContext.draw(gfx::Triangles(), lineIndexes.size(), triangleIndexes.size());
         }
         if (!lineIndexes.empty()) {
-            glContext.draw(gfx::Lines(1), 0, lineIndexes.size());
+            glContext.draw(gfx::Lines(lineWidth), 0, lineIndexes.size());
         }
     }
 

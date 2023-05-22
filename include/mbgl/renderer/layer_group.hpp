@@ -69,8 +69,8 @@ public:
     std::size_t getDrawableCount() const;
 
     const gfx::UniqueDrawable& getDrawable(mbgl::RenderPass, const OverscaledTileID&) const;
-    gfx::UniqueDrawable removeDrawable(mbgl::RenderPass, const OverscaledTileID&);
-    bool addDrawable(mbgl::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
+    std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass, const OverscaledTileID&);
+    void addDrawable(mbgl::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
 
     void observeDrawables(std::function<void(gfx::Drawable&)>) override;
     void observeDrawables(std::function<void(const gfx::Drawable&)>) const override;
