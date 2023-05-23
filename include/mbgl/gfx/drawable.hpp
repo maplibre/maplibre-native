@@ -20,8 +20,8 @@ enum class RenderPass : uint8_t;
 
 namespace gfx {
 
+class CullFaceMode;
 enum class DepthMaskType : bool;
-
 class DrawableTweaker;
 class ShaderProgramBase;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
@@ -34,7 +34,7 @@ protected:
     Drawable(std::string name);
 
 public:
-    virtual ~Drawable() = default;
+    virtual ~Drawable();
 
     const util::SimpleIdentity& getId() const { return uniqueID; }
 
@@ -91,6 +91,9 @@ public:
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
 
+    const gfx::CullFaceMode& getCullFaceMode() const;
+    void setCullFaceMode(const gfx::CullFaceMode&);
+
     /// Get the number of vertexes
     std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
 
@@ -103,11 +106,11 @@ public:
     virtual std::vector<std::uint16_t>& getTriangleIndexData() const = 0;
 
     /// Attach a tweaker to be run on this drawable for each frame
-    void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
-    template <typename TIter>
-    void addTweakers(TIter beg, TIter end) {
-        tweakers.insert(tweakers.end(), beg, end);
-    }
+    //void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
+    //template <typename TIter>
+    //void addTweakers(TIter beg, TIter end) {
+    //    tweakers.insert(tweakers.end(), beg, end);
+    //}
 
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
@@ -140,7 +143,10 @@ protected:
     int32_t lineWidth = 1;
     int32_t layerIndex = -1;
     int32_t subLayerIndex = 0;
-    DepthMaskType depthType; // = DepthMaskType::ReadOnly;
+    DepthMaskType depthType;// = DepthMaskType::ReadOnly;
+    
+    struct Impl;
+    std::unique_ptr<Impl> impl;
 
     std::vector<DrawableTweakerPtr> tweakers;
 };
