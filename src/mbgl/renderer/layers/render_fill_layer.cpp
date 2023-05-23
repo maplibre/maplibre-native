@@ -365,7 +365,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
             const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
 
             std::vector<std::array<int16_t, 2>> rawVerts;
-            const auto buildVertices = [&](){
+            const auto buildVertices = [&]() {
                 const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
                     verts = bucket.vertices.vector();
                 if (rawVerts.size() < verts.size()) {
@@ -373,7 +373,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
                 }
             };
-            
+
             fillVertexAttrs.clear();
             outlineVertexAttrs.clear();
 
@@ -546,9 +546,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 }
 
                 const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
-                const auto doOutline = evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined();
-                const auto& fillPatternValue =
-                    evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
+                const auto doOutline = evaluated.get<FillAntialias>() &&
+                                       unevaluated.get<FillOutlineColor>().isUndefined();
+                const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(
+                    Faded<expression::Image>{"", ""});
                 const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
                 const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
 
@@ -581,11 +582,11 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
                 if (patternBuilder) {
                     patternBuilder->setRenderPass(renderPass);
-                    //patternBuilder->setVertexAttributes(fillVertexAttrs);
+                    // patternBuilder->setVertexAttributes(fillVertexAttrs);
                 }
                 if (outlinePatternBuilder) {
                     outlinePatternBuilder->setRenderPass(renderPass);
-                    //outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
+                    // outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
                 }
 
                 if (patternBuilder) {
@@ -601,7 +602,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     for (auto& drawable : patternBuilder->clearDrawables()) {
                         drawable->setTileID(tileID);
 
-                        //tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                        // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                         ++stats.tileDrawablesAdded;
                     }
                 }
@@ -618,7 +619,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     for (auto& drawable : outlinePatternBuilder->clearDrawables()) {
                         drawable->setTileID(tileID);
 
-                        //tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                        // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                         ++stats.tileDrawablesAdded;
                     }
                 }
