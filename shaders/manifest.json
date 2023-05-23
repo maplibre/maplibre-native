@@ -20,6 +20,20 @@
         "glsl_frag": "drawable.fill_outline.fragment.glsl",
         "uses_ubos": false 
     },
+    {
+        "name": "FillPatternShader",
+        "header": "drawable_fill_pattern",
+        "glsl_vert": "drawable.fill_pattern.vertex.glsl",
+        "glsl_frag": "drawable.fill_pattern.fragment.glsl",
+        "uses_ubos": false 
+    },
+    {
+        "name": "FillOutlinePatternShader",
+        "header": "drawable_fill_outline_pattern",
+        "glsl_vert": "drawable.fill_outline_pattern.vertex.glsl",
+        "glsl_frag": "drawable.fill_outline_pattern.fragment.glsl",
+        "uses_ubos": false 
+    },
 
     {
         "name": "Prelude",

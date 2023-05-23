@@ -1,4 +1,5 @@
 #include <mbgl/gfx/attribute.hpp>
+#include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/programs/segment.hpp>
@@ -16,6 +17,7 @@ struct DrawableBuilder::Impl {
     gfx::IndexVector<gfx::Lines> lineIndexes;
     Color currentColor = Color::white();
     std::vector<Color> colors;
+    gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
 };
 
 } // namespace gfx

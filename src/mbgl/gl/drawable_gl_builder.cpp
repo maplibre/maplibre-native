@@ -21,7 +21,7 @@ void DrawableGLBuilder::init() {
             posAttr->set(index++, gfx::VertexAttribute::int2{vert.a1[0], vert.a1[1]});
         }
     }
-    if (colorMode != ColorMode::None && !colorAttrName.empty()) {
+    if (colorAttrMode != ColorAttrMode::None && !colorAttrName.empty()) {
         if (const auto& colorAttr = attrs.getOrAdd(colorAttrName)) {
             // We should have either a single color or one per vertex.  Otherwise,
             // the color mode was probably changed after vertexes were added.

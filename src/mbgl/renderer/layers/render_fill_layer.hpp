@@ -46,6 +46,9 @@ private:
                                 const mat4&,
                                 const FeatureState&) const override;
 
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&);
+
     // Paint properties
     style::FillPaintProperties::Unevaluated unevaluated;
 
@@ -57,6 +60,8 @@ private:
 
     gfx::ShaderProgramBasePtr fillShader;
     gfx::ShaderProgramBasePtr outlineShader;
+    gfx::ShaderProgramBasePtr patternShader;
+    gfx::ShaderProgramBasePtr outlinePatternShader;
 };
 
 } // namespace mbgl

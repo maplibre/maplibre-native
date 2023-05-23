@@ -315,8 +315,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
                 builder = context.createDrawableBuilder("background");
                 builder->setRenderPass(drawPasses);
                 builder->setShader(shader);
-                builder->addTweaker(context.createDrawableTweaker());
-                builder->setColorMode(gfx::DrawableBuilder::ColorMode::PerDrawable);
+                builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                 builder->setLayerIndex(layerIndex);
             }
@@ -336,8 +335,6 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
                 drawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
-                // Log::Warning(Event::General, "Adding drawable for " + util::toString(tileID) + " total " +
-                // std::to_string(stats.tileDrawablesAdded+1));
             }
         }
     }
