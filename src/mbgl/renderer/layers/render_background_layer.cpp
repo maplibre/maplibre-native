@@ -298,7 +298,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
             if (!(renderPass & drawPasses)) {
                 // Not in this pass
                 if (tileDrawable) {
-                    tileLayerGroup->removeDrawable(renderPass, tileID);
+                    tileLayerGroup->removeDrawables(renderPass, tileID);
                     ++stats.tileDrawablesRemoved;
                 }
                 continue;

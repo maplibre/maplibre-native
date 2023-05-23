@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-15T21:08:38.312Z by timsylvester using shaders/generate_shader_code.js
+// Generated on 2023-05-23T00:45:10.632Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -14,6 +14,8 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
 
 layout (std140) uniform DrawableUBO {
     mat4 u_matrix;
+    vec2 u_world;
+    vec2 pad;
 };
 
 #ifndef HAS_UNIFORM_u_color

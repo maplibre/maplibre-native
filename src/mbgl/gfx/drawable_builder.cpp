@@ -33,9 +33,11 @@ const UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
+        draw->setLineWidth(lineWidth);
         draw->setRenderPass(renderPass);
         draw->setDrawPriority(drawPriority);
         draw->setLayerIndex(layerIndex);
+        draw->setSubLayerIndex(subLayerIndex);
         draw->setDepthType(depthType);
         draw->setShader(shader);
         draw->setMatrix(matrix);
