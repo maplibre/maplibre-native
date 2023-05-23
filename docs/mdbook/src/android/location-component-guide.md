@@ -83,7 +83,7 @@ val locationComponentOptions =
    ![result](https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63)
 
 
-[^1]: [LocationComponentsOptions] can also be set by defining a style in your app's `style.xml` file.  
+[^1]: [LocationComponentOptions] can also be set by defining a style in your app's `style.xml` file.  
 [^2]: A variety of [camera modes] determine how the camera will track the user location.  
       They provide the right context to your users at the correct time.  
 [^3]: In [Test APP], it also uses menu items to manage user location icon.  
