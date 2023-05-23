@@ -2,6 +2,8 @@ layout (location = 0) in vec2 a_pos;
 
 layout (std140) uniform DrawableUBO {
     mat4 u_matrix;
+    vec2 u_world;
+    vec2 pad;
 };
 
 #pragma mapbox: define highp vec4 color
