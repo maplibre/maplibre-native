@@ -20,6 +20,7 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
 
+/* ANCHOR: top */
 /**
  * This activity shows a basic usage of the LocationComponent's pulsing circle. There's no
  * customization of the pulsing circle's color, radius, speed, etc.
@@ -30,6 +31,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
     private lateinit var mapboxMap: MapboxMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_basic_pulsing_circle)
@@ -40,7 +42,9 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
         mapView.onCreate(savedInstanceState)
         checkPermissions()
     }
+    /* ANCHOR_END: top */
 
+    /* ANCHOR: onMapReady */
     @SuppressLint("MissingPermission")
     override fun onMapReady(mapboxMap: MapboxMap) {
         this.mapboxMap = mapboxMap
@@ -58,7 +62,9 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
             locationComponent!!.forceLocationUpdate(lastLocation)
         }
     }
+    /* ANCHOR_END: onMapReady */
 
+    /* ANCHOR: LocationComponentActivationOptions */
     private fun buildLocationComponentActivationOptions(
         style: Style,
         locationComponentOptions: LocationComponentOptions
@@ -75,6 +81,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
             )
             .build()
     }
+    /* ANCHOR_END: LocationComponentActivationOptions */
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_pulsing_location_mode, menu)
@@ -122,6 +129,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
         mapboxMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
     }
 
+    /* ANCHOR: permission */
     private fun checkPermissions() {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)
@@ -155,6 +163,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+    /* ANCHOR_END: permission */
 
     override fun onStart() {
         super.onStart()
