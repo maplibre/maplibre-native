@@ -23,6 +23,13 @@ void DrawableBuilder::setColor(const Color& value) {
     impl->currentColor = value;
 }
 
+const gfx::CullFaceMode& DrawableBuilder::getCullFaceMode() const {
+    return impl->cullFaceMode;
+}
+void DrawableBuilder::setCullFaceMode(const gfx::CullFaceMode& value) {
+    impl->cullFaceMode = value;
+}
+
 const UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
         currentDrawable = createDrawable();
@@ -39,9 +46,9 @@ void DrawableBuilder::flush() {
         draw->setLayerIndex(layerIndex);
         draw->setSubLayerIndex(subLayerIndex);
         draw->setDepthType(depthType);
+        draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
         draw->setMatrix(matrix);
-        draw->addTweakers(tweakers.begin(), tweakers.end());
 
         if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
@@ -100,7 +107,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
     impl->vertices.emplace_back(Impl::VT({{{x1, y1}}}));
     impl->vertices.emplace_back(Impl::VT({{{x2, y2}}}));
     impl->triangleIndexes.emplace_back(n, n + 1, n + 2);
-    if (colorMode == ColorMode::PerVertex) {
+    if (colorAttrMode == ColorAttrMode::PerVertex) {
         impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
     }
 }
@@ -109,7 +116,7 @@ void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
     impl->triangleIndexes.emplace_back(n - 2, n - 1, n);
-    if (colorMode == ColorMode::PerVertex) {
+    if (colorAttrMode == ColorAttrMode::PerVertex) {
         impl->colors.emplace_back(impl->currentColor);
     }
 }
@@ -134,7 +141,7 @@ std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2
     std::for_each(std::next(vertices.begin(), vertexOffset),
                   std::next(vertices.begin(), vertexOffset + vertexLength),
                   [&](const std::array<int16_t, 2>& x) { impl->vertices.emplace_back(Impl::VT({{x}})); });
-    if (colorMode == ColorMode::PerVertex) {
+    if (colorAttrMode == ColorAttrMode::PerVertex) {
         for (size_t i = 0; i < vertexLength; ++i) {
             impl->colors.emplace_back(impl->currentColor);
         }

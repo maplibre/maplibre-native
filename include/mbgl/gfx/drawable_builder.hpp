@@ -72,14 +72,15 @@ public:
     const Color& getColor() const;
     void setColor(const Color& value);
 
-    enum class ColorMode {
+    /// Handling of color attributes
+    enum class ColorAttrMode {
         None,
         PerDrawable,
         PerVertex
     };
     /// Set how the color value is used
     /// This should not be changed while a build is in progress
-    void setColorMode(ColorMode mode) { colorMode = mode; }
+    void setColorAttrMode(ColorAttrMode mode) { colorAttrMode = mode; }
 
     /// Width for lines
     int32_t getLineWidth() const { return lineWidth; }
@@ -87,6 +88,9 @@ public:
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
+
+    const gfx::CullFaceMode& getCullFaceMode() const;
+    void setCullFaceMode(const gfx::CullFaceMode& value);
 
     /// Which shader to use when rendering emitted drawables
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
@@ -143,7 +147,7 @@ public:
                       std::size_t indexLength);
 
     /// Add a tweaker to be attached to each emitted drawable
-    void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
+    // void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
 
 protected:
     /// Create an instance of the appropriate drawable type
@@ -167,8 +171,7 @@ protected:
     mat4 matrix;
     UniqueDrawable currentDrawable;
     std::vector<UniqueDrawable> drawables;
-    std::vector<DrawableTweakerPtr> tweakers;
-    ColorMode colorMode = ColorMode::PerVertex;
+    ColorAttrMode colorAttrMode = ColorAttrMode::PerVertex;
     VertexAttributeArray vertexAttrs;
 
     struct Impl;
