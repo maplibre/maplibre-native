@@ -70,10 +70,20 @@ struct alignas(16) FillLayerUBO {
     /* 24 */ std::array<float, 2> pixel_coord_lower;
     /* 32 */ std::array<float, 2> texsize;
     /* 40 */ float fade;
-    /*  */ // Drawable::TextureAttachment? image;
-    /* 44 */ std::array<float, 1> padding;
-    /* 48 */
+    
+    // Attribute interpolations
+    /* 44 */ float color_t;
+    /* 48 */ float opacity_t;
+    /* 52 */ float outline_color_t;
+    /* 56 */ float pattern_from_t;
+    /* 60 */ float pattern_to_t;
+
+    // Pattern texture
+    /* ? */ // Drawable::TextureAttachment? image;
+
+    /* 64 */ //std::array<float, 1> padding;
+    /* 64 */
 };
-static_assert(sizeof(FillLayerUBO) == 48);
+static_assert(sizeof(FillLayerUBO) == 64);
 
 } // namespace mbgl

@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-24T17:07:33.996Z by timsylvester using shaders/generate_shader_code.js
+// Generated on 2023-05-24T19:41:14.882Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -10,29 +10,35 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlineShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
-
-layout (std140) uniform DrawableUBO {
+    static constexpr const char* vertex = R"(layout (std140) uniform DrawableUBO {
     mat4 u_matrix;
     vec2 u_world;
     vec2 u_padding_drawable;
 };
+layout (std140) uniform FillLayerUBO {
+    vec4 u_scale;
+    vec2 u_pixel_coord_upper;
+    vec2 u_pixel_coord_lower;
+    vec2 u_texsize;
+    float u_fade;
+    float u_color_t;
+    float u_opacity_t;
+    float u_outline_color_t;
+    float u_pattern_from_t;
+    float u_pattern_to_t;
+};
+
+layout (location = 0) in vec2 a_pos;
 
 out vec2 v_pos;
 
 #ifndef HAS_UNIFORM_u_outline_color
-uniform lowp float u_outline_color_t;
 layout (location = 1) in highp vec4 a_outline_color;
 out highp vec4 outline_color;
-#else
-uniform highp vec4 u_outline_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
 layout (location = 2) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 
 void main() {
@@ -51,17 +57,31 @@ lowp float opacity = u_opacity;
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
 )";
-    static constexpr const char* fragment = R"(in vec2 v_pos;
+    static constexpr const char* fragment = R"(layout (std140) uniform DrawableUBO {
+    mat4 u_matrix;
+    vec2 u_world;
+    vec2 u_padding_drawable;
+};
+layout (std140) uniform FillLayerUBO {
+    vec4 u_scale;
+    vec2 u_pixel_coord_upper;
+    vec2 u_pixel_coord_lower;
+    vec2 u_texsize;
+    float u_fade;
+    float u_color_t;
+    float u_opacity_t;
+    float u_outline_color_t;
+    float u_pattern_from_t;
+    float u_pattern_to_t;
+};
+
+in vec2 v_pos;
 
 #ifndef HAS_UNIFORM_u_outline_color
 in highp vec4 outline_color;
-#else
-uniform highp vec4 u_outline_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 
 void main() {

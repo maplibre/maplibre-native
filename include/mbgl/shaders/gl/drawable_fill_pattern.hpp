@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-24T17:23:35.970Z by timsylvester using shaders/generate_shader_code.js
+// Generated on 2023-05-24T19:41:14.882Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -21,7 +21,11 @@ layout (std140) uniform FillLayerUBO {
     vec2 u_pixel_coord_lower;
     vec2 u_texsize;
     float u_fade;
-    float u_padding_fill;
+    float u_color_t;
+    float u_opacity_t;
+    float u_outline_color_t;
+    float u_pattern_from_t;
+    float u_pattern_to_t;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -30,25 +34,16 @@ out vec2 v_pos_a;
 out vec2 v_pos_b;
 
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
 layout (location = 1) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-uniform lowp float u_pattern_from_t;
 layout (location = 2) in lowp vec4 a_pattern_from;
 out lowp vec4 pattern_from;
-#else
-uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-uniform lowp float u_pattern_to_t;
 layout (location = 3) in lowp vec4 a_pattern_to;
 out lowp vec4 pattern_to;
-#else
-uniform lowp vec4 u_pattern_to;
 #endif
 
 void main() {
@@ -97,7 +92,11 @@ layout (std140) uniform FillLayerUBO {
     vec2 u_pixel_coord_lower;
     vec2 u_texsize;
     float u_fade;
-    float u_padding_fill;
+    float u_color_t;
+    float u_opacity_t;
+    float u_outline_color_t;
+    float u_pattern_from_t;
+    float u_pattern_to_t;
 };
 
 uniform sampler2D u_image;
@@ -107,18 +106,12 @@ in vec2 v_pos_b;
 
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
 in lowp vec4 pattern_from;
-#else
-uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
 in lowp vec4 pattern_to;
-#else
-uniform lowp vec4 u_pattern_to;
 #endif
 
 void main() {
