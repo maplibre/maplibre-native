@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-23T00:45:10.632Z by timsylvester using shaders/generate_shader_code.js
+// Generated on 2023-05-24T21:16:59.579Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -12,9 +12,9 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "BackgroundShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (std140) uniform DrawableUBO {
-    mat4 u_matrix;
-    vec2 u_world;
-    vec2 pad;
+    highp mat4 u_matrix;
+    highp vec2 u_world;
+    highp vec2 pad;
 };
 
 void main() {
@@ -22,8 +22,8 @@ void main() {
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform BackgroundLayerUBO {
-    vec4 u_color;
-    vec4 u_opacity_pad3;
+    highp vec4 u_color;
+    highp vec4 u_opacity_pad3;
 };
 
 void main() {

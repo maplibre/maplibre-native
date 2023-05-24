@@ -1,19 +1,26 @@
 layout (std140) uniform DrawableUBO {
-    mat4 u_matrix;
-    vec2 u_world;
-    vec2 u_padding_drawable;
+    highp mat4 u_matrix;
+    highp vec2 u_world;
+    highp vec2 u_padding_drawable;
 };
 layout (std140) uniform FillLayerUBO {
-    vec4 u_scale;
-    vec2 u_pixel_coord_upper;
-    vec2 u_pixel_coord_lower;
-    vec2 u_texsize;
-    float u_fade;
-    float u_color_t;
-    float u_opacity_t;
-    float u_outline_color_t;
-    float u_pattern_from_t;
-    float u_pattern_to_t;
+    highp vec4 u_scale;
+    highp vec2 u_pixel_coord_upper;
+    highp vec2 u_pixel_coord_lower;
+    highp vec2 u_texsize;
+    highp float u_fade;
+
+    highp float u_color_t;
+    highp float u_opacity_t;
+    highp float u_outline_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+
+    highp vec2 u_color;
+    highp vec2 u_opacity;
+    highp vec4 u_outline_color;
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
 };
 
 in vec2 v_pos;

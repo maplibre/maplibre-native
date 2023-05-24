@@ -408,11 +408,16 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     /*.texsize=*/ { 0.0f, 0.0f }, // tile.getIconAtlasTexture().size
                     /*.fade=*/ crossfade.t,
                     /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
-                    /*.color_t=*/ 0.0f,
-                    /*.opacity_t=*/ 0.0f,
-                    /*.outline_color_t=*/ 0.0f,
-                    /*.pattern_from_t=*/ 0.0f,
-                    /*.pattern_to_t=*/ 0.0f,
+                    /*.color=*/ 0.0f,
+                    /*.opacity=*/ 0.0f,
+                    /*.outline_color=*/ 0.0f,
+                    /*.pattern_from=*/ 0.0f,
+                    /*.pattern_to=*/ 0.0f,
+                    /*.color_t=*/ { 0.0f },
+                    /*.opacity_t=*/ { 0.0f },
+                    /*.outline_color_t=*/ { 0.0f },
+                    /*.pattern_from_t=*/ { 0.0f },
+                    /*.pattern_to_t=*/ { 0.0f },
                 };
                 uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
                 evaluatedPropertiesChange = false;
@@ -578,7 +583,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     patternBuilder->setLayerIndex(layerIndex);
-                    outlinePatternBuilder->setSubLayerIndex(1);
+                    patternBuilder->setSubLayerIndex(1);
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
                     outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
