@@ -64,4 +64,16 @@ private:
     gfx::ShaderProgramBasePtr outlinePatternShader;
 };
 
+struct alignas(16) FillLayerUBO {
+    /*  0 */ std::array<float, 4> scale;
+    /* 16 */ std::array<float, 2> pixel_coord_upper;
+    /* 24 */ std::array<float, 2> pixel_coord_lower;
+    /* 32 */ std::array<float, 2> texsize;
+    /* 40 */ float fade;
+    /*  */ // Drawable::TextureAttachment? image;
+    /* 44 */ std::array<float, 1> padding;
+    /* 48 */
+};
+static_assert(sizeof(FillLayerUBO) == 48);
+
 } // namespace mbgl

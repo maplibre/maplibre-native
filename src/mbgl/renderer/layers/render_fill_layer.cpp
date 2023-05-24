@@ -285,7 +285,7 @@ void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
 void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& /*state*/,
+                             const TransformState& state,
                              UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
@@ -333,6 +333,18 @@ void RenderFillLayer::update(const int32_t layerIndex,
     gfx::VertexAttributeArray fillVertexAttrs;
     gfx::VertexAttributeArray outlineVertexAttrs;
 
+    const auto finish = [&](gfx::DrawableBuilder& builder, RenderPass pass, const OverscaledTileID& tileID){
+        builder.flush();
+
+        for (auto& drawable : builder.clearDrawables()) {
+            drawable->setTileID(tileID);
+            drawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
+
+            tileLayerGroup->addDrawable(pass, tileID, std::move(drawable));
+            ++stats.tileDrawablesAdded;
+        }
+    };
+
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
         if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
             continue;
@@ -363,6 +375,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
             auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
             const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+            const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
 
             std::vector<std::array<int16_t, 2>> rawVerts;
             const auto buildVertices = [&]() {
@@ -378,6 +391,28 @@ void RenderFillLayer::update(const int32_t layerIndex,
             outlineVertexAttrs.clear();
 
             const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+
+            // from FillPatternProgram::layoutUniformValues
+            // This seems to belong in a layergroup tweaker
+            if (evaluatedPropertiesChange) {
+                const auto tileRatio = 1 / tile.id.pixelsToTileUnits(1, state.getIntegerZoom());
+                const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
+                const int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
+                const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
+                const auto pixelRatio = 1.0f;   // parameters.pixelRatio
+                //matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
+                const FillLayerUBO fillLayerUBO = {
+                    /*.scale=*/ {pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
+                    /*.pixel_coord_upper=*/ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                    /*.pixel_coord_lower=*/ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                    /*.texsize=*/ { 0.0f, 0.0f }, // tile.getIconAtlasTexture().size
+                    /*.fade=*/ crossfade.t,
+                    /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
+                    /*.padding=*/ {0},
+                };
+                uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
+                evaluatedPropertiesChange = false;
+            }
 
             if (unevaluated.get<FillPattern>().isUndefined()) {
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
@@ -442,16 +477,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     }
                 }
 
-                if (evaluatedPropertiesChange) {
-                    // FillLayerUBO fillLayerUBO;
-                    // fillLayerUBO.color = evaluated.get<FillColor>();
-                    // fillLayerUBO.opacity = evaluated.get<FillOpacity>();
-                    // uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
-                    evaluatedPropertiesChange = false;
-                }
-
                 if (tileDrawable) {
-                    // tileDrawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
+                    tileDrawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
                     continue;
                 }
 
@@ -514,14 +541,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         fillBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
                     }
 
-                    fillBuilder->flush();
-
-                    for (auto& drawable : fillBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
+                    finish(*fillBuilder, renderPass, tileID);
                 }
                 if (outlineBuilder) {
                     buildVertices();
@@ -531,21 +551,13 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         outlineBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
                     }
 
-                    outlineBuilder->flush();
-
-                    for (auto& drawable : outlineBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
+                    finish(*outlineBuilder, renderPass, tileID);
                 }
             } else { // FillPattern is defined
                 if (renderPass != RenderPass::Translucent) {
                     continue;
                 }
 
-                const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
                 const auto doOutline = evaluated.get<FillAntialias>() &&
                                        unevaluated.get<FillOutlineColor>().isUndefined();
                 const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(
@@ -597,14 +609,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         patternBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
                     }
 
-                    patternBuilder->flush();
-
-                    for (auto& drawable : patternBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
+                    finish(*patternBuilder, renderPass, tileID);
                 }
                 if (outlinePatternBuilder) {
                     buildVertices();
@@ -614,14 +619,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         outlinePatternBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
                     }
 
+                    finish(*outlinePatternBuilder, renderPass, tileID);
                     outlinePatternBuilder->flush();
-
-                    for (auto& drawable : outlinePatternBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
                 }
 
                 //    auto draw = [&](auto& programInstance,

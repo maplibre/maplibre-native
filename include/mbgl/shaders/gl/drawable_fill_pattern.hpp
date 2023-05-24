@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-23T18:10:10.798Z by timsylvester using shaders/generate_shader_code.js
+// Generated on 2023-05-24T17:23:35.970Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -10,10 +10,19 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillPatternShader";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
-uniform vec2 u_pixel_coord_upper;
-uniform vec2 u_pixel_coord_lower;
-uniform vec4 u_scale;
+    static constexpr const char* vertex = R"(layout (std140) uniform DrawableUBO {
+    mat4 u_matrix;
+    vec2 u_world;
+    vec2 u_padding_drawable;
+};
+layout (std140) uniform FillLayerUBO {
+    vec4 u_scale;
+    vec2 u_pixel_coord_upper;
+    vec2 u_pixel_coord_lower;
+    vec2 u_texsize;
+    float u_fade;
+    float u_padding_fill;
+};
 
 layout (location = 0) in vec2 a_pos;
 
@@ -77,8 +86,19 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileZoomRatio, a_pos);
 }
 )";
-    static constexpr const char* fragment = R"(uniform vec2 u_texsize;
-uniform float u_fade;
+    static constexpr const char* fragment = R"(layout (std140) uniform DrawableUBO {
+    mat4 u_matrix;
+    vec2 u_world;
+    vec2 u_padding_drawable;
+};
+layout (std140) uniform FillLayerUBO {
+    vec4 u_scale;
+    vec2 u_pixel_coord_upper;
+    vec2 u_pixel_coord_lower;
+    vec2 u_texsize;
+    float u_fade;
+    float u_padding_fill;
+};
 
 uniform sampler2D u_image;
 

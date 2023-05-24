@@ -1,8 +1,16 @@
-uniform mat4 u_matrix;
-uniform vec2 u_world;
-uniform vec2 u_pixel_coord_upper;
-uniform vec2 u_pixel_coord_lower;
-uniform vec4 u_scale;
+layout (std140) uniform DrawableUBO {
+    mat4 u_matrix;
+    vec2 u_world;
+    vec2 u_padding_drawable;
+};
+layout (std140) uniform FillLayerUBO {
+    vec4 u_scale;
+    vec2 u_pixel_coord_upper;
+    vec2 u_pixel_coord_lower;
+    vec2 u_texsize;
+    float u_fade;
+    float u_padding_fill;
+};
 
 layout (location = 0) in vec2 a_pos;
 

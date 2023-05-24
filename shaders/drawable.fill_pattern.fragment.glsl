@@ -1,5 +1,16 @@
-uniform vec2 u_texsize;
-uniform float u_fade;
+layout (std140) uniform DrawableUBO {
+    mat4 u_matrix;
+    vec2 u_world;
+    vec2 u_padding_drawable;
+};
+layout (std140) uniform FillLayerUBO {
+    vec4 u_scale;
+    vec2 u_pixel_coord_upper;
+    vec2 u_pixel_coord_lower;
+    vec2 u_texsize;
+    float u_fade;
+    float u_padding_fill;
+};
 
 uniform sampler2D u_image;
 
