@@ -35,7 +35,7 @@ class JsonApiActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
 
     // Declare a variable for MapboxMap
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MapboxMap
     /* ANCHOR_END: top */
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,9 +51,9 @@ class JsonApiActivity : AppCompatActivity() {
 
         /* ANCHOR: mapAsync */
         mapView.getMapAsync { map ->
-            mapboxMap = map
+            maplibreMap = map
 
-            map.setStyle("https://demotiles.maplibre.org/style.json")
+            maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
 
             // Fetch data from USGS
             getEarthQuakeDataFromUSGS()
@@ -134,16 +134,16 @@ class JsonApiActivity : AppCompatActivity() {
                 .title(dateString)
                 .snippet(title)
                 .icon(icon)
-            mapboxMap.addMarker(markerOptions)
+            maplibreMap.addMarker(markerOptions)
         }
 
         // Move camera to newly added annotations
-        mapboxMap.getCameraForLatLngBounds(LatLngBounds.fromLatLngs(bounds))?.let {
+        maplibreMap.getCameraForLatLngBounds(LatLngBounds.fromLatLngs(bounds))?.let {
             val newCameraPosition = CameraPosition.Builder()
                 .target(it.target)
                 .zoom(it.zoom - 0.5)
                 .build()
-            mapboxMap.cameraPosition = newCameraPosition
+            maplibreMap.cameraPosition = newCameraPosition
         }
     }
     /* ANCHOR_END: addMarkers */
