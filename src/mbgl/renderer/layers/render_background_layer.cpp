@@ -75,15 +75,9 @@ bool RenderBackgroundLayer::hasCrossfade() const {
     return getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 }
 
-static bool enableDefaultRender = false;
-
 void RenderBackgroundLayer::render(PaintParameters& parameters) {
     // Note that for bottommost layers without a pattern, the background color
     // is drawn with glClear rather than this method.
-
-    if (!enableDefaultRender) {
-        return;
-    }
 
     // Ensure programs are available
     if (!parameters.shaders.populate(backgroundProgram)) return;
@@ -181,8 +175,7 @@ std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
         return std::nullopt;
     }
 
-    return std::nullopt;
-    // return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
+    return {evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>()};
 }
 
 namespace {
@@ -213,15 +206,11 @@ void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     }
 }
 
-void RenderBackgroundLayer::update(const int32_t layerIndex,
-                                   gfx::ShaderRegistry& shaders,
+void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
-                                   UniqueChangeRequestVec& changes) {
-    if (enableDefaultRender) {
-        return;
-    }
-
+                                   [[maybe_unused]] const RenderTree& renderTree,
+                                   [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {
@@ -271,7 +260,6 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
             return;
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
     // Drawables per overscaled or canonical tile?

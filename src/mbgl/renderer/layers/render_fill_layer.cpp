@@ -78,14 +78,8 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
-static bool enableDefaultRender = false;
-
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
-
-    if (!enableDefaultRender) {
-        return;
-    }
 
     if (!parameters.shaders.populate(fillProgram)) return;
     if (!parameters.shaders.populate(fillPatternProgram)) return;
@@ -284,15 +278,11 @@ void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
-void RenderFillLayer::update(const int32_t layerIndex,
-                             gfx::ShaderRegistry& shaders,
+void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& /*state*/,
-                             UniqueChangeRequestVec& changes) {
-    if (enableDefaultRender) {
-        return;
-    }
-
+                             [[maybe_unused]] const RenderTree& renderTree,
+                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -310,7 +300,6 @@ void RenderFillLayer::update(const int32_t layerIndex,
             return;
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
     if (!fillShader) {
