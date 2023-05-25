@@ -13,11 +13,36 @@ namespace mbgl {
 using namespace style;
 
 struct alignas(16) FillDrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 2> world;
-    std::array<float, 2> padding;
+    /*   0 */ std::array<float, 4 * 4> matrix;
+    /*  64 */ std::array<float, 4> scale;
+    /*  80 */ std::array<float, 2> world;
+    /*  88 */ std::array<float, 2> pixel_coord_upper;
+    /*  96 */ std::array<float, 2> pixel_coord_lower;
+    /* 104 */ std::array<float, 2> texsize;
+    /* 112 */ float fade;
+
+    // Attribute interpolations (used without HAS_UNIFORM_u_*)
+    /* 116 */ float color_t;
+    /* 120 */ float opacity_t;
+    /* 124 */ float outline_color_t;
+    /* 128 */ float pattern_from_t;
+    /* 132 */ float pattern_to_t;
+
+    // Uniform alternates for attributes (used with HAS_UNIFORM_u_*)
+    /* 136 */ std::array<float, 2> color;
+    /* 144 */ std::array<float, 2> opacity;
+    /* 152 */ std::array<float, 2> outline_color_pad;
+    /* 160 */ std::array<float, 4> outline_color;
+    /* 176 */ std::array<float, 4> pattern_from;
+    /* 208 */ std::array<float, 4> pattern_to;
+
+    // Pattern texture
+    /* ? */ // Drawable::TextureAttachment? image;
+
+    /*  */ //std::array<float, 3> padding;
+    /* 208 */
 };
-static_assert(sizeof(FillDrawableUBO) % 16 == 0);
+static_assert(sizeof(FillDrawableUBO) == 208);
 
 void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
     // const auto& evaluated = static_cast<const FillLayerProperties&>(*evaluatedProperties).evaluated;
@@ -26,21 +51,6 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         if (!drawable.getTileID()) {
             return;
         }
-        /*mat4 matrix = drawable.getMatrix();
-        if (drawable.getTileID()) {
-            const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-            const auto tileMat = parameters.matrixForTile(tileID);
-            matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-            matrix = tileMat;
-        }
-
-        const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
-
-        gfx::DrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(matrix);
-        drawableUBO.world = {(float)renderableSize.width, (float)renderableSize.height};
-        auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-        drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);*/
 
         mat4 matrix = drawable.getMatrix();
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
@@ -48,11 +58,38 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         matrix::multiply(matrix, drawable.getMatrix(), tileMat);
         matrix = tileMat;
 
+        //matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
+        // from FillPatternProgram::layoutUniformValues
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
+        const auto intZoom = parameters.state.getIntegerZoom();
+        const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, intZoom);
+        const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * parameters.state.zoomScale(intZoom - tileID.canonical.z));
+        const int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * parameters.state.zoomScale(tileID.canonical.z)));
+        const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
+        const auto pixelRatio = parameters.pixelRatio;
+        //matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
+        const FillDrawableUBO drawableUBO = {
+            /*.matrix=*/ util::cast<float>(matrix),
+            /*.scale=*/ {pixelRatio, tileRatio, 0.0f, 0.0f }, //crossfade.fromScale, crossfade.toScale},
+            /*.world=*/ {(float)renderableSize.width, (float)renderableSize.height},
+            /*.pixel_coord_upper=*/ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+            /*.pixel_coord_lower=*/ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+            /*.texsize=*/ { 0.0f, 0.0f }, // tile.getIconAtlasTexture().size
+            /*.fade=*/ 0.0f, //crossfade.t,
+            /*.color_t=*/ 0.0f,
+            /*.opacity_t=*/ 0.0f,
+            /*.outline_color_t=*/ 0.0f,
+            /*.pattern_from_t=*/ 0.0f,
+            /*.pattern_to_t=*/ 0.0f,
+            /*.color=*/ { 0.0f },
+            /*.opacity=*/ { 0.0f },
+            /*.outline_color_pad=*/ { 0.0f },
+            /*.outline_color=*/ { 0.0f },
+            /*.pattern_from=*/ { 0.0f },
+            /*.pattern_to=*/ { 0.0f },
+            /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
+        };
 
-        FillDrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(matrix);
-        drawableUBO.world = {(float)renderableSize.width, (float)renderableSize.height};
         auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("FillDrawableUBO", drawableUniformBuffer);
     });

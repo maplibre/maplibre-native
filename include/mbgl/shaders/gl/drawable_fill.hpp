@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-25T14:44:39.644Z by timsylvester using shaders/generate_shader_code.js
+// Generated on 2023-05-25T15:19:24.210Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -11,7 +11,6 @@ template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillShader";
     static constexpr const char* vertex = R"(layout (std140) uniform FillDrawableUBO {
-layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
     highp vec2 u_world;

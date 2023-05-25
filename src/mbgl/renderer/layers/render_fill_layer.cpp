@@ -397,41 +397,6 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
             const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
-            // from FillPatternProgram::layoutUniformValues
-            // This seems to belong in a layergroup tweaker
-#if 0
-            if (evaluatedPropertiesChange) {
-                const auto tileRatio = 1 / tile.id.pixelsToTileUnits(1, state.getIntegerZoom());
-                const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
-                const int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
-                const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
-                const auto pixelRatio = 1.0f;   // parameters.pixelRatio
-                //matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
-                const FillDrawableUBO fillLayerUBO = {
-                    /*.matrix=*/ matrix::identity4f(),
-                    /*.scale=*/ {pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-                    /*.world=*/ { 0.0f }, //parameters.backend.getDefaultRenderable().getSize(),
-                    /*.pixel_coord_upper=*/ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                    /*.pixel_coord_lower=*/ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-                    /*.texsize=*/ { 0.0f, 0.0f }, // tile.getIconAtlasTexture().size
-                    /*.fade=*/ crossfade.t,
-                    /*.color_t=*/ 0.0f,
-                    /*.opacity_t=*/ 0.0f,
-                    /*.outline_color_t=*/ 0.0f,
-                    /*.pattern_from_t=*/ 0.0f,
-                    /*.pattern_to_t=*/ 0.0f,
-                    /*.color=*/ { 0.0f },
-                    /*.opacity=*/ { 0.0f },
-                    /*.outline_color_pad=*/ { 0.0f },
-                    /*.outline_color=*/ { 0.0f },
-                    /*.pattern_from=*/ { 0.0f },
-                    /*.pattern_to=*/ { 0.0f },
-                    /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
-                };
-                uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
-            }
-#endif
-
             if (unevaluated.get<FillPattern>().isUndefined()) {
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
                 const auto fillOpacity = evaluated.get<FillOpacity>().constantOr(0);
