@@ -1,6 +1,4 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-17T18:24:20.170Z by alex using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 

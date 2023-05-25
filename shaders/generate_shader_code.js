@@ -252,7 +252,8 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "${elem.name}";
     static constexpr const char* vertex = R"(${args.strip ? strip(vert) : vert})";
     static constexpr const char* fragment = R"(${args.strip ? strip(frag) : frag})";
@@ -302,7 +303,8 @@ template <BuiltIn T, gfx::Backend::Type>
 struct ShaderSource;
 
 /// @brief A specialization of the ShaderSource template for no shader code.
-template <> struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "";
     static constexpr const char* vertex = "";
     static constexpr const char* fragment = "";
