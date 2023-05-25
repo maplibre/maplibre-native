@@ -17,7 +17,7 @@ a provided image as its icon (User may find it in drawable folder from the packa
 Or, the icon can be customized using [IconFactory] to generate an
 [Icon] using as provided image.
 
-For more customization, please read documentation about [MarkerOptions].
+For more customization, please read the documentation about [MarkerOptions].
 
 In this showcase, we continue the code from [Quickstart],
 rename Activity into `JsonApiActivity`,
