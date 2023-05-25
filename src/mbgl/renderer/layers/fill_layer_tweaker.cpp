@@ -20,7 +20,7 @@ struct alignas(16) FillDrawableUBO {
 static_assert(sizeof(FillDrawableUBO) % 16 == 0);
 
 void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
-    //const auto& evaluated = static_cast<const FillLayerProperties&>(*evaluatedProperties).evaluated;
+    // const auto& evaluated = static_cast<const FillLayerProperties&>(*evaluatedProperties).evaluated;
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID()) {
@@ -41,7 +41,7 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         drawableUBO.world = {(float)renderableSize.width, (float)renderableSize.height};
         auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);*/
-        
+
         mat4 matrix = drawable.getMatrix();
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto tileMat = parameters.matrixForTile(tileID);
@@ -49,7 +49,7 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         matrix = tileMat;
 
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
-        
+
         FillDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
         drawableUBO.world = {(float)renderableSize.width, (float)renderableSize.height};

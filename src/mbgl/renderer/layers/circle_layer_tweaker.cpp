@@ -55,7 +55,7 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& 
     auto paintParamsUniformBuffer = parameters.context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
 
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
-    
+
     if (!evaluatedPropsUniformBuffer) {
         CircleEvaluatedPropsUBO evaluatedPropsUBO;
         evaluatedPropsUBO.color = evaluated.get<CircleColor>().constantOr(Color());
@@ -67,7 +67,8 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& 
         evaluatedPropsUBO.stroke_opacity = evaluated.get<CircleStrokeOpacity>().constantOr(0);
         evaluatedPropsUBO.scale_with_map = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
         evaluatedPropsUBO.pitch_with_map = pitchWithMap;
-        evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
+        evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
+                                                                             sizeof(evaluatedPropsUBO));
     }
 
     CircleInterpolateUBO interpolateUBO;
