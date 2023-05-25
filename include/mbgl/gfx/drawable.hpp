@@ -25,7 +25,6 @@ enum class DepthMaskType : bool;
 class DrawableTweaker;
 class ShaderProgramBase;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
-using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
@@ -177,13 +176,6 @@ struct DrawablePtrLessByLayer {
 private:
     bool desc;
 };
-
-struct alignas(16) DrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 2> world;
-    std::array<float, 2> padding;
-};
-static_assert(sizeof(DrawableUBO) % 16 == 0);
 
 } // namespace gfx
 } // namespace mbgl

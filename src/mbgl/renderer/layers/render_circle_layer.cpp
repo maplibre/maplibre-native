@@ -436,7 +436,6 @@ void RenderCircleLayer::update(const int32_t layerIndex,
         circleBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                        : gfx::DepthMaskType::ReadOnly);
         circleBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        circleBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
         circleBuilder->setLayerIndex(layerIndex);
 
         circleBuilder->setRenderPass(renderPass);

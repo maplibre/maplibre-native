@@ -13,29 +13,29 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 out vec3 v_data;
 
-layout (std140) uniform CircleLayerDrawableUBO {
+layout (std140) uniform CircleDrawableUBO {
     mat4 u_matrix;
     vec2 u_extrude_scale;
 };
 
-layout (std140) uniform CircleLayerVertexUBO {
+layout (std140) uniform CirclePaintParamsUBO {
     highp float u_camera_to_center_distance;
     lowp float u_device_pixel_ratio;
+};
+
+layout (std140) uniform CircleEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_stroke_color;
+    mediump float u_radius;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_stroke_width;
+    lowp float u_stroke_opacity;
     bool u_scale_with_map;
     bool u_pitch_with_map;
 };
 
-layout (std140) uniform CircleLayerFragmentUBO {
-    highp vec4 u_color;
-    mediump float u_radius;
-    lowp float u_blur;
-    lowp float u_opacity;
-    highp vec4 u_stroke_color;
-    mediump float u_stroke_width;
-    lowp float u_stroke_opacity;
-};
-
-layout (std140) uniform CircleLayerInterpolateUBO {
+layout (std140) uniform CircleInterpolateUBO {
     lowp float u_color_t;
     lowp float u_radius_t;
     lowp float u_blur_t;
@@ -150,14 +150,16 @@ lowp float stroke_opacity = u_stroke_opacity;
 )";
     static constexpr const char* fragment = R"(in vec3 v_data;
 
-layout (std140) uniform CircleLayerFragmentUBO {
+layout (std140) uniform CircleEvaluatedPropsUBO {
     highp vec4 u_color;
+    highp vec4 u_stroke_color;
     mediump float u_radius;
     lowp float u_blur;
     lowp float u_opacity;
-    highp vec4 u_stroke_color;
     mediump float u_stroke_width;
     lowp float u_stroke_opacity;
+    bool u_scale_with_map;
+    bool u_pitch_with_map;
 };
 
 #ifndef HAS_UNIFORM_u_color

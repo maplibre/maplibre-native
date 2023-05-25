@@ -10,20 +10,20 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
 
 /**
-    Circle layer specific tweaker
+    Background layer specific tweaker
  */
-class CircleLayerTweaker : public LayerTweaker {
+class BackgroundLayerTweaker : public LayerTweaker {
 public:
-    CircleLayerTweaker(Immutable<style::LayerProperties> properties)
+    BackgroundLayerTweaker(Immutable<style::LayerProperties> properties)
         : LayerTweaker(properties){};
 
 public:
-    ~CircleLayerTweaker() override = default;
+    ~BackgroundLayerTweaker() override = default;
 
     void execute(LayerGroup&, const PaintParameters&) override;
 
 protected:
-    gfx::UniformBufferPtr evaluatedPropsUniformBuffer = nullptr;
+    gfx::UniformBufferPtr layerUniformBuffer = nullptr;
 };
 
 } // namespace mbgl

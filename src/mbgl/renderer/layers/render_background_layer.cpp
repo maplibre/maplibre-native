@@ -1,5 +1,5 @@
 #include <mbgl/renderer/layers/render_background_layer.hpp>
-
+#include <mbgl/renderer/layers/background_layer_tweaker.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
@@ -62,7 +62,9 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     properties->renderPasses = mbgl::underlying_type(passes);
 
     evaluatedProperties = std::move(properties);
-    evaluatedPropertiesChange = true;
+    if (tileLayerGroup) {
+        tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
+    }
 }
 
 bool RenderBackgroundLayer::hasTransition() const {
@@ -263,19 +265,12 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
         return;
     }
 
-    if (evaluatedPropertiesChange) {
-        BackgroundLayerUBO backgroundLayerUBO;
-        backgroundLayerUBO.color = evaluated.get<BackgroundColor>();
-        backgroundLayerUBO.opacity = evaluated.get<BackgroundOpacity>();
-        uniformBuffer = context.createUniformBuffer(&backgroundLayerUBO, sizeof(backgroundLayerUBO));
-        evaluatedPropertiesChange = false;
-    }
-
     if (!tileLayerGroup) {
         tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
         if (!tileLayerGroup) {
             return;
         }
+        tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
@@ -316,7 +311,6 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
 
             if (tileDrawable) {
                 // Already created, update it.
-                tileDrawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
                 continue;
             }
 
@@ -342,7 +336,6 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
             if (!newDrawables.empty()) {
                 auto& drawable = newDrawables[0];
                 drawable->setTileID(tileID);
-                drawable->mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", uniformBuffer);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
             }
