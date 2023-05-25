@@ -181,6 +181,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/platform/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/query.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_group.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_frontend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_observer.hpp
@@ -520,6 +521,13 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_background_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_background_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_circle_layer.cpp
@@ -929,6 +937,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline_pattern.hpp

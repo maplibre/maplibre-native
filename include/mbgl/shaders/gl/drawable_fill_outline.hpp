@@ -12,7 +12,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlineShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 
-layout (std140) uniform DrawableUBO {
+layout (std140) uniform FillDrawableUBO {
     mat4 u_matrix;
     vec2 u_world;
     vec2 pad;

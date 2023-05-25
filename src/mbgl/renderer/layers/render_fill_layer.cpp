@@ -9,6 +9,7 @@
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
@@ -64,8 +65,9 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     }
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-
-    evaluatedPropertiesChange = true;
+    if (tileLayerGroup) {
+        tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
+    }
 }
 
 bool RenderFillLayer::hasTransition() const {
@@ -287,6 +289,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::Context& context,
                              const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
+    if (enableDefaultRender) {
+        return;
+    }
+
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -303,6 +309,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
         if (!tileLayerGroup) {
             return;
         }
+        tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
@@ -442,16 +449,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     }
                 }
 
-                if (evaluatedPropertiesChange) {
-                    // FillLayerUBO fillLayerUBO;
-                    // fillLayerUBO.color = evaluated.get<FillColor>();
-                    // fillLayerUBO.opacity = evaluated.get<FillOpacity>();
-                    // uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
-                    evaluatedPropertiesChange = false;
-                }
-
                 if (tileDrawable) {
-                    // tileDrawable->mutableUniformBuffers().addOrReplace("FillLayerUBO", uniformBuffer);
                     continue;
                 }
 
