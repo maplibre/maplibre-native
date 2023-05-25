@@ -261,10 +261,10 @@ void RenderCircleLayer::removeTile(RenderPass renderPass, const OverscaledTileID
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
-void RenderCircleLayer::update(const int32_t layerIndex,
-                               gfx::ShaderRegistry& shaders,
+void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
+                               [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
     if (enableDefaultRender) {
         return;
