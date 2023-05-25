@@ -287,7 +287,7 @@ void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
 void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& state,
+                             const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
     if (enableDefaultRender) {
         return;
