@@ -259,8 +259,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
     }
     assert(orderedLayers.size() == renderLayers.size());
-    
-    addChanges(changes);
 
     if (layersAddedOrRemoved || !layerDiff.changed.empty()) {
         glyphManager->evict(fontStacks(*layerImpls));
@@ -314,6 +312,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     // Update all sources and initialize renderItems.
+
+    // @NOTE: Here, we need to indicate which layer groups are going to be rendered by the tree.
     for (const auto& sourceImpl : *sourceImpls) {
         RenderSource* source = renderSources.at(sourceImpl->id).get();
         bool sourceNeedsRendering = false;
@@ -340,6 +340,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                         }
                     }
                 }
+
                 continue;
             }
 
@@ -360,6 +361,14 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
     }
+
+    for (size_t i = 0; i < orderedLayers.size(); ++i) {
+        RenderLayer& layer = orderedLayers[i];
+        layer.markLayerRenderable(layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(i))) != layerRenderItems.end(), changes);
+    }
+
+    // Add all change requests up to this point
+    addChanges(changes);
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
     if (!isMapModeContinuous && !renderTreeParameters->loaded) {
@@ -822,6 +831,10 @@ bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
     }
 }
 
+size_t RenderOrchestrator::numLayerGroups() const noexcept {
+    return layerGroupsByLayerIndex.size();
+}
+
 static const LayerGroupPtr no_group;
 
 const LayerGroupPtr& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
@@ -863,7 +876,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     for (const auto& item : renderTree.getLayerRenderItems()) {
         auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
-        renderLayer.update(shaders, context, state, changes);
+        renderLayer.update(shaders, context, state, renderTree, changes);
     }
 
     addChanges(changes);

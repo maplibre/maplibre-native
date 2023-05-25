@@ -29,6 +29,7 @@ public:
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
+                const RenderTree&,
                 UniqueChangeRequestVec&) override;
 
 private:

@@ -287,6 +287,7 @@ void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& /*state*/,
+                             [[maybe_unused]] const RenderTree& renderTree,
                              UniqueChangeRequestVec& changes) {
     if (enableDefaultRender) {
         return;
@@ -309,7 +310,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return;
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
     if (!fillShader) {

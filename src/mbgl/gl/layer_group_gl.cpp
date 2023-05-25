@@ -56,7 +56,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 
     // TODO: figure out how to make drawables participate in the depth system
     // Maybe make it a function mapping draw priority to the depth range (always (0,1)?)
-    parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
+    // parameters.depthRangeSize = 1 - (1 + 2) * parameters.numSublayers * parameters.depthEpsilon;
 
     // TODO: Render tile masks
     // for (auto& layer : renderLayers) {

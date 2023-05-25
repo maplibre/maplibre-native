@@ -184,25 +184,30 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
     }
 
-    {
-        parameters.pass = RenderPass::Opaque;
-        parameters.currentLayer = 0;
-        parameters.opaquePassCutoff = 1;
-
-        // draw layer groups, opaque pass
-        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
-
-        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
-    }
-
     // Actually render the layers
-    parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
-    parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
-
+    
     // - OPAQUE PASS -------------------------------------------------------------------------------
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
+    
+    // Drawables
+    {
+        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
+        parameters.pass = RenderPass::Opaque;
+        parameters.currentLayer = 0;
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * parameters.numSublayers * parameters.depthEpsilon;
+
+        // draw layer groups, opaque pass
+        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
+            layerGroup.render(orchestrator, parameters);
+            parameters.currentLayer++;
+        });
+    }
+
+    // RenderLayers
     {
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
+        parameters.pass = RenderPass::Opaque;
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
 
         uint32_t i = 0;
         for (auto it = layerRenderItems.rbegin(); it != layerRenderItems.rend(); ++it, ++i) {
@@ -215,23 +220,29 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
-    {
-        parameters.pass = RenderPass::Translucent;
-        parameters.currentLayer = 1;
-        parameters.opaquePassCutoff = 1;
-
-        // draw layer groups, translucent pass
-        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
-
-        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.render(orchestrator, parameters); });
-
-        parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
-    }
-
     // - TRANSLUCENT PASS --------------------------------------------------------------------------
     // Make a second pass, rendering translucent objects. This time, we render bottom-to-top.
+    // Drawables
+    {
+        const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
+        parameters.pass = RenderPass::Translucent;
+        parameters.currentLayer = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
+        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * parameters.numSublayers * parameters.depthEpsilon;
+        parameters.opaquePassCutoff = 0;
+
+        // draw layer groups, translucent pass
+        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
+            assert(parameters.currentLayer >= 0);
+            layerGroup.render(orchestrator, parameters);
+            parameters.currentLayer--;
+        });
+    }
+
+    // RenderLayers
     {
         const auto debugGroup(parameters.renderPass->createDebugGroup("translucent"));
+        parameters.pass = RenderPass::Translucent;
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
 
         int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
         for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {

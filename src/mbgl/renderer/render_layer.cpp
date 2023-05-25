@@ -1,5 +1,6 @@
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -31,7 +32,7 @@ const std::string& RenderLayer::getID() const {
     return baseImpl->id;
 }
 
-const int32_t RenderLayer::getLayerIndex() const noexcept {
+int32_t RenderLayer::getLayerIndex() const noexcept {
     return layerIndex;
 }
 
@@ -117,6 +118,25 @@ void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVe
     // Submit a change request to update the layer index of our tile layer group
     if (tileLayerGroup) {
         changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(tileLayerGroup, newLayerIndex));
+    }
+}
+
+void RenderLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    if (!tileLayerGroup) {
+        return;
+    }
+    if (renderable == willRender) {
+        return;
+    }
+
+    // This layer is either being freshly included in the renderable set or excluded
+    renderable = willRender;
+    if (willRender) {
+        // The RenderTree has determined this layer should be included in the renderable set for a frame
+        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
+    } else {
+        // The RenderTree is informing us we should not render anything
+        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
     }
 }
 

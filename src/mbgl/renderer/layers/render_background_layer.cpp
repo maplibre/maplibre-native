@@ -216,6 +216,7 @@ void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
+                                   [[maybe_unused]] const RenderTree& renderTree,
                                    UniqueChangeRequestVec& changes) {
     if (enableDefaultRender) {
         return;
@@ -270,7 +271,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
             return;
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
     // Drawables per overscaled or canonical tile?

@@ -103,6 +103,7 @@ public:
 
     bool addLayerGroup(LayerGroupPtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
+    size_t numLayerGroups() const noexcept;
     const LayerGroupPtr& getLayerGroup(const int32_t layerIndex) const;
     void observeLayerGroups(std::function<void(LayerGroup&)>);
     void observeLayerGroups(std::function<void(const LayerGroup&)>) const;
