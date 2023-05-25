@@ -78,7 +78,7 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
-static bool enableDefaultRender = false;
+static bool enableDefaultRender = true;
 
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
