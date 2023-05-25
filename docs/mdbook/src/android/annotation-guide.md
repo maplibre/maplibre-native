@@ -9,8 +9,7 @@ This guide will show you how to add Markers in the map.
 3. [Polygon]
 
 A Marker shows an icon image at a geographical location. By default, marker uses
-a provided image as its icon (User may find it in drawable folder from the package
-`com.comapbox.mapboxsdk`).
+a [provided image] as its icon.
 
 ![marker image]
 
@@ -76,6 +75,7 @@ Then add markers to the map with GeoJSON:
 </div>
 
 [Marker]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker/index.html
+[provided image]: https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapboxGLAndroidSDK/src/main/res/drawable-xxxhdpi/maplibre_marker_icon_default.png
 [Polyline]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polyline/index.html
 [Polygon]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polygon/index.html
 [marker image]: https://raw.githubusercontent.com/maplibre/maplibre-native/main/test/fixtures/sprites/default_marker.png
