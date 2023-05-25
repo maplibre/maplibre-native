@@ -19,7 +19,7 @@ Or, the icon can be customized using [IconFactory] to generate an
 
 For more customization, please read the documentation about [MarkerOptions].
 
-In this showcase, we continue the code from [Quickstart],
+In this showcase, we continue the code from the [Quickstart],
 rename Activity into `JsonApiActivity`,
 and pull the GeoJSON data from a free and public API.
 Then add markers into map with GeoJSON:
