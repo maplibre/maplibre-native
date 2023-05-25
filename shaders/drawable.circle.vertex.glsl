@@ -2,13 +2,15 @@ layout (location = 0) in vec2 a_pos;
 out vec3 v_data;
 
 layout (std140) uniform CircleDrawableUBO {
-    mat4 u_matrix;
-    vec2 u_extrude_scale;
+    highp mat4 u_matrix;
+    highp vec2 u_extrude_scale;
+    lowp vec2 pad2_;
 };
 
 layout (std140) uniform CirclePaintParamsUBO {
     highp float u_camera_to_center_distance;
     lowp float u_device_pixel_ratio;
+    lowp vec2 pad3_;
 };
 
 layout (std140) uniform CircleEvaluatedPropsUBO {
@@ -21,6 +23,7 @@ layout (std140) uniform CircleEvaluatedPropsUBO {
     lowp float u_stroke_opacity;
     bool u_scale_with_map;
     bool u_pitch_with_map;
+    lowp float pad0_;
 };
 
 layout (std140) uniform CircleInterpolateUBO {
@@ -31,6 +34,7 @@ layout (std140) uniform CircleInterpolateUBO {
     lowp float u_stroke_color_t;
     lowp float u_stroke_width_t;
     lowp float u_stroke_opacity_t;
+    lowp float pad1_;
 };
 
 #pragma mapbox: define highp vec4 color
