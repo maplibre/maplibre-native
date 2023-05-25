@@ -56,7 +56,7 @@ public:
 
     /// Call the provided function for each drawable in undefined order, allowing ownership to be taken.
     virtual void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) = 0;
-    
+
     /// Attach a tweaker to be run on this layer group for each frame
     void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
 

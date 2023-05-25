@@ -89,11 +89,11 @@ static bool enableDefaultRender = false;
 
 void RenderCircleLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
-    
+
     if (!enableDefaultRender) {
         return;
     }
-    
+
     if (parameters.pass == RenderPass::Opaque) {
         return;
     }
@@ -262,14 +262,14 @@ void RenderCircleLayer::removeTile(RenderPass renderPass, const OverscaledTileID
 }
 
 void RenderCircleLayer::update(const int32_t layerIndex,
-                             gfx::ShaderRegistry& shaders,
-                             gfx::Context& context,
-                             const TransformState& /*state*/,
-                             UniqueChangeRequestVec& changes) {
+                               gfx::ShaderRegistry& shaders,
+                               gfx::Context& context,
+                               const TransformState& /*state*/,
+                               UniqueChangeRequestVec& changes) {
     if (enableDefaultRender) {
         return;
     }
-    
+
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -304,7 +304,7 @@ void RenderCircleLayer::update(const int32_t layerIndex,
     std::vector<gfx::DrawablePtr> newTiles;
     gfx::VertexAttributeArray circleVertexAttrs;
     auto renderPass = RenderPass::Translucent;
-    
+
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
@@ -343,17 +343,20 @@ void RenderCircleLayer::update(const int32_t layerIndex,
                 std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
             }
         };
-        
+
         circleVertexAttrs.clear();
 
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
-        
+
         if (auto& binder = paintPropertyBinders.get<CircleColor>()) {
             const auto count = binder->getVertexCount();
             if (auto& attr = circleVertexAttrs.getOrAdd("a_color")) {
                 for (std::size_t i = 0; i < count; ++i) {
-                    const auto& packedColor = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(binder->getVertexValue(i))->a1;
-                    attr->set<gfx::VertexAttribute::float4>(i, {packedColor[0], packedColor[1], packedColor[0], packedColor[1]});
+                    const auto& packedColor = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
+                                                  binder->getVertexValue(i))
+                                                  ->a1;
+                    attr->set<gfx::VertexAttribute::float4>(
+                        i, {packedColor[0], packedColor[1], packedColor[0], packedColor[1]});
                 }
             }
         }
@@ -361,7 +364,9 @@ void RenderCircleLayer::update(const int32_t layerIndex,
             const auto count = binder->getVertexCount();
             if (auto& attr = circleVertexAttrs.getOrAdd("a_radius")) {
                 for (std::size_t i = 0; i < count; ++i) {
-                    const auto& radius = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(binder->getVertexValue(i))->a1;
+                    const auto& radius = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                             binder->getVertexValue(i))
+                                             ->a1;
                     attr->set<gfx::VertexAttribute::float2>(i, {radius[0], radius[0]});
                 }
             }
@@ -370,7 +375,9 @@ void RenderCircleLayer::update(const int32_t layerIndex,
             const auto count = binder->getVertexCount();
             if (auto& attr = circleVertexAttrs.getOrAdd("a_blur")) {
                 for (std::size_t i = 0; i < count; ++i) {
-                    const auto& blur = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(binder->getVertexValue(i))->a1;
+                    const auto& blur = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                           binder->getVertexValue(i))
+                                           ->a1;
                     attr->set<gfx::VertexAttribute::float2>(i, {blur[0], blur[0]});
                 }
             }
@@ -379,7 +386,9 @@ void RenderCircleLayer::update(const int32_t layerIndex,
             const auto count = binder->getVertexCount();
             if (auto& attr = circleVertexAttrs.getOrAdd("a_opacity")) {
                 for (std::size_t i = 0; i < count; ++i) {
-                    const auto& opacity = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(binder->getVertexValue(i))->a1;
+                    const auto& opacity = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                              binder->getVertexValue(i))
+                                              ->a1;
                     attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
                 }
             }
@@ -388,8 +397,12 @@ void RenderCircleLayer::update(const int32_t layerIndex,
             const auto count = binder->getVertexCount();
             if (auto& attr = circleVertexAttrs.getOrAdd("a_stroke_color")) {
                 for (std::size_t i = 0; i < count; ++i) {
-                    const auto& packedStrokeColor = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(binder->getVertexValue(i))->a1;
-                    attr->set<gfx::VertexAttribute::float4>(i, {packedStrokeColor[0], packedStrokeColor[1], packedStrokeColor[0], packedStrokeColor[1]});
+                    const auto& packedStrokeColor =
+                        static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
+                            binder->getVertexValue(i))
+                            ->a1;
+                    attr->set<gfx::VertexAttribute::float4>(
+                        i, {packedStrokeColor[0], packedStrokeColor[1], packedStrokeColor[0], packedStrokeColor[1]});
                 }
             }
         }
@@ -397,7 +410,9 @@ void RenderCircleLayer::update(const int32_t layerIndex,
             const auto count = binder->getVertexCount();
             if (auto& attr = circleVertexAttrs.getOrAdd("a_stroke_width")) {
                 for (std::size_t i = 0; i < count; ++i) {
-                    const auto& strokeWidth = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(binder->getVertexValue(i))->a1;
+                    const auto& strokeWidth = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                                  binder->getVertexValue(i))
+                                                  ->a1;
                     attr->set<gfx::VertexAttribute::float2>(i, {strokeWidth[0], strokeWidth[0]});
                 }
             }
@@ -406,7 +421,10 @@ void RenderCircleLayer::update(const int32_t layerIndex,
             const auto count = binder->getVertexCount();
             if (auto& attr = circleVertexAttrs.getOrAdd("a_stroke_opacity")) {
                 for (std::size_t i = 0; i < count; ++i) {
-                    const auto& strokeOpacity = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(binder->getVertexValue(i))->a1;
+                    const auto& strokeOpacity =
+                        static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                            binder->getVertexValue(i))
+                            ->a1;
                     attr->set<gfx::VertexAttribute::float2>(i, {strokeOpacity[0], strokeOpacity[0]});
                 }
             }
@@ -415,7 +433,8 @@ void RenderCircleLayer::update(const int32_t layerIndex,
         circleBuilder = context.createDrawableBuilder("circle");
         circleBuilder->setShader(circleShader);
         circleBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-        circleBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
+        circleBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                       : gfx::DepthMaskType::ReadOnly);
         circleBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
         circleBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
         circleBuilder->setLayerIndex(layerIndex);

@@ -82,7 +82,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     if (!enableDefaultRender) {
         return;
     }
-    
+
     // Ensure programs are available
     if (!parameters.shaders.populate(backgroundProgram)) return;
     if (!parameters.shaders.populate(backgroundPatternProgram)) return;
@@ -219,7 +219,7 @@ void RenderBackgroundLayer::update(const int32_t layerIndex,
     if (enableDefaultRender) {
         return;
     }
-    
+
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {

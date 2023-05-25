@@ -25,7 +25,7 @@ public:
     virtual ~LayerTweaker() = default;
 
     virtual void execute(LayerGroup&, const PaintParameters&) = 0;
-    
+
 protected:
     Immutable<style::LayerProperties> evaluatedProperties;
 };

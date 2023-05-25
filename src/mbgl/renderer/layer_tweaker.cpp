@@ -4,6 +4,6 @@
 namespace mbgl {
 
 LayerTweaker::LayerTweaker(Immutable<style::LayerProperties> properties)
-    : evaluatedProperties(std::move(properties)) {};
+    : evaluatedProperties(std::move(properties)){};
 
 }

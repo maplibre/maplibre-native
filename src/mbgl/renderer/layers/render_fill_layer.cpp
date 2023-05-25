@@ -290,7 +290,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
     if (enableDefaultRender) {
         return;
     }
-    
+
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {

@@ -48,14 +48,14 @@ static_assert(sizeof(CircleLayerInterpolateUBO) % 16 == 0);
 
 void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
-    
+
     CircleLayerVertexUBO vertexUBO;
     vertexUBO.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
     vertexUBO.device_pixel_ratio = parameters.pixelRatio;
     vertexUBO.scale_with_map = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
     vertexUBO.pitch_with_map = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
     auto vertexUniformBuffer = parameters.context.createUniformBuffer(&vertexUBO, sizeof(vertexUBO));
-    
+
     if (!fragmentUniformBuffer) {
         CircleLayerFragmentUBO fragmentUBO;
         fragmentUBO.color = evaluated.get<CircleColor>().constantOr(Color());
@@ -67,7 +67,7 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& 
         fragmentUBO.stroke_opacity = evaluated.get<CircleStrokeOpacity>().constantOr(0);
         fragmentUniformBuffer = parameters.context.createUniformBuffer(&fragmentUBO, sizeof(fragmentUBO));
     }
-    
+
     CircleLayerInterpolateUBO interpolateUBO;
     interpolateUBO.color_t = 0;
     interpolateUBO.radius_t = 0;
@@ -77,12 +77,12 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& 
     interpolateUBO.stroke_width_t = 0;
     interpolateUBO.stroke_opacity_t = 0;
     auto interpolateUniformBuffer = parameters.context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
-    
+
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         drawable.mutableUniformBuffers().addOrReplace("CircleLayerVertexUBO", vertexUniformBuffer);
         drawable.mutableUniformBuffers().addOrReplace("CircleLayerFragmentUBO", fragmentUniformBuffer);
         drawable.mutableUniformBuffers().addOrReplace("CircleLayerInterpolateUBO", interpolateUniformBuffer);
-        
+
         if (!drawable.getTileID()) {
             return;
         }
@@ -94,10 +94,11 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& 
 
         CircleLayerDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
-        drawableUBO.extrude_scale = vertexUBO.pitch_with_map ? std::array<float, 2>{
-            {tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-            tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()))}
-        } : parameters.pixelsToGLUnits;
+        drawableUBO.extrude_scale =
+            vertexUBO.pitch_with_map
+                ? std::array<float, 2>{{tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
+                                        tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()))}}
+                : parameters.pixelsToGLUnits;
         auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("CircleLayerDrawableUBO", drawableUniformBuffer);
     });

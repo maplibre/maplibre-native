@@ -21,7 +21,7 @@ public:
                 gfx::Context&,
                 const TransformState&,
                 UniqueChangeRequestVec&) override;
-    
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -36,7 +36,7 @@ private:
                                 float,
                                 const mat4&,
                                 const FeatureState&) const override;
-    
+
     /// Remove all drawables for the tile from the layer group
     void removeTile(RenderPass, const OverscaledTileID&);
 
@@ -45,7 +45,7 @@ private:
 
     // Programs
     std::shared_ptr<CircleProgram> circleProgram;
-    
+
     gfx::ShaderProgramBasePtr circleShader;
 };
 
