@@ -69,7 +69,7 @@ Then add markers to the map with GeoJSON:
 {{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
 ```
 
-7. Here is the final result. For the full content of `JsonApiActivity`, please visit source code of [Test APP]
+7. Here is the final result. For the full contents of `JsonApiActivity`, please visit source code of [Test APP]
 
 <div style="align: center">
   <img src="https://github.com/maplibre/maplibre-native/assets/19887090/00446249-9b19-4a48-8a46-00d4c5a2f981" alt="Screenshot with the map in demotile style">
