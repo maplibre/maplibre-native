@@ -85,14 +85,8 @@ bool RenderCircleLayer::hasCrossfade() const {
     return false;
 }
 
-static bool enableDefaultRender = false;
-
 void RenderCircleLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
-
-    if (!enableDefaultRender) {
-        return;
-    }
 
     if (parameters.pass == RenderPass::Opaque) {
         return;
@@ -261,15 +255,11 @@ void RenderCircleLayer::removeTile(RenderPass renderPass, const OverscaledTileID
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
-void RenderCircleLayer::update(const int32_t layerIndex,
-                               gfx::ShaderRegistry& shaders,
+void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
+                               [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
-    if (enableDefaultRender) {
-        return;
-    }
-
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
