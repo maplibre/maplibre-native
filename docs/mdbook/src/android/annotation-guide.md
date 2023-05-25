@@ -63,7 +63,7 @@ Then add markers to the map with GeoJSON:
    - In method `addMarkersToMap()`, we define two types of bitmap for marker icon.
    - For each feature in GeoJSON, add a marker with snippet about earthquake details.
    - If the magnitude of an earthquake is bigger than 6.0, we use the red icon. Otherwise, use the blue one.
-   - Finally, move camera to bounds of newly added markers
+   - Finally, move the camera to the bounds of the newly added markers
 
 ```kotlin
 {{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
