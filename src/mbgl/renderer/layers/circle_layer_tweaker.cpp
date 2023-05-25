@@ -13,12 +13,14 @@ using namespace style;
 struct alignas(16) CircleDrawableUBO {
     std::array<float, 4 * 4> matrix;
     std::array<float, 2> extrude_scale;
+    std::array<float, 2> padding;
 };
 static_assert(sizeof(CircleDrawableUBO) % 16 == 0);
 
 struct alignas(16) CirclePaintParamsUBO {
     float camera_to_center_distance;
     float device_pixel_ratio;
+    std::array<float, 2> padding;
 };
 static_assert(sizeof(CirclePaintParamsUBO) % 16 == 0);
 
@@ -32,6 +34,7 @@ struct alignas(16) CircleEvaluatedPropsUBO {
     float stroke_opacity;
     int scale_with_map;
     int pitch_with_map;
+    float padding;
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) % 16 == 0);
 
@@ -43,6 +46,7 @@ struct alignas(16) CircleInterpolateUBO {
     float stroke_color_t;
     float stroke_width_t;
     float stroke_opacity_t;
+    float padding;
 };
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
