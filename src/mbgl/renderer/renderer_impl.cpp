@@ -21,7 +21,13 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
+// Enable a debugging split view to compare drawables and vanilla rendering pathways
+// Drawables will be on the left, vanilla rendering on the right
 #define SPLIT_VIEW
+// If using SPLIT_VIEW, QUAD_SPLIT_VIEW will split each half, showing just the opaque
+// pass on top and then a composited opaque+translucent pass on the bottom
+#define QUAD_SPLIT_VIEW
+
 #ifdef SPLIT_VIEW
 #include <mbgl/gl/context.hpp>
 #endif
@@ -260,26 +266,47 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     };
 
 #ifdef SPLIT_VIEW
-    // Drawable LayerGroups on the left
-    platform::glScissor(
-        0, 0, backend.getDefaultRenderable().getSize().width, backend.getDefaultRenderable().getSize().height);
+    [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
+    [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
+    [[maybe_unused]] const auto halfW = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width *
+                                                                       0.5f);
+    [[maybe_unused]] const auto halfH = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().height *
+                                                                       0.5f);
     platform::glEnable(GL_SCISSOR_TEST);
+#ifdef QUAD_SPLIT_VIEW
+    // Drawable LayerGroups on the left
+    // Opaque only on top
+    platform::glScissor(0, 0, halfW, H);
+    drawableOpaquePass();
+
+    // Composite (Opaque+Translucent) on bottom
+    platform::glScissor(0, 0, halfW, halfH);
+    drawableTranslucentPass();
+
+    // RenderLayers on the right
+    // Opaque only on top
+    platform::glScissor(halfW, 0, halfW, H);
+    renderLayerOpaquePass();
+
+    // Composite (Opaque+Translucent) on bottom
+    platform::glScissor(halfW, 0, halfW, halfH);
+    renderLayerTranslucentPass();
+#else
+    // Drawable LayerGroups on the left
+    platform::glScissor(0, 0, halfW, H);
     drawableOpaquePass();
     drawableTranslucentPass();
 
     // RenderLayers on the right
-    platform::glScissor(static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width * 0.5f),
-                        0,
-                        backend.getDefaultRenderable().getSize().width,
-                        backend.getDefaultRenderable().getSize().height);
+    platform::glScissor(halfW, 0, W, H);
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
-
+#endif
     // Reset viewport
-    platform::glScissor(
-        0, 0, backend.getDefaultRenderable().getSize().width, backend.getDefaultRenderable().getSize().height);
+    platform::glScissor(0, 0, W, H);
     platform::glDisable(GL_SCISSOR_TEST);
-#else
+#else // ifdef SPLIT_VIEW
+
     // Do RenderLayers first, drawables last
     renderLayerOpaquePass();
     drawableOpaquePass();
