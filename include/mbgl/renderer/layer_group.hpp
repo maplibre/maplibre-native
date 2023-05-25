@@ -76,6 +76,7 @@ public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity);
     ~TileLayerGroup() override;
 
+    void updateLayerIndex(int32_t newLayerIndex);
     std::size_t getDrawableCount() const;
 
     const gfx::UniqueDrawable& getDrawable(mbgl::RenderPass, const OverscaledTileID&) const;
