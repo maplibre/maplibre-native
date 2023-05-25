@@ -46,7 +46,7 @@ Then add markers to the map with GeoJSON:
 ```
 
 4. Rewrite `mapview.getMapSync()`. Now we assign values for `mapboxMap`.
-   Also, call method `getEarthQuakeDataFromUSGS()` for HTTP request.
+   Also, call the `getEarthQuakeDataFromUSGS()` method to make a HTTP request.
 
 ```kotlin
 {{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:mapAsync}}
