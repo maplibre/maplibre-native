@@ -85,14 +85,8 @@ bool RenderCircleLayer::hasCrossfade() const {
     return false;
 }
 
-static bool enableDefaultRender = false;
-
 void RenderCircleLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
-
-    if (!enableDefaultRender) {
-        return;
-    }
 
     if (parameters.pass == RenderPass::Opaque) {
         return;
@@ -266,10 +260,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                const TransformState& /*state*/,
                                [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
-    if (enableDefaultRender) {
-        return;
-    }
-
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {

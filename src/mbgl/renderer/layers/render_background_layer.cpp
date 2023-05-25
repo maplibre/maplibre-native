@@ -75,15 +75,9 @@ bool RenderBackgroundLayer::hasCrossfade() const {
     return getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 }
 
-static bool enableDefaultRender = false;
-
 void RenderBackgroundLayer::render(PaintParameters& parameters) {
     // Note that for bottommost layers without a pattern, the background color
     // is drawn with glClear rather than this method.
-
-    if (!enableDefaultRender) {
-        return;
-    }
 
     // Ensure programs are available
     if (!parameters.shaders.populate(backgroundProgram)) return;
