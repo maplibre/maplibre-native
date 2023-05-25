@@ -31,6 +31,10 @@ const std::string& RenderLayer::getID() const {
     return baseImpl->id;
 }
 
+const int32_t RenderLayer::getLayerIndex() const noexcept {
+    return layerIndex;
+}
+
 bool RenderLayer::hasRenderPass(RenderPass pass) const {
     return passes & pass;
 }
@@ -105,6 +109,15 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
         return bool(RenderPass(renderData->layerProperties->renderPasses) & pass) ? renderData : nullptr;
     }
     return nullptr;
+}
+
+void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
+    layerIndex = newLayerIndex;
+
+    // Submit a change request to update the layer index of our tile layer group
+    if (tileLayerGroup) {
+        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(tileLayerGroup, newLayerIndex));
+    }
 }
 
 } // namespace mbgl

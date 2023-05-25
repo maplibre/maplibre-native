@@ -101,6 +101,8 @@ public:
 
     const std::string& getID() const;
 
+    const int32_t getLayerIndex() const noexcept;
+
     // Checks whether this layer needs to be rendered in the given render pass.
     bool hasRenderPass(RenderPass) const;
 
@@ -143,9 +145,11 @@ public:
 
     /// Generate any changes needed by the layer
     virtual void update(
-        int32_t /*layerIndex*/, gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) {}
+        gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) {}
 
     virtual void layerRemoved(UniqueChangeRequestVec&) {}
+
+    virtual void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&);
 
 protected:
     // Checks whether the current hardware can render this layer. If it can't,
@@ -167,6 +171,7 @@ protected:
     LayerPlacementData placementData;
 
     TileLayerGroupPtr tileLayerGroup;
+    int32_t layerIndex{0};
 
     std::mutex mutex;
 

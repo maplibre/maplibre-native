@@ -284,8 +284,7 @@ void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
-void RenderFillLayer::update(const int32_t layerIndex,
-                             gfx::ShaderRegistry& shaders,
+void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {

@@ -213,8 +213,7 @@ void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     }
 }
 
-void RenderBackgroundLayer::update(const int32_t layerIndex,
-                                   gfx::ShaderRegistry& shaders,
+void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
                                    UniqueChangeRequestVec& changes) {

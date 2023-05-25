@@ -25,8 +25,7 @@ public:
     void layerRemoved(UniqueChangeRequestVec&) override;
 
     /// Generate any changes needed by the layer
-    void update(int32_t layerIndex,
-                gfx::ShaderRegistry&,
+    void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
                 UniqueChangeRequestVec&) override;

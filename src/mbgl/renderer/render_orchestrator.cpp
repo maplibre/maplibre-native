@@ -233,8 +233,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
     }
 
-    addChanges(changes);
-
     // Create render layers for newly added layers.
     for (const auto& entry : layerDiff.added) {
         auto renderLayer = LayerManager::get()->createRenderLayer(entry.second);
@@ -250,13 +248,19 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     if (layersAddedOrRemoved) {
         orderedLayers.clear();
         orderedLayers.reserve(layerImpls->size());
+        int32_t layerIndex = 0;
         for (const auto& layerImpl : *layerImpls) {
             RenderLayer* layer = renderLayers.at(layerImpl->id).get();
             assert(layer);
             orderedLayers.emplace_back(*layer);
+
+            // We're mutating the list of ordered layers and must notify them of their new assigned indices
+            layer->layerIndexChanged(layerIndex++, changes);
         }
     }
     assert(orderedLayers.size() == renderLayers.size());
+    
+    addChanges(changes);
 
     if (layersAddedOrRemoved || !layerDiff.changed.empty()) {
         glyphManager->evict(fontStacks(*layerImpls));
@@ -778,6 +782,16 @@ const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdenti
 
 void RenderOrchestrator::onRemoveLayerGroup(LayerGroup&) {}
 
+void RenderOrchestrator::updateLayerGroupOrder() {
+    // In the event layer indices change for layer groups, we must re-sort them
+    LayerGroupMap newMap;
+    for (auto& it : layerGroupsByLayerIndex) {
+        newMap.emplace(it.second->getLayerIndex(), it.second);
+    }
+    layerGroupsByLayerIndex = std::move(newMap);
+    layerGroupOrderDirty = false;
+}
+
 bool RenderOrchestrator::addLayerGroup(LayerGroupPtr layerGroup, const bool replace) {
     const auto index = layerGroup->getLayerIndex();
     const auto result = layerGroupsByLayerIndex.insert(std::make_pair(index, LayerGroupPtr{}));
@@ -847,15 +861,9 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     };
 
     std::vector<std::unique_ptr<ChangeRequest>> changes;
-
-    // Layer index, similar but not identical to `layerRenderItems` index in render_impl
-    // int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
-    // for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
-    auto index = static_cast<int32_t>(renderTree.getLayerRenderItems().size()) - 1;
-
     for (const auto& item : renderTree.getLayerRenderItems()) {
         auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
-        renderLayer.update(index--, shaders, context, state, changes);
+        renderLayer.update(shaders, context, state, changes);
     }
 
     addChanges(changes);
@@ -866,6 +874,14 @@ void RenderOrchestrator::processChanges() {
     for (auto& change : localChanges) {
         change->execute(*this);
     }
+
+    if (layerGroupOrderDirty) {
+        updateLayerGroupOrder();
+    }
+}
+
+void RenderOrchestrator::markLayerGroupOrderDirty() {
+    layerGroupOrderDirty = true;
 }
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
