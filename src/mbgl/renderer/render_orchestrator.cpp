@@ -835,7 +835,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
-                                      RenderItems& layerRenderItems) {
+                                      const RenderTree& renderTree) {
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
                                                        : style::TransitionOptions();
@@ -851,10 +851,11 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     // Layer index, similar but not identical to `layerRenderItems` index in render_impl
     // int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
     // for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
-    auto index = static_cast<int32_t>(layerRenderItems.size()) - 1;
+    auto index = static_cast<int32_t>(renderTree.getLayerRenderItems().size()) - 1;
 
-    for (auto& item : layerRenderItems) {
-        static_cast<LayerRenderItem&>(item.get()).layer.get().update(index--, shaders, context, state, changes);
+    for (const auto& item : renderTree.getLayerRenderItems()) {
+        auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
+        renderLayer.update(index--, shaders, context, state, changes);
     }
 
     addChanges(changes);
