@@ -22,7 +22,7 @@ For more customization, please read the documentation about [MarkerOptions].
 In this showcase, we continue the code from the [Quickstart],
 rename Activity into `JsonApiActivity`,
 and pull the GeoJSON data from a free and public API.
-Then add markers into map with GeoJSON:
+Then add markers to the map with GeoJSON:
 
 1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add
    `okhttp` to simplify code about HTTP requests.
