@@ -220,9 +220,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
         // draw layer groups, translucent pass
         orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
-            assert(parameters.currentLayer >= 0);
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer--;
+            if (parameters.currentLayer != 0) {
+                parameters.currentLayer--;
+            }
         });
     };
 
