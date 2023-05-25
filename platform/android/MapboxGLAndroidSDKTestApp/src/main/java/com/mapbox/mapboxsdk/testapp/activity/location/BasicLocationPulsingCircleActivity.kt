@@ -30,7 +30,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     private lateinit var mapView: MapView
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MapboxMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,10 +46,10 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 
     /* ANCHOR: onMapReady */
     @SuppressLint("MissingPermission")
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
-            locationComponent = mapboxMap.locationComponent
+    override fun onMapReady(map: MapboxMap) {
+        this.maplibreMap = map
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+            locationComponent = maplibreMap.locationComponent
             val locationComponentOptions =
                 LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
                     .pulseEnabled(true)
@@ -126,7 +126,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     }
 
     private fun loadNewStyle() {
-        mapboxMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
+        maplibreMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
     }
 
     /* ANCHOR: permission */
