@@ -71,8 +71,10 @@ void LineLayerTweaker::execute(LayerGroup& /*layerGroup*/, const PaintParameters
     //     drawableUBO.matrix = util::cast<float>(matrix);
     //     drawableUBO.extrude_scale =
     //         pitchWithMap
-    //             ? std::array<float, 2>{{tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-    //                                     tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()))}}
+    //             ? std::array<float, 2>{{tileID.pixelsToTileUnits(1.0f,
+    //             static_cast<float>(parameters.state.getZoom())),
+    //                                     tileID.pixelsToTileUnits(1.0f,
+    //                                     static_cast<float>(parameters.state.getZoom()))}}
     //             : parameters.pixelsToGLUnits;
     //     auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
     //     drawable.mutableUniformBuffers().addOrReplace("CircleDrawableUBO", drawableUniformBuffer);
