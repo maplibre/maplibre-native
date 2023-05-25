@@ -33,7 +33,7 @@ public:
             glContext.draw(gfx::Triangles(), lineIndexes.size(), triangleIndexes.size());
         }
         if (!lineIndexes.empty()) {
-            glContext.draw(gfx::Lines(lineWidth), 0, lineIndexes.size());
+            glContext.draw(gfx::Lines(static_cast<float>(lineWidth)), 0, lineIndexes.size());
         }
     }
 
