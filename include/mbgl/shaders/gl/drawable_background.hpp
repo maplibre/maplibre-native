@@ -11,10 +11,8 @@ template <>
 struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "BackgroundShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
-layout (std140) uniform DrawableUBO {
+layout (std140) uniform BackgroundDrawableUBO {
     mat4 u_matrix;
-    vec2 u_world;
-    vec2 pad;
 };
 
 void main() {
