@@ -16,5 +16,12 @@ UniformBufferGL::UniformBufferGL(const void* data, std::size_t size_)
     MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
 }
 
+UniformBufferGL::~UniformBufferGL() {
+    if (id) {
+        MBGL_CHECK_ERROR(glDeleteBuffers(1, &id));
+        id = 0;
+    }
+}
+
 } // namespace gl
 } // namespace mbgl
