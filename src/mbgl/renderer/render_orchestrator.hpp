@@ -105,6 +105,7 @@ public:
 
     bool addLayerGroup(LayerGroupPtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
+    size_t numLayerGroups() const noexcept;
     const LayerGroupPtr& getLayerGroup(const int32_t layerIndex) const;
     void observeLayerGroups(std::function<void(LayerGroup&)>);
     void observeLayerGroups(std::function<void(const LayerGroup&)>) const;
@@ -116,6 +117,8 @@ public:
                       const RenderTree&);
 
     void processChanges();
+    /// @brief Indicate that the orchestrator needs to re-sort layer groups when processing changes
+    void markLayerGroupOrderDirty();
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
@@ -153,6 +156,8 @@ private:
 
     void onRemoveLayerGroup(LayerGroup&);
 
+    void updateLayerGroupOrder();
+
     RendererObserver* observer;
 
     ZoomHistory zoomHistory;
@@ -189,6 +194,7 @@ private:
 
     using LayerGroupMap = std::map<int32_t, LayerGroupPtr>;
     LayerGroupMap layerGroupsByLayerIndex;
+    bool layerGroupOrderDirty = false;
 };
 
 } // namespace mbgl

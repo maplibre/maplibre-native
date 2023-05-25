@@ -21,6 +21,7 @@ class PropertyEvaluationParameters;
 class PaintParameters;
 class PatternAtlas;
 class RenderTile;
+class RenderTree;
 class SymbolBucket;
 class TileLayerGroup;
 class TransformState;
@@ -101,6 +102,8 @@ public:
 
     const std::string& getID() const;
 
+    int32_t getLayerIndex() const noexcept;
+
     // Checks whether this layer needs to be rendered in the given render pass.
     bool hasRenderPass(RenderPass) const;
 
@@ -143,9 +146,21 @@ public:
 
     /// Generate any changes needed by the layer
     virtual void update(
-        int32_t /*layerIndex*/, gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&) {}
+        gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const RenderTree&, UniqueChangeRequestVec&) {}
 
     virtual void layerRemoved(UniqueChangeRequestVec&) {}
+
+    /// @brief Called by the RenderOrchestrator during RenderTree construction.
+    /// This event is run when a layer is added or removed from the style.
+    /// @param newLayerIndex The new layer index for this layer
+    /// @param changes The collection of current pending change requests
+    virtual void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes);
+
+    /// @brief Called by the RenderOrchestrator during RenderTree construction.
+    /// This event is run to indicate if the layer should render or not for the current frame.
+    /// @param willRender Indicates if this layer should render or not
+    /// @param changes The collection of current pending change requests
+    virtual void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes);
 
 protected:
     // Checks whether the current hardware can render this layer. If it can't,
@@ -167,6 +182,10 @@ protected:
     LayerPlacementData placementData;
 
     TileLayerGroupPtr tileLayerGroup;
+    // Current layer index as specified by the layerIndexChanged event
+    int32_t layerIndex{0};
+    // Current renderable status as specified by the markLayerRenderable event
+    bool isRenderable{false};
 
     std::mutex mutex;
 
