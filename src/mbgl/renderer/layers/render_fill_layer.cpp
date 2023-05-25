@@ -340,7 +340,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
     gfx::VertexAttributeArray fillVertexAttrs;
     gfx::VertexAttributeArray outlineVertexAttrs;
 
-    const auto finish = [&](gfx::DrawableBuilder& builder, RenderPass pass, const OverscaledTileID& tileID){
+    const auto finish = [&](gfx::DrawableBuilder& builder, RenderPass pass, const OverscaledTileID& tileID) {
         builder.flush();
 
         for (auto& drawable : builder.clearDrawables()) {

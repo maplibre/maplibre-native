@@ -39,14 +39,14 @@ struct alignas(16) FillDrawableUBO {
     // Pattern texture
     /* ? */ // Drawable::TextureAttachment? image;
 
-    /*  */ //std::array<float, 3> padding;
+    /*  */ // std::array<float, 3> padding;
     /* 208 */
 };
 static_assert(sizeof(FillDrawableUBO) == 208);
 
 void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
-    //const auto& evaluated = props.evaluated;
+    // const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
@@ -75,36 +75,40 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         matrix::multiply(matrix, drawable.getMatrix(), tileMat);
         matrix = tileMat;
 
-        //matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
+        // matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
+        // parameters.state),
 
         // from FillPatternProgram::layoutUniformValues
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
         const auto intZoom = parameters.state.getIntegerZoom();
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, intZoom);
-        const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * parameters.state.zoomScale(intZoom - tileID.canonical.z));
-        const int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * parameters.state.zoomScale(tileID.canonical.z)));
+        const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(
+            util::tileSize_D * parameters.state.zoomScale(intZoom - tileID.canonical.z));
+        const int32_t pixelX = static_cast<int32_t>(
+            tileSizeAtNearestZoom *
+            (tileID.canonical.x + tileID.wrap * parameters.state.zoomScale(tileID.canonical.z)));
         const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
         const auto pixelRatio = parameters.pixelRatio;
 
         const FillDrawableUBO drawableUBO = {
-            /*.matrix=*/ util::cast<float>(matrix),
-            /*.scale=*/ {pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-            /*.world=*/ {(float)renderableSize.width, (float)renderableSize.height},
-            /*.pixel_coord_upper=*/ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-            /*.pixel_coord_lower=*/ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-            /*.texsize=*/ { 0.0f, 0.0f }, // tile.getIconAtlasTexture().size
-            /*.fade=*/ crossfade.t,
-            /*.color_t=*/ 0.0f,
-            /*.opacity_t=*/ 0.0f,
-            /*.outline_color_t=*/ 0.0f,
-            /*.pattern_from_t=*/ 0.0f,
-            /*.pattern_to_t=*/ 0.0f,
-            /*.color=*/ { 0.0f },
-            /*.opacity=*/ { 0.0f },
-            /*.outline_color_pad=*/ { 0.0f },
-            /*.outline_color=*/ { 0.0f },
-            /*.pattern_from=*/ { 0.0f },
-            /*.pattern_to=*/ { 0.0f },
+            /*.matrix=*/util::cast<float>(matrix),
+            /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
+            /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
+            /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+            /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+            /*.texsize=*/{0.0f, 0.0f}, // tile.getIconAtlasTexture().size
+            /*.fade=*/crossfade.t,
+            /*.color_t=*/0.0f,
+            /*.opacity_t=*/0.0f,
+            /*.outline_color_t=*/0.0f,
+            /*.pattern_from_t=*/0.0f,
+            /*.pattern_to_t=*/0.0f,
+            /*.color=*/{0.0f},
+            /*.opacity=*/{0.0f},
+            /*.outline_color_pad=*/{0.0f},
+            /*.outline_color=*/{0.0f},
+            /*.pattern_from=*/{0.0f},
+            /*.pattern_to=*/{0.0f},
             /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
         };
 
