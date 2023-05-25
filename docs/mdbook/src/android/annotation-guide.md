@@ -15,7 +15,7 @@ a provided image as its icon (User may find it in drawable folder from the packa
 ![marker image]
 
 Or, the icon can be customized using [IconFactory] to generate an
-[Icon] using as provided image.
+[Icon] using a provided image.
 
 For more customization, please read the documentation about [MarkerOptions].
 
