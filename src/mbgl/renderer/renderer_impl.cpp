@@ -21,13 +21,12 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
-// Enable a debugging split view to compare drawables and vanilla rendering pathways
+// DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
 // Drawables will be on the left, vanilla rendering on the right
-#define SPLIT_VIEW
+// #define SPLIT_VIEW
 // If using SPLIT_VIEW, QUAD_SPLIT_VIEW will split each half, showing just the opaque
 // pass on top and then a composited opaque+translucent pass on the bottom
-#define QUAD_SPLIT_VIEW
-
+// #define QUAD_SPLIT_VIEW
 #ifdef SPLIT_VIEW
 #include <mbgl/gl/context.hpp>
 #endif
@@ -204,7 +203,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.currentLayer = 0;
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * parameters.numSublayers *
                                             parameters.depthEpsilon;
-        parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
 
         // draw layer groups, opaque pass
         orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
@@ -234,7 +232,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.pass = RenderPass::Opaque;
         parameters.depthRangeSize = 1 -
                                     (layerRenderItems.size() + 2) * parameters.numSublayers * parameters.depthEpsilon;
-        parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
 
         uint32_t i = 0;
         for (auto it = layerRenderItems.rbegin(); it != layerRenderItems.rend(); ++it, ++i) {

@@ -312,8 +312,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     // Update all sources and initialize renderItems.
-
-    // @NOTE: Here, we need to indicate which layer groups are going to be rendered by the tree.
     for (const auto& sourceImpl : *sourceImpls) {
         RenderSource* source = renderSources.at(sourceImpl->id).get();
         bool sourceNeedsRendering = false;
@@ -362,6 +360,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         filteredLayersForSource.clear();
     }
 
+    // Mark layers included in the renderable set as renderable
+    // @TODO: Optimize this logic, combine with the above
     for (size_t i = 0; i < orderedLayers.size(); ++i) {
         RenderLayer& layer = orderedLayers[i];
         layer.markLayerRenderable(layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(i))) != layerRenderItems.end(), changes);
