@@ -45,7 +45,9 @@ struct alignas(16) FillDrawableUBO {
 static_assert(sizeof(FillDrawableUBO) == 208);
 
 void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
-    // const auto& evaluated = static_cast<const FillLayerProperties&>(*evaluatedProperties).evaluated;
+    const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
+    //const auto& evaluated = props.evaluated;
+    const auto& crossfade = props.crossfade;
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID()) {
@@ -59,6 +61,7 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         matrix = tileMat;
 
         //matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
+
         // from FillPatternProgram::layoutUniformValues
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
         const auto intZoom = parameters.state.getIntegerZoom();
@@ -67,15 +70,15 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         const int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * parameters.state.zoomScale(tileID.canonical.z)));
         const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
         const auto pixelRatio = parameters.pixelRatio;
-        //matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
+
         const FillDrawableUBO drawableUBO = {
             /*.matrix=*/ util::cast<float>(matrix),
-            /*.scale=*/ {pixelRatio, tileRatio, 0.0f, 0.0f }, //crossfade.fromScale, crossfade.toScale},
+            /*.scale=*/ {pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
             /*.world=*/ {(float)renderableSize.width, (float)renderableSize.height},
             /*.pixel_coord_upper=*/ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
             /*.pixel_coord_lower=*/ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
             /*.texsize=*/ { 0.0f, 0.0f }, // tile.getIconAtlasTexture().size
-            /*.fade=*/ 0.0f, //crossfade.t,
+            /*.fade=*/ crossfade.t,
             /*.color_t=*/ 0.0f,
             /*.opacity_t=*/ 0.0f,
             /*.outline_color_t=*/ 0.0f,
