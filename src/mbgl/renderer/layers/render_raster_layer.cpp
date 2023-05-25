@@ -1,5 +1,6 @@
 #include <mbgl/renderer/layers/render_raster_layer.hpp>
 #include <mbgl/renderer/buckets/raster_bucket.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -7,6 +8,8 @@
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/programs/raster_program.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
@@ -82,7 +85,13 @@ void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     assert(renderTiles || imageData || !params.source->isEnabled());
 }
 
+static bool enableDefaultRender = true;
+
 void RenderRasterLayer::render(PaintParameters& parameters) {
+    if (!enableDefaultRender) {
+        return;
+    }
+    
     if (parameters.pass != RenderPass::Translucent || (!renderTiles && !imageData)) {
         return;
     }
@@ -192,6 +201,162 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
                          textures::image1::Value{bucket.texture->getResource(), filter},
                      },
                      "image");
+            }
+        }
+    }
+}
+
+void RenderRasterLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    // Remove everything
+    if (tileLayerGroup) {
+        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
+        tileLayerGroup.reset();
+    }
+}
+
+void RenderRasterLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
+}
+
+void RenderRasterLayer::update(const int32_t layerIndex,
+                             gfx::ShaderRegistry& shaders,
+                             gfx::Context& context,
+                             const TransformState& /*state*/,
+                             UniqueChangeRequestVec& changes) {
+    if (enableDefaultRender) {
+        return;
+    }
+    std::unique_lock<std::mutex> guard(mutex);
+
+    // Set up a layer group
+    if (!tileLayerGroup) {
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
+    }
+
+    const auto removeAll = [&]() {
+        if (tileLayerGroup) {
+            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
+            tileLayerGroup->clearDrawables();
+        }
+    };
+
+    // Note: parameter.pass should be RenderPass::Translucent
+    if (/*parameters.pass != RenderPass::Translucent ||*/ (!renderTiles && !imageData)) {
+        removeAll();
+        return;
+    }
+
+    std::unique_ptr<gfx::DrawableBuilder> builderRaster{context.createDrawableBuilder("raster")};
+    builderRaster->setShader(context.getGenericShader(shaders, "RasterShader"));
+
+    const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
+    RasterProgram::Binders paintAttributeData{evaluated, 0};
+
+    /*
+    auto draw = [&](const mat4& matrix,
+                    const auto& vertexBuffer,
+                    const auto& indexBuffer,
+                    const auto& segments,
+                    const auto& textureBindings,
+                    const std::string& drawScopeID) {
+        const auto allUniformValues = RasterProgram::computeAllUniformValues(
+            RasterProgram::LayoutUniformValues{
+                uniforms::matrix::Value(matrix),
+                uniforms::opacity::Value(evaluated.get<RasterOpacity>()),
+                uniforms::fade_t::Value(1),
+                uniforms::brightness_low::Value(evaluated.get<RasterBrightnessMin>()),
+                uniforms::brightness_high::Value(evaluated.get<RasterBrightnessMax>()),
+                uniforms::saturation_factor::Value(saturationFactor(evaluated.get<RasterSaturation>())),
+                uniforms::contrast_factor::Value(contrastFactor(evaluated.get<RasterContrast>())),
+                uniforms::spin_weights::Value(spinWeights(evaluated.get<RasterHueRotate>())),
+                uniforms::buffer_scale::Value(1.0f),
+                uniforms::scale_parent::Value(1.0f),
+                uniforms::tl_parent::Value(std::array<float, 2>{{0.0f, 0.0f}}),
+            },
+            paintAttributeData,
+            evaluated,
+            static_cast<float>(parameters.state.getZoom()));
+        const auto allAttributeBindings = RasterProgram::computeAllAttributeBindings(
+            vertexBuffer, paintAttributeData, evaluated);
+
+        checkRenderability(parameters, RasterProgram::activeBindingCount(allAttributeBindings));
+
+        rasterProgram->draw(parameters.context,
+                            *parameters.renderPass,
+                            gfx::Triangles(),
+                            parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
+                            gfx::StencilMode::disabled(),
+                            parameters.colorModeForRenderPass(),
+                            gfx::CullFaceMode::disabled(),
+                            indexBuffer,
+                            segments,
+                            allUniformValues,
+                            allAttributeBindings,
+                            textureBindings,
+                            getID() + "/" + drawScopeID);
+    };
+    */
+
+    const gfx::TextureFilterType filter = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest
+                                              ? gfx::TextureFilterType::Nearest
+                                              : gfx::TextureFilterType::Linear;
+    (void)filter;
+
+    if (imageData && !imageData->bucket->needsUpload()) {
+        RasterBucket& bucket = *imageData->bucket;
+        assert(bucket.texture);
+
+//        size_t i = 0;
+        for (const auto& matrix_ : imageData->matrices) {
+            /*draw(matrix_,
+                 *bucket.vertexBuffer,
+                 *bucket.indexBuffer,
+                 bucket.segments,
+                 RasterProgram::TextureBindings{
+                     textures::image0::Value{bucket.texture->getResource(), filter},
+                     textures::image1::Value{bucket.texture->getResource(), filter},
+                 },
+                 std::to_string(i++));*/
+            (void)matrix_;
+        }
+    } else if (renderTiles) {
+        for (const RenderTile& tile : *renderTiles) {
+            auto* bucket_ = tile.getBucket(*baseImpl);
+            if (!bucket_) {
+                continue;
+            }
+            auto& bucket = static_cast<RasterBucket&>(*bucket_);
+
+            if (!bucket.hasData()) continue;
+
+            assert(bucket.texture);
+            if (bucket.vertexBuffer && bucket.indexBuffer) {
+                // Draw only the parts of the tile that aren't drawn by another tile in the layer.
+                /*draw(parameters.matrixForTile(tile.id, !parameters.state.isChanging()),
+                     *bucket.vertexBuffer,
+                     *bucket.indexBuffer,
+                     bucket.segments,
+                     RasterProgram::TextureBindings{
+                         textures::image0::Value{bucket.texture->getResource(), filter},
+                         textures::image1::Value{bucket.texture->getResource(), filter},
+                     },
+                     "image");*/
+            } else {
+                // Draw the full tile.
+                if (bucket.segments.empty()) {
+                    // Copy over the segments so that we can create our own DrawScopes.
+                    bucket.segments = RenderStaticData::rasterSegments();
+                }
+                /*draw(parameters.matrixForTile(tile.id, !parameters.state.isChanging()),
+                     *parameters.staticData.rasterVertexBuffer,
+                     *parameters.staticData.quadTriangleIndexBuffer,
+                     bucket.segments,
+                     RasterProgram::TextureBindings{
+                         textures::image0::Value{bucket.texture->getResource(), filter},
+                         textures::image1::Value{bucket.texture->getResource(), filter},
+                     },
+                     "image");*/
             }
         }
     }

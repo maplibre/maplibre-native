@@ -76,7 +76,7 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
-static bool enableDefaultRender = false;
+static bool enableDefaultRender = true;
 
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
@@ -287,6 +287,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::Context& context,
                              const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
+    if (enableDefaultRender) {
+        return;
+    }
+        
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
