@@ -1,5 +1,5 @@
 layout (location = 0) in vec2 a_pos;
-layout (std140) uniform DrawableUBO {
+layout (std140) uniform BackgroundDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_world;
     highp vec2 pad;

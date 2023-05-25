@@ -81,22 +81,6 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         const auto labelPtr = (label.empty() ? drawable.getName() : label).c_str();
         const auto debugGroup = parameters.encoder->createDebugGroup(labelPtr);
 
-        mat4 matrix = drawable.getMatrix();
-        if (drawable.getTileID()) {
-            const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-            const auto tileMat = parameters.matrixForTile(tileID);
-            matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-            matrix = tileMat;
-        }
-
-        const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
-
-        gfx::DrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(matrix);
-        drawableUBO.world = {(float)renderableSize.width, (float)renderableSize.height};
-        auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-        drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);
-
         drawable.draw(parameters);
     });
 }

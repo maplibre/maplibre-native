@@ -11,6 +11,7 @@ template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlineShader";
     static constexpr const char* vertex = R"(layout (std140) uniform FillDrawableUBO {
+layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
     highp vec2 u_world;

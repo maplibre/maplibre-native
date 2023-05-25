@@ -25,6 +25,9 @@ using DrawablePtr = std::shared_ptr<Drawable>;
 using UniqueDrawable = std::unique_ptr<Drawable>;
 } // namespace gfx
 
+class LayerTweaker;
+using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
+
 /**
     A layer-like group of drawables, not a group of layers.
  */
@@ -54,8 +57,15 @@ public:
     /// Call the provided function for each drawable in undefined order, allowing ownership to be taken.
     virtual void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) = 0;
 
+    /// Attach a tweaker to be run on this layer group for each frame
+    void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
+
+    /// Get the tweaker attached to this layer group
+    const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
+
 protected:
     int32_t layerIndex;
+    LayerTweakerPtr layerTweaker;
 };
 
 /**

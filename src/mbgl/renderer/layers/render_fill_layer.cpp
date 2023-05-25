@@ -9,6 +9,7 @@
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
@@ -64,8 +65,9 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     }
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-
-    evaluatedPropertiesChange = true;
+    if (tileLayerGroup) {
+        tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
+    }
 }
 
 bool RenderFillLayer::hasTransition() const {
@@ -287,6 +289,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::Context& context,
                              const TransformState& state,
                              UniqueChangeRequestVec& changes) {
+    if (enableDefaultRender) {
+        return;
+    }
+
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -303,6 +309,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
         if (!tileLayerGroup) {
             return;
         }
+        tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
@@ -338,8 +345,6 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
         for (auto& drawable : builder.clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->mutableUniformBuffers().addOrReplace("FillDrawableUBO", uniformBuffer);
-
             tileLayerGroup->addDrawable(pass, tileID, std::move(drawable));
             ++stats.tileDrawablesAdded;
         }
@@ -394,6 +399,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
             // from FillPatternProgram::layoutUniformValues
             // This seems to belong in a layergroup tweaker
+#if 0
             if (evaluatedPropertiesChange) {
                 const auto tileRatio = 1 / tile.id.pixelsToTileUnits(1, state.getIntegerZoom());
                 const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
@@ -423,8 +429,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
                 };
                 uniformBuffer = context.createUniformBuffer(&fillLayerUBO, sizeof(fillLayerUBO));
-                evaluatedPropertiesChange = false;
             }
+#endif
 
             if (unevaluated.get<FillPattern>().isUndefined()) {
                 const auto evalColor = evaluated.get<FillColor>().constantOr(Color());
@@ -490,7 +496,6 @@ void RenderFillLayer::update(const int32_t layerIndex,
                 }
 
                 if (tileDrawable) {
-                    tileDrawable->mutableUniformBuffers().addOrReplace("FillDrawableUBO", uniformBuffer);
                     continue;
                 }
 
