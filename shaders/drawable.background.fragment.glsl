@@ -1,6 +1,6 @@
 layout (std140) uniform BackgroundLayerUBO {
-    vec4 u_color;
-    vec4 u_opacity_pad3;
+    highp vec4 u_color;
+    highp vec4 u_opacity_pad3;
 };
 
 void main() {
