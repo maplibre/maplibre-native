@@ -18,28 +18,28 @@
         "header": "drawable_fill",
         "glsl_vert": "drawable.fill.vertex.glsl",
         "glsl_frag": "drawable.fill.fragment.glsl",
-        "uses_ubos": false 
+        "uses_ubos": true
     },
     {
         "name": "FillOutlineShader",
         "header": "drawable_fill_outline",
         "glsl_vert": "drawable.fill_outline.vertex.glsl",
         "glsl_frag": "drawable.fill_outline.fragment.glsl",
-        "uses_ubos": false 
+        "uses_ubos": true
     },
     {
         "name": "FillPatternShader",
         "header": "drawable_fill_pattern",
         "glsl_vert": "drawable.fill_pattern.vertex.glsl",
         "glsl_frag": "drawable.fill_pattern.fragment.glsl",
-        "uses_ubos": false 
+        "uses_ubos": true
     },
     {
         "name": "FillOutlinePatternShader",
         "header": "drawable_fill_outline_pattern",
         "glsl_vert": "drawable.fill_outline_pattern.vertex.glsl",
         "glsl_frag": "drawable.fill_outline_pattern.fragment.glsl",
-        "uses_ubos": false 
+        "uses_ubos": true
     },
 
     {

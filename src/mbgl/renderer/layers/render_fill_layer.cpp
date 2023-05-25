@@ -340,6 +340,16 @@ void RenderFillLayer::update(const int32_t layerIndex,
     gfx::VertexAttributeArray fillVertexAttrs;
     gfx::VertexAttributeArray outlineVertexAttrs;
 
+    const auto finish = [&](gfx::DrawableBuilder& builder, RenderPass pass, const OverscaledTileID& tileID) {
+        builder.flush();
+
+        for (auto& drawable : builder.clearDrawables()) {
+            drawable->setTileID(tileID);
+            tileLayerGroup->addDrawable(pass, tileID, std::move(drawable));
+            ++stats.tileDrawablesAdded;
+        }
+    };
+
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
         if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
             continue;
@@ -370,6 +380,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
 
             auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
             const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+            const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
 
             std::vector<std::array<int16_t, 2>> rawVerts;
             const auto buildVertices = [&]() {
@@ -512,14 +523,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         fillBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
                     }
 
-                    fillBuilder->flush();
-
-                    for (auto& drawable : fillBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
+                    finish(*fillBuilder, renderPass, tileID);
                 }
                 if (outlineBuilder) {
                     buildVertices();
@@ -529,21 +533,13 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         outlineBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
                     }
 
-                    outlineBuilder->flush();
-
-                    for (auto& drawable : outlineBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
+                    finish(*outlineBuilder, renderPass, tileID);
                 }
             } else { // FillPattern is defined
                 if (renderPass != RenderPass::Translucent) {
                     continue;
                 }
 
-                const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
                 const auto doOutline = evaluated.get<FillAntialias>() &&
                                        unevaluated.get<FillOutlineColor>().isUndefined();
                 const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(
@@ -560,7 +556,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                     patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     patternBuilder->setLayerIndex(layerIndex);
-                    outlinePatternBuilder->setSubLayerIndex(1);
+                    patternBuilder->setSubLayerIndex(1);
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
                     outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
@@ -595,14 +591,7 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         patternBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
                     }
 
-                    patternBuilder->flush();
-
-                    for (auto& drawable : patternBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
+                    finish(*patternBuilder, renderPass, tileID);
                 }
                 if (outlinePatternBuilder) {
                     buildVertices();
@@ -612,14 +601,8 @@ void RenderFillLayer::update(const int32_t layerIndex,
                         outlinePatternBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
                     }
 
+                    finish(*outlinePatternBuilder, renderPass, tileID);
                     outlinePatternBuilder->flush();
-
-                    for (auto& drawable : outlinePatternBuilder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-
-                        // tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
-                    }
                 }
 
                 //    auto draw = [&](auto& programInstance,
