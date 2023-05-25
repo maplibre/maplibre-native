@@ -62,7 +62,7 @@ Then add markers to the map with GeoJSON:
 6. Now it is time to add markers into the map.
    - In method `addMarkersToMap()`, we define two types of bitmap for marker icon.
    - For each feature in GeoJSON, add a marker with snippet about earthquake details.
-   - If the magnitude of an earthquake is bigger than 6.0, we use the red icon. Otherwise, use the blue one.
+   - If the magnitude of an earthquake is bigger than 6.0, we use the red icon. Otherwise, we use the blue one.
    - Finally, move the camera to the bounds of the newly added markers
 
 ```kotlin
