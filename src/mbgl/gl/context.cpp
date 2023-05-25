@@ -477,7 +477,7 @@ bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& 
         setStencilMode(gfx::StencilMode::disabled());
     }
 
-    setColorMode(gfx::ColorMode::alphaBlended());
+    setColorMode(parameters.colorModeForRenderPass());
     setCullFaceMode(gfx::CullFaceMode::disabled());
 
     auto& drawableGL = static_cast<const DrawableGL&>(drawable);

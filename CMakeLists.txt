@@ -933,6 +933,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_gradient.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_sdf.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp

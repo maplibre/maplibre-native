@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-16T12:04:47.554Z by stefan using shaders/generate_shader_code.js
+// Generated on 2023-05-23T18:10:10.798Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/gfx/backend.hpp>
@@ -18,6 +18,8 @@ enum class BuiltIn {
     LinePatternShader,
     LineSDFShader,
     LineShader,
+    FillPatternShader,
+    FillOutlinePatternShader,
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,
