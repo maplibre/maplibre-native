@@ -39,7 +39,7 @@ Then add markers to the map with GeoJSON:
 2. Sync your Android project the with Gradle files.
 
 3. In `JsonApiActivity` we add a new variable for `MapboxMap`.
-   It is used for map instance about adding annotations.
+   It is used to add annotations to the map instance.
 
 ```kotlin
 {{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:top}}
