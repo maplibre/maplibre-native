@@ -287,6 +287,10 @@ void RenderFillLayer::update(const int32_t layerIndex,
                              gfx::Context& context,
                              const TransformState& /*state*/,
                              UniqueChangeRequestVec& changes) {
+    if (enableDefaultRender) {
+        return;
+    }
+    
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {

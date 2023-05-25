@@ -181,6 +181,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/platform/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/query.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_group.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_frontend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_observer.hpp
@@ -519,6 +520,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_background_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_background_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_circle_layer.cpp

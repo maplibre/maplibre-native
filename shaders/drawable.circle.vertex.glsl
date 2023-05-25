@@ -1,12 +1,12 @@
 layout (location = 0) in vec2 a_pos;
 out vec3 v_data;
 
-layout (std140) uniform DrawableUBO {
+layout (std140) uniform CircleLayerDrawableUBO {
     mat4 u_matrix;
+    vec2 u_extrude_scale;
 };
 
 layout (std140) uniform CircleLayerVertexUBO {
-    vec2 u_extrude_scale;
     highp float u_camera_to_center_distance;
     lowp float u_device_pixel_ratio;
     bool u_scale_with_map;
