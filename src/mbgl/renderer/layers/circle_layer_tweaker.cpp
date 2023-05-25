@@ -20,7 +20,7 @@ static_assert(sizeof(CircleDrawableUBO) % 16 == 0);
 struct alignas(16) CirclePaintParamsUBO {
     float camera_to_center_distance;
     float device_pixel_ratio;
-    float padding[2];
+    std::array<float, 2> padding;
 };
 static_assert(sizeof(CirclePaintParamsUBO) % 16 == 0);
 
