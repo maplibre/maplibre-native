@@ -53,7 +53,7 @@ Then add markers to the map with GeoJSON:
 ```
 
 5. Define a function `getEarthQuakeDataFromUSGS()` to fetch GeoJSON data from a public API.
-   If we successfully get the response, call `addMarkersToMap()` on UI thread.
+   If we successfully get the response, call `addMarkersToMap()` on the UI thread.
 
 ```kotlin
 {{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes}}
