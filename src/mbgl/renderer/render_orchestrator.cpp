@@ -364,7 +364,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     // @TODO: Optimize this logic, combine with the above
     for (size_t i = 0; i < orderedLayers.size(); ++i) {
         RenderLayer& layer = orderedLayers[i];
-        layer.markLayerRenderable(layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(i))) != layerRenderItems.end(), changes);
+        layer.markLayerRenderable(
+            layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(i))) != layerRenderItems.end(),
+            changes);
     }
 
     // Add all change requests up to this point
