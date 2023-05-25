@@ -6,9 +6,7 @@ const path = require("node:path");
 const fs = require("node:fs")
 const os = require("node:os");
 
-const generatedHeader = `// Generated code, do not modify this file!
-// Generated on ${new Date().toISOString()} by ${os.userInfo().username} using shaders/generate_shader_code.js
-`;
+const generatedHeader = `// Generated code, do not modify this file!`;
 
 const newAttribLocationMapping = (source) => {
     return {
@@ -252,7 +250,8 @@ JSON.parse(fs.readFileSync(path.join(args.input, "manifest.json")))
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "${elem.name}";
     static constexpr const char* vertex = R"(${args.strip ? strip(vert) : vert})";
     static constexpr const char* fragment = R"(${args.strip ? strip(frag) : frag})";
@@ -298,10 +297,12 @@ enum class BuiltIn {
 /// @tparam T One of the built-in shader types available in the BuiltIn enum
 /// @tparam The desired graphics API to request shader code for. One of
 /// gfx::Backend::Type enums.
-template <BuiltIn T, gfx::Backend::Type> struct ShaderSource;
+template <BuiltIn T, gfx::Backend::Type>
+struct ShaderSource;
 
 /// @brief A specialization of the ShaderSource template for no shader code.
-template <> struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "";
     static constexpr const char* vertex = "";
     static constexpr const char* fragment = "";
