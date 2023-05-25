@@ -1,6 +1,6 @@
 layout (location = 0) in vec2 a_pos;
 layout (std140) uniform BackgroundDrawableUBO {
-    mat4 u_matrix;
+    highp mat4 u_matrix;
 };
 
 void main() {
