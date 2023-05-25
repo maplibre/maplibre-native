@@ -64,32 +64,36 @@ private:
     gfx::ShaderProgramBasePtr outlinePatternShader;
 };
 
-struct alignas(16) FillLayerUBO {
-    /*   0 */ std::array<float, 4> scale;
-    /*  16 */ std::array<float, 2> pixel_coord_upper;
-    /*  24 */ std::array<float, 2> pixel_coord_lower;
-    /*  32 */ std::array<float, 2> texsize;
-    /*  40 */ float fade;
+struct alignas(16) FillDrawableUBO {
+    /*   0 */ std::array<float, 4 * 4> matrix;
+    /*  64 */ std::array<float, 4> scale;
+    /*  80 */ std::array<float, 2> world;
+    /*  88 */ std::array<float, 2> pixel_coord_upper;
+    /*  96 */ std::array<float, 2> pixel_coord_lower;
+    /* 104 */ std::array<float, 2> texsize;
+    /* 112 */ float fade;
 
-    // Attribute interpolations
-    /*  44 */ float color_t;
-    /*  48 */ float opacity_t;
-    /*  52 */ float outline_color_t;
-    /*  56 */ float pattern_from_t;
-    /*  60 */ float pattern_to_t;
+    // Attribute interpolations (used without HAS_UNIFORM_u_*)
+    /* 116 */ float color_t;
+    /* 120 */ float opacity_t;
+    /* 124 */ float outline_color_t;
+    /* 128 */ float pattern_from_t;
+    /* 132 */ float pattern_to_t;
 
-    /*  64 */ std::array<float, 2> u_color;
-    /*  72 */ std::array<float, 2> u_opacity;
-    /*  80 */ std::array<float, 4> u_outline_color;
-    /*  96 */ std::array<float, 4> u_pattern_from;
-    /* 112 */ std::array<float, 4> u_pattern_to;
+    // Uniform alternates for attributes (used with HAS_UNIFORM_u_*)
+    /* 136 */ std::array<float, 2> color;
+    /* 144 */ std::array<float, 2> opacity;
+    /* 152 */ std::array<float, 2> outline_color_pad;
+    /* 160 */ std::array<float, 4> outline_color;
+    /* 176 */ std::array<float, 4> pattern_from;
+    /* 208 */ std::array<float, 4> pattern_to;
 
     // Pattern texture
     /* ? */ // Drawable::TextureAttachment? image;
 
     /*  */ //std::array<float, 3> padding;
-    /* 128 */
+    /* 208 */
 };
-static_assert(sizeof(FillLayerUBO) == 128);
+static_assert(sizeof(FillDrawableUBO) == 208);
 
 } // namespace mbgl

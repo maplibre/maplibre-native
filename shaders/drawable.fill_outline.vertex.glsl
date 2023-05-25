@@ -1,10 +1,7 @@
-layout (std140) uniform DrawableUBO {
+layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
-    highp vec2 u_world;
-    highp vec2 u_padding_drawable;
-};
-layout (std140) uniform FillLayerUBO {
     highp vec4 u_scale;
+    highp vec2 u_world;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
@@ -18,6 +15,7 @@ layout (std140) uniform FillLayerUBO {
 
     highp vec2 u_color;
     highp vec2 u_opacity;
+    highp vec2 u_outline_color_pad;
     highp vec4 u_outline_color;
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;

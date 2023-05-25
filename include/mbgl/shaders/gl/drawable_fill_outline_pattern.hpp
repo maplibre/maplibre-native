@@ -1,5 +1,5 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-24T21:16:59.579Z by timsylvester using shaders/generate_shader_code.js
+// Generated on 2023-05-25T14:44:39.644Z by timsylvester using shaders/generate_shader_code.js
 
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -10,13 +10,10 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlinePatternShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform DrawableUBO {
+    static constexpr const char* vertex = R"(layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
-    highp vec2 u_world;
-    highp vec2 u_padding_drawable;
-};
-layout (std140) uniform FillLayerUBO {
     highp vec4 u_scale;
+    highp vec2 u_world;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
@@ -30,6 +27,7 @@ layout (std140) uniform FillLayerUBO {
 
     highp vec2 u_color;
     highp vec2 u_opacity;
+    highp vec2 u_outline_color_pad;
     highp vec4 u_outline_color;
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
@@ -92,13 +90,10 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform DrawableUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
-    highp vec2 u_world;
-    highp vec2 u_padding_drawable;
-};
-layout (std140) uniform FillLayerUBO {
     highp vec4 u_scale;
+    highp vec2 u_world;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
@@ -112,6 +107,7 @@ layout (std140) uniform FillLayerUBO {
 
     highp vec2 u_color;
     highp vec2 u_opacity;
+    highp vec2 u_outline_color_pad;
     highp vec4 u_outline_color;
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
