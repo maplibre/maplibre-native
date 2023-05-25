@@ -125,12 +125,12 @@ void RenderLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& c
     if (!tileLayerGroup) {
         return;
     }
-    if (renderable == willRender) {
+    if (isRenderable == willRender) {
         return;
     }
 
     // This layer is either being freshly included in the renderable set or excluded
-    renderable = willRender;
+    isRenderable = willRender;
     if (willRender) {
         // The RenderTree has determined this layer should be included in the renderable set for a frame
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));

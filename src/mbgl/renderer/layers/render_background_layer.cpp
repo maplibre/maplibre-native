@@ -181,7 +181,7 @@ std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
         return std::nullopt;
     }
 
-    return { evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>() };
+    return {evaluated.get<BackgroundColor>() * evaluated.get<BackgroundOpacity>()};
 }
 
 namespace {
@@ -216,11 +216,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
                                    [[maybe_unused]] const RenderTree& renderTree,
-                                   UniqueChangeRequestVec& changes) {
-    if (enableDefaultRender) {
-        return;
-    }
-
+                                   [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!shader) {

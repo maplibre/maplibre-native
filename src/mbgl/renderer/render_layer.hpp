@@ -184,8 +184,8 @@ protected:
     TileLayerGroupPtr tileLayerGroup;
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};
-    // Curent renderable status as specified by the markLayerRenderable event
-    bool renderable{false};
+    // Current renderable status as specified by the markLayerRenderable event
+    bool isRenderable{false};
 
     std::mutex mutex;
 

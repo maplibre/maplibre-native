@@ -288,11 +288,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& /*state*/,
                              [[maybe_unused]] const RenderTree& renderTree,
-                             UniqueChangeRequestVec& changes) {
-    if (enableDefaultRender) {
-        return;
-    }
-
+                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
