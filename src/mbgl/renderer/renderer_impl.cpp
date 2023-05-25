@@ -11,6 +11,7 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/programs/programs.hpp>
+#include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -106,6 +107,13 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     }
 
+    // Run layer tweakers to update any dynamic elements
+    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
+        if (layerGroup.getLayerTweaker()) {
+            layerGroup.getLayerTweaker()->execute(layerGroup, parameters);
+        }
+    });
+
     // Give the layers a chance to do setup
     orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters); });
 
@@ -200,9 +208,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         for (auto it = layerRenderItems.rbegin(); it != layerRenderItems.rend(); ++it, ++i) {
             parameters.currentLayer = i;
             const RenderItem& renderItem = it->get();
-            if (renderItem.getName() == "background") {
-                continue;
-            }
             if (renderItem.hasRenderPass(parameters.pass)) {
                 const auto layerDebugGroup(parameters.renderPass->createDebugGroup(renderItem.getName().c_str()));
                 renderItem.render(parameters);

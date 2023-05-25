@@ -6,6 +6,7 @@
 
 #ifdef MBGL_RENDER_BACKEND_OPENGL
 #include <mbgl/shaders/gl/drawable_background.hpp>
+#include <mbgl/shaders/gl/drawable_circle.hpp>
 #include <mbgl/shaders/gl/drawable_fill.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline.hpp>
 #include <mbgl/shaders/gl/drawable_fill_pattern.hpp>
