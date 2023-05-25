@@ -25,7 +25,7 @@ and pull the GeoJSON data from a free and public API.
 Then add markers to the map with GeoJSON:
 
 1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add
-   `okhttp` to simplify code about HTTP requests.
+   `okhttp` to simplify code for making HTTP requests.
 
 
     ```gradle
