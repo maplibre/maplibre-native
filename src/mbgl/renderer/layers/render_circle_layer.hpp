@@ -13,6 +13,15 @@ public:
     explicit RenderCircleLayer(Immutable<style::CircleLayer::Impl>);
     ~RenderCircleLayer() final = default;
 
+    void layerRemoved(UniqueChangeRequestVec&) override;
+
+    /// Generate any changes needed by the layer
+    void update(int32_t layerIndex,
+                gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                UniqueChangeRequestVec&) override;
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -28,11 +37,16 @@ private:
                                 const mat4&,
                                 const FeatureState&) const override;
 
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&);
+
     // Paint properties
     style::CirclePaintProperties::Unevaluated unevaluated;
 
     // Programs
     std::shared_ptr<CircleProgram> circleProgram;
+
+    gfx::ShaderProgramBasePtr circleShader;
 };
 
 } // namespace mbgl

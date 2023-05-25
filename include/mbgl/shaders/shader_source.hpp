@@ -12,6 +12,7 @@ namespace shaders {
 enum class BuiltIn {
     None,
     BackgroundShader,
+    CircleShader,
     FillShader,
     FillOutlineShader,
     FillPatternShader,

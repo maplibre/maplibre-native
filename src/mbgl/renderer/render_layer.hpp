@@ -169,8 +169,6 @@ protected:
     TileLayerGroupPtr tileLayerGroup;
 
     std::mutex mutex;
-    bool evaluatedPropertiesChange = false;
-    gfx::UniformBufferPtr uniformBuffer = nullptr;
 
     struct Stats {
         size_t propertyEvaluations = 0;
