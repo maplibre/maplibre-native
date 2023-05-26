@@ -88,10 +88,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-          path: ${{ github.sha }}
-
-      - run: ls -R
-        if: runner.os == 'Linux'      
+          path: ${{ github.sha }}    
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
