@@ -10,10 +10,13 @@
 #include <mbgl/shaders/gl/drawable_line_gradient.hpp>
 #include <mbgl/shaders/gl/drawable_line_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_line_sdf.hpp>
+#include <mbgl/shaders/gl/drawable_line.hpp>
 #include <mbgl/shaders/gl/drawable_fill_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline_pattern.hpp>
+#include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
 #include <mbgl/shaders/gl/background_pattern.hpp>
+#include <mbgl/shaders/gl/circle.hpp>
 #include <mbgl/shaders/gl/clipping_mask.hpp>
 #include <mbgl/shaders/gl/collision_box.hpp>
 #include <mbgl/shaders/gl/collision_circle.hpp>
