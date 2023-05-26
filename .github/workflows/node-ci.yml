@@ -89,13 +89,7 @@ jobs:
         with:
           fetch-depth: 0
           path: ${{ github.sha }}
-
-      - name: Setup submodules
-        shell: bash
-        run: |
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive || true
+          submodules: true
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
