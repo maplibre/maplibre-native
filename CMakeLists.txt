@@ -953,12 +953,19 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
+add_custom_target(
+    npm-deps
+    COMMAND npm install --ignore-scripts
+)
+
 if(MLN_WITH_OPENGL OR MLN_WITH_EGL)
     add_subdirectory(${PROJECT_SOURCE_DIR}/shaders/gl)
     set(SHADER_HEADERS ${OPENGL_SHADERS_HEADERS})
     # ensure that shaders are generated
     add_dependencies(mbgl-core opengl-shader-headers)
 endif()
+
+
 
 if(NOT SHADER_HEADERS)
   message(FATAL_ERROR "SHADER_HEADERS not initialized")

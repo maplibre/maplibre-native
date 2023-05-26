@@ -25,6 +25,9 @@ add_custom_target(
   opengl-shader-headers
   DEPENDS ${OPENGL_SHADERS_HEADERS}
 )
+add_dependencies(
+  opengl-shader-headers npm-deps
+)
 
 target_include_directories(
     mbgl-core
