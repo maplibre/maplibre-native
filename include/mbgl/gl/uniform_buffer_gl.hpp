@@ -13,6 +13,7 @@ public:
         : UniformBuffer(other) {}
     UniformBufferGL(UniformBufferGL&& other)
         : UniformBuffer(std::move(other)) {}
+    ~UniformBufferGL() override;
 
     BufferID getID() const { return id; }
 

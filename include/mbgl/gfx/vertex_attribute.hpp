@@ -50,7 +50,7 @@ public:
           items(std::move(other.items)) {}
 
 public:
-    ~VertexAttribute() = default;
+    virtual ~VertexAttribute() = default;
 
     int getIndex() const { return index; }
     void setIndex(int value) { index = value; }

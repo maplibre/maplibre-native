@@ -38,6 +38,13 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity)
 
 TileLayerGroup::~TileLayerGroup() {}
 
+void TileLayerGroup::updateLayerIndex(int32_t newLayerIndex) {
+    layerIndex = newLayerIndex;
+    for (auto& it : impl->tileDrawables) {
+        it.second->setLayerIndex(newLayerIndex);
+    }
+}
+
 std::size_t TileLayerGroup::getDrawableCount() const {
     return impl->tileDrawables.size();
 }

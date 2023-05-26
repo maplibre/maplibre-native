@@ -9,6 +9,7 @@
 namespace mbgl {
 class ChangeRequest;
 class LayerGroup;
+class TileLayerGroup;
 class RenderOrchestrator;
 
 using ChangeRequestPtr = std::shared_ptr<ChangeRequest>;
@@ -74,6 +75,18 @@ public:
 
 protected:
     int32_t layerIndex;
+};
+
+class UpdateLayerGroupIndexRequest : public ChangeRequest {
+public:
+    UpdateLayerGroupIndexRequest(std::shared_ptr<TileLayerGroup> tileLayerGroup_, int32_t newLayerIndex_);
+    UpdateLayerGroupIndexRequest(const UpdateLayerGroupIndexRequest &) = delete;
+
+    void execute(RenderOrchestrator &) override;
+
+protected:
+    std::shared_ptr<TileLayerGroup> tileLayerGroup;
+    int32_t newLayerIndex;
 };
 
 } // namespace mbgl
