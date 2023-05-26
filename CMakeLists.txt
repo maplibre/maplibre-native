@@ -955,6 +955,7 @@ endif()
 
 add_custom_target(
     npm-deps
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND npm install --ignore-scripts
 )
 
