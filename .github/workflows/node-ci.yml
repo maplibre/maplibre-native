@@ -80,7 +80,6 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./
         shell: bash
 
     steps:
