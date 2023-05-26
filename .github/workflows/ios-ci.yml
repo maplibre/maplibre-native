@@ -66,6 +66,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          path: ${{ github.sha }}
 
       - name: Install macos dependencies
         run: |
