@@ -891,33 +891,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_source.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_box.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/collision_circle.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/debug.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_extrusion.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_outline.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/fill.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap_texture.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/heatmap.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade_prepare.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/hillshade.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_gradient.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_pattern.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line_sdf.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/line.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/raster.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_icon.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_text.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_sdf_icon.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/symbol_text_and_icon.hpp
     )
     list(APPEND 
         SRC_FILES
@@ -980,10 +953,22 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
+if(MLN_WITH_OPENGL OR MLN_WITH_EGL)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/shaders/gl)
+    set(SHADER_HEADERS ${OPENGL_SHADERS_HEADERS})
+    # ensure that shaders are generated
+    add_dependencies(mbgl-core opengl-shader-headers)
+endif()
+
+if(NOT SHADER_HEADERS)
+  message(FATAL_ERROR "SHADER_HEADERS not initialized")
+endif()
+
 target_sources(
     mbgl-core PRIVATE
     ${INCLUDE_FILES}
     ${SRC_FILES}
+    ${SHADERS_HEADERS}
 )
 
 if (MLN_WITH_CLANG_TIDY)

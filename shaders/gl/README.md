@@ -1,6 +1,6 @@
-# Mapbox GL Shaders
+# OpenGL ES Shaders
 
-This repository contains GL shaders which are shared by [Mapbox GL JS](https://github.com/mapbox/mapbox-gl-js) and [Mapbox GL Native](https://github.com/mapbox/mapbox-gl-native).
+This directory contains the OpenGL ES shaders for MapLibre Native.
 
 ## Pragmas
 

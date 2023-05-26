@@ -151,6 +151,10 @@ const args = (() => {
     return parser.parse_args();
 })();
 
+if (!fs.existsSync(args.output)){
+    console.error("Trying to create output directory");
+    fs.mkdirSync(args.output, { recursive: true });
+}
 
 // Generate shader source headers
 let generatedHeaders = [];
