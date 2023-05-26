@@ -1,7 +1,9 @@
 #include <mbgl/gl/drawable_gl_builder.hpp>
 
 #include <mbgl/gfx/drawable_builder_impl.hpp>
+#include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
+#include <mbgl/gl/drawable_gl_impl.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {
@@ -10,6 +12,10 @@ namespace gl {
 gfx::UniqueDrawable DrawableGLBuilder::createDrawable() const {
     return std::make_unique<DrawableGL>(drawableName.empty() ? name : drawableName);
 };
+
+std::unique_ptr<gfx::Drawable::DrawSegment> DrawableGLBuilder::createSegment(gfx::DrawMode mode, Segment<void>&& seg) {
+    return std::make_unique<DrawableGL::DrawSegmentGL>(mode, std::move(seg), VertexArray{{nullptr, false}});
+}
 
 void DrawableGLBuilder::init() {
     auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
@@ -41,11 +47,10 @@ void DrawableGLBuilder::init() {
         }
     }
 
-    drawableGL.setLineIndexData(impl->lineIndexes.vector());
-    drawableGL.setTriangleIndexData(impl->triangleIndexes.vector());
+    drawableGL.setIndexData(std::move(impl->indexes), std::move(impl->segments));
 
-    impl->lineIndexes.clear();
-    impl->triangleIndexes.clear();
+    impl->indexes.clear();
+    impl->segments.clear();
     impl->vertices.clear();
     impl->colors.clear();
 }

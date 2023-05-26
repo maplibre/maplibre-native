@@ -141,6 +141,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp

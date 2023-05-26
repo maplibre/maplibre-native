@@ -454,43 +454,6 @@ void Context::setDirtyState() {
     globalVertexArrayState.setDirty();
 }
 
-bool Context::setupDraw(const PaintParameters& parameters, const gfx::Drawable& drawable) {
-    if (const auto& shader = drawable.getShader()) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        if (shaderGL.getGLProgramID() != program.getCurrentValue()) {
-            program = shaderGL.getGLProgramID();
-        }
-    } else if (program != value::Program::Default) {
-        program = value::Program::Default;
-    }
-
-    setDepthMode(parameters.depthModeForSublayer(drawable.getSubLayerIndex(), drawable.getDepthType()));
-
-    // force disable depth test for debugging
-    // setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
-
-    if (auto tileID = drawable.getTileID()) {
-        // Doesn't work until the clipping masks are generated
-        // parameters.stencilModeForClipping(tileID->toUnwrapped());
-        setStencilMode(gfx::StencilMode::disabled());
-    } else {
-        setStencilMode(gfx::StencilMode::disabled());
-    }
-
-    setColorMode(parameters.colorModeForRenderPass());
-    setCullFaceMode(gfx::CullFaceMode::disabled());
-
-    auto& drawableGL = static_cast<const DrawableGL&>(drawable);
-    auto& vao = drawableGL.getVertexArray();
-    if (vao.isValid()) {
-        bindVertexArray = vao.getID();
-        return true;
-    } else {
-        bindVertexArray = value::BindVertexArray::Default;
-        return false;
-    }
-}
-
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }

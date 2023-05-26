@@ -3,6 +3,7 @@
 #include <mbgl/gfx/types.hpp>
 
 #include <cassert>
+#include <cstddef>
 
 namespace mbgl {
 namespace gfx {

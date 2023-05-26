@@ -102,8 +102,6 @@ public:
 
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
-    bool setupDraw(const PaintParameters&, const gfx::Drawable&) override;
-
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::DrawableTweakerPtr createDrawableTweaker() override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
