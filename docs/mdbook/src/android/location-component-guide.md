@@ -49,9 +49,9 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
    - Use the annotation `@SuppressLint("MissingPermission")` to suppress warnings related to missing location access permissions.
    - In `setStyle(),` you can utilize other public and token-free styles like [demotiles] instead of the [predefined styles].
    - For the builder of [LocationComponentOptions], use `pulseEnabled(true)` to enable the pulse animation, which enhances awareness of the user's location.
-   - Use method `buildLocationComponentActivationOptions()` to set [LocationComponentActivationOptions].
    - Use method `buildLocationComponentActivationOptions()` to set [LocationComponentActivationOptions], then activate `locatinoComponent` with it.
-   - `CameraMode.TRACKING`[^2] means that when the user's location is updated, the camera will reposition accordingly.
+   - To apply options, make sure you call `activateLocationComponent()` of `locationComponent`. You can also set `locationComponent`'s various properties like `isLocationComponentEnabled` , `cameraMode` , etc...
+   - `CameraMode.TRACKING`[^1] means that when the user's location is updated, the camera will reposition accordingly.
    - `locationComponent!!.forceLocationUpdate(lastLocation)` updates the the user's last known location.
 
 ```kotlin
