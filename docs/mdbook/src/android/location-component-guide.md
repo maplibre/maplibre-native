@@ -20,7 +20,7 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
 ```
 
 2. Create a new activity named `BasicLocationPulsingCircleActivity`:
-  - This Activity Implements the `OnMapReadyCallback` interface. The `onMapReady()` method is used to manage the application once the map is ready.
+  - This Activity should implement the `OnMapReadyCallback` interface. The `onMapReady()` method is triggered when the map is ready to be used.
   - Add a variable `permissionsManager` to manage permissions.
   - Add a variable `locationComponent` to manage user location.
   - At the end of the `onCreate()` method, call `checkPermissions(`) to ensure that the application can access the user's location.
@@ -33,7 +33,7 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
 
    Additionally, you should pass the results of `Activity.onRequestPermissionResult()` to it.
 
-   If the permissions are granted, call `mapView.getMapAsync(this)` to execute the `onMapReady()` method when the map is ready.
+   If the permissions are granted, call `mapView.getMapAsync(this)` to register the activity as a listener for onMapReady event.
 
 ```kotlin
 {{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:permission}}
@@ -43,7 +43,7 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
 
    To configure the [LocationComponent], developers should use [LocationComponentOptions].
 
-   In this demonstration, we create an instance of this class.[^1]
+   In this demonstration, we create an instance of this class.
 
    In this method:
    - Use the annotation `@SuppressLint("MissingPermission")` to suppress warnings related to missing location access permissions.
@@ -78,15 +78,14 @@ val locationComponentOptions =
        .build()
 ```
 
-7. Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the [Test APP] [^3].
+7. Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the [Test APP] [^2].
 
    ![result](https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63)
 
 
-[^1]: [LocationComponentOptions] can also be set by defining a style in your app's `style.xml` file.  
-[^2]: A variety of [camera modes] determine how the camera will track the user location.  
+[^1]: A variety of [camera modes] determine how the camera will track the user location.  
       They provide the right context to your users at the correct time.  
-[^3]: In [Test APP], it also uses menu items to manage user location icon.  
+[^2]: In [Test APP], it also uses menu items to manage user location icon.  
 
 [LocationComponent]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html
 [Android Developer Documentation]: https://developer.android.com/training/location/permissions
