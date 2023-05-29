@@ -194,7 +194,7 @@ check [Geometry Tile Worker](./geometry-tile-worker.md) chapter.
 ______________
 [^1]: To read in depth about the data flow for map initialization and
     rendering in Android, please check 
-    [Android Map Rendering Data Flow](./android-map-rendering-data-flow.md.md)
+    [Android Map Rendering Data Flow](./android-map-rendering-data-flow.md)
 
 [^2]: This document speaks of a simplified configuration for brevity.
     These also includes viewport mode, constrain mode, and north
