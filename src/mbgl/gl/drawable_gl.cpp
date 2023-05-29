@@ -130,7 +130,12 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
         return;
     }
 
-    if (impl->vertexArrays.size() != impl->segments.size() || impl->vertexAttributes.isDirty()) {
+    const bool build = impl->vertexAttributes.isDirty() ||
+        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg){
+            return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
+        });
+    
+    if (build) {
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
@@ -151,15 +156,20 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
 
         // Create a VAO for each group of vertexes described by a segment
         for (const auto& seg : impl->segments) {
-            const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
+            auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
             const auto& mlSeg = glSeg.getSegment();
 
             for (auto& binding : bindings) {
                 binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
             }
 
-            impl->vertexArrays.emplace_back(glContext.createVertexArray());
-            impl->vertexArrays.back().bind(glContext, impl->indexBuffer, bindings);
+            auto vertexArray = glContext.createVertexArray();
+
+            vertexArray.bind(glContext, impl->indexBuffer, bindings);
+
+            assert(vertexArray.isValid());
+            
+            glSeg.setVertexArray(std::move(vertexArray));
         };
     }
 }

@@ -36,7 +36,6 @@ public:
 
     VertexAttributeArrayGL vertexAttributes;
 
-    std::vector<VertexArray> vertexArrays;
     gfx::IndexBuffer indexBuffer = {0, nullptr};
     gfx::UniqueVertexBufferResource attributeBuffer;
 
@@ -46,10 +45,6 @@ public:
     gfx::StencilMode stencilMode;
     gfx::ColorMode colorMode;
     gfx::CullFaceMode cullFaceMode;
-    // gfx::UniformValues<typename Program<>::UniformList> uniformValues;
-    // Segment<Program<>::AttributeList> segment;
-    // gfx::AttributeBindings<Program<>::AttributeList> attributeBindings;
-    // gfx::TextureBindings<Program<>::TextureList> textureBindings;
     GLfloat pointSize = 0.0f;
 };
 
@@ -59,6 +54,7 @@ struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
           vertexArray(std::move(vertexArray_)) {}
 
     const VertexArray& getVertexArray() const { return vertexArray; }
+    void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
 
 protected:
     VertexArray vertexArray;

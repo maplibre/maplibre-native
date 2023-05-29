@@ -154,6 +154,19 @@ void DrawableBuilder::setSegments(gfx::DrawMode mode, std::vector<uint16_t> inde
                                   const std::vector<Segment<void>>& segments) {
     impl->indexes = std::move(indexes);
     for (const auto& seg : segments) {
+#if !defined(NDEBUG)
+        if (mode.type == DrawModeType::Triangles) {
+            assert(seg.indexLength % 3 == 0);
+        } else if (mode.type == DrawModeType::Lines) {
+            assert(seg.indexLength % 2 == 0);
+        }
+        assert(seg.vertexOffset + seg.vertexLength <= impl->vertices.elements());
+        assert(seg.indexOffset + seg.indexLength <= impl->indexes.size());
+        for (decltype(seg.indexLength) i = 0; i < seg.indexLength; ++i) {
+            assert(impl->indexes[seg.indexOffset + i] < impl->vertices.elements());
+        }
+#endif
+
         auto segCopy = Segment<void> {  // no copy constructor
             seg.vertexOffset,
             seg.indexOffset,
@@ -200,8 +213,8 @@ void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
 
     impl->segments.emplace_back(createSegment(Triangles(), Segment<void> {
         /*.vertexOffset = */ 0,
-        /*.indexOffset = */ indexes.size(),
-        /*.vertexLength = */ 0,
+        /*.indexOffset = */ impl->indexes.size(),
+        /*.vertexLength = */ impl->vertices.elements(),
         /*.indexLength = */ indexLength
     }));
 

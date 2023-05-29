@@ -180,23 +180,24 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         bindings[defaultGL.getIndex()] = {
             /*.attribute = */ {defaultAttr.getDataType(), offset},
-            /* vertexStride = */ 0, // buffer details established later
-            /* vertexBufferResource = */ nullptr,
+            /* vertexStride = */ static_cast<uint32_t>(stride),
+            /* vertexBufferResource = */ nullptr, // buffer details established later
             /* vertexOffset = */ 0,
         };
 
-        const auto padSize = pad(allData, align, padding);
+        pad(allData, align, padding);
 
-        // The vertex stride is the sum of the attribute strides and padding
-        vertexStride += stride + padSize;
+        // The vertex stride is the sum of the attribute strides
+        vertexStride += stride;
     };
     defaults.resolve(overrides, resolveAttr);
+
+    assert(vertexStride * vertexCount <= allData.size());
 
     if (auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage)) {
         // Fill in the buffer in each binding that was generated
         std::for_each(bindings.begin(), bindings.end(), [&](auto& b) {
             if (b) {
-                b->vertexStride = vertexStride;
                 b->vertexBufferResource = vertBuf.get();
             }
         });
