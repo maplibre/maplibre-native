@@ -29,7 +29,7 @@ public:
     ~Impl() = default;
 
     std::vector<UniqueDrawSegment> segments;
-    
+
     std::vector<TextureID> textures;
 
     std::vector<std::uint16_t> indexes;

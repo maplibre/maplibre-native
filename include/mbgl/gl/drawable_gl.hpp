@@ -10,7 +10,8 @@
 
 namespace mbgl {
 
-template <class AttributeList> class Segment;
+template <class AttributeList>
+class Segment;
 
 namespace gfx {
 

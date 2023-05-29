@@ -48,7 +48,6 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     context.setColorMode(parameters.colorModeForRenderPass());
     context.setCullFaceMode(gfx::CullFaceMode::disabled());
 
-    
     bindUniformBuffers();
 
     auto& glContext = static_cast<gl::Context&>(parameters.context);
@@ -131,17 +130,17 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
     }
 
     const bool build = impl->vertexAttributes.isDirty() ||
-        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg){
-            return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
-        });
-    
+                       std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
+                           return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
+                       });
+
     if (build) {
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
         const auto indexBytes = impl->indexes.size() * sizeof(decltype(impl->indexes)::value_type);
         auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes.data(), indexBytes, usage);
-        auto indexBuffer = gfx::IndexBuffer{ impl->indexes.size(), std::move(indexBufferResource) };
+        auto indexBuffer = gfx::IndexBuffer{impl->indexes.size(), std::move(indexBufferResource)};
 
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
@@ -168,7 +167,7 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
             vertexArray.bind(glContext, impl->indexBuffer, bindings);
 
             assert(vertexArray.isValid());
-            
+
             glSeg.setVertexArray(std::move(vertexArray));
         };
     }

@@ -150,7 +150,8 @@ std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2
     return baseIndex;
 }
 
-void DrawableBuilder::setSegments(gfx::DrawMode mode, std::vector<uint16_t> indexes,
+void DrawableBuilder::setSegments(gfx::DrawMode mode,
+                                  std::vector<uint16_t> indexes,
                                   const std::vector<Segment<void>>& segments) {
     impl->indexes = std::move(indexes);
     for (const auto& seg : segments) {
@@ -167,7 +168,8 @@ void DrawableBuilder::setSegments(gfx::DrawMode mode, std::vector<uint16_t> inde
         }
 #endif
 
-        auto segCopy = Segment<void> {  // no copy constructor
+        auto segCopy = Segment<void>{
+            // no copy constructor
             seg.vertexOffset,
             seg.indexOffset,
             seg.vertexLength,
@@ -186,19 +188,18 @@ void DrawableBuilder::addLines(const std::vector<uint16_t>& indexes,
         return;
     }
 
-    impl->segments.emplace_back(createSegment(Lines(lineWidth), Segment<void> {
-        /*.vertexOffset = */ 0,
-        /*.indexOffset = */ indexes.size(),
-        /*.vertexLength = */ 0,
-        /*.indexLength = */ indexLength
-    }));
+    impl->segments.emplace_back(createSegment(Lines(lineWidth),
+                                              Segment<void>{/*.vertexOffset = */ 0,
+                                                            /*.indexOffset = */ indexes.size(),
+                                                            /*.vertexLength = */ 0,
+                                                            /*.indexLength = */ indexLength}));
 
     if (impl->indexes.empty()) {
         impl->indexes.reserve(indexLength);
     }
 
-    for (auto i = std::next(indexes.begin(), indexOffset);
-         i != std::next(indexes.begin(), indexOffset + indexLength); ++i) {
+    for (auto i = std::next(indexes.begin(), indexOffset); i != std::next(indexes.begin(), indexOffset + indexLength);
+         ++i) {
         impl->indexes.emplace_back(static_cast<uint16_t>(*i + baseIndex));
     }
 }
@@ -211,19 +212,18 @@ void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
         return;
     }
 
-    impl->segments.emplace_back(createSegment(Triangles(), Segment<void> {
-        /*.vertexOffset = */ 0,
-        /*.indexOffset = */ impl->indexes.size(),
-        /*.vertexLength = */ impl->vertices.elements(),
-        /*.indexLength = */ indexLength
-    }));
+    impl->segments.emplace_back(createSegment(Triangles(),
+                                              Segment<void>{/*.vertexOffset = */ 0,
+                                                            /*.indexOffset = */ impl->indexes.size(),
+                                                            /*.vertexLength = */ impl->vertices.elements(),
+                                                            /*.indexLength = */ indexLength}));
 
     if (impl->indexes.empty()) {
         impl->indexes.reserve(indexLength);
     }
 
-    for (auto i = std::next(indexes.begin(), indexOffset);
-         i != std::next(indexes.begin(), indexOffset + indexLength); ++i) {
+    for (auto i = std::next(indexes.begin(), indexOffset); i != std::next(indexes.begin(), indexOffset + indexLength);
+         ++i) {
         impl->indexes.emplace_back(static_cast<uint16_t>(*i + baseIndex));
     }
 }

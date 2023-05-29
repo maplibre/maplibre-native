@@ -172,9 +172,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // something else, the binding is invalid
             // TODO: throw?
             Log::Warning(Event::General,
-                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name +
-                          "' (" + util::toString(defaultGL.getIndex()) + "), expected " +
-                          util::toString(stride) + " or " + util::toString(stride * vertexCount));
+                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name + "' (" +
+                             util::toString(defaultGL.getIndex()) + "), expected " + util::toString(stride) + " or " +
+                             util::toString(stride * vertexCount));
             return;
         }
 
@@ -201,7 +201,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 b->vertexBufferResource = vertBuf.get();
             }
         });
-        
+
         outBuffer = std::move(vertBuf);
         return bindings;
     }

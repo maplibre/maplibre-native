@@ -11,7 +11,8 @@
 namespace mbgl {
 
 class Color;
-template<typename VertexType> class Segment;
+template <typename VertexType>
+class Segment;
 
 namespace gfx {
 
