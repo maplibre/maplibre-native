@@ -18,10 +18,10 @@ class LayerGroup;
  */
 class LayerTweaker {
 protected:
-    LayerTweaker() = delete;
     LayerTweaker(Immutable<style::LayerProperties> properties);
 
 public:
+    LayerTweaker() = delete;
     virtual ~LayerTweaker() = default;
 
     virtual void execute(LayerGroup&, const PaintParameters&) = 0;
