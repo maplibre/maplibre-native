@@ -85,8 +85,8 @@ public:
     void setColorAttrMode(ColorAttrMode mode) { colorAttrMode = mode; }
 
     /// Width for lines
-    int32_t getLineWidth() const { return lineWidth; }
-    void setLineWidth(int32_t value) { lineWidth = value; }
+    float getLineWidth() const { return lineWidth; }
+    void setLineWidth(float value) { lineWidth = value; }
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
@@ -158,7 +158,7 @@ protected:
     std::string vertexAttrName;
     std::string colorAttrName;
     mbgl::RenderPass renderPass;
-    int32_t lineWidth = 1;
+    float lineWidth = 1.0f;
     DrawPriority drawPriority = 0;
     int32_t layerIndex = -1;
     int32_t subLayerIndex = 0;

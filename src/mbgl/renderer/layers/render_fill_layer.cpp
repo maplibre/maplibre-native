@@ -467,7 +467,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlineBuilder = context.createDrawableBuilder("fill-outline");
                     outlineBuilder->setShader(outlineShader);
                     outlineBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-                    outlineBuilder->setLineWidth(2);
+                    outlineBuilder->setLineWidth(2.0f);
                     outlineBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlineBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     outlineBuilder->setLayerIndex(layerIndex);
@@ -549,7 +549,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
                     outlinePatternBuilder->setShader(outlineShader);
                     outlinePatternBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-                    outlinePatternBuilder->setLineWidth(2);
+                    outlinePatternBuilder->setLineWidth(2.0f);
                     outlinePatternBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlinePatternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     outlinePatternBuilder->setLayerIndex(layerIndex);
