@@ -87,7 +87,7 @@ public:
     /// Width for lines
     int32_t getLineWidth() const { return lineWidth; }
     void setLineWidth(int32_t value) { lineWidth = value; }
-    
+
     /// @brief Remove an attached texture from this drawable at the given sampler location
     /// @param location Texture sampler location
     void removeTexture(int32_t location);
