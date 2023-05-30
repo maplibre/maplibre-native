@@ -1,6 +1,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 
 #include <mbgl/gfx/drawable_builder_impl.hpp>
+#include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -102,11 +103,11 @@ void DrawableBuilder::resetDrawPriority(DrawPriority value) {
 }
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
-    const auto n = (uint16_t)impl->vertices.elements();
+    const auto n = static_cast<uint16_t>(impl->vertices.elements());
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
     impl->vertices.emplace_back(Impl::VT({{{x1, y1}}}));
     impl->vertices.emplace_back(Impl::VT({{{x2, y2}}}));
-    impl->triangleIndexes.emplace_back(n, n + 1, n + 2);
+    impl->indexes.insert(impl->indexes.end(), {n, static_cast<uint16_t>(n + 1), static_cast<uint16_t>(n + 2)});
     if (colorAttrMode == ColorAttrMode::PerVertex) {
         impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
     }
@@ -115,7 +116,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
-    impl->triangleIndexes.emplace_back(n - 2, n - 1, n);
+    impl->indexes.insert(impl->indexes.end(), {static_cast<uint16_t>(n - 2), static_cast<uint16_t>(n - 1), n});
     if (colorAttrMode == ColorAttrMode::PerVertex) {
         impl->colors.emplace_back(impl->currentColor);
     }
@@ -149,14 +150,57 @@ std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2
     return baseIndex;
 }
 
+void DrawableBuilder::setSegments(gfx::DrawMode mode,
+                                  std::vector<uint16_t> indexes,
+                                  const std::vector<Segment<void>>& segments) {
+    impl->indexes = std::move(indexes);
+    for (const auto& seg : segments) {
+#if !defined(NDEBUG)
+        if (mode.type == DrawModeType::Triangles) {
+            assert(seg.indexLength % 3 == 0);
+        } else if (mode.type == DrawModeType::Lines) {
+            assert(seg.indexLength % 2 == 0);
+        }
+        assert(seg.vertexOffset + seg.vertexLength <= impl->vertices.elements());
+        assert(seg.indexOffset + seg.indexLength <= impl->indexes.size());
+        for (decltype(seg.indexLength) i = 0; i < seg.indexLength; ++i) {
+            assert(impl->indexes[seg.indexOffset + i] < impl->vertices.elements());
+        }
+#endif
+
+        auto segCopy = Segment<void>{
+            // no copy constructor
+            seg.vertexOffset,
+            seg.indexOffset,
+            seg.vertexLength,
+            seg.indexLength,
+            seg.sortKey,
+        };
+        impl->segments.emplace_back(createSegment(mode, std::move(segCopy)));
+    }
+}
+
 void DrawableBuilder::addLines(const std::vector<uint16_t>& indexes,
                                std::size_t indexOffset,
                                std::size_t indexLength,
                                std::size_t baseIndex) {
-    for (auto i = std::next(indexes.begin(), indexOffset);
-         i != std::next(indexes.begin(), indexOffset + indexLength);) {
-        impl->lineIndexes.emplace_back(static_cast<uint16_t>(*i++ + baseIndex),
-                                       static_cast<uint16_t>(*i++ + baseIndex));
+    if (!indexLength) {
+        return;
+    }
+
+    impl->segments.emplace_back(createSegment(Lines(lineWidth),
+                                              Segment<void>{/*.vertexOffset = */ 0,
+                                                            /*.indexOffset = */ indexes.size(),
+                                                            /*.vertexLength = */ 0,
+                                                            /*.indexLength = */ indexLength}));
+
+    if (impl->indexes.empty()) {
+        impl->indexes.reserve(indexLength);
+    }
+
+    for (auto i = std::next(indexes.begin(), indexOffset); i != std::next(indexes.begin(), indexOffset + indexLength);
+         ++i) {
+        impl->indexes.emplace_back(static_cast<uint16_t>(*i + baseIndex));
     }
 }
 
@@ -164,30 +208,24 @@ void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
                                    std::size_t indexOffset,
                                    std::size_t indexLength,
                                    std::size_t baseIndex) {
-    for (auto i = std::next(indexes.begin(), indexOffset);
-         i != std::next(indexes.begin(), indexOffset + indexLength);) {
-        impl->triangleIndexes.emplace_back(static_cast<uint16_t>(*i++ + baseIndex),
-                                           static_cast<uint16_t>(*i++ + baseIndex),
-                                           static_cast<uint16_t>(*i++ + baseIndex));
+    if (!indexLength) {
+        return;
     }
-}
 
-void DrawableBuilder::addTriangles(const std::vector<std::array<int16_t, 2>>& vertices,
-                                   std::size_t vertexOffset,
-                                   std::size_t vertexLength,
-                                   const std::vector<uint16_t>& indexes,
-                                   std::size_t indexOffset,
-                                   std::size_t indexLength) {
-    // TODO: bulk add in `gfx::VertexVector`... or use vector directly?
-    // impl->vertices.insert(impl->vertices.end(),
-    //                      std::next(vertices.begin(), vertexOffset),
-    //                      std::next(vertices.begin(), vertexOffset + vertexLength));
-    // impl->indexes.insert(impl->indexes.end(),
-    //                     std::next(indexes.begin(), indexOffset),
-    //                     std::next(indexes.begin(), indexOffset + indexLength));
+    impl->segments.emplace_back(createSegment(Triangles(),
+                                              Segment<void>{/*.vertexOffset = */ 0,
+                                                            /*.indexOffset = */ impl->indexes.size(),
+                                                            /*.vertexLength = */ impl->vertices.elements(),
+                                                            /*.indexLength = */ indexLength}));
 
-    const auto baseIndex = addVertices(vertices, vertexOffset, vertexLength);
-    addTriangles(indexes, indexOffset, indexLength, baseIndex);
+    if (impl->indexes.empty()) {
+        impl->indexes.reserve(indexLength);
+    }
+
+    for (auto i = std::next(indexes.begin(), indexOffset); i != std::next(indexes.begin(), indexOffset + indexLength);
+         ++i) {
+        impl->indexes.emplace_back(static_cast<uint16_t>(*i + baseIndex));
+    }
 }
 
 } // namespace gfx

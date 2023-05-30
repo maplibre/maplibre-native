@@ -1,14 +1,23 @@
 #pragma once
 
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/draw_mode.hpp>
+#include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mbgl/programs/segment.hpp>
 
 #include <memory>
 
 namespace mbgl {
+
+template <class AttributeList>
+class Segment;
+
 namespace gfx {
 
+class Context;
 class IndexBuffer;
+class UploadPass;
 class VertexBufferResource;
 
 using UniqueVertexBufferResource = std::unique_ptr<gfx::VertexBufferResource>;
@@ -26,11 +35,8 @@ public:
 
     void draw(const PaintParameters&) const override;
 
-    void setLineIndexData(std::vector<uint16_t> indexes);
-    void setTriangleIndexData(std::vector<uint16_t> indexes);
-
-    std::vector<std::uint16_t>& getLineIndexData() const override;
-    std::vector<std::uint16_t>& getTriangleIndexData() const override;
+    struct DrawSegmentGL;
+    void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments);
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override;
     void setVertexAttributes(const gfx::VertexAttributeArray& value) override;
@@ -38,17 +44,13 @@ public:
 
     gfx::VertexAttributeArray& mutableVertexAttributes();
 
-    const gl::VertexArray& getVertexArray() const;
-    void setVertexArray(gl::VertexArray&&, gfx::UniqueVertexBufferResource&&, gfx::IndexBuffer&&);
-
-    const gfx::UniqueVertexBufferResource& getBuffer() const;
-    const gfx::IndexBuffer& getIndexBuffer() const;
-
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
     /// Reset a single color attribute for all vertexes
     void resetColor(const Color&) override;
+
+    void upload(gfx::Context&, gfx::UploadPass&);
 
 protected:
     class Impl;
