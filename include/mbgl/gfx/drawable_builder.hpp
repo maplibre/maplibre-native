@@ -60,10 +60,6 @@ public:
     void setDrawPriority(DrawPriority);
 
     /// The layer index assigned to generated drawables
-    int32_t getLayerIndex() const { return layerIndex; }
-    void setLayerIndex(int32_t value) { layerIndex = value; }
-
-    /// The layer index assigned to generated drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
@@ -162,7 +158,6 @@ protected:
     mbgl::RenderPass renderPass;
     float lineWidth = 1.0f;
     DrawPriority drawPriority = 0;
-    int32_t layerIndex = -1;
     int32_t subLayerIndex = 0;
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;

@@ -40,9 +40,6 @@ TileLayerGroup::~TileLayerGroup() {}
 
 void TileLayerGroup::updateLayerIndex(int32_t newLayerIndex) {
     layerIndex = newLayerIndex;
-    for (auto& it : impl->tileDrawables) {
-        it.second->setLayerIndex(newLayerIndex);
-    }
 }
 
 std::size_t TileLayerGroup::getDrawableCount() const {
