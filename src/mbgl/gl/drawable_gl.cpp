@@ -23,7 +23,7 @@ DrawableGL::~DrawableGL() {
 void DrawableGL::draw(const PaintParameters& parameters) const {
     auto& context = static_cast<gl::Context&>(parameters.context);
 
-    if (const auto& shader = getShader()) {
+    if (shader) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
         if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
             context.program = shaderGL.getGLProgramID();
@@ -37,7 +37,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     // force disable depth test for debugging
     // setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    if (auto tileID = getTileID()) {
+    if (tileID) {
         // Doesn't work until the clipping masks are generated
         // parameters.stencilModeForClipping(tileID->toUnwrapped());
         context.setStencilMode(gfx::StencilMode::disabled());
