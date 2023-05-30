@@ -47,7 +47,9 @@ struct alignas(16) FillDrawableUBO {
 };
 static_assert(sizeof(FillDrawableUBO) == 208);
 
-void FillLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderTree, const PaintParameters& parameters) {
+void FillLayerTweaker::execute(LayerGroup& layerGroup,
+                               const RenderTree& renderTree,
+                               const PaintParameters& parameters) {
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
@@ -77,7 +79,8 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderT
         const auto& translation = evaluated.get<FillTranslate>();
         const auto anchor = evaluated.get<FillTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
 
         // from FillPatternProgram::layoutUniformValues
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();

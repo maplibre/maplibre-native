@@ -52,7 +52,9 @@ struct alignas(16) CircleInterpolateUBO {
 };
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
-void CircleLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderTree, const PaintParameters& parameters) {
+void CircleLayerTweaker::execute(LayerGroup& layerGroup,
+                                 const RenderTree& renderTree,
+                                 const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
     CirclePaintParamsUBO paintParamsUBO;
@@ -100,7 +102,8 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& rende
         const auto& translation = evaluated.get<CircleTranslate>();
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
 
         CircleDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
