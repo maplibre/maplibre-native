@@ -50,6 +50,7 @@ void DrawableBuilder::flush() {
         draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
         draw->setMatrix(matrix);
+        draw->setTextures(textures);
 
         if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
@@ -100,6 +101,16 @@ void DrawableBuilder::resetDrawPriority(DrawPriority value) {
     for (auto& drawble : drawables) {
         drawble->setDrawPriority(value);
     }
+}
+
+void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture, int32_t location) {
+    for (auto& tex : textures) {
+        if (tex.location == location) {
+            tex.texture = texture;
+            return;
+        }
+    }
+    textures.emplace_back(texture, location);
 }
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {

@@ -1,6 +1,7 @@
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/texture2d.hpp>
 
 namespace mbgl {
 
@@ -87,19 +88,29 @@ Size PatternAtlas::getPixelSize() const {
 }
 
 void PatternAtlas::upload(gfx::UploadPass& uploadPass) {
-    if (!atlasTexture) {
-        atlasTexture = uploadPass.createTexture(atlasImage);
+    // @note: This is what we should be doing, but will fail a ton of render tests until we update them all
+    // if (atlasImage.size.isEmpty()) {
+    //     return;
+    // }
+
+    if (!atlasTexture2D) {
+        atlasTexture2D = uploadPass.createTexture2D(atlasImage);
     } else if (dirty) {
-        uploadPass.updateTexture(*atlasTexture, atlasImage);
+        atlasTexture2D->upload(atlasImage, uploadPass);
     }
 
     dirty = false;
 }
 
+// @note: Deprecated
 gfx::TextureBinding PatternAtlas::textureBinding() const {
-    assert(atlasTexture);
+    assert(atlasTexture2D);
     assert(!dirty);
-    return {atlasTexture->getResource(), gfx::TextureFilterType::Linear};
+    return {atlasTexture2D->getResource(), gfx::TextureFilterType::Linear};
+}
+
+const std::shared_ptr<gfx::Texture2D>& PatternAtlas::texture() const {
+    return atlasTexture2D;
 }
 
 } // namespace mbgl

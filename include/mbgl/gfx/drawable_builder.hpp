@@ -108,6 +108,11 @@ public:
     void setVertexAttrName(std::string value) { vertexAttrName = std::move(value); }
     void setColorAttrName(std::string value) { colorAttrName = std::move(value); }
 
+    /// @brief Attach the given texture at the given sampler location.
+    /// @param texture Texture2D instance
+    /// @param location A sampler location in the shader being used.
+    void setTexture(const std::shared_ptr<gfx::Texture2D>& texture, int32_t location);
+
     /// Set the matrix applied to new drawables
     void setMatrix(mat4 value) { matrix = value; }
 
@@ -169,6 +174,7 @@ protected:
     std::vector<UniqueDrawable> drawables;
     ColorAttrMode colorAttrMode = ColorAttrMode::PerVertex;
     VertexAttributeArray vertexAttrs;
+    gfx::Drawable::Textures textures;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
