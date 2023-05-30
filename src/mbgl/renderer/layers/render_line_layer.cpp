@@ -395,44 +395,41 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 lineShader = context.getGenericShader(shaders, "LineShader");
             }
 
-            // one drawable per segment
-            for (const auto& seg : bucket.segments) {
-                builder->setShader(lineShader);
-                builder->setRenderPass(renderPass);
-                builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setSubLayerIndex(0);
-//                builder->setDepthType(parameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly));
-                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                builder->setLayerIndex(layerIndex);
-                builder->setVertexAttrName("a_pos_normal");
+            builder->setShader(lineShader);
+            builder->setRenderPass(renderPass);
+            builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
+            builder->setSubLayerIndex(0);
+            builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                     : gfx::DepthMaskType::ReadOnly);
+            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+            builder->setLayerIndex(layerIndex);
+            builder->setVertexAttrName("a_pos_normal");
 
-                // vertices
-                std::vector<std::array<int16_t, 2>> rawVerts(seg.vertexLength);
-                std::transform(
-                    std::next(bucket.vertices.vector().begin(), seg.vertexOffset),
-                    std::next(bucket.vertices.vector().begin(), seg.vertexOffset + seg.vertexLength),
-                    rawVerts.begin(),
-                    [](const auto& x) {
-                        return x.a1;
-                    });
-                builder->addVertices(rawVerts, 0, seg.vertexLength);
-
-                // attributes
-                gfx::VertexAttributeArray vertexAttrs;
-                if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
-                    size_t index{0};
-                    for (auto ivert = std::next(bucket.vertices.vector().begin(), seg.vertexOffset);
-                         ivert != std::next(bucket.vertices.vector().begin(), seg.vertexOffset + seg.vertexLength);
-                         ++ivert) {
-                        const auto& vert = *ivert;
-                        attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
-                    }
+            std::vector<std::array<int16_t, 2>> rawVerts;
+            const auto buildVertices = [&rawVerts, &bucket]() {
+                if (rawVerts.size() != bucket.vertices.vector().size()) {
+                    rawVerts.resize(bucket.vertices.vector().size());
+                    std::transform(bucket.vertices.vector().begin(), bucket.vertices.vector().end(), rawVerts.begin(),
+                                [](const auto& x) { return x.a1; });
                 }
-                builder->setVertexAttributes(std::move(vertexAttrs));
+            };
+            
+            // vertices
+            buildVertices();
+            builder->addVertices(rawVerts, 0, rawVerts.size());
+            
+            // attributes
+            gfx::VertexAttributeArray vertexAttrs;
+            if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
+                size_t index{0};
+                for (const auto& vert : bucket.vertices.vector()) {
+                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+                }
+            }
+            builder->setVertexAttributes(std::move(vertexAttrs));
 
-                // indexes
-                builder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
+            // segments
+            builder->setSegments(gfx::Triangles(), bucket.triangles.vector(), reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
 //                using namespace std::string_literals;
 //                Log::Warning(Event::General,
 //                             "SEG: "s + util::toString(tileID) +
@@ -443,15 +440,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 //                             " max(index): " + std::to_string(builder->maxIndex())
 //                             );
                 
-                // flush, add drawables to layer group
-                builder->flush();
-
-                for (auto& drawable : builder->clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    
-                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.tileDrawablesAdded;
-                }
+            // finish
+            builder->flush();
+            for (auto& drawable : builder->clearDrawables()) {
+                drawable->setTileID(tileID);
+                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                ++stats.tileDrawablesAdded;
             }
         }
     }

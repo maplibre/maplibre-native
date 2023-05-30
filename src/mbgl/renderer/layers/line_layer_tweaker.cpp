@@ -75,7 +75,6 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
             return;
         }
 
-
         // TODO: refactor this, use RenderTile::translatedMatrix?
         auto translateVtxMatrix = [](const UnwrappedTileID& id, const mat4& tileMatrix, const std::array<float, 2>& translation,
                                     TranslateAnchorType anchor,
@@ -119,6 +118,9 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
 //        const auto tileMat = parameters.matrixForTile(tileID);
 //        matrix::multiply(matrix, drawable.getMatrix(), tileMat);
 //        matrix = tileMat;
+
+//        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+//        mat4 matrix = parameters.matrixForTile(tileID);
 
         LineDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
