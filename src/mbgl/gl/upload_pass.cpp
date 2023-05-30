@@ -127,8 +127,10 @@ static std::size_t padSize(std::size_t size, std::size_t padding) {
     return (padding - (size % padding)) % padding;
 }
 template <typename T>
-static void pad(std::vector<T>& vector, std::size_t size, T value) {
-    vector.insert(vector.end(), padSize(vector.size(), size), value);
+static std::size_t pad(std::vector<T>& vector, std::size_t size, T value) {
+    const auto count = padSize(vector.size(), size);
+    vector.insert(vector.end(), count, value);
+    return count;
 }
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
@@ -147,56 +149,64 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     allData.reserve(defaults.getTotalSize() * vertexCount);
 
     // For each attribute in the program, with the corresponding default and optional override...
-    defaults.resolve(overrides,
-                     [&](const std::string& name, const auto& defaultAttr, const auto& overrideAttr) -> void {
-                         const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
-                         const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
-                         const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
-                         const auto stride = defaultAttr.getStride();
-                         const auto offset = static_cast<uint32_t>(allData.size());
+    uint32_t vertexStride = 0;
+    const auto resolveAttr = [&](const std::string& name, const auto& defaultAttr, const auto& overrideAttr) -> void {
+        const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
+        const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
+        const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
+        const auto stride = defaultAttr.getStride();
+        const auto offset = static_cast<uint32_t>(allData.size());
 
-                         // Get the raw data for the values in the desired format
-                         const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
+        // Get the raw data for the values in the desired format
+        const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
 
-                         if (rawData.size() == stride * vertexCount) {
-                             // The override provided a value for each vertex, append it as-is
-                             allData.insert(allData.end(), rawData.begin(), rawData.end());
-                         } else if (rawData.size() == stride) {
-                             // We only have one value, append a copy for each vertex
-                             for (std::size_t i = 0; i < vertexCount; ++i) {
-                                 allData.insert(allData.end(), rawData.begin(), rawData.end());
-                             }
-                         } else {
-                             // something else, the binding is invalid
-                             // TODO: throw?
-                             Log::Warning(Event::General,
-                                          "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name +
-                                              "' (" + util::toString(defaultGL.getIndex()) + "), expected " +
-                                              util::toString(stride) + " or " + util::toString(stride * vertexCount));
-                             return;
-                         }
-
-                         bindings[defaultGL.getIndex()] = {
-                             /*.attribute = */ {defaultAttr.getDataType(), offset},
-                             /*.vertexStride = */ static_cast<uint8_t>(stride),
-                             /*.vertexBufferResource = */ nullptr, // buffer pointer established later
-                             /*.vertexOffset = */ 0,
-                         };
-
-                         pad(allData, align, padding);
-                     });
-
-    auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage);
-
-    // Go back and fill in the newly-allocated buffer in each binding that was generated
-    std::for_each(bindings.begin(), bindings.end(), [&](auto& b) {
-        if (b) {
-            b->vertexBufferResource = vertBuf.get();
+        if (rawData.size() == stride * vertexCount) {
+            // The override provided a value for each vertex, append it as-is
+            allData.insert(allData.end(), rawData.begin(), rawData.end());
+        } else if (rawData.size() == stride) {
+            // We only have one value, append a copy for each vertex
+            for (std::size_t i = 0; i < vertexCount; ++i) {
+                allData.insert(allData.end(), rawData.begin(), rawData.end());
+            }
+        } else {
+            // something else, the binding is invalid
+            // TODO: throw?
+            Log::Warning(Event::General,
+                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name + "' (" +
+                             util::toString(defaultGL.getIndex()) + "), expected " + util::toString(stride) + " or " +
+                             util::toString(stride * vertexCount));
+            return;
         }
-    });
 
-    outBuffer = std::move(vertBuf);
-    return bindings;
+        bindings[defaultGL.getIndex()] = {
+            /*.attribute = */ {defaultAttr.getDataType(), offset},
+            /* vertexStride = */ static_cast<uint32_t>(stride),
+            /* vertexBufferResource = */ nullptr, // buffer details established later
+            /* vertexOffset = */ 0,
+        };
+
+        pad(allData, align, padding);
+
+        // The vertex stride is the sum of the attribute strides
+        vertexStride += stride;
+    };
+    defaults.resolve(overrides, resolveAttr);
+
+    assert(vertexStride * vertexCount <= allData.size());
+
+    if (auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage)) {
+        // Fill in the buffer in each binding that was generated
+        std::for_each(bindings.begin(), bindings.end(), [&](auto& b) {
+            if (b) {
+                b->vertexBufferResource = vertBuf.get();
+            }
+        });
+
+        outBuffer = std::move(vertBuf);
+        return bindings;
+    }
+
+    return {};
 }
 
 void UploadPass::pushDebugGroup(const char* name) {
