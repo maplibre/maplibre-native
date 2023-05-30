@@ -315,9 +315,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
             // Tile coordinates are fixed...
             builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
 
-            // ... they're placed with the matrix in the uniforms, which changes with the view
-            builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
-
             builder->flush();
 
             auto newDrawables = builder->clearDrawables();

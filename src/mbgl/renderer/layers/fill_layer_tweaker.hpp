@@ -15,7 +15,7 @@ public:
 public:
     ~FillLayerTweaker() override = default;
 
-    void execute(LayerGroup&, const PaintParameters&) override;
+    void execute(LayerGroup&, const RenderTree&, const PaintParameters&) override;
 };
 
 } // namespace mbgl

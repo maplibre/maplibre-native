@@ -40,7 +40,7 @@ struct alignas(16) BackgroundPatternLayerUBO {
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) % 16 == 0);
 
-void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
+void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (!layerUniformBuffer) {
@@ -56,11 +56,8 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const PaintParamete
         if (!drawable.getTileID()) {
             return;
         }
-        mat4 matrix = drawable.getMatrix();
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto tileMat = parameters.matrixForTile(tileID);
-        matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-        matrix = tileMat;
+        const auto matrix = parameters.matrixForTile(tileID);
 
         BackgroundDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
