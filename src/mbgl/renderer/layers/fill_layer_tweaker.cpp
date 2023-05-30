@@ -7,7 +7,6 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_tile.cpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
