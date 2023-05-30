@@ -507,21 +507,19 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (fillBuilder) {
                     buildVertices();
                     fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
-
-                    for (const auto& seg : bucket.triangleSegments) {
-                        fillBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
-                    }
-
+                    fillBuilder->setSegments(
+                        gfx::Triangles(),
+                        bucket.triangles.vector(),
+                        reinterpret_cast<const std::vector<Segment<void>>&>(bucket.triangleSegments));
                     finish(*fillBuilder, renderPass, tileID);
                 }
                 if (outlineBuilder) {
                     buildVertices();
                     outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
-
-                    for (const auto& seg : bucket.lineSegments) {
-                        outlineBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
-                    }
-
+                    outlineBuilder->setSegments(
+                        gfx::Lines(2),
+                        bucket.lines.vector(),
+                        reinterpret_cast<const std::vector<Segment<void>>&>(bucket.lineSegments));
                     finish(*outlineBuilder, renderPass, tileID);
                 }
             } else { // FillPattern is defined
@@ -575,23 +573,20 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (patternBuilder) {
                     buildVertices();
                     patternBuilder->addVertices(rawVerts, 0, rawVerts.size());
-
-                    for (const auto& seg : bucket.triangleSegments) {
-                        patternBuilder->addTriangles(bucket.triangles.vector(), seg.indexOffset, seg.indexLength);
-                    }
-
+                    patternBuilder->setSegments(
+                        gfx::Triangles(),
+                        bucket.triangles.vector(),
+                        reinterpret_cast<const std::vector<Segment<void>>&>(bucket.triangleSegments));
                     finish(*patternBuilder, renderPass, tileID);
                 }
                 if (outlinePatternBuilder) {
                     buildVertices();
                     outlinePatternBuilder->addVertices(rawVerts, 0, rawVerts.size());
-
-                    for (const auto& seg : bucket.lineSegments) {
-                        outlinePatternBuilder->addLines(bucket.lines.vector(), seg.indexOffset, seg.indexLength);
-                    }
-
+                    outlinePatternBuilder->setSegments(
+                        gfx::Lines(2),
+                        bucket.lines.vector(),
+                        reinterpret_cast<const std::vector<Segment<void>>&>(bucket.lineSegments));
                     finish(*outlinePatternBuilder, renderPass, tileID);
-                    outlinePatternBuilder->flush();
                 }
 
                 //    auto draw = [&](auto& programInstance,

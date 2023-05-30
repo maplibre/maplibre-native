@@ -114,7 +114,7 @@ struct VertexDescriptor {
 class AttributeBinding {
 public:
     AttributeDescriptor attribute;
-    uint8_t vertexStride;
+    uint32_t vertexStride;
     const VertexBufferResource* vertexBufferResource;
     uint32_t vertexOffset;
 
