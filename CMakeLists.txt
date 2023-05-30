@@ -153,6 +153,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/texture2d.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_extrusion_layer_factory.hpp
@@ -394,7 +396,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/types.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
@@ -929,6 +930,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/platform/gl_functions.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/change_request.hpp
@@ -1010,6 +1012,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/types.hpp

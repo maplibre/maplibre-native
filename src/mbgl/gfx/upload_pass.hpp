@@ -8,6 +8,7 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/util/size.hpp>
+#include <mbgl/util/image.hpp>
 
 #include <optional>
 #include <vector>
@@ -15,6 +16,7 @@
 namespace mbgl {
 namespace gfx {
 
+class Texture2D;
 class VertexAttributeArray;
 
 using AttributeBindingArray = std::vector<std::optional<gfx::AttributeBinding>>;
@@ -107,7 +109,7 @@ public:
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
 
-protected:
+public:
     virtual std::unique_ptr<TextureResource> createTextureResource(Size,
                                                                    const void* data,
                                                                    TexturePixelType,
@@ -121,6 +123,8 @@ protected:
                                           const void* data,
                                           TexturePixelType,
                                           TextureChannelDataType) = 0;
+
+    virtual std::shared_ptr<gfx::Texture2D> createTexture2D(const PremultipliedImage& image) = 0;
 };
 
 } // namespace gfx
