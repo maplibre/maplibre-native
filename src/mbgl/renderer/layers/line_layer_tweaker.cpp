@@ -109,8 +109,6 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
             return vtxMatrix;
         };
 
-        /* mat4 matrix = renderTile.translatedMatrix(properties.get<LineTranslate>(),
-         * properties.get<LineTranslateAnchor>(), state) */
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         mat4 matrix;
         parameters.state.matrixFor(matrix, tileID);
@@ -120,17 +118,6 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
                                     evaluated.get<LineTranslateAnchor>(),
                                     parameters.state,
                                     false);
-        matrix::multiply(matrix, parameters.transformParams.projMatrix, matrix);
-
-        //        mat4 matrix = drawable.getMatrix();
-        //        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        //        const auto tileMat = parameters.matrixForTile(tileID);
-        //        matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-        //        matrix = tileMat;
-
-        //        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        //        mat4 matrix = parameters.matrixForTile(tileID);
-
         LineDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
         drawableUBO.ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
