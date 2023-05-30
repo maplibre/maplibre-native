@@ -6,20 +6,24 @@
 // #define scale 63.0
 #define scale 0.015873016
 
+#define HAS_UNIFORM_u_color
+#define HAS_UNIFORM_u_blur
+#define HAS_UNIFORM_u_opacity
+#define HAS_UNIFORM_u_gapwidth
+#define HAS_UNIFORM_u_offset
+#define HAS_UNIFORM_u_width
+
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-layout (std140) uniform DrawableUBO {
-    mat4 u_matrix;
-};
-
-layout (std140) uniform LineLayerUBO1 {
-    vec2 u_units_to_pixels;
+layout (std140) uniform LineDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     lowp float u_device_pixel_ratio;
 };
 
-layout (std140) uniform LineLayerUBO2 {
+layout (std140) uniform LineEvaluatedPropsUBO {
     highp vec4 u_color;
     lowp float u_blur;
     lowp float u_opacity;
@@ -28,7 +32,7 @@ layout (std140) uniform LineLayerUBO2 {
     mediump float u_width;
 };
 
-layout (std140) uniform LineLayerUBO3 {
+layout (std140) uniform LineInterpolatedPropsUBO {
     lowp float u_color_t;
     lowp float u_blur_t;
     lowp float u_opacity_t;

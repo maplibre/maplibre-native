@@ -1,4 +1,34 @@
-uniform lowp float u_device_pixel_ratio;
+#define HAS_UNIFORM_u_color
+#define HAS_UNIFORM_u_blur
+#define HAS_UNIFORM_u_opacity
+#define HAS_UNIFORM_u_gapwidth
+#define HAS_UNIFORM_u_offset
+#define HAS_UNIFORM_u_width
+
+layout (std140) uniform LineDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+};
+
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+};
+
+layout (std140) uniform LineInterpolatedPropsUBO {
+    lowp float u_color_t;
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+};
 
 in vec2 v_width2;
 in vec2 v_normal;

@@ -23,10 +23,10 @@ public:
     void layerRemoved(UniqueChangeRequestVec&) override;
 
     /// Generate any changes needed by the layer
-    void update(int32_t layerIndex,
-                gfx::ShaderRegistry&,
+    void update(gfx::ShaderRegistry&,
                 gfx::Context&,
-                const TransformState& state,
+                const TransformState&,
+                const RenderTree&,
                 UniqueChangeRequestVec&) override;
 
 private:
@@ -55,18 +55,19 @@ private:
     PremultipliedImage colorRamp;
     std::optional<gfx::Texture> colorRampTexture;
 
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&);
+
     // Programs
     std::shared_ptr<LineProgram> lineProgram;
     std::shared_ptr<LineGradientProgram> lineGradientProgram;
     std::shared_ptr<LineSDFProgram> lineSDFProgram;
     std::shared_ptr<LinePatternProgram> linePatternProgram;
+    
+    gfx::ShaderProgramBasePtr lineShader;
+    gfx::ShaderProgramBasePtr lineGradientShader;
+    gfx::ShaderProgramBasePtr lineSDFShader;
+    gfx::ShaderProgramBasePtr linePatternShader;
 };
-
-struct alignas(16) LineLayerUBO1 {
-    std::array<float, 2> units_to_pixels;
-    float ratio;
-    float device_pixel_ratio;
-};
-static_assert(sizeof(LineLayerUBO1) % 16 == 0);
 
 } // namespace mbgl
