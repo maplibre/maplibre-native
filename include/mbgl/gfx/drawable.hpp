@@ -120,9 +120,6 @@ public:
     std::optional<OverscaledTileID> getTileID() const { return tileID; }
     void setTileID(OverscaledTileID value) { tileID = value; }
 
-    mat4 getMatrix() const { return matrix; }
-    void setMatrix(mat4 value) { matrix = value; }
-
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
 
@@ -162,7 +159,6 @@ protected:
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
     mbgl::RenderPass renderPass;
-    mat4 matrix; //= matrix::identity4();
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;

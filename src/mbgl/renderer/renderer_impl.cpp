@@ -120,7 +120,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Run layer tweakers to update any dynamic elements
     orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
-            layerGroup.getLayerTweaker()->execute(layerGroup, parameters);
+            layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
     });
 

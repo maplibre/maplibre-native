@@ -49,7 +49,6 @@ void DrawableBuilder::flush() {
         draw->setDepthType(depthType);
         draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
-        draw->setMatrix(matrix);
         draw->setTextures(textures);
 
         if (auto drawAttrs = getVertexAttributes().clone()) {

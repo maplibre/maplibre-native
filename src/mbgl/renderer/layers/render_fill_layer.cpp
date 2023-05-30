@@ -492,9 +492,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 //                     FillOutlineProgram::TextureBindings{});
                 //            }
 
-                // tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
-                // parameters.state)
-
                 if (fillBuilder) {
                     fillBuilder->setRenderPass(renderPass);
                     fillBuilder->setVertexAttributes(fillVertexAttrs);
@@ -600,9 +597,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 //
                 //        const auto allUniformValues = programInstance.computeAllUniformValues(
                 //            FillPatternProgram::layoutUniformValues(
-                //                tile.translatedMatrix(
-                //                    evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
-                //                    parameters.state),
                 //                parameters.backend.getDefaultRenderable().getSize(),
                 //                tile.getIconAtlasTexture().size,
                 //                crossfade,
