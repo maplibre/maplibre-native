@@ -26,6 +26,7 @@ using UniqueVertexBufferResource = std::unique_ptr<gfx::VertexBufferResource>;
 
 namespace gl {
 
+class Texture2D;
 class VertexArray;
 
 class DrawableGL : public gfx::Drawable {
@@ -62,6 +63,9 @@ protected:
 private:
     void bindUniformBuffers() const;
     void unbindUniformBuffers() const;
+
+    void bindTextures() const;
+    void unbindTextures() const;
 };
 
 } // namespace gl
