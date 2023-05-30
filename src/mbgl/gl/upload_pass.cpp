@@ -189,7 +189,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         pad(allData, align, padding);
 
         // The vertex stride is the sum of the attribute strides
-        vertexStride += stride;
+        vertexStride += static_cast<uint32_t>(stride);
     };
     defaults.resolve(overrides, resolveAttr);
 
