@@ -15,6 +15,7 @@ namespace gl {
 class CommandEncoder;
 class Context;
 class VertexArray;
+class Texture2D;
 
 class UploadPass final : public gfx::UploadPass {
 public:
@@ -55,6 +56,8 @@ public:
                                   const void* data,
                                   gfx::TexturePixelType,
                                   gfx::TextureChannelDataType) override;
+
+    std::shared_ptr<gfx::Texture2D> createTexture2D(const PremultipliedImage& image) override;
 
 private:
     gl::CommandEncoder& commandEncoder;

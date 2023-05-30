@@ -14,6 +14,7 @@
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/texture.hpp>
+#include <mbgl/gl/texture2d.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
