@@ -16,12 +16,14 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
 // #define scale 63.0
 #define scale 0.015873016
 
-#define HAS_UNIFORM_u_color
-#define HAS_UNIFORM_u_blur
-#define HAS_UNIFORM_u_opacity
-#define HAS_UNIFORM_u_gapwidth
-#define HAS_UNIFORM_u_offset
-#define HAS_UNIFORM_u_width
+// SWITCH BETWEEN THE VERSIONS OF THE SHADER BY CHANGING THE FOLLOWING LINES:
+// #define HAS_UNIFORM_u_color
+// #define HAS_UNIFORM_u_blur
+// #define HAS_UNIFORM_u_opacity
+// #define HAS_UNIFORM_u_gapwidth
+// #define HAS_UNIFORM_u_offset
+// #define HAS_UNIFORM_u_width
+// END SWITCH 
 
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
@@ -160,12 +162,14 @@ mediump float width = u_width;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(#define HAS_UNIFORM_u_color
-#define HAS_UNIFORM_u_blur
-#define HAS_UNIFORM_u_opacity
-#define HAS_UNIFORM_u_gapwidth
-#define HAS_UNIFORM_u_offset
-#define HAS_UNIFORM_u_width
+    static constexpr const char* fragment = R"(// SWITCH BETWEEN THE VERSIONS OF THE SHADER BY CHANGING THE FOLLOWING LINES:
+// #define HAS_UNIFORM_u_color
+// #define HAS_UNIFORM_u_blur
+// #define HAS_UNIFORM_u_opacity
+// #define HAS_UNIFORM_u_gapwidth
+// #define HAS_UNIFORM_u_offset
+// #define HAS_UNIFORM_u_width
+// END SWITCH 
 
 layout (std140) uniform LineDrawableUBO {
     highp mat4 u_matrix;

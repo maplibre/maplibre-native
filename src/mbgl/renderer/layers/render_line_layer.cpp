@@ -19,6 +19,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
 
 namespace mbgl {
 
@@ -382,16 +383,15 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
-        // const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
+        const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
-        /*if (!evaluated.get<LineDasharray>().from.empty()) {
+        if (!evaluated.get<LineDasharray>().from.empty()) {
             // TODO: dash array line: LineSDFShader
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
             // TODO: pattern line: LinePatternShader
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             // TODO: gradient line: LineGradientShader
-        } else */
-        {
+        } else {
             // simple line
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("line")};
             if (!lineShader) {
@@ -424,15 +424,92 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             builder->addVertices(rawVerts, 0, rawVerts.size());
 
             // attributes
-            gfx::VertexAttributeArray vertexAttrs;
-            if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
-                size_t index{0};
-                for (const auto& vert : bucket.vertices.vector()) {
-                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+            {
+                gfx::VertexAttributeArray vertexAttrs;
+                if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
+                    size_t index{0};
+                    for (const auto& vert : bucket.vertices.vector()) {
+                        attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+                    }
                 }
+                
+                // test whether the shader has the extra attributes
+                if (lineShader->getVertexAttributes().size() > 2) {
+                    const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+                    
+//                    lineShader->getVertexAttributes().get("a_color") &&
+                    if (auto& binder = paintPropertyBinders.get<LineColor>()) {
+                        const auto count = binder->getVertexCount();
+                        if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& packedColor = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
+                                                              binder->getVertexValue(i))
+                                                              ->a1;
+                                attr->set<gfx::VertexAttribute::float4>(
+                                    i, {packedColor[0], packedColor[1], packedColor[0], packedColor[1]});
+                            }
+                        }
+                    }
+                    if (auto& binder = paintPropertyBinders.get<LineBlur>()) {
+                        const auto count = binder->getVertexCount();
+                        if (auto& attr = vertexAttrs.getOrAdd("a_blur")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& blur = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                                       binder->getVertexValue(i))
+                                                       ->a1;
+                                attr->set<gfx::VertexAttribute::float2>(i, {blur[0], blur[0]});
+                            }
+                        }
+                    }
+                    if (auto& binder = paintPropertyBinders.get<LineOpacity>()) {
+                        const auto count = binder->getVertexCount();
+                        if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& opacity = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                                          binder->getVertexValue(i))
+                                                          ->a1;
+                                attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
+                            }
+                        }
+                    }
+                    if (auto& binder = paintPropertyBinders.get<LineGapWidth>()) {
+                        const auto count = binder->getVertexCount();
+                        if (auto& attr = vertexAttrs.getOrAdd("a_gapwidth")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& gapwidth = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                                          binder->getVertexValue(i))
+                                                          ->a1;
+                                attr->set<gfx::VertexAttribute::float2>(i, {gapwidth[0], gapwidth[0]});
+                            }
+                        }
+                    }
+                    if (auto& binder = paintPropertyBinders.get<LineOffset>()) {
+                        const auto count = binder->getVertexCount();
+                        if (auto& attr = vertexAttrs.getOrAdd("a_offset")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& offset = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                                          binder->getVertexValue(i))
+                                                          ->a1;
+                                attr->set<gfx::VertexAttribute::float2>(i, {offset[0], offset[0]});
+                            }
+                        }
+                    }
+                    if (auto& binder = paintPropertyBinders.get<LineOffset>()) {
+                        const auto count = binder->getVertexCount();
+                        if (auto& attr = vertexAttrs.getOrAdd("a_width")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& width = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                                          binder->getVertexValue(i))
+                                                          ->a1;
+                                attr->set<gfx::VertexAttribute::float2>(i, {width[0], width[0]});
+                            }
+                        }
+                    }
+                }
+                
+                builder->setVertexAttributes(std::move(vertexAttrs));
             }
-            builder->setVertexAttributes(std::move(vertexAttrs));
-
+            
             // segments
             builder->setSegments(gfx::Triangles(),
                                  bucket.triangles.vector(),
