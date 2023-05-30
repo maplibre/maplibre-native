@@ -29,5 +29,14 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
 }
 
+void Drawable::removeTexture(int32_t location) {
+    for (auto it = textures.begin(); it != textures.end(); ++it) {
+        if (it->location == location) {
+            textures.erase(it);
+            return;
+        }
+    }
+}
+
 } // namespace gfx
 } // namespace mbgl

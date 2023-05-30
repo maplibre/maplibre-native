@@ -1,6 +1,6 @@
 #include <mbgl/gl/drawable_gl.hpp>
-
 #include <mbgl/gl/drawable_gl_impl.hpp>
+#include <mbgl/gl/texture2d.hpp>
 #include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
@@ -93,6 +93,16 @@ const gfx::UniformBufferArray& DrawableGL::getUniformBuffers() const {
 
 gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
+}
+
+void DrawableGL::setTexture(std::shared_ptr<gl::Texture2D>& texture, int32_t location) {
+    for (auto& tex : textures) {
+        if (tex.location == location) {
+            tex.texture = texture;
+            return;
+        }
+    }
+    textures.emplace_back(std::static_pointer_cast<gfx::Texture2D>(texture), location);
 }
 
 void DrawableGL::resetColor(const Color& newColor) {

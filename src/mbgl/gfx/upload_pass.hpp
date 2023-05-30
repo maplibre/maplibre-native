@@ -107,7 +107,7 @@ public:
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
 
-protected:
+public:
     virtual std::unique_ptr<TextureResource> createTextureResource(Size,
                                                                    const void* data,
                                                                    TexturePixelType,

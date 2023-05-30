@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gl/types.hpp>
+#include <mbgl/util/image.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -15,6 +16,7 @@ namespace gl {
 class CommandEncoder;
 class Context;
 class VertexArray;
+class Texture2D;
 
 class UploadPass final : public gfx::UploadPass {
 public:
@@ -55,6 +57,8 @@ public:
                                   const void* data,
                                   gfx::TexturePixelType,
                                   gfx::TextureChannelDataType) override;
+
+    std::unique_ptr<gl::Texture2D> createTexture2D(const PremultipliedImage& image);
 
 private:
     gl::CommandEncoder& commandEncoder;

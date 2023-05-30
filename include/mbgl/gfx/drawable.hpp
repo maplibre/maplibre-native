@@ -7,6 +7,8 @@
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/traits.hpp>
 
+#include <mbgl/gfx/texture2d.hpp>
+
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -30,6 +32,20 @@ using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 class Drawable {
+public:
+    struct TextureAttachment {
+        /// @brief A Texture2D instance
+        std::shared_ptr<gfx::Texture2D> texture{nullptr};
+        /// @brief A sampler location to bind the texture to
+        int32_t location{0};
+
+        TextureAttachment() = delete;
+        TextureAttachment(std::shared_ptr<gfx::Texture2D> tex, int32_t loc)
+            : texture(std::move(tex)),
+              location(loc) {}
+    };
+    using Textures = std::vector<TextureAttachment>;
+
 protected:
     Drawable(std::string name);
 
@@ -72,6 +88,14 @@ public:
     /// Width for lines
     int32_t getLineWidth() const { return lineWidth; }
     void setLineWidth(int32_t value) { lineWidth = value; }
+    
+    /// @brief Remove an attached texture from this drawable at the given sampler location
+    /// @param location Texture sampler location
+    void removeTexture(int32_t location);
+
+    /// @brief Return the textures attached to this drawable
+    /// @return Texture and sampler location pairs
+    const Textures& getTextures() const { return textures; };
 
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
@@ -141,6 +165,7 @@ protected:
     struct Impl;
     std::unique_ptr<Impl> impl;
 
+    Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
 };
 
