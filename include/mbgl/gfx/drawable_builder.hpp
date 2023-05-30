@@ -113,9 +113,6 @@ public:
     /// @param location A sampler location in the shader being used.
     void setTexture(const std::shared_ptr<gfx::Texture2D>& texture, int32_t location);
 
-    /// Set the matrix applied to new drawables
-    void setMatrix(mat4 value) { matrix = value; }
-
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
     /// Add another triangle based on the previous two points
@@ -169,7 +166,6 @@ protected:
     int32_t subLayerIndex = 0;
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;
-    mat4 matrix;
     UniqueDrawable currentDrawable;
     std::vector<UniqueDrawable> drawables;
     ColorAttrMode colorAttrMode = ColorAttrMode::PerVertex;

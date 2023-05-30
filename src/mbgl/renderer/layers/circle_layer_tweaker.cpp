@@ -1,9 +1,11 @@
 #include <mbgl/renderer/layers/circle_layer_tweaker.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/style/layers/circle_layer_properties.hpp>
+
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/style/layers/circle_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {
@@ -50,7 +52,7 @@ struct alignas(16) CircleInterpolateUBO {
 };
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
-void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
+void CircleLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderTree, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
     CirclePaintParamsUBO paintParamsUBO;
@@ -93,11 +95,12 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& 
         if (!drawable.getTileID()) {
             return;
         }
-        mat4 matrix = drawable.getMatrix();
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto tileMat = parameters.matrixForTile(tileID);
-        matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-        matrix = tileMat;
+
+        const auto& translation = evaluated.get<CircleTranslate>();
+        const auto anchor = evaluated.get<CircleTranslateAnchor>();
+        constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
 
         CircleDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
