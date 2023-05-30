@@ -20,7 +20,7 @@ public:
 public:
     ~BackgroundLayerTweaker() override = default;
 
-    void execute(LayerGroup&, const PaintParameters&) override;
+    void execute(LayerGroup&, const RenderTree&, const PaintParameters&) override;
 
 protected:
     gfx::UniformBufferPtr layerUniformBuffer = nullptr;

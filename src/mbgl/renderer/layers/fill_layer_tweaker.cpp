@@ -1,11 +1,14 @@
 #include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/style/layers/fill_layer_properties.hpp>
+
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_tile.cpp>
+#include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {
@@ -44,9 +47,9 @@ struct alignas(16) FillDrawableUBO {
 };
 static_assert(sizeof(FillDrawableUBO) == 208);
 
-void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
+void FillLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderTree, const PaintParameters& parameters) {
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
-    // const auto& evaluated = props.evaluated;
+    const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
@@ -69,14 +72,12 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         auto uniformBuffer = context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("DrawableUBO", uniformBuffer);*/
 
-        mat4 matrix = drawable.getMatrix();
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto tileMat = parameters.matrixForTile(tileID);
-        matrix::multiply(matrix, drawable.getMatrix(), tileMat);
-        matrix = tileMat;
 
-        // matrix = tile.translatedMatrix(evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(),
-        // parameters.state),
+        const auto& translation = evaluated.get<FillTranslate>();
+        const auto anchor = evaluated.get<FillTranslateAnchor>();
+        constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
 
         // from FillPatternProgram::layoutUniformValues
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
