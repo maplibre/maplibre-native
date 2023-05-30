@@ -48,11 +48,6 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    /// @brief Attach the given texture to this drawable at the given sampler location.
-    /// @param texture Texture2D instance
-    /// @param location A sampler location in the shader being used with this drawable.
-    void setTexture(std::shared_ptr<gl::Texture2D>& texture, int32_t location);
-
     /// Reset a single color attribute for all vertexes
     void resetColor(const Color&) override;
 
@@ -68,6 +63,9 @@ protected:
 private:
     void bindUniformBuffers() const;
     void unbindUniformBuffers() const;
+
+    void bindTextures() const;
+    void unbindTextures() const;
 };
 
 } // namespace gl

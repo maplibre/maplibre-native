@@ -1,5 +1,6 @@
 #pragma once
 #include <mbgl/gfx/types.hpp>
+#include <mbgl/util/image.hpp>
 
 #include <cstddef>
 #include <vector>
@@ -14,6 +15,7 @@ constexpr int32_t MaxActiveTextureUnits = 8;
 
 class Context;
 class UploadPass;
+class TextureResource;
 
 class Texture2D {
 public:
@@ -67,6 +69,16 @@ public:
 
     /// @brief Create the texture with default initialized memory.
     virtual void create() noexcept = 0;
+
+    /// @brief Upload image data to the texture resource
+    /// @param image Image data to transfer
+    /// @param uploadPass Upload pass to orchestrate upload
+    virtual void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept = 0;
+
+    /// @brief Get the underlying GL texture resource
+    /// @note: Compat with legacy textures, to be refactored
+    /// @return gfx::TextureResource
+    virtual gfx::TextureResource& getResource() = 0;
 };
 
 } // namespace gfx

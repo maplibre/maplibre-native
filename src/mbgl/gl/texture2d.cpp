@@ -4,11 +4,9 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
-// @REFACTOR_ME
 #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
-// ~@REFACTOR_ME
 
 namespace mbgl {
 namespace gl {
@@ -73,7 +71,7 @@ platform::GLuint Texture2D::getTextureID() const noexcept {
     return static_cast<gl::TextureResource&>(*textureResource).texture;
 }
 
-void Texture2D::bind(int32_t location, int32_t textureUnit) const noexcept {
+void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
     using namespace platform;
 
     assert(gfx::MaxActiveTextureUnits > textureUnit);
@@ -81,6 +79,8 @@ void Texture2D::bind(int32_t location, int32_t textureUnit) const noexcept {
 
     context.activeTextureUnit = static_cast<uint8_t>(textureUnit);
     context.texture[static_cast<size_t>(textureUnit)] = getTextureID();
+
+    boundTextureUnit = textureUnit;
 
     // Update the sampler state if it was changed after resource creation
     if (samplerStateDirty) {
@@ -108,6 +108,24 @@ void Texture2D::bind(int32_t location, int32_t textureUnit) const noexcept {
     glUniform1i(location, textureUnit);
 }
 
+void Texture2D::unbind() noexcept {
+    using namespace platform;
+
+    // Unlink the texture from the last used texture unit
+    if (boundTextureUnit != -1) {
+        context.activeTextureUnit = boundTextureUnit;
+        context.texture[static_cast<size_t>(boundTextureUnit)] = 0;
+        boundTextureUnit = -1;
+    }
+
+    // And clear the uniform value linking a sampler to the texture unit
+    // Default back to GL_TEXTURE0
+    if (boundLocation != -1) {
+        glUniform1i(boundLocation, 0);
+        boundLocation = -1;
+    }
+}
+
 void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept {
     assert(textureResource);
     assert(image.size == size);
@@ -120,8 +138,9 @@ void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadP
         return;
     }
 
-    assert(image.stride() == getPixelStride());
-    if (image.stride() != getPixelStride()) {
+    // note: images are always unsigned bytes
+    assert(image.channels == getPixelStride());
+    if (image.channels != getPixelStride()) {
         return;
     }
 

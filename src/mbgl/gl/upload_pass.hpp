@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/util/image.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -58,7 +57,7 @@ public:
                                   gfx::TexturePixelType,
                                   gfx::TextureChannelDataType) override;
 
-    std::unique_ptr<gl::Texture2D> createTexture2D(const PremultipliedImage& image);
+    std::shared_ptr<gfx::Texture2D> createTexture2D(const PremultipliedImage& image) override;
 
 private:
     gl::CommandEncoder& commandEncoder;

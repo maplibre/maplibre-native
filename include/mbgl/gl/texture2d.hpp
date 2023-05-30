@@ -8,10 +8,6 @@
 
 namespace mbgl {
 
-namespace gfx {
-class TextureResource;
-} // namespace gfx
-
 namespace gl {
 
 class Context;
@@ -19,7 +15,7 @@ class Context;
 class Texture2D : public gfx::Texture2D {
 public:
     Texture2D(gl::Context& context_);
-    virtual ~Texture2D();
+    ~Texture2D() override;
 
 public: // gfx::Texture2D
     Texture2D& setSamplerConfiguration(const SamplerState& samplerState) noexcept override;
@@ -37,6 +33,10 @@ public: // gfx::Texture2D
     void create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept override;
     void create() noexcept override;
 
+    void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept override;
+
+    gfx::TextureResource& getResource() override { return *textureResource; }
+
 public:
     /// @brief Get the OpenGL handle ID for the underlying resource
     /// @return GLuint
@@ -46,16 +46,10 @@ public:
     /// @param location Location index of texture sampler in a shader
     /// @param textureUnit Unit to bind to. A maximum of gl::MaxActiveTextureUnits
     /// texture units are available for binding.
-    void bind(int32_t location, int32_t textureUnit) const noexcept;
+    void bind(int32_t location, int32_t textureUnit) noexcept;
 
-    /// @brief Upload image data to the texture resource
-    /// @param image Image data to transfer
-    /// @param uploadPass Upload pass to orchestrate upload
-    void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept;
-
-public:
-    // @REMOVEME
-    inline gfx::TextureResource& getResource() { return *textureResource; }
+    /// @brief Unbind the texture, if it was bound
+    void unbind() noexcept;
 
 private:
     gl::Context& context;
@@ -67,6 +61,9 @@ private:
 
     Size size{0, 0};
     mutable bool samplerStateDirty{false};
+
+    int32_t boundTextureUnit{-1};
+    int32_t boundLocation{-1};
 };
 
 } // namespace gl

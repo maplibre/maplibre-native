@@ -15,6 +15,7 @@ template <class T>
 class Actor;
 
 namespace gfx {
+class Texture2D;
 class UploadPass;
 } // namespace gfx
 
@@ -29,7 +30,8 @@ public:
     std::optional<ImagePosition> addPattern(const style::Image::Impl&);
     void removePattern(const std::string&);
 
-    gfx::TextureBinding textureBinding() const;
+    gfx::TextureBinding textureBinding() const; // @TODO: Migrate
+    const std::shared_ptr<gfx::Texture2D>& texture() const;
 
     void upload(gfx::UploadPass&);
     Size getPixelSize() const;
@@ -46,7 +48,7 @@ private:
     mapbox::ShelfPack shelfPack;
     std::unordered_map<std::string, Pattern> patterns;
     PremultipliedImage atlasImage;
-    std::optional<gfx::Texture> atlasTexture;
+    std::shared_ptr<gfx::Texture2D> atlasTexture2D{nullptr};
     bool dirty = true;
 };
 

@@ -49,6 +49,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     context.setCullFaceMode(gfx::CullFaceMode::disabled());
 
     bindUniformBuffers();
+    bindTextures();
 
     auto& glContext = static_cast<gl::Context&>(parameters.context);
     const auto saveVertexArray = glContext.bindVertexArray.getCurrentValue();
@@ -64,6 +65,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
 
     glContext.bindVertexArray = saveVertexArray;
 
+    unbindTextures();
     unbindUniformBuffers();
 }
 
@@ -93,16 +95,6 @@ const gfx::UniformBufferArray& DrawableGL::getUniformBuffers() const {
 
 gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
-}
-
-void DrawableGL::setTexture(std::shared_ptr<gl::Texture2D>& texture, int32_t location) {
-    for (auto& tex : textures) {
-        if (tex.location == location) {
-            tex.texture = texture;
-            return;
-        }
-    }
-    textures.emplace_back(std::static_pointer_cast<gfx::Texture2D>(texture), location);
 }
 
 void DrawableGL::resetColor(const Color& newColor) {
@@ -180,6 +172,19 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
 
             glSeg.setVertexArray(std::move(vertexArray));
         };
+    }
+}
+
+void DrawableGL::bindTextures() const {
+    int32_t unit = 0;
+    for (const auto& tex : textures) {
+        std::static_pointer_cast<gl::Texture2D>(tex.texture)->bind(tex.location, unit++);
+    }
+}
+
+void DrawableGL::unbindTextures() const {
+    for (const auto& tex : textures) {
+        std::static_pointer_cast<gl::Texture2D>(tex.texture)->unbind();
     }
 }
 
