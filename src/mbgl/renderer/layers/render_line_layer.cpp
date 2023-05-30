@@ -341,7 +341,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
         return;
     }
-    
+
     // Set up a layer group
     if (!tileLayerGroup) {
         tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
@@ -351,12 +351,14 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         tileLayerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
-    
+
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         // Has this tile dropped out of the cover set?
-        if (const auto it = std::find_if(renderTiles->begin(), renderTiles->end(),
-                                         [&drawable] (const auto& renderTile)
-                                         { return drawable->getTileID() == renderTile.get().getOverscaledTileID(); } );
+        if (const auto it = std::find_if(renderTiles->begin(),
+                                         renderTiles->end(),
+                                         [&drawable](const auto& renderTile) {
+                                             return drawable->getTileID() == renderTile.get().getOverscaledTileID();
+                                         });
             it == renderTiles->end()) {
             // remove it
             drawable.reset();
@@ -372,7 +374,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         if (tileDrawable) {
             continue;
         }
-        
+
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData) {
             removeTile(renderPass, tileID);
@@ -380,7 +382,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
-        //const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
+        // const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
         /*if (!evaluated.get<LineDasharray>().from.empty()) {
             // TODO: dash array line: LineSDFShader
@@ -388,7 +390,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // TODO: pattern line: LinePatternShader
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             // TODO: gradient line: LineGradientShader
-        } else */ {
+        } else */
+        {
             // simple line
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("line")};
             if (!lineShader) {
@@ -409,15 +412,17 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             const auto buildVertices = [&rawVerts, &bucket]() {
                 if (rawVerts.size() != bucket.vertices.vector().size()) {
                     rawVerts.resize(bucket.vertices.vector().size());
-                    std::transform(bucket.vertices.vector().begin(), bucket.vertices.vector().end(), rawVerts.begin(),
-                                [](const auto& x) { return x.a1; });
+                    std::transform(bucket.vertices.vector().begin(),
+                                   bucket.vertices.vector().end(),
+                                   rawVerts.begin(),
+                                   [](const auto& x) { return x.a1; });
                 }
             };
-            
+
             // vertices
             buildVertices();
             builder->addVertices(rawVerts, 0, rawVerts.size());
-            
+
             // attributes
             gfx::VertexAttributeArray vertexAttrs;
             if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
@@ -429,17 +434,19 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             builder->setVertexAttributes(std::move(vertexAttrs));
 
             // segments
-            builder->setSegments(gfx::Triangles(), bucket.triangles.vector(), reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
-//                using namespace std::string_literals;
-//                Log::Warning(Event::General,
-//                             "SEG: "s + util::toString(tileID) +
-//                             " vertex offset: " + std::to_string(seg.vertexOffset) +
-//                             " vertex len: " + std::to_string(seg.vertexLength) +
-//                             " index offset: " + std::to_string(seg.indexOffset) +
-//                             " index len: " + std::to_string(seg.indexLength) +
-//                             " max(index): " + std::to_string(builder->maxIndex())
-//                             );
-                
+            builder->setSegments(gfx::Triangles(),
+                                 bucket.triangles.vector(),
+                                 reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
+            //                using namespace std::string_literals;
+            //                Log::Warning(Event::General,
+            //                             "SEG: "s + util::toString(tileID) +
+            //                             " vertex offset: " + std::to_string(seg.vertexOffset) +
+            //                             " vertex len: " + std::to_string(seg.vertexLength) +
+            //                             " index offset: " + std::to_string(seg.indexOffset) +
+            //                             " index len: " + std::to_string(seg.indexLength) +
+            //                             " max(index): " + std::to_string(builder->maxIndex())
+            //                             );
+
             // finish
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {

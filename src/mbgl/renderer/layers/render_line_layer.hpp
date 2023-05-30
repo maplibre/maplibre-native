@@ -63,7 +63,7 @@ private:
     std::shared_ptr<LineGradientProgram> lineGradientProgram;
     std::shared_ptr<LineSDFProgram> lineSDFProgram;
     std::shared_ptr<LinePatternProgram> linePatternProgram;
-    
+
     gfx::ShaderProgramBasePtr lineShader;
     gfx::ShaderProgramBasePtr lineGradientShader;
     gfx::ShaderProgramBasePtr lineSDFShader;
