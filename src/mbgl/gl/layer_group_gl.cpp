@@ -18,7 +18,7 @@ TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapac
 void TileLayerGroupGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
     observeDrawables([&](gfx::Drawable& drawable) {
         auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
-        
+
 #if !defined(NDEBUG)
         std::string label;
         if (const auto& tileID = drawable.getTileID()) {
