@@ -460,8 +460,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     fillBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                                  : gfx::DepthMaskType::ReadOnly);
                     fillBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                    fillBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                    fillBuilder->setLayerIndex(layerIndex);
                 }
                 if (doOutline && !outlineBuilder && outlineShader) {
                     outlineBuilder = context.createDrawableBuilder("fill-outline");
@@ -470,27 +468,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlineBuilder->setLineWidth(2.0f);
                     outlineBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlineBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                    outlineBuilder->setLayerIndex(layerIndex);
                     outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                 }
-
-                //            evaluated.get<FillTranslate>(),
-                //            evaluated.get<FillTranslateAnchor>(),
-                //            parameters.stencilModeForClipping(tile.id),
-                //            parameters.colorModeForRenderPass(),
-                //            gfx::CullFaceMode::disabled(),
-                //
-
-                //            if (evaluated.get<FillAntialias>() && parameters.pass == RenderPass::Translucent) {
-                //                draw(*fillOutlineProgram,
-                //                     gfx::Lines{2.0f},
-                //                     parameters.depthModeForSublayer(unevaluated.get<FillOutlineColor>().isUndefined()
-                //                     ? 2 : 0,
-                //                                                     gfx::DepthMaskType::ReadOnly),
-                //                     *bucket.lineIndexBuffer,
-                //                     bucket.lineSegments,
-                //                     FillOutlineProgram::TextureBindings{});
-                //            }
 
                 if (fillBuilder) {
                     fillBuilder->setRenderPass(renderPass);
@@ -539,7 +518,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     patternBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
                     patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                    patternBuilder->setLayerIndex(layerIndex);
                     patternBuilder->setSubLayerIndex(1);
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
@@ -549,7 +527,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setLineWidth(2.0f);
                     outlinePatternBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlinePatternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                    outlinePatternBuilder->setLayerIndex(layerIndex);
                     outlinePatternBuilder->setSubLayerIndex(2);
                 }
 

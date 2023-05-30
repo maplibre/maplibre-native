@@ -426,7 +426,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         circleBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                        : gfx::DepthMaskType::ReadOnly);
         circleBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        circleBuilder->setLayerIndex(layerIndex);
 
         circleBuilder->setRenderPass(renderPass);
         circleBuilder->setVertexAttributes(circleVertexAttrs);

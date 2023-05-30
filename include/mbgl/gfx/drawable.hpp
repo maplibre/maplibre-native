@@ -109,10 +109,6 @@ public:
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
-    /// The layer index determines the drawing order
-    int32_t getLayerIndex() const { return layerIndex; }
-    void setLayerIndex(int32_t value) { layerIndex = value; }
-
     /// Determines depth range within the layer
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
@@ -162,7 +158,6 @@ protected:
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
-    int32_t layerIndex = -1;
     int32_t subLayerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
 
@@ -176,24 +171,23 @@ protected:
 using DrawablePtr = std::shared_ptr<Drawable>;
 using UniqueDrawable = std::unique_ptr<Drawable>;
 
-/// Comparator for sorting drawable pointers primarily by layer index
-struct DrawablePtrLessByLayer {
-    DrawablePtrLessByLayer(bool descending)
+/// Comparator for sorting drawable pointers primarily by draw priority
+struct DrawableLessByPriority {
+    DrawableLessByPriority(bool descending)
         : desc(descending) {}
+    bool operator()(const Drawable& left, const Drawable& right) const {
+        const auto& a = desc ? right : left;
+        const auto& b = desc ? left : right;
+        if (a.getDrawPriority() != b.getDrawPriority()) {
+            return a.getDrawPriority() < b.getDrawPriority();
+        }
+        return a.getId() < b.getId();
+    }
     bool operator()(const DrawablePtr& left, const DrawablePtr& right) const {
         const auto& a = desc ? right : left;
         const auto& b = desc ? left : right;
-        if (!a || !b) {
-            // nulls are less than non-nulls
-            return (!a && b);
-        }
-        if (a->getLayerIndex() != b->getLayerIndex()) {
-            return a->getLayerIndex() < b->getLayerIndex();
-        }
-        if (a->getDrawPriority() != b->getDrawPriority()) {
-            return a->getDrawPriority() < b->getDrawPriority();
-        }
-        return a->getId() < b->getId();
+        // nulls are less than non-nulls
+        return (a && b) ? operator()(*a, *b) : (!a && b);
     }
 
 private:
