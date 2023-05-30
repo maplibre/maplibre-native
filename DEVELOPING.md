@@ -43,7 +43,7 @@ cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILE
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
 
-Also, if your system support OpenGL ES 3+, you can now execute the GLFW demo with:
+Also, if your system supports OpenGL ES 3+, you can now execute the GLFW demo with:
 
 ```
 MLN_API_KEY=add_maptiler_api_key_here ./build/platform/glfw/mbgl-glfw
