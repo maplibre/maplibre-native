@@ -309,7 +309,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setShader(shader);
                 builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setLayerIndex(layerIndex);
             }
 
             // Tile coordinates are fixed...
