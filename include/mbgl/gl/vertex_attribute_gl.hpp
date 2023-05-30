@@ -23,7 +23,7 @@ private:
           glType(other.glType) {}
 
 public:
-    virtual ~VertexAttributeGL() = default;
+    ~VertexAttributeGL() override = default;
 
 public:
     platform::GLenum getGLType() const { return glType; }
