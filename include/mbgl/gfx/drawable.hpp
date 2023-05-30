@@ -23,6 +23,7 @@ namespace gfx {
 class CullFaceMode;
 enum class DepthMaskType : bool;
 class DrawableTweaker;
+class DrawMode;
 class ShaderProgramBase;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using DrawPriority = int64_t;
@@ -34,6 +35,9 @@ protected:
 
 public:
     virtual ~Drawable();
+
+    struct DrawSegment;
+    using UniqueDrawSegment = std::unique_ptr<DrawSegment>;
 
     const util::SimpleIdentity& getId() const { return uniqueID; }
 
@@ -100,16 +104,6 @@ public:
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
-
-    virtual std::vector<std::uint16_t>& getLineIndexData() const = 0;
-    virtual std::vector<std::uint16_t>& getTriangleIndexData() const = 0;
-
-    /// Attach a tweaker to be run on this drawable for each frame
-    // void addTweaker(DrawableTweakerPtr tweaker) { tweakers.emplace_back(std::move(tweaker)); }
-    // template <typename TIter>
-    // void addTweakers(TIter beg, TIter end) {
-    //     tweakers.insert(tweakers.end(), beg, end);
-    // }
 
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }

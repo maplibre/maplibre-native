@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
+#include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/uniform.hpp>
@@ -10,6 +10,7 @@
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
@@ -27,26 +28,14 @@ public:
     Impl() = default;
     ~Impl() = default;
 
-    void draw(const PaintParameters& parameters, int32_t lineWidth) const {
-        auto& glContext = static_cast<gl::Context&>(parameters.context);
-        if (!triangleIndexes.empty()) {
-            glContext.draw(gfx::Triangles(), lineIndexes.size(), triangleIndexes.size());
-        }
-        if (!lineIndexes.empty()) {
-            glContext.draw(gfx::Lines(static_cast<float>(lineWidth)), 0, lineIndexes.size());
-        }
-    }
+    std::vector<UniqueDrawSegment> segments;
 
-    // ShaderID shaderId;
-    // RenderbufferID renderTarget;
     std::vector<TextureID> textures;
 
-    std::vector<std::uint16_t> lineIndexes;
-    std::vector<std::uint16_t> triangleIndexes;
+    std::vector<std::uint16_t> indexes;
 
     VertexAttributeArrayGL vertexAttributes;
 
-    VertexArray vertexArray = {{nullptr, false}};
     gfx::IndexBuffer indexBuffer = {0, nullptr};
     gfx::UniqueVertexBufferResource attributeBuffer;
 
@@ -56,11 +45,19 @@ public:
     gfx::StencilMode stencilMode;
     gfx::ColorMode colorMode;
     gfx::CullFaceMode cullFaceMode;
-    // gfx::UniformValues<typename Program<>::UniformList> uniformValues;
-    // Segment<Program<>::AttributeList> segment;
-    // gfx::AttributeBindings<Program<>::AttributeList> attributeBindings;
-    // gfx::TextureBindings<Program<>::TextureList> textureBindings;
     GLfloat pointSize = 0.0f;
+};
+
+struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
+    DrawSegmentGL(gfx::DrawMode mode_, Segment<void>&& segment_, VertexArray&& vertexArray_)
+        : gfx::Drawable::DrawSegment(mode_, std::move(segment_)),
+          vertexArray(std::move(vertexArray_)) {}
+
+    const VertexArray& getVertexArray() const { return vertexArray; }
+    void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
+
+protected:
+    VertexArray vertexArray;
 };
 
 } // namespace gl

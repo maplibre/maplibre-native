@@ -101,9 +101,6 @@ public:
     virtual void clearStencilBuffer(int32_t) = 0;
 
 public:
-    /// Activate the shader, vertex attributes, etc., specified by the drawable
-    virtual bool setupDraw(const PaintParameters&, const gfx::Drawable&) = 0;
-
     /// Create a new drawable builder
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
 

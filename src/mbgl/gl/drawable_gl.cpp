@@ -1,7 +1,11 @@
 #include <mbgl/gl/drawable_gl.hpp>
-#include <mbgl/gl/drawable_gl_impl.hpp>
-#include <mbgl/gl/vertex_buffer_resource.hpp>
 
+#include <mbgl/gl/drawable_gl_impl.hpp>
+#include <mbgl/gl/upload_pass.hpp>
+#include <mbgl/gl/vertex_array.hpp>
+#include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mbgl/gl/vertex_buffer_resource.hpp>
+#include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 
 namespace mbgl {
@@ -12,43 +16,60 @@ DrawableGL::DrawableGL(std::string name_)
       impl(std::make_unique<Impl>()) {}
 
 DrawableGL::~DrawableGL() {
-    impl->vertexArray = {{nullptr, false}};
     impl->indexBuffer = {0, nullptr};
     impl->attributeBuffer.reset();
 }
 
 void DrawableGL::draw(const PaintParameters& parameters) const {
+    auto& context = static_cast<gl::Context&>(parameters.context);
+
+    if (const auto& shader = getShader()) {
+        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
+        if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
+            context.program = shaderGL.getGLProgramID();
+        }
+    } else {
+        context.program = value::Program::Default;
+    }
+
+    context.setDepthMode(parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+
+    // force disable depth test for debugging
+    // setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
+
+    if (auto tileID = getTileID()) {
+        // Doesn't work until the clipping masks are generated
+        // parameters.stencilModeForClipping(tileID->toUnwrapped());
+        context.setStencilMode(gfx::StencilMode::disabled());
+    } else {
+        context.setStencilMode(gfx::StencilMode::disabled());
+    }
+
+    context.setColorMode(parameters.colorModeForRenderPass());
+    context.setCullFaceMode(gfx::CullFaceMode::disabled());
+
     bindUniformBuffers();
-    impl->draw(parameters, lineWidth);
+
+    auto& glContext = static_cast<gl::Context&>(parameters.context);
+    const auto saveVertexArray = glContext.bindVertexArray.getCurrentValue();
+
+    for (const auto& seg : impl->segments) {
+        const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
+        const auto& mlSeg = glSeg.getSegment();
+        if (glSeg.getVertexArray().isValid()) {
+            glContext.bindVertexArray = glSeg.getVertexArray().getID();
+        }
+        glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
+    }
+
+    glContext.bindVertexArray = saveVertexArray;
+
     unbindUniformBuffers();
 }
 
-void DrawableGL::setLineIndexData(std::vector<std::uint16_t> indexes) {
-    impl->lineIndexes = std::move(indexes);
-}
-
-void DrawableGL::setTriangleIndexData(std::vector<std::uint16_t> indexes) {
-    impl->triangleIndexes = std::move(indexes);
-}
-
-std::vector<std::uint16_t>& DrawableGL::getLineIndexData() const {
-    return impl->lineIndexes;
-}
-
-std::vector<std::uint16_t>& DrawableGL::getTriangleIndexData() const {
-    return impl->triangleIndexes;
-}
-
-const gl::VertexArray& DrawableGL::getVertexArray() const {
-    return impl->vertexArray;
-}
-
-const gfx::IndexBuffer& DrawableGL::getIndexBuffer() const {
-    return impl->indexBuffer;
-}
-
-const gfx::UniqueVertexBufferResource& DrawableGL::getBuffer() const {
-    return impl->attributeBuffer;
+void DrawableGL::setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments) {
+    impl->indexes = std::move(indexes);
+    impl->segments = std::move(segments);
 }
 
 const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
@@ -64,14 +85,6 @@ void DrawableGL::setVertexAttributes(const gfx::VertexAttributeArray& value) {
 }
 void DrawableGL::setVertexAttributes(gfx::VertexAttributeArray&& value) {
     impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
-}
-
-void DrawableGL::setVertexArray(gl::VertexArray&& vertexArray_,
-                                gfx::UniqueVertexBufferResource&& attributeBuffer_,
-                                gfx::IndexBuffer&& indexBuffer_) {
-    impl->vertexArray = std::move(vertexArray_);
-    impl->attributeBuffer = std::move(attributeBuffer_);
-    impl->indexBuffer = std::move(indexBuffer_);
 }
 
 const gfx::UniformBufferArray& DrawableGL::getUniformBuffers() const {
@@ -108,6 +121,55 @@ void DrawableGL::unbindUniformBuffers() const {
         for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
             element.second->unbindBuffer();
         }
+    }
+}
+
+void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
+    if (!shader) {
+        return;
+    }
+
+    const bool build = impl->vertexAttributes.isDirty() ||
+                       std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
+                           return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
+                       });
+
+    if (build) {
+        auto& glContext = static_cast<gl::Context&>(context);
+        constexpr auto usage = gfx::BufferUsageType::StaticDraw;
+
+        const auto indexBytes = impl->indexes.size() * sizeof(decltype(impl->indexes)::value_type);
+        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes.data(), indexBytes, usage);
+        auto indexBuffer = gfx::IndexBuffer{impl->indexes.size(), std::move(indexBufferResource)};
+
+        // Apply drawable values to shader defaults
+        const auto& defaults = shader->getVertexAttributes();
+        const auto& overrides = impl->vertexAttributes;
+        const auto vertexCount = overrides.getMaxCount();
+
+        std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
+        auto bindings = uploadPass.buildAttributeBindings(vertexCount, defaults, overrides, usage, vertexBuffer);
+
+        impl->attributeBuffer = std::move(vertexBuffer);
+        impl->indexBuffer = std::move(indexBuffer);
+
+        // Create a VAO for each group of vertexes described by a segment
+        for (const auto& seg : impl->segments) {
+            auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
+            const auto& mlSeg = glSeg.getSegment();
+
+            for (auto& binding : bindings) {
+                binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+            }
+
+            auto vertexArray = glContext.createVertexArray();
+
+            vertexArray.bind(glContext, impl->indexBuffer, bindings);
+
+            assert(vertexArray.isValid());
+
+            glSeg.setVertexArray(std::move(vertexArray));
+        };
     }
 }
 
