@@ -9,7 +9,7 @@
 namespace mbgl {
 
 LayerTweaker::LayerTweaker(Immutable<style::LayerProperties> properties)
-    : evaluatedProperties(std::move(properties)){}
+    : evaluatedProperties(std::move(properties)) {}
 
 mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  const RenderTree& renderTree,
@@ -27,4 +27,4 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, state, inViewportPixelUnits);
 }
 
-}
+} // namespace mbgl
