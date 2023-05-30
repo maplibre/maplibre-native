@@ -41,7 +41,7 @@ const UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
-        draw->setLineWidth(lineWidth);
+        draw->setLineWidth(static_cast<int32_t>(lineWidth));
         draw->setRenderPass(renderPass);
         draw->setDrawPriority(drawPriority);
         draw->setLayerIndex(layerIndex);
