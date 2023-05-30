@@ -44,7 +44,6 @@ void DrawableBuilder::flush() {
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
         draw->setRenderPass(renderPass);
         draw->setDrawPriority(drawPriority);
-        draw->setLayerIndex(layerIndex);
         draw->setSubLayerIndex(subLayerIndex);
         draw->setDepthType(depthType);
         draw->setCullFaceMode(impl->cullFaceMode);
