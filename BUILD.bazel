@@ -86,6 +86,9 @@ config_setting(
 )
 
 exports_files(
-    ["LICENSE.md"],
+    [
+        "LICENSE.md",
+        "scripts/style-spec-reference/v8.json",
+    ],
     visibility = ["//visibility:public"],
 )
