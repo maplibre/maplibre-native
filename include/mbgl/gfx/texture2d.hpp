@@ -50,6 +50,10 @@ public:
     /// @return this
     virtual Texture2D& setSize(Size size_) noexcept = 0;
 
+    /// @brief Get the size of the texture
+    /// @return Size of the texture
+    virtual Size getSize() const noexcept = 0;
+
     /// @brief Determine the size of the buffer backing this texture
     /// as configured, in bytes.
     /// @return Size in bytes
@@ -65,7 +69,11 @@ public:
 
     /// @brief Create the texture using the provided buffer.
     /// @param pixelData Buffer of bytes to initialize the texture with
-    virtual void create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept = 0;
+    virtual void create(const void* pixelData, gfx::UploadPass&) noexcept = 0;
+
+    /// @brief Create the texture using the provided buffer.
+    /// @param pixelData Buffer of bytes to initialize the texture with
+    virtual void create(const std::vector<uint8_t>& pixelData, gfx::UploadPass&) noexcept = 0;
 
     /// @brief Create the texture with default initialized memory.
     virtual void create() noexcept = 0;

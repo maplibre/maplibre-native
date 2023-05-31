@@ -10,7 +10,9 @@
 namespace mbgl {
 
 namespace gfx {
+class Texture2D;
 class UploadPass;
+using Texture2DPtr = std::shared_ptr<gfx::Texture2D>;
 } // namespace gfx
 
 class Bucket;
@@ -19,15 +21,15 @@ class SourcePrepareParameters;
 
 class TileAtlasTextures {
 public:
-    std::optional<gfx::Texture> glyph;
-    std::optional<gfx::Texture> icon;
+    gfx::Texture2DPtr glyph;
+    gfx::Texture2DPtr icon;
 };
 
 class TileRenderData {
 public:
     virtual ~TileRenderData();
-    const gfx::Texture& getGlyphAtlasTexture() const;
-    const gfx::Texture& getIconAtlasTexture() const;
+    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
+    const gfx::Texture2DPtr& getIconAtlasTexture() const;
     // To be implemented for concrete tile types.
     virtual std::optional<ImagePosition> getPattern(const std::string&) const;
     virtual const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;

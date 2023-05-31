@@ -49,6 +49,13 @@ public:
                                                                 gfx::TextureChannelDataType) override;
     void updateTextureResource(
         gfx::TextureResource&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
+    
+    void updateTexture2D(gfx::Texture2D&,
+                         Size,
+                         const void* data,
+                         gfx::TexturePixelType,
+                         gfx::TextureChannelDataType) override;
+
     void updateTextureResourceSub(gfx::TextureResource&,
                                   uint16_t xOffset,
                                   uint16_t yOffset,
@@ -57,7 +64,12 @@ public:
                                   gfx::TexturePixelType,
                                   gfx::TextureChannelDataType) override;
 
-    std::shared_ptr<gfx::Texture2D> createTexture2D(const PremultipliedImage& image) override;
+    gfx::Texture2DPtr createTexture2D(const PremultipliedImage& image) override;
+
+    gfx::Texture2DPtr createTexture2D(Size,
+                                      const void* data,
+                                      gfx::TexturePixelType,
+                                      gfx::TextureChannelDataType) override;
 
 private:
     gl::CommandEncoder& commandEncoder;

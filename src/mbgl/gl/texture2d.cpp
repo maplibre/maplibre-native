@@ -57,9 +57,13 @@ size_t Texture2D::numChannels() const noexcept {
     }
 }
 
-void Texture2D::create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept {
+void Texture2D::create(const void* pixelData, gfx::UploadPass& uploadPass) noexcept {
     assert(!textureResource);
-    textureResource = uploadPass.createTextureResource(size, pixelData.data(), pixelFormat, channelType);
+    textureResource = uploadPass.createTextureResource(size, pixelData, pixelFormat, channelType);
+}
+
+void Texture2D::create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept {
+    return create(pixelData.data(), uploadPass);
 }
 
 void Texture2D::create() noexcept {
