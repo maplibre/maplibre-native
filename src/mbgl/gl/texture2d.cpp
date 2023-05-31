@@ -133,14 +133,14 @@ void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadP
         return;
     }
 
-    assert(image.channels == numChannels());
-    if (image.channels != numChannels()) {
+    assert(PremultipliedImage::channels == numChannels());
+    if (PremultipliedImage::channels != numChannels()) {
         return;
     }
 
     // note: images are always unsigned bytes
-    assert(image.channels == getPixelStride());
-    if (image.channels != getPixelStride()) {
+    assert(PremultipliedImage::channels == getPixelStride());
+    if (PremultipliedImage::channels != getPixelStride()) {
         return;
     }
 
