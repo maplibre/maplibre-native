@@ -7,6 +7,13 @@
         "uses_ubos": true
     },
     {
+        "name": "BackgroundPatternShader",
+        "header": "drawable_background_pattern",
+        "glsl_vert": "drawable.background_pattern.vertex.glsl",
+        "glsl_frag": "drawable.background_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "CircleShader",
         "header": "drawable_circle",
         "glsl_vert": "drawable.circle.vertex.glsl",

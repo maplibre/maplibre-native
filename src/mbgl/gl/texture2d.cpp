@@ -79,7 +79,7 @@ void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
     using namespace platform;
 
     assert(gfx::MaxActiveTextureUnits > textureUnit);
-    if (gfx::MaxActiveTextureUnits > textureUnit) return;
+    if (gfx::MaxActiveTextureUnits <= textureUnit) return;
 
     context.activeTextureUnit = static_cast<uint8_t>(textureUnit);
     context.texture[static_cast<size_t>(textureUnit)] = getTextureID();
@@ -130,7 +130,7 @@ void Texture2D::unbind() noexcept {
     }
 }
 
-void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept {
+void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) noexcept {
     assert(textureResource);
     assert(image.size == size);
     if (image.size != size) {

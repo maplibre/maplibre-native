@@ -30,7 +30,7 @@ const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const std::string&
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::addOrReplace(
-    std::string name, const std::shared_ptr<UniformBuffer>& uniformBuffer) {
+    std::string name, std::shared_ptr<UniformBuffer> uniformBuffer) {
     const auto result = uniformBufferMap.insert(std::make_pair(std::move(name), std::shared_ptr<UniformBuffer>()));
     result.first->second = std::move(uniformBuffer);
     return result.first->second;

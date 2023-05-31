@@ -36,7 +36,7 @@ public: // gfx::Texture2D
     void create(const std::vector<uint8_t>& pixelData, gfx::UploadPass&) noexcept override;
     void create() noexcept override;
 
-    void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept override;
+    void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) noexcept override;
 
     gfx::TextureResource& getResource() override { assert(textureResource); return *textureResource; }
 

@@ -52,7 +52,7 @@ public:
 
     /// Add a new uniform buffer element or replace the existing one.
     const std::shared_ptr<UniformBuffer>& addOrReplace(std::string name,
-                                                       const std::shared_ptr<UniformBuffer>& uniformBuffer);
+                                                       std::shared_ptr<UniformBuffer> uniformBuffer);
 
     UniformBufferArray& operator=(UniformBufferArray&&);
     UniformBufferArray& operator=(const UniformBufferArray&);

@@ -81,7 +81,7 @@ public:
     /// @brief Upload image data to the texture resource
     /// @param image Image data to transfer
     /// @param uploadPass Upload pass to orchestrate upload
-    virtual void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept = 0;
+    virtual void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) noexcept = 0;
 
     /// @brief Get the underlying GL texture resource
     /// @note: Compat with legacy textures, to be refactored
