@@ -1,6 +1,6 @@
 #include <mbgl/gl/drawable_gl.hpp>
-
 #include <mbgl/gl/drawable_gl_impl.hpp>
+#include <mbgl/gl/texture2d.hpp>
 #include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
@@ -23,7 +23,7 @@ DrawableGL::~DrawableGL() {
 void DrawableGL::draw(const PaintParameters& parameters) const {
     auto& context = static_cast<gl::Context&>(parameters.context);
 
-    if (const auto& shader = getShader()) {
+    if (shader) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
         if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
             context.program = shaderGL.getGLProgramID();
@@ -37,7 +37,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     // force disable depth test for debugging
     // setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    if (auto tileID = getTileID()) {
+    if (tileID) {
         // Doesn't work until the clipping masks are generated
         // parameters.stencilModeForClipping(tileID->toUnwrapped());
         context.setStencilMode(gfx::StencilMode::disabled());
@@ -49,6 +49,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     context.setCullFaceMode(gfx::CullFaceMode::disabled());
 
     bindUniformBuffers();
+    bindTextures();
 
     auto& glContext = static_cast<gl::Context&>(parameters.context);
     const auto saveVertexArray = glContext.bindVertexArray.getCurrentValue();
@@ -64,6 +65,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
 
     glContext.bindVertexArray = saveVertexArray;
 
+    unbindTextures();
     unbindUniformBuffers();
 }
 
@@ -170,6 +172,19 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
 
             glSeg.setVertexArray(std::move(vertexArray));
         };
+    }
+}
+
+void DrawableGL::bindTextures() const {
+    int32_t unit = 0;
+    for (const auto& tex : textures) {
+        std::static_pointer_cast<gl::Texture2D>(tex.texture)->bind(tex.location, unit++);
+    }
+}
+
+void DrawableGL::unbindTextures() const {
+    for (const auto& tex : textures) {
+        std::static_pointer_cast<gl::Texture2D>(tex.texture)->unbind();
     }
 }
 

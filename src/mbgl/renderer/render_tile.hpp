@@ -62,6 +62,13 @@ public:
     void prepare(const SourcePrepareParameters&);
     void finishRender(PaintParameters&) const;
 
+    static mat4 translateVtxMatrix(const UnwrappedTileID& id,
+                                   const mat4& tileMatrix,
+                                   const std::array<float, 2>& translation,
+                                   style::TranslateAnchorType anchor,
+                                   const TransformState& state,
+                                   bool inViewportPixelUnits);
+
     mat4 translateVtxMatrix(const mat4& tileMatrix,
                             const std::array<float, 2>& translation,
                             style::TranslateAnchorType anchor,

@@ -309,14 +309,10 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setShader(shader);
                 builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setLayerIndex(layerIndex);
             }
 
             // Tile coordinates are fixed...
             builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
-
-            // ... they're placed with the matrix in the uniforms, which changes with the view
-            builder->setMatrix(/*parameters.matrixForTile(tileID.toUnwrapped())*/ matrix::identity4());
 
             builder->flush();
 

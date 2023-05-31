@@ -7,6 +7,7 @@
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture_resource.hpp>
+#include <mbgl/gl/texture2d.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <algorithm>
@@ -188,7 +189,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         pad(allData, align, padding);
 
         // The vertex stride is the sum of the attribute strides
-        vertexStride += stride;
+        vertexStride += static_cast<uint32_t>(stride);
     };
     defaults.resolve(overrides, resolveAttr);
 
@@ -207,6 +208,16 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     }
 
     return {};
+}
+
+std::shared_ptr<gfx::Texture2D> UploadPass::createTexture2D(const PremultipliedImage& image) {
+    auto tex = std::make_shared<gl::Texture2D>(commandEncoder.context);
+    tex->setSize(image.size)
+        .setFormat(image.channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha,
+                   gfx::TextureChannelDataType::UnsignedByte)
+        .create();
+    tex->upload(image, *this);
+    return tex;
 }
 
 void UploadPass::pushDebugGroup(const char* name) {

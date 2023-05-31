@@ -60,10 +60,6 @@ public:
     void setDrawPriority(DrawPriority);
 
     /// The layer index assigned to generated drawables
-    int32_t getLayerIndex() const { return layerIndex; }
-    void setLayerIndex(int32_t value) { layerIndex = value; }
-
-    /// The layer index assigned to generated drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
@@ -85,8 +81,8 @@ public:
     void setColorAttrMode(ColorAttrMode mode) { colorAttrMode = mode; }
 
     /// Width for lines
-    int32_t getLineWidth() const { return lineWidth; }
-    void setLineWidth(int32_t value) { lineWidth = value; }
+    float getLineWidth() const { return lineWidth; }
+    void setLineWidth(float value) { lineWidth = value; }
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
@@ -108,8 +104,10 @@ public:
     void setVertexAttrName(std::string value) { vertexAttrName = std::move(value); }
     void setColorAttrName(std::string value) { colorAttrName = std::move(value); }
 
-    /// Set the matrix applied to new drawables
-    void setMatrix(mat4 value) { matrix = value; }
+    /// @brief Attach the given texture at the given sampler location.
+    /// @param texture Texture2D instance
+    /// @param location A sampler location in the shader being used.
+    void setTexture(const std::shared_ptr<gfx::Texture2D>& texture, int32_t location);
 
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
@@ -158,17 +156,16 @@ protected:
     std::string vertexAttrName;
     std::string colorAttrName;
     mbgl::RenderPass renderPass;
-    int32_t lineWidth = 1;
+    float lineWidth = 1.0f;
     DrawPriority drawPriority = 0;
-    int32_t layerIndex = -1;
     int32_t subLayerIndex = 0;
     DepthMaskType depthType = DepthMaskType::ReadOnly;
     gfx::ShaderProgramBasePtr shader;
-    mat4 matrix;
     UniqueDrawable currentDrawable;
     std::vector<UniqueDrawable> drawables;
     ColorAttrMode colorAttrMode = ColorAttrMode::PerVertex;
     VertexAttributeArray vertexAttrs;
+    gfx::Drawable::Textures textures;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

@@ -6,6 +6,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/gfx/texture2d.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -30,6 +31,20 @@ using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 class Drawable {
+public:
+    struct TextureAttachment {
+        /// @brief A Texture2D instance
+        std::shared_ptr<gfx::Texture2D> texture{nullptr};
+        /// @brief A sampler location to bind the texture to
+        int32_t location{0};
+
+        TextureAttachment() = delete;
+        TextureAttachment(std::shared_ptr<gfx::Texture2D> tex, int32_t loc)
+            : texture(std::move(tex)),
+              location(loc) {}
+    };
+    using Textures = std::vector<TextureAttachment>;
+
 protected:
     Drawable(std::string name);
 
@@ -73,13 +88,26 @@ public:
     int32_t getLineWidth() const { return lineWidth; }
     void setLineWidth(int32_t value) { lineWidth = value; }
 
+    /// @brief Remove an attached texture from this drawable at the given sampler location
+    /// @param location Texture sampler location
+    void removeTexture(int32_t location);
+
+    /// @brief Return the textures attached to this drawable
+    /// @return Texture and sampler location pairs
+    const Textures& getTextures() const { return textures; };
+
+    /// @brief Set the collection of textures bound to this drawable
+    /// @param textures_ A Textures collection to set
+    void setTextures(const Textures& textures_) noexcept { textures = textures_; }
+
+    /// @brief Attach the given texture to this drawable at the given sampler location.
+    /// @param texture Texture2D instance
+    /// @param location A sampler location in the shader being used with this drawable.
+    void setTexture(std::shared_ptr<gfx::Texture2D>& texture, int32_t location);
+
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
-
-    /// The layer index determines the drawing order
-    int32_t getLayerIndex() const { return layerIndex; }
-    void setLayerIndex(int32_t value) { layerIndex = value; }
 
     /// Determines depth range within the layer
     int32_t getSubLayerIndex() const { return subLayerIndex; }
@@ -87,9 +115,6 @@ public:
 
     std::optional<OverscaledTileID> getTileID() const { return tileID; }
     void setTileID(OverscaledTileID value) { tileID = value; }
-
-    mat4 getMatrix() const { return matrix; }
-    void setMatrix(mat4 value) { matrix = value; }
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
@@ -130,41 +155,39 @@ protected:
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
     mbgl::RenderPass renderPass;
-    mat4 matrix; //= matrix::identity4();
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
-    int32_t layerIndex = -1;
     int32_t subLayerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
 
+    Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;
 using UniqueDrawable = std::unique_ptr<Drawable>;
 
-/// Comparator for sorting drawable pointers primarily by layer index
-struct DrawablePtrLessByLayer {
-    DrawablePtrLessByLayer(bool descending)
+/// Comparator for sorting drawable pointers primarily by draw priority
+struct DrawableLessByPriority {
+    DrawableLessByPriority(bool descending)
         : desc(descending) {}
+    bool operator()(const Drawable& left, const Drawable& right) const {
+        const auto& a = desc ? right : left;
+        const auto& b = desc ? left : right;
+        if (a.getDrawPriority() != b.getDrawPriority()) {
+            return a.getDrawPriority() < b.getDrawPriority();
+        }
+        return a.getId() < b.getId();
+    }
     bool operator()(const DrawablePtr& left, const DrawablePtr& right) const {
         const auto& a = desc ? right : left;
         const auto& b = desc ? left : right;
-        if (!a || !b) {
-            // nulls are less than non-nulls
-            return (!a && b);
-        }
-        if (a->getLayerIndex() != b->getLayerIndex()) {
-            return a->getLayerIndex() < b->getLayerIndex();
-        }
-        if (a->getDrawPriority() != b->getDrawPriority()) {
-            return a->getDrawPriority() < b->getDrawPriority();
-        }
-        return a->getId() < b->getId();
+        // nulls are less than non-nulls
+        return (a && b) ? operator()(*a, *b) : (!a && b);
     }
 
 private:

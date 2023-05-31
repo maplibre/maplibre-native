@@ -103,32 +103,15 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Run changes
     orchestrator.processChanges();
 
-    // Collect drawables
-    std::vector<gfx::DrawablePtr> drawables(orchestrator.getDrawables().size());
-    std::transform(orchestrator.getDrawables().begin(),
-                   orchestrator.getDrawables().end(),
-                   drawables.begin(),
-                   std::bind(&RenderOrchestrator::DrawableMap::value_type::second, std::placeholders::_1));
-
-    // Run tweakers to update any dynamic elements
-    for (auto& drawable : drawables) {
-        for (auto& tweaker : drawable->getTweakers()) {
-            tweaker->execute(*drawable, parameters);
-        }
-    }
-
     // Run layer tweakers to update any dynamic elements
     orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
-            layerGroup.getLayerTweaker()->execute(layerGroup, parameters);
+            layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
     });
 
     // Give the layers a chance to do setup
     orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters); });
-
-    // Sort the drawables
-    std::sort(drawables.begin(), drawables.end(), gfx::DrawablePtrLessByLayer(/*descending=*/true));
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
