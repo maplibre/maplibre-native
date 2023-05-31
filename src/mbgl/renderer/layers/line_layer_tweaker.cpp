@@ -44,7 +44,9 @@ struct alignas(16) LineInterpolatedPropsUBO {
 static_assert(sizeof(LineInterpolatedPropsUBO) == 32);
 static_assert(sizeof(LineInterpolatedPropsUBO) % 16 == 0);
 
-void LineLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderTree, const PaintParameters& parameters) {
+void LineLayerTweaker::execute(LayerGroup& layerGroup,
+                               const RenderTree& renderTree,
+                               const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (!evaluatedPropsUniformBuffer) {
@@ -75,7 +77,7 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderT
         if (!drawable.getTileID()) {
             return;
         }
-        
+
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         const auto& translation = evaluated.get<LineTranslate>();

@@ -431,19 +431,20 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                         attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
                     }
                 }
-                
+
                 // test whether the shader has the extra attributes
                 if (lineShader->getVertexAttributes().size() > 2) {
                     const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
-                    
-//                    lineShader->getVertexAttributes().get("a_color") &&
+
+                    //                    lineShader->getVertexAttributes().get("a_color") &&
                     if (auto& binder = paintPropertyBinders.get<LineColor>()) {
                         const auto count = binder->getVertexCount();
                         if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
                             for (std::size_t i = 0; i < count; ++i) {
-                                const auto& packedColor = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
-                                                              binder->getVertexValue(i))
-                                                              ->a1;
+                                const auto& packedColor =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
                                 attr->set<gfx::VertexAttribute::float4>(
                                     i, {packedColor[0], packedColor[1], packedColor[0], packedColor[1]});
                             }
@@ -453,9 +454,10 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                         const auto count = binder->getVertexCount();
                         if (auto& attr = vertexAttrs.getOrAdd("a_blur")) {
                             for (std::size_t i = 0; i < count; ++i) {
-                                const auto& blur = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                                       binder->getVertexValue(i))
-                                                       ->a1;
+                                const auto& blur =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
                                 attr->set<gfx::VertexAttribute::float2>(i, {blur[0], blur[0]});
                             }
                         }
@@ -464,9 +466,10 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                         const auto count = binder->getVertexCount();
                         if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
                             for (std::size_t i = 0; i < count; ++i) {
-                                const auto& opacity = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                                          binder->getVertexValue(i))
-                                                          ->a1;
+                                const auto& opacity =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
                                 attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
                             }
                         }
@@ -475,9 +478,10 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                         const auto count = binder->getVertexCount();
                         if (auto& attr = vertexAttrs.getOrAdd("a_gapwidth")) {
                             for (std::size_t i = 0; i < count; ++i) {
-                                const auto& gapwidth = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                                          binder->getVertexValue(i))
-                                                          ->a1;
+                                const auto& gapwidth =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
                                 attr->set<gfx::VertexAttribute::float2>(i, {gapwidth[0], gapwidth[0]});
                             }
                         }
@@ -486,9 +490,10 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                         const auto count = binder->getVertexCount();
                         if (auto& attr = vertexAttrs.getOrAdd("a_offset")) {
                             for (std::size_t i = 0; i < count; ++i) {
-                                const auto& offset = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                                          binder->getVertexValue(i))
-                                                          ->a1;
+                                const auto& offset =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
                                 attr->set<gfx::VertexAttribute::float2>(i, {offset[0], offset[0]});
                             }
                         }
@@ -497,18 +502,19 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                         const auto count = binder->getVertexCount();
                         if (auto& attr = vertexAttrs.getOrAdd("a_width")) {
                             for (std::size_t i = 0; i < count; ++i) {
-                                const auto& width = static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                                          binder->getVertexValue(i))
-                                                          ->a1;
+                                const auto& width =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
                                 attr->set<gfx::VertexAttribute::float2>(i, {width[0], width[0]});
                             }
                         }
                     }
                 }
-                
+
                 builder->setVertexAttributes(std::move(vertexAttrs));
             }
-            
+
             // segments
             builder->setSegments(gfx::Triangles(),
                                  bucket.triangles.vector(),
