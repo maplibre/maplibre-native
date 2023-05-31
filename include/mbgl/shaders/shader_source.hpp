@@ -1,6 +1,4 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-23T18:10:10.798Z by timsylvester using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/gfx/backend.hpp>
 
@@ -12,6 +10,7 @@ namespace shaders {
 enum class BuiltIn {
     None,
     BackgroundShader,
+    CircleShader,
     FillShader,
     FillOutlineShader,
     FillPatternShader,

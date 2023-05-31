@@ -218,11 +218,11 @@ void RenderRasterLayer::removeTile(RenderPass renderPass, const OverscaledTileID
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
-void RenderRasterLayer::update(const int32_t layerIndex,
-                             gfx::ShaderRegistry& shaders,
-                             gfx::Context& context,
-                             const TransformState& /*state*/,
-                             UniqueChangeRequestVec& changes) {
+void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
+                               gfx::Context& context,
+                               const TransformState& /*state*/,
+                               [[maybe_unused]] const RenderTree& renderTree,
+                               [[maybe_unused]] UniqueChangeRequestVec& changes) {
     if (enableDefaultRender) {
         return;
     }

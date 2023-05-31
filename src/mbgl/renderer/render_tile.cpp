@@ -22,11 +22,12 @@ RenderTile::RenderTile(UnwrappedTileID id_, Tile& tile_)
 
 RenderTile::~RenderTile() = default;
 
-mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
+mat4 RenderTile::translateVtxMatrix(const UnwrappedTileID& id,
+                                    const mat4& tileMatrix,
                                     const std::array<float, 2>& translation,
                                     TranslateAnchorType anchor,
                                     const TransformState& state,
-                                    const bool inViewportPixelUnits) const {
+                                    const bool inViewportPixelUnits) {
     if (translation[0] == 0 && translation[1] == 0) {
         return tileMatrix;
     }
@@ -51,6 +52,14 @@ mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
     }
 
     return vtxMatrix;
+}
+
+mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
+                                    const std::array<float, 2>& translation,
+                                    TranslateAnchorType anchor,
+                                    const TransformState& state,
+                                    const bool inViewportPixelUnits) const {
+    return translateVtxMatrix(id, tileMatrix, translation, anchor, state, inViewportPixelUnits);
 }
 
 mat4 RenderTile::translatedMatrix(const std::array<float, 2>& translation,

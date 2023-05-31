@@ -1,11 +1,10 @@
 // Generated code, do not modify this file!
-// Generated on 2023-05-23T18:10:10.798Z by timsylvester using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
 #ifdef MBGL_RENDER_BACKEND_OPENGL
 #include <mbgl/shaders/gl/drawable_background.hpp>
+#include <mbgl/shaders/gl/drawable_circle.hpp>
 #include <mbgl/shaders/gl/drawable_fill.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline.hpp>
 #include <mbgl/shaders/gl/drawable_fill_pattern.hpp>

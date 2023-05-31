@@ -6,6 +6,7 @@
 #include <mbgl/util/color.hpp>
 
 #include <cstdint>
+#include <memory>
 
 namespace mbgl {
 namespace gfx {
@@ -13,8 +14,9 @@ namespace gfx {
 struct DrawableBuilder::Impl {
     using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t, 2>>;
     gfx::VertexVector<VT> vertices;
-    gfx::IndexVector<gfx::Triangles> triangleIndexes;
-    gfx::IndexVector<gfx::Lines> lineIndexes;
+    std::vector<uint16_t> indexes;
+    std::vector<std::unique_ptr<Drawable::DrawSegment>> segments;
+
     Color currentColor = Color::white();
     std::vector<Color> colors;
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();

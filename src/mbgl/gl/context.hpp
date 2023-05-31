@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
+#include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -102,8 +103,6 @@ public:
 
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
-    bool setupDraw(const PaintParameters&, const gfx::Drawable&) override;
-
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::DrawableTweakerPtr createDrawableTweaker() override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
@@ -124,7 +123,7 @@ public:
     State<value::BindFramebuffer> bindFramebuffer;
     State<value::Viewport> viewport;
     State<value::ScissorTest> scissorTest;
-    std::array<State<value::BindTexture>, 2> texture;
+    std::array<State<value::BindTexture>, gfx::MaxActiveTextureUnits> texture;
     State<value::Program> program;
     State<value::BindVertexBuffer> vertexBuffer;
 
@@ -159,10 +158,12 @@ private:
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
+public:
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
                                                                 gfx::TexturePixelType,
                                                                 gfx::TextureChannelDataType) override;
 
+private:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
                                                                           Size size) override;
 
