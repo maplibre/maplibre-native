@@ -46,6 +46,12 @@ target_include_directories(
     PUBLIC ${PROJECT_SOURCE_DIR}/render-test/include ${PROJECT_SOURCE_DIR}/include
 )
 
+# needed for test_runner_common.hpp
+target_include_directories(
+    mbgl-render-test
+    PRIVATE ${PROJECT_SOURCE_DIR}/expression-test
+)
+
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 
 target_link_libraries(
