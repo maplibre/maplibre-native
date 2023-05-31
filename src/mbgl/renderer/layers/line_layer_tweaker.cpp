@@ -44,7 +44,7 @@ struct alignas(16) LineInterpolatedPropsUBO {
 static_assert(sizeof(LineInterpolatedPropsUBO) == 32);
 static_assert(sizeof(LineInterpolatedPropsUBO) % 16 == 0);
 
-void LineLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& parameters) {
+void LineLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree& renderTree, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (!evaluatedPropsUniformBuffer) {
@@ -75,49 +75,15 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup, const PaintParameters& pa
         if (!drawable.getTileID()) {
             return;
         }
-
-        // TODO: refactor this, use RenderTile::translatedMatrix?
-        auto translateVtxMatrix = [](const UnwrappedTileID& id,
-                                     const mat4& tileMatrix,
-                                     const std::array<float, 2>& translation,
-                                     TranslateAnchorType anchor,
-                                     const TransformState& state,
-                                     const bool inViewportPixelUnits) -> mat4 {
-            if (translation[0] == 0 && translation[1] == 0) {
-                return tileMatrix;
-            }
-
-            mat4 vtxMatrix;
-
-            const float angle =
-                inViewportPixelUnits
-                    ? (anchor == TranslateAnchorType::Map ? static_cast<float>(state.getBearing()) : 0.0f)
-                    : (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing()) : 0.0f);
-
-            Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
-
-            if (inViewportPixelUnits) {
-                matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
-            } else {
-                matrix::translate(vtxMatrix,
-                                  tileMatrix,
-                                  id.pixelsToTileUnits(translate.x, static_cast<float>(state.getZoom())),
-                                  id.pixelsToTileUnits(translate.y, static_cast<float>(state.getZoom())),
-                                  0);
-            }
-
-            return vtxMatrix;
-        };
-
+        
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        mat4 matrix;
-        parameters.state.matrixFor(matrix, tileID);
-        matrix = translateVtxMatrix(tileID,
-                                    matrix,
-                                    evaluated.get<LineTranslate>(),
-                                    evaluated.get<LineTranslateAnchor>(),
-                                    parameters.state,
-                                    false);
+
+        const auto& translation = evaluated.get<LineTranslate>();
+        const auto anchor = evaluated.get<LineTranslateAnchor>();
+        constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+        const auto matrix = getTileMatrix(
+            tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
+
         LineDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
         drawableUBO.ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));

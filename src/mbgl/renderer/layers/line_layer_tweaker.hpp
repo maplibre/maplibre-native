@@ -20,7 +20,7 @@ public:
 public:
     ~LineLayerTweaker() override = default;
 
-    void execute(LayerGroup&, const PaintParameters&) override;
+    void execute(LayerGroup&, const RenderTree&, const PaintParameters&) override;
 
 protected:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer = nullptr;

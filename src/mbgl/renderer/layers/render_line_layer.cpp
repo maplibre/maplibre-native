@@ -405,7 +405,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                      : gfx::DepthMaskType::ReadOnly);
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setLayerIndex(layerIndex);
             builder->setVertexAttrName("a_pos_normal");
 
             std::vector<std::array<int16_t, 2>> rawVerts;
