@@ -120,7 +120,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
     if (colorAttrMode == ColorAttrMode::PerVertex) {
         impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
     }
-    
+
     if (impl->segments.empty()) {
         impl->segments.emplace_back(createSegment(gfx::Triangles(), {0, 0}));
     }
@@ -136,7 +136,7 @@ void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     if (colorAttrMode == ColorAttrMode::PerVertex) {
         impl->colors.emplace_back(impl->currentColor);
     }
-    
+
     assert(!impl->segments.empty());
     auto& segment = impl->segments.back();
     segment->getSegment().vertexLength += 1;

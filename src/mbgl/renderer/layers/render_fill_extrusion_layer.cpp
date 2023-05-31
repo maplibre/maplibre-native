@@ -201,8 +201,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                          patternPosA,
                          patternPosB,
                          FillExtrusionPatternProgram::TextureBindings{
-                             textures::image::Value{
-                                 tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear)},
+                             textures::image::Value{tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear)},
                          },
                          name);
                 }

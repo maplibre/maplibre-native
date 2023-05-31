@@ -52,9 +52,11 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
 
     const bool hasPattern = !evaluated.get<BackgroundPattern>().to.empty();
     const std::optional<ImagePosition> imagePosA = hasPattern ? parameters.patternAtlas.getPattern(
-        evaluated.get<BackgroundPattern>().from.id()) : std::nullopt;
+                                                                    evaluated.get<BackgroundPattern>().from.id())
+                                                              : std::nullopt;
     const std::optional<ImagePosition> imagePosB = hasPattern ? parameters.patternAtlas.getPattern(
-        evaluated.get<BackgroundPattern>().to.id()) : std::nullopt;
+                                                                    evaluated.get<BackgroundPattern>().to.id())
+                                                              : std::nullopt;
 
     if (hasPattern && (!imagePosA || !imagePosB)) {
         return;
@@ -84,8 +86,10 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
             drawable.setTexture(parameters.patternAtlas.texture(), 0);
 
             // from BackgroundPatternProgram::layoutUniformValues
-            const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
-            const int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
+            const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(
+                util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
+            const int32_t pixelX = static_cast<int32_t>(
+                tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
             const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
             const Size atlasSize = parameters.patternAtlas.getPixelSize();
 
@@ -94,7 +98,7 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
             layerUBO.pattern_br_a = util::cast<float>(imagePosA->br());
             layerUBO.pattern_tl_b = util::cast<float>(imagePosB->tl());
             layerUBO.pattern_br_b = util::cast<float>(imagePosB->br());
-            layerUBO.texsize = { static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height) };
+            layerUBO.texsize = {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)};
             layerUBO.pattern_size_a = imagePosA->displaySize();
             layerUBO.pattern_size_b = imagePosB->displaySize();
             layerUBO.pixel_coord_upper = {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)};

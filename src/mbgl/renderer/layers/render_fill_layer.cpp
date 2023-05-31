@@ -517,7 +517,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     patternBuilder->setSubLayerIndex(1);
-                    //patternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
+                    // patternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
                     outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
@@ -527,7 +527,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlinePatternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     outlinePatternBuilder->setSubLayerIndex(2);
-                    //outlinePatternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
+                    // outlinePatternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
                 }
 
                 //                             parameters.stencilModeForClipping(tile.id),

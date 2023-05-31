@@ -49,12 +49,9 @@ public:
                                                                 gfx::TextureChannelDataType) override;
     void updateTextureResource(
         gfx::TextureResource&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
-    
-    void updateTexture2D(gfx::Texture2D&,
-                         Size,
-                         const void* data,
-                         gfx::TexturePixelType,
-                         gfx::TextureChannelDataType) override;
+
+    void updateTexture2D(
+        gfx::Texture2D&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
 
     void updateTextureResourceSub(gfx::TextureResource&,
                                   uint16_t xOffset,

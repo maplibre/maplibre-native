@@ -64,12 +64,12 @@ public:
     }
 
     virtual gfx::AttributeBindingArray buildAttributeBindings(
-                                                              const std::size_t vertexCount,
-                                                              const gfx::VertexAttributeArray& defaults,
-                                                              const gfx::VertexAttributeArray& overrides,
-                                                              gfx::BufferUsageType,
-                                                              /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) = 0;
-    
+        const std::size_t vertexCount,
+        const gfx::VertexAttributeArray& defaults,
+        const gfx::VertexAttributeArray& overrides,
+        gfx::BufferUsageType,
+        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) = 0;
+
 protected:
     virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,
                                                                              std::size_t size,
@@ -110,15 +110,14 @@ public:
         const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
-    
+
     // Create a texture from an image with data.
     template <typename Image>
     Texture2DPtr createTexture2D(const Image& image, TextureChannelDataType type) {
         const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         return createTexture2D(image.size, image.data.get(), format, type);
     }
-    
-    
+
     template <typename Image>
     void updateTexture(Texture2D& texture,
                        const Image& image,
@@ -126,7 +125,7 @@ public:
         const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         updateTexture2D(texture, image.size, image.data.get(), format, type);
     }
-    
+
     template <typename Image>
     void updateTextureSub(Texture2D& texture,
                           const Image& image,
@@ -138,15 +137,15 @@ public:
         const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
-    
+
 public:
     virtual std::unique_ptr<TextureResource> createTextureResource(Size,
                                                                    const void* data,
                                                                    TexturePixelType,
                                                                    TextureChannelDataType) = 0;
     virtual void updateTextureResource(
-                                       TextureResource&, Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
-    
+        TextureResource&, Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
+
     virtual void updateTextureResourceSub(TextureResource&,
                                           uint16_t xOffset,
                                           uint16_t yOffset,
@@ -154,19 +153,12 @@ public:
                                           const void* data,
                                           TexturePixelType,
                                           TextureChannelDataType) = 0;
-    
-    virtual gfx::Texture2DPtr createTexture2D(const PremultipliedImage& image) = 0;
-    virtual gfx::Texture2DPtr createTexture2D(Size,
-                                              const void* data,
-                                              TexturePixelType,
-                                              TextureChannelDataType) = 0;
-    
-    virtual void updateTexture2D(gfx::Texture2D&,
-                                 Size,
-                                 const void* data,
-                                 gfx::TexturePixelType,
-                                 gfx::TextureChannelDataType) = 0;
 
+    virtual gfx::Texture2DPtr createTexture2D(const PremultipliedImage& image) = 0;
+    virtual gfx::Texture2DPtr createTexture2D(Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
+
+    virtual void updateTexture2D(
+        gfx::Texture2D&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) = 0;
 };
 
 } // namespace gfx

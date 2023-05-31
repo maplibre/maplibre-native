@@ -296,7 +296,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& /*shaders*/,
             if (!builder) {
                 builder = context.createDrawableBuilder("background");
                 builder->setRenderPass(drawPasses);
-                //builder->setShader(shader);
+                // builder->setShader(shader);
                 builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
             }

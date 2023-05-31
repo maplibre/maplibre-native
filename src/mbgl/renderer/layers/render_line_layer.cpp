@@ -185,7 +185,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
                  posA,
                  posB,
                  LinePatternProgram::TextureBindings{
-                    tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
+                     tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
                  });
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             assert(colorRampTexture);
