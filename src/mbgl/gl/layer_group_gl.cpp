@@ -42,8 +42,15 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         if (!drawable.hasRenderPass(parameters.pass)) {
             return;
         }
-        if (drawable.hasRenderPass(RenderPass::Opaque) && parameters.currentLayer >= parameters.opaquePassCutoff) {
-            return;
+
+        // If this drawable can render either opaque or translucent...
+        if (drawable.hasAllRenderPasses(RenderPass::Opaque | RenderPass::Translucent)) {
+            // Render it only in the translucent pass if we're below the cutoff, and only in the opaque pass otherwise
+            //  (parameters.currentLayer >= parameters.opaquePassCutoff) ? RenderPass::Opaque : RenderPass::Translucent;
+            if ((parameters.currentLayer < parameters.opaquePassCutoff && parameters.pass != RenderPass::Translucent) ||
+                (parameters.currentLayer >= parameters.opaquePassCutoff && parameters.pass != RenderPass::Opaque)) {
+                return;
+            }
         }
 
 #if !defined(NDEBUG)

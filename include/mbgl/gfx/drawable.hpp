@@ -72,7 +72,6 @@ public:
     void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
 
     /// Test whether to draw this drawable in a given render pass.
-    /// If multiple render pass bits are set, all must be present.
     bool hasRenderPass(const mbgl::RenderPass value) const {
         return (mbgl::underlying_type(renderPass) & mbgl::underlying_type(value)) != 0;
     }
