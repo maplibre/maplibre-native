@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <functional>
+#include <stdexcept>
 
 #include <uv.h>
 

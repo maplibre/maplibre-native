@@ -1,0 +1,20 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+cc_library(
+    name = "test_runner_common",
+    srcs = [
+        "test_runner_common.cpp",
+        "test_runner_common.hpp",
+    ],
+    hdrs = [
+        "test_runner_common.hpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    includes = [
+        ".",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+    ],
+)

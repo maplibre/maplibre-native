@@ -1,0 +1,18 @@
+filegroup(
+    name = "render-test-files",
+    srcs = glob([
+        "cache-style.db",
+        "cache-metrics.db",
+        "integration/**",
+        "tests/**",
+        "linux-gcc8-release/**",
+        "expectations/platform-all/**",
+        "ignores/**",
+    ]) + [
+        "linux-gcc8-release-metrics.json",
+        "linux-gcc8-release-style.json",
+    ],
+    visibility = [
+        "//render-test:__pkg__",
+    ],
+)
