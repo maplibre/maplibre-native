@@ -213,7 +213,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 std::shared_ptr<gfx::Texture2D> UploadPass::createTexture2D(const PremultipliedImage& image) {
     auto tex = std::make_shared<gl::Texture2D>(commandEncoder.context);
     tex->setSize(image.size)
-        .setFormat(image.channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha,
+        .setFormat(gfx::TexturePixelType::RGBA,
                    gfx::TextureChannelDataType::UnsignedByte)
         .create();
     tex->upload(image, *this);
