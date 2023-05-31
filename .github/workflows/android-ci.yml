@@ -23,6 +23,30 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - CMakeLists.txt
+      - 'platform/android/**'
+      - ".github/workflows/android-ci.yml"
+      - "bin/**"
+      - "expression-test/**"
+      - "include/**"
+      - "metrics/**"
+      - "platform/default/**"
+      - "render-test/**"
+      - "scripts/**"
+      - "src/**"
+      - "test/**"
+      - "vendor/**"
+      - ".gitmodules"
+      - "!**/*.md"
+
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
@@ -56,6 +80,7 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts
+        working-directory: platform/android
 
       - name: Install ccache
         run: sudo apt-get install -y ccache
@@ -101,6 +126,7 @@ jobs:
         run: make android-lib-arm-v8
 
       - name: Copy developer config with API key for UI tests
+        if: github.ref == 'refs/heads/main'
         run: |
           MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
           if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
@@ -110,6 +136,7 @@ jobs:
           fi
     
       - name: Build UI tests
+        if: github.ref == 'refs/heads/main'
         run: make android-ui-test-arm-v8
 
       - name: Configure AWS Credentials
