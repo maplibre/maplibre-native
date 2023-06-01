@@ -54,7 +54,7 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup,
 
     if (!evaluatedPropsUniformBuffer) {
         LineEvaluatedPropsUBO evaluatedPropsUBO;
-        evaluatedPropsUBO.color = Color(1, 0, 1, 1); // evaluated.get<LineColor>().constantOr(Color(1, 0, 1, 1));
+        evaluatedPropsUBO.color = evaluated.get<LineColor>().constantOr(Color(1, 0, 1, 1));
         evaluatedPropsUBO.blur = evaluated.get<LineBlur>().constantOr(0);
         evaluatedPropsUBO.opacity = evaluated.get<LineOpacity>().constantOr(0);
         evaluatedPropsUBO.gapwidth = evaluated.get<LineGapWidth>().constantOr(0);
