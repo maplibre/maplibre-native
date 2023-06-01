@@ -100,10 +100,11 @@ void TileLayerGroup::observeDrawables(std::function<void(gfx::UniqueDrawable&)> 
     }
 }
 
-void TileLayerGroup::observeDrawables(mbgl::RenderPass pass, const OverscaledTileID& tileID,
+void TileLayerGroup::observeDrawables(mbgl::RenderPass pass,
+                                      const OverscaledTileID& tileID,
                                       std::function<void(const gfx::Drawable&)> f) const {
     const auto range = impl->tileDrawables.equal_range({pass, tileID});
-    std::for_each(range.first, range.second, [&f](const auto& pair){ f(*pair.second); });
+    std::for_each(range.first, range.second, [&f](const auto& pair) { f(*pair.second); });
 }
 
 std::size_t TileLayerGroup::clearDrawables() {
