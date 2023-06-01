@@ -185,7 +185,14 @@ jobs:
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
-            libglfw3-dev
+            libglfw3-dev \
+            xserver-xorg-video-dummy
+
+      - name: Run Xorg with xserver-xorg-video-dummy
+        run: |
+          sudo X -config .github/xorg.conf &
+          xrandr -d :0 -q
+          echo DISPLAY="$DISPLAY"
 
       - name: Cache Bazel
         uses: actions/cache@v2
@@ -202,7 +209,7 @@ jobs:
     
       - name: Generate coverage report
         run: | 
-          bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --run_under="xvfb-run -a --server-args=\"-screen 0 1024x768x24\""
+          bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --test_env=DISPLAY
           echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
 
       - name: Upload coverage report
