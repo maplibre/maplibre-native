@@ -117,7 +117,7 @@ public:
 
     /// Create a layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) = 0;
-    
+
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
 };
