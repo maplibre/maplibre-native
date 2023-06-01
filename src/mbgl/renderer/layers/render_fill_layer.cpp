@@ -20,6 +20,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 
 namespace mbgl {
@@ -287,8 +288,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!renderTiles || renderTiles->empty()) {
         if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
+            stats.tileDrawablesRemoved += tileLayerGroup->clearDrawables();
         }
         return;
     }
@@ -359,7 +359,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
 
-            auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
+            // If we already have drawables for this tile, skip.
+            // If a drawable needs to be updated, that's handled in the layer tweaker.
+            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+                continue;
+            }
 
             const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
             if (!renderData) {
@@ -447,10 +451,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                             }
                         }
                     }
-                }
-
-                if (tileDrawable) {
-                    continue;
                 }
 
                 if (doFill && !fillBuilder && fillShader) {

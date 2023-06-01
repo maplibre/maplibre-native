@@ -77,9 +77,10 @@ public:
     ~TileLayerGroup() override;
 
     void updateLayerIndex(int32_t newLayerIndex);
+    
     std::size_t getDrawableCount() const;
+    std::size_t getDrawableCount(mbgl::RenderPass, const OverscaledTileID&) const;
 
-    const gfx::UniqueDrawable& getDrawable(mbgl::RenderPass, const OverscaledTileID&) const;
     std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass, const OverscaledTileID&);
     void addDrawable(mbgl::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
 
@@ -87,7 +88,11 @@ public:
     void observeDrawables(std::function<void(const gfx::Drawable&)>) const override;
     void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) override;
 
-    void clearDrawables();
+    /// Call the provided function for each drawable for the given tile
+    void observeDrawables(mbgl::RenderPass, const OverscaledTileID&,
+                          std::function<void(const gfx::Drawable&)>) const;
+
+    std::size_t clearDrawables();
 
 protected:
     struct Impl;

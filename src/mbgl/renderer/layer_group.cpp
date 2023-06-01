@@ -48,9 +48,9 @@ std::size_t TileLayerGroup::getDrawableCount() const {
 
 static const gfx::UniqueDrawable no_tile;
 
-const gfx::UniqueDrawable& TileLayerGroup::getDrawable(mbgl::RenderPass pass, const OverscaledTileID& id) const {
-    const auto hit = impl->tileDrawables.find({pass, id});
-    return (hit == impl->tileDrawables.end()) ? no_tile : hit->second;
+std::size_t TileLayerGroup::getDrawableCount(mbgl::RenderPass pass, const OverscaledTileID& id) const {
+    const auto range = impl->tileDrawables.equal_range({pass, id});
+    return std::distance(range.first, range.second);
 }
 
 std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPass pass, const OverscaledTileID& id) {
@@ -100,8 +100,16 @@ void TileLayerGroup::observeDrawables(std::function<void(gfx::UniqueDrawable&)> 
     }
 }
 
-void TileLayerGroup::clearDrawables() {
+void TileLayerGroup::observeDrawables(mbgl::RenderPass pass, const OverscaledTileID& tileID,
+                                      std::function<void(const gfx::Drawable&)> f) const {
+    const auto range = impl->tileDrawables.equal_range({pass, tileID});
+    std::for_each(range.first, range.second, [&f](const auto& pair){ f(*pair.second); });
+}
+
+std::size_t TileLayerGroup::clearDrawables() {
+    const auto count = impl->tileDrawables.size();
     impl->tileDrawables.clear();
+    return count;
 }
 
 } // namespace mbgl
