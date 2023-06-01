@@ -311,8 +311,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
-        if (tileDrawable) {
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
             continue;
         }
 

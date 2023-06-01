@@ -286,19 +286,9 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         // For each tile in the cover set, add a tile drawable if one doesn't already exist.
         // We currently assume only one drawable per tile.
         for (const auto& tileID : tileCover) {
-            auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
-
-            if (!(renderPass & drawPasses)) {
-                // Not in this pass
-                if (tileDrawable) {
-                    tileLayerGroup->removeDrawables(renderPass, tileID);
-                    ++stats.tileDrawablesRemoved;
-                }
-                continue;
-            }
-
-            if (tileDrawable) {
-                // Already created, update it.
+            // If we already have drawables for this tile, skip.
+            // If a drawable needs to be updated, that's handled in the layer tweaker.
+            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
                 continue;
             }
 
