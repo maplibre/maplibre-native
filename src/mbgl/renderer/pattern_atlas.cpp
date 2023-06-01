@@ -93,7 +93,7 @@ void PatternAtlas::upload(gfx::UploadPass& uploadPass) {
     //     return;
     // }
 
-    if (!atlasTexture2D || atlasTexture2D->getSize() != atlasImage.size) {
+    if (!atlasTexture2D) {
         atlasTexture2D = uploadPass.createTexture2D(atlasImage);
     } else if (dirty) {
         atlasTexture2D->upload(atlasImage, uploadPass);

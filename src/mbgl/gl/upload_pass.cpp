@@ -68,10 +68,9 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
                                                                         gfx::TexturePixelType format,
                                                                         gfx::TextureChannelDataType type) {
     auto obj = commandEncoder.context.createUniqueTexture();
-    int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
+    const int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
     commandEncoder.context.renderingStats().memTextures += textureByteSize;
-    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj),
-                                                                                           textureByteSize);
+    auto resource = std::make_unique<gl::TextureResource>(std::move(obj), textureByteSize);
     commandEncoder.context.pixelStoreUnpack = {1};
     updateTextureResource(*resource, size, data, format, type);
     // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
@@ -89,9 +88,11 @@ gfx::Texture2DPtr UploadPass::createTexture2D(const Size size,
                                               gfx::TexturePixelType format,
                                               gfx::TextureChannelDataType type) {
     auto tex = std::make_shared<gl::Texture2D>(commandEncoder.context);
-    int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
+    const int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
     commandEncoder.context.renderingStats().memTextures += textureByteSize;
     commandEncoder.context.pixelStoreUnpack = {1};
+    tex->setFormat(format, type);
+    tex->setSize(size);
     tex->create(data, *this);
     updateTexture2D(*tex, size, data, format, type);
     // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT

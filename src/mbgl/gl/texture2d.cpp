@@ -131,17 +131,16 @@ void Texture2D::unbind() noexcept {
 }
 
 void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) noexcept {
-    assert(textureResource);
-    assert(image.size == size);
-    if (image.size != size) {
-        return;
-    }
-
     assert(PremultipliedImage::channels == numChannels());
     // note: images are always unsigned bytes
     assert(PremultipliedImage::channels == getPixelStride());
 
-    uploadPass.updateTextureResource(*textureResource, size, &image.data[0], pixelFormat, channelType);
+    // If the size has changed, re-create the texture resource
+    if (textureResource && image.size == size) {
+        uploadPass.updateTextureResource(*textureResource, size, &image.data[0], pixelFormat, channelType);
+    } else {
+        textureResource = uploadPass.createTextureResource(size, &image.data[0], pixelFormat, channelType);
+    }
 }
 
 } // namespace gl
