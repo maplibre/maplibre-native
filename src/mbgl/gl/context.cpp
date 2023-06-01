@@ -475,6 +475,10 @@ TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t 
     return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity);
 }
 
+gfx::Texture2DPtr Context::createTexture2D() {
+    return std::make_shared<gl::Texture2D>(*this);
+}
+
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     GLbitfield mask = 0;
 

@@ -51,7 +51,7 @@ private:
     std::optional<ImagePosition> getPattern(const std::string&) const override;
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const override;
     Bucket* getBucket(const style::Layer::Impl&) const override;
-    void upload(gfx::UploadPass&) override;
+    void upload(gfx::Context&, gfx::UploadPass&) override;
     void prepare(const SourcePrepareParameters&) override;
 
     std::shared_ptr<GeometryTile::LayoutResult> layoutResult;
@@ -71,7 +71,7 @@ std::optional<ImagePosition> GeometryTileRenderData::getPattern(const std::strin
     return std::nullopt;
 }
 
-void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
+void GeometryTileRenderData::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
     if (!layoutResult) return;
 
     auto uploadFn = [&](Bucket& bucket) {
@@ -87,13 +87,13 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     assert(atlasTextures);
 
     if (layoutResult->glyphAtlasImage) {
-        atlasTextures->glyph = uploadPass.createTexture2D();
+        atlasTextures->glyph = context.createTexture2D();
         atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
         layoutResult->glyphAtlasImage = {};
     }
 
     if (layoutResult->iconAtlas.image.valid()) {
-        atlasTextures->icon = uploadPass.createTexture2D();
+        atlasTextures->icon = context.createTexture2D();
         atlasTextures->icon->upload(layoutResult->iconAtlas.image);
         layoutResult->iconAtlas.image = {};
     }

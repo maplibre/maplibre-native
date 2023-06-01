@@ -21,7 +21,7 @@ class UploadPass;
 class RenderItem {
 public:
     virtual ~RenderItem() = default;
-    virtual void upload(gfx::UploadPass&) const = 0;
+    virtual void upload(gfx::Context&, gfx::UploadPass&) const = 0;
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
     virtual const std::string& getName() const = 0;

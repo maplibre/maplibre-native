@@ -146,8 +146,6 @@ public:
                                           const void* data,
                                           TexturePixelType,
                                           TextureChannelDataType) = 0;
-
-    virtual gfx::Texture2DPtr createTexture2D() = 0;
 };
 
 } // namespace gfx

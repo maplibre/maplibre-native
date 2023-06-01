@@ -120,14 +120,14 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
         // Update all clipping IDs + upload buckets.
         for (const RenderItem& item : sourceRenderItems) {
-            item.upload(*uploadPass);
+            item.upload(context, *uploadPass);
         }
         for (const RenderItem& item : layerRenderItems) {
-            item.upload(*uploadPass);
+            item.upload(context, *uploadPass);
         }
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
-        renderTree.getPatternAtlas().upload(*uploadPass);
+        renderTree.getPatternAtlas().upload(context, *uploadPass);
 
         // Give the layers a chance to upload
         orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(context, *uploadPass); });

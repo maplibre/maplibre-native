@@ -53,7 +53,7 @@ public:
 
 private:
     bool hasRenderPass(RenderPass pass) const override { return layer.get().hasRenderPass(pass); }
-    void upload(gfx::UploadPass& pass) const override { layer.get().upload(pass); }
+    void upload(gfx::Context&, gfx::UploadPass& pass) const override { layer.get().upload(pass); }
     void render(PaintParameters& parameters) const override { layer.get().render(parameters); }
     const std::string& getName() const override { return layer.get().getID(); }
 };

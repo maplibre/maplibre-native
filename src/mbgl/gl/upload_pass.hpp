@@ -58,8 +58,6 @@ public:
                                   gfx::TexturePixelType,
                                   gfx::TextureChannelDataType) override;
 
-    gfx::Texture2DPtr createTexture2D() override;
-
 private:
     gl::CommandEncoder& commandEncoder;
     const gfx::DebugGroup<gfx::CommandEncoder> debugGroup;

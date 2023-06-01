@@ -15,6 +15,7 @@ template <class T>
 class Actor;
 
 namespace gfx {
+class Context;
 class Texture2D;
 class UploadPass;
 } // namespace gfx
@@ -33,7 +34,7 @@ public:
     gfx::TextureBinding textureBinding() const; // @TODO: Migrate
     const std::shared_ptr<gfx::Texture2D>& texture() const;
 
-    void upload(gfx::UploadPass&);
+    void upload(gfx::Context&, gfx::UploadPass&);
     Size getPixelSize() const;
 
     const PremultipliedImage& getAtlasImageForTests() const { return atlasImage; }

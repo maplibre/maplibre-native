@@ -14,6 +14,7 @@
 namespace mbgl {
 
 namespace gfx {
+class Context;
 class Texture2D;
 class UploadPass;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
@@ -66,7 +67,7 @@ public:
     const gfx::Texture2DPtr& getIconAtlasTexture() const;
     gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
 
-    void upload(gfx::UploadPass&) const;
+    void upload(gfx::Context&, gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
     void finishRender(PaintParameters&) const;
 
