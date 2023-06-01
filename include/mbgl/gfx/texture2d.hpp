@@ -73,16 +73,18 @@ public:
     /// @brief Upload image data to the texture resource
     /// @param image Image data to transfer
     virtual void upload(const void* pixelData, const Size& size_) noexcept = 0;
-    template<typename Image>
+    template <typename Image>
     void upload(const Image& img) noexcept {
-        setFormat(Image::channels == 1 ?
-            gfx::TexturePixelType::Alpha : gfx::TexturePixelType::RGBA,
-            gfx::TextureChannelDataType::UnsignedByte);
+        setFormat(Image::channels == 1 ? gfx::TexturePixelType::Alpha : gfx::TexturePixelType::RGBA,
+                  gfx::TextureChannelDataType::UnsignedByte);
         upload(&img.data[0], img.size);
     }
 
-    virtual void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept = 0;
-    template<typename Image>
+    virtual void uploadSubRegion(const void* pixelData,
+                                 const Size& size,
+                                 uint16_t xOffset,
+                                 uint16_t yOffset) noexcept = 0;
+    template <typename Image>
     void uploadSubRegion(const Image& img, uint16_t xOffset, uint16_t yOffset) noexcept {
         assert(Image::channels == numChannels());
         assert(Image::channels == getPixelStride());

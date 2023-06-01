@@ -163,7 +163,6 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
                                       pixelData));
     } else {
         uploadSubRegion(pixelData, size, 0, 0);
-
     }
 }
 
@@ -172,7 +171,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size, uint16_
 
     assert(textureResource);
     assert(!samplerStateDirty);
-    
+
     // Bind to TU 0 and upload
     context.activeTextureUnit = 0;
     context.texture[0] = getTextureID();

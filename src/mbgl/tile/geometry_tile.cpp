@@ -100,10 +100,9 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
 
     if (atlasTextures->icon && !imagePatches.empty()) {
         for (const auto& imagePatch : imagePatches) { // patch updated images.
-            atlasTextures->icon->uploadSubRegion(
-                imagePatch.image->image,
-                imagePatch.paddedRect.x + ImagePosition::padding,
-                imagePatch.paddedRect.y + ImagePosition::padding);
+            atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
+                                                 imagePatch.paddedRect.x + ImagePosition::padding,
+                                                 imagePatch.paddedRect.y + ImagePosition::padding);
         }
         imagePatches.clear();
     }
