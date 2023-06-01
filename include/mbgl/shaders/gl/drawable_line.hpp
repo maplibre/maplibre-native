@@ -166,7 +166,8 @@ mediump float width = u_width;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(// SWITCH BETWEEN THE VERSIONS OF THE SHADER BY CHANGING THE FOLLOWING LINES:
+    static constexpr const char* fragment =
+        R"(// SWITCH BETWEEN THE VERSIONS OF THE SHADER BY CHANGING THE FOLLOWING LINES:
 // #define HAS_UNIFORM_u_color
 // #define HAS_UNIFORM_u_blur
 // #define HAS_UNIFORM_u_opacity
