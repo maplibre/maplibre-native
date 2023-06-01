@@ -55,27 +55,25 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroup& layerGroup,
                 return -saturation;
             }
         };
-        auto contrastFactor = [](float contrast) ->float {
+        auto contrastFactor = [](float contrast) -> float {
             if (contrast > 0) {
                 return 1 / (1 - contrast);
             } else {
                 return 1 + contrast;
             }
         };
-        
-        RasterDrawableUBO drawableUBO{
-            /*.matrix = */ util::cast<float>(matrix),
-            /*.spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),
-            /*.tl_parent = */ {{0.0f, 0.0f}},
-            /*.scale_parent = */ 1.0f,
-            /*.buffer_scale = */ 1.0f,
-            /*.fade_t = */ 1.0f,
-            /*.opacity = */ evaluated.get<RasterOpacity>(),
-            /*.brightness_low = */ evaluated.get<RasterBrightnessMin>(),
-            /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
-            /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
-            /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>())
-        };
+
+        RasterDrawableUBO drawableUBO{/*.matrix = */ util::cast<float>(matrix),
+                                      /*.spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),
+                                      /*.tl_parent = */ {{0.0f, 0.0f}},
+                                      /*.scale_parent = */ 1.0f,
+                                      /*.buffer_scale = */ 1.0f,
+                                      /*.fade_t = */ 1.0f,
+                                      /*.opacity = */ evaluated.get<RasterOpacity>(),
+                                      /*.brightness_low = */ evaluated.get<RasterBrightnessMin>(),
+                                      /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
+                                      /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
+                                      /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>())};
         auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("RasterDrawableUBO", drawableUniformBuffer);
     });

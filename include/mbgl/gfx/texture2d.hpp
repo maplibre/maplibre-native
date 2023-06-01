@@ -87,7 +87,7 @@ public:
     /// @note: Compat with legacy textures, to be refactored
     /// @return gfx::TextureResource
     virtual gfx::TextureResource& getResource() = 0;
-    
+
     /// @brief Check whether the texture needs upload
     virtual bool needsUpload() const noexcept = 0;
 };

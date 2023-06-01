@@ -62,7 +62,7 @@ protected:
 
 private:
     void uploadTextures(gfx::UploadPass&) const;
-    
+
     void bindUniformBuffers() const;
     void unbindUniformBuffers() const;
 

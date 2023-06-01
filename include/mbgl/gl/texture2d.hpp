@@ -23,7 +23,7 @@ public: // gfx::Texture2D
     Texture2D& setFormat(gfx::TexturePixelType pixelFormat, gfx::TextureChannelDataType channelType) noexcept override;
 
     Texture2D& setSize(Size size_) noexcept override;
-    
+
     Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept override;
 
     size_t getDataSize() const noexcept override;

@@ -240,11 +240,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     auto renderPass = RenderPass::Translucent;
-    
+
     if (!rasterShader) {
         rasterShader = context.getGenericShader(shaders, "RasterShader");
     }
-    
+
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
     RasterProgram::Binders paintAttributeData{evaluated, 0};
 
@@ -258,7 +258,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         RasterBucket& bucket = *imageData->bucket;
         assert(bucket.texture);
 
-//        size_t i = 0;
+        //        size_t i = 0;
         for (const auto& matrix_ : imageData->matrices) {
             /*draw(matrix_,
                  *bucket.vertexBuffer,
@@ -295,11 +295,10 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
 
             if (!bucket.hasData()) continue;
-                        
-            if(auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID)) continue;
-            
-            if(bucket.image)
-            {
+
+            if (auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID)) continue;
+
+            if (bucket.image) {
                 std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
                 builder->setShader(rasterShader);
                 builder->setRenderPass(renderPass);
@@ -311,7 +310,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setVertexAttrName("a_pos");
 
                 // render data
-                auto buildRenderData = [](const TileMask& mask, std::vector<std::array<int16_t, 2>>& vertices, std::vector<std::array<int16_t, 2>>& attributes, std::vector<uint16_t>& indices, std::vector<Segment<void>>& segments) {
+                auto buildRenderData = [](const TileMask& mask,
+                                          std::vector<std::array<int16_t, 2>>& vertices,
+                                          std::vector<std::array<int16_t, 2>>& attributes,
+                                          std::vector<uint16_t>& indices,
+                                          std::vector<Segment<void>>& segments) {
                     constexpr const uint16_t vertexLength = 4;
 
                     // Create the vertex buffer for the specified tile mask.
@@ -324,20 +327,21 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                         const Point<int16_t> brVertex = {static_cast<int16_t>(tlVertex.x + vertexExtent),
                                                          static_cast<int16_t>(tlVertex.y + vertexExtent)};
 
-                        if (segments.empty() || (segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max())) {
+                        if (segments.empty() ||
+                            (segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max())) {
                             // Move to a new segments because the old one can't hold the geometry.
                             segments.emplace_back(vertices.size(), indices.size());
                         }
 
                         vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
                         attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
-                        
+
                         vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
                         attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
-                        
+
                         vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
                         attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
-                        
+
                         vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
                         attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
 
@@ -347,8 +351,12 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
                         // 0, 1, 2
                         // 1, 2, 3
-                        indices.insert(indices.end(), {offset, static_cast<uint16_t>(offset + 1), static_cast<uint16_t>(offset + 2u)});
-                        indices.insert(indices.end(), {static_cast<uint16_t>(offset + 1), static_cast<uint16_t>(offset + 2), static_cast<uint16_t>(offset + 3)});
+                        indices.insert(indices.end(),
+                                       {offset, static_cast<uint16_t>(offset + 1), static_cast<uint16_t>(offset + 2u)});
+                        indices.insert(indices.end(),
+                                       {static_cast<uint16_t>(offset + 1),
+                                        static_cast<uint16_t>(offset + 2),
+                                        static_cast<uint16_t>(offset + 3)});
 
                         segment.vertexLength += vertexLength;
                         segment.indexLength += 6;
@@ -361,33 +369,31 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 buildRenderData(bucket.mask, vertices, attributes, indices, segments);
                 builder->addVertices(vertices, 0, vertices.size());
                 builder->setSegments(gfx::Triangles(), indices, segments);
-                                
+
                 // attributes
                 {
                     gfx::VertexAttributeArray vertexAttrs;
                     if (auto& attr = vertexAttrs.getOrAdd("a_texture_pos")) {
                         std::size_t index{0};
-                        for(auto& a: attributes) {
+                        for (auto& a : attributes) {
                             attr->set<gfx::VertexAttribute::int2>(index++, {a[0], a[1]});
                         }
                     }
                     builder->setVertexAttributes(std::move(vertexAttrs));
                 }
-                
+
                 // textures
                 // TODO: move texture creation into gfx::Context
                 std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
-                tex0->setImage(bucket.image)
-                    .create();
+                tex0->setImage(bucket.image).create();
                 auto location0 = rasterShader->getSamplerLocation("u_image0");
-                if(location0.has_value()) {
+                if (location0.has_value()) {
                     builder->setTexture(tex0, location0.value());
                 }
                 std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
-                tex1->setImage(bucket.image)
-                    .create();
+                tex1->setImage(bucket.image).create();
                 auto location1 = rasterShader->getSamplerLocation("u_image1");
-                if(location1.has_value()) {
+                if (location1.has_value()) {
                     builder->setTexture(tex1, location1.value());
                 }
 

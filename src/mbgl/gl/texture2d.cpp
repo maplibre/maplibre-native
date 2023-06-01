@@ -35,8 +35,9 @@ Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
 
 Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) noexcept {
     image = image_;
-    setSize(image->size).setFormat(image->channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha,
-                                   gfx::TextureChannelDataType::UnsignedByte);
+    setSize(image->size)
+        .setFormat(image->channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha,
+                   gfx::TextureChannelDataType::UnsignedByte);
     return *this;
 }
 
@@ -149,8 +150,7 @@ void Texture2D::upload(const PremultipliedImage& image_, gfx::UploadPass& upload
 }
 
 void Texture2D::upload(gfx::UploadPass& uploadPass) noexcept {
-    if(image)
-    {
+    if (image) {
         upload(*image, uploadPass);
         image.reset();
     }

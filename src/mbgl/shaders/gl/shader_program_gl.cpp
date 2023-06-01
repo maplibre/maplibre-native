@@ -164,7 +164,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
         uniformBlocks.add(name.data(), index, size);
     }
-    
+
     VertexAttributeArrayGL attrs;
 
     count = 0;
