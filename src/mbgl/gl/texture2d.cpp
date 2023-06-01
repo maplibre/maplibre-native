@@ -166,7 +166,7 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     }
 }
 
-void Texture2D::uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept {
+void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
     using namespace platform;
 
     assert(textureResource);
@@ -180,8 +180,8 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size, uint16_
                                      0,
                                      xOffset,
                                      yOffset,
-                                     size.width,
-                                     size.height,
+                                     size_.width,
+                                     size_.height,
                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
                                      Enum<gfx::TextureChannelDataType>::to(channelType),
                                      pixelData));

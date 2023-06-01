@@ -71,7 +71,7 @@ public:
     virtual void create() noexcept = 0;
 
     /// @brief Upload image data to the texture resource
-    /// @param image Image data to transfer
+    /// @param pixelData Image data to transfer
     virtual void upload(const void* pixelData, const Size& size_) noexcept = 0;
     template <typename Image>
     void upload(const Image& img) noexcept {
