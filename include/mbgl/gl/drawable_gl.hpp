@@ -15,7 +15,6 @@ class Segment;
 
 namespace gfx {
 
-class Context;
 class IndexBuffer;
 class UploadPass;
 class VertexBufferResource;
@@ -51,7 +50,7 @@ public:
     /// Reset a single color attribute for all vertexes
     void resetColor(const Color&) override;
 
-    void upload(gfx::Context&, gfx::UploadPass&);
+    void upload(gfx::UploadPass&);
 
 protected:
     class Impl;

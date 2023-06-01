@@ -87,13 +87,13 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     assert(atlasTextures);
 
     if (layoutResult->glyphAtlasImage) {
-        atlasTextures->glyph = uploadPass.createTexture2D();
+        atlasTextures->glyph = uploadPass.getContext().createTexture2D();
         atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
         layoutResult->glyphAtlasImage = {};
     }
 
     if (layoutResult->iconAtlas.image.valid()) {
-        atlasTextures->icon = uploadPass.createTexture2D();
+        atlasTextures->icon = uploadPass.getContext().createTexture2D();
         atlasTextures->icon->upload(layoutResult->iconAtlas.image);
         layoutResult->iconAtlas.image = {};
     }

@@ -89,7 +89,7 @@ Size PatternAtlas::getPixelSize() const {
 
 void PatternAtlas::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     if (!atlasTexture2D) {
-        atlasTexture2D = uploadPass.createTexture2D();
+        atlasTexture2D = uploadPass.getContext().createTexture2D();
         atlasTexture2D->upload(atlasImage);
     } else if (dirty) {
         atlasTexture2D->upload(atlasImage);

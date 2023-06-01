@@ -38,6 +38,9 @@ public:
 
     DebugGroup<UploadPass> createDebugGroup(const char* name) { return {*this, name}; }
 
+    virtual Context& getContext() = 0;
+    virtual const Context& getContext() const = 0;
+
 public:
     template <class Vertex>
     VertexBuffer<Vertex> createVertexBuffer(VertexVector<Vertex>&& v,
@@ -146,8 +149,6 @@ public:
                                           const void* data,
                                           TexturePixelType,
                                           TextureChannelDataType) = 0;
-
-    virtual gfx::Texture2DPtr createTexture2D() = 0;
 };
 
 } // namespace gfx

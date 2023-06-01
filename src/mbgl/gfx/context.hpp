@@ -28,12 +28,14 @@ class DrawableTweaker;
 class OffscreenTexture;
 class ShaderProgramBase;
 class ShaderRegistry;
+class Texture2D;
 
 using DrawablePtr = std::shared_ptr<Drawable>;
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class Context {
 protected:
@@ -115,6 +117,9 @@ public:
 
     /// Create a layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) = 0;
+
+    /// Create a texture
+    virtual Texture2DPtr createTexture2D() = 0;
 };
 
 } // namespace gfx

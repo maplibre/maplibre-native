@@ -209,16 +209,20 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     return {};
 }
 
-gfx::Texture2DPtr UploadPass::createTexture2D() {
-    return std::make_shared<gl::Texture2D>(commandEncoder.context);
-}
-
 void UploadPass::pushDebugGroup(const char* name) {
     commandEncoder.pushDebugGroup(name);
 }
 
 void UploadPass::popDebugGroup() {
     commandEncoder.popDebugGroup();
+}
+
+gfx::Context& UploadPass::getContext() {
+    return commandEncoder.context;
+}
+
+const gfx::Context& UploadPass::getContext() const {
+    return commandEncoder.context;
 }
 
 } // namespace gl
