@@ -27,7 +27,9 @@ struct alignas(16) LineEvaluatedPropsUBO {
     float gapwidth;
     float offset;
     float width;
-    std::array<float, 3> pad;
+    float pad1;
+    float pad2;
+    float pad3;
 };
 static_assert(sizeof(LineEvaluatedPropsUBO) == 48);
 static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
@@ -39,7 +41,8 @@ struct alignas(16) LineInterpolatedPropsUBO {
     float gapwidth_t;
     float offset_t;
     float width_t;
-    std::array<float, 2> pad;
+    float pad1;
+    float pad2;
 };
 static_assert(sizeof(LineInterpolatedPropsUBO) == 32);
 static_assert(sizeof(LineInterpolatedPropsUBO) % 16 == 0);
