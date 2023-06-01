@@ -603,10 +603,10 @@ void Context::performCleanup() {
     // TODO: Find a better way to unbind VAOs after we're done with them without
     // introducing unnecessary bind(0)/bind(N) sequences.
     {
-        activeTextureUnit = 1;
-        texture[1] = 0;
-        activeTextureUnit = 0;
-        texture[0] = 0;
+        for (auto i = 0; i < gfx::MaxActiveTextureUnits; i++) {
+            activeTextureUnit = i;
+            texture[i] = 0;
+        }
 
         bindVertexArray = 0;
     }

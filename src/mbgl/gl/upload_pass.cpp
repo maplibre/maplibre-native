@@ -83,28 +83,6 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
     return resource;
 }
 
-gfx::Texture2DPtr UploadPass::createTexture2D(const Size size,
-                                              const void* data,
-                                              gfx::TexturePixelType format,
-                                              gfx::TextureChannelDataType type) {
-    auto tex = std::make_shared<gl::Texture2D>(commandEncoder.context);
-    const int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
-    commandEncoder.context.renderingStats().memTextures += textureByteSize;
-    commandEncoder.context.pixelStoreUnpack = {1};
-    tex->setFormat(format, type);
-    tex->setSize(size);
-    tex->create(data, *this);
-    updateTexture2D(*tex, size, data, format, type);
-    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
-    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
-    // e.g. on iPhone 6 Plus.
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-    return tex;
-}
-
 void UploadPass::updateTextureResource(gfx::TextureResource& resource,
                                        const Size size,
                                        const void* data,
@@ -122,29 +100,6 @@ void UploadPass::updateTextureResource(gfx::TextureResource& resource,
                                   Enum<gfx::TexturePixelType>::to(format),
                                   Enum<gfx::TextureChannelDataType>::to(type),
                                   data));
-}
-
-void UploadPass::updateTexture2D(gfx::Texture2D& tex,
-                                 const Size size,
-                                 const void* data,
-                                 gfx::TexturePixelType format,
-                                 gfx::TextureChannelDataType type) {
-    const auto& resource = static_cast<gl::TextureResource&>(tex.getResource());
-
-    // Always use texture unit 0 for manipulating it.
-    commandEncoder.context.activeTextureUnit = 0;
-    commandEncoder.context.texture[0] = resource.texture;
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::to(format),
-                                  size.width,
-                                  size.height,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::to(format),
-                                  Enum<gfx::TextureChannelDataType>::to(type),
-                                  data));
-
-    tex.setSize(size);
 }
 
 void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
@@ -254,13 +209,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     return {};
 }
 
-gfx::Texture2DPtr UploadPass::createTexture2D(const PremultipliedImage& image) {
-    //    return createTexture2D(image.size, image, gfx::TexturePixelType::RGBA,
-    //    gfx::TextureChannelDataType::UnsignedByte);
-    auto tex = std::make_shared<gl::Texture2D>(commandEncoder.context);
-    tex->setSize(image.size).setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte).create();
-    tex->upload(image, *this);
-    return tex;
+gfx::Texture2DPtr UploadPass::createTexture2D() {
+    return std::make_shared<gl::Texture2D>(commandEncoder.context);
 }
 
 void UploadPass::pushDebugGroup(const char* name) {

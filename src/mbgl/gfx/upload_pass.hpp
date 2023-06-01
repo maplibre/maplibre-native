@@ -111,13 +111,6 @@ public:
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
 
-    // Create a texture from an image with data.
-    template <typename Image>
-    Texture2DPtr createTexture2D(const Image& image, TextureChannelDataType type) {
-        const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
-        return createTexture2D(image.size, image.data.get(), format, type);
-    }
-
     template <typename Image>
     void updateTexture(Texture2D& texture,
                        const Image& image,
@@ -154,11 +147,7 @@ public:
                                           TexturePixelType,
                                           TextureChannelDataType) = 0;
 
-    virtual gfx::Texture2DPtr createTexture2D(const PremultipliedImage& image) = 0;
-    virtual gfx::Texture2DPtr createTexture2D(Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
-
-    virtual void updateTexture2D(
-        gfx::Texture2D&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) = 0;
+    virtual gfx::Texture2DPtr createTexture2D() = 0;
 };
 
 } // namespace gfx
