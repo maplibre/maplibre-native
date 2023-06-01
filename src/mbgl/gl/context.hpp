@@ -111,6 +111,7 @@ public:
 
     TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) override;
 
+    gfx::Texture2DPtr createTexture2D() override;
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;

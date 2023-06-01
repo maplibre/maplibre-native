@@ -50,6 +50,10 @@ public:
     /// @return this
     virtual Texture2D& setSize(Size size_) noexcept = 0;
 
+    /// @brief Sets the internal image
+    /// @param image_ Image data to transfer
+    virtual Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept = 0;
+
     /// @brief Determine the size of the buffer backing this texture
     /// as configured, in bytes.
     /// @return Size in bytes
@@ -75,10 +79,17 @@ public:
     /// @param uploadPass Upload pass to orchestrate upload
     virtual void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept = 0;
 
+    /// @brief Upload internal image data to the texture resource if needed
+    /// @param uploadPass Upload pass to orchestrate upload
+    virtual void upload(gfx::UploadPass& uploadPass) noexcept = 0;
+
     /// @brief Get the underlying GL texture resource
     /// @note: Compat with legacy textures, to be refactored
     /// @return gfx::TextureResource
     virtual gfx::TextureResource& getResource() = 0;
+    
+    /// @brief Check whether the texture needs upload
+    virtual bool needsUpload() const noexcept = 0;
 };
 
 } // namespace gfx

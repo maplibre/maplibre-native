@@ -23,6 +23,8 @@ public: // gfx::Texture2D
     Texture2D& setFormat(gfx::TexturePixelType pixelFormat, gfx::TextureChannelDataType channelType) noexcept override;
 
     Texture2D& setSize(Size size_) noexcept override;
+    
+    Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept override;
 
     size_t getDataSize() const noexcept override;
 
@@ -34,8 +36,11 @@ public: // gfx::Texture2D
     void create() noexcept override;
 
     void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept override;
+    void upload(gfx::UploadPass& uploadPass) noexcept override;
 
     gfx::TextureResource& getResource() override { return *textureResource; }
+
+    bool needsUpload() const noexcept override { return !!image; };
 
 public:
     /// @brief Get the OpenGL handle ID for the underlying resource
@@ -59,6 +64,7 @@ private:
     gfx::TexturePixelType pixelFormat;
     gfx::TextureChannelDataType channelType;
 
+    std::shared_ptr<PremultipliedImage> image{nullptr};
     Size size{0, 0};
     mutable bool samplerStateDirty{false};
 

@@ -33,6 +33,13 @@ Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     return *this;
 }
 
+Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) noexcept {
+    image = image_;
+    setSize(image->size).setFormat(image->channels == 4 ? gfx::TexturePixelType::RGBA : gfx::TexturePixelType::Alpha,
+                                   gfx::TextureChannelDataType::UnsignedByte);
+    return *this;
+}
+
 size_t Texture2D::getDataSize() const noexcept {
     return size.width * size.height * getPixelStride();
 }
@@ -75,7 +82,7 @@ void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
     using namespace platform;
 
     assert(gfx::MaxActiveTextureUnits > textureUnit);
-    if (gfx::MaxActiveTextureUnits > textureUnit) return;
+    if (!(gfx::MaxActiveTextureUnits > textureUnit)) return;
 
     context.activeTextureUnit = static_cast<uint8_t>(textureUnit);
     context.texture[static_cast<size_t>(textureUnit)] = getTextureID();
@@ -106,6 +113,7 @@ void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
 
     // Link the bound texture unit with the requested sampler in the active shader
     glUniform1i(location, textureUnit);
+    boundLocation = location;
 }
 
 void Texture2D::unbind() noexcept {
@@ -126,25 +134,33 @@ void Texture2D::unbind() noexcept {
     }
 }
 
-void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept {
+void Texture2D::upload(const PremultipliedImage& image_, gfx::UploadPass& uploadPass) const noexcept {
     assert(textureResource);
-    assert(image.size == size);
-    if (image.size != size) {
+    assert(image_.size == size);
+    if (image_.size != size) {
         return;
     }
 
-    assert(image.channels == numChannels());
-    if (image.channels != numChannels()) {
+    assert(image_.channels == numChannels());
+    if (image_.channels != numChannels()) {
         return;
     }
 
     // note: images are always unsigned bytes
-    assert(image.channels == getPixelStride());
-    if (image.channels != getPixelStride()) {
+    assert(image_.channels == getPixelStride());
+    if (image_.channels != getPixelStride()) {
         return;
     }
 
-    uploadPass.updateTextureResource(*textureResource, size, &image.data[0], pixelFormat, channelType);
+    uploadPass.updateTextureResource(*textureResource, size, &image_.data[0], pixelFormat, channelType);
+}
+
+void Texture2D::upload(gfx::UploadPass& uploadPass) noexcept {
+    if(image)
+    {
+        upload(*image, uploadPass);
+        image.reset();
+    }
 }
 
 } // namespace gl

@@ -61,6 +61,8 @@ protected:
     DrawableGL(std::unique_ptr<Impl>);
 
 private:
+    void uploadTextures(gfx::UploadPass&) const;
+    
     void bindUniformBuffers() const;
     void unbindUniformBuffers() const;
 
