@@ -10,7 +10,6 @@
 namespace mbgl {
 
 namespace gfx {
-class Context;
 class Texture2D;
 class UploadPass;
 using Texture2DPtr = std::shared_ptr<gfx::Texture2D>;
@@ -35,7 +34,7 @@ public:
     virtual std::optional<ImagePosition> getPattern(const std::string&) const;
     virtual const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;
     virtual Bucket* getBucket(const style::Layer::Impl&) const;
-    virtual void upload(gfx::Context&, gfx::UploadPass&) {}
+    virtual void upload(gfx::UploadPass&) {}
     virtual void prepare(const SourcePrepareParameters&) {}
 
 protected:
@@ -53,7 +52,7 @@ public:
 private:
     // TileRenderData overrides.
     Bucket* getBucket(const style::Layer::Impl&) const override { return bucket ? bucket.get() : nullptr; }
-    void upload(gfx::Context&, gfx::UploadPass& uploadPass) override {
+    void upload(gfx::UploadPass& uploadPass) override {
         if (bucket) bucket->upload(uploadPass);
     }
 

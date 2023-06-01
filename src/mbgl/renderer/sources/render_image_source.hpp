@@ -20,7 +20,7 @@ public:
     const std::vector<mat4> matrices;
 
 private:
-    void upload(gfx::Context&, gfx::UploadPass&) const override;
+    void upload(gfx::UploadPass&) const override;
     void render(PaintParameters&) const override;
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }

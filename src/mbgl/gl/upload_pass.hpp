@@ -26,6 +26,9 @@ private:
     void popDebugGroup() override;
 
 public:
+    gfx::Context& getContext() override;
+    const gfx::Context& getContext() const override;
+
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
                                                                           gfx::BufferUsageType) override;

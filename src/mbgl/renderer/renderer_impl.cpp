@@ -120,17 +120,17 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
         // Update all clipping IDs + upload buckets.
         for (const RenderItem& item : sourceRenderItems) {
-            item.upload(context, *uploadPass);
+            item.upload(*uploadPass);
         }
         for (const RenderItem& item : layerRenderItems) {
-            item.upload(context, *uploadPass);
+            item.upload(*uploadPass);
         }
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
-        renderTree.getPatternAtlas().upload(context, *uploadPass);
+        renderTree.getPatternAtlas().upload(*uploadPass);
 
         // Give the layers a chance to upload
-        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(context, *uploadPass); });
+        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 
     // - 3D PASS

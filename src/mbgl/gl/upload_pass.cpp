@@ -217,5 +217,13 @@ void UploadPass::popDebugGroup() {
     commandEncoder.popDebugGroup();
 }
 
+gfx::Context& UploadPass::getContext() {
+    return commandEncoder.context;
+}
+
+const gfx::Context& UploadPass::getContext() const {
+    return commandEncoder.context;
+}
+
 } // namespace gl
 } // namespace mbgl

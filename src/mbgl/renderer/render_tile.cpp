@@ -124,9 +124,9 @@ gfx::TextureBinding RenderTile::getIconAtlasTextureBinding(gfx::TextureFilterTyp
     return {getIconAtlasTexture()->getResource(), filter};
 }
 
-void RenderTile::upload(gfx::Context& context, gfx::UploadPass& uploadPass) const {
+void RenderTile::upload(gfx::UploadPass& uploadPass) const {
     assert(renderData);
-    renderData->upload(context, uploadPass);
+    renderData->upload(uploadPass);
 
     if (debugBucket) {
         debugBucket->upload(uploadPass);

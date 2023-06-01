@@ -87,9 +87,9 @@ Size PatternAtlas::getPixelSize() const {
     return {static_cast<uint32_t>(shelfPack.width()), static_cast<uint32_t>(shelfPack.height())};
 }
 
-void PatternAtlas::upload(gfx::Context& context, [[maybe_unused]] gfx::UploadPass& uploadPass) {
+void PatternAtlas::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     if (!atlasTexture2D) {
-        atlasTexture2D = context.createTexture2D();
+        atlasTexture2D = uploadPass.getContext().createTexture2D();
         atlasTexture2D->upload(atlasImage);
     } else if (dirty) {
         atlasTexture2D->upload(atlasImage);

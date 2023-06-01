@@ -19,7 +19,7 @@ using namespace style;
 
 ImageSourceRenderData::~ImageSourceRenderData() = default;
 
-void ImageSourceRenderData::upload(gfx::Context&, gfx::UploadPass& uploadPass) const {
+void ImageSourceRenderData::upload(gfx::UploadPass& uploadPass) const {
     if (bucket && bucket->needsUpload()) {
         bucket->upload(uploadPass);
     }

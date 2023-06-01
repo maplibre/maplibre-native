@@ -21,7 +21,7 @@ public:
           name(std::move(name_)) {}
 
 private:
-    void upload(gfx::Context&, gfx::UploadPass&) const override;
+    void upload(gfx::UploadPass&) const override;
     void render(PaintParameters&) const override;
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
@@ -30,9 +30,9 @@ private:
     std::string name;
 };
 
-void TileSourceRenderItem::upload(gfx::Context& context, gfx::UploadPass& parameters) const {
+void TileSourceRenderItem::upload(gfx::UploadPass& parameters) const {
     for (auto& tile : *renderTiles) {
-        tile.upload(context, parameters);
+        tile.upload(parameters);
     }
 }
 
