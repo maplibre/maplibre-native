@@ -82,8 +82,13 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
 
         BackgroundDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
-        auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-        drawable.mutableUniformBuffers().addOrReplace("BackgroundDrawableUBO", std::move(drawableUniformBuffer));
+        
+        if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundDrawableUBO")) {
+            ubo->update(&drawableUBO, sizeof(drawableUBO));
+        } else {
+            drawable.mutableUniformBuffers().addOrReplace("BackgroundDrawableUBO",
+                parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
+        }
 
         gfx::UniformBufferPtr layerUniformBuffer;
         if (hasPattern) {
@@ -117,17 +122,27 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ {0},
             };
-            // TODO: Update UBOs in-place
-            layerUniformBuffer = parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
+
+            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO"); ubo->getSize() == sizeof(layerUBO)) {
+                ubo->update(&drawableUBO, sizeof(drawableUBO));
+            } else {
+                drawable.mutableUniformBuffers().addOrReplace("BackgroundLayerUBO",
+                    parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
+            }
         } else {
             const BackgroundLayerUBO layerUBO = {
                 /* .color = */ evaluated.get<BackgroundColor>(),
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ {0, 0, 0},
             };
-            layerUniformBuffer = parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
+
+            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO"); ubo->getSize() == sizeof(layerUBO)) {
+                ubo->update(&drawableUBO, sizeof(drawableUBO));
+            } else {
+                drawable.mutableUniformBuffers().addOrReplace("BackgroundLayerUBO",
+                    parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
+            }
         }
-        drawable.mutableUniformBuffers().addOrReplace("BackgroundLayerUBO", std::move(layerUniformBuffer));
     });
 }
 

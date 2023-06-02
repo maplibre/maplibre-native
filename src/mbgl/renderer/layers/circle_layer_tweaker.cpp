@@ -60,7 +60,12 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
     CirclePaintParamsUBO paintParamsUBO;
     paintParamsUBO.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
     paintParamsUBO.device_pixel_ratio = parameters.pixelRatio;
-    auto paintParamsUniformBuffer = parameters.context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
+
+    if (!paintParamsUniformBuffer) {
+        paintParamsUniformBuffer = parameters.context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
+    } else {
+        paintParamsUniformBuffer->update(&paintParamsUBO, sizeof(CirclePaintParamsUBO));
+    }
 
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
 
@@ -87,7 +92,12 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
     interpolateUBO.stroke_color_t = 0;
     interpolateUBO.stroke_width_t = 0;
     interpolateUBO.stroke_opacity_t = 0;
-    auto interpolateUniformBuffer = parameters.context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+
+    if (!interpolateUniformBuffer) {
+        interpolateUniformBuffer = parameters.context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+    } else {
+        interpolateUniformBuffer->update(&interpolateUBO, sizeof(CircleInterpolateUBO));
+    }
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         drawable.mutableUniformBuffers().addOrReplace("CirclePaintParamsUBO", paintParamsUniformBuffer);
@@ -112,8 +122,13 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
                 ? std::array<float, 2>{{tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
                                         tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()))}}
                 : parameters.pixelsToGLUnits;
-        auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-        drawable.mutableUniformBuffers().addOrReplace("CircleDrawableUBO", drawableUniformBuffer);
+
+        if (auto& ubo = drawable.mutableUniformBuffers().get("CircleDrawableUBO")) {
+            ubo->update(&drawableUBO, sizeof(drawableUBO));
+        } else {
+            auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
+            drawable.mutableUniformBuffers().addOrReplace("CircleDrawableUBO", drawableUniformBuffer);
+        }
     });
 }
 
