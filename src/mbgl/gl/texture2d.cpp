@@ -91,14 +91,14 @@ void Texture2D::createStorage(const void* data) noexcept {
     context.texture[0] = getTextureID();
     updateSamplerConfiguration();
     MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-        0,
-        Enum<gfx::TexturePixelType>::to(pixelFormat),
-        size.width,
-        size.height,
-        0,
-        Enum<gfx::TexturePixelType>::to(pixelFormat),
-        Enum<gfx::TextureChannelDataType>::to(channelType),
-        data));
+                                  0,
+                                  Enum<gfx::TexturePixelType>::to(pixelFormat),
+                                  size.width,
+                                  size.height,
+                                  0,
+                                  Enum<gfx::TexturePixelType>::to(pixelFormat),
+                                  Enum<gfx::TextureChannelDataType>::to(channelType),
+                                  data));
 }
 
 void Texture2D::create() noexcept {
@@ -208,8 +208,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
 
 void Texture2D::upload() noexcept {
     if (image && image->valid()) {
-        setFormat(gfx::TexturePixelType::RGBA,
-            gfx::TextureChannelDataType::UnsignedByte);
+        setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
         upload(&(*image).data[0], image->size);
         image.reset();
     }
