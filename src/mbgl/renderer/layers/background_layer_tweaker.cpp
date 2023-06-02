@@ -86,8 +86,8 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
         if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundDrawableUBO")) {
             ubo->update(&drawableUBO, sizeof(drawableUBO));
         } else {
-            drawable.mutableUniformBuffers().addOrReplace("BackgroundDrawableUBO",
-                parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
+            drawable.mutableUniformBuffers().addOrReplace(
+                "BackgroundDrawableUBO", parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
         }
 
         gfx::UniformBufferPtr layerUniformBuffer;

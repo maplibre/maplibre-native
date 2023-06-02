@@ -118,8 +118,8 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
         if (auto& ubo = drawable.mutableUniformBuffers().get("FillDrawableUBO")) {
             ubo->update(&drawableUBO, sizeof(drawableUBO));
         } else {
-            drawable.mutableUniformBuffers().addOrReplace("FillDrawableUBO",
-                parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
+            drawable.mutableUniformBuffers().addOrReplace(
+                "FillDrawableUBO", parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
         }
     });
 }
