@@ -7,6 +7,7 @@
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/texture.hpp>
+#include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/image.hpp>
 
@@ -20,6 +21,7 @@ class Texture2D;
 class VertexAttributeArray;
 
 using AttributeBindingArray = std::vector<std::optional<gfx::AttributeBinding>>;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class UploadPass {
 protected:
@@ -35,6 +37,9 @@ public:
     UploadPass& operator=(const UploadPass&) = delete;
 
     DebugGroup<UploadPass> createDebugGroup(const char* name) { return {*this, name}; }
+
+    virtual Context& getContext() = 0;
+    virtual const Context& getContext() const = 0;
 
 public:
     template <class Vertex>
@@ -92,7 +97,7 @@ public:
     void updateTexture(Texture& texture,
                        const Image& image,
                        TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
+        const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         updateTextureResource(texture.getResource(), image.size, image.data.get(), format, type);
         texture.size = image.size;
     }
@@ -105,7 +110,27 @@ public:
                           TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
         assert(image.size.width + offsetX <= texture.size.width);
         assert(image.size.height + offsetY <= texture.size.height);
-        auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
+        const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
+        updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
+    }
+
+    template <typename Image>
+    void updateTexture(Texture2D& texture,
+                       const Image& image,
+                       TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
+        const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
+        updateTexture2D(texture, image.size, image.data.get(), format, type);
+    }
+
+    template <typename Image>
+    void updateTextureSub(Texture2D& texture,
+                          const Image& image,
+                          const uint16_t offsetX,
+                          const uint16_t offsetY,
+                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
+        assert(image.size.width + offsetX <= texture.getSize().width);
+        assert(image.size.height + offsetY <= texture.getSize().height);
+        const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
 
@@ -116,6 +141,7 @@ public:
                                                                    TextureChannelDataType) = 0;
     virtual void updateTextureResource(
         TextureResource&, Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
+
     virtual void updateTextureResourceSub(TextureResource&,
                                           uint16_t xOffset,
                                           uint16_t yOffset,
@@ -123,8 +149,6 @@ public:
                                           const void* data,
                                           TexturePixelType,
                                           TextureChannelDataType) = 0;
-
-    virtual std::shared_ptr<gfx::Texture2D> createTexture2D(const PremultipliedImage& image) = 0;
 };
 
 } // namespace gfx

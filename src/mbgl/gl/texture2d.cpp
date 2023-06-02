@@ -23,6 +23,11 @@ Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_)
 }
 
 Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::TextureChannelDataType channelType_) noexcept {
+    if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
+        return *this;
+    }
+
+    assert(!textureResource);
     pixelFormat = pixelFormat_;
     channelType = channelType_;
     return *this;
@@ -52,56 +57,61 @@ size_t Texture2D::numChannels() const noexcept {
     switch (pixelFormat) {
         case gfx::TexturePixelType::RGBA:
             return 4;
+        case gfx::TexturePixelType::Alpha:
+            return 1;
         default:
             return 0;
     }
 }
 
-void Texture2D::create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept {
-    assert(!textureResource);
-    textureResource = uploadPass.createTextureResource(size, pixelData.data(), pixelFormat, channelType);
-}
-
 void Texture2D::create() noexcept {
     assert(!textureResource);
-    textureResource = context.createTextureResource(size, pixelFormat, channelType);
+
+    auto obj = context.createUniqueTexture();
+    const auto storageSize = gl::TextureResource::getStorageSize(size, pixelFormat, channelType);
+    context.renderingStats().memTextures += storageSize;
+
+    // @TODO: TextureResource is still needed while we have legacy rendering pathways
+    textureResource = std::make_unique<gl::TextureResource>(std::move(obj), storageSize);
 }
 
 platform::GLuint Texture2D::getTextureID() const noexcept {
     return static_cast<gl::TextureResource&>(*textureResource).texture;
 }
 
+void Texture2D::updateSamplerConfiguration() noexcept {
+    using namespace platform;
+
+    MBGL_CHECK_ERROR(
+        glTexParameteri(GL_TEXTURE_2D,
+                        GL_TEXTURE_MIN_FILTER,
+                        samplerState.minification == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
+    MBGL_CHECK_ERROR(
+        glTexParameteri(GL_TEXTURE_2D,
+                        GL_TEXTURE_MAG_FILTER,
+                        samplerState.magnification == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
+    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
+                                     GL_TEXTURE_WRAP_S,
+                                     samplerState.wrapU == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
+                                     GL_TEXTURE_WRAP_T,
+                                     samplerState.wrapV == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+}
+
 void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
     using namespace platform;
 
     assert(gfx::MaxActiveTextureUnits > textureUnit);
-    if (gfx::MaxActiveTextureUnits > textureUnit) return;
+    if (gfx::MaxActiveTextureUnits <= textureUnit) return;
 
+    // Bind to the texture unit
     context.activeTextureUnit = static_cast<uint8_t>(textureUnit);
     context.texture[static_cast<size_t>(textureUnit)] = getTextureID();
-
     boundTextureUnit = textureUnit;
 
     // Update the sampler state if it was changed after resource creation
     if (samplerStateDirty) {
-        samplerStateDirty = false;
-
-        MBGL_CHECK_ERROR(
-            glTexParameteri(GL_TEXTURE_2D,
-                            GL_TEXTURE_MIN_FILTER,
-                            samplerState.minification == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
-        MBGL_CHECK_ERROR(
-            glTexParameteri(GL_TEXTURE_2D,
-                            GL_TEXTURE_MAG_FILTER,
-                            samplerState.magnification == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
-        MBGL_CHECK_ERROR(
-            glTexParameteri(GL_TEXTURE_2D,
-                            GL_TEXTURE_WRAP_S,
-                            samplerState.wrapU == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-        MBGL_CHECK_ERROR(
-            glTexParameteri(GL_TEXTURE_2D,
-                            GL_TEXTURE_WRAP_T,
-                            samplerState.wrapV == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+        updateSamplerConfiguration();
     }
 
     // Link the bound texture unit with the requested sampler in the active shader
@@ -126,18 +136,55 @@ void Texture2D::unbind() noexcept {
     }
 }
 
-void Texture2D::upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept {
+void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
+    using namespace platform;
+    if (!textureResource) {
+        create();
+    }
     assert(textureResource);
-    assert(image.size == size);
-    if (image.size != size) {
-        return;
+
+    // Bind to TU 0 and upload
+    context.activeTextureUnit = 0;
+    context.texture[0] = getTextureID();
+    if (samplerStateDirty) {
+        updateSamplerConfiguration();
     }
 
-    assert(PremultipliedImage::channels == numChannels());
-    // note: images are always unsigned bytes
-    assert(PremultipliedImage::channels == getPixelStride());
+    if (size_ == Size{0, 0} || size_ != size) {
+        size = size_;
+        MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
+                                      0,
+                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
+                                      size.width,
+                                      size.height,
+                                      0,
+                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
+                                      Enum<gfx::TextureChannelDataType>::to(channelType),
+                                      pixelData));
+    } else {
+        uploadSubRegion(pixelData, size, 0, 0);
+    }
+}
 
-    uploadPass.updateTextureResource(*textureResource, size, &image.data[0], pixelFormat, channelType);
+void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
+    using namespace platform;
+
+    assert(textureResource);
+    assert(!samplerStateDirty);
+
+    // Bind to TU 0 and upload
+    context.activeTextureUnit = 0;
+    context.texture[0] = getTextureID();
+
+    MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
+                                     0,
+                                     xOffset,
+                                     yOffset,
+                                     size_.width,
+                                     size_.height,
+                                     Enum<gfx::TexturePixelType>::to(pixelFormat),
+                                     Enum<gfx::TextureChannelDataType>::to(channelType),
+                                     pixelData));
 }
 
 } // namespace gl

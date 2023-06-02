@@ -15,7 +15,7 @@ namespace gl {
 TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity)
     : TileLayerGroup(layerIndex_, initialCapacity) {}
 
-void TileLayerGroupGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
+void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
     observeDrawables([&](gfx::Drawable& drawable) {
         auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
 
@@ -28,7 +28,7 @@ void TileLayerGroupGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass
         const auto debugGroup = uploadPass.createDebugGroup(labelPtr);
 #endif
 
-        drawableGL.upload(context, uploadPass);
+        drawableGL.upload(uploadPass);
     });
 }
 

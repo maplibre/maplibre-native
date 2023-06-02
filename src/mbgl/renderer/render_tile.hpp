@@ -14,7 +14,9 @@
 namespace mbgl {
 
 namespace gfx {
+class Texture2D;
 class UploadPass;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
 } // namespace gfx
 
 class Bucket;
@@ -55,8 +57,14 @@ public:
     Bucket* getBucket(const style::Layer::Impl&) const;
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;
     std::optional<ImagePosition> getPattern(const std::string& pattern) const;
-    const gfx::Texture& getGlyphAtlasTexture() const;
-    const gfx::Texture& getIconAtlasTexture() const;
+
+    bool hasGlyphAtlasTexture() const;
+    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
+    gfx::TextureBinding getGlyphAtlasTextureBinding(gfx::TextureFilterType) const;
+
+    bool hasIconAtlasTexture() const;
+    const gfx::Texture2DPtr& getIconAtlasTexture() const;
+    gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
 
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
