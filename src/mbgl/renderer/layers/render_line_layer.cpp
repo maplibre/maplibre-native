@@ -371,8 +371,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
-        if (tileDrawable) {
+        // If we already have drawables for this tile, skip.
+        // If a drawable needs to be updated, that's handled in the layer tweaker.
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
             continue;
         }
 
@@ -429,7 +430,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
                     size_t index{0};
                     for (const auto& vert : bucket.vertices.vector()) {
-                        attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+                        attr->set(index++, gfx::VertexAttribute::float4{(float)vert.a2[0], (float)vert.a2[1], (float)vert.a2[2], (float)vert.a2[3]});
                     }
                 }
 

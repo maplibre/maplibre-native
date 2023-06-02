@@ -75,7 +75,7 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup,
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         drawable.mutableUniformBuffers().addOrReplace("LineEvaluatedPropsUBO", evaluatedPropsUniformBuffer);
-        drawable.mutableUniformBuffers().addOrReplace("LineInterpolatedUBO", interpolateUniformBuffer);
+        drawable.mutableUniformBuffers().addOrReplace("LineInterpolatedPropsUBO", interpolateUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
