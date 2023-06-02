@@ -24,6 +24,8 @@ public: // gfx::Texture2D
 
     Texture2D& setSize(Size size_) noexcept override;
 
+    Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept override;
+
     Size getSize() const noexcept override { return size; }
 
     size_t getDataSize() const noexcept override;
@@ -36,11 +38,14 @@ public: // gfx::Texture2D
 
     void upload(const void* pixelData, const Size& size_) noexcept override;
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
+    void upload() noexcept override;
 
     gfx::TextureResource& getResource() override {
         assert(textureResource);
         return *textureResource;
     }
+
+    bool needsUpload() const noexcept override { return !!image; };
 
 public:
     /// @brief Get the OpenGL handle ID for the underlying resource
@@ -59,13 +64,18 @@ public:
     void unbind() noexcept;
 
 private:
+    void createObject() noexcept;
+    void createStorage(const void* data = nullptr) noexcept;
+
+private:
     gl::Context& context;
     std::unique_ptr<gfx::TextureResource> textureResource{nullptr};
 
     SamplerState samplerState{};
-    gfx::TexturePixelType pixelFormat;
-    gfx::TextureChannelDataType channelType;
+    gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
+    gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
 
+    std::shared_ptr<PremultipliedImage> image{nullptr};
     Size size{0, 0};
     bool samplerStateDirty{false};
 
