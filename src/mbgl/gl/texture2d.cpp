@@ -81,6 +81,7 @@ platform::GLuint Texture2D::getTextureID() const noexcept {
 
 void Texture2D::updateSamplerConfiguration() noexcept {
     using namespace platform;
+    samplerStateDirty = false;
 
     MBGL_CHECK_ERROR(
         glTexParameteri(GL_TEXTURE_2D,
@@ -146,9 +147,7 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     // Bind to TU 0 and upload
     context.activeTextureUnit = 0;
     context.texture[0] = getTextureID();
-    if (samplerStateDirty) {
-        updateSamplerConfiguration();
-    }
+    updateSamplerConfiguration();
 
     if (size_ == Size{0, 0} || size_ != size) {
         size = size_;
