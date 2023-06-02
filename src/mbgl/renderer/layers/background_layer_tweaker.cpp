@@ -90,7 +90,6 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
                 "BackgroundDrawableUBO", parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
         }
 
-        gfx::UniformBufferPtr layerUniformBuffer;
         if (hasPattern) {
             // TODO: add when raster is merged
             // curShader->getSamplerLocation("u_image");
