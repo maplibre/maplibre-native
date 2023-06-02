@@ -126,7 +126,7 @@ void DrawableGL::unbindUniformBuffers() const {
     }
 }
 
-void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
+void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     if (!shader) {
         return;
     }
@@ -137,6 +137,7 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
                        });
 
     if (build) {
+        auto& context = uploadPass.getContext();
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 

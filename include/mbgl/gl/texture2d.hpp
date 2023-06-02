@@ -24,23 +24,30 @@ public: // gfx::Texture2D
 
     Texture2D& setSize(Size size_) noexcept override;
 
+    Size getSize() const noexcept override { return size; }
+
     size_t getDataSize() const noexcept override;
 
     size_t getPixelStride() const noexcept override;
 
     size_t numChannels() const noexcept override;
 
-    void create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept override;
     void create() noexcept override;
 
-    void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept override;
+    void upload(const void* pixelData, const Size& size_) noexcept override;
+    void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
 
-    gfx::TextureResource& getResource() override { return *textureResource; }
+    gfx::TextureResource& getResource() override {
+        assert(textureResource);
+        return *textureResource;
+    }
 
 public:
     /// @brief Get the OpenGL handle ID for the underlying resource
     /// @return GLuint
     platform::GLuint getTextureID() const noexcept;
+
+    void updateSamplerConfiguration() noexcept;
 
     /// @brief Bind this texture to the specified texture unit
     /// @param location Location index of texture sampler in a shader
@@ -60,7 +67,7 @@ private:
     gfx::TextureChannelDataType channelType;
 
     Size size{0, 0};
-    mutable bool samplerStateDirty{false};
+    bool samplerStateDirty{false};
 
     int32_t boundTextureUnit{-1};
     int32_t boundLocation{-1};

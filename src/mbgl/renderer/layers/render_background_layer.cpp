@@ -2,7 +2,6 @@
 #include <mbgl/renderer/layers/background_layer_tweaker.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/programs/programs.hpp>
@@ -206,16 +205,12 @@ void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     }
 }
 
-void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
+void RenderBackgroundLayer::update(gfx::ShaderRegistry& /*shaders*/,
                                    gfx::Context& context,
                                    const TransformState& state,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-
-    if (!shader) {
-        shader = context.getGenericShader(shaders, "BackgroundShader");
-    }
 
     const auto removeAll = [&]() {
         if (tileLayerGroup) {
@@ -228,7 +223,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     const auto tileCover = util::tileCover(state, zoom);
 
     // renderTiles is always empty, we use tileCover instead
-    // if (!renderTiles || renderTiles->empty()) {
     if (tileCover.empty()) {
         removeAll();
         return;
@@ -244,9 +238,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                 ? RenderPass::Translucent
                                 : RenderPass::Opaque |
                                       RenderPass::Translucent; // evaluated based on opaquePassCutoff in render()
-
-    // unevaluated.hasTransition();
-    // getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (drawPasses == RenderPass::None) {
@@ -284,7 +275,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         });
 
         // For each tile in the cover set, add a tile drawable if one doesn't already exist.
-        // We currently assume only one drawable per tile.
         for (const auto& tileID : tileCover) {
             // If we already have drawables for this tile, skip.
             // If a drawable needs to be updated, that's handled in the layer tweaker.
@@ -296,7 +286,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
             if (!builder) {
                 builder = context.createDrawableBuilder("background");
                 builder->setRenderPass(drawPasses);
-                builder->setShader(shader);
+                // builder->setShader(shader);
                 builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
             }
@@ -306,9 +296,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
             builder->flush();
 
-            auto newDrawables = builder->clearDrawables();
-            if (!newDrawables.empty()) {
-                auto& drawable = newDrawables[0];
+            for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;

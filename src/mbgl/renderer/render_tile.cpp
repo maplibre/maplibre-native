@@ -96,14 +96,32 @@ std::optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) 
     return renderData->getPattern(pattern);
 }
 
-const gfx::Texture& RenderTile::getGlyphAtlasTexture() const {
-    assert(renderData);
-    return renderData->getGlyphAtlasTexture();
+static const gfx::Texture2DPtr noTexture;
+
+bool RenderTile::hasGlyphAtlasTexture() const {
+    return renderData && renderData->getGlyphAtlasTexture();
 }
 
-const gfx::Texture& RenderTile::getIconAtlasTexture() const {
-    assert(renderData);
-    return renderData->getIconAtlasTexture();
+const gfx::Texture2DPtr& RenderTile::getGlyphAtlasTexture() const {
+    return renderData ? renderData->getGlyphAtlasTexture() : noTexture;
+}
+
+gfx::TextureBinding RenderTile::getGlyphAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData && renderData->getGlyphAtlasTexture());
+    return {getGlyphAtlasTexture()->getResource(), filter};
+}
+
+bool RenderTile::hasIconAtlasTexture() const {
+    return renderData && renderData->getIconAtlasTexture();
+}
+
+const gfx::Texture2DPtr& RenderTile::getIconAtlasTexture() const {
+    return renderData ? renderData->getIconAtlasTexture() : noTexture;
+}
+
+gfx::TextureBinding RenderTile::getIconAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData && renderData->getIconAtlasTexture());
+    return {getIconAtlasTexture()->getResource(), filter};
 }
 
 void RenderTile::upload(gfx::UploadPass& uploadPass) const {
