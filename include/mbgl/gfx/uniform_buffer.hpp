@@ -18,6 +18,7 @@ protected:
 
 public:
     virtual ~UniformBuffer() = default;
+    virtual void update(const void* data, std::size_t size_) = 0;
 
     std::size_t getSize() const { return size; }
 
