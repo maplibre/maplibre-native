@@ -16,7 +16,15 @@ TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapac
     : TileLayerGroup(layerIndex_, initialCapacity) {}
 
 void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
+    if (!enabled) {
+        return;
+    }
+
     observeDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getEnabled()) {
+            return;
+        }
+
         auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
 
 #if !defined(NDEBUG)
@@ -33,13 +41,12 @@ void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
 }
 
 void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
-    // TODO: Render tile masks
-    // for (auto& layer : renderLayers) {
-    //    parameters.renderTileClippingMasks(renderTiles);
-    //}
+    if (!enabled) {
+        return;
+    }
 
     observeDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.hasRenderPass(parameters.pass)) {
+        if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
 

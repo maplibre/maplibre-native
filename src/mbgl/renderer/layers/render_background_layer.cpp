@@ -205,7 +205,10 @@ void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     }
 }
 
-void RenderBackgroundLayer::update(gfx::ShaderRegistry& /*shaders*/,
+static constexpr std::string_view BackgroundPlainShaderName = "BackgroundShader";
+static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatternShader";
+
+void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
                                    [[maybe_unused]] const RenderTree& renderTree,
@@ -229,6 +232,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& /*shaders*/,
     }
 
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
+    const bool hasPattern = !evaluated.get<BackgroundPattern>().to.empty();
 
     // TODO: If background is solid, we can skip drawables and rely on the clear color
     const auto drawPasses = evaluated.get<style::BackgroundOpacity>() == 0.0f ? RenderPass::None
@@ -253,8 +257,18 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& /*shaders*/,
         tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
     }
 
-    // Drawables per overscaled or canonical tile?
-    // const UnwrappedTileID unwrappedTileID = tileID.toUnwrapped();
+    if (!hasPattern && !plainShader) {
+        plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));
+    }
+    if (hasPattern && !patternShader) {
+        patternShader = context.getGenericShader(shaders, std::string(BackgroundPatternShaderName));
+    }
+
+    const auto& curShader = hasPattern ? patternShader : plainShader;
+    if (!curShader) {
+        removeAll();
+        return;
+    }
 
     // Put the tile cover into a searchable form.
     // TODO: Likely better to sort and `std::binary_search` the vector.
@@ -286,12 +300,12 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& /*shaders*/,
             if (!builder) {
                 builder = context.createDrawableBuilder("background");
                 builder->setRenderPass(drawPasses);
-                // builder->setShader(shader);
+                builder->setShader(curShader);
                 builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
             }
 
-            // Tile coordinates are fixed...
+            // Tile coordinates are fixed.
             builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
 
             builder->flush();

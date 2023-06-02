@@ -39,6 +39,10 @@ public:
     LayerGroup(const LayerGroup&) = delete;
     LayerGroup& operator=(const LayerGroup&) = delete;
 
+    /// Whether the drawables should be drawn
+    bool getEnabled() const { return enabled; }
+    void setEnabled(bool value) { enabled = value; }
+
     int32_t getLayerIndex() const { return layerIndex; }
 
     /// Called before starting each frame
@@ -64,6 +68,7 @@ public:
     const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
 
 protected:
+    bool enabled = true;
     int32_t layerIndex;
     LayerTweakerPtr layerTweaker;
 };
