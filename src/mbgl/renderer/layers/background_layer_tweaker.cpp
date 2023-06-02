@@ -55,12 +55,10 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
     const auto& evaluated = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).crossfade;
     const bool hasPattern = !evaluated.get<BackgroundPattern>().to.empty();
-    const auto imagePosA = hasPattern ? parameters.patternAtlas.getPattern(
-                                                                    evaluated.get<BackgroundPattern>().from.id())
-                                                              : std::nullopt;
-    const auto imagePosB = hasPattern ? parameters.patternAtlas.getPattern(
-                                                                    evaluated.get<BackgroundPattern>().to.id())
-                                                              : std::nullopt;
+    const auto imagePosA = hasPattern ? parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().from.id())
+                                      : std::nullopt;
+    const auto imagePosB = hasPattern ? parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().to.id())
+                                      : std::nullopt;
 
     if (hasPattern && (!imagePosA || !imagePosB)) {
         // The pattern isn't valid, disable the whole thing.
@@ -72,16 +70,15 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
     constexpr int32_t samplerLocation = 0;
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
-        
+
         // We assume that drawables don't change between pattern and non-pattern.
-        assert(hasPattern == (drawable.getShader() == context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
+        assert(hasPattern == (drawable.getShader() ==
+                              context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = parameters.matrixForTile(tileID);
 
-        BackgroundDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(matrix)
-        };
+        BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(BackgroundDrawableUBOName, &drawableUBO, context);

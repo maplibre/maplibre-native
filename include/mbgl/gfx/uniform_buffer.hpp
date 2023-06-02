@@ -54,7 +54,8 @@ public:
     const std::shared_ptr<UniformBuffer>& get(std::string_view name) const;
 
     /// Add a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& addOrReplace(std::string_view name, std::shared_ptr<UniformBuffer> uniformBuffer);
+    const std::shared_ptr<UniformBuffer>& addOrReplace(std::string_view name,
+                                                       std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
     void createOrUpdate(std::string_view name, const std::vector<uint8_t>& data, gfx::Context&);

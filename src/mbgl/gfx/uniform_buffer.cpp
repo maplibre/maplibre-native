@@ -38,12 +38,16 @@ const std::shared_ptr<UniformBuffer>& UniformBufferArray::addOrReplace(const std
     return result.first->second;
 }
 
-void UniformBufferArray::createOrUpdate(std::string_view name, const std::vector<uint8_t>& data, gfx::Context& context) {
+void UniformBufferArray::createOrUpdate(std::string_view name,
+                                        const std::vector<uint8_t>& data,
+                                        gfx::Context& context) {
     createOrUpdate(name, data.data(), data.size(), context);
 }
 
-void UniformBufferArray::createOrUpdate(const std::string_view name, const void* data,
-                                        const std::size_t size, gfx::Context& context) {
+void UniformBufferArray::createOrUpdate(const std::string_view name,
+                                        const void* data,
+                                        const std::size_t size,
+                                        gfx::Context& context) {
     if (auto& ubo = get(name); ubo && ubo->getSize() == size) {
         ubo->update(data, size);
     } else {
