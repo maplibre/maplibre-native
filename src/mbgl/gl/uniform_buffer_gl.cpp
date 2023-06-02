@@ -1,6 +1,7 @@
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <cassert>
 
@@ -26,6 +27,13 @@ UniformBufferGL::~UniformBufferGL() {
 
 void UniformBufferGL::update(const void* data, std::size_t size_) {
     assert(size == size_);
+    if (size != size_) {
+        Log::Error(
+            Event::General,
+            "Mismatched size given to UBO update, expected " + std::to_string(size) + ", got " + std::to_string(size_));
+        return;
+    }
+
     MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, id));
     MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, size_, data));
     MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
