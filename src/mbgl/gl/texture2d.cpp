@@ -38,6 +38,11 @@ Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     return *this;
 }
 
+Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) noexcept {
+    image = std::move(image_);
+    return *this;
+}
+
 size_t Texture2D::getDataSize() const noexcept {
     return size.width * size.height * getPixelStride();
 }
@@ -64,15 +69,41 @@ size_t Texture2D::numChannels() const noexcept {
     }
 }
 
-void Texture2D::create() noexcept {
+void Texture2D::createObject() noexcept {
+    // Create a new texture object
     assert(!textureResource);
-
     auto obj = context.createUniqueTexture();
     const auto storageSize = gl::TextureResource::getStorageSize(size, pixelFormat, channelType);
     context.renderingStats().memTextures += storageSize;
 
     // @TODO: TextureResource is still needed while we have legacy rendering pathways
     textureResource = std::make_unique<gl::TextureResource>(std::move(obj), storageSize);
+}
+
+void Texture2D::createStorage(const void* data) noexcept {
+    assert(textureResource);
+
+    // Create backing storage for our texture object
+    using namespace platform;
+
+    // Bind to TU 0 and upload
+    context.activeTextureUnit = 0;
+    context.texture[0] = getTextureID();
+    updateSamplerConfiguration();
+    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
+        0,
+        Enum<gfx::TexturePixelType>::to(pixelFormat),
+        size.width,
+        size.height,
+        0,
+        Enum<gfx::TexturePixelType>::to(pixelFormat),
+        Enum<gfx::TextureChannelDataType>::to(channelType),
+        data));
+}
+
+void Texture2D::create() noexcept {
+    createObject();
+    createStorage();
 }
 
 platform::GLuint Texture2D::getTextureID() const noexcept {
@@ -139,28 +170,18 @@ void Texture2D::unbind() noexcept {
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     using namespace platform;
-    if (!textureResource) {
-        create();
-    }
-    assert(textureResource);
 
-    // Bind to TU 0 and upload
-    context.activeTextureUnit = 0;
-    context.texture[0] = getTextureID();
-    updateSamplerConfiguration();
+    if (!textureResource || size_ == Size{0, 0} || size_ != size) {
+        // Create the texture object if we don't already have one
+        if (!textureResource) {
+            createObject();
+        }
 
-    if (size_ == Size{0, 0} || size_ != size) {
         size = size_;
-        MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                      0,
-                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
-                                      size.width,
-                                      size.height,
-                                      0,
-                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
-                                      Enum<gfx::TextureChannelDataType>::to(channelType),
-                                      pixelData));
+        createStorage(pixelData);
+
     } else {
+        // Upload to existing memory
         uploadSubRegion(pixelData, size, 0, 0);
     }
 }
@@ -174,7 +195,6 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     // Bind to TU 0 and upload
     context.activeTextureUnit = 0;
     context.texture[0] = getTextureID();
-
     MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
                                      0,
                                      xOffset,
@@ -184,6 +204,15 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
                                      Enum<gfx::TexturePixelType>::to(pixelFormat),
                                      Enum<gfx::TextureChannelDataType>::to(channelType),
                                      pixelData));
+}
+
+void Texture2D::upload() noexcept {
+    if (image && image->valid()) {
+        setFormat(gfx::TexturePixelType::RGBA,
+            gfx::TextureChannelDataType::UnsignedByte);
+        upload(&(*image).data[0], image->size);
+        image.reset();
+    }
 }
 
 } // namespace gl
