@@ -50,6 +50,10 @@ public:
     /// @return this
     virtual Texture2D& setSize(Size size_) noexcept = 0;
 
+    /// @brief Sets the internal image
+    /// @param image_ Image data to transfer
+    virtual Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept = 0;
+
     /// @brief Get the size of the texture
     /// @return Size of the texture
     virtual Size getSize() const noexcept = 0;
@@ -68,6 +72,7 @@ public:
     virtual size_t numChannels() const noexcept = 0;
 
     /// @brief Create the texture with default initialized memory.
+    /// @note Be sure to configure a valid size and format.
     virtual void create() noexcept = 0;
 
     /// @brief Upload image data to the texture resource
@@ -93,10 +98,17 @@ public:
         uploadSubRegion(&img.data[0], img.size, xOffset, yOffset);
     }
 
+    /// @brief Upload staged image data if present and required.
+    /// @see needsUpload
+    virtual void upload() noexcept = 0;
+
     /// @brief Get the underlying GL texture resource
     /// @note: Compat with legacy textures, to be refactored
     /// @return gfx::TextureResource
     virtual gfx::TextureResource& getResource() = 0;
+
+    /// @brief Check whether the texture needs upload
+    virtual bool needsUpload() const noexcept = 0;
 };
 
 } // namespace gfx
