@@ -44,7 +44,7 @@ public:
     /// Called before starting each frame
     virtual void preRender(RenderOrchestrator&, PaintParameters&) {}
     /// Called during the upload pass
-    virtual void upload(gfx::Context&, gfx::UploadPass&) {}
+    virtual void upload(gfx::UploadPass&) {}
     /// Called during each render pass
     virtual void render(RenderOrchestrator&, PaintParameters&) {}
     /// Called at the end of each frame

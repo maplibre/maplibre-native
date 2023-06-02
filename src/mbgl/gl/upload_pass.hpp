@@ -26,6 +26,9 @@ private:
     void popDebugGroup() override;
 
 public:
+    gfx::Context& getContext() override;
+    const gfx::Context& getContext() const override;
+
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
                                                                           gfx::BufferUsageType) override;
@@ -49,6 +52,7 @@ public:
                                                                 gfx::TextureChannelDataType) override;
     void updateTextureResource(
         gfx::TextureResource&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
+
     void updateTextureResourceSub(gfx::TextureResource&,
                                   uint16_t xOffset,
                                   uint16_t yOffset,
@@ -56,8 +60,6 @@ public:
                                   const void* data,
                                   gfx::TexturePixelType,
                                   gfx::TextureChannelDataType) override;
-
-    std::shared_ptr<gfx::Texture2D> createTexture2D(const PremultipliedImage& image) override;
 
 private:
     gl::CommandEncoder& commandEncoder;

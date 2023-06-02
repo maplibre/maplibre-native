@@ -130,7 +130,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         renderTree.getPatternAtlas().upload(*uploadPass);
 
         // Give the layers a chance to upload
-        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(context, *uploadPass); });
+        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 
     // - 3D PASS

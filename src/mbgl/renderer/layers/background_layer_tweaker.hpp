@@ -2,10 +2,15 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 
+#include <memory>
+
 namespace mbgl {
 
 namespace gfx {
+class ShaderProgramBase;
 class UniformBuffer;
+
+using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
 
@@ -23,7 +28,8 @@ public:
     void execute(LayerGroup&, const RenderTree&, const PaintParameters&) override;
 
 protected:
-    gfx::UniformBufferPtr layerUniformBuffer = nullptr;
+    gfx::ShaderProgramBasePtr shader;
+    gfx::ShaderProgramBasePtr patternShader;
 };
 
 } // namespace mbgl

@@ -50,6 +50,10 @@ public:
     /// @return this
     virtual Texture2D& setSize(Size size_) noexcept = 0;
 
+    /// @brief Get the size of the texture
+    /// @return Size of the texture
+    virtual Size getSize() const noexcept = 0;
+
     /// @brief Determine the size of the buffer backing this texture
     /// as configured, in bytes.
     /// @return Size in bytes
@@ -63,17 +67,31 @@ public:
     /// @return Channel count
     virtual size_t numChannels() const noexcept = 0;
 
-    /// @brief Create the texture using the provided buffer.
-    /// @param pixelData Buffer of bytes to initialize the texture with
-    virtual void create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept = 0;
-
     /// @brief Create the texture with default initialized memory.
     virtual void create() noexcept = 0;
 
     /// @brief Upload image data to the texture resource
-    /// @param image Image data to transfer
-    /// @param uploadPass Upload pass to orchestrate upload
-    virtual void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept = 0;
+    /// @param pixelData Image data to transfer
+    virtual void upload(const void* pixelData, const Size& size_) noexcept = 0;
+    template <typename Image>
+    void upload(const Image& img) noexcept {
+        setFormat(Image::channels == 1 ? gfx::TexturePixelType::Alpha : gfx::TexturePixelType::RGBA,
+                  gfx::TextureChannelDataType::UnsignedByte);
+        upload(&img.data[0], img.size);
+    }
+
+    virtual void uploadSubRegion(const void* pixelData,
+                                 const Size& size,
+                                 uint16_t xOffset,
+                                 uint16_t yOffset) noexcept = 0;
+    template <typename Image>
+    void uploadSubRegion(const Image& img, uint16_t xOffset, uint16_t yOffset) noexcept {
+        assert(Image::channels == numChannels());
+        assert(Image::channels == getPixelStride());
+        assert(img.size.width + xOffset <= getSize().width);
+        assert(img.size.height + yOffset <= getSize().height);
+        uploadSubRegion(&img.data[0], img.size, xOffset, yOffset);
+    }
 
     /// @brief Get the underlying GL texture resource
     /// @note: Compat with legacy textures, to be refactored

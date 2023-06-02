@@ -195,7 +195,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                         tile.translatedMatrix(
                             evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
                         parameters.backend.getDefaultRenderable().getSize(),
-                        tile.getIconAtlasTexture().size,
+                        tile.getIconAtlasTexture()->getSize(),
                         crossfade,
                         tile.id,
                         parameters.state,
@@ -230,8 +230,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                      *bucket.triangleIndexBuffer,
                      bucket.triangleSegments,
                      FillPatternProgram::TextureBindings{
-                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
-                                                gfx::TextureFilterType::Linear},
+                         tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
                      });
             }
             if (evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined()) {
@@ -241,8 +240,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                      *bucket.lineIndexBuffer,
                      bucket.lineSegments,
                      FillOutlinePatternProgram::TextureBindings{
-                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
-                                                gfx::TextureFilterType::Linear},
+                         tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
                      });
             }
         }
@@ -519,6 +517,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     patternBuilder->setSubLayerIndex(1);
+                    // patternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
                     outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
@@ -528,6 +527,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlinePatternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     outlinePatternBuilder->setSubLayerIndex(2);
+                    // outlinePatternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
                 }
 
                 //                             parameters.stencilModeForClipping(tile.id),

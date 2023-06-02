@@ -11,6 +11,8 @@ struct Drawable::DrawSegment {
           segment(std::move(segment_)) {}
 
     const gfx::DrawMode& getMode() const { return mode; }
+
+    Segment<void>& getSegment() { return segment; }
     const Segment<void>& getSegment() const { return segment; }
 
 protected:
