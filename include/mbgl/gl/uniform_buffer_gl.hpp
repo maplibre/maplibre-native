@@ -16,6 +16,7 @@ public:
     ~UniformBufferGL() override;
 
     BufferID getID() const { return id; }
+    void update(const void* data, std::size_t size_) override;
 
 protected:
     BufferID id = 0;
