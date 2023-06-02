@@ -52,25 +52,23 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup,
                                const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
 
-    if (!evaluatedPropsUniformBuffer) {
-        LineEvaluatedPropsUBO evaluatedPropsUBO;
-        evaluatedPropsUBO.color = evaluated.get<LineColor>().constantOr(Color(1, 0, 1, 1));
-        evaluatedPropsUBO.blur = evaluated.get<LineBlur>().constantOr(0);
-        evaluatedPropsUBO.opacity = evaluated.get<LineOpacity>().constantOr(0);
-        evaluatedPropsUBO.gapwidth = evaluated.get<LineGapWidth>().constantOr(0);
-        evaluatedPropsUBO.offset = evaluated.get<LineOffset>().constantOr(0);
-        evaluatedPropsUBO.width = evaluated.get<LineWidth>().constantOr(0);
-        evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
-                                                                             sizeof(evaluatedPropsUBO));
-    }
+    LineEvaluatedPropsUBO evaluatedPropsUBO;
+    evaluatedPropsUBO.color = evaluated.get<LineColor>().constantOr(Color(1, 0, 1, 1));
+    evaluatedPropsUBO.blur = evaluated.get<LineBlur>().constantOr(0);
+    evaluatedPropsUBO.opacity = evaluated.get<LineOpacity>().constantOr(0);
+    evaluatedPropsUBO.gapwidth = evaluated.get<LineGapWidth>().constantOr(0);
+    evaluatedPropsUBO.offset = evaluated.get<LineOffset>().constantOr(0);
+    evaluatedPropsUBO.width = evaluated.get<LineWidth>().constantOr(0);
+    evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
+                                                                         sizeof(evaluatedPropsUBO));
 
     LineInterpolatedPropsUBO interpolatedUBO;
-    interpolatedUBO.color_t = 0;
-    interpolatedUBO.blur_t = 0;
-    interpolatedUBO.opacity_t = 0;
-    interpolatedUBO.gapwidth_t = 0;
-    interpolatedUBO.offset_t = 0;
-    interpolatedUBO.width_t = 0;
+    interpolatedUBO.color_t = 1;
+    interpolatedUBO.blur_t = 1;
+    interpolatedUBO.opacity_t = 1;
+    interpolatedUBO.gapwidth_t = 1;
+    interpolatedUBO.offset_t = 1;
+    interpolatedUBO.width_t = 1;
     auto interpolateUniformBuffer = parameters.context.createUniformBuffer(&interpolatedUBO, sizeof(interpolatedUBO));
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
