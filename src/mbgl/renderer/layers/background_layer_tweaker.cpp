@@ -82,7 +82,7 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
 
         BackgroundDrawableUBO drawableUBO;
         drawableUBO.matrix = util::cast<float>(matrix);
-        
+
         if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundDrawableUBO")) {
             ubo->update(&drawableUBO, sizeof(drawableUBO));
         } else {
@@ -123,11 +123,12 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
                 /* .pad = */ {0},
             };
 
-            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO"); ubo->getSize() == sizeof(layerUBO)) {
+            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO");
+                ubo->getSize() == sizeof(layerUBO)) {
                 ubo->update(&drawableUBO, sizeof(drawableUBO));
             } else {
-                drawable.mutableUniformBuffers().addOrReplace("BackgroundLayerUBO",
-                    parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
+                drawable.mutableUniformBuffers().addOrReplace(
+                    "BackgroundLayerUBO", parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
             }
         } else {
             const BackgroundLayerUBO layerUBO = {
@@ -136,11 +137,12 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
                 /* .pad = */ {0, 0, 0},
             };
 
-            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO"); ubo->getSize() == sizeof(layerUBO)) {
+            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO");
+                ubo->getSize() == sizeof(layerUBO)) {
                 ubo->update(&drawableUBO, sizeof(drawableUBO));
             } else {
-                drawable.mutableUniformBuffers().addOrReplace("BackgroundLayerUBO",
-                    parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
+                drawable.mutableUniformBuffers().addOrReplace(
+                    "BackgroundLayerUBO", parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
             }
         }
     });
