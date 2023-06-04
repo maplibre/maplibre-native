@@ -44,7 +44,7 @@ public:
 
 }; // class HeatmapLayer
 
-class HeatmapJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::HeatmapLayerFactory {
+class HeatmapJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::HeatmapLayerFactory {
 public:
     ~HeatmapJavaLayerPeerFactory() override;
 
@@ -56,7 +56,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class HeatmapJavaLayerPeerFactory
+}; // class HeatmapJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

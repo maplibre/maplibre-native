@@ -48,7 +48,7 @@ public:
 
 }; // class HillshadeLayer
 
-class HillshadeJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::HillshadeLayerFactory {
+class HillshadeJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::HillshadeLayerFactory {
 public:
     ~HillshadeJavaLayerPeerFactory() override;
 
@@ -60,7 +60,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class HillshadeJavaLayerPeerFactory
+}; // class HillshadeJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl
