@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.*
-import org.maplibre.android.maps.MapboxMap.OnCameraMoveListener
-import org.maplibre.android.maps.MapboxMap.OnFpsChangedListener
+import org.maplibre.android.maps.MaplibreMap.OnCameraMoveListener
+import org.maplibre.android.maps.MaplibreMap.OnFpsChangedListener
 import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
@@ -23,7 +23,7 @@ import java.util.*
  */
 open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsChangedListener {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var cameraMoveListener: OnCameraMoveListener? = null
     private var actionBarDrawerToggle: ActionBarDrawerToggle? = null
     private var currentStyleIndex = 0
@@ -60,8 +60,8 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         mapView = MapView(this, mapboxMapOptions)
         (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView, 0)
         mapView.addOnDidFinishLoadingStyleListener {
-            if (mapboxMap != null) {
-                setupNavigationView(mapboxMap.style!!.layers)
+            if (maplibreMap != null) {
+                setupNavigationView(maplibreMap.style!!.layers)
             }
         }
         mapView.tag = true
@@ -74,9 +74,9 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         return MapboxMapOptions.createFromAttributes(this, null)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(
             Style.Builder().fromUri(STYLES[currentStyleIndex])
         ) { style: Style -> setupNavigationView(style.layers) }
         setupZoomView()
@@ -85,7 +85,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     private fun setFpsView() {
         fpsView = findViewById(R.id.fpsView)
-        mapboxMap.setOnFpsChangedListener(this)
+        maplibreMap.setOnFpsChangedListener(this)
     }
 
     override fun onFpsChanged(fps: Double) {
@@ -93,7 +93,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     }
 
     private fun setupNavigationView(layerList: List<Layer>) {
-        Timber.v("New style loaded with JSON: %s", mapboxMap.style!!.json)
+        Timber.v("New style loaded with JSON: %s", maplibreMap.style!!.json)
         val adapter = LayerListAdapter(this, layerList)
         val listView = findViewById<ListView>(R.id.listView)
         listView.adapter = adapter
@@ -121,13 +121,13 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     private fun setupZoomView() {
         val textView = findViewById<TextView>(R.id.textZoom)
-        mapboxMap.addOnCameraMoveListener(
+        maplibreMap.addOnCameraMoveListener(
             OnCameraMoveListener {
                 textView.text = String.format(
                     this@DebugModeActivity.getString(
                         R.string.debug_zoom
                     ),
-                    mapboxMap.cameraPosition.zoom
+                    maplibreMap.cameraPosition.zoom
                 )
             }.also { cameraMoveListener = it }
         )
@@ -136,9 +136,9 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     private fun setupDebugChangeView() {
         val fabDebug = findViewById<FloatingActionButton>(R.id.fabDebug)
         fabDebug.setOnClickListener { view: View? ->
-            if (mapboxMap != null) {
-                mapboxMap.isDebugActive = !mapboxMap.isDebugActive
-                Timber.d("Debug FAB: isDebug Active? %s", mapboxMap.isDebugActive)
+            if (maplibreMap != null) {
+                maplibreMap.isDebugActive = !maplibreMap.isDebugActive
+                Timber.d("Debug FAB: isDebug Active? %s", maplibreMap.isDebugActive)
             }
         }
     }
@@ -146,12 +146,12 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     private fun setupStyleChangeView() {
         val fabStyles = findViewById<FloatingActionButton>(R.id.fabStyles)
         fabStyles.setOnClickListener { view: View? ->
-            if (mapboxMap != null) {
+            if (maplibreMap != null) {
                 currentStyleIndex++
                 if (currentStyleIndex == STYLES.size) {
                     currentStyleIndex = 0
                 }
-                mapboxMap.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]))
+                maplibreMap.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]))
             }
         }
     }
@@ -161,7 +161,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         if (itemId == R.id.menu_action_toggle_report_fps) {
             isReportFps = !isReportFps
             fpsView!!.visibility = if (isReportFps) View.VISIBLE else View.GONE
-            mapboxMap.setOnFpsChangedListener(if (isReportFps) this else null)
+            maplibreMap.setOnFpsChangedListener(if (isReportFps) this else null)
         } else if (itemId == R.id.menu_action_limit_to_30_fps) {
             mapView.setMaximumFps(30)
         } else if (itemId == R.id.menu_action_limit_to_60_fps) {
@@ -204,8 +204,8 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap.removeOnCameraMoveListener(cameraMoveListener!!)
+        if (maplibreMap != null) {
+            maplibreMap.removeOnCameraMoveListener(cameraMoveListener!!)
         }
         mapView.onDestroy()
     }

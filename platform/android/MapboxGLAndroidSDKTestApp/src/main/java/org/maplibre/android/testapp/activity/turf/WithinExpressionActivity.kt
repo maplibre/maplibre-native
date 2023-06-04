@@ -10,7 +10,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression.within
 import org.maplibre.android.style.layers.CircleLayer
@@ -28,7 +28,7 @@ import org.maplibre.android.testapp.databinding.ActivityWithinExpressionBinding
  */
 class WithinExpressionActivity : AppCompatActivity() {
 
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var binding: ActivityWithinExpressionBinding
     private lateinit var mapView: MapView
 
@@ -45,10 +45,10 @@ class WithinExpressionActivity : AppCompatActivity() {
 
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
-            mapboxMap = map
+            maplibreMap = map
 
             // Setup camera position above Georgetown
-            mapboxMap.cameraPosition = CameraPosition.Builder()
+            maplibreMap.cameraPosition = CameraPosition.Builder()
                 .target(LatLng(38.90628988399711, -77.06574689337494))
                 .zoom(15.5)
                 .build()
@@ -95,7 +95,7 @@ class WithinExpressionActivity : AppCompatActivity() {
 
         // Setup style with additional layers,
         // using streets as a base style
-        mapboxMap.setStyle(
+        maplibreMap.setStyle(
             Style.Builder()
                 .fromUri(Style.getPredefinedStyle("Streets"))
                 .withSources(
@@ -127,10 +127,10 @@ class WithinExpressionActivity : AppCompatActivity() {
     }
 
     private fun optimizeStyle() {
-        val style = mapboxMap.style!!
+        val style = maplibreMap.style!!
 
         // Add fill layer to represent buffered LineString
-        mapboxMap.style!!.addLayerBelow(
+        maplibreMap.style!!.addLayerBelow(
             FillLayer(FILL_ID, FILL_ID)
                 .withProperties(
                     fillOpacity(0.12f),
@@ -140,7 +140,7 @@ class WithinExpressionActivity : AppCompatActivity() {
         )
 
         // Move to a new camera position
-        mapboxMap.easeCamera(
+        maplibreMap.easeCamera(
             CameraUpdateFactory.newCameraPosition(
                 CameraPosition.Builder()
                     .zoom(16.0)

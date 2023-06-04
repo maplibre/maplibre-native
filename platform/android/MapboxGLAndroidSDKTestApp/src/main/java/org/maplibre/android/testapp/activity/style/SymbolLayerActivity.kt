@@ -16,8 +16,8 @@ import com.mapbox.geojson.Point
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.OnMapClickListener
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
 import org.maplibre.android.maps.MapboxMapOptions
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
@@ -51,7 +51,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
     private var markerSymbolLayer: SymbolLayer? = null
     private var mapboxSignSymbolLayer: SymbolLayer? = null
     private var numberFormatSymbolLayer: SymbolLayer? = null
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +75,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
 
         // Use OnStyleImageMissing API to lazily load an icon
         mapView.addOnStyleImageMissingListener { id: String? ->
-            val style = mapboxMap.style
+            val style = maplibreMap.style
             if (style != null) {
                 Timber.e("Adding image with id: %s", id)
                 val androidIcon =
@@ -85,8 +85,8 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
         }
     }
 
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
         val carBitmap = BitmapUtils.getBitmapFromDrawable(
             ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, null)
         )
@@ -153,7 +153,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
                 )
             )
         )
-        mapboxMap.setStyle(
+        maplibreMap.setStyle(
             Style.Builder()
                 .fromUri("asset://streets.json")
                 .withImage("Car", Objects.requireNonNull(carBitmap)!!, false)
@@ -162,13 +162,13 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
         )
 
         // Set a click-listener so we can manipulate the map
-        mapboxMap.addOnMapClickListener(this@SymbolLayerActivity)
+        maplibreMap.addOnMapClickListener(this@SymbolLayerActivity)
     }
 
     override fun onMapClick(point: LatLng): Boolean {
         // Query which features are clicked
-        val screenLoc = mapboxMap.projection.toScreenLocation(point)
-        val markerFeatures = mapboxMap.queryRenderedFeatures(screenLoc, MARKER_LAYER)
+        val screenLoc = maplibreMap.projection.toScreenLocation(point)
+        val markerFeatures = maplibreMap.queryRenderedFeatures(screenLoc, MARKER_LAYER)
         if (!markerFeatures.isEmpty()) {
             for (feature in Objects.requireNonNull(markerCollection!!.features())!!) {
                 if (feature.getStringProperty(ID_FEATURE_PROPERTY)
@@ -195,7 +195,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
             }
             markerSource!!.setGeoJson(markerCollection)
         } else {
-            val mapboxSignFeatures = mapboxMap.queryRenderedFeatures(screenLoc, MAPBOX_SIGN_LAYER)
+            val mapboxSignFeatures = maplibreMap.queryRenderedFeatures(screenLoc, MAPBOX_SIGN_LAYER)
             if (!mapboxSignFeatures.isEmpty()) {
                 shuffleMapboxSign()
             }
@@ -312,8 +312,8 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
 
     public override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap.removeOnMapClickListener(this)
+        if (maplibreMap != null) {
+            maplibreMap.removeOnMapClickListener(this)
         }
         mapView.onDestroy()
     }

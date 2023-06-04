@@ -1,4 +1,4 @@
 /**
- * Contains the Mapbox Maps Android Camera API classes.
+ * Contains the Maplibre Maps Android Camera API classes.
  */
 package org.maplibre.android.camera

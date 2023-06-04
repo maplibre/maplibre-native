@@ -41,7 +41,7 @@ import static org.junit.Assert.assertTrue;
  * @deprecated remove this file when removing deprecated annotations
  */
 @Deprecated
-public class MapboxMapTest extends EspressoTest {
+public class MaplibreMapTest extends EspressoTest {
 
   //
   // InfoWindow
@@ -51,8 +51,8 @@ public class MapboxMapTest extends EspressoTest {
   public void testConcurrentInfoWindowEnabled() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
-      mapboxMap.setAllowConcurrentMultipleOpenInfoWindows(true);
-      assertTrue("ConcurrentWindows should be true", mapboxMap.isAllowConcurrentMultipleOpenInfoWindows());
+      maplibreMap.setAllowConcurrentMultipleOpenInfoWindows(true);
+      assertTrue("ConcurrentWindows should be true", maplibreMap.isAllowConcurrentMultipleOpenInfoWindows());
     }));
   }
 
@@ -60,8 +60,8 @@ public class MapboxMapTest extends EspressoTest {
   public void testConcurrentInfoWindowDisabled() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
-      mapboxMap.setAllowConcurrentMultipleOpenInfoWindows(false);
-      assertFalse("ConcurrentWindows should be false", mapboxMap.isAllowConcurrentMultipleOpenInfoWindows());
+      maplibreMap.setAllowConcurrentMultipleOpenInfoWindows(false);
+      assertFalse("ConcurrentWindows should be false", maplibreMap.isAllowConcurrentMultipleOpenInfoWindows());
     }));
   }
 
@@ -69,9 +69,9 @@ public class MapboxMapTest extends EspressoTest {
   public void testInfoWindowAdapter() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
-      MapboxMap.InfoWindowAdapter infoWindowAdapter = marker -> null;
-      mapboxMap.setInfoWindowAdapter(infoWindowAdapter);
-      assertEquals("InfoWindowAdpter should be the same", infoWindowAdapter, mapboxMap.getInfoWindowAdapter());
+      MaplibreMap.InfoWindowAdapter infoWindowAdapter = marker -> null;
+      maplibreMap.setInfoWindowAdapter(infoWindowAdapter);
+      assertEquals("InfoWindowAdpter should be the same", infoWindowAdapter, maplibreMap.getInfoWindowAdapter());
     }));
   }
 
@@ -84,8 +84,8 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      Marker marker = mapboxMap.addMarker(markerOptions);
-      assertTrue("Marker should be contained", mapboxMap.getMarkers().contains(marker));
+      Marker marker = maplibreMap.addMarker(markerOptions);
+      assertTrue("Marker should be contained", maplibreMap.getMarkers().contains(marker));
     }));
   }
 
@@ -103,10 +103,10 @@ public class MapboxMapTest extends EspressoTest {
       MarkerOptions markerOptions2 = new MarkerOptions().position(new LatLng()).title("b");
       markerList.add(markerOptions1);
       markerList.add(markerOptions2);
-      List<Marker> markers = mapboxMap.addMarkers(markerList);
-      assertEquals("Markers size should be 2", 2, mapboxMap.getMarkers().size());
-      assertTrue(mapboxMap.getMarkers().contains(markers.get(0)));
-      assertTrue(mapboxMap.getMarkers().contains(markers.get(1)));
+      List<Marker> markers = maplibreMap.addMarkers(markerList);
+      assertEquals("Markers size should be 2", 2, maplibreMap.getMarkers().size());
+      assertTrue(maplibreMap.getMarkers().contains(markers.get(0)));
+      assertTrue(maplibreMap.getMarkers().contains(markers.get(1)));
     }));
   }
 
@@ -115,8 +115,8 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
-      mapboxMap.addMarkers(markerList);
-      assertEquals("Markers size should be 0", 0, mapboxMap.getMarkers().size());
+      maplibreMap.addMarkers(markerList);
+      assertEquals("Markers size should be 0", 0, maplibreMap.getMarkers().size());
     }));
   }
 
@@ -127,9 +127,9 @@ public class MapboxMapTest extends EspressoTest {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
       MarkerOptions markerOptions = new MarkerOptions().title("a").position(new LatLng());
       markerList.add(markerOptions);
-      List<Marker> markers = mapboxMap.addMarkers(markerList);
-      assertEquals("Markers size should be 1", 1, mapboxMap.getMarkers().size());
-      assertTrue(mapboxMap.getMarkers().contains(markers.get(0)));
+      List<Marker> markers = maplibreMap.addMarkers(markerList);
+      assertEquals("Markers size should be 1", 1, maplibreMap.getMarkers().size());
+      assertTrue(maplibreMap.getMarkers().contains(markers.get(0)));
     }));
   }
 
@@ -138,8 +138,8 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       PolygonOptions polygonOptions = new PolygonOptions().add(new LatLng());
-      Polygon polygon = mapboxMap.addPolygon(polygonOptions);
-      assertTrue("Polygon should be contained", mapboxMap.getPolygons().contains(polygon));
+      Polygon polygon = maplibreMap.addPolygon(polygonOptions);
+      assertTrue("Polygon should be contained", maplibreMap.getPolygons().contains(polygon));
     }));
   }
 
@@ -148,8 +148,8 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       PolygonOptions polygonOptions = new PolygonOptions();
-      Polygon polygon = mapboxMap.addPolygon(polygonOptions);
-      assertTrue("Polygon should be ignored", !mapboxMap.getPolygons().contains(polygon));
+      Polygon polygon = maplibreMap.addPolygon(polygonOptions);
+      assertTrue("Polygon should be ignored", !maplibreMap.getPolygons().contains(polygon));
     }));
   }
 
@@ -164,11 +164,11 @@ public class MapboxMapTest extends EspressoTest {
       polygonList.add(polygonOptions1);
       polygonList.add(polygonOptions2);
       polygonList.add(polygonOptions3);
-      mapboxMap.addPolygons(polygonList);
-      assertEquals("Polygons size should be 2", 2, mapboxMap.getPolygons().size());
-      assertTrue(mapboxMap.getPolygons().contains(polygonOptions1.getPolygon()));
-      assertTrue(mapboxMap.getPolygons().contains(polygonOptions2.getPolygon()));
-      assertTrue("Polygon should be ignored", !mapboxMap.getPolygons().contains(polygonOptions3.getPolygon()));
+      maplibreMap.addPolygons(polygonList);
+      assertEquals("Polygons size should be 2", 2, maplibreMap.getPolygons().size());
+      assertTrue(maplibreMap.getPolygons().contains(polygonOptions1.getPolygon()));
+      assertTrue(maplibreMap.getPolygons().contains(polygonOptions2.getPolygon()));
+      assertTrue("Polygon should be ignored", !maplibreMap.getPolygons().contains(polygonOptions3.getPolygon()));
     }));
   }
 
@@ -176,8 +176,8 @@ public class MapboxMapTest extends EspressoTest {
   public void addPolygonsEmpty() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
-      mapboxMap.addPolygons(new ArrayList<PolygonOptions>());
-      assertEquals("Polygons size should be 0", 0, mapboxMap.getPolygons().size());
+      maplibreMap.addPolygons(new ArrayList<PolygonOptions>());
+      assertEquals("Polygons size should be 0", 0, maplibreMap.getPolygons().size());
     }));
   }
 
@@ -188,9 +188,9 @@ public class MapboxMapTest extends EspressoTest {
       List<PolygonOptions> polygonList = new ArrayList<>();
       PolygonOptions polygonOptions = new PolygonOptions().fillColor(Color.BLACK).add(new LatLng());
       polygonList.add(polygonOptions);
-      mapboxMap.addPolygons(polygonList);
-      assertEquals("Polygons size should be 1", 1, mapboxMap.getPolygons().size());
-      assertTrue(mapboxMap.getPolygons().contains(polygonOptions.getPolygon()));
+      maplibreMap.addPolygons(polygonList);
+      assertEquals("Polygons size should be 1", 1, maplibreMap.getPolygons().size());
+      assertTrue(maplibreMap.getPolygons().contains(polygonOptions.getPolygon()));
     }));
   }
 
@@ -199,8 +199,8 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       PolylineOptions polylineOptions = new PolylineOptions().add(new LatLng());
-      Polyline polyline = mapboxMap.addPolyline(polylineOptions);
-      assertTrue("Polyline should be contained", mapboxMap.getPolylines().contains(polyline));
+      Polyline polyline = maplibreMap.addPolyline(polylineOptions);
+      assertTrue("Polyline should be contained", maplibreMap.getPolylines().contains(polyline));
     }));
   }
 
@@ -209,8 +209,8 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       PolylineOptions polylineOptions = new PolylineOptions();
-      Polyline polyline = mapboxMap.addPolyline(polylineOptions);
-      assertTrue("Polyline should be ignored", !mapboxMap.getPolylines().contains(polyline));
+      Polyline polyline = maplibreMap.addPolyline(polylineOptions);
+      assertTrue("Polyline should be ignored", !maplibreMap.getPolylines().contains(polyline));
     }));
   }
 
@@ -225,12 +225,12 @@ public class MapboxMapTest extends EspressoTest {
       polylineList.add(polygonOptions1);
       polylineList.add(polygonOptions2);
       polylineList.add(polygonOptions3);
-      mapboxMap.addPolylines(polylineList);
-      assertEquals("Polygons size should be 2", 2, mapboxMap.getPolylines().size());
-      assertTrue(mapboxMap.getPolylines().contains(polygonOptions1.getPolyline()));
-      assertTrue(mapboxMap.getPolylines().contains(polygonOptions2.getPolyline()));
+      maplibreMap.addPolylines(polylineList);
+      assertEquals("Polygons size should be 2", 2, maplibreMap.getPolylines().size());
+      assertTrue(maplibreMap.getPolylines().contains(polygonOptions1.getPolyline()));
+      assertTrue(maplibreMap.getPolylines().contains(polygonOptions2.getPolyline()));
       assertTrue(
-        "Polyline should be ignored", !mapboxMap.getPolylines().contains(polygonOptions3.getPolyline())
+        "Polyline should be ignored", !maplibreMap.getPolylines().contains(polygonOptions3.getPolyline())
       );
     }));
   }
@@ -239,8 +239,8 @@ public class MapboxMapTest extends EspressoTest {
   public void testAddPolylinesEmpty() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
-      mapboxMap.addPolylines(new ArrayList<PolylineOptions>());
-      assertEquals("Polygons size should be 0", 0, mapboxMap.getPolylines().size());
+      maplibreMap.addPolylines(new ArrayList<PolylineOptions>());
+      assertEquals("Polygons size should be 0", 0, maplibreMap.getPolylines().size());
     }));
   }
 
@@ -251,9 +251,9 @@ public class MapboxMapTest extends EspressoTest {
       List<PolylineOptions> polylineList = new ArrayList<>();
       PolylineOptions polygonOptions = new PolylineOptions().color(Color.BLACK).add(new LatLng());
       polylineList.add(polygonOptions);
-      mapboxMap.addPolylines(polylineList);
-      assertEquals("Polygons size should be 1", 1, mapboxMap.getPolylines().size());
-      assertTrue(mapboxMap.getPolylines().contains(polygonOptions.getPolyline()));
+      maplibreMap.addPolylines(polylineList);
+      assertEquals("Polygons size should be 1", 1, maplibreMap.getPolylines().size());
+      assertTrue(maplibreMap.getPolylines().contains(polygonOptions.getPolyline()));
     }));
   }
 
@@ -262,9 +262,9 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      Marker marker = mapboxMap.addMarker(markerOptions);
-      mapboxMap.removeMarker(marker);
-      assertTrue("Markers should be empty", mapboxMap.getMarkers().isEmpty());
+      Marker marker = maplibreMap.addMarker(markerOptions);
+      maplibreMap.removeMarker(marker);
+      assertTrue("Markers should be empty", maplibreMap.getMarkers().isEmpty());
     }));
   }
 
@@ -273,9 +273,9 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       PolygonOptions polygonOptions = new PolygonOptions();
-      Polygon polygon = mapboxMap.addPolygon(polygonOptions);
-      mapboxMap.removePolygon(polygon);
-      assertTrue("Polygons should be empty", mapboxMap.getPolylines().isEmpty());
+      Polygon polygon = maplibreMap.addPolygon(polygonOptions);
+      maplibreMap.removePolygon(polygon);
+      assertTrue("Polygons should be empty", maplibreMap.getPolylines().isEmpty());
     }));
   }
 
@@ -284,9 +284,9 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       PolylineOptions polylineOptions = new PolylineOptions();
-      Polyline polyline = mapboxMap.addPolyline(polylineOptions);
-      mapboxMap.removePolyline(polyline);
-      assertTrue("Polylines should be empty", mapboxMap.getPolylines().isEmpty());
+      Polyline polyline = maplibreMap.addPolyline(polylineOptions);
+      maplibreMap.removePolyline(polyline);
+      assertTrue("Polylines should be empty", maplibreMap.getPolylines().isEmpty());
     }));
   }
 
@@ -295,9 +295,9 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      Marker marker = mapboxMap.addMarker(markerOptions);
-      mapboxMap.removeAnnotation(marker);
-      assertTrue("Annotations should be empty", mapboxMap.getAnnotations().isEmpty());
+      Marker marker = maplibreMap.addMarker(markerOptions);
+      maplibreMap.removeAnnotation(marker);
+      assertTrue("Annotations should be empty", maplibreMap.getAnnotations().isEmpty());
     }));
   }
 
@@ -306,10 +306,10 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      mapboxMap.addMarker(markerOptions);
+      maplibreMap.addMarker(markerOptions);
       // id will always be 0 in unit tests
-      mapboxMap.removeAnnotation(0);
-      assertTrue("Annotations should be empty", mapboxMap.getAnnotations().isEmpty());
+      maplibreMap.removeAnnotation(0);
+      assertTrue("Annotations should be empty", maplibreMap.getAnnotations().isEmpty());
     }));
   }
 
@@ -322,9 +322,9 @@ public class MapboxMapTest extends EspressoTest {
       MarkerOptions markerOptions2 = new MarkerOptions().title("b").position(new LatLng());
       markerList.add(markerOptions1);
       markerList.add(markerOptions2);
-      mapboxMap.addMarkers(markerList);
-      mapboxMap.removeAnnotations();
-      assertTrue("Annotations should be empty", mapboxMap.getAnnotations().isEmpty());
+      maplibreMap.addMarkers(markerList);
+      maplibreMap.removeAnnotations();
+      assertTrue("Annotations should be empty", maplibreMap.getAnnotations().isEmpty());
     }));
   }
 
@@ -337,9 +337,9 @@ public class MapboxMapTest extends EspressoTest {
       MarkerOptions markerOptions2 = new MarkerOptions().title("b").position(new LatLng());
       markerList.add(markerOptions1);
       markerList.add(markerOptions2);
-      mapboxMap.addMarkers(markerList);
-      mapboxMap.clear();
-      assertTrue("Annotations should be empty", mapboxMap.getAnnotations().isEmpty());
+      maplibreMap.addMarkers(markerList);
+      maplibreMap.clear();
+      assertTrue("Annotations should be empty", maplibreMap.getAnnotations().isEmpty());
     }));
   }
 
@@ -352,11 +352,11 @@ public class MapboxMapTest extends EspressoTest {
       MarkerOptions markerOptions2 = new MarkerOptions().title("b").position(new LatLng());
       markerList.add(markerOptions1);
       markerList.add(markerOptions2);
-      List<Marker> markers = mapboxMap.addMarkers(markerList);
-      Marker marker = mapboxMap.addMarker(new MarkerOptions().position(new LatLng()).title("c"));
-      mapboxMap.removeAnnotations(markers);
-      assertTrue("Annotations should not be empty", mapboxMap.getAnnotations().size() == 1);
-      assertTrue("Marker should be contained", mapboxMap.getAnnotations().contains(marker));
+      List<Marker> markers = maplibreMap.addMarkers(markerList);
+      Marker marker = maplibreMap.addMarker(new MarkerOptions().position(new LatLng()).title("c"));
+      maplibreMap.removeAnnotations(markers);
+      assertTrue("Annotations should not be empty", maplibreMap.getAnnotations().size() == 1);
+      assertTrue("Marker should be contained", maplibreMap.getAnnotations().contains(marker));
     }));
   }
 
@@ -365,8 +365,8 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      Marker initialMarker = mapboxMap.addMarker(markerOptions);
-      Marker retrievedMarker = (Marker) mapboxMap.getAnnotation(0);
+      Marker initialMarker = maplibreMap.addMarker(markerOptions);
+      Marker retrievedMarker = (Marker) maplibreMap.getAnnotation(0);
       assertEquals("Markers should match", initialMarker, retrievedMarker);
     }));
   }
@@ -376,7 +376,7 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(
       new MapboxMapAction((uiController, view) ->
-        assertNotNull("Annotations should be non null", mapboxMap.getAnnotations()))
+        assertNotNull("Annotations should be non null", maplibreMap.getAnnotations()))
     );
   }
 
@@ -385,7 +385,7 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(
       new MapboxMapAction((uiController, view) ->
-        assertNotNull("Markers should be non null", mapboxMap.getMarkers()))
+        assertNotNull("Markers should be non null", maplibreMap.getMarkers()))
     );
   }
 
@@ -393,7 +393,7 @@ public class MapboxMapTest extends EspressoTest {
   public void testGetPolygons() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) ->
-      assertNotNull("Polygons should be non null", mapboxMap.getPolygons()))
+      assertNotNull("Polygons should be non null", maplibreMap.getPolygons()))
     );
   }
 
@@ -401,7 +401,7 @@ public class MapboxMapTest extends EspressoTest {
   public void testGetPolylines() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) ->
-      assertNotNull("Polylines should be non null", mapboxMap.getPolylines()))
+      assertNotNull("Polylines should be non null", maplibreMap.getPolylines()))
     );
   }
 
@@ -409,7 +409,7 @@ public class MapboxMapTest extends EspressoTest {
   public void testGetSelectedMarkers() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) ->
-      assertNotNull("Selected markers should be non null", mapboxMap.getSelectedMarkers()))
+      assertNotNull("Selected markers should be non null", maplibreMap.getSelectedMarkers()))
     );
   }
 
@@ -418,9 +418,9 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      Marker marker = mapboxMap.addMarker(markerOptions);
-      mapboxMap.selectMarker(marker);
-      assertTrue("Marker should be contained", mapboxMap.getSelectedMarkers().contains(marker));
+      Marker marker = maplibreMap.addMarker(markerOptions);
+      maplibreMap.selectMarker(marker);
+      assertTrue("Marker should be contained", maplibreMap.getSelectedMarkers().contains(marker));
     }));
   }
 
@@ -429,10 +429,10 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      Marker marker = mapboxMap.addMarker(markerOptions);
-      mapboxMap.selectMarker(marker);
-      mapboxMap.deselectMarker(marker);
-      assertTrue("Selected markers should be empty", mapboxMap.getSelectedMarkers().isEmpty());
+      Marker marker = maplibreMap.addMarker(markerOptions);
+      maplibreMap.selectMarker(marker);
+      maplibreMap.deselectMarker(marker);
+      assertTrue("Selected markers should be empty", maplibreMap.getSelectedMarkers().isEmpty());
     }));
   }
 
@@ -441,12 +441,12 @@ public class MapboxMapTest extends EspressoTest {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
-      Marker marker1 = mapboxMap.addMarker(markerOptions);
-      Marker marker2 = mapboxMap.addMarker(markerOptions);
-      mapboxMap.selectMarker(marker1);
-      mapboxMap.selectMarker(marker2);
-      mapboxMap.deselectMarkers();
-      assertTrue("Selected markers should be empty", mapboxMap.getSelectedMarkers().isEmpty());
+      Marker marker1 = maplibreMap.addMarker(markerOptions);
+      Marker marker2 = maplibreMap.addMarker(markerOptions);
+      maplibreMap.selectMarker(marker1);
+      maplibreMap.selectMarker(marker2);
+      maplibreMap.deselectMarkers();
+      assertTrue("Selected markers should be empty", maplibreMap.getSelectedMarkers().isEmpty());
     }));
   }
 

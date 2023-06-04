@@ -25,7 +25,7 @@ class ImageTest : EspressoTest() {
     @Test
     fun testAddGetImage() {
         validateTestSetup()
-        MapboxMapAction.invoke(mapboxMap) { uiController, mapboxMap ->
+        MapboxMapAction.invoke(maplibreMap) { uiController, mapboxMap ->
             val drawable = rule.activity.resources.getDrawable(R.drawable.ic_launcher_round)
             assertTrue(drawable is BitmapDrawable)
 

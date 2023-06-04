@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MapboxFusedLocationEngineImplTest {
+public class MaplibreFusedLocationEngineImplTest {
   private static final double LATITUDE = 37.7749;
   private static final double LONGITUDE = 122.4194;
 

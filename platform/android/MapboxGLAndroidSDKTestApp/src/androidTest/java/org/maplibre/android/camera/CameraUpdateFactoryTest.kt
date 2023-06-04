@@ -23,7 +23,7 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsUntiltedUnrotated() {
-        mapboxMap.cameraPosition = CameraPosition.Builder()
+        maplibreMap.cameraPosition = CameraPosition.Builder()
             .target(LatLng(60.0, 24.0))
             .bearing(0.0)
             .tilt(0.0)
@@ -34,9 +34,9 @@ class CameraUpdateFactoryTest : BaseTest() {
             .include(LatLng(58.0, 22.0))
             .build()
 
-        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+        maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
-        val cameraPosition = mapboxMap.cameraPosition
+        val cameraPosition = maplibreMap.cameraPosition
         assertEquals("latitude should match:", 60.0, cameraPosition.target!!.latitude, 0.1)
         assertEquals("longitude should match:", 24.0, cameraPosition.target!!.longitude, 0.1)
         assertEquals("bearing should match:", 0.0, cameraPosition.bearing, 0.1)
@@ -47,7 +47,7 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsTilted() {
-        mapboxMap.cameraPosition = CameraPosition.Builder()
+        maplibreMap.cameraPosition = CameraPosition.Builder()
             .target(LatLng(60.0, 24.0))
             .bearing(0.0)
             .tilt(45.0)
@@ -58,9 +58,9 @@ class CameraUpdateFactoryTest : BaseTest() {
             .include(LatLng(58.0, 22.0))
             .build()
 
-        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+        maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
-        val cameraPosition = mapboxMap.cameraPosition
+        val cameraPosition = maplibreMap.cameraPosition
         assertEquals("latitude should match:", 60.0, cameraPosition.target!!.latitude, 0.1)
         assertEquals("longitude should match:", 24.0, cameraPosition.target!!.longitude, 0.1)
         assertEquals("bearing should match:", 0.0, cameraPosition.bearing, 0.1)
@@ -71,7 +71,7 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsRotated() {
-        mapboxMap.cameraPosition = CameraPosition.Builder()
+        maplibreMap.cameraPosition = CameraPosition.Builder()
             .target(LatLng(60.0, 24.0))
             .bearing(30.0)
             .tilt(0.0)
@@ -82,9 +82,9 @@ class CameraUpdateFactoryTest : BaseTest() {
             .include(LatLng(58.0, 22.0))
             .build()
 
-        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+        maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
-        val cameraPosition = mapboxMap.cameraPosition
+        val cameraPosition = maplibreMap.cameraPosition
         assertEquals("latitude should match:", 60.0, cameraPosition.target!!.latitude, 0.1)
         assertEquals("longitude should match:", 24.0, cameraPosition.target!!.longitude, 0.1)
         assertEquals("bearing should match:", 30.0, cameraPosition.bearing, 0.1)
@@ -95,7 +95,7 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsTiltedRotated() {
-        mapboxMap.cameraPosition = CameraPosition.Builder()
+        maplibreMap.cameraPosition = CameraPosition.Builder()
             .target(LatLng(60.0, 24.0))
             .bearing(30.0)
             .tilt(45.0)
@@ -106,9 +106,9 @@ class CameraUpdateFactoryTest : BaseTest() {
             .include(LatLng(58.0, 22.0))
             .build()
 
-        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+        maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
 
-        val cameraPosition = mapboxMap.cameraPosition
+        val cameraPosition = maplibreMap.cameraPosition
         assertEquals("latitude should match:", 60.0, cameraPosition.target!!.latitude, 0.1)
         assertEquals("longitude should match:", 24.0, cameraPosition.target!!.longitude, 0.1)
         assertEquals("bearing should match:", 30.0, cameraPosition.bearing, 0.1)
@@ -119,7 +119,7 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun testLatLngBoundsWithProvidedTiltAndRotation() {
-        mapboxMap.cameraPosition = CameraPosition.Builder()
+        maplibreMap.cameraPosition = CameraPosition.Builder()
             .target(LatLng(60.0, 24.0))
             .bearing(0.0)
             .tilt(0.0)
@@ -130,9 +130,9 @@ class CameraUpdateFactoryTest : BaseTest() {
             .include(LatLng(58.0, 22.0))
             .build()
 
-        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30.0, 40.0, 0))
+        maplibreMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 30.0, 40.0, 0))
 
-        val cameraPosition = mapboxMap.cameraPosition
+        val cameraPosition = maplibreMap.cameraPosition
         assertEquals("latitude should match:", 60.0, cameraPosition.target!!.latitude, 0.1)
         assertEquals("longitude should match:", 24.0, cameraPosition.target!!.longitude, 0.1)
         assertEquals("bearing should match:", 30.0, cameraPosition.bearing, 0.1)
@@ -143,21 +143,21 @@ class CameraUpdateFactoryTest : BaseTest() {
     @Test
     @UiThreadTest
     fun withPadding_cameraInvalidated_paddingPersisting() {
-        val initialCameraPosition = mapboxMap.cameraPosition
-        val initialPoint = mapboxMap.projection.toScreenLocation(initialCameraPosition.target!!)
+        val initialCameraPosition = maplibreMap.cameraPosition
+        val initialPoint = maplibreMap.projection.toScreenLocation(initialCameraPosition.target!!)
 
         val bottomPadding = mapView.height / 4
         val leftPadding = mapView.width / 4
         val padding = doubleArrayOf(leftPadding.toDouble(), 0.0, 0.0, bottomPadding.toDouble())
-        mapboxMap.moveCamera(CameraUpdateFactory.paddingTo(leftPadding.toDouble(), 0.0, 0.0, bottomPadding.toDouble()))
+        maplibreMap.moveCamera(CameraUpdateFactory.paddingTo(leftPadding.toDouble(), 0.0, 0.0, bottomPadding.toDouble()))
 
-        Assert.assertArrayEquals(intArrayOf(leftPadding, 0, 0, bottomPadding), mapboxMap.padding)
+        Assert.assertArrayEquals(intArrayOf(leftPadding, 0, 0, bottomPadding), maplibreMap.padding)
 
-        val resultingCameraPosition = mapboxMap.cameraPosition
+        val resultingCameraPosition = maplibreMap.cameraPosition
         assertEquals(initialCameraPosition.target!!, resultingCameraPosition.target!!)
         assertEquals(
             PointF(initialPoint.x + leftPadding / 2, initialPoint.y - bottomPadding / 2),
-            mapboxMap.projection.toScreenLocation(resultingCameraPosition.target!!)
+            maplibreMap.projection.toScreenLocation(resultingCameraPosition.target!!)
         )
         Assert.assertArrayEquals(padding, resultingCameraPosition.padding, 0.0001)
     }
@@ -170,15 +170,15 @@ class CameraUpdateFactoryTest : BaseTest() {
         val topPadding = mapView.height / 4
         val rightPadding = mapView.width / 4
         val padding = doubleArrayOf(0.0, topPadding.toDouble(), rightPadding.toDouble(), 0.0)
-        mapboxMap.moveCamera(CameraUpdateFactory.newLatLngPadding(expectedTarget, 0.0, topPadding.toDouble(), rightPadding.toDouble(), 0.0))
+        maplibreMap.moveCamera(CameraUpdateFactory.newLatLngPadding(expectedTarget, 0.0, topPadding.toDouble(), rightPadding.toDouble(), 0.0))
 
-        Assert.assertArrayEquals(intArrayOf(0, topPadding, rightPadding, 0), mapboxMap.padding)
+        Assert.assertArrayEquals(intArrayOf(0, topPadding, rightPadding, 0), maplibreMap.padding)
 
-        val resultingCameraPosition = mapboxMap.cameraPosition
+        val resultingCameraPosition = maplibreMap.cameraPosition
         assertEquals(expectedTarget.latitude, resultingCameraPosition.target!!.latitude, 0.1)
         assertEquals(expectedTarget!!.longitude, resultingCameraPosition.target!!.longitude, 0.1)
 
-        val centerLatLng = mapboxMap.projection.fromScreenLocation(PointF((mapView.width / 2).toFloat(), (mapView.height / 2).toFloat()))
+        val centerLatLng = maplibreMap.projection.fromScreenLocation(PointF((mapView.width / 2).toFloat(), (mapView.height / 2).toFloat()))
         assertTrue(centerLatLng.latitude > resultingCameraPosition.target!!.latitude)
         assertTrue(centerLatLng.longitude > resultingCameraPosition.target!!.longitude)
         Assert.assertArrayEquals(padding, resultingCameraPosition.padding, 0.0001)

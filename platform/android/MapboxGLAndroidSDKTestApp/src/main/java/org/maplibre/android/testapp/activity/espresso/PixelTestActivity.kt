@@ -3,7 +3,7 @@ package org.maplibre.android.testapp.activity.espresso
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -14,7 +14,7 @@ import org.maplibre.android.testapp.R
 class PixelTestActivity : AppCompatActivity(), OnMapReadyCallback {
 
     lateinit var mapView: MapView
-    lateinit var mapboxMap: MapboxMap
+    lateinit var maplibreMap: MaplibreMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,9 +24,9 @@ class PixelTestActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
     }
 
     public override fun onResume() {

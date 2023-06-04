@@ -22,7 +22,7 @@ import timber.log.Timber;
 
 import com.mapbox.android.gestures.AndroidGesturesManager;
 import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.Mapbox;
+import org.maplibre.android.Maplibre;
 import org.maplibre.android.R;
 import org.maplibre.android.WellKnownTileServer;
 import org.maplibre.android.annotations.Annotation;
@@ -56,8 +56,8 @@ import static org.maplibre.android.maps.widgets.CompassView.TIME_WAIT_IDLE;
  * and style the features of the map to fit your application's use case.
  * </p>
  * <p>
- * Use of {@code MapView} requires a Mapbox API access token.
- * Obtain an access token on the <a href="https://www.mapbox.com/studio/account/tokens/">Mapbox account page</a>.
+ * Use of {@code MapView} requires a Maplibre API access token.
+ * Obtain an access token on the <a href="https://www.mapbox.com/studio/account/tokens/">Maplibre account page</a>.
  * </p>
  * <strong>Warning:</strong> Please note that you are responsible for getting permission to use the map data,
  * and for ensuring your use adheres to the relevant terms of use.
@@ -71,7 +71,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @Nullable
   private NativeMap nativeMapView;
   @Nullable
-  private MapboxMap mapboxMap;
+  private MaplibreMap maplibreMap;
   private View renderView;
 
   private AttributionClickListener attributionClickListener;
@@ -134,7 +134,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       return;
     }
 
-    if (!Mapbox.hasInstance()) {
+    if (!Maplibre.hasInstance()) {
       throw new MapboxConfigurationException();
     }
 
@@ -170,10 +170,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     Transform transform = new Transform(this, nativeMapView, cameraDispatcher);
 
     // MapboxMap
-    List<MapboxMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
-    mapboxMap = new MapboxMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
+    List<MaplibreMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
+    maplibreMap = new MaplibreMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
             developerAnimationListeners);
-    mapboxMap.injectAnnotationManager(annotationManager);
+    maplibreMap.injectAnnotationManager(annotationManager);
 
     // user input
     mapGestureDetector = new MapGestureDetector(context, transform, proj, uiSettings,
@@ -181,7 +181,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     mapKeyListener = new MapKeyListener(transform, uiSettings, mapGestureDetector);
 
     // LocationComponent
-    mapboxMap.injectLocationComponent(new LocationComponent(mapboxMap, transform, developerAnimationListeners));
+    maplibreMap.injectLocationComponent(new LocationComponent(maplibreMap, transform, developerAnimationListeners));
 
     // Ensure this view is interactable
     setClickable(true);
@@ -191,13 +191,13 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     requestDisallowInterceptTouchEvent(true);
 
     // notify Map object about current connectivity state
-    nativeMapView.setReachability(Mapbox.isConnected());
+    nativeMapView.setReachability(Maplibre.isConnected());
 
     // initialise MapboxMap
     if (savedInstanceState == null) {
-      mapboxMap.initialise(context, mapboxMapOptions);
+      maplibreMap.initialise(context, mapboxMapOptions);
     } else {
-      mapboxMap.onRestoreInstanceState(savedInstanceState);
+      maplibreMap.onRestoreInstanceState(savedInstanceState);
     }
 
     mapCallback.initialised();
@@ -227,7 +227,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     attrView.setContentDescription(getResources().getString(R.string.maplibre_attributionsIconContentDescription));
     attrView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.maplibre_info_bg_selector));
     // inject widgets with MapboxMap
-    attrView.setOnClickListener(attributionClickListener = new AttributionClickListener(getContext(), mapboxMap));
+    attrView.setOnClickListener(attributionClickListener = new AttributionClickListener(getContext(), maplibreMap));
     return attrView;
   }
 
@@ -250,9 +250,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     };
   }
 
-  private MapboxMap.OnCompassAnimationListener createCompassAnimationListener(@NonNull final CameraChangeDispatcher
+  private MaplibreMap.OnCompassAnimationListener createCompassAnimationListener(@NonNull final CameraChangeDispatcher
                                                                                       cameraChangeDispatcher) {
-    return new MapboxMap.OnCompassAnimationListener() {
+    return new MaplibreMap.OnCompassAnimationListener() {
       @Override
       public void onCompassAnimation() {
         cameraChangeDispatcher.onCameraMove();
@@ -272,13 +272,13 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     return new OnClickListener() {
       @Override
       public void onClick(View v) {
-        if (mapboxMap != null && compassView != null) {
+        if (maplibreMap != null && compassView != null) {
           if (focalPoint != null) {
-            mapboxMap.setFocalBearing(0, focalPoint.x, focalPoint.y, TIME_MAP_NORTH_ANIMATION);
+            maplibreMap.setFocalBearing(0, focalPoint.x, focalPoint.y, TIME_MAP_NORTH_ANIMATION);
           } else {
-            mapboxMap.setFocalBearing(0, mapboxMap.getWidth() / 2, mapboxMap.getHeight() / 2, TIME_MAP_NORTH_ANIMATION);
+            maplibreMap.setFocalBearing(0, maplibreMap.getWidth() / 2, maplibreMap.getHeight() / 2, TIME_MAP_NORTH_ANIMATION);
           }
-          cameraChangeDispatcher.onCameraMoveStarted(MapboxMap.OnCameraMoveStartedListener.REASON_API_ANIMATION);
+          cameraChangeDispatcher.onCameraMoveStarted(MaplibreMap.OnCameraMoveStartedListener.REASON_API_ANIMATION);
           compassView.isAnimating(true);
           compassView.postDelayed(compassView, TIME_WAIT_IDLE + TIME_MAP_NORTH_ANIMATION);
         }
@@ -296,11 +296,11 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    * Fragment#onViewCreated(View, Bundle).
    * </p>
    * You must set a valid access token with
-   * {@link Mapbox#getInstance(Context, String, WellKnownTileServer)}
+   * {@link Maplibre#getInstance(Context, String, WellKnownTileServer)}
    * before you call this method or an exception will be thrown.
    *
    * @param savedInstanceState Pass in the parent's savedInstanceState.
-   * @see Mapbox#getInstance(Context, String, WellKnownTileServer)
+   * @see Maplibre#getInstance(Context, String, WellKnownTileServer)
    */
   @UiThread
   public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -351,9 +351,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       @Override
       public void run() {
         // Initialise only when not destroyed and only once
-        if (!destroyed && mapboxMap == null) {
+        if (!destroyed && maplibreMap == null) {
           MapView.this.initialiseMap();
-          mapboxMap.onStart();
+          maplibreMap.onStart();
         }
       }
     });
@@ -367,9 +367,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    */
   @UiThread
   public void onSaveInstanceState(@NonNull Bundle outState) {
-    if (mapboxMap != null) {
+    if (maplibreMap != null) {
       outState.putBoolean(MapboxConstants.STATE_HAS_SAVED_STATE, true);
-      mapboxMap.onSaveInstanceState(outState);
+      maplibreMap.onSaveInstanceState(outState);
     }
   }
 
@@ -383,8 +383,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       FileSource.getInstance(getContext()).activate();
       isStarted = true;
     }
-    if (mapboxMap != null) {
-      mapboxMap.onStart();
+    if (maplibreMap != null) {
+      maplibreMap.onStart();
     }
 
     if (mapRenderer != null) {
@@ -421,10 +421,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       attributionClickListener.onStop();
     }
 
-    if (mapboxMap != null) {
+    if (maplibreMap != null) {
       // map was destroyed before it was started
       mapGestureDetector.cancelAnimators();
-      mapboxMap.onStop();
+      maplibreMap.onStop();
     }
 
     if (mapRenderer != null) {
@@ -453,8 +453,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       compassView.resetAnimation();
     }
 
-    if (mapboxMap != null) {
-      mapboxMap.onDestroy();
+    if (maplibreMap != null) {
+      maplibreMap.onDestroy();
     }
 
     if (nativeMapView != null) {
@@ -575,7 +575,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    */
   @UiThread
   public void onLowMemory() {
-    if (nativeMapView != null && mapboxMap != null && !destroyed) {
+    if (nativeMapView != null && maplibreMap != null && !destroyed) {
       nativeMapView.onLowMemory();
     }
   }
@@ -1044,7 +1044,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   /**
    * Interface definition for a callback to be invoked when the map has entered the idle state.
    * <p>
-   * Calling {@link MapboxMap#snapshot(MapboxMap.SnapshotReadyCallback)} from this callback
+   * Calling {@link MaplibreMap#snapshot(MaplibreMap.SnapshotReadyCallback)} from this callback
    * will result in recursive execution. Use {@link OnDidFinishRenderingFrameListener} instead.
    * </p>
    * <p>
@@ -1122,17 +1122,17 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
-   * Sets a callback object which will be triggered when the {@link MapboxMap} instance is ready to be used.
+   * Sets a callback object which will be triggered when the {@link MaplibreMap} instance is ready to be used.
    *
    * @param callback The callback object that will be triggered when the map is ready to be used.
    */
   @UiThread
   public void getMapAsync(final @NonNull OnMapReadyCallback callback) {
-    if (mapboxMap == null) {
+    if (maplibreMap == null) {
       // Add callback to the list only if the style hasn't loaded, or the drawing surface isn't ready
       mapCallback.addOnMapReadyCallback(callback);
     } else {
-      callback.onMapReady(mapboxMap);
+      callback.onMapReady(maplibreMap);
     }
   }
 
@@ -1145,12 +1145,12 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   @Nullable
-  MapboxMap getMapboxMap() {
-    return mapboxMap;
+  MaplibreMap getMapboxMap() {
+    return maplibreMap;
   }
 
-  void setMapboxMap(MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
+  void setMapboxMap(MaplibreMap maplibreMap) {
+    this.maplibreMap = maplibreMap;
   }
 
   private class FocalPointInvalidator implements FocalPointChangeListener {
@@ -1184,7 +1184,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     @Override
     public void onDidFinishRenderingFrame(boolean fully) {
-      if (mapboxMap != null && mapboxMap.getStyle() != null && mapboxMap.getStyle().isFullyLoaded()) {
+      if (maplibreMap != null && maplibreMap.getStyle() != null && maplibreMap.getStyle().isFullyLoaded()) {
         renderCount++;
         if (renderCount == 3) {
           MapView.this.setForeground(null);
@@ -1198,75 +1198,75 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
   }
 
-  private class GesturesManagerInteractionListener implements MapboxMap.OnGesturesManagerInteractionListener {
+  private class GesturesManagerInteractionListener implements MaplibreMap.OnGesturesManagerInteractionListener {
 
     @Override
-    public void onAddMapClickListener(MapboxMap.OnMapClickListener listener) {
+    public void onAddMapClickListener(MaplibreMap.OnMapClickListener listener) {
       mapGestureDetector.addOnMapClickListener(listener);
     }
 
     @Override
-    public void onRemoveMapClickListener(MapboxMap.OnMapClickListener listener) {
+    public void onRemoveMapClickListener(MaplibreMap.OnMapClickListener listener) {
       mapGestureDetector.removeOnMapClickListener(listener);
     }
 
     @Override
-    public void onAddMapLongClickListener(MapboxMap.OnMapLongClickListener listener) {
+    public void onAddMapLongClickListener(MaplibreMap.OnMapLongClickListener listener) {
       mapGestureDetector.addOnMapLongClickListener(listener);
     }
 
     @Override
-    public void onRemoveMapLongClickListener(MapboxMap.OnMapLongClickListener listener) {
+    public void onRemoveMapLongClickListener(MaplibreMap.OnMapLongClickListener listener) {
       mapGestureDetector.removeOnMapLongClickListener(listener);
     }
 
     @Override
-    public void onAddFlingListener(MapboxMap.OnFlingListener listener) {
+    public void onAddFlingListener(MaplibreMap.OnFlingListener listener) {
       mapGestureDetector.addOnFlingListener(listener);
     }
 
     @Override
-    public void onRemoveFlingListener(MapboxMap.OnFlingListener listener) {
+    public void onRemoveFlingListener(MaplibreMap.OnFlingListener listener) {
       mapGestureDetector.removeOnFlingListener(listener);
     }
 
     @Override
-    public void onAddMoveListener(MapboxMap.OnMoveListener listener) {
+    public void onAddMoveListener(MaplibreMap.OnMoveListener listener) {
       mapGestureDetector.addOnMoveListener(listener);
     }
 
     @Override
-    public void onRemoveMoveListener(MapboxMap.OnMoveListener listener) {
+    public void onRemoveMoveListener(MaplibreMap.OnMoveListener listener) {
       mapGestureDetector.removeOnMoveListener(listener);
     }
 
     @Override
-    public void onAddRotateListener(MapboxMap.OnRotateListener listener) {
+    public void onAddRotateListener(MaplibreMap.OnRotateListener listener) {
       mapGestureDetector.addOnRotateListener(listener);
     }
 
     @Override
-    public void onRemoveRotateListener(MapboxMap.OnRotateListener listener) {
+    public void onRemoveRotateListener(MaplibreMap.OnRotateListener listener) {
       mapGestureDetector.removeOnRotateListener(listener);
     }
 
     @Override
-    public void onAddScaleListener(MapboxMap.OnScaleListener listener) {
+    public void onAddScaleListener(MaplibreMap.OnScaleListener listener) {
       mapGestureDetector.addOnScaleListener(listener);
     }
 
     @Override
-    public void onRemoveScaleListener(MapboxMap.OnScaleListener listener) {
+    public void onRemoveScaleListener(MaplibreMap.OnScaleListener listener) {
       mapGestureDetector.removeOnScaleListener(listener);
     }
 
     @Override
-    public void onAddShoveListener(MapboxMap.OnShoveListener listener) {
+    public void onAddShoveListener(MaplibreMap.OnShoveListener listener) {
       mapGestureDetector.addShoveListener(listener);
     }
 
     @Override
-    public void onRemoveShoveListener(MapboxMap.OnShoveListener listener) {
+    public void onRemoveShoveListener(MaplibreMap.OnShoveListener listener) {
       mapGestureDetector.removeShoveListener(listener);
     }
 
@@ -1304,9 +1304,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
 
     void initialised() {
-      mapboxMap.onPreMapReady();
+      maplibreMap.onPreMapReady();
       onMapReady();
-      mapboxMap.onPostMapReady();
+      maplibreMap.onPostMapReady();
     }
 
     /**
@@ -1319,7 +1319,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
           OnMapReadyCallback callback = iterator.next();
           if (callback != null) {
             // null checking required for #13279
-            callback.onMapReady(mapboxMap);
+            callback.onMapReady(maplibreMap);
           }
           iterator.remove();
         }
@@ -1342,43 +1342,43 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     @Override
     public void onDidFinishLoadingStyle() {
-      if (mapboxMap != null) {
-        mapboxMap.onFinishLoadingStyle();
+      if (maplibreMap != null) {
+        maplibreMap.onFinishLoadingStyle();
       }
     }
 
     @Override
     public void onDidFailLoadingMap(String errorMessage) {
-      if (mapboxMap != null) {
-        mapboxMap.onFailLoadingStyle();
+      if (maplibreMap != null) {
+        maplibreMap.onFailLoadingStyle();
       }
     }
 
     @Override
     public void onDidFinishRenderingFrame(boolean fully) {
-      if (mapboxMap != null) {
-        mapboxMap.onUpdateFullyRendered();
+      if (maplibreMap != null) {
+        maplibreMap.onUpdateFullyRendered();
       }
     }
 
     @Override
     public void onDidFinishLoadingMap() {
-      if (mapboxMap != null) {
-        mapboxMap.onUpdateRegionChange();
+      if (maplibreMap != null) {
+        maplibreMap.onUpdateRegionChange();
       }
     }
 
     @Override
     public void onCameraIsChanging() {
-      if (mapboxMap != null) {
-        mapboxMap.onUpdateRegionChange();
+      if (maplibreMap != null) {
+        maplibreMap.onUpdateRegionChange();
       }
     }
 
     @Override
     public void onCameraDidChange(boolean animated) {
-      if (mapboxMap != null) {
-        mapboxMap.onUpdateRegionChange();
+      if (maplibreMap != null) {
+        maplibreMap.onUpdateRegionChange();
       }
     }
   }
@@ -1392,9 +1392,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     private final AttributionDialogManager defaultDialogManager;
     private UiSettings uiSettings;
 
-    private AttributionClickListener(@NonNull Context context, @NonNull MapboxMap mapboxMap) {
-      this.defaultDialogManager = new AttributionDialogManager(context, mapboxMap);
-      this.uiSettings = mapboxMap.getUiSettings();
+    private AttributionClickListener(@NonNull Context context, @NonNull MaplibreMap maplibreMap) {
+      this.defaultDialogManager = new AttributionDialogManager(context, maplibreMap);
+      this.uiSettings = maplibreMap.getUiSettings();
     }
 
     @Override

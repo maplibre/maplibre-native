@@ -12,9 +12,9 @@ import com.mapbox.geojson.Feature
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.InfoWindowAdapter
-import org.maplibre.android.maps.MapboxMap.OnMapClickListener
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import timber.log.Timber
@@ -24,12 +24,12 @@ import timber.log.Timber
  */
 class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var mapboxMap: MapboxMap
+    lateinit var maplibreMap: MaplibreMap
         private set
     private var marker: Marker? = null
     private val mapClickListener = OnMapClickListener { point ->
         val density = resources.displayMetrics.density
-        val pixel = mapboxMap.projection.toScreenLocation(point)
+        val pixel = maplibreMap.projection.toScreenLocation(point)
         Timber.i(
             "Requesting features for %sx%s (%sx%s adjusted for density)",
             pixel.x,
@@ -37,19 +37,19 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
             pixel.x / density,
             pixel.y / density
         )
-        val features = mapboxMap.queryRenderedFeatures(pixel)
+        val features = maplibreMap.queryRenderedFeatures(pixel)
 
         // Debug output
         debugOutput(features)
 
         // Remove any previous markers
         if (marker != null) {
-            mapboxMap.removeMarker(marker!!)
+            maplibreMap.removeMarker(marker!!)
         }
 
         // Add a marker on the clicked point
-        marker = mapboxMap.addMarker(CustomMarkerOptions().position(point)!!.features(features))
-        mapboxMap.selectMarker(marker!!)
+        marker = maplibreMap.addMarker(CustomMarkerOptions().position(point)!!.features(features))
+        maplibreMap.selectMarker(marker!!)
         true
     }
 
@@ -60,15 +60,15 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap: MapboxMap ->
-            mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
-                this@QueryRenderedFeaturesPropertiesActivity.mapboxMap = mapboxMap
+        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+            maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                this@QueryRenderedFeaturesPropertiesActivity.maplibreMap = maplibreMap
 
                 // Add custom window adapter
-                addCustomInfoWindowAdapter(mapboxMap)
+                addCustomInfoWindowAdapter(maplibreMap)
 
                 // Add a click listener
-                mapboxMap.addOnMapClickListener(mapClickListener)
+                maplibreMap.addOnMapClickListener(mapClickListener)
             }
         }
     }
@@ -99,8 +99,8 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         }
     }
 
-    private fun addCustomInfoWindowAdapter(mapboxMap: MapboxMap) {
-        mapboxMap.infoWindowAdapter = object : InfoWindowAdapter {
+    private fun addCustomInfoWindowAdapter(maplibreMap: MaplibreMap) {
+        maplibreMap.infoWindowAdapter = object : InfoWindowAdapter {
             private fun row(text: String): TextView {
                 val view = TextView(this@QueryRenderedFeaturesPropertiesActivity)
                 view.text = text
@@ -160,8 +160,8 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap.removeOnMapClickListener(mapClickListener)
+        if (maplibreMap != null) {
+            maplibreMap.removeOnMapClickListener(mapClickListener)
         }
         mapView.onDestroy()
     }

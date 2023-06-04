@@ -14,7 +14,7 @@ import org.maplibre.android.testapp.R
  */
 class RuntimeStyleTimingTestActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var mapboxMap: MapboxMap
+    lateinit var maplibreMap: MaplibreMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,8 +24,8 @@ class RuntimeStyleTimingTestActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap: MapboxMap ->
-            this@RuntimeStyleTimingTestActivity.mapboxMap = mapboxMap
+        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+            this@RuntimeStyleTimingTestActivity.maplibreMap = maplibreMap
             val parksLayer = CircleLayer("parks", "parks_source")
             parksLayer.sourceLayer = "parks"
             parksLayer.setProperties(
@@ -37,7 +37,7 @@ class RuntimeStyleTimingTestActivity : AppCompatActivity() {
                 "parks_source",
                 "maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a"
             )
-            mapboxMap.setStyle(
+            maplibreMap.setStyle(
                 Style.Builder()
                     .fromUri(Style.getPredefinedStyle("Streets"))
                     .withSource(parks)

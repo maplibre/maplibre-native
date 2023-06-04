@@ -15,7 +15,7 @@ import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -29,7 +29,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     private lateinit var mapView: MapView
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_basic_pulsing_circle)
@@ -42,10 +42,10 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     }
 
     @SuppressLint("MissingPermission")
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
-            locationComponent = mapboxMap.locationComponent
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+            locationComponent = maplibreMap.locationComponent
             val locationComponentOptions =
                 LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
                     .pulseEnabled(true)
@@ -119,7 +119,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     }
 
     private fun loadNewStyle() {
-        mapboxMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
+        maplibreMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
     }
 
     private fun checkPermissions() {

@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Point
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression.distance
 import org.maplibre.android.style.expressions.Expression.lt
@@ -26,7 +26,7 @@ import com.mapbox.turf.TurfTransformation
 class DistanceExpressionActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityWithinExpressionBinding
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
 
     private val lat = 37.78794572301525
     private val lon = -122.40752220153807
@@ -38,10 +38,10 @@ class DistanceExpressionActivity : AppCompatActivity() {
 
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync { map ->
-            mapboxMap = map
+            maplibreMap = map
 
             // Setup camera position above Georgetown
-            mapboxMap.cameraPosition = CameraPosition.Builder()
+            maplibreMap.cameraPosition = CameraPosition.Builder()
                 .target(LatLng(lat, lon))
                 .zoom(16.0)
                 .build()
@@ -54,7 +54,7 @@ class DistanceExpressionActivity : AppCompatActivity() {
         val circle = TurfTransformation.circle(center, 150.0, TurfConstants.UNIT_METRES)
         // Setup style with additional layers,
         // using Streets as a base style
-        mapboxMap.setStyle(
+        maplibreMap.setStyle(
             Style.Builder()
                 .fromUri(Style.getPredefinedStyle("Streets"))
                 .withSources(

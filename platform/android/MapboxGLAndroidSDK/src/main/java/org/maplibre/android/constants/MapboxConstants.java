@@ -3,7 +3,7 @@ package org.maplibre.android.constants;
 import java.util.Locale;
 
 /**
- * MapboxConstants exposes Mapbox related constants
+ * MapboxConstants exposes Maplibre related constants
  */
 public class MapboxConstants {
 

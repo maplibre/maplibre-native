@@ -1,4 +1,4 @@
 /**
- * Contains the Mapbox Location layer component.
+ * Contains the Maplibre Location layer component.
  */
 package org.maplibre.android.location;

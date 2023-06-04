@@ -5,7 +5,7 @@ import android.view.animation.Interpolator;
 
 import androidx.annotation.Nullable;
 
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 import org.maplibre.android.geometry.LatLng;
 
 final class MapboxAnimatorProvider {
@@ -35,7 +35,7 @@ final class MapboxAnimatorProvider {
 
   MapboxCameraAnimatorAdapter cameraAnimator(Float[] values,
                                              MapboxAnimator.AnimationsValueChangeListener updateListener,
-                                             @Nullable MapboxMap.CancelableCallback cancelableCallback) {
+                                             @Nullable MaplibreMap.CancelableCallback cancelableCallback) {
     return new MapboxCameraAnimatorAdapter(values, updateListener, cancelableCallback);
   }
 

@@ -21,7 +21,7 @@ import java.net.URISyntaxException
  */
 class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var handler: Handler? = null
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,9 +32,9 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style -> // add source
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style -> // add source
             try {
                 style.addSource(GeoJsonSource(ID_GEOJSON_SOURCE, URI(URL_GEOJSON_SOURCE)))
             } catch (malformedUriException: URISyntaxException) {
@@ -48,7 +48,7 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
 
             // loop refresh geojson
             handler = Handler()
-            runnable = RefreshGeoJsonRunnable(mapboxMap!!, handler!!)
+            runnable = RefreshGeoJsonRunnable(maplibreMap!!, handler!!)
             runnable?.let {
                 handler!!.postDelayed(it, 2000)
             }
@@ -89,11 +89,11 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private class RefreshGeoJsonRunnable internal constructor(
-        private val mapboxMap: MapboxMap,
+        private val maplibreMap: MaplibreMap,
         private val handler: Handler
     ) : Runnable {
         override fun run() {
-            val geoJsonSource = mapboxMap.style!!.getSource(ID_GEOJSON_SOURCE) as GeoJsonSource
+            val geoJsonSource = maplibreMap.style!!.getSource(ID_GEOJSON_SOURCE) as GeoJsonSource
             geoJsonSource.url = URL_GEOJSON_SOURCE
             handler.postDelayed(this, 2000)
         }

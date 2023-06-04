@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 
@@ -13,7 +13,7 @@ import org.maplibre.android.testapp.R
  */
 class FillExtrusionStyleTestActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var mapboxMap: MapboxMap
+    lateinit var maplibreMap: MaplibreMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,10 +23,10 @@ class FillExtrusionStyleTestActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap: MapboxMap ->
-            mapboxMap.setStyle(
+        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+            maplibreMap.setStyle(
                 Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
-            ) { style: Style? -> this@FillExtrusionStyleTestActivity.mapboxMap = mapboxMap }
+            ) { style: Style? -> this@FillExtrusionStyleTestActivity.maplibreMap = maplibreMap }
         }
     }
 

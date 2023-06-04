@@ -29,10 +29,10 @@ class MarkerContainer implements Markers {
   }
 
   @Override
-  public Marker addBy(@NonNull BaseMarkerOptions markerOptions, @NonNull MapboxMap mapboxMap) {
+  public Marker addBy(@NonNull BaseMarkerOptions markerOptions, @NonNull MaplibreMap maplibreMap) {
     Marker marker = prepareMarker(markerOptions);
     long id = nativeMapView != null ? nativeMapView.addMarker(marker) : 0;
-    marker.setMapboxMap(mapboxMap);
+    marker.setMapboxMap(maplibreMap);
     marker.setId(id);
     annotations.put(id, marker);
     return marker;
@@ -40,8 +40,8 @@ class MarkerContainer implements Markers {
 
   @NonNull
   @Override
-  public List<Marker> addBy(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MapboxMap
-    mapboxMap) {
+  public List<Marker> addBy(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MaplibreMap
+      maplibreMap) {
     int count = markerOptionsList.size();
     List<Marker> markers = new ArrayList<>(count);
     if (nativeMapView != null && count > 0) {
@@ -57,7 +57,7 @@ class MarkerContainer implements Markers {
         long[] ids = nativeMapView.addMarkers(markers);
         for (int i = 0; i < ids.length; i++) {
           Marker createdMarker = markers.get(i);
-          createdMarker.setMapboxMap(mapboxMap);
+          createdMarker.setMapboxMap(maplibreMap);
           createdMarker.setId(ids[i]);
           annotations.put(ids[i], createdMarker);
         }
@@ -67,8 +67,8 @@ class MarkerContainer implements Markers {
   }
 
   @Override
-  public void update(@NonNull Marker updatedMarker, @NonNull MapboxMap mapboxMap) {
-    ensureIconLoaded(updatedMarker, mapboxMap);
+  public void update(@NonNull Marker updatedMarker, @NonNull MaplibreMap maplibreMap) {
+    ensureIconLoaded(updatedMarker, maplibreMap);
     nativeMapView.updateMarker(updatedMarker);
     annotations.setValueAt(annotations.indexOfKey(updatedMarker.getId()), updatedMarker);
   }
@@ -132,8 +132,8 @@ class MarkerContainer implements Markers {
     return marker;
   }
 
-  private void ensureIconLoaded(Marker marker, @NonNull MapboxMap mapboxMap) {
-    iconManager.ensureIconLoaded(marker, mapboxMap);
+  private void ensureIconLoaded(Marker marker, @NonNull MaplibreMap maplibreMap) {
+    iconManager.ensureIconLoaded(marker, maplibreMap);
   }
 
   @NonNull

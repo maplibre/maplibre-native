@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.InfoWindowAdapter
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.InfoWindowAdapter
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -22,15 +22,15 @@ import org.maplibre.android.testapp.utils.IconUtils
  */
 class InfoWindowAdapterActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_infowindow_adapter)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap ->
-                mapboxMap = map
+            OnMapReadyCallback { map: MaplibreMap ->
+                maplibreMap = map
                 map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
                     addMarkers()
                     addCustomInfoWindowAdapter()
@@ -40,10 +40,10 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
     }
 
     private fun addMarkers() {
-        mapboxMap.addMarker(generateCityStateMarker("Andorra", 42.505777, 1.52529, "#F44336"))
-        mapboxMap.addMarker(generateCityStateMarker("Luxembourg", 49.815273, 6.129583, "#3F51B5"))
-        mapboxMap.addMarker(generateCityStateMarker("Monaco", 43.738418, 7.424616, "#673AB7"))
-        mapboxMap.addMarker(
+        maplibreMap.addMarker(generateCityStateMarker("Andorra", 42.505777, 1.52529, "#F44336"))
+        maplibreMap.addMarker(generateCityStateMarker("Luxembourg", 49.815273, 6.129583, "#3F51B5"))
+        maplibreMap.addMarker(generateCityStateMarker("Monaco", 43.738418, 7.424616, "#673AB7"))
+        maplibreMap.addMarker(
             generateCityStateMarker(
                 "Vatican City",
                 41.902916,
@@ -51,7 +51,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
                 "#009688"
             )
         )
-        mapboxMap.addMarker(
+        maplibreMap.addMarker(
             generateCityStateMarker(
                 "San Marino",
                 43.942360,
@@ -59,7 +59,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
                 "#795548"
             )
         )
-        mapboxMap.addMarker(
+        maplibreMap.addMarker(
             generateCityStateMarker(
                 "Liechtenstein",
                 47.166000,
@@ -86,7 +86,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
     }
 
     private fun addCustomInfoWindowAdapter() {
-        mapboxMap.infoWindowAdapter = object : InfoWindowAdapter {
+        maplibreMap.infoWindowAdapter = object : InfoWindowAdapter {
             private val tenDp = resources.getDimension(R.dimen.attr_margin).toInt()
             override fun getInfoWindow(marker: Marker): View? {
                 val textView = TextView(this@InfoWindowAdapterActivity)

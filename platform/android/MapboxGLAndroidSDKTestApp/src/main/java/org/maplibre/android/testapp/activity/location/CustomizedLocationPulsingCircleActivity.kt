@@ -23,7 +23,7 @@ import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -38,7 +38,7 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
     private lateinit var pulsingCircleColorButton: Button
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var currentPulseDuration = 0f
 
     //endregion
@@ -85,10 +85,10 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
     }
 
     @SuppressLint("MissingPermission")
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
-            locationComponent = mapboxMap.locationComponent
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+            locationComponent = maplibreMap.locationComponent
             val locationComponentOptions = buildLocationComponentOptions(
                 LOCATION_CIRCLE_PULSE_COLOR,
                 LOCATION_CIRCLE_PULSE_DURATION
@@ -124,7 +124,7 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
         newPulsingDuration: Float,
         newPulsingColor: Int
     ) {
-        mapboxMap.getStyle { style: Style? ->
+        maplibreMap.getStyle { style: Style? ->
             locationComponent!!.applyStyle(
                 buildLocationComponentOptions(
                     newPulsingColor,
@@ -197,7 +197,7 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
     }
 
     private fun loadNewStyle() {
-        mapboxMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
+        maplibreMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
     }
 
     private fun checkPermissions() {

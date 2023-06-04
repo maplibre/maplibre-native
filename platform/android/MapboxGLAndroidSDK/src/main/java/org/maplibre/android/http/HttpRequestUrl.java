@@ -9,7 +9,7 @@ public class HttpRequestUrl {
 
   /**
    * Adapts a resource request url based on the host, query size, and offline requirement.
-   * Mapbox resources downloaded for offline use are subject to separate Vector Tile and
+   * Maplibre resources downloaded for offline use are subject to separate Vector Tile and
    * Raster Tile API pricing and are not included in the Maps SDK’s “unlimited” requests.
    * See <a href="https://www.mapbox.com/pricing">our pricing page</a> for more information.
    *
@@ -35,10 +35,10 @@ public class HttpRequestUrl {
   }
 
   /**
-   * Validates if the host used as endpoint is a valid Mapbox endpoint.
+   * Validates if the host used as endpoint is a valid Maplibre endpoint.
    *
    * @param host the host used as endpoint
-   * @return true if a valid Mapbox endpoint
+   * @return true if a valid Maplibre endpoint
    */
   private static boolean isValidMapboxEndpoint(String host) {
     return host.equals("mapbox.com")

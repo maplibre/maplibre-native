@@ -14,11 +14,11 @@ public class MapboxInjector {
 
   public static void inject(@NonNull Context context, @NonNull String apiKey,
                             @NonNull TileServerOptions options) {
-    Mapbox mapbox = new Mapbox(context, apiKey, options);
+    Maplibre maplibre = new Maplibre(context, apiKey, options);
     try {
-      Field instance = Mapbox.class.getDeclaredField(FIELD_INSTANCE);
+      Field instance = Maplibre.class.getDeclaredField(FIELD_INSTANCE);
       instance.setAccessible(true);
-      instance.set(mapbox, mapbox);
+      instance.set(maplibre, maplibre);
     } catch (Exception exception) {
       throw new AssertionError();
     }
@@ -26,7 +26,7 @@ public class MapboxInjector {
 
   public static void clear() {
     try {
-      Field field = Mapbox.class.getDeclaredField(FIELD_INSTANCE);
+      Field field = Maplibre.class.getDeclaredField(FIELD_INSTANCE);
       field.setAccessible(true);
       field.set(field, null);
     } catch (Exception exception) {

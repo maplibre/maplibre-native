@@ -8,9 +8,9 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.maplibre.android.AppCenter;
-import org.maplibre.android.Mapbox;
+import org.maplibre.android.Maplibre;
 import org.maplibre.android.maps.MapView;
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 import org.maplibre.android.testapp.R;
 
 import org.junit.After;
@@ -43,7 +43,7 @@ public abstract class BaseTest extends AppCenter {
   public GrantPermissionRule grantLocationPermissionRule = GrantPermissionRule
           .grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
-  protected MapboxMap mapboxMap;
+  protected MaplibreMap maplibreMap;
   protected MapView mapView;
   private final CountDownLatch latch = new CountDownLatch(1);
 
@@ -62,19 +62,19 @@ public abstract class BaseTest extends AppCenter {
 
   @UiThread
   @CallSuper
-  protected void initMap(MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
-    mapboxMap.getStyle(style -> latch.countDown());
+  protected void initMap(MaplibreMap maplibreMap) {
+    this.maplibreMap = maplibreMap;
+    maplibreMap.getStyle(style -> latch.countDown());
   }
 
   protected void validateTestSetup() {
-    if (!Mapbox.isConnected()) {
+    if (!Maplibre.isConnected()) {
       Timber.e("Not connected to the internet while running test");
     }
     assertNotNull("MapView isn't initialised", mapView);
-    assertNotNull("MapboxMap isn't initialised", mapboxMap);
-    assertNotNull("Style isn't initialised", mapboxMap.getStyle());
-    assertTrue("Style isn't fully loaded", mapboxMap.getStyle().isFullyLoaded());
+    assertNotNull("MapboxMap isn't initialised", maplibreMap);
+    assertNotNull("Style isn't initialised", maplibreMap.getStyle());
+    assertTrue("Style isn't fully loaded", maplibreMap.getStyle().isFullyLoaded());
   }
 
   protected abstract Class getActivityClass();

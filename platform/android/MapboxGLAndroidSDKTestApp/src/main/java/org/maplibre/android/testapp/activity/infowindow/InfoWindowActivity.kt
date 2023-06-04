@@ -10,11 +10,11 @@ import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.OnInfoWindowClickListener
-import org.maplibre.android.maps.MapboxMap.OnInfoWindowCloseListener
-import org.maplibre.android.maps.MapboxMap.OnInfoWindowLongClickListener
-import org.maplibre.android.maps.MapboxMap.OnMapLongClickListener
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.OnInfoWindowClickListener
+import org.maplibre.android.maps.MaplibreMap.OnInfoWindowCloseListener
+import org.maplibre.android.maps.MaplibreMap.OnInfoWindowLongClickListener
+import org.maplibre.android.maps.MaplibreMap.OnMapLongClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -33,18 +33,18 @@ class InfoWindowActivity :
     OnInfoWindowCloseListener,
     OnInfoWindowClickListener,
     OnInfoWindowLongClickListener {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     private var customMarker: Marker? = null
     private val mapLongClickListener = OnMapLongClickListener { point ->
         if (customMarker != null) {
             // Remove previous added marker
-            mapboxMap.removeAnnotation(customMarker!!)
+            maplibreMap.removeAnnotation(customMarker!!)
             customMarker = null
         }
 
         // Add marker on long click location with default marker image
-        customMarker = mapboxMap.addMarker(
+        customMarker = maplibreMap.addMarker(
             MarkerOptions()
                 .title("Custom Marker")
                 .snippet(
@@ -64,34 +64,34 @@ class InfoWindowActivity :
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
             addMarkers()
             addInfoWindowListeners()
         }
     }
 
     private fun addMarkers() {
-        mapboxMap.addMarker(
+        maplibreMap.addMarker(
             MarkerOptions()
                 .title("Intersection")
                 .snippet("H St NW with 15th St NW")
                 .position(LatLng(38.9002073, -77.03364419))
         )
-        mapboxMap.addMarker(
+        maplibreMap.addMarker(
             MarkerOptions().title("Intersection")
                 .snippet("E St NW with 17th St NW")
                 .position(LatLng(38.8954236, -77.0394623))
         )
-        mapboxMap.addMarker(
+        maplibreMap.addMarker(
             MarkerOptions().title("The Ellipse").position(LatLng(38.89393, -77.03654))
         )
-        mapboxMap.addMarker(MarkerOptions().position(LatLng(38.89596, -77.03434)))
-        mapboxMap.addMarker(
+        maplibreMap.addMarker(MarkerOptions().position(LatLng(38.89596, -77.03434)))
+        maplibreMap.addMarker(
             MarkerOptions().snippet("Lafayette Square").position(LatLng(38.89949, -77.03656))
         )
-        val marker = mapboxMap.addMarker(
+        val marker = maplibreMap.addMarker(
             MarkerOptions()
                 .title("White House")
                 .snippet(
@@ -103,23 +103,23 @@ class InfoWindowActivity :
         )
 
         // open InfoWindow at startup
-        mapboxMap.selectMarker(marker)
+        maplibreMap.selectMarker(marker)
     }
 
     private fun addInfoWindowListeners() {
-        mapboxMap.onInfoWindowCloseListener = this
-        mapboxMap.addOnMapLongClickListener(mapLongClickListener)
-        mapboxMap.onInfoWindowClickListener = this
-        mapboxMap.onInfoWindowLongClickListener = this
+        maplibreMap.onInfoWindowCloseListener = this
+        maplibreMap.addOnMapLongClickListener(mapLongClickListener)
+        maplibreMap.onInfoWindowClickListener = this
+        maplibreMap.onInfoWindowLongClickListener = this
     }
 
     private fun toggleConcurrentInfoWindow(allowConcurrentInfoWindow: Boolean) {
-        mapboxMap.deselectMarkers()
-        mapboxMap.isAllowConcurrentMultipleOpenInfoWindows = allowConcurrentInfoWindow
+        maplibreMap.deselectMarkers()
+        maplibreMap.isAllowConcurrentMultipleOpenInfoWindows = allowConcurrentInfoWindow
     }
 
     private fun toggleDeselectMarkersOnTap(deselectMarkersOnTap: Boolean) {
-        mapboxMap.uiSettings.isDeselectMarkersOnTap = deselectMarkersOnTap
+        maplibreMap.uiSettings.isDeselectMarkersOnTap = deselectMarkersOnTap
     }
 
     override fun onInfoWindowClick(marker: Marker): Boolean {
@@ -163,8 +163,8 @@ class InfoWindowActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap.removeOnMapLongClickListener(mapLongClickListener)
+        if (maplibreMap != null) {
+            maplibreMap.removeOnMapLongClickListener(mapLongClickListener)
         }
         mapView.onDestroy()
     }

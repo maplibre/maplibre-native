@@ -16,7 +16,7 @@ import org.maplibre.android.testapp.R
  */
 class MapPaddingActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_padding)
@@ -24,15 +24,15 @@ class MapPaddingActivity : AppCompatActivity() {
         mapView.setTag(true)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { mapboxMap: MapboxMap ->
-                this@MapPaddingActivity.mapboxMap = mapboxMap
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+            OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                this@MapPaddingActivity.maplibreMap = maplibreMap
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
                 val paddingLeft = resources.getDimension(R.dimen.map_padding_left).toInt()
                 val paddingBottom = resources.getDimension(R.dimen.map_padding_bottom).toInt()
                 val paddingRight = resources.getDimension(R.dimen.map_padding_right).toInt()
                 val paddingTop = resources.getDimension(R.dimen.map_padding_top).toInt()
-                mapboxMap.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
-                val settings = mapboxMap.uiSettings
+                maplibreMap.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
+                val settings = maplibreMap.uiSettings
                 settings.setLogoMargins(paddingLeft, 0, 0, paddingBottom)
                 settings.setCompassMargins(0, paddingTop, paddingRight, 0)
                 settings.isAttributionEnabled = false
@@ -89,14 +89,14 @@ class MapPaddingActivity : AppCompatActivity() {
             .bearing(40.0)
             .tilt(45.0)
             .build()
-        mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-        mapboxMap.addMarker(MarkerOptions().title("Center map").position(bangalore))
+        maplibreMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        maplibreMap.addMarker(MarkerOptions().title("Center map").position(bangalore))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_bangalore -> {
-                if (mapboxMap != null) {
+                if (maplibreMap != null) {
                     moveToBangalore()
                 }
                 true

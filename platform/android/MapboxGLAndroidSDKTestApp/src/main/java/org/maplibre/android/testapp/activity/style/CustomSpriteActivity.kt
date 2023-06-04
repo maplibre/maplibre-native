@@ -12,7 +12,7 @@ import com.mapbox.geojson.Point
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.Layer
@@ -27,7 +27,7 @@ import timber.log.Timber
  */
 class CustomSpriteActivity : AppCompatActivity() {
     private var source: GeoJsonSource? = null
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     private lateinit var layer: Layer
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,8 +36,8 @@ class CustomSpriteActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap ->
-                mapboxMap = map
+            OnMapReadyCallback { map: MaplibreMap ->
+                maplibreMap = map
                 map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
                     val fab = findViewById<FloatingActionButton>(R.id.fab)
                     fab.setColorFilter(
@@ -66,7 +66,7 @@ class CustomSpriteActivity : AppCompatActivity() {
                                     "point",
                                     FeatureCollection.fromFeatures(arrayOf(Feature.fromGeometry(point)))
                                 )
-                                mapboxMap.style!!.addSource(source!!)
+                                maplibreMap.style!!.addSource(source!!)
 
                                 // Add a symbol layer that references that point source
                                 layer = SymbolLayer("layer", "point")
@@ -77,7 +77,7 @@ class CustomSpriteActivity : AppCompatActivity() {
                                 )
 
                                 // lets add a circle below labels!
-                                mapboxMap.style!!.addLayerBelow(layer, "water_intermittent")
+                                maplibreMap.style!!.addLayerBelow(layer, "water_intermittent")
                                 fab.setImageResource(R.drawable.ic_directions_car_black)
                             } else {
                                 // Update point
@@ -96,7 +96,7 @@ class CustomSpriteActivity : AppCompatActivity() {
                                 )
 
                                 // Move the camera as well
-                                mapboxMap.moveCamera(
+                                maplibreMap.moveCamera(
                                     CameraUpdateFactory.newLatLng(
                                         LatLng(
                                             point.latitude(),

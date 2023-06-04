@@ -9,7 +9,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapView.OnDidFinishLoadingStyleListener
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -32,7 +32,7 @@ import java.net.URISyntaxException
  */
 class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var styleFab: FloatingActionButton
     private lateinit var routeFab: FloatingActionButton
     private var layer: CircleLayer? = null
@@ -45,14 +45,14 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap? ->
+            OnMapReadyCallback { map: MaplibreMap? ->
                 if (map != null) {
-                    mapboxMap = map
+                    maplibreMap = map
                 }
-                mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+                maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
                 mapView.addOnDidFinishLoadingStyleListener(
                     OnDidFinishLoadingStyleListener {
-                        val style = mapboxMap.style
+                        val style = maplibreMap.style
                         addBusStopSource(style)
                         addBusStopCircleLayer(style)
                         initFloatingActionButtons()
@@ -107,13 +107,13 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun removeOldSource() {
-        mapboxMap.style!!.removeSource(SOURCE_ID)
-        mapboxMap.style!!.removeLayer(LAYER_ID)
+        maplibreMap.style!!.removeSource(SOURCE_ID)
+        maplibreMap.style!!.removeLayer(LAYER_ID)
     }
 
     private fun addClusteredSource() {
         try {
-            mapboxMap.style!!.addSource(
+            maplibreMap.style!!.addSource(
                 GeoJsonSource(
                     SOURCE_ID_CLUSTER,
                     URI(URL_BUS_ROUTES),
@@ -151,7 +151,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
         unclustered.setProperties(
             PropertyFactory.iconImage("bus-15")
         )
-        mapboxMap.style!!.addLayer(unclustered)
+        maplibreMap.style!!.addLayer(unclustered)
         for (i in layers.indices) {
             // Add some nice circles
             val circles = CircleLayer("cluster-$i", SOURCE_ID_CLUSTER)
@@ -190,7 +190,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
                     )
                 }
             )
-            mapboxMap.style!!.addLayer(circles)
+            maplibreMap.style!!.addLayer(circles)
         }
 
         // Add the count labels
@@ -202,7 +202,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
             PropertyFactory.textIgnorePlacement(true),
             PropertyFactory.textAllowOverlap(true)
         )
-        mapboxMap.style!!.addLayer(count)
+        maplibreMap.style!!.addLayer(count)
     }
 
     private fun removeFabs() {
@@ -217,17 +217,17 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun removeBusStop() {
-        mapboxMap.style!!.removeLayer(layer!!)
-        mapboxMap.style!!.removeSource(source!!)
+        maplibreMap.style!!.removeLayer(layer!!)
+        maplibreMap.style!!.removeSource(source!!)
     }
 
     private fun loadNewStyle() {
-        mapboxMap.setStyle(Style.Builder().fromUri(nextStyle))
+        maplibreMap.setStyle(Style.Builder().fromUri(nextStyle))
     }
 
     private fun addBusStop() {
-        mapboxMap.style!!.addLayer(layer!!)
-        mapboxMap.style!!.addSource(source!!)
+        maplibreMap.style!!.addLayer(layer!!)
+        maplibreMap.style!!.addSource(source!!)
     }
 
     private val nextStyle: String

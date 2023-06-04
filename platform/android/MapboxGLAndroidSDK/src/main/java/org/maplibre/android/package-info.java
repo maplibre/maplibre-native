@@ -1,4 +1,4 @@
 /**
- * Contains the Mapbox Maps Android API classes.
+ * Contains the Maplibre Maps Android API classes.
  */
 package org.maplibre.android;

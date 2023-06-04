@@ -13,7 +13,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.activity.maplayout.DoubleMapActivity.DoubleMapFragment
 import org.maplibre.android.utils.MapFragmentUtils
 
 /**
@@ -63,8 +62,8 @@ class DoubleMapActivity : AppCompatActivity() {
             // MapView large
             mapView = MapView(view.context, MapFragmentUtils.resolveArgs(view.context, arguments))
             mapView.onCreate(savedInstanceState)
-            mapView.getMapAsync { mapboxMap: MapboxMap ->
-                mapboxMap.setStyle(
+            mapView.getMapAsync { maplibreMap: MaplibreMap ->
+                maplibreMap.setStyle(
                     Style.getPredefinedStyle(
                         "Streets"
                     )
@@ -76,21 +75,21 @@ class DoubleMapActivity : AppCompatActivity() {
             mapViewMini = view.findViewById(R.id.mini_map)
             mapViewMini.onCreate(savedInstanceState)
             mapViewMini.getMapAsync(
-                OnMapReadyCallback { mapboxMap: MapboxMap ->
-                    mapboxMap.moveCamera(
+                OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                    maplibreMap.moveCamera(
                         CameraUpdateFactory.newCameraPosition(
                             CameraPosition.Builder().target(MACHU_PICCHU)
                                 .zoom(ZOOM_OUT)
                                 .build()
                         )
                     )
-                    mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Bright")))
-                    val uiSettings = mapboxMap.uiSettings
+                    maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Bright")))
+                    val uiSettings = maplibreMap.uiSettings
                     uiSettings.setAllGesturesEnabled(false)
                     uiSettings.isCompassEnabled = false
                     uiSettings.isAttributionEnabled = false
                     uiSettings.isLogoEnabled = false
-                    mapboxMap.addOnMapClickListener { point: LatLng? ->
+                    maplibreMap.addOnMapClickListener { point: LatLng? ->
                         // test if we can open 2 activities after each other
                         Toast.makeText(
                             mapViewMini.getContext(),

@@ -9,8 +9,8 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.OnMapClickListener
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -26,20 +26,20 @@ import timber.log.Timber
  */
 class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var source: GeoJsonSource? = null
     private var layer: SymbolLayer? = null
     private var isInitialPosition = true
     private var isSelected = false
     private var isShowingSymbolLayer = true
     private val mapClickListener = OnMapClickListener { point ->
-        val screenPoint = mapboxMap.projection.toScreenLocation(point)
-        val featureList = mapboxMap.queryRenderedFeatures(screenPoint, LAYER_ID)
+        val screenPoint = maplibreMap.projection.toScreenLocation(point)
+        val featureList = maplibreMap.queryRenderedFeatures(screenPoint, LAYER_ID)
         if (!featureList.isEmpty()) {
             val feature = featureList[0]
             val selectedNow = feature.getBooleanProperty(KEY_PROPERTY_SELECTED)
             isSelected = !selectedNow
-            updateSource(mapboxMap.style)
+            updateSource(maplibreMap.style)
         } else {
             Timber.e("No features found")
         }
@@ -52,8 +52,8 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap ->
-                mapboxMap = map
+            OnMapReadyCallback { map: MaplibreMap ->
+                maplibreMap = map
                 map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
                     updateSource(style)
                     addLayer(style)
@@ -120,10 +120,10 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mapboxMap != null) {
+        if (maplibreMap != null) {
             if (item.itemId == R.id.menu_action_change_location) {
                 isInitialPosition = !isInitialPosition
-                updateSource(mapboxMap.style)
+                updateSource(maplibreMap.style)
             } else if (item.itemId == R.id.menu_action_toggle_source) {
                 toggleSymbolLayerVisibility()
             }

@@ -18,7 +18,7 @@ import java.io.IOException
  */
 class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private val mapboxMap: MapboxMap? = null
+    private val maplibreMap: MaplibreMap? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_textureview_transparent)
@@ -44,13 +44,13 @@ class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
         )
         mapView = MapView(this, mapboxMapOptions)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap: MapboxMap -> initMap(mapboxMap) }
+        mapView.getMapAsync { maplibreMap: MaplibreMap -> initMap(maplibreMap) }
         (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView)
     }
 
-    private fun initMap(mapboxMap: MapboxMap) {
+    private fun initMap(maplibreMap: MaplibreMap) {
         try {
-            mapboxMap.setStyle(
+            maplibreMap.setStyle(
                 Style.Builder().fromJson(ResourceUtils.readRawResource(this, R.raw.no_bg_style))
             )
         } catch (exception: IOException) {

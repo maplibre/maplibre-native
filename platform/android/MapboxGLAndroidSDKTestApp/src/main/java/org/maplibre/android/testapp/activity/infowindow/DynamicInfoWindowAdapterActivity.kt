@@ -10,9 +10,9 @@ import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.InfoWindowAdapter
-import org.maplibre.android.maps.MapboxMap.OnMapClickListener
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -23,7 +23,7 @@ import java.util.*
  * Test activity showcasing how to dynamically update InfoWindow when Using an MapboxMap.InfoWindowAdapter.
  */
 class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     private var marker: Marker? = null
     private val mapClickListener = OnMapClickListener { point ->
@@ -56,29 +56,29 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Streets"))
 
         // Add info window adapter
-        addCustomInfoWindowAdapter(mapboxMap!!)
+        addCustomInfoWindowAdapter(maplibreMap!!)
 
         // Keep info windows open on click
-        mapboxMap.uiSettings.isDeselectMarkersOnTap = false
+        maplibreMap.uiSettings.isDeselectMarkersOnTap = false
 
         // Add a marker
-        marker = addMarker(mapboxMap!!)
-        mapboxMap.selectMarker(marker!!)
+        marker = addMarker(maplibreMap!!)
+        maplibreMap.selectMarker(marker!!)
 
         // On map click, change the info window contents
-        mapboxMap.addOnMapClickListener(mapClickListener)
+        maplibreMap.addOnMapClickListener(mapClickListener)
 
         // Focus on Paris
-        mapboxMap.animateCamera(CameraUpdateFactory.newLatLng(PARIS))
+        maplibreMap.animateCamera(CameraUpdateFactory.newLatLng(PARIS))
     }
 
-    private fun addMarker(mapboxMap: MapboxMap): Marker {
-        return mapboxMap.addMarker(
+    private fun addMarker(maplibreMap: MaplibreMap): Marker {
+        return maplibreMap.addMarker(
             MarkerOptions()
                 .position(PARIS)
                 .icon(
@@ -91,9 +91,9 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
         )
     }
 
-    private fun addCustomInfoWindowAdapter(mapboxMap: MapboxMap) {
+    private fun addCustomInfoWindowAdapter(maplibreMap: MaplibreMap) {
         val padding = resources.getDimension(R.dimen.attr_margin).toInt()
-        mapboxMap.infoWindowAdapter = InfoWindowAdapter { marker: Marker ->
+        maplibreMap.infoWindowAdapter = InfoWindowAdapter { marker: Marker ->
             val textView = TextView(this@DynamicInfoWindowAdapterActivity)
             textView.text = marker.title
             textView.setBackgroundColor(Color.WHITE)
@@ -130,8 +130,8 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap.removeOnMapClickListener(mapClickListener)
+        if (maplibreMap != null) {
+            maplibreMap.removeOnMapClickListener(mapClickListener)
         }
         mapView.onDestroy()
     }

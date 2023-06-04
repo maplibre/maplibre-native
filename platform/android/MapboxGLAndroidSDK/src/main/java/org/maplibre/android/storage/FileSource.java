@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
 import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.Mapbox;
+import org.maplibre.android.Maplibre;
 import org.maplibre.android.constants.MapboxConstants;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.util.TileServerOptions;
@@ -293,7 +293,7 @@ public class FileSource {
    */
   public static void setResourcesCachePath(@NonNull final String path,
                                            @NonNull final ResourcesCachePathChangeCallback callback) {
-    final Context applicationContext = Mapbox.getApplicationContext();
+    final Context applicationContext = Maplibre.getApplicationContext();
     final FileSource fileSource = FileSource.getInstance(applicationContext);
 
     if (path.equals(getResourcesCachePath(applicationContext))) {
@@ -372,8 +372,8 @@ public class FileSource {
   private long nativePtr;
 
   private FileSource(String cachePath) {
-    TileServerOptions options = Mapbox.getTileServerOptions();
-    initialize(Mapbox.getApiKey(), cachePath, options);
+    TileServerOptions options = Maplibre.getTileServerOptions();
+    initialize(Maplibre.getApiKey(), cachePath, options);
   }
 
   @Keep

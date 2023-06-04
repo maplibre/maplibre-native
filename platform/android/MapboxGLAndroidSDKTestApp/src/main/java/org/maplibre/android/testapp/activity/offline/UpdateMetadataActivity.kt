@@ -11,13 +11,12 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.offline.OfflineManager
 import org.maplibre.android.offline.OfflineManager.ListOfflineRegionsCallback
 import org.maplibre.android.offline.OfflineRegion
 import org.maplibre.android.offline.OfflineRegion.OfflineRegionUpdateMetadataCallback
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.activity.offline.UpdateMetadataActivity.OfflineRegionMetadataAdapter
 import org.maplibre.android.testapp.utils.OfflineUtils
 import java.util.*
 
@@ -76,7 +75,7 @@ class UpdateMetadataActivity :
         container.removeAllViews()
         container.addView(MapView(view.context).also { mapView = it })
         mapView.onCreate(null)
-        mapView.getMapAsync { map: MapboxMap ->
+        mapView.getMapAsync { map: MaplibreMap ->
             map.setOfflineRegionDefinition(
                 adapter!!.getItem(position).definition
             )

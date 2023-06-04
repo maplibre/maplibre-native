@@ -11,9 +11,9 @@
 -dontnote com.google.gson.**
 
 # dontnote for keeps the entry point x but not the descriptor class y
--dontnote org.maplibre.android.maps.MapboxMap$OnFpsChangedListener
+-dontnote org.maplibre.android.maps.MaplibreMap$OnFpsChangedListener
 -dontnote org.maplibre.android.style.layers.PropertyValue
--dontnote org.maplibre.android.maps.MapboxMap
+-dontnote org.maplibre.android.maps.MaplibreMap
 -dontnote org.maplibre.android.maps.MapboxMapOptions
 -dontnote org.maplibre.android.log.LoggerDefinition
 

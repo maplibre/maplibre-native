@@ -9,7 +9,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.snapshotter.MapSnapshot
 import org.maplibre.android.snapshotter.MapSnapshotter
@@ -29,7 +29,7 @@ import org.maplibre.android.testapp.databinding.ActivityMapsnapshotterWithinExpr
  */
 class MapSnapshotterWithinExpression : AppCompatActivity() {
     private lateinit var binding: ActivityMapsnapshotterWithinExpressionBinding
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var snapshotter: MapSnapshotter
     private var snapshotInProgress = false
 
@@ -37,7 +37,7 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
         override fun onCameraDidChange(animated: Boolean) {
             if (!snapshotInProgress) {
                 snapshotInProgress = true
-                snapshotter.setCameraPosition(mapboxMap.cameraPosition)
+                snapshotter.setCameraPosition(maplibreMap.cameraPosition)
                 snapshotter.start(object : MapSnapshotter.SnapshotReadyCallback {
                     override fun onSnapshotReady(snapshot: MapSnapshot) {
                         binding.imageView.setImageBitmap(snapshot.bitmap)
@@ -73,15 +73,15 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync { map ->
-            mapboxMap = map
+            maplibreMap = map
 
             // Setup camera position above Georgetown
-            mapboxMap.cameraPosition = CameraPosition.Builder().target(LatLng(38.90628988399711, -77.06574689337494)).zoom(15.5).build()
+            maplibreMap.cameraPosition = CameraPosition.Builder().target(LatLng(38.90628988399711, -77.06574689337494)).zoom(15.5).build()
 
             // Wait for the map to become idle before manipulating the style and camera of the map
             binding.mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
                 override fun onDidBecomeIdle() {
-                    mapboxMap.easeCamera(
+                    maplibreMap.easeCamera(
                         CameraUpdateFactory.newCameraPosition(
                             CameraPosition.Builder().zoom(16.0).target(LatLng(38.905156245642814, -77.06535338052844)).bearing(80.68015859462369).tilt(55.0).build()
                         ),
@@ -106,14 +106,14 @@ class MapSnapshotterWithinExpression : AppCompatActivity() {
 
         // Setup style with additional layers,
         // using streets as a base style
-        mapboxMap.setStyle(
+        maplibreMap.setStyle(
             Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
         ) {
             binding.mapView.addOnCameraDidChangeListener(cameraListener)
         }
 
         val options = MapSnapshotter.Options(binding.imageView.measuredWidth / 2, binding.imageView.measuredHeight / 2)
-            .withCameraPosition(mapboxMap.cameraPosition)
+            .withCameraPosition(maplibreMap.cameraPosition)
             .withPixelRatio(2.0f).withStyleBuilder(
                 Style.Builder().fromUri(Style.getPredefinedStyle("Streets")).withSources(
                     GeoJsonSource(

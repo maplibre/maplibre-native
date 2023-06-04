@@ -7,7 +7,7 @@ import org.maplibre.android.AppCenter
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
@@ -28,7 +28,7 @@ class RemoveUnusedImagesTest : AppCenter() {
     var rule = ActivityTestRule(EspressoTestActivity::class.java)
 
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private val latch = CountDownLatch(1)
 
     @Before
@@ -36,8 +36,8 @@ class RemoveUnusedImagesTest : AppCenter() {
         rule.runOnUiThread {
             mapView = rule.activity.findViewById(R.id.mapView)
             mapView.getMapAsync {
-                mapboxMap = it
-                mapboxMap.setStyle(Style.Builder().fromJson(styleJson))
+                maplibreMap = it
+                maplibreMap.setStyle(Style.Builder().fromJson(styleJson))
             }
         }
     }
@@ -47,22 +47,22 @@ class RemoveUnusedImagesTest : AppCenter() {
         var callbackLatch = CountDownLatch(2)
         rule.runOnUiThread {
             mapView.addOnStyleImageMissingListener {
-                mapboxMap.style!!.addImage(it, Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888))
+                maplibreMap.style!!.addImage(it, Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888))
             }
 
             // Remove layer and source, so that rendered tiles are no longer used, therefore, map must
             // notify client about unused images.
             mapView.addOnDidBecomeIdleListener {
-                mapboxMap.style!!.removeLayer("icon")
-                mapboxMap.style!!.removeSource("geojson")
+                maplibreMap.style!!.removeLayer("icon")
+                maplibreMap.style!!.removeSource("geojson")
             }
 
             mapView.addOnCanRemoveUnusedStyleImageListener {
                 callbackLatch.countDown()
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
+                maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
                 mapView.addOnDidFinishRenderingFrameListener {
-                    assertNotNull(mapboxMap.style!!.getImage("small"))
-                    assertNotNull(mapboxMap.style!!.getImage("large"))
+                    assertNotNull(maplibreMap.style!!.getImage("small"))
+                    assertNotNull(maplibreMap.style!!.getImage("large"))
                     latch.countDown()
                 }
                 return@addOnCanRemoveUnusedStyleImageListener false
@@ -78,19 +78,19 @@ class RemoveUnusedImagesTest : AppCenter() {
     fun testRemoveUnusedImagesDefaultListener() {
         rule.runOnUiThread {
             mapView.addOnStyleImageMissingListener {
-                mapboxMap.style!!.addImage(it, Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888))
+                maplibreMap.style!!.addImage(it, Bitmap.createBitmap(512, 512, Bitmap.Config.ARGB_8888))
             }
 
             // Remove layer and source, so that rendered tiles are no longer used, thus
             // map must request removal of unused images.
             mapView.addOnDidBecomeIdleListener {
-                mapboxMap.style!!.removeLayer("icon")
-                mapboxMap.style!!.removeSource("geojson")
-                mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
+                maplibreMap.style!!.removeLayer("icon")
+                maplibreMap.style!!.removeSource("geojson")
+                maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
 
                 // Wait for the next frame and check that images were removed from the style.
                 mapView.addOnDidFinishRenderingFrameListener {
-                    if (mapboxMap.style!!.getImage("small") == null && mapboxMap.style!!.getImage("large") == null) {
+                    if (maplibreMap.style!!.getImage("small") == null && maplibreMap.style!!.getImage("large") == null) {
                         latch.countDown()
                     }
                 }
@@ -107,7 +107,7 @@ class RemoveUnusedImagesTest : AppCenter() {
             """
     {
       "version": 8,
-      "name": "Mapbox Streets",
+      "name": "Maplibre Streets",
       "sources": {
         "geojson": {
           "type": "geojson",

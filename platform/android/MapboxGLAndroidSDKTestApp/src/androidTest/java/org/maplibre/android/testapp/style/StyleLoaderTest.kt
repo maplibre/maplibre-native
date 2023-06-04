@@ -3,7 +3,7 @@ package org.maplibre.android.testapp.style
 import android.view.View
 import androidx.test.espresso.UiController
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.action.MapboxMapAction
@@ -21,16 +21,16 @@ class StyleLoaderTest : EspressoTest() {
     fun testSetGetStyleJsonString() {
         validateTestSetup()
         MapboxMapAction.invoke(
-            mapboxMap
-        ) { uiController: UiController?, mapboxMap: MapboxMap ->
+            maplibreMap
+        ) { uiController: UiController?, maplibreMap: MaplibreMap ->
             try {
                 val expected =
                     readRawResource(
                         rule.activity,
                         R.raw.local_style
                     )
-                mapboxMap.setStyle(Style.Builder().fromJson(expected))
-                val actual = mapboxMap.style!!.json
+                maplibreMap.setStyle(Style.Builder().fromJson(expected))
+                val actual = maplibreMap.style!!.json
                 Assert.assertEquals("Style json should match", expected, actual)
             } catch (exception: IOException) {
                 exception.printStackTrace()
@@ -42,15 +42,15 @@ class StyleLoaderTest : EspressoTest() {
     fun testDefaultStyleLoadWithActivityLifecycleChange() {
         validateTestSetup()
         MapboxMapAction.invoke(
-            mapboxMap
-        ) { uiController: UiController?, mapboxMap: MapboxMap ->
+            maplibreMap
+        ) { uiController: UiController?, maplibreMap: MaplibreMap ->
             try {
                 val expected =
                     readRawResource(
                         rule.activity,
                         R.raw.local_style
                     )
-                mapboxMap.setStyle(Style.Builder().fromJson(expected))
+                maplibreMap.setStyle(Style.Builder().fromJson(expected))
 
                 // fake activity stop/start
                 val mapView =
@@ -59,11 +59,11 @@ class StyleLoaderTest : EspressoTest() {
                 mapView.onStop()
                 mapView.onStart()
                 mapView.onResume()
-                val actual = mapboxMap.style!!.json
+                val actual = maplibreMap.style!!.json
                 Assert.assertEquals(
                     "Style URL should be empty",
                     "",
-                    mapboxMap.style!!.uri
+                    maplibreMap.style!!.uri
                 )
                 Assert.assertEquals("Style json should match", expected, actual)
             } catch (exception: IOException) {

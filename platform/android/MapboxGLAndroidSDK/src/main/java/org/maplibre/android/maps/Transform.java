@@ -14,7 +14,7 @@ import org.maplibre.android.constants.MapboxConstants;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.log.Logger;
 
-import static org.maplibre.android.maps.MapboxMap.OnCameraMoveStartedListener;
+import static org.maplibre.android.maps.MaplibreMap.OnCameraMoveStartedListener;
 
 /**
  * Internal use.
@@ -36,7 +36,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   @Nullable
   private CameraPosition cameraPosition;
   @Nullable
-  private MapboxMap.CancelableCallback cameraCancelableCallback;
+  private MaplibreMap.CancelableCallback cameraCancelableCallback;
   private CameraChangeDispatcher cameraChangeDispatcher;
 
   private final MapView.OnCameraDidChangeListener moveByChangeListener = new MapView.OnCameraDidChangeListener() {
@@ -55,10 +55,10 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
     this.cameraChangeDispatcher = cameraChangeDispatcher;
   }
 
-  void initialise(@NonNull MapboxMap mapboxMap, @NonNull MapboxMapOptions options) {
+  void initialise(@NonNull MaplibreMap maplibreMap, @NonNull MapboxMapOptions options) {
     CameraPosition position = options.getCamera();
     if (position != null && !position.equals(CameraPosition.DEFAULT)) {
-      moveCamera(mapboxMap, CameraUpdateFactory.newCameraPosition(position), null);
+      moveCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(position), null);
     }
     setMinZoom(options.getMinZoomPreference());
     setMaxZoom(options.getMaxZoomPreference());
@@ -84,7 +84,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
     if (animated) {
       invalidateCameraPosition();
       if (cameraCancelableCallback != null) {
-        final MapboxMap.CancelableCallback callback = cameraCancelableCallback;
+        final MaplibreMap.CancelableCallback callback = cameraCancelableCallback;
 
         // nullification has to happen before Handler#post, see https://github.com/robolectric/robolectric/issues/1306
         cameraCancelableCallback = null;
@@ -105,9 +105,9 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
    * Internal use.
    */
   @UiThread
-  public final void moveCamera(@NonNull MapboxMap mapboxMap, CameraUpdate update,
-                               @Nullable final MapboxMap.CancelableCallback callback) {
-    CameraPosition cameraPosition = update.getCameraPosition(mapboxMap);
+  public final void moveCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update,
+                               @Nullable final MaplibreMap.CancelableCallback callback) {
+    CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
       cancelTransitions();
       cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
@@ -129,9 +129,9 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   @UiThread
-  final void easeCamera(@NonNull MapboxMap mapboxMap, CameraUpdate update, int durationMs, boolean easingInterpolator,
-                        @Nullable final MapboxMap.CancelableCallback callback) {
-    CameraPosition cameraPosition = update.getCameraPosition(mapboxMap);
+  final void easeCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update, int durationMs, boolean easingInterpolator,
+                        @Nullable final MaplibreMap.CancelableCallback callback) {
+    CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
       cancelTransitions();
       cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
@@ -151,9 +151,9 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
    * Internal use.
    */
   @UiThread
-  public final void animateCamera(@NonNull MapboxMap mapboxMap, CameraUpdate update, int durationMs,
-                                  @Nullable final MapboxMap.CancelableCallback callback) {
-    CameraPosition cameraPosition = update.getCameraPosition(mapboxMap);
+  public final void animateCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update, int durationMs,
+                                  @Nullable final MaplibreMap.CancelableCallback callback) {
+    CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
       cancelTransitions();
       cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
@@ -193,7 +193,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
 
     // notify animateCamera and easeCamera about cancelling
     if (cameraCancelableCallback != null) {
-      final MapboxMap.CancelableCallback callback = cameraCancelableCallback;
+      final MaplibreMap.CancelableCallback callback = cameraCancelableCallback;
       cameraChangeDispatcher.onCameraIdle();
 
       // nullification has to happen before Handler#post, see https://github.com/robolectric/robolectric/issues/1306

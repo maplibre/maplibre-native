@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.LongSparseArray;
 
-import org.maplibre.android.Mapbox;
+import org.maplibre.android.Maplibre;
 import org.maplibre.android.R;
 import org.maplibre.android.annotations.Annotation;
 import org.maplibre.android.annotations.BaseMarkerOptions;
@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * Responsible for managing and tracking state of Annotations linked to Map. All events related to
- * annotations that occur on {@link MapboxMap} are forwarded to this class.
+ * annotations that occur on {@link MaplibreMap} are forwarded to this class.
  * <p>
  * Responsible for referencing {@link InfoWindowManager}.
  * </p>
@@ -48,13 +48,13 @@ class AnnotationManager {
   private final LongSparseArray<Annotation> annotationsArray;
   private final List<Marker> selectedMarkers = new ArrayList<>();
 
-  private MapboxMap mapboxMap;
+  private MaplibreMap maplibreMap;
   @Nullable
-  private MapboxMap.OnMarkerClickListener onMarkerClickListener;
+  private MaplibreMap.OnMarkerClickListener onMarkerClickListener;
   @Nullable
-  private MapboxMap.OnPolygonClickListener onPolygonClickListener;
+  private MaplibreMap.OnPolygonClickListener onPolygonClickListener;
   @Nullable
-  private MapboxMap.OnPolylineClickListener onPolylineClickListener;
+  private MaplibreMap.OnPolylineClickListener onPolylineClickListener;
 
   private Annotations annotations;
   private ShapeAnnotations shapeAnnotations;
@@ -78,8 +78,8 @@ class AnnotationManager {
   // TODO refactor MapboxMap out for Projection and Transform
   // Requires removing MapboxMap from Annotations by using Peer model from #6912
   @NonNull
-  AnnotationManager bind(MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
+  AnnotationManager bind(MaplibreMap maplibreMap) {
+    this.maplibreMap = maplibreMap;
     return this;
   }
 
@@ -151,20 +151,20 @@ class AnnotationManager {
   // Markers
   //
 
-  Marker addMarker(@NonNull BaseMarkerOptions markerOptions, @NonNull MapboxMap mapboxMap) {
-    return markers.addBy(markerOptions, mapboxMap);
+  Marker addMarker(@NonNull BaseMarkerOptions markerOptions, @NonNull MaplibreMap maplibreMap) {
+    return markers.addBy(markerOptions, maplibreMap);
   }
 
-  List<Marker> addMarkers(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MapboxMap mapboxMap) {
-    return markers.addBy(markerOptionsList, mapboxMap);
+  List<Marker> addMarkers(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MaplibreMap maplibreMap) {
+    return markers.addBy(markerOptionsList, maplibreMap);
   }
 
-  void updateMarker(@NonNull Marker updatedMarker, @NonNull MapboxMap mapboxMap) {
+  void updateMarker(@NonNull Marker updatedMarker, @NonNull MaplibreMap maplibreMap) {
     if (!isAddedToMap(updatedMarker)) {
       logNonAdded(updatedMarker);
       return;
     }
-    markers.update(updatedMarker, mapboxMap);
+    markers.update(updatedMarker, maplibreMap);
   }
 
   List<Marker> getMarkers() {
@@ -184,12 +184,12 @@ class AnnotationManager {
   // Polygons
   //
 
-  Polygon addPolygon(@NonNull PolygonOptions polygonOptions, @NonNull MapboxMap mapboxMap) {
-    return polygons.addBy(polygonOptions, mapboxMap);
+  Polygon addPolygon(@NonNull PolygonOptions polygonOptions, @NonNull MaplibreMap maplibreMap) {
+    return polygons.addBy(polygonOptions, maplibreMap);
   }
 
-  List<Polygon> addPolygons(@NonNull List<PolygonOptions> polygonOptionsList, @NonNull MapboxMap mapboxMap) {
-    return polygons.addBy(polygonOptionsList, mapboxMap);
+  List<Polygon> addPolygons(@NonNull List<PolygonOptions> polygonOptionsList, @NonNull MaplibreMap maplibreMap) {
+    return polygons.addBy(polygonOptionsList, maplibreMap);
   }
 
   void updatePolygon(@NonNull Polygon polygon) {
@@ -208,12 +208,12 @@ class AnnotationManager {
   // Polylines
   //
 
-  Polyline addPolyline(@NonNull PolylineOptions polylineOptions, @NonNull MapboxMap mapboxMap) {
-    return polylines.addBy(polylineOptions, mapboxMap);
+  Polyline addPolyline(@NonNull PolylineOptions polylineOptions, @NonNull MaplibreMap maplibreMap) {
+    return polylines.addBy(polylineOptions, maplibreMap);
   }
 
-  List<Polyline> addPolylines(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MapboxMap mapboxMap) {
-    return polylines.addBy(polylineOptionsList, mapboxMap);
+  List<Polyline> addPolylines(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MaplibreMap maplibreMap) {
+    return polylines.addBy(polylineOptionsList, maplibreMap);
   }
 
   void updatePolyline(@NonNull Polyline polyline) {
@@ -229,15 +229,15 @@ class AnnotationManager {
   }
 
   // TODO Refactor from here still in progress
-  void setOnMarkerClickListener(@Nullable MapboxMap.OnMarkerClickListener listener) {
+  void setOnMarkerClickListener(@Nullable MaplibreMap.OnMarkerClickListener listener) {
     onMarkerClickListener = listener;
   }
 
-  void setOnPolygonClickListener(@Nullable MapboxMap.OnPolygonClickListener listener) {
+  void setOnPolygonClickListener(@Nullable MaplibreMap.OnPolygonClickListener listener) {
     onPolygonClickListener = listener;
   }
 
-  void setOnPolylineClickListener(@Nullable MapboxMap.OnPolylineClickListener listener) {
+  void setOnPolylineClickListener(@Nullable MaplibreMap.OnPolylineClickListener listener) {
     onPolylineClickListener = listener;
   }
 
@@ -252,7 +252,7 @@ class AnnotationManager {
     }
 
     if (infoWindowManager.isInfoWindowValidForMarker(marker) || infoWindowManager.getInfoWindowAdapter() != null) {
-      infoWindowManager.add(marker.showInfoWindow(mapboxMap, mapView));
+      infoWindowManager.add(marker.showInfoWindow(maplibreMap, mapView));
     }
 
     // only add to selected markers if user didn't handle the click event themselves #3176
@@ -297,7 +297,7 @@ class AnnotationManager {
     return infoWindowManager;
   }
 
-  void adjustTopOffsetPixels(@NonNull MapboxMap mapboxMap) {
+  void adjustTopOffsetPixels(@NonNull MaplibreMap maplibreMap) {
     int count = annotationsArray.size();
     for (int i = 0; i < count; i++) {
       Annotation annotation = annotationsArray.get(i);
@@ -311,7 +311,7 @@ class AnnotationManager {
     for (Marker marker : selectedMarkers) {
       if (marker.isInfoWindowShown()) {
         marker.hideInfoWindow();
-        marker.showInfoWindow(mapboxMap, mapView);
+        marker.showInfoWindow(maplibreMap, mapView);
       }
     }
   }
@@ -332,7 +332,7 @@ class AnnotationManager {
 
   boolean onTap(@NonNull PointF tapPoint) {
     MarkerHit markerHit = getMarkerHitFromTouchArea(tapPoint);
-    long markerId = new MarkerHitResolver(mapboxMap).execute(markerHit);
+    long markerId = new MarkerHitResolver(maplibreMap).execute(markerHit);
     if (markerId != NO_ANNOTATION_ID) {
       if (isClickHandledForMarker(markerId)) {
         return true;
@@ -345,7 +345,7 @@ class AnnotationManager {
   }
 
   private ShapeAnnotationHit getShapeAnnotationHitFromTap(PointF tapPoint) {
-    float touchTargetSide = Mapbox.getApplicationContext().getResources().getDimension(R.dimen.maplibre_eight_dp);
+    float touchTargetSide = Maplibre.getApplicationContext().getResources().getDimension(R.dimen.maplibre_eight_dp);
     RectF tapRect = new RectF(
       tapPoint.x - touchTargetSide,
       tapPoint.y - touchTargetSide,
@@ -440,9 +440,9 @@ class AnnotationManager {
 
     private long closestMarkerId = NO_ANNOTATION_ID;
 
-    MarkerHitResolver(@NonNull MapboxMap mapboxMap) {
-      this.projection = mapboxMap.getProjection();
-      this.minimalTouchSize = (int) (32 * Mapbox.getApplicationContext().getResources().getDisplayMetrics().density);
+    MarkerHitResolver(@NonNull MaplibreMap maplibreMap) {
+      this.projection = maplibreMap.getProjection();
+      this.minimalTouchSize = (int) (32 * Maplibre.getApplicationContext().getResources().getDisplayMetrics().density);
     }
 
     public long execute(@NonNull MarkerHit markerHit) {

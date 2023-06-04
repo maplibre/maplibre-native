@@ -13,7 +13,7 @@ import org.robolectric.RuntimeEnvironment
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)
-class MapboxMapOptionsTest {
+class MaplibreMapOptionsTest {
     @Test
     fun testSanity() {
         Assert.assertNotNull("should not be null", MapboxMapOptions())

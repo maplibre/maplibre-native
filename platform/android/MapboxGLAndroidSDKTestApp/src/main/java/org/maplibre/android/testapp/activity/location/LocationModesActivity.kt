@@ -26,8 +26,8 @@ import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.CancelableCallback
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.CancelableCallback
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -43,7 +43,7 @@ class LocationModesActivity :
     private var protectedGestureArea: View? = null
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var defaultStyle = false
 
     @CameraMode.Mode
@@ -115,10 +115,10 @@ class LocationModesActivity :
     }
 
     @SuppressLint("MissingPermission")
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
-            locationComponent = mapboxMap.locationComponent
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+            locationComponent = maplibreMap.locationComponent
             locationComponent!!.activateLocationComponent(
                 LocationComponentActivationOptions
                     .builder(this, style!!)
@@ -225,7 +225,7 @@ class LocationModesActivity :
         if (locationComponent == null) {
             return
         }
-        mapboxMap.getStyle { style: Style ->
+        maplibreMap.getStyle { style: Style ->
             val styleUrl =
                 Style.getPredefinedStyle(
                     if (Style.getPredefinedStyle("Bright") == style.uri) {
@@ -235,7 +235,7 @@ class LocationModesActivity :
                     }
                 )
 
-            mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
+            maplibreMap.setStyle(Style.Builder().fromUri(styleUrl))
         }
     }
 

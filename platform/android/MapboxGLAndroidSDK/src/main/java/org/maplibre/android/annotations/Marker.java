@@ -9,13 +9,13 @@ import androidx.annotation.Nullable;
 import org.maplibre.android.R;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.maps.MapView;
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 
 /**
  * Marker is an annotation that shows an icon image at a geographical location. The default marker
  * uses a provided icon. This icon can be customized using {@link IconFactory} to generate an
  * {@link Icon} using a provided image. Markers are added to the map by first giving a
- * {@link LatLng} and using {@link MapboxMap#addMarker(MarkerOptions)}. The marker icon will be
+ * {@link LatLng} and using {@link MaplibreMap#addMarker(MarkerOptions)}. The marker icon will be
  * centered at this position so it is common to add padding to the icon image before usage.
  * <p>
  * Markers are designed to be interactive. They receive click events by default, and are often used
@@ -24,7 +24,7 @@ import org.maplibre.android.maps.MapboxMap;
  * </p>
  * @deprecated As of 7.0.0,
  * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
- *   Mapbox Annotation Plugin</a> instead
+ *   Maplibre Annotation Plugin</a> instead
  */
 @Deprecated
 public class Marker extends Annotation {
@@ -123,7 +123,7 @@ public class Marker extends Annotation {
    */
   public void setPosition(LatLng position) {
     this.position = position;
-    MapboxMap map = getMapboxMap();
+    MaplibreMap map = getMapboxMap();
     if (map != null) {
       map.updateMarker(this);
     }
@@ -148,7 +148,7 @@ public class Marker extends Annotation {
   public void setIcon(@Nullable Icon icon) {
     this.icon = icon;
     this.iconId = icon != null ? icon.getId() : null;
-    MapboxMap map = getMapboxMap();
+    MaplibreMap map = getMapboxMap();
     if (map != null) {
       map.updateMarker(this);
     }
@@ -191,12 +191,12 @@ public class Marker extends Annotation {
    * Update only for default Marker's InfoWindow content for Title and Snippet
    */
   private void refreshInfoWindowContent() {
-    if (isInfoWindowShown() && mapView != null && mapboxMap != null && mapboxMap.getInfoWindowAdapter() == null) {
+    if (isInfoWindowShown() && mapView != null && maplibreMap != null && maplibreMap.getInfoWindowAdapter() == null) {
       InfoWindow infoWindow = getInfoWindow(mapView);
       if (mapView.getContext() != null) {
-        infoWindow.adaptDefaultMarker(this, mapboxMap, mapView);
+        infoWindow.adaptDefaultMarker(this, maplibreMap, mapView);
       }
-      MapboxMap map = getMapboxMap();
+      MaplibreMap map = getMapboxMap();
       if (map != null) {
         map.updateMarker(this);
       }
@@ -205,23 +205,23 @@ public class Marker extends Annotation {
   }
 
   /**
-   * Do not use this method, used internally by the SDK. Use {@link MapboxMap#selectMarker(Marker)}
+   * Do not use this method, used internally by the SDK. Use {@link MaplibreMap#selectMarker(Marker)}
    * if you want to programmatically display the markers info window.
    *
-   * @param mapboxMap The hosting mapbox map.
+   * @param maplibreMap The hosting mapbox map.
    * @param mapView   The hosting map view.
    * @return The info window that was shown.
    */
   @Nullable
-  public InfoWindow showInfoWindow(@NonNull MapboxMap mapboxMap, @NonNull MapView mapView) {
-    setMapboxMap(mapboxMap);
+  public InfoWindow showInfoWindow(@NonNull MaplibreMap maplibreMap, @NonNull MapView mapView) {
+    setMapboxMap(maplibreMap);
     setMapView(mapView);
-    MapboxMap.InfoWindowAdapter infoWindowAdapter = getMapboxMap().getInfoWindowAdapter();
+    MaplibreMap.InfoWindowAdapter infoWindowAdapter = getMapboxMap().getInfoWindowAdapter();
     if (infoWindowAdapter != null) {
       // end developer is using a custom InfoWindowAdapter
       View content = infoWindowAdapter.getInfoWindow(this);
       if (content != null) {
-        infoWindow = new InfoWindow(content, mapboxMap);
+        infoWindow = new InfoWindow(content, maplibreMap);
         showInfoWindow(infoWindow, mapView);
         return infoWindow;
       }
@@ -229,7 +229,7 @@ public class Marker extends Annotation {
 
     InfoWindow infoWindow = getInfoWindow(mapView);
     if (mapView.getContext() != null) {
-      infoWindow.adaptDefaultMarker(this, mapboxMap, mapView);
+      infoWindow.adaptDefaultMarker(this, maplibreMap, mapView);
     }
     return showInfoWindow(infoWindow, mapView);
   }

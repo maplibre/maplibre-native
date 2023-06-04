@@ -22,7 +22,7 @@ import java.util.ArrayList
  * Test stretchable image as a background for text..
  */
 class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,9 +32,9 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
             val popup = BitmapUtils.getBitmapFromDrawable(
                 resources.getDrawable(R.drawable.popup)
             )
@@ -66,7 +66,7 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
             Timber.e("json is null.")
             return
         }
-        val style = mapboxMap.style
+        val style = maplibreMap.style
         if (style != null) {
             val featureCollection = FeatureCollection.fromJson(json)
             val stretchSource = GeoJsonSource(STRETCH_SOURCE, featureCollection)

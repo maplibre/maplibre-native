@@ -25,7 +25,7 @@ public class MarkerTest extends EspressoTest {
   @Ignore
   public void addMarkerTest() {
     validateTestSetup();
-    MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
+    MapboxMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertEquals("Markers should be empty", 0, mapboxMap.getMarkers().size());
 
       MarkerOptions options = new MarkerOptions();
@@ -48,7 +48,7 @@ public class MarkerTest extends EspressoTest {
   @Ignore
   public void showInfoWindowTest() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       final MarkerOptions options = new MarkerOptions();
       options.setPosition(new LatLng());
       options.setSnippet(TestConstants.TEXT_MARKER_SNIPPET);

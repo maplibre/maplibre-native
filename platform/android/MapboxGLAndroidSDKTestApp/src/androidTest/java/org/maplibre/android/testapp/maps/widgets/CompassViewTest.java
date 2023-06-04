@@ -32,7 +32,7 @@ public class CompassViewTest extends EspressoTest {
   @Ignore("No explanation given")
   public void testVisible() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
         new CameraPosition.Builder()
           .bearing(45)
@@ -49,7 +49,7 @@ public class CompassViewTest extends EspressoTest {
   @Ignore("No explanation given")
   public void testClick() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
+    invoke(maplibreMap, (uiController, mapboxMap) -> mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
       new CameraPosition.Builder()
         .bearing(45)
         .zoom(1)
@@ -59,7 +59,7 @@ public class CompassViewTest extends EspressoTest {
     onView(withTagValue(is("compassView"))).perform(click());
     WaitAction.invoke(500);
     onView(withTagValue(is("compassView"))).check(matches(not(isDisplayed())));
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       CameraPosition cameraPosition = mapboxMap.getCameraPosition();
       assertEquals("Camera bearing should face north, ", 0, cameraPosition.bearing, TestConstants.BEARING_DELTA);
     });

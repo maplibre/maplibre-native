@@ -17,15 +17,15 @@ class TransformTest : EspressoTest() {
     @Test
     fun mapboxMapScrollByWithPadding() {
         validateTestSetup()
-        invoke(mapboxMap) { _: UiController, mapboxMap: MapboxMap ->
-            mapboxMap.moveCamera(initialCameraUpdate)
-            mapboxMap.scrollBy(400.0f, 0.0f)
-            val expectedCameraPosition = mapboxMap.cameraPosition
+        invoke(maplibreMap) { _: UiController, maplibreMap: MaplibreMap ->
+            maplibreMap.moveCamera(initialCameraUpdate)
+            maplibreMap.scrollBy(400.0f, 0.0f)
+            val expectedCameraPosition = maplibreMap.cameraPosition
 
-            mapboxMap.moveCamera(initialCameraUpdate)
-            mapboxMap.setPadding(250, 250, 0, 0)
-            mapboxMap.scrollBy(400.0f, 0.0f)
-            val actualCameraPosition = mapboxMap.cameraPosition
+            maplibreMap.moveCamera(initialCameraUpdate)
+            maplibreMap.setPadding(250, 250, 0, 0)
+            maplibreMap.scrollBy(400.0f, 0.0f)
+            val actualCameraPosition = maplibreMap.cameraPosition
 
             assertEquals("Camera position should match", expectedCameraPosition, actualCameraPosition)
         }

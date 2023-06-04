@@ -47,8 +47,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The general class to interact with in the Android Mapbox SDK. It exposes the entry point for all
- * methods related to the MapView. You cannot instantiate {@link MapboxMap} object directly, rather,
+ * The general class to interact with in the Android MapLibre SDK. It exposes the entry point for all
+ * methods related to the MapView. You cannot instantiate {@link MaplibreMap} object directly, rather,
  * you must obtain one from the getMapAsync() method on a MapFragment or MapView that you have
  * added to your application.
  * <p>
@@ -56,7 +56,7 @@ import java.util.List;
  * </p>
  */
 @UiThread
-public final class MapboxMap {
+public final class MaplibreMap {
 
   private static final String TAG = "Mbgl-MapboxMap";
 
@@ -76,7 +76,7 @@ public final class MapboxMap {
   private AnnotationManager annotationManager;
 
   @Nullable
-  private MapboxMap.OnFpsChangedListener onFpsChangedListener;
+  private MaplibreMap.OnFpsChangedListener onFpsChangedListener;
 
   @Nullable
   private Style style;
@@ -84,9 +84,9 @@ public final class MapboxMap {
   private boolean debugActive;
   private boolean started;
 
-  MapboxMap(NativeMap map, Transform transform, UiSettings ui, Projection projection,
-            OnGesturesManagerInteractionListener listener, CameraChangeDispatcher cameraChangeDispatcher,
-            List<OnDeveloperAnimationListener> developerAnimationStartedListeners) {
+  MaplibreMap(NativeMap map, Transform transform, UiSettings ui, Projection projection,
+              OnGesturesManagerInteractionListener listener, CameraChangeDispatcher cameraChangeDispatcher,
+              List<OnDeveloperAnimationListener> developerAnimationStartedListeners) {
     this.nativeMapView = map;
     this.uiSettings = ui;
     this.projection = projection;
@@ -287,7 +287,7 @@ public final class MapboxMap {
    * Check whether tile pre-fetching is enabled or not.
    *
    * @return true if enabled
-   * @see MapboxMap#setPrefetchesTiles(boolean)
+   * @see MaplibreMap#setPrefetchesTiles(boolean)
    * @deprecated Use {@link #getPrefetchZoomDelta()} instead.
    */
   @Deprecated
@@ -313,7 +313,7 @@ public final class MapboxMap {
    * Check current pre-fetching zoom delta.
    *
    * @return current zoom delta.
-   * @see MapboxMap#setPrefetchZoomDelta(int)
+   * @see MaplibreMap#setPrefetchZoomDelta(int)
    */
   @IntRange(from = 0)
   public int getPrefetchZoomDelta() {
@@ -523,9 +523,9 @@ public final class MapboxMap {
    * @param callback the callback to be invoked when an animation finishes or is canceled
    */
   public final void moveCamera(@NonNull final CameraUpdate update,
-                               @Nullable final MapboxMap.CancelableCallback callback) {
+                               @Nullable final MaplibreMap.CancelableCallback callback) {
     notifyDeveloperAnimationListeners();
-    transform.moveCamera(MapboxMap.this, update, callback);
+    transform.moveCamera(MaplibreMap.this, update, callback);
   }
 
   /**
@@ -553,7 +553,7 @@ public final class MapboxMap {
    *                 Do not update or ease the camera from within onCancel().
    * @see CameraUpdateFactory for a set of updates.
    */
-  public final void easeCamera(@NonNull CameraUpdate update, @Nullable final MapboxMap.CancelableCallback callback) {
+  public final void easeCamera(@NonNull CameraUpdate update, @Nullable final MaplibreMap.CancelableCallback callback) {
     easeCamera(update, MapboxConstants.ANIMATION_DURATION, callback);
   }
 
@@ -591,7 +591,7 @@ public final class MapboxMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void easeCamera(@NonNull CameraUpdate update, int durationMs,
-                               @Nullable final MapboxMap.CancelableCallback callback) {
+                               @Nullable final MaplibreMap.CancelableCallback callback) {
     easeCamera(update, durationMs, true, callback);
   }
 
@@ -632,12 +632,12 @@ public final class MapboxMap {
   public final void easeCamera(@NonNull final CameraUpdate update,
                                final int durationMs,
                                final boolean easingInterpolator,
-                               @Nullable final MapboxMap.CancelableCallback callback) {
+                               @Nullable final MaplibreMap.CancelableCallback callback) {
     if (durationMs <= 0) {
       throw new IllegalArgumentException("Null duration passed into easeCamera");
     }
     notifyDeveloperAnimationListeners();
-    transform.easeCamera(MapboxMap.this, update, durationMs, easingInterpolator, callback);
+    transform.easeCamera(MaplibreMap.this, update, durationMs, easingInterpolator, callback);
   }
 
   /**
@@ -665,7 +665,7 @@ public final class MapboxMap {
    *                 called. Do not update or animate the camera from within onCancel().
    * @see CameraUpdateFactory for a set of updates.
    */
-  public final void animateCamera(@NonNull CameraUpdate update, @Nullable MapboxMap.CancelableCallback callback) {
+  public final void animateCamera(@NonNull CameraUpdate update, @Nullable MaplibreMap.CancelableCallback callback) {
     animateCamera(update, MapboxConstants.ANIMATION_DURATION, callback);
   }
 
@@ -703,12 +703,12 @@ public final class MapboxMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void animateCamera(@NonNull final CameraUpdate update, final int durationMs,
-                                  @Nullable final MapboxMap.CancelableCallback callback) {
+                                  @Nullable final MaplibreMap.CancelableCallback callback) {
     if (durationMs <= 0) {
       throw new IllegalArgumentException("Null duration passed into animateCamera");
     }
     notifyDeveloperAnimationListeners();
-    transform.animateCamera(MapboxMap.this, update, durationMs, callback);
+    transform.animateCamera(MaplibreMap.this, update, durationMs, callback);
   }
 
   /**
@@ -989,7 +989,7 @@ public final class MapboxMap {
    * @return The {@code Marker} that was added to the map
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1008,7 +1008,7 @@ public final class MapboxMap {
    * @return The {@code Marker} that was added to the map
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1027,7 +1027,7 @@ public final class MapboxMap {
    * @return A list of the {@code Marker}s that were added to the map
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1044,7 +1044,7 @@ public final class MapboxMap {
    * @param updatedMarker An updated marker object
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void updateMarker(@NonNull Marker updatedMarker) {
@@ -1058,7 +1058,7 @@ public final class MapboxMap {
    * @return The {@code Polyine} that was added to the map
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1073,7 +1073,7 @@ public final class MapboxMap {
    * @return A list of the {@code Polyline}s that were added to the map.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1087,7 +1087,7 @@ public final class MapboxMap {
    * @param polyline An updated polyline object.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void updatePolyline(@NonNull Polyline polyline) {
@@ -1101,7 +1101,7 @@ public final class MapboxMap {
    * @return The {@code Polygon} that was added to the map.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1116,7 +1116,7 @@ public final class MapboxMap {
    * @return A list of the {@code Polygon}s that were added to the map
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1130,7 +1130,7 @@ public final class MapboxMap {
    * @param polygon An updated polygon object
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void updatePolygon(@NonNull Polygon polygon) {
@@ -1146,7 +1146,7 @@ public final class MapboxMap {
    * @param marker Marker to remove
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void removeMarker(@NonNull Marker marker) {
@@ -1162,7 +1162,7 @@ public final class MapboxMap {
    * @param polyline Polyline to remove
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void removePolyline(@NonNull Polyline polyline) {
@@ -1178,7 +1178,7 @@ public final class MapboxMap {
    * @param polygon Polygon to remove
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void removePolygon(@NonNull Polygon polygon) {
@@ -1191,7 +1191,7 @@ public final class MapboxMap {
    * @param annotation The annotation object to remove.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void removeAnnotation(@NonNull Annotation annotation) {
@@ -1204,7 +1204,7 @@ public final class MapboxMap {
    * @param id The identifier associated to the annotation to be removed
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void removeAnnotation(long id) {
@@ -1217,7 +1217,7 @@ public final class MapboxMap {
    * @param annotationList A list of annotation objects to remove.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void removeAnnotations(@NonNull List<? extends Annotation> annotationList) {
@@ -1229,7 +1229,7 @@ public final class MapboxMap {
    *
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void removeAnnotations() {
@@ -1241,7 +1241,7 @@ public final class MapboxMap {
    *
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void clear() {
@@ -1255,7 +1255,7 @@ public final class MapboxMap {
    * @return An annotation with a matched id, null is returned if no match was found
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @Nullable
@@ -1270,7 +1270,7 @@ public final class MapboxMap {
    * list will not update the map
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1285,7 +1285,7 @@ public final class MapboxMap {
    * list will not update the map.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1300,7 +1300,7 @@ public final class MapboxMap {
    * list will not update the map.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1315,7 +1315,7 @@ public final class MapboxMap {
    * list will not update the map.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1330,7 +1330,7 @@ public final class MapboxMap {
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void setOnMarkerClickListener(@Nullable OnMarkerClickListener listener) {
@@ -1344,7 +1344,7 @@ public final class MapboxMap {
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void setOnPolygonClickListener(@Nullable OnPolygonClickListener listener) {
@@ -1358,7 +1358,7 @@ public final class MapboxMap {
    *                 To unset the callback, use null.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void setOnPolylineClickListener(@Nullable OnPolylineClickListener listener) {
@@ -1376,7 +1376,7 @@ public final class MapboxMap {
    * @param marker The marker to select.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void selectMarker(@NonNull Marker marker) {
@@ -1392,7 +1392,7 @@ public final class MapboxMap {
    *
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void deselectMarkers() {
@@ -1405,7 +1405,7 @@ public final class MapboxMap {
    * @param marker the marker to deselect
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void deselectMarker(@NonNull Marker marker) {
@@ -1418,7 +1418,7 @@ public final class MapboxMap {
    * @return The currently selected marker.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @NonNull
@@ -1441,7 +1441,7 @@ public final class MapboxMap {
    *                          To unset the callback, use null.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void setInfoWindowAdapter(@Nullable InfoWindowAdapter infoWindowAdapter) {
@@ -1454,7 +1454,7 @@ public final class MapboxMap {
    * @return The callback to be invoked when an info window will be shown.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   @Nullable
@@ -1468,7 +1468,7 @@ public final class MapboxMap {
    * @param allow If true, map allows concurrent multiple infowindows to be shown.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public void setAllowConcurrentMultipleOpenInfoWindows(boolean allow) {
@@ -1481,7 +1481,7 @@ public final class MapboxMap {
    * @return If true, map allows concurrent multiple infowindows to be shown.
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public boolean isAllowConcurrentMultipleOpenInfoWindows() {
@@ -2114,7 +2114,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the map is flinged.
    *
-   * @see MapboxMap#addOnFlingListener(OnFlingListener)
+   * @see MaplibreMap#addOnFlingListener(OnFlingListener)
    */
   public interface OnFlingListener {
     /**
@@ -2126,7 +2126,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the map is moved.
    *
-   * @see MapboxMap#addOnMoveListener(OnMoveListener)
+   * @see MaplibreMap#addOnMoveListener(OnMoveListener)
    */
   public interface OnMoveListener {
     void onMoveBegin(@NonNull MoveGestureDetector detector);
@@ -2139,7 +2139,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the map is rotated.
    *
-   * @see MapboxMap#addOnRotateListener(OnRotateListener)
+   * @see MaplibreMap#addOnRotateListener(OnRotateListener)
    */
   public interface OnRotateListener {
     void onRotateBegin(@NonNull RotateGestureDetector detector);
@@ -2152,7 +2152,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the map is scaled.
    *
-   * @see MapboxMap#addOnScaleListener(OnScaleListener)
+   * @see MaplibreMap#addOnScaleListener(OnScaleListener)
    */
   public interface OnScaleListener {
     void onScaleBegin(@NonNull StandardScaleGestureDetector detector);
@@ -2165,7 +2165,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the map is tilted.
    *
-   * @see MapboxMap#addOnShoveListener(OnShoveListener)
+   * @see MaplibreMap#addOnShoveListener(OnShoveListener)
    */
   public interface OnShoveListener {
     void onShoveBegin(@NonNull ShoveGestureDetector detector);
@@ -2243,7 +2243,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when a frame is rendered to the map view.
    *
-   * @see MapboxMap#setOnFpsChangedListener(OnFpsChangedListener)
+   * @see MaplibreMap#setOnFpsChangedListener(OnFpsChangedListener)
    */
   public interface OnFpsChangedListener {
     /**
@@ -2299,7 +2299,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the user clicks on the map view.
    *
-   * @see MapboxMap#addOnMapClickListener(OnMapClickListener)
+   * @see MaplibreMap#addOnMapClickListener(OnMapClickListener)
    */
   public interface OnMapClickListener {
     /**
@@ -2315,7 +2315,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the user long clicks on the map view.
    *
-   * @see MapboxMap#addOnMapLongClickListener(OnMapLongClickListener)
+   * @see MaplibreMap#addOnMapLongClickListener(OnMapLongClickListener)
    */
   public interface OnMapLongClickListener {
     /**
@@ -2331,10 +2331,10 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the user clicks on a marker.
    *
-   * @see MapboxMap#setOnMarkerClickListener(OnMarkerClickListener)
+   * @see MaplibreMap#setOnMarkerClickListener(OnMarkerClickListener)
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public interface OnMarkerClickListener {
@@ -2350,10 +2350,10 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the user clicks on a polygon.
    *
-   * @see MapboxMap#setOnPolygonClickListener(OnPolygonClickListener)
+   * @see MaplibreMap#setOnPolygonClickListener(OnPolygonClickListener)
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public interface OnPolygonClickListener {
@@ -2368,10 +2368,10 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the user clicks on a polyline.
    *
-   * @see MapboxMap#setOnPolylineClickListener(OnPolylineClickListener)
+   * @see MaplibreMap#setOnPolylineClickListener(OnPolylineClickListener)
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public interface OnPolylineClickListener {
@@ -2386,7 +2386,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the user clicks on an info window.
    *
-   * @see MapboxMap#setOnInfoWindowClickListener(OnInfoWindowClickListener)
+   * @see MaplibreMap#setOnInfoWindowClickListener(OnInfoWindowClickListener)
    */
   public interface OnInfoWindowClickListener {
     /**
@@ -2401,7 +2401,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when the user long presses on a marker's info window.
    *
-   * @see MapboxMap#setOnInfoWindowClickListener(OnInfoWindowClickListener)
+   * @see MaplibreMap#setOnInfoWindowClickListener(OnInfoWindowClickListener)
    */
   public interface OnInfoWindowLongClickListener {
 
@@ -2416,7 +2416,7 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when a marker's info window is closed.
    *
-   * @see MapboxMap#setOnInfoWindowCloseListener(OnInfoWindowCloseListener)
+   * @see MaplibreMap#setOnInfoWindowCloseListener(OnInfoWindowCloseListener)
    */
   public interface OnInfoWindowCloseListener {
 
@@ -2431,10 +2431,10 @@ public final class MapboxMap {
   /**
    * Interface definition for a callback to be invoked when an info window will be shown.
    *
-   * @see MapboxMap#setInfoWindowAdapter(InfoWindowAdapter)
+   * @see MaplibreMap#setInfoWindowAdapter(InfoWindowAdapter)
    * @deprecated As of 7.0.0,
    * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * Mapbox Annotation Plugin</a> instead
+   * Maplibre Annotation Plugin</a> instead
    */
   @Deprecated
   public interface InfoWindowAdapter {

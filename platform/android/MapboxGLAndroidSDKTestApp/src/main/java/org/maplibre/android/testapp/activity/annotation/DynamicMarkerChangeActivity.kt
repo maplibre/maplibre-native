@@ -10,7 +10,7 @@ import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -21,7 +21,7 @@ import org.maplibre.android.testapp.utils.IconUtils
  */
 class DynamicMarkerChangeActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var marker: Marker? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +30,9 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
         mapView.setTag(false)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { mapboxMap: MapboxMap ->
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
-                this@DynamicMarkerChangeActivity.mapboxMap = mapboxMap
+            OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                this@DynamicMarkerChangeActivity.maplibreMap = maplibreMap
                 // Create marker
                 val markerOptions = MarkerOptions()
                     .position(LAT_LNG_CHELSEA)
@@ -45,7 +45,7 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
                     )
                     .title(getString(R.string.dynamic_marker_chelsea_title))
                     .snippet(getString(R.string.dynamic_marker_chelsea_snippet))
-                marker = mapboxMap.addMarker(markerOptions)
+                marker = maplibreMap.addMarker(markerOptions)
             }
         )
         val fab = findViewById<FloatingActionButton>(R.id.fab)

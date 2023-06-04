@@ -16,7 +16,7 @@ import org.maplibre.android.testapp.R
  */
 class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_restricted_bounds)
@@ -25,11 +25,11 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
-        mapboxMap.setMinZoomPreference(2.0)
-        mapboxMap.uiSettings.isFlingVelocityAnimationEnabled = false
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+        maplibreMap.setMinZoomPreference(2.0)
+        maplibreMap.uiSettings.isFlingVelocityAnimationEnabled = false
         showCrosshair()
         setupBounds(ICELAND_BOUNDS)
     }
@@ -58,12 +58,12 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setupBounds(bounds: LatLngBounds?) {
-        mapboxMap.setLatLngBoundsForCameraTarget(bounds)
+        maplibreMap.setLatLngBoundsForCameraTarget(bounds)
         showBoundsArea(bounds)
     }
 
     private fun showBoundsArea(bounds: LatLngBounds?) {
-        mapboxMap.clear()
+        maplibreMap.clear()
         if (bounds != null) {
             val boundsArea = PolygonOptions()
                 .add(bounds.northWest)
@@ -72,7 +72,7 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
                 .add(bounds.southWest)
             boundsArea.alpha(0.25f)
             boundsArea.fillColor(Color.RED)
-            mapboxMap.addPolygon(boundsArea)
+            maplibreMap.addPolygon(boundsArea)
         }
     }
 

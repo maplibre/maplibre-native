@@ -11,8 +11,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.activity.maplayout.BottomSheetActivity.BottomSheetFragment
-import org.maplibre.android.testapp.activity.maplayout.BottomSheetActivity.MainMapFragment
 import org.maplibre.android.utils.MapFragmentUtils
 
 /**
@@ -115,14 +113,14 @@ class BottomSheetActivity : AppCompatActivity() {
             map!!.getMapAsync(this)
         }
 
-        override fun onMapReady(mapboxMap: MapboxMap) {
-            mapboxMap.moveCamera(
+        override fun onMapReady(maplibreMap: MaplibreMap) {
+            maplibreMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(37.760545, -122.436055),
                     15.0
                 )
             )
-            mapboxMap.setStyle(
+            maplibreMap.setStyle(
                 Style.Builder().fromUri(
                     STYLES[
                         Math.min(
@@ -211,14 +209,14 @@ class BottomSheetActivity : AppCompatActivity() {
             map!!.getMapAsync(this)
         }
 
-        override fun onMapReady(mapboxMap: MapboxMap) {
-            mapboxMap.moveCamera(
+        override fun onMapReady(maplibreMap: MaplibreMap) {
+            maplibreMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(37.760545, -122.436055),
                     15.0
                 )
             )
-            mapboxMap.setStyle(Style.getPredefinedStyle("Bright"))
+            maplibreMap.setStyle(Style.getPredefinedStyle("Bright"))
         }
 
         override fun onStart() {

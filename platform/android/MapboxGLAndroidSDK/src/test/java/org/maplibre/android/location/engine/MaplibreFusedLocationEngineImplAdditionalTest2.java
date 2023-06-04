@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MapboxFusedLocationEngineImplAdditionalTest2 {
+public class MaplibreFusedLocationEngineImplAdditionalTest2 {
   private static final long INTERVAL = 1000L;
   private static final String PROVIDER = "test_provider";
   private ArrayList<LocationEngineProxy> engines = new ArrayList<>();

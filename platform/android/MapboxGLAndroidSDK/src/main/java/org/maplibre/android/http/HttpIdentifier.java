@@ -6,7 +6,7 @@ import android.content.pm.PackageInfo;
 import androidx.annotation.NonNull;
 
 import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.Mapbox;
+import org.maplibre.android.Maplibre;
 
 public class HttpIdentifier {
 
@@ -19,7 +19,7 @@ public class HttpIdentifier {
    * @return the application identifier
    */
   public static String getIdentifier() {
-    return getIdentifier(Mapbox.getApplicationContext());
+    return getIdentifier(Maplibre.getApplicationContext());
   }
 
   /**

@@ -1,4 +1,4 @@
 /**
- * Contains the Mapbox Maps Android Modular Library Loader API classes.
+ * Contains the Maplibre Maps Android Modular Library Loader API classes.
  */
 package org.maplibre.android.module.loader;

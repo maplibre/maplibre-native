@@ -39,84 +39,84 @@ public class GeoJsonConversionTest extends EspressoTest {
   @UiThreadTest
   public void testEmptyFeatureCollection() {
     validateTestSetup();
-    mapboxMap.getStyle().addSource(
+    maplibreMap.getStyle().addSource(
       new GeoJsonSource("test-id",
         fromFeatures(singletonList(fromGeometry(fromGeometries(emptyList()))))
       )
     );
-    mapboxMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
+    maplibreMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
   }
 
   @Test
   @UiThreadTest
   public void testPointFeatureCollection() {
     validateTestSetup();
-    mapboxMap.getStyle().addSource(
+    maplibreMap.getStyle().addSource(
       new GeoJsonSource("test-id",
         fromFeatures(singletonList(fromGeometry(Point.fromLngLat(0.0, 0.0))))
       )
     );
-    mapboxMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
+    maplibreMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
   }
 
   @Test
   @UiThreadTest
   public void testMultiPointFeatureCollection() {
     validateTestSetup();
-    mapboxMap.getStyle().addSource(
+    maplibreMap.getStyle().addSource(
       new GeoJsonSource("test-id",
         fromFeatures(singletonList(fromGeometry(fromLngLats(emptyList()))))
       )
     );
-    mapboxMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
+    maplibreMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
   }
 
   @Test
   @UiThreadTest
   public void testPolygonFeatureCollection() {
     validateTestSetup();
-    mapboxMap.getStyle().addSource(
+    maplibreMap.getStyle().addSource(
       new GeoJsonSource("test-id",
         fromFeatures(singletonList(fromGeometry(Polygon.fromLngLats(emptyList()))))
       )
     );
-    mapboxMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
+    maplibreMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
   }
 
   @Test
   @UiThreadTest
   public void testMultiPolygonFeatureCollection() {
     validateTestSetup();
-    mapboxMap.getStyle().addSource(
+    maplibreMap.getStyle().addSource(
       new GeoJsonSource("test-id",
         fromFeatures(singletonList(fromGeometry(fromPolygon(Polygon.fromLngLats(emptyList())))))
       )
     );
-    mapboxMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
+    maplibreMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
   }
 
   @Test
   @UiThreadTest
   public void testLineStringFeatureCollection() {
     validateTestSetup();
-    mapboxMap.getStyle().addSource(
+    maplibreMap.getStyle().addSource(
       new GeoJsonSource("test-id",
         fromFeatures(singletonList(fromGeometry(fromLngLats(emptyList()))))
       )
     );
-    mapboxMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
+    maplibreMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
   }
 
   @Test
   @UiThreadTest
   public void testMultiLineStringFeatureCollection() {
     validateTestSetup();
-    mapboxMap.getStyle().addSource(
+    maplibreMap.getStyle().addSource(
       new GeoJsonSource("test-id",
         fromFeatures(singletonList(fromGeometry(fromLineString(fromLngLats(emptyList())))))
       )
     );
-    mapboxMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
+    maplibreMap.getStyle().addLayer(new SymbolLayer("test-id", "test-id"));
   }
 
 
@@ -145,6 +145,6 @@ public class GeoJsonConversionTest extends EspressoTest {
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
       assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng)).isEmpty());
-    }, mapboxMap));
+    }, maplibreMap));
   }
 }

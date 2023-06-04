@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.databinding.ActivitySnapshotBinding
@@ -17,14 +17,14 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivitySnapshotBinding
 
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
 
     private val idleListener = object : MapView.OnDidFinishRenderingFrameListener {
         override fun onDidFinishRenderingFrame(fully: Boolean) {
             if (fully) {
                 binding.mapView.removeOnDidFinishRenderingFrameListener(this)
                 Logger.v(TAG, LOG_MESSAGE)
-                mapboxMap.snapshot { snapshot ->
+                maplibreMap.snapshot { snapshot ->
                     binding.imageView.setImageBitmap(snapshot)
                     binding.mapView.addOnDidFinishRenderingFrameListener(this)
                 }
@@ -40,9 +40,9 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))) { binding.mapView.addOnDidFinishRenderingFrameListener(idleListener) }
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))) { binding.mapView.addOnDidFinishRenderingFrameListener(idleListener) }
     }
 
     override fun onStart() {
@@ -57,7 +57,7 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onPause() {
         super.onPause()
-        mapboxMap.snapshot {
+        maplibreMap.snapshot {
             Timber.e("Regression test for https://github.com/mapbox/mapbox-gl-native/pull/11358")
         }
         binding.mapView.onPause()

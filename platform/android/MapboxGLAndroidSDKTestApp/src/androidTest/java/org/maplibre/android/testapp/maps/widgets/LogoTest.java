@@ -5,7 +5,7 @@ import android.view.View;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 import org.maplibre.android.testapp.activity.EspressoTest;
 
 import org.hamcrest.Matcher;
@@ -31,16 +31,16 @@ public class LogoTest extends EspressoTest {
     validateTestSetup();
 
     onView(withTagValue(is("logoView")))
-            .perform(new DisableAction(mapboxMap))
+            .perform(new DisableAction(maplibreMap))
             .check(matches(not(isDisplayed())));
   }
 
   private class DisableAction implements ViewAction {
 
-    private MapboxMap mapboxMap;
+    private MaplibreMap maplibreMap;
 
-    DisableAction(MapboxMap map) {
-      mapboxMap = map;
+    DisableAction(MaplibreMap map) {
+      maplibreMap = map;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class LogoTest extends EspressoTest {
 
     @Override
     public void perform(UiController uiController, View view) {
-      mapboxMap.getUiSettings().setLogoEnabled(false);
+      maplibreMap.getUiSettings().setLogoEnabled(false);
     }
   }
 }

@@ -8,14 +8,13 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.activity.maplayout.VisibilityChangeActivity.VisibilityRunner
 
 /**
  * Test activity showcasing visibility changes to the mapview.
  */
 class VisibilityChangeActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private val handler = Handler()
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,12 +23,12 @@ class VisibilityChangeActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap? ->
+            OnMapReadyCallback { map: MaplibreMap? ->
                 if (map != null) {
-                    mapboxMap = map
+                    maplibreMap = map
                 }
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
-                mapboxMap.animateCamera(
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                maplibreMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(55.754020, 37.620948),
                         12.0

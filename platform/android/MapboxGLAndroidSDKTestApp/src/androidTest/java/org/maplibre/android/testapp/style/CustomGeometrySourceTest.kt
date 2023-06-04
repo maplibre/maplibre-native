@@ -40,7 +40,7 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun threadsShutdownWhenSourceRemovedTest() {
         validateTestSetup()
-        invoke(mapboxMap) { uiController, mapboxMap ->
+        invoke(maplibreMap) { uiController, mapboxMap ->
             mapboxMap.style!!.removeLayer(ID_GRID_LAYER)
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             mapboxMap.style!!.removeSource(ID_GRID_SOURCE)
@@ -57,7 +57,7 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun threadsRestartedWhenSourceReAddedTest() {
         validateTestSetup()
-        invoke(mapboxMap) { uiController, mapboxMap ->
+        invoke(maplibreMap) { uiController, mapboxMap ->
             mapboxMap.style!!.removeLayer((rule.activity as GridSourceActivity).layer!!)
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             mapboxMap.style!!.removeSource(ID_GRID_SOURCE)
@@ -77,7 +77,7 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun sourceZoomDeltaTest() {
         validateTestSetup()
-        invoke(mapboxMap) { uiController, mapboxMap ->
+        invoke(maplibreMap) { uiController, mapboxMap ->
             mapboxMap.prefetchZoomDelta = 3
             mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
                 assertNull(it.prefetchZoomDelta)
@@ -93,7 +93,7 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun isVolatileTest() {
         validateTestSetup()
-        invoke(mapboxMap) { uiController, mapboxMap ->
+        invoke(maplibreMap) { uiController, mapboxMap ->
             mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
                 assertFalse(it.isVolatile)
                 it.isVolatile = true
@@ -105,7 +105,7 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun minimumTileUpdateIntervalTest() {
         validateTestSetup()
-        invoke(mapboxMap) { uiController, mapboxMap ->
+        invoke(maplibreMap) { uiController, mapboxMap ->
             mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
                 assertEquals(0, it.minimumTileUpdateInterval)
                 it.minimumTileUpdateInterval = 1000

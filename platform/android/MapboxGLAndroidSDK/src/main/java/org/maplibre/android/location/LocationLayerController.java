@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import com.mapbox.geojson.Feature;
 import org.maplibre.android.location.modes.RenderMode;
 import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.expressions.Expression;
 
@@ -39,7 +39,7 @@ final class LocationLayerController {
   @RenderMode.Mode
   private int renderMode;
 
-  private final MapboxMap mapboxMap;
+  private final MaplibreMap maplibreMap;
   private final LayerBitmapProvider bitmapProvider;
   private LocationComponentOptions options;
   private final OnRenderModeChangedListener internalRenderModeChangedListener;
@@ -52,14 +52,14 @@ final class LocationLayerController {
 
   private LocationLayerRenderer locationLayerRenderer;
 
-  LocationLayerController(MapboxMap mapboxMap, Style style,
+  LocationLayerController(MaplibreMap maplibreMap, Style style,
                           LayerSourceProvider layerSourceProvider,
                           LayerFeatureProvider featureProvider,
                           LayerBitmapProvider bitmapProvider,
                           @NonNull LocationComponentOptions options,
                           @NonNull OnRenderModeChangedListener internalRenderModeChangedListener,
                           boolean useSpecializedLocationLayer) {
-    this.mapboxMap = mapboxMap;
+    this.maplibreMap = maplibreMap;
     this.bitmapProvider = bitmapProvider;
     this.internalRenderModeChangedListener = internalRenderModeChangedListener;
     this.useSpecializedLocationLayer = useSpecializedLocationLayer;
@@ -203,8 +203,8 @@ final class LocationLayerController {
 
   private void styleScaling(@NonNull LocationComponentOptions options) {
     Expression scaleExpression = interpolate(linear(), zoom(),
-      stop(mapboxMap.getMinZoomLevel(), options.minZoomIconScale()),
-      stop(mapboxMap.getMaxZoomLevel(), options.maxZoomIconScale())
+      stop(maplibreMap.getMinZoomLevel(), options.minZoomIconScale()),
+      stop(maplibreMap.getMaxZoomLevel(), options.maxZoomIconScale())
     );
 
     locationLayerRenderer.styleScaling(scaleExpression);
@@ -249,8 +249,8 @@ final class LocationLayerController {
   //
 
   boolean onMapClick(@NonNull LatLng point) {
-    PointF screenLoc = mapboxMap.getProjection().toScreenLocation(point);
-    List<Feature> features = mapboxMap.queryRenderedFeatures(screenLoc,
+    PointF screenLoc = maplibreMap.getProjection().toScreenLocation(point);
+    List<Feature> features = maplibreMap.queryRenderedFeatures(screenLoc,
       BACKGROUND_LAYER,
       FOREGROUND_LAYER,
       BEARING_LAYER

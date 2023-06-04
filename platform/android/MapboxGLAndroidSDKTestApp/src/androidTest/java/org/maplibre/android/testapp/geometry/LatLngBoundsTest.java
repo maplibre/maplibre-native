@@ -28,7 +28,7 @@ public class LatLngBoundsTest extends BaseTest {
   public void testLatLngBounds() {
     // regression test for #9322
     validateTestSetup();
-    MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
+    MapboxMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLngBounds bounds = new LatLngBounds.Builder()
         .include(new LatLng(48.8589506, 2.2773457))
         .include(new LatLng(47.2383171, -1.6309316))
@@ -41,7 +41,7 @@ public class LatLngBoundsTest extends BaseTest {
   public void testLatLngBoundsBearing() {
     // regression test for #12549
     validateTestSetup();
-    MapboxMapAction.invoke(mapboxMap, (uiController, mapboxMap) -> {
+    MapboxMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLngBounds bounds = new LatLngBounds.Builder()
         .include(new LatLng(48.8589506, 2.2773457))
         .include(new LatLng(47.2383171, -1.6309316))

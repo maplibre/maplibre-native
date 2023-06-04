@@ -13,7 +13,7 @@ import androidx.annotation.StringDef
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import org.maplibre.android.MapStrictMode
-import org.maplibre.android.Mapbox
+import org.maplibre.android.Maplibre
 import org.maplibre.android.constants.MapboxConstants
 import org.maplibre.android.module.http.HttpRequestUtil
 import okhttp3.Interceptor
@@ -49,7 +49,7 @@ class TileLoadingMeasurementUtils {
         private fun isBooleanMetaDataValueOn(propKey: String, defaultValue: Boolean): Boolean {
             try {
                 // Try getting a custom value from the app Manifest
-                val context = Mapbox.getApplicationContext()
+                val context = Maplibre.getApplicationContext()
                 val appInfo = context.packageManager.getApplicationInfo(
                     context.packageName,
                     PackageManager.GET_META_DATA
@@ -134,7 +134,7 @@ class TileLoadingMeasurementUtils {
 
                 private val ram: String
                     private get() {
-                        val actManager = Mapbox.getApplicationContext()
+                        val actManager = Maplibre.getApplicationContext()
                             .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
                         val memInfo = ActivityManager.MemoryInfo()
                         actManager.getMemoryInfo(memInfo)
@@ -142,7 +142,7 @@ class TileLoadingMeasurementUtils {
                     }
                 private val windowSize: String
                     private get() {
-                        val windowManager = Mapbox.getApplicationContext()
+                        val windowManager = Maplibre.getApplicationContext()
                             .getSystemService(Context.WINDOW_SERVICE) as WindowManager
                         val display = windowManager.defaultDisplay
                         val metrics = DisplayMetrics()
@@ -155,7 +155,7 @@ class TileLoadingMeasurementUtils {
                 @get:ConnectionState
                 private val connectionState: String
                     private get() {
-                        val appContext = Mapbox.getApplicationContext()
+                        val appContext = Maplibre.getApplicationContext()
                         val connectivityManager =
                             appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

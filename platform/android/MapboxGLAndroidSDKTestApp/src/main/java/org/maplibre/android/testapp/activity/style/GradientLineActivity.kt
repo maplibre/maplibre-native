@@ -4,7 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -29,13 +29,13 @@ class GradientLineActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(mapboxMap: MapboxMap) {
+    override fun onMapReady(maplibreMap: MaplibreMap) {
         try {
             val geoJson = ResourceUtils.readRawResource(
                 this@GradientLineActivity,
                 R.raw.test_line_gradient_feature
             )
-            mapboxMap.setStyle(
+            maplibreMap.setStyle(
                 Style.Builder()
                     .withSource(
                         GeoJsonSource(

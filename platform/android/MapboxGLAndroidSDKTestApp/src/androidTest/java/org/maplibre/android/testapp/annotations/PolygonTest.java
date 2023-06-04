@@ -19,7 +19,7 @@ public class PolygonTest extends EspressoTest {
   @Ignore
   public void addPolygonTest() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLngOne = new LatLng();
       LatLng latLngTwo = new LatLng(1, 0);
       LatLng latLngThree = new LatLng(1, 1);

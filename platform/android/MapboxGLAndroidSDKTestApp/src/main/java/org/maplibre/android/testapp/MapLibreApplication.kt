@@ -6,7 +6,7 @@ import android.os.StrictMode.VmPolicy
 import android.text.TextUtils
 import androidx.multidex.MultiDexApplication
 import org.maplibre.android.MapStrictMode
-import org.maplibre.android.Mapbox
+import org.maplibre.android.Maplibre
 import org.maplibre.android.WellKnownTileServer
 import org.maplibre.android.log.Logger
 import org.maplibre.android.testapp.utils.ApiKeyUtils
@@ -19,7 +19,7 @@ import timber.log.Timber.DebugTree
  * Application class of the test application.
  *
  *
- * Initialises components as LeakCanary, Strictmode, Timber and Mapbox
+ * Initialises components as LeakCanary, Strictmode, Timber and Maplibre
  *
  */
 open class MapLibreApplication : MultiDexApplication() {
@@ -60,7 +60,7 @@ open class MapLibreApplication : MultiDexApplication() {
         if (apiKey != null) {
             validateApiKey(apiKey)
         }
-        Mapbox.getInstance(applicationContext, apiKey, TILE_SERVER)
+        Maplibre.getInstance(applicationContext, apiKey, TILE_SERVER)
         TileLoadingMeasurementUtils.setUpTileLoadingMeasurement()
         MapStrictMode.setStrictModeEnabled(true)
     }

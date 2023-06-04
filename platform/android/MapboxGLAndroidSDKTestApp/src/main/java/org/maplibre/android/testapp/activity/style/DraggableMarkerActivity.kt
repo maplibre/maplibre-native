@@ -16,7 +16,7 @@ import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.PropertyFactory.*
 import org.maplibre.android.style.layers.SymbolLayer
@@ -47,7 +47,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDraggableMarkerBinding
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private val featureCollection = FeatureCollection.fromFeatures(mutableListOf())
     private val source = GeoJsonSource(sourceId, featureCollection)
     private val layer = SymbolLayer(layerId, sourceId)
@@ -67,7 +67,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
         mapView = binding.mapView
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { mapboxMap ->
-            this.mapboxMap = mapboxMap
+            this.maplibreMap = mapboxMap
 
             mapboxMap.setStyle(
                 Style.Builder()
@@ -175,7 +175,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
      * we still need to listen for move gesture events which map won't be able to provide anymore.
      *
      * @param mapView the mapView
-     * @param mapboxMap the mapboxMap
+     * @param maplibreMap the mapboxMap
      * @param symbolsCollection the collection that contains all the symbols that we want to be draggable
      * @param symbolsSource the source that contains the [symbolsCollection]
      * @param symbolsLayerId the ID of the layer that the symbols are displayed on
@@ -188,7 +188,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
      */
     class DraggableSymbolsManager(
         mapView: MapView,
-        private val mapboxMap: MapboxMap,
+        private val maplibreMap: MaplibreMap,
         private val symbolsCollection: FeatureCollection,
         private val symbolsSource: GeoJsonSource,
         private val symbolsLayerId: String,
@@ -203,11 +203,11 @@ class DraggableMarkerActivity : AppCompatActivity() {
         private val onSymbolDragListeners: MutableList<OnSymbolDragListener> = mutableListOf<OnSymbolDragListener>()
 
         init {
-            mapboxMap.addOnMapLongClickListener {
+            maplibreMap.addOnMapLongClickListener {
                 // Starting the drag process on long click
-                draggedSymbolId = mapboxMap.queryRenderedSymbols(it, symbolsLayerId).firstOrNull()?.id()?.also { id ->
-                    mapboxMap.uiSettings.setAllGesturesEnabled(false)
-                    mapboxMap.gesturesManager.moveGestureDetector.interrupt()
+                draggedSymbolId = maplibreMap.queryRenderedSymbols(it, symbolsLayerId).firstOrNull()?.id()?.also { id ->
+                    maplibreMap.uiSettings.setAllGesturesEnabled(false)
+                    maplibreMap.gesturesManager.moveGestureDetector.interrupt()
                     notifyOnSymbolDragListeners {
                         onSymbolDragStarted(id)
                     }
@@ -239,7 +239,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
                         stopDragging()
                     }
 
-                    val latLng = mapboxMap.projection.fromScreenLocation(point)
+                    val latLng = maplibreMap.projection.fromScreenLocation(point)
 
                     symbolsCollection.features()?.indexOfFirst {
                         it.id() == draggedSymbolId
@@ -271,7 +271,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
         }
 
         private fun stopDragging() {
-            mapboxMap.uiSettings.setAllGesturesEnabled(true)
+            maplibreMap.uiSettings.setAllGesturesEnabled(true)
             draggedSymbolId?.let {
                 notifyOnSymbolDragListeners {
                     onSymbolDragFinished(it)
@@ -341,6 +341,6 @@ class DraggableMarkerActivity : AppCompatActivity() {
     }
 }
 
-private fun MapboxMap.queryRenderedSymbols(latLng: LatLng, layerId: String): List<Feature> {
+private fun MaplibreMap.queryRenderedSymbols(latLng: LatLng, layerId: String): List<Feature> {
     return this.queryRenderedFeatures(this.projection.toScreenLocation(latLng), layerId)
 }

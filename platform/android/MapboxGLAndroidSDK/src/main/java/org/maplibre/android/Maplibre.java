@@ -29,11 +29,11 @@ import org.maplibre.android.utils.ThreadUtils;
 @UiThread
 @SuppressLint("StaticFieldLeak")
 @Keep
-public final class Mapbox {
+public final class Maplibre {
 
-  private static final String TAG = "Mbgl-Mapbox";
+  private static final String TAG = "Mbgl-Maplibre";
   private static ModuleProvider moduleProvider;
-  private static Mapbox INSTANCE;
+  private static Maplibre INSTANCE;
 
   private Context context;
   @Nullable
@@ -42,23 +42,23 @@ public final class Mapbox {
   private TileServerOptions tileServerOptions;
 
   /**
-   * Get an instance of Mapbox.
+   * Get an instance of Maplibre.
    * <p>
    * This class manages the API key, application context, and connectivity state.
    * </p>
    *
    * @param context Android context which holds or is an application context
-   * @return the single instance of Mapbox
+   * @return the single instance of Maplibre
    */
   @UiThread
   @NonNull
-  public static synchronized Mapbox getInstance(@NonNull Context context) {
+  public static synchronized Maplibre getInstance(@NonNull Context context) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new Mapbox(appContext, null);
+      INSTANCE = new Maplibre(appContext, null);
       ConnectivityReceiver.instance(appContext);
     }
 
@@ -73,7 +73,7 @@ public final class Mapbox {
   }
 
   /**
-   * Get an instance of Mapbox.
+   * Get an instance of Maplibre.
    * <p>
    * This class manages the API key, application context, and connectivity state.
    * </p>
@@ -84,19 +84,19 @@ public final class Mapbox {
    *                   bootstrap the SDK. The predefined configuration includes
    *                   rules for converting resource URLs between normal and canonical forms
    *                   and set of predefined styles available on the server.
-   * @return the single instance of Mapbox
+   * @return the single instance of Maplibre
    */
   @UiThread
   @NonNull
-  public static synchronized Mapbox getInstance(@NonNull Context context, @Nullable String apiKey,
-                                                WellKnownTileServer tileServer) {
+  public static synchronized Maplibre getInstance(@NonNull Context context, @Nullable String apiKey,
+                                                  WellKnownTileServer tileServer) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
       Timber.plant();
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new Mapbox(appContext, apiKey);
+      INSTANCE = new Maplibre(appContext, apiKey);
       ConnectivityReceiver.instance(appContext);
     } else {
       INSTANCE.apiKey = apiKey;
@@ -110,12 +110,12 @@ public final class Mapbox {
     return INSTANCE;
   }
 
-  Mapbox(@NonNull Context context, @Nullable String apiKey) {
+  Maplibre(@NonNull Context context, @Nullable String apiKey) {
     this.context = context;
     this.apiKey = apiKey;
   }
 
-  Mapbox(@NonNull Context context, @Nullable String apiKey, @NonNull TileServerOptions options) {
+  Maplibre(@NonNull Context context, @Nullable String apiKey, @NonNull TileServerOptions options) {
     this.context = context;
     this.apiKey = apiKey;
     this.tileServerOptions = options;
@@ -232,7 +232,7 @@ public final class Mapbox {
   }
 
   /**
-   * Runtime validation of Mapbox creation.
+   * Runtime validation of Maplibre creation.
    */
   private static void validateMapbox() {
     if (INSTANCE == null) {
@@ -241,7 +241,7 @@ public final class Mapbox {
   }
 
   /**
-   * Runtime validation of Mapbox access token
+   * Runtime validation of Maplibre access token
    *
    * @param apiKey the access token to validate
    * @return true is valid, false otherwise
@@ -267,7 +267,7 @@ public final class Mapbox {
 
 
   /**
-   * Internal use. Check if the {@link Mapbox#INSTANCE} is present.
+   * Internal use. Check if the {@link Maplibre#INSTANCE} is present.
    */
   public static boolean hasInstance() {
     return INSTANCE != null;

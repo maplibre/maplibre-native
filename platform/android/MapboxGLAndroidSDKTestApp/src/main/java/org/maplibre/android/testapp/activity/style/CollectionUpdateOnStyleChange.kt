@@ -11,7 +11,7 @@ import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.LineLayer
@@ -27,7 +27,7 @@ import java.util.*
 class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, Style.OnStyleLoaded {
 
     private lateinit var binding: ActivityCollectionUpdateOnStyleChangeBinding
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var currentStyleIndex: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,9 +45,9 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
             .show()
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]), this)
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]), this)
     }
 
     override fun onStyleLoaded(style: Style) {
@@ -73,7 +73,7 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
             if (currentStyleIndex == STYLES.size) {
                 currentStyleIndex = 0
             }
-            mapboxMap.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]), this)
+            maplibreMap.setStyle(Style.Builder().fromUri(STYLES[currentStyleIndex]), this)
         }
     }
 

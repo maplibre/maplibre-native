@@ -23,7 +23,7 @@ import java.util.ArrayList
  */
 class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var polygon: Polygon? = null
     private var fullAlpha = true
     private var polygonIsVisible = true
@@ -53,8 +53,8 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(mapView)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Streets"))
         map.setOnPolygonClickListener { polygon: Polygon ->
             Toast.makeText(
@@ -63,7 +63,7 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.LENGTH_SHORT
             ).show()
         }
-        polygon = mapboxMap.addPolygon(
+        polygon = maplibreMap.addPolygon(
             PolygonOptions()
                 .addAll(Config.STAR_SHAPE_POINTS)
                 .fillColor(Config.BLUE_COLOR)

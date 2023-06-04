@@ -8,7 +8,7 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.maplibre.android.AppCenter;
-import org.maplibre.android.Mapbox;
+import org.maplibre.android.Maplibre;
 import org.maplibre.android.exceptions.MapboxConfigurationException;
 
 import org.junit.After;
@@ -19,7 +19,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4ClassRunner.class)
-public class MapboxTest extends AppCenter {
+public class MaplibreTest extends AppCenter {
 
   private static final String API_KEY = "pk.0000000001";
   private static final String API_KEY_2 = "pk.0000000002";
@@ -31,32 +31,32 @@ public class MapboxTest extends AppCenter {
 
   @Before
   public void setup() {
-    realToken = Mapbox.getApiKey();
+    realToken = Maplibre.getApiKey();
   }
 
   @Test
   @UiThreadTest
   public void testConnected() {
-    assertTrue(Mapbox.isConnected());
+    assertTrue(Maplibre.isConnected());
 
     // test manual connectivity
-    Mapbox.setConnected(true);
-    assertTrue(Mapbox.isConnected());
-    Mapbox.setConnected(false);
-    assertFalse(Mapbox.isConnected());
+    Maplibre.setConnected(true);
+    assertTrue(Maplibre.isConnected());
+    Maplibre.setConnected(false);
+    assertFalse(Maplibre.isConnected());
 
     // reset to Android connectivity
-    Mapbox.setConnected(null);
-    assertTrue(Mapbox.isConnected());
+    Maplibre.setConnected(null);
+    assertTrue(Maplibre.isConnected());
   }
 
   @Test
   @UiThreadTest
   public void setApiKey() {
-    Mapbox.setApiKey(API_KEY);
-    assertSame(API_KEY, Mapbox.getApiKey());
-    Mapbox.setApiKey(API_KEY_2);
-    assertSame(API_KEY_2, Mapbox.getApiKey());
+    Maplibre.setApiKey(API_KEY);
+    assertSame(API_KEY, Maplibre.getApiKey());
+    Maplibre.setApiKey(API_KEY_2);
+    assertSame(API_KEY_2, Maplibre.getApiKey());
   }
 
   @Test
@@ -67,11 +67,11 @@ public class MapboxTest extends AppCenter {
       "A valid API key is required, currently provided key is: " + null
     );
 
-    Mapbox.setApiKey(null);
+    Maplibre.setApiKey(null);
   }
 
   @After
   public void tearDown() {
-    Mapbox.setApiKey(realToken);
+    Maplibre.setApiKey(realToken);
   }
 }

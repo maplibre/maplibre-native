@@ -9,7 +9,7 @@ import org.maplibre.android.location.engine.LocationEngine
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Projection
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.Transform
@@ -31,7 +31,7 @@ class LocationComponentTest {
     private lateinit var locationComponentOptions: LocationComponentOptions
 
     @Mock
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
 
     @Mock
     private lateinit var transform: Transform
@@ -69,7 +69,7 @@ class LocationComponentTest {
     @Mock
     private lateinit var style: Style
 
-    private lateinit var developerAnimationListeners: List<MapboxMap.OnDeveloperAnimationListener>
+    private lateinit var developerAnimationListeners: List<MaplibreMap.OnDeveloperAnimationListener>
 
     private val defaultOptions: LocationComponentActivationOptions
         get() = LocationComponentActivationOptions.builder(context, style).locationEngine(locationEngine).locationEngineRequest(locationEngineRequest).locationComponentOptions(locationComponentOptions).build()
@@ -78,8 +78,8 @@ class LocationComponentTest {
     fun before() {
         MockitoAnnotations.initMocks(this)
         developerAnimationListeners = mutableListOf()
-        locationComponent = LocationComponent(mapboxMap, transform, developerAnimationListeners, currentListener, lastListener, locationLayerController, locationCameraController, locationAnimatorCoordinator, staleStateManager, compassEngine, false)
-        doReturn(style).`when`(mapboxMap).style
+        locationComponent = LocationComponent(maplibreMap, transform, developerAnimationListeners, currentListener, lastListener, locationLayerController, locationCameraController, locationAnimatorCoordinator, staleStateManager, compassEngine, false)
+        doReturn(style).`when`(maplibreMap).style
         `when`(style.isFullyLoaded).thenReturn(true)
     }
 
@@ -160,7 +160,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         val listener = mock(OnLocationCameraTransitionListener::class.java)
 
@@ -178,7 +178,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         val listener = mock(OnLocationCameraTransitionListener::class.java)
 
@@ -197,7 +197,7 @@ class LocationComponentTest {
 
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         val listener = mock(OnLocationCameraTransitionListener::class.java)
 
@@ -215,7 +215,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationCameraController.isConsumingCompass).thenReturn(true)
         locationComponent.cameraMode = CameraMode.NONE_COMPASS
@@ -227,7 +227,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationCameraController.isConsumingCompass).thenReturn(true)
         locationComponent.cameraMode = CameraMode.TRACKING_COMPASS
@@ -239,7 +239,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -251,7 +251,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(false)
         `when`(locationCameraController.isConsumingCompass).thenReturn(false)
@@ -270,7 +270,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -284,7 +284,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -297,7 +297,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -311,7 +311,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -324,7 +324,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -338,7 +338,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -353,7 +353,7 @@ class LocationComponentTest {
     fun compass_notAdListenerWhenDisabled() {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -364,7 +364,7 @@ class LocationComponentTest {
     fun compass_notAdListenerWhenStopped() {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
@@ -376,7 +376,7 @@ class LocationComponentTest {
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.onStart()
         locationComponent.isLocationComponentEnabled = true
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         `when`(locationLayerController.isConsumingCompass).thenReturn(true)
         locationComponent.renderMode = RenderMode.COMPASS
 
@@ -459,8 +459,8 @@ class LocationComponentTest {
         location.bearing = 50f
         val projection: Projection = mock(Projection::class.java)
         `when`(projection.getMetersPerPixelAtLatitude(location.latitude)).thenReturn(10.0)
-        `when`(mapboxMap.projection).thenReturn(projection)
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.projection).thenReturn(projection)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
 
         locationComponent.activateLocationComponent(
             LocationComponentActivationOptions.builder(context, style)
@@ -482,11 +482,11 @@ class LocationComponentTest {
 
     @Test
     fun tiltWhileTracking_notReady() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.tiltWhileTracking(30.0, 500L, callback)
         verify(callback).onCancel()
@@ -495,13 +495,13 @@ class LocationComponentTest {
 
     @Test
     fun tiltWhileTracking_notTracking() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         `when`(locationCameraController.cameraMode).thenReturn(CameraMode.NONE)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
         locationComponent.onStart()
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.tiltWhileTracking(30.0, 500L, callback)
         verify(callback).onCancel()
@@ -510,14 +510,14 @@ class LocationComponentTest {
 
     @Test
     fun tiltWhileTracking_transitioning() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         `when`(locationCameraController.cameraMode).thenReturn(CameraMode.TRACKING)
         `when`(locationCameraController.isTransitioning).thenReturn(true)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
         locationComponent.onStart()
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.tiltWhileTracking(30.0, 500L, callback)
         verify(callback).onCancel()
@@ -526,14 +526,14 @@ class LocationComponentTest {
 
     @Test
     fun tiltWhileTracking_sucessful() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         `when`(locationCameraController.cameraMode).thenReturn(CameraMode.TRACKING)
         `when`(locationCameraController.isTransitioning).thenReturn(false)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
         locationComponent.onStart()
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.tiltWhileTracking(30.0, 500L, callback)
         verify(callback, times(0)).onCancel()
@@ -542,11 +542,11 @@ class LocationComponentTest {
 
     @Test
     fun zoomWhileTracking_notReady() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.zoomWhileTracking(14.0, 500L, callback)
         verify(callback).onCancel()
@@ -555,13 +555,13 @@ class LocationComponentTest {
 
     @Test
     fun zoomWhileTracking_notTracking() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         `when`(locationCameraController.cameraMode).thenReturn(CameraMode.NONE)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
         locationComponent.onStart()
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.zoomWhileTracking(14.0, 500L, callback)
         verify(callback).onCancel()
@@ -570,14 +570,14 @@ class LocationComponentTest {
 
     @Test
     fun zoomWhileTracking_transitioning() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         `when`(locationCameraController.cameraMode).thenReturn(CameraMode.TRACKING)
         `when`(locationCameraController.isTransitioning).thenReturn(true)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
         locationComponent.onStart()
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.zoomWhileTracking(14.0, 500L, callback)
         verify(callback).onCancel()
@@ -586,14 +586,14 @@ class LocationComponentTest {
 
     @Test
     fun zoomWhileTracking_successful() {
-        `when`(mapboxMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
+        `when`(maplibreMap.cameraPosition).thenReturn(CameraPosition.DEFAULT)
         `when`(locationCameraController.cameraMode).thenReturn(CameraMode.TRACKING)
         `when`(locationCameraController.isTransitioning).thenReturn(false)
         locationComponent.activateLocationComponent(defaultOptions)
         locationComponent.isLocationComponentEnabled = true
         locationComponent.onStart()
 
-        val callback = mock(MapboxMap.CancelableCallback::class.java)
+        val callback = mock(MaplibreMap.CancelableCallback::class.java)
 
         locationComponent.zoomWhileTracking(14.0, 500L, callback)
         verify(callback, times(0)).onCancel()
@@ -606,7 +606,7 @@ class LocationComponentTest {
         location.accuracy = 50f
         val projection: Projection = mock(Projection::class.java)
         `when`(projection.getMetersPerPixelAtLatitude(location.latitude)).thenReturn(10.0)
-        `when`(mapboxMap.projection).thenReturn(projection)
+        `when`(maplibreMap.projection).thenReturn(projection)
         locationComponent.activateLocationComponent(
             LocationComponentActivationOptions.builder(context, style)
                 .locationComponentOptions(locationComponentOptions)
@@ -625,7 +625,7 @@ class LocationComponentTest {
     fun newLocation_accuracy_indicatorLayerRadiusValue() {
         val location = Location("test")
         location.accuracy = 50f
-        locationComponent = LocationComponent(mapboxMap, transform, developerAnimationListeners, currentListener, lastListener, locationLayerController, locationCameraController, locationAnimatorCoordinator, staleStateManager, compassEngine, true)
+        locationComponent = LocationComponent(maplibreMap, transform, developerAnimationListeners, currentListener, lastListener, locationLayerController, locationCameraController, locationAnimatorCoordinator, staleStateManager, compassEngine, true)
         locationComponent.activateLocationComponent(
             LocationComponentActivationOptions.builder(context, style)
                 .locationComponentOptions(locationComponentOptions)

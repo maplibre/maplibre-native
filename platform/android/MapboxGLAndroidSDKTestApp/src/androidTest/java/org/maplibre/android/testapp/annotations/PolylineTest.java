@@ -19,7 +19,7 @@ public class PolylineTest extends EspressoTest {
   @Ignore
   public void addPolylineTest() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLngOne = new LatLng();
       LatLng latLngTwo = new LatLng(1, 0);
 

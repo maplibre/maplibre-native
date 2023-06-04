@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Feature
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.utils.NavUtils
@@ -20,7 +20,7 @@ import timber.log.Timber
  */
 class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var mapboxMap: MapboxMap
+    lateinit var maplibreMap: MaplibreMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,9 +31,9 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap: MapboxMap ->
-            this@QueryRenderedFeaturesBoxCountActivity.mapboxMap = mapboxMap
-            mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
+        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+            this@QueryRenderedFeaturesBoxCountActivity.maplibreMap = maplibreMap
+            maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
             selectionBox.setOnClickListener { view: View? ->
                 // Query
                 val top = selectionBox.top - mapView.top
@@ -45,7 +45,7 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
                     (top + selectionBox.height).toFloat()
                 )
                 Timber.i("Querying box %s", box)
-                val features = mapboxMap.queryRenderedFeatures(box)
+                val features = maplibreMap.queryRenderedFeatures(box)
 
                 // Show count
                 Toast.makeText(
@@ -90,9 +90,9 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
         super.onStart()
         mapView.onStart()
 
-        if (::mapboxMap.isInitialized) {
+        if (::maplibreMap.isInitialized) {
             // Regression test for #14394
-            mapboxMap.queryRenderedFeatures(PointF(0F, 0F))
+            maplibreMap.queryRenderedFeatures(PointF(0F, 0F))
         }
     }
 

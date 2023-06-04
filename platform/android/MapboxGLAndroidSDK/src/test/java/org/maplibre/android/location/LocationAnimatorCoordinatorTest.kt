@@ -11,7 +11,7 @@ import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION
 import org.maplibre.android.location.MapboxAnimator.*
 import org.maplibre.android.location.modes.RenderMode
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Projection
 import io.mockk.*
 import org.junit.Assert.*
@@ -83,7 +83,7 @@ class LocationAnimatorCoordinatorTest {
             MapboxLatLngAnimator(latLngsSlot.captured, listenerSlot.captured, maxFpsSlot.captured)
         }
 
-        val callback = slot<MapboxMap.CancelableCallback>()
+        val callback = slot<MaplibreMap.CancelableCallback>()
         every {
             animatorProvider.cameraAnimator(capture(floatsSlot), capture(listenerSlot), capture(callback))
         } answers {

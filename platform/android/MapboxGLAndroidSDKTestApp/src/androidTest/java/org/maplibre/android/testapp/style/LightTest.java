@@ -45,7 +45,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("anchor");
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertNotNull(light);
       // Set and Get
       light.setAnchor(ANCHOR_MAP);
@@ -58,7 +58,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("positionTransitionOptions");
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertNotNull(light);
       // Set and Get
       TransitionOptions options = new TransitionOptions(300, 100);
@@ -72,7 +72,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("position");
-    invoke(mapboxMap,(uiController, mapboxMap) -> {
+    invoke(maplibreMap,(uiController, mapboxMap) -> {
       assertNotNull(light);
       // Set and Get
       Position position = new Position(1, 2, 3);
@@ -86,7 +86,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("colorTransitionOptions");
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertNotNull(light);
       // Set and Get
       TransitionOptions options = new TransitionOptions(300, 100);
@@ -100,7 +100,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("color");
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertNotNull(light);
       // Set and Get
       light.setColor("rgba(255,128,0,0.7)");
@@ -113,7 +113,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("intensityTransitionOptions");
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertNotNull(light);
       // Set and Get
       TransitionOptions options = new TransitionOptions(300, 100);
@@ -127,7 +127,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("intensity");
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertNotNull(light);
       // Set and Get
       light.setIntensity(0.3f);
@@ -149,7 +149,7 @@ public class LightTest extends BaseTest {
 
       @Override
       public void perform(UiController uiController, View view) {
-        light = mapboxMap.getStyle().getLight();
+        light = maplibreMap.getStyle().getLight();
         FillExtrusionLayer fillExtrusionLayer = new FillExtrusionLayer("3d-buildings", "composite");
         fillExtrusionLayer.setSourceLayer("building");
         fillExtrusionLayer.setFilter(eq(Expression.get("extrude"), "true"));
@@ -160,7 +160,7 @@ public class LightTest extends BaseTest {
           fillExtrusionBase(Expression.get("min_height")),
           fillExtrusionOpacity(0.6f)
         );
-        mapboxMap.getStyle().addLayer(fillExtrusionLayer);
+        maplibreMap.getStyle().addLayer(fillExtrusionLayer);
       }
     });
   }

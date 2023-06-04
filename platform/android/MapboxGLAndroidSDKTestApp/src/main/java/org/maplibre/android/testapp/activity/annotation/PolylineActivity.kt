@@ -11,7 +11,7 @@ import org.maplibre.android.annotations.Polyline
 import org.maplibre.android.annotations.PolylineOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -28,7 +28,7 @@ class PolylineActivity : AppCompatActivity() {
     private var polylines: MutableList<Polyline>? = null
     private var polylineOptions: ArrayList<PolylineOptions?>? = ArrayList()
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var fullAlpha = true
     private var showPolylines = true
     private var width = true
@@ -44,34 +44,34 @@ class PolylineActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { mapboxMap: MapboxMap ->
-                this@PolylineActivity.mapboxMap = mapboxMap
-                mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
-                mapboxMap.setOnPolylineClickListener { polyline: Polyline ->
+            OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                this@PolylineActivity.maplibreMap = maplibreMap
+                maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+                maplibreMap.setOnPolylineClickListener { polyline: Polyline ->
                     Toast.makeText(
                         this@PolylineActivity,
                         "You clicked on polyline with id = " + polyline.id,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-                polylines = mapboxMap.addPolylines(polylineOptions!!)
+                polylines = maplibreMap.addPolylines(polylineOptions!!)
             }
         )
         val fab = findViewById<View>(R.id.fab)
         fab?.setOnClickListener { view: View? ->
-            if (mapboxMap != null) {
+            if (maplibreMap != null) {
                 if (polylines != null && polylines!!.size > 0) {
                     if (polylines!!.size == 1) {
                         // test for removing annotation
-                        mapboxMap.removeAnnotation(polylines!![0])
+                        maplibreMap.removeAnnotation(polylines!![0])
                     } else {
                         // test for removing annotations
-                        mapboxMap.removeAnnotations(polylines!!)
+                        maplibreMap.removeAnnotations(polylines!!)
                     }
                 }
                 polylineOptions!!.clear()
                 polylineOptions!!.addAll(randomLine)
-                polylines = mapboxMap.addPolylines(polylineOptions!!)
+                polylines = maplibreMap.addPolylines(polylineOptions!!)
             }
         }
     }
@@ -157,7 +157,7 @@ class PolylineActivity : AppCompatActivity() {
             R.id.action_id_remove -> {
                 // test to remove all annotations
                 polylineOptions!!.clear()
-                mapboxMap.clear()
+                maplibreMap.clear()
                 polylines!!.clear()
                 true
             }

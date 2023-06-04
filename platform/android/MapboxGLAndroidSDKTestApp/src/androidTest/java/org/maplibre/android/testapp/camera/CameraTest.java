@@ -5,7 +5,7 @@ import org.maplibre.android.camera.CameraUpdate;
 import org.maplibre.android.camera.CameraUpdateFactory;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 import org.maplibre.android.testapp.activity.BaseTest;
 import org.maplibre.android.testapp.activity.espresso.DeviceIndependentTestActivity;
 import org.maplibre.android.testapp.utils.TestConstants;
@@ -38,7 +38,7 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToCameraPositionTarget() throws InterruptedException {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       float zoom = 1.0f;
       LatLng moveTarget = new LatLng(1, 1);
       CameraPosition initialPosition = new CameraPosition.Builder().target(
@@ -46,7 +46,7 @@ public abstract class CameraTest extends BaseTest {
       CameraPosition cameraPosition = mapboxMap.getCameraPosition();
       assertEquals("Default camera position should match default", cameraPosition, initialPosition);
 
-      executeCameraMovement(CameraUpdateFactory.newLatLng(moveTarget), new MapboxMap.CancelableCallback() {
+      executeCameraMovement(CameraUpdateFactory.newLatLng(moveTarget), new MaplibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
           verifyCameraPosition(mapboxMap, moveTarget, zoom, 0, 0, new double[4]);
@@ -69,12 +69,12 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToCameraPositionTargetZoom() throws InterruptedException {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       final float moveZoom = 15.5f;
       final LatLng moveTarget = new LatLng(1.0000000001, 1.0000000003);
 
       executeCameraMovement(CameraUpdateFactory.newLatLngZoom(moveTarget, moveZoom),
-        new MapboxMap.CancelableCallback() {
+        new MaplibreMap.CancelableCallback() {
           @Override
           public void onCancel() {
             verifyCameraPosition(mapboxMap, moveTarget, moveZoom, 0, 0, new double[4]);
@@ -97,7 +97,7 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToCameraPosition() throws InterruptedException {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       final LatLng moveTarget = new LatLng(1.0000000001, 1.0000000003);
       final float moveZoom = 15.5f;
       final float moveTilt = 45.5f;
@@ -112,7 +112,7 @@ public abstract class CameraTest extends BaseTest {
           .bearing(moveBearing)
           .padding(movePadding)
           .build()),
-        new MapboxMap.CancelableCallback() {
+        new MaplibreMap.CancelableCallback() {
           @Override
           public void onCancel() {
             verifyCameraPosition(mapboxMap, moveTarget, moveZoom, moveBearing, moveTilt, movePadding);
@@ -135,7 +135,7 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToBounds() throws InterruptedException {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       final LatLng centerBounds = new LatLng(1, 1);
       LatLng cornerOne = new LatLng();
       LatLng cornerTwo = new LatLng(2, 2);
@@ -144,7 +144,7 @@ public abstract class CameraTest extends BaseTest {
       builder.include(cornerTwo);
 
       executeCameraMovement(CameraUpdateFactory.newLatLngBounds(builder.build(), 0),
-        new MapboxMap.CancelableCallback() {
+        new MaplibreMap.CancelableCallback() {
           @Override
           public void onCancel() {
             verifyCameraPosition(mapboxMap, centerBounds, mapboxMap.getCameraPosition().zoom, 0, 0, new double[4]);
@@ -167,10 +167,10 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToZoomIn() throws InterruptedException {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       float zoom = 1.0f;
 
-      executeCameraMovement(CameraUpdateFactory.zoomIn(), new MapboxMap.CancelableCallback() {
+      executeCameraMovement(CameraUpdateFactory.zoomIn(), new MaplibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
           verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + 1, 0, 0, new double[4]);
@@ -194,8 +194,8 @@ public abstract class CameraTest extends BaseTest {
   public void testToZoomOut() throws InterruptedException {
     float zoom = 10.0f;
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
-      executeCameraMovement(CameraUpdateFactory.newLatLngZoom(new LatLng(), zoom), new MapboxMap.CancelableCallback() {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
+      executeCameraMovement(CameraUpdateFactory.newLatLngZoom(new LatLng(), zoom), new MaplibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
           verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
@@ -216,8 +216,8 @@ public abstract class CameraTest extends BaseTest {
 
     latch = new CountDownLatch(1);
 
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
-      executeCameraMovement(CameraUpdateFactory.zoomOut(), new MapboxMap.CancelableCallback() {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
+      executeCameraMovement(CameraUpdateFactory.zoomOut(), new MaplibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
           verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom - 1, 0, 0, new double[4]);
@@ -240,11 +240,11 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToZoomBy() throws InterruptedException {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       float zoom = 1.0f;
       final float zoomBy = 2.45f;
 
-      executeCameraMovement(CameraUpdateFactory.zoomBy(zoomBy), new MapboxMap.CancelableCallback() {
+      executeCameraMovement(CameraUpdateFactory.zoomBy(zoomBy), new MaplibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
           verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + zoomBy, 0, 0, new double[4]);
@@ -267,10 +267,10 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToZoomTo() throws InterruptedException {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       final float zoomTo = 2.45f;
 
-      executeCameraMovement(CameraUpdateFactory.zoomTo(zoomTo), new MapboxMap.CancelableCallback() {
+      executeCameraMovement(CameraUpdateFactory.zoomTo(zoomTo), new MaplibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
           verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoomTo, 0, 0, new double[4]);
@@ -290,11 +290,11 @@ public abstract class CameraTest extends BaseTest {
     }
   }
 
-  abstract void executeCameraMovement(CameraUpdate cameraUpdate, MapboxMap.CancelableCallback callback);
+  abstract void executeCameraMovement(CameraUpdate cameraUpdate, MaplibreMap.CancelableCallback callback);
 
-  private void verifyCameraPosition(MapboxMap mapboxMap, LatLng moveTarget, double moveZoom, double moveBearing,
+  private void verifyCameraPosition(MaplibreMap maplibreMap, LatLng moveTarget, double moveZoom, double moveBearing,
                                     double moveTilt, double[] padding) {
-    CameraPosition cameraPosition = mapboxMap.getCameraPosition();
+    CameraPosition cameraPosition = maplibreMap.getCameraPosition();
     assertEquals("Moved camera position latitude should match", cameraPosition.target.getLatitude(),
       moveTarget.getLatitude(), TestConstants.LAT_LNG_DELTA);
     assertEquals("Moved camera position longitude should match", cameraPosition.target.getLongitude(),

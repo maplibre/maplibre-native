@@ -7,7 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -24,7 +24,7 @@ import org.maplibre.android.utils.ColorUtils
  */
 class BuildingFillExtrusionActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var light: Light? = null
     private var isMapAnchorLight = false
     private var isLowIntensityLight = false
@@ -36,11 +36,11 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap? ->
+            OnMapReadyCallback { map: MaplibreMap? ->
                 if (map != null) {
-                    mapboxMap = map
+                    maplibreMap = map
                 }
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
                     setupBuildings(style)
                     setupLight()
                 }
@@ -68,7 +68,7 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
     }
 
     private fun setupLight() {
-        light = mapboxMap.style!!.light
+        light = maplibreMap.style!!.light
         findViewById<View>(R.id.fabLightPosition).setOnClickListener { v: View? ->
             isInitPosition = !isInitPosition
             if (isInitPosition) {

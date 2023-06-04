@@ -24,7 +24,7 @@ public class CameraForTest extends BaseTest {
   @UiThreadTest
   public void testGetCameraForLatLngBounds() {
     validateTestSetup();
-    CameraPosition actualPosition = mapboxMap.getCameraForLatLngBounds(
+    CameraPosition actualPosition = maplibreMap.getCameraForLatLngBounds(
       LatLngBounds.from(10, 10, -10, -10));
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng()).zoom(4.16).tilt(0).bearing(0).build();
@@ -41,7 +41,7 @@ public class CameraForTest extends BaseTest {
   @UiThreadTest
   public void testGetCameraForLatLngBoundsPadding() {
     validateTestSetup();
-    CameraPosition actualPosition = mapboxMap.getCameraForLatLngBounds(
+    CameraPosition actualPosition = maplibreMap.getCameraForLatLngBounds(
       LatLngBounds.from(10, 10, -10, -10), new int[] {5, 5, 5, 5});
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng()).zoom(4.13).tilt(0).bearing(0).build();
@@ -61,7 +61,7 @@ public class CameraForTest extends BaseTest {
   @UiThreadTest
   public void testGetCameraForLatLngBoundsBearing() {
     validateTestSetup();
-    CameraPosition actualPosition = mapboxMap.getCameraForLatLngBounds(
+    CameraPosition actualPosition = maplibreMap.getCameraForLatLngBounds(
       LatLngBounds.from(10, 10, -10, -10), 45, 0);
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng()).zoom(3.66).tilt(0).bearing(45).build();
@@ -81,7 +81,7 @@ public class CameraForTest extends BaseTest {
   @UiThreadTest
   public void testGetCameraForLatLngBoundsTilt() {
     validateTestSetup();
-    CameraPosition actualPosition = mapboxMap.getCameraForLatLngBounds(
+    CameraPosition actualPosition = maplibreMap.getCameraForLatLngBounds(
       LatLngBounds.from(10, 10, -10, -10), 0, 45);
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng(-0.264576975267, 0)).zoom(4.13).tilt(45).bearing(0).build();
@@ -101,7 +101,7 @@ public class CameraForTest extends BaseTest {
   @UiThreadTest
   public void testGetCameraForLatLngBoundsAll() {
     validateTestSetup();
-    CameraPosition actualPosition = mapboxMap.getCameraForLatLngBounds(
+    CameraPosition actualPosition = maplibreMap.getCameraForLatLngBounds(
       LatLngBounds.from(10, 10, -10, -10), new int[] {5, 5, 5, 5}, 45, 45);
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng(-0.3732134634, -0.3713191053)).zoom(3.63).tilt(45).bearing(45).build();
@@ -122,7 +122,7 @@ public class CameraForTest extends BaseTest {
   public void testGetCameraForGeometry() {
     validateTestSetup();
     List<List<Point>> polygonDefinition = getPolygonDefinition();
-    CameraPosition actualPosition = mapboxMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition));
+    CameraPosition actualPosition = maplibreMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition));
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng()).zoom(4.16).tilt(0).bearing(0).build();
     assertEquals("Latitude should match",
@@ -155,7 +155,7 @@ public class CameraForTest extends BaseTest {
   public void testGetCameraForGeometryPadding() {
     validateTestSetup();
     List<List<Point>> polygonDefinition = getPolygonDefinition();
-    CameraPosition actualPosition = mapboxMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition),
+    CameraPosition actualPosition = maplibreMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition),
       new int[] {5, 5, 5, 5});
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng()).zoom(4.13).tilt(0).bearing(0).build();
@@ -176,7 +176,7 @@ public class CameraForTest extends BaseTest {
   public void testGetCameraForGeometryBearing() {
     validateTestSetup();
     List<List<Point>> polygonDefinition = getPolygonDefinition();
-    CameraPosition actualPosition = mapboxMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition), 45, 0);
+    CameraPosition actualPosition = maplibreMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition), 45, 0);
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng()).zoom(3.66).tilt(0).bearing(45).build();
     assertEquals("Latitude should match",
@@ -196,7 +196,7 @@ public class CameraForTest extends BaseTest {
   public void testGetCameraForGeometryTilt() {
     validateTestSetup();
     List<List<Point>> polygonDefinition = getPolygonDefinition();
-    CameraPosition actualPosition = mapboxMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition), 0, 45);
+    CameraPosition actualPosition = maplibreMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition), 0, 45);
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng(-0.2645769752, 0)).zoom(4.13).tilt(45).bearing(0).build();
     assertEquals("Latitude should match",
@@ -216,7 +216,7 @@ public class CameraForTest extends BaseTest {
   public void testGetCameraForGeometryAll() {
     validateTestSetup();
     List<List<Point>> polygonDefinition = getPolygonDefinition();
-    CameraPosition actualPosition = mapboxMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition),
+    CameraPosition actualPosition = maplibreMap.getCameraForGeometry(Polygon.fromLngLats(polygonDefinition),
       new int[] {5, 5, 5, 5}, 45, 45);
     CameraPosition expectedPosition = new CameraPosition.Builder()
       .target(new LatLng(-0.373213463, -0.37131910534)).zoom(3.63).tilt(45).bearing(45).build();
@@ -237,7 +237,7 @@ public class CameraForTest extends BaseTest {
   public void testGetCameraForGeometryDeprecatedApi() {
     validateTestSetup();
     List<List<Point>> polygonDefinition = getPolygonDefinition();
-    CameraPosition actualPosition = mapboxMap.getCameraForGeometry(
+    CameraPosition actualPosition = maplibreMap.getCameraForGeometry(
       Polygon.fromLngLats(polygonDefinition),
       new int[] {5, 5, 5, 5},
       45, 0);

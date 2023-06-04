@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -30,7 +30,7 @@ import java.io.IOException
  */
 class DataDrivenStyleActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var idleListener: IdleZoomListener? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,12 +40,12 @@ class DataDrivenStyleActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap? ->
+            OnMapReadyCallback { map: MaplibreMap? ->
                 // Store for later
                 if (map != null) {
-                    mapboxMap = map
+                    maplibreMap = map
                 }
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
                     // Add a parks layer
                     addParksLayer()
 
@@ -54,7 +54,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 }
 
                 // Center and Zoom (Amsterdam, zoomed to streets)
-                mapboxMap.animateCamera(
+                maplibreMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(52.379189, 4.899431),
                         14.0
@@ -66,9 +66,9 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun setupDebugZoomView() {
         val textView = findViewById<View>(R.id.textZoom) as TextView
-        mapboxMap.addOnCameraIdleListener(
+        maplibreMap.addOnCameraIdleListener(
             IdleZoomListener(
-                mapboxMap,
+                maplibreMap,
                 textView
             ).also { idleListener = it }
         )
@@ -106,8 +106,8 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null && idleListener != null) {
-            mapboxMap.removeOnCameraIdleListener(idleListener!!)
+        if (maplibreMap != null && idleListener != null) {
+            maplibreMap.removeOnCameraIdleListener(idleListener!!)
         }
         mapView.onDestroy()
     }
@@ -161,7 +161,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addExponentialZoomFunction() {
         Timber.i("Add exponential zoom function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>("water")!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>("water")!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.interpolate(
@@ -178,7 +178,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addIntervalZoomFunction() {
         Timber.i("Add interval zoom function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>("water")!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>("water")!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.step(
@@ -195,7 +195,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addExponentialSourceFunction() {
         Timber.i("Add exponential source function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.interpolate(
@@ -212,7 +212,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addCategoricalSourceFunction() {
         Timber.i("Add categorical source function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.match(
@@ -232,7 +232,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addIdentitySourceFunction() {
         Timber.i("Add identity source function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillOpacity(
                 Expression.get("fill-opacity")
@@ -243,7 +243,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addIntervalSourceFunction() {
         Timber.i("Add interval source function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.step(
@@ -260,7 +260,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addCompositeExponentialFunction() {
         Timber.i("Add composite exponential function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.interpolate(
@@ -304,7 +304,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addCompositeIntervalFunction() {
         Timber.i("Add composite interval function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.interpolate(
@@ -348,7 +348,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     private fun addCompositeCategoricalFunction() {
         Timber.i("Add composite categorical function")
-        val layer = mapboxMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
+        val layer = maplibreMap.style!!.getLayerAs<FillLayer>(AMSTERDAM_PARKS_LAYER)!!
         layer.setProperties(
             PropertyFactory.fillColor(
                 Expression.step(
@@ -518,7 +518,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 "amsterdam-parks-source",
                 ResourceUtils.readRawResource(this, R.raw.amsterdam)
             )
-            mapboxMap.style!!.addSource(source)
+            maplibreMap.style!!.addSource(source)
         } catch (ioException: IOException) {
             Toast.makeText(
                 this@DataDrivenStyleActivity,
@@ -529,7 +529,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
         }
 
         // Add a fill layer
-        mapboxMap.style!!
+        maplibreMap.style!!
             .addLayer(
                 FillLayer(AMSTERDAM_PARKS_LAYER, source.id)
                     .withProperties(

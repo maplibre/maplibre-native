@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -24,7 +24,7 @@ import java.lang.ref.WeakReference
  * Test activity showcasing how to use a file:// resource for the style.json and how to use MapboxMap#setStyleJson.
  */
 class StyleFileActivity : AppCompatActivity() {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,17 +32,17 @@ class StyleFileActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap? ->
+            OnMapReadyCallback { map: MaplibreMap? ->
                 if (map != null) {
-                    mapboxMap = map
+                    maplibreMap = map
                 }
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
                     val fab = findViewById<FloatingActionButton>(R.id.fab_file)
                     fab.setColorFilter(ContextCompat.getColor(this@StyleFileActivity, R.color.primary))
                     fab.setOnClickListener { view: View ->
                         CreateStyleFileTask(
                             view.context,
-                            mapboxMap
+                            maplibreMap
                         ).execute()
                     }
                     val fabStyleJson = findViewById<FloatingActionButton>(R.id.fab_style_json)
@@ -55,7 +55,7 @@ class StyleFileActivity : AppCompatActivity() {
                     fabStyleJson.setOnClickListener { view: View ->
                         LoadStyleFileTask(
                             view.context,
-                            mapboxMap
+                            maplibreMap
                         ).execute()
                     }
                 }
@@ -66,10 +66,10 @@ class StyleFileActivity : AppCompatActivity() {
     /**
      * Task to read a style file from the raw folder
      */
-    private class LoadStyleFileTask internal constructor(context: Context, mapboxMap: MapboxMap?) :
+    private class LoadStyleFileTask internal constructor(context: Context, maplibreMap: MaplibreMap?) :
         AsyncTask<Void?, Void?, String>() {
         private val context: WeakReference<Context>
-        private val mapboxMap: WeakReference<MapboxMap?>
+        private val maplibreMap: WeakReference<MaplibreMap?>
         protected override fun doInBackground(vararg p0: Void?): String? {
             var styleJson = ""
             try {
@@ -83,13 +83,13 @@ class StyleFileActivity : AppCompatActivity() {
         override fun onPostExecute(json: String) {
             super.onPostExecute(json)
             Timber.d("Read json, %s", json)
-            val mapboxMap = mapboxMap.get()
+            val mapboxMap = maplibreMap.get()
             mapboxMap?.setStyle(Style.Builder().fromJson(json))
         }
 
         init {
             this.context = WeakReference(context)
-            this.mapboxMap = WeakReference(mapboxMap)
+            this.maplibreMap = WeakReference(maplibreMap)
         }
     }
 
@@ -98,11 +98,11 @@ class StyleFileActivity : AppCompatActivity() {
      */
     private class CreateStyleFileTask internal constructor(
         context: Context,
-        mapboxMap: MapboxMap?
+        maplibreMap: MaplibreMap?
     ) : AsyncTask<Void?, Int?, Long>() {
         private lateinit var cacheStyleFile: File
         private val context: WeakReference<Context>
-        private val mapboxMap: WeakReference<MapboxMap?>
+        private val maplibreMap: WeakReference<MaplibreMap?>
         protected override fun doInBackground(vararg p0: Void?): Long? {
             try {
                 cacheStyleFile = File.createTempFile("my-", ".style.json")
@@ -127,7 +127,7 @@ class StyleFileActivity : AppCompatActivity() {
 
         override fun onPostExecute(result: Long) {
             // Actual file:// usage
-            val mapboxMap = mapboxMap.get()
+            val mapboxMap = maplibreMap.get()
             mapboxMap?.setStyle(
                 Style.Builder().fromUri("file://" + cacheStyleFile!!.absolutePath)
             )
@@ -145,7 +145,7 @@ class StyleFileActivity : AppCompatActivity() {
 
         init {
             this.context = WeakReference(context)
-            this.mapboxMap = WeakReference(mapboxMap)
+            this.maplibreMap = WeakReference(maplibreMap)
         }
     }
 

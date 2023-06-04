@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapView.OnDidFinishLoadingStyleListener
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.OnMapClickListener
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -14,10 +14,10 @@ import timber.log.Timber
 /** Test activity showcasing using maximum and minimum zoom levels to restrict camera movement. */
 class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private val clickListener = OnMapClickListener {
-        if (mapboxMap != null) {
-            mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor")))
+        if (maplibreMap != null) {
+            maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor")))
         }
         true
     }
@@ -33,12 +33,12 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
-        mapboxMap.setMinZoomPreference(3.0)
-        mapboxMap.setMaxZoomPreference(5.0)
-        mapboxMap.addOnMapClickListener(clickListener)
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        maplibreMap.setMinZoomPreference(3.0)
+        maplibreMap.setMaxZoomPreference(5.0)
+        maplibreMap.addOnMapClickListener(clickListener)
     }
 
     override fun onStart() {
@@ -68,8 +68,8 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap.removeOnMapClickListener(clickListener)
+        if (maplibreMap != null) {
+            maplibreMap.removeOnMapClickListener(clickListener)
         }
         mapView.onDestroy()
     }

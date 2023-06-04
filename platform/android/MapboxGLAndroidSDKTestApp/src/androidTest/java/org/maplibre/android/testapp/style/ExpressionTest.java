@@ -78,7 +78,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       // create color expression
       Expression inputExpression = rgba(255.0f, 0.0f, 0.0f, 1.0f);
 
@@ -101,7 +101,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       // create get expression
       Expression inputExpression = get("fill");
 
@@ -127,7 +127,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       // create camera function expression
       Expression inputExpression = interpolate(
               exponential(0.5f), zoom(),
@@ -155,7 +155,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       // create camera function expression
       Expression inputExpression = toColor(get("fill"));
 
@@ -178,7 +178,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       // create camera function expression
       Expression inputExpression = step(zoom(),
               rgba(255.0f, 255.0f, 255.0f, 1.0f),
@@ -211,7 +211,7 @@ public class ExpressionTest extends EspressoTest {
   public void testLiteralProperty() {
     validateTestSetup();
     setupStyle();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       layer.setProperties(
               fillColor(literal("#4286f4"))
       );
@@ -222,7 +222,7 @@ public class ExpressionTest extends EspressoTest {
   public void testLiteralMatchExpression() {
     validateTestSetup();
     setupStyle();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       Expression expression = match(literal("something"), literal(0f),
               stop("1", get("1")),
               stop("2", get("2")),
@@ -240,7 +240,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testCollatorExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
 
       Expression expression1 = eq(literal("Łukasz"), literal("lukasz"), collator(true, true));
@@ -288,7 +288,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -311,7 +311,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionFontScaleParam() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -334,7 +334,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionTextFontParam() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -364,7 +364,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionTextColorParam() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -393,7 +393,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionAllParams() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -427,7 +427,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionMultipleInputs() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -464,7 +464,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testVariableFormatExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
       feature.addStringProperty("test_property", "test");
@@ -495,7 +495,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testVariableFormatExpressionMultipleInputs() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
       feature.addStringProperty("test_property", "test");
@@ -527,7 +527,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testFormatExpressionPlainTextCoercion() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -548,7 +548,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testTextFieldFormattedArgument() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -574,7 +574,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatCurrencyExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -599,7 +599,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatMaxExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -624,7 +624,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatMinExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -649,7 +649,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatLocaleExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
@@ -675,7 +675,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatNonConstantExpression() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
       feature.addNumberProperty("number_value", 12.345678);
@@ -741,7 +741,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testDoubleConversion() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLng latLng = new LatLng(51, 17);
       mapboxMap.getStyle().addSource(
               new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
@@ -764,7 +764,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   private void setupStyle() {
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       // Add a source
       Source source;
       source = new GeoJsonSource("amsterdam-parks-source",

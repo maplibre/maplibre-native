@@ -18,11 +18,11 @@ class SimpleMapActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { mapboxMap: MapboxMap ->
+            OnMapReadyCallback { maplibreMap: MaplibreMap ->
                 val styles = Style.getPredefinedStyles()
                 if (styles != null && styles.size > 0) {
                     val styleUrl = styles[0].url
-                    mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
+                    maplibreMap.setStyle(Style.Builder().fromUri(styleUrl))
                 }
             }
         )

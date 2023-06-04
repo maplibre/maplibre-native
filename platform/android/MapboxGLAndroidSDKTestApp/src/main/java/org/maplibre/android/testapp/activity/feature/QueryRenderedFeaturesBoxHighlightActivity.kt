@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.FeatureCollection
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.FillLayer
@@ -23,7 +23,7 @@ import timber.log.Timber
  */
 class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var mapboxMap: MapboxMap
+    lateinit var maplibreMap: MaplibreMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,8 +34,8 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap: MapboxMap ->
-            this@QueryRenderedFeaturesBoxHighlightActivity.mapboxMap = mapboxMap
+        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+            this@QueryRenderedFeaturesBoxHighlightActivity.maplibreMap = maplibreMap
 
             // Add layer / source
             val source = GeoJsonSource("highlighted-shapes-source")
@@ -56,7 +56,7 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
                     Expression.toNumber(Expression.get("height")),
                     Expression.literal(10)
                 )
-                val features = mapboxMap.queryRenderedFeatures(box, filter, "building")
+                val features = maplibreMap.queryRenderedFeatures(box, filter, "building")
 
                 // Show count
                 Toast.makeText(
@@ -68,7 +68,7 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
                 // Update source data
                 source.setGeoJson(FeatureCollection.fromFeatures(features))
             }
-            mapboxMap.setStyle(
+            maplibreMap.setStyle(
                 Style.Builder()
                     .fromUri(Style.getPredefinedStyle("Streets"))
                     .withSource(source)

@@ -9,7 +9,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.*
@@ -28,8 +28,8 @@ class FillExtrusionActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { mapboxMap: MapboxMap ->
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+            OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
                     val lngLats = listOf(
                         Arrays.asList(
                             Point.fromLngLat(5.12112557888031, 52.09071040847704),
@@ -50,7 +50,7 @@ class FillExtrusionActivity : AppCompatActivity() {
                                 PropertyFactory.fillExtrusionColor(Color.RED)
                             )
                     )
-                    mapboxMap.animateCamera(
+                    maplibreMap.animateCamera(
                         CameraUpdateFactory.newCameraPosition(
                             CameraPosition.Builder()
                                 .target(LatLng(52.09071040847704, 5.12112557888031))

@@ -222,7 +222,7 @@ open class MapSnapshotter(context: Context, options: Options) {
         }
 
         /**
-         * @param showLogo The flag indicating to show the Mapbox logo.
+         * @param showLogo The flag indicating to show the Maplibre logo.
          * @return the mutated [Options]
          */
         fun withLogo(showLogo: Boolean): Options {

@@ -8,7 +8,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 
@@ -18,19 +18,19 @@ import org.maplibre.android.testapp.R
  * This includes zoomIn, zoomOut, zoomTo, zoomBy (center and custom focal point).
  */
 class ManualZoomActivity : AppCompatActivity() {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manual_zoom)
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap: MapboxMap ->
-            this@ManualZoomActivity.mapboxMap = mapboxMap
-            mapboxMap.setStyle(
+        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+            this@ManualZoomActivity.maplibreMap = maplibreMap
+            maplibreMap.setStyle(
                 Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Hybrid"))
             )
-            val uiSettings = this@ManualZoomActivity.mapboxMap.uiSettings
+            val uiSettings = this@ManualZoomActivity.maplibreMap.uiSettings
             uiSettings.setAllGesturesEnabled(false)
         }
     }
@@ -43,24 +43,24 @@ class ManualZoomActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_zoom_in -> {
-                mapboxMap.animateCamera(CameraUpdateFactory.zoomIn())
+                maplibreMap.animateCamera(CameraUpdateFactory.zoomIn())
                 true
             }
             R.id.action_zoom_out -> {
-                mapboxMap.animateCamera(CameraUpdateFactory.zoomOut())
+                maplibreMap.animateCamera(CameraUpdateFactory.zoomOut())
                 true
             }
             R.id.action_zoom_by -> {
-                mapboxMap.animateCamera(CameraUpdateFactory.zoomBy(2.0))
+                maplibreMap.animateCamera(CameraUpdateFactory.zoomBy(2.0))
                 true
             }
             R.id.action_zoom_to -> {
-                mapboxMap.animateCamera(CameraUpdateFactory.zoomTo(2.0))
+                maplibreMap.animateCamera(CameraUpdateFactory.zoomTo(2.0))
                 true
             }
             R.id.action_zoom_to_point -> {
                 val view = window.decorView
-                mapboxMap.animateCamera(
+                maplibreMap.animateCamera(
                     CameraUpdateFactory.zoomBy(
                         1.0,
                         Point(view.measuredWidth / 4, view.measuredHeight / 4)

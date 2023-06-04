@@ -13,7 +13,7 @@ import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.intent.Intents;
 
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.testapp.R;
 import org.maplibre.android.testapp.activity.EspressoTest;
@@ -60,7 +60,7 @@ public class AttributionTest extends EspressoTest {
 
     // Disabled
     onView(withTagValue(is("attrView")))
-      .perform(new DisableAction(mapboxMap))
+      .perform(new DisableAction(maplibreMap))
       .check(matches(not(isDisplayed())));
   }
 
@@ -135,7 +135,7 @@ public class AttributionTest extends EspressoTest {
 
   private void buildUrlSpans() {
     onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
-      for (Source source : mapboxMap.getStyle().getSources()) {
+      for (Source source : maplibreMap.getStyle().getSources()) {
         String attributionSource = source.getAttribution();
         if (!TextUtils.isEmpty(attributionSource)) {
           SpannableStringBuilder htmlBuilder = (SpannableStringBuilder) Html.fromHtml(attributionSource);
@@ -147,10 +147,10 @@ public class AttributionTest extends EspressoTest {
 
   private class DisableAction implements ViewAction {
 
-    private MapboxMap mapboxMap;
+    private MaplibreMap maplibreMap;
 
-    DisableAction(MapboxMap map) {
-      mapboxMap = map;
+    DisableAction(MaplibreMap map) {
+      maplibreMap = map;
     }
 
     @Override
@@ -165,7 +165,7 @@ public class AttributionTest extends EspressoTest {
 
     @Override
     public void perform(UiController uiController, View view) {
-      mapboxMap.getUiSettings().setAttributionEnabled(false);
+      maplibreMap.getUiSettings().setAttributionEnabled(false);
     }
   }
 

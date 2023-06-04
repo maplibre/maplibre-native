@@ -2,11 +2,11 @@
 package org.maplibre.android.testapp.camera;
 
 import org.maplibre.android.camera.CameraUpdate;
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 
 public class CameraMoveTest extends CameraTest {
   @Override
-  void executeCameraMovement(CameraUpdate cameraUpdate, MapboxMap.CancelableCallback callback) {
-    mapboxMap.moveCamera(cameraUpdate, callback);
+  void executeCameraMovement(CameraUpdate cameraUpdate, MaplibreMap.CancelableCallback callback) {
+    maplibreMap.moveCamera(cameraUpdate, callback);
   }
 }

@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class MapboxMapOptionsAttrsTest {
+class MaplibreMapOptionsAttrsTest {
 
     @RelaxedMockK
     private lateinit var options: MapboxMapOptions

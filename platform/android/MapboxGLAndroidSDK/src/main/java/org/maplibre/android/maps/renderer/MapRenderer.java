@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 
 import org.maplibre.android.LibraryLoader;
 import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -32,7 +32,7 @@ public abstract class MapRenderer implements MapRendererScheduler {
   // Holds the pointer to the native peer after initialisation
   private long nativePtr = 0;
   private double expectedRenderTime = 0;
-  private MapboxMap.OnFpsChangedListener onFpsChangedListener;
+  private MaplibreMap.OnFpsChangedListener onFpsChangedListener;
 
   public MapRenderer(@NonNull Context context, String localIdeographFontFamily) {
     float pixelRatio = context.getResources().getDisplayMetrics().density;
@@ -61,7 +61,7 @@ public abstract class MapRenderer implements MapRendererScheduler {
     // Implement if needed
   }
 
-  public void setOnFpsChangedListener(MapboxMap.OnFpsChangedListener listener) {
+  public void setOnFpsChangedListener(MaplibreMap.OnFpsChangedListener listener) {
     onFpsChangedListener = listener;
   }
 

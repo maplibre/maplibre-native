@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.FeatureCollection
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -34,7 +34,7 @@ import java.lang.ref.WeakReference
  */
 class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_symbol_generator)
@@ -43,8 +43,8 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Outdoor")) { style: Style? ->
             addSymbolClickListener()
             LoadDataTask(this@SymbolGeneratorActivity).execute()
@@ -52,15 +52,15 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun addSymbolClickListener() {
-        mapboxMap.addOnMapClickListener { point: LatLng? ->
-            val screenPoint = mapboxMap.projection.toScreenLocation(
+        maplibreMap.addOnMapClickListener { point: LatLng? ->
+            val screenPoint = maplibreMap.projection.toScreenLocation(
                 point!!
             )
-            val features = mapboxMap.queryRenderedFeatures(screenPoint, LAYER_ID)
+            val features = maplibreMap.queryRenderedFeatures(screenPoint, LAYER_ID)
             if (!features.isEmpty()) {
                 val feature = features[0]
                 // validate symbol flicker regression for #13407
-                val layer = mapboxMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
+                val layer = maplibreMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
                 layer!!.setProperties(
                     PropertyFactory.iconOpacity(
                         Expression.match(
@@ -88,11 +88,11 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_action_icon_overlap) {
-            val layer = mapboxMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
+            val layer = maplibreMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
             layer!!.setProperties(PropertyFactory.iconAllowOverlap(!layer.iconAllowOverlap.getValue()!!))
             return true
         } else if (item.itemId == R.id.menu_action_filter) {
-            val layer = mapboxMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
+            val layer = maplibreMap.style!!.getLayerAs<SymbolLayer>(LAYER_ID)
             layer!!.setFilter(Expression.eq(Expression.get(FEATURE_RANK), Expression.literal(1)))
             Timber.e("Filter that was set: %s", layer.filter)
             return true
@@ -270,10 +270,10 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // add a geojson source to the map
         val source: Source = GeoJsonSource(SOURCE_ID, featureCollection)
-        mapboxMap.style!!.addSource(source)
+        maplibreMap.style!!.addSource(source)
 
         // add symbol layer
-        mapboxMap.style!!.addLayer(symbolLayer)
+        maplibreMap.style!!.addLayer(symbolLayer)
 
         // get expressions
         val iconImageExpressionResult = symbolLayer.iconImage.expression
@@ -297,11 +297,11 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
             PropertyFactory.textField(textFieldExpressionResult),
             PropertyFactory.textColor(textColorExpressionResult)
         )
-        GenerateSymbolTask(mapboxMap, this).execute(featureCollection)
+        GenerateSymbolTask(maplibreMap, this).execute(featureCollection)
     }
 
     private class GenerateSymbolTask internal constructor(
-        private val mapboxMap: MapboxMap?,
+        private val maplibreMap: MaplibreMap?,
         context: Context
     ) : AsyncTask<FeatureCollection?, Void?, HashMap<String, Bitmap>>() {
         private val context: WeakReference<Context>
@@ -330,7 +330,7 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onPostExecute(bitmapHashMap: HashMap<String, Bitmap>) {
             super.onPostExecute(bitmapHashMap)
-            mapboxMap?.getStyle { style -> style.addImagesAsync(bitmapHashMap) }
+            maplibreMap?.getStyle { style -> style.addImagesAsync(bitmapHashMap) }
         }
     }
 

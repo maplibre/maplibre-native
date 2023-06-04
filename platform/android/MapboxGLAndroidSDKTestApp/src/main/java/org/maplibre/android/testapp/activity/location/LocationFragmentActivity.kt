@@ -16,7 +16,7 @@ import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityLocationLayerFragmentBinding
@@ -94,7 +94,7 @@ class LocationFragmentActivity : AppCompatActivity() {
         }
 
         private lateinit var mapView: MapView
-        private lateinit var mapboxMap: MapboxMap
+        private lateinit var maplibreMap: MaplibreMap
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             mapView = MapView(inflater.context)
@@ -106,9 +106,9 @@ class LocationFragmentActivity : AppCompatActivity() {
             super.onViewCreated(view, savedInstanceState)
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync {
-                mapboxMap = it
+                maplibreMap = it
                 it.setStyle(Style.getPredefinedStyle("Streets")) { style ->
-                    val component = mapboxMap.locationComponent
+                    val component = maplibreMap.locationComponent
 
                     component.activateLocationComponent(
                         LocationComponentActivationOptions
@@ -124,7 +124,7 @@ class LocationFragmentActivity : AppCompatActivity() {
         }
 
         override fun onSuccess(result: LocationEngineResult?) {
-            if (!mapView.isDestroyed) mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(result?.lastLocation!!), 12.0))
+            if (!mapView.isDestroyed) maplibreMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(result?.lastLocation!!), 12.0))
         }
 
         override fun onFailure(exception: Exception) {

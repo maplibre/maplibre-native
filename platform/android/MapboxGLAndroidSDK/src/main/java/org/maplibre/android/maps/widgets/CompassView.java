@@ -13,7 +13,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.ViewPropertyAnimatorCompat;
 import androidx.core.view.ViewPropertyAnimatorListenerAdapter;
 
-import org.maplibre.android.maps.MapboxMap;
+import org.maplibre.android.maps.MaplibreMap;
 
 /**
  * UI element overlaid on a map to show the map's bearing when it isn't true north (0.0). Tapping
@@ -34,7 +34,7 @@ public final class CompassView extends ImageView implements Runnable {
   private boolean fadeCompassViewFacingNorth = true;
   @Nullable
   private ViewPropertyAnimatorCompat fadeAnimator;
-  private MapboxMap.OnCompassAnimationListener compassAnimationListener;
+  private MaplibreMap.OnCompassAnimationListener compassAnimationListener;
   private boolean isAnimating = false;
 
   public CompassView(@NonNull Context context) {
@@ -61,7 +61,7 @@ public final class CompassView extends ImageView implements Runnable {
     setLayoutParams(lp);
   }
 
-  public void injectCompassAnimationListener(@NonNull MapboxMap.OnCompassAnimationListener compassAnimationListener) {
+  public void injectCompassAnimationListener(@NonNull MaplibreMap.OnCompassAnimationListener compassAnimationListener) {
     this.compassAnimationListener = compassAnimationListener;
   }
 

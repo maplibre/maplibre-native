@@ -518,7 +518,7 @@ public final class UiSettings {
 
   /**
    * <p>
-   * Enables or disables the Mapbox logo.
+   * Enables or disables the Maplibre logo.
    * </p>
    * By default, the logo is enabled.
    *
@@ -549,7 +549,7 @@ public final class UiSettings {
   /**
    * <p>
    * Sets the gravity of the logo view. Use this to change the corner of the map view that the
-   * Mapbox logo is displayed in.
+   * Maplibre logo is displayed in.
    * </p>
    * By default, the logo is in the bottom left corner.
    *
@@ -575,7 +575,7 @@ public final class UiSettings {
   }
 
   /**
-   * Sets the margins of the logo view in pixels. Use this to change the distance of the Mapbox logo from the
+   * Sets the margins of the logo view in pixels. Use this to change the distance of the Maplibre logo from the
    * map view edge.
    *
    * @param left   The left margin in pixels.
@@ -686,7 +686,7 @@ public final class UiSettings {
    * <p>
    * Sets the gravity of the attribution.
    * </p>
-   * By default, the attribution is in the bottom left corner next to the Mapbox logo.
+   * By default, the attribution is in the bottom left corner next to the Maplibre logo.
    *
    * @param gravity Android SDK Gravity.
    */

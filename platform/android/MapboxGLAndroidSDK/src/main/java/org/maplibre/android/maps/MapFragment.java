@@ -34,7 +34,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
 
   private final List<OnMapReadyCallback> mapReadyCallbackList = new ArrayList<>();
   private OnMapViewReadyCallback mapViewReadyCallback;
-  private MapboxMap mapboxMap;
+  private MaplibreMap maplibreMap;
   private MapView map;
 
   /**
@@ -122,13 +122,13 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
   /**
    * Called when the style of the map has successfully loaded.
    *
-   * @param mapboxMap The public api controller of the map
+   * @param maplibreMap The public api controller of the map
    */
   @Override
-  public void onMapReady(@NonNull MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
+  public void onMapReady(@NonNull MaplibreMap maplibreMap) {
+    this.maplibreMap = maplibreMap;
     for (OnMapReadyCallback onMapReadyCallback : mapReadyCallbackList) {
-      onMapReadyCallback.onMapReady(mapboxMap);
+      onMapReadyCallback.onMapReady(maplibreMap);
     }
   }
 
@@ -216,10 +216,10 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
    * @param onMapReadyCallback The callback to be invoked.
    */
   public void getMapAsync(@NonNull final OnMapReadyCallback onMapReadyCallback) {
-    if (mapboxMap == null) {
+    if (maplibreMap == null) {
       mapReadyCallbackList.add(onMapReadyCallback);
     } else {
-      onMapReadyCallback.onMapReady(mapboxMap);
+      onMapReadyCallback.onMapReady(maplibreMap);
     }
   }
 

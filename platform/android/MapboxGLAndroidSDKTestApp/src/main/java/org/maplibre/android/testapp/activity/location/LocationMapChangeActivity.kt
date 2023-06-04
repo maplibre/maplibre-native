@@ -11,14 +11,14 @@ import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 
 class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var permissionsManager: PermissionsManager? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,8 +26,8 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView = findViewById(R.id.mapView)
         val stylesFab = findViewById<FloatingActionButton>(R.id.fabStyles)
         stylesFab.setOnClickListener { v: View? ->
-            if (mapboxMap != null) {
-                mapboxMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
+            if (maplibreMap != null) {
+                maplibreMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
             }
         }
         mapView.onCreate(savedInstanceState)
@@ -64,16 +64,16 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    override fun onMapReady(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(
+    override fun onMapReady(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(
             Style.Builder().fromUri(Utils.nextStyle())
         ) { style: Style -> activateLocationComponent(style) }
     }
 
     @SuppressLint("MissingPermission")
     private fun activateLocationComponent(style: Style) {
-        val locationComponent = mapboxMap.locationComponent
+        val locationComponent = maplibreMap.locationComponent
         locationComponent.activateLocationComponent(
             LocationComponentActivationOptions
                 .builder(this, style)

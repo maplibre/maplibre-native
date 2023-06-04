@@ -10,7 +10,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CustomLayer
@@ -25,7 +25,7 @@ import org.maplibre.android.testapp.model.customlayer.ExampleCustomLayer
  *
  */
 class CustomLayerActivity : AppCompatActivity() {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     private var customLayer: CustomLayer? = null
     private lateinit var fab: FloatingActionButton
@@ -35,15 +35,15 @@ class CustomLayerActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap? ->
-                mapboxMap = map!!
-                mapboxMap.moveCamera(
+            OnMapReadyCallback { map: MaplibreMap? ->
+                maplibreMap = map!!
+                maplibreMap.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(39.91448, -243.60947),
                         10.0
                     )
                 )
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? -> initFab() }
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? -> initFab() }
             }
         )
     }
@@ -53,7 +53,7 @@ class CustomLayerActivity : AppCompatActivity() {
         fab.setColorFilter(ContextCompat.getColor(this, R.color.primary))
         fab.setOnClickListener(
             View.OnClickListener { view: View? ->
-                if (mapboxMap != null) {
+                if (maplibreMap != null) {
                     swapCustomLayer()
                 }
             }
@@ -61,7 +61,7 @@ class CustomLayerActivity : AppCompatActivity() {
     }
 
     private fun swapCustomLayer() {
-        val style = mapboxMap.style
+        val style = maplibreMap.style
         if (customLayer != null) {
             style!!.removeLayer(customLayer!!)
             customLayer = null
@@ -77,8 +77,8 @@ class CustomLayerActivity : AppCompatActivity() {
     }
 
     private fun updateLayer() {
-        if (mapboxMap != null) {
-            mapboxMap.triggerRepaint()
+        if (maplibreMap != null) {
+            maplibreMap.triggerRepaint()
         }
     }
 

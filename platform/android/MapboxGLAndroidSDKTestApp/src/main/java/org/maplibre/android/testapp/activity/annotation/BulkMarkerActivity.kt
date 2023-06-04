@@ -14,7 +14,7 @@ import androidx.core.view.MenuItemCompat
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -29,7 +29,7 @@ import java.util.*
  * Test activity showcasing adding a large amount of Markers.
  */
 class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     private var locations: List<LatLng>? = null
     private var progressDialog: ProgressDialog? = null
@@ -38,12 +38,12 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         setContentView(R.layout.activity_marker_bulk)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(OnMapReadyCallback { mapboxMap: MapboxMap -> initMap(mapboxMap) })
+        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MaplibreMap -> initMap(maplibreMap) })
     }
 
-    private fun initMap(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+    private fun initMap(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -79,10 +79,10 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
 
     private fun showMarkers(amount: Int) {
         var amount = amount
-        if (mapboxMap == null || locations == null || mapView.isDestroyed) {
+        if (maplibreMap == null || locations == null || mapView.isDestroyed) {
             return
         }
-        mapboxMap.clear()
+        maplibreMap.clear()
         if (locations!!.size < amount) {
             amount = locations!!.size
         }
@@ -104,7 +104,7 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
                     .snippet(formatter.format(latLng.latitude) + "`, " + formatter.format(latLng.longitude))
             )
         }
-        mapboxMap.addMarkers(markerOptionsList)
+        maplibreMap.addMarkers(markerOptionsList)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {

@@ -1,7 +1,7 @@
 package org.maplibre.android.log;
 
 /**
- * Definition of a logger for the Mapbox Maps SDK for Android.
+ * Definition of a logger for the Maplibre Maps SDK for Android.
  */
 public interface LoggerDefinition {
 

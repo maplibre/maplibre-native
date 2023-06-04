@@ -64,12 +64,12 @@ Then:
 * Go to your AWS Console and choose Device Farm.
 * Create a new project, e.g. `MapboxGLAndroidSDKTestApp`
 * On step 1, upload the APK in `mapbox-gl-native/android/java/MapboxGLAndroidSDKTestApp/build/outputs/apk/MapboxGLAndroidSDKTestApp-debug-unaligned.apk`
-* On step 2, choose Instrumentation, test filter is `com.mapbox.mapboxgl.testapp.MainActivityTest` and upload the APK in `mapbox-gl-native/android/java/MapboxGLAndroidSDKTestApp/build/outputs/apk/MapboxGLAndroidSDKTestApp-debug-androidTest-unaligned.apk`
+* On step 2, choose Instrumentation, test filter is `org.maplibre.android.testapp.MainActivityTest` and upload the APK in `mapbox-gl-native/android/java/MapboxGLAndroidSDKTestApp/build/outputs/apk/MapboxGLAndroidSDKTestApp-debug-androidTest-unaligned.apk`
 * On step 3, choose a device pool. E.g. Top Devices
 * On step 4, customize your device state (if needed)
 * Finally, confirm the configuration and run the tests.
 
-On Step 2, you can also separate by commas different classes: `com.mapbox.mapboxgl.testapp.MainActivityTest,com.mapbox.mapboxgl.testapp.MainActivityScreenTest`
+On Step 2, you can also separate by commas different classes: `org.maplibre.android.testapp.MainActivityTest,org.maplibre.android.testapp.MainActivityScreenTest`
 
 If you have no tests for your app, or want to test some random user behavior,
 you can just choose "Built-in: Fuzz" in step 2.
@@ -106,7 +106,7 @@ To exercise Monkey on the test app, install the package on the device (e.g. via 
 and then:
 
 ```
-$ adb shell monkey -p com.mapbox.mapboxgl.testapp -v 500
+$ adb shell monkey -p org.maplibre.testapp -v 500
 ```
 
 

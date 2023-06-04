@@ -34,7 +34,7 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
 
   private final List<OnMapReadyCallback> mapReadyCallbackList = new ArrayList<>();
   private MapFragment.OnMapViewReadyCallback mapViewReadyCallback;
-  private MapboxMap mapboxMap;
+  private MaplibreMap maplibreMap;
   private MapView map;
 
   /**
@@ -120,10 +120,10 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
   }
 
   @Override
-  public void onMapReady(@NonNull MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
+  public void onMapReady(@NonNull MaplibreMap maplibreMap) {
+    this.maplibreMap = maplibreMap;
     for (OnMapReadyCallback onMapReadyCallback : mapReadyCallbackList) {
-      onMapReadyCallback.onMapReady(mapboxMap);
+      onMapReadyCallback.onMapReady(maplibreMap);
     }
   }
 
@@ -211,10 +211,10 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
    * @param onMapReadyCallback The callback to be invoked.
    */
   public void getMapAsync(@NonNull final OnMapReadyCallback onMapReadyCallback) {
-    if (mapboxMap == null) {
+    if (maplibreMap == null) {
       mapReadyCallbackList.add(onMapReadyCallback);
     } else {
-      onMapReadyCallback.onMapReady(mapboxMap);
+      onMapReadyCallback.onMapReady(maplibreMap);
     }
   }
 }

@@ -56,7 +56,7 @@ public class RuntimeStyleTests extends EspressoTest {
 
       @Override
       public void perform(UiController uiController, View view) {
-        List<Layer> layers = mapboxMap.getStyle().getLayers();
+        List<Layer> layers = maplibreMap.getStyle().getLayers();
         assertNotNull(layers);
         assertTrue(layers.size() > 0);
         for (Layer layer : layers) {
@@ -79,12 +79,12 @@ public class RuntimeStyleTests extends EspressoTest {
     onView(withId(R.id.mapView)).perform(new BaseViewAction() {
       @Override
       public void perform(UiController uiController, View view) {
-        List<Layer> layers = mapboxMap.getStyle().getLayers();
-        Source source = mapboxMap.getStyle().getSources().get(0);
+        List<Layer> layers = maplibreMap.getStyle().getLayers();
+        Source source = maplibreMap.getStyle().getSources().get(0);
 
         // Test inserting with invalid above-id
         try {
-          mapboxMap.getStyle().addLayerAbove(
+          maplibreMap.getStyle().addLayerAbove(
             new CircleLayer("invalid-id-layer-test", source.getId()), "no-such-layer-here-man"
           );
           fail("Should have thrown exception");
@@ -95,14 +95,14 @@ public class RuntimeStyleTests extends EspressoTest {
 
         // Insert as last
         CircleLayer last = new CircleLayer("this is the last one", source.getId());
-        mapboxMap.getStyle().addLayerAbove(last, layers.get(layers.size() - 1).getId());
-        layers = mapboxMap.getStyle().getLayers();
+        maplibreMap.getStyle().addLayerAbove(last, layers.get(layers.size() - 1).getId());
+        layers = maplibreMap.getStyle().getLayers();
         assertEquals(last.getId(), layers.get(layers.size() - 1).getId());
 
         // Insert
         CircleLayer second = new CircleLayer("this is the second one", source.getId());
-        mapboxMap.getStyle().addLayerAbove(second, layers.get(0).getId());
-        layers = mapboxMap.getStyle().getLayers();
+        maplibreMap.getStyle().addLayerAbove(second, layers.get(0).getId());
+        layers = maplibreMap.getStyle().getLayers();
         assertEquals(second.getId(), layers.get(1).getId());
       }
     });
@@ -116,14 +116,14 @@ public class RuntimeStyleTests extends EspressoTest {
       @Override
       public void perform(UiController uiController, View view) {
         // Remove by index
-        Layer firstLayer = mapboxMap.getStyle().getLayers().get(0);
-        boolean removed = mapboxMap.getStyle().removeLayerAt(0);
+        Layer firstLayer = maplibreMap.getStyle().getLayers().get(0);
+        boolean removed = maplibreMap.getStyle().removeLayerAt(0);
         assertTrue(removed);
         assertNotNull(firstLayer);
 
         // Test remove by index bounds checks
         Timber.i("Remove layer at index > size");
-        assertFalse(mapboxMap.getStyle().removeLayerAt(Integer.MAX_VALUE));
+        assertFalse(maplibreMap.getStyle().removeLayerAt(Integer.MAX_VALUE));
       }
     });
   }
@@ -133,12 +133,12 @@ public class RuntimeStyleTests extends EspressoTest {
     onView(withId(R.id.mapView)).perform(new BaseViewAction() {
       @Override
       public void perform(UiController uiController, View view) {
-        List<Layer> layers = mapboxMap.getStyle().getLayers();
-        Source source = mapboxMap.getStyle().getSources().get(0);
+        List<Layer> layers = maplibreMap.getStyle().getLayers();
+        Source source = maplibreMap.getStyle().getSources().get(0);
 
         // Test inserting out of range
         try {
-          mapboxMap.getStyle().addLayerAt(new CircleLayer("invalid-id-layer-test", source.getId()), layers.size());
+          maplibreMap.getStyle().addLayerAt(new CircleLayer("invalid-id-layer-test", source.getId()), layers.size());
           fail("Should have thrown exception");
         } catch (CannotAddLayerException ex) {
           // Yeah
@@ -147,14 +147,14 @@ public class RuntimeStyleTests extends EspressoTest {
 
         // Insert at current last position
         CircleLayer last = new CircleLayer("this is the last one", source.getId());
-        mapboxMap.getStyle().addLayerAt(last, layers.size() - 1);
-        layers = mapboxMap.getStyle().getLayers();
+        maplibreMap.getStyle().addLayerAt(last, layers.size() - 1);
+        layers = maplibreMap.getStyle().getLayers();
         assertEquals(last.getId(), layers.get(layers.size() - 2).getId());
 
         // Insert at start
         CircleLayer second = new CircleLayer("this is the first one", source.getId());
-        mapboxMap.getStyle().addLayerAt(second, 0);
-        layers = mapboxMap.getStyle().getLayers();
+        maplibreMap.getStyle().addLayerAt(second, 0);
+        layers = maplibreMap.getStyle().getLayers();
         assertEquals(second.getId(), layers.get(0).getId());
       }
     });
@@ -168,7 +168,7 @@ public class RuntimeStyleTests extends EspressoTest {
 
       @Override
       public void perform(UiController uiController, View view) {
-        List<Source> sources = mapboxMap.getStyle().getSources();
+        List<Source> sources = maplibreMap.getStyle().getSources();
         assertNotNull(sources);
         assertTrue(sources.size() > 0);
         for (Source source : sources) {
@@ -182,7 +182,7 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testAddRemoveSource() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       mapboxMap.getStyle().addSource(new VectorSource("my-source", "maptiler://sources/hillshades"));
       mapboxMap.getStyle().removeSource("my-source");
 
@@ -222,7 +222,7 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testVectorSourceUrlGetter() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       VectorSource source = new VectorSource("my-source", "maptiler://sources/hillshades");
       mapboxMap.getStyle().addSource(source);
       assertEquals("maptiler://sources/hillshades", source.getUri());
@@ -232,7 +232,7 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testRasterSourceUrlGetter() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       RasterSource source = new RasterSource("my-source", "maptiler://sources/hillshades");
       mapboxMap.getStyle().addSource(source);
       assertEquals("maptiler://sources/hillshades", source.getUri());
@@ -242,7 +242,7 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testGeoJsonSourceUrlGetter() {
     validateTestSetup();
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = new GeoJsonSource("my-source");
       mapboxMap.getStyle().addSource(source);
       assertNull(source.getUri());
@@ -259,10 +259,10 @@ public class RuntimeStyleTests extends EspressoTest {
 
       @Override
       public void perform(UiController uiController, View view) {
-        mapboxMap.getStyle().addSource(new VectorSource("my-source", "maptiler://sources/hillshades"));
-        mapboxMap.getStyle().addLayer(new LineLayer("my-layer", "my-source"));
-        mapboxMap.getStyle().removeSource("my-source");
-        assertNotNull(mapboxMap.getStyle().getSource("my-source"));
+        maplibreMap.getStyle().addSource(new VectorSource("my-source", "maptiler://sources/hillshades"));
+        maplibreMap.getStyle().addLayer(new LineLayer("my-layer", "my-source"));
+        maplibreMap.getStyle().removeSource("my-source");
+        assertNotNull(maplibreMap.getStyle().getSource("my-source"));
       }
 
     });
@@ -270,12 +270,12 @@ public class RuntimeStyleTests extends EspressoTest {
 
   @Test
   public void testRemoveNonExistingSource() {
-    invoke(mapboxMap, (uiController, mapboxMap) -> mapboxMap.getStyle().removeSource("source"));
+    invoke(maplibreMap, (uiController, mapboxMap) -> mapboxMap.getStyle().removeSource("source"));
   }
 
   @Test
   public void testRemoveNonExistingLayer() {
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertFalse(mapboxMap.getStyle().removeLayer("layer"));
       assertFalse(mapboxMap.getStyle().removeLayerAt(mapboxMap.getStyle().getLayers().size() + 1));
       assertFalse(mapboxMap.getStyle().removeLayerAt(-1));
@@ -284,7 +284,7 @@ public class RuntimeStyleTests extends EspressoTest {
 
   @Test
   public void testRemoveExistingLayer() {
-    invoke(mapboxMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, mapboxMap) -> {
       Layer firstLayer = mapboxMap.getStyle().getLayers().get(0);
       assertTrue(mapboxMap.getStyle().removeLayer(firstLayer));
 
@@ -309,7 +309,7 @@ public class RuntimeStyleTests extends EspressoTest {
         for (int i = 0; i < layerIds.length; i++) {
           layerIds[i] = "layer-" + i;
         }
-        mapboxMap.queryRenderedFeatures(new PointF(100, 100), layerIds);
+        maplibreMap.queryRenderedFeatures(new PointF(100, 100), layerIds);
       }
 
     });
@@ -320,37 +320,37 @@ public class RuntimeStyleTests extends EspressoTest {
     @Override
     public void perform(UiController uiController, View view) {
       // Get initial
-      assertNotNull(mapboxMap.getStyle().getLayer("building"));
+      assertNotNull(maplibreMap.getStyle().getLayer("building"));
 
       // Remove
-      boolean removed = mapboxMap.getStyle().removeLayer("building");
+      boolean removed = maplibreMap.getStyle().removeLayer("building");
       assertTrue(removed);
-      assertNull(mapboxMap.getStyle().getLayer("building"));
+      assertNull(maplibreMap.getStyle().getLayer("building"));
 
       // Add
       FillLayer layer = new FillLayer("building", "composite");
       layer.setSourceLayer("building");
-      mapboxMap.getStyle().addLayer(layer);
-      assertNotNull(mapboxMap.getStyle().getLayer("building"));
+      maplibreMap.getStyle().addLayer(layer);
+      assertNotNull(maplibreMap.getStyle().getLayer("building"));
 
       // Assure the reference still works
       layer.setProperties(PropertyFactory.visibility(Property.VISIBLE));
 
       // Remove, preserving the reference
-      mapboxMap.getStyle().removeLayer(layer);
+      maplibreMap.getStyle().removeLayer(layer);
 
       // Property setters should still work
       layer.setProperties(PropertyFactory.fillColor(Color.RED));
 
       // Re-add the reference...
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       // Ensure it's there
-      Assert.assertNotNull(mapboxMap.getStyle().getLayer(layer.getId()));
+      Assert.assertNotNull(maplibreMap.getStyle().getLayer(layer.getId()));
 
       // Test adding a duplicate layer
       try {
-        mapboxMap.getStyle().addLayer(new FillLayer("building", "composite"));
+        maplibreMap.getStyle().addLayer(new FillLayer("building", "composite"));
         fail("Should not have been allowed to add a layer with a duplicate id");
       } catch (CannotAddLayerException cannotAddLayerException) {
         // OK

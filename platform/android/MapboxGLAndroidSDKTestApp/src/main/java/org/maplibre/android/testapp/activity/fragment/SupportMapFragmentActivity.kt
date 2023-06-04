@@ -22,7 +22,7 @@ class SupportMapFragmentActivity :
     OnMapViewReadyCallback,
     OnMapReadyCallback,
     OnDidFinishRenderingFrameListener {
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     private var initialCameraAnimation = true
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,9 +65,9 @@ class SupportMapFragmentActivity :
         mapView.addOnDidFinishRenderingFrameListener(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
     }
 
     override fun onDestroy() {
@@ -76,8 +76,8 @@ class SupportMapFragmentActivity :
     }
 
     override fun onDidFinishRenderingFrame(fully: Boolean) {
-        if (initialCameraAnimation && fully && mapboxMap != null) {
-            mapboxMap.animateCamera(
+        if (initialCameraAnimation && fully && maplibreMap != null) {
+            maplibreMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().tilt(45.0).build()),
                 5000
             )

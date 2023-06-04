@@ -8,9 +8,9 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
-import org.maplibre.android.maps.MapboxMap.CancelableCallback
-import org.maplibre.android.maps.MapboxMap.OnCameraIdleListener
+import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MaplibreMap.CancelableCallback
+import org.maplibre.android.maps.MaplibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -45,12 +45,12 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                     .show()
             }
         }
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private lateinit var mapView: MapView
     private var cameraState = false
     private val cameraIdleListener = OnCameraIdleListener {
-        if (mapboxMap != null) {
-            Timber.w(mapboxMap.cameraPosition.toString())
+        if (maplibreMap != null) {
+            Timber.w(maplibreMap.cameraPosition.toString())
         }
     }
 
@@ -62,12 +62,12 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
-        mapboxMap = map
-        mapboxMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
-        mapboxMap.uiSettings.isAttributionEnabled = false
-        mapboxMap.uiSettings.isLogoEnabled = false
-        mapboxMap.addOnCameraIdleListener(cameraIdleListener)
+    override fun onMapReady(map: MaplibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
+        maplibreMap.uiSettings.isAttributionEnabled = false
+        maplibreMap.uiSettings.isLogoEnabled = false
+        maplibreMap.addOnCameraIdleListener(cameraIdleListener)
 
         // handle move button clicks
         val moveButton = findViewById<View>(R.id.cameraMoveButton)
@@ -79,7 +79,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                     .tilt(30.0)
                     .tilt(0.0)
                     .build()
-            mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            maplibreMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
         }
 
         // handle ease button clicks
@@ -92,7 +92,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                     .bearing(180.0)
                     .tilt(30.0)
                     .build()
-            mapboxMap.easeCamera(
+            maplibreMap.easeCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 7500,
                 callback
@@ -104,7 +104,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         animateButton?.setOnClickListener { view: View? ->
             val cameraPosition =
                 CameraPosition.Builder().target(nextLatLng).bearing(270.0).tilt(20.0).build()
-            mapboxMap.animateCamera(
+            maplibreMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 7500,
                 callback
@@ -145,8 +145,8 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapboxMap != null) {
-            mapboxMap.removeOnCameraIdleListener(cameraIdleListener)
+        if (maplibreMap != null) {
+            maplibreMap.removeOnCameraIdleListener(cameraIdleListener)
         }
         mapView.onDestroy()
     }

@@ -9,7 +9,7 @@ import com.mapbox.geojson.MultiLineString
 import com.mapbox.geojson.Point
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.*
@@ -92,7 +92,7 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MapboxMap) {
+    override fun onMapReady(map: MaplibreMap) {
         source = CustomGeometrySource(ID_GRID_SOURCE, GridProvider())
         layer = LineLayer(ID_GRID_LAYER, ID_GRID_SOURCE)
         layer!!.setProperties(

@@ -6,7 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.print.PrintHelper
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -14,26 +14,26 @@ import org.maplibre.android.testapp.R
 /**
  * Test activity showcasing using the Snaphot API to print a Map.
  */
-class PrintActivity : AppCompatActivity(), MapboxMap.SnapshotReadyCallback {
+class PrintActivity : AppCompatActivity(), MaplibreMap.SnapshotReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_print)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(OnMapReadyCallback { mapboxMap: MapboxMap -> initMap(mapboxMap) })
+        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MaplibreMap -> initMap(maplibreMap) })
         val fab = findViewById<View>(R.id.fab)
         fab?.setOnClickListener { view: View? ->
-            if (mapboxMap != null && mapboxMap.style != null) {
-                mapboxMap.snapshot(this@PrintActivity)
+            if (maplibreMap != null && maplibreMap.style != null) {
+                maplibreMap.snapshot(this@PrintActivity)
             }
         }
     }
 
-    private fun initMap(mapboxMap: MapboxMap) {
-        this.mapboxMap = mapboxMap
-        mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+    private fun initMap(maplibreMap: MaplibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
     }
 
     override fun onSnapshotReady(snapshot: Bitmap) {

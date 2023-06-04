@@ -20,10 +20,10 @@ class LocalGlyphActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { mapboxMap: MapboxMap ->
-                mapboxMap.setStyle(Style.getPredefinedStyle("Streets"))
+            OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
                 // Set initial position to Suzhou
-                mapboxMap.moveCamera(
+                maplibreMap.moveCamera(
                     CameraUpdateFactory.newCameraPosition(
                         CameraPosition.Builder()
                             .target(LatLng(31.3003, 120.7457))

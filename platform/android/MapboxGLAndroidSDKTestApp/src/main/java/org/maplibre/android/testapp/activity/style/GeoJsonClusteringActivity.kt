@@ -12,7 +12,7 @@ import com.mapbox.geojson.Feature
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -33,7 +33,7 @@ import java.util.Objects
  */
 class GeoJsonClusteringActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var mapboxMap: MapboxMap
+    private lateinit var maplibreMap: MaplibreMap
     private var clusterSource: GeoJsonSource? = null
     private var clickOptionCounter = 0
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,11 +45,11 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
         // noinspection ConstantConditions
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MapboxMap? ->
+            OnMapReadyCallback { map: MaplibreMap? ->
                 if (map != null) {
-                    mapboxMap = map
+                    maplibreMap = map
                 }
-                mapboxMap.animateCamera(
+                maplibreMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(37.7749, 122.4194),
                         0.0
@@ -75,7 +75,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                     )
                 )
                 try {
-                    mapboxMap.setStyle(
+                    maplibreMap.setStyle(
                         Style.Builder()
                             .fromUri(Style.getPredefinedStyle("Bright"))
                             .withSource(createClusterSource().also { clusterSource = it })
@@ -95,10 +95,10 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 } catch (exception: URISyntaxException) {
                     Timber.e(exception)
                 }
-                mapboxMap.addOnMapClickListener { latLng: LatLng? ->
-                    val point = mapboxMap.projection.toScreenLocation(latLng!!)
+                maplibreMap.addOnMapClickListener { latLng: LatLng? ->
+                    val point = maplibreMap.projection.toScreenLocation(latLng!!)
                     val features =
-                        mapboxMap.queryRenderedFeatures(point, "cluster-0", "cluster-1", "cluster-2")
+                        maplibreMap.queryRenderedFeatures(point, "cluster-0", "cluster-1", "cluster-2")
                     if (!features.isEmpty()) {
                         onClusterClick(features[0], Point(point.x.toInt(), point.y.toInt()))
                     }
@@ -115,8 +115,8 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
     private fun onClusterClick(cluster: Feature, clickPoint: Point) {
         if (clickOptionCounter == 0) {
             val nextZoomLevel = clusterSource!!.getClusterExpansionZoom(cluster).toDouble()
-            val zoomDelta = nextZoomLevel - mapboxMap.cameraPosition.zoom
-            mapboxMap.animateCamera(
+            val zoomDelta = nextZoomLevel - maplibreMap.cameraPosition.zoom
+            maplibreMap.animateCamera(
                 CameraUpdateFactory.zoomBy(
                     zoomDelta + CAMERA_ZOOM_DELTA,
                     clickPoint

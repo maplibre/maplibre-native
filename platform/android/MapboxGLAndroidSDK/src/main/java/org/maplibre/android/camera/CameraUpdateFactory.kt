@@ -5,7 +5,7 @@ import android.graphics.PointF
 import androidx.annotation.IntDef
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.maps.MapboxMap
+import org.maplibre.android.maps.MaplibreMap
 import timber.log.Timber
 import java.lang.Double.max
 import java.util.Arrays
@@ -267,9 +267,9 @@ object CameraUpdateFactory {
     //
     class CameraPositionUpdate(val bearing: Double, val target: LatLng?, val tilt: Double, val zoom: Double, val padding: DoubleArray?) : CameraUpdate {
 
-        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition {
+        override fun getCameraPosition(maplibreMap: MaplibreMap): CameraPosition {
             if (target == null) {
-                val previousPosition = mapboxMap.cameraPosition
+                val previousPosition = maplibreMap.cameraPosition
                 return CameraPosition.Builder(this).target(previousPosition.target).build()
             }
             return CameraPosition.Builder(this).build()
@@ -327,15 +327,15 @@ object CameraUpdateFactory {
         ) {
         }
 
-        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition? {
+        override fun getCameraPosition(maplibreMap: MaplibreMap): CameraPosition? {
             return if (bearing == null && tilt == null) {
                 // use current camera position tilt and bearing
-                mapboxMap.getCameraForLatLngBounds(bounds, padding)
+                maplibreMap.getCameraForLatLngBounds(bounds, padding)
             } else {
                 // use provided tilt and bearing
                 assert(bearing != null)
                 assert(tilt != null)
-                mapboxMap.getCameraForLatLngBounds(bounds, padding, bearing!!, tilt!!)
+                maplibreMap.getCameraForLatLngBounds(bounds, padding, bearing!!, tilt!!)
             }
         }
 
@@ -460,12 +460,12 @@ object CameraUpdateFactory {
             }
         }
 
-        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition {
-            val cameraPosition = mapboxMap.cameraPosition
+        override fun getCameraPosition(maplibreMap: MaplibreMap): CameraPosition {
+            val cameraPosition = maplibreMap.cameraPosition
             return if (type != ZOOM_TO_POINT) {
                 CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).build()
             } else {
-                CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).target(mapboxMap.projection.fromScreenLocation(PointF(x, y))).build()
+                CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).target(maplibreMap.projection.fromScreenLocation(PointF(x, y))).build()
             }
         }
 

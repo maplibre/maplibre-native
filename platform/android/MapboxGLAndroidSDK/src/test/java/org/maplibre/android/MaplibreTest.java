@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MapboxTest {
+public class MaplibreTest {
 
   private Context context;
   private Context appContext;
@@ -47,30 +47,30 @@ public class MapboxTest {
   public void testGetApiKey() {
     final String apiKey = "pk.0000000001";
     MapboxInjector.inject(context, apiKey, ConfigUtils.getMockedOptions());
-    assertSame(apiKey, Mapbox.getApiKey());
+    assertSame(apiKey, Maplibre.getApiKey());
   }
 
   @Test
   public void testApplicationContext() {
     MapboxInjector.inject(context, "pk.0000000001", ConfigUtils.getMockedOptions());
-    assertNotNull(Mapbox.getApplicationContext());
+    assertNotNull(Maplibre.getApplicationContext());
     assertNotEquals(context, appContext);
     assertEquals(appContext, appContext);
   }
 
   @Test
   public void testPlainTokenValid() {
-    assertTrue(Mapbox.isApiKeyValid("apiKey"));
+    assertTrue(Maplibre.isApiKeyValid("apiKey"));
   }
 
   @Test
   public void testEmptyToken() {
-    assertFalse(Mapbox.isApiKeyValid(""));
+    assertFalse(Maplibre.isApiKeyValid(""));
   }
 
   @Test
   public void testNullToken() {
-    assertFalse(Mapbox.isApiKeyValid(null));
+    assertFalse(Maplibre.isApiKeyValid(null));
   }
 
   @Test
@@ -85,7 +85,7 @@ public class MapboxTest {
 
     expectedException.expect(MapboxConfigurationException.class);
     expectedException.expectMessage(
-      "\nUsing MapView requires calling Mapbox.getInstance(Context context, String apiKey,"
+      "\nUsing MapView requires calling Maplibre.getInstance(Context context, String apiKey,"
               + " WellKnownTileServer wellKnownTileServer) before inflating or creating the view."
     );
     new MapView(context);

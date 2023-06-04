@@ -36,17 +36,17 @@ class MarkerTest {
 
     @Test
     fun testTitle() {
-        val markerOptions = MarkerOptions().title("Mapbox").position(LatLng())
+        val markerOptions = MarkerOptions().title("Maplibre").position(LatLng())
         val marker = markerOptions.marker
-        Assert.assertEquals(marker.title, "Mapbox")
-        Assert.assertEquals(markerOptions.getTitle(), "Mapbox")
+        Assert.assertEquals(marker.title, "Maplibre")
+        Assert.assertEquals(markerOptions.getTitle(), "Maplibre")
     }
 
     @Test
     fun testSnippet() {
-        val markerOptions = MarkerOptions().snippet("Mapbox").position(LatLng())
+        val markerOptions = MarkerOptions().snippet("Maplibre").position(LatLng())
         val marker = markerOptions.marker
-        Assert.assertEquals(marker.snippet, "Mapbox")
+        Assert.assertEquals(marker.snippet, "Maplibre")
     }
 
     @Test

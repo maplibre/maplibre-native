@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
+import org.maplibre.android.Maplibre;
 import org.maplibre.android.log.Logger;
 
 import java.util.List;
@@ -100,7 +101,7 @@ public class ConnectivityReceiver extends BroadcastReceiver {
   }
 
   /**
-   * Overwrites system connectivity state. To set, use {@link org.maplibre.android.Mapbox#setConnected(Boolean)}.
+   * Overwrites system connectivity state. To set, use {@link Maplibre#setConnected(Boolean)}.
    *
    * @param connected flag to determine the connectivity state, true for connected, false for
    *                  disconnected, and null for ConnectivityManager to determine.

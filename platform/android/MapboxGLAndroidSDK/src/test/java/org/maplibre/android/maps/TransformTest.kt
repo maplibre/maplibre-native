@@ -42,10 +42,10 @@ class TransformTest {
 
     @Test
     fun testMoveCamera() {
-        val mapboxMap = mockk<MapboxMap>()
-        every { mapboxMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        val maplibreMap = mockk<MaplibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MapboxMap.CancelableCallback>()
+        val callback = mockk<MaplibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val target = LatLng(1.0, 2.0)
@@ -54,7 +54,7 @@ class TransformTest {
 
         transform.cameraPosition
         every { nativeMapView.cameraPosition } returns expected
-        transform.moveCamera(mapboxMap, update, callback)
+        transform.moveCamera(maplibreMap, update, callback)
 
         mainLooper.idle()
         verify { cameraChangeDispatcher.onCameraMove() }
@@ -64,17 +64,17 @@ class TransformTest {
 
     @Test
     fun testMoveCameraToSamePosition() {
-        val mapboxMap = mockk<MapboxMap>()
-        every { mapboxMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        val maplibreMap = mockk<MaplibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MapboxMap.CancelableCallback>()
+        val callback = mockk<MaplibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val expected = CameraPosition.DEFAULT
         val update = CameraUpdateFactory.newCameraPosition(expected)
 
-        transform.moveCamera(mapboxMap, update, null) // Initialize camera position
-        transform.moveCamera(mapboxMap, update, callback)
+        transform.moveCamera(maplibreMap, update, null) // Initialize camera position
+        transform.moveCamera(maplibreMap, update, callback)
 
         verify(exactly = 1, verifyBlock = { nativeMapView.jumpTo(any(), any(), any(), any(), any()) })
         verify { callback.onFinish() }
@@ -82,20 +82,20 @@ class TransformTest {
 
     @Test
     fun testEaseCamera() {
-        val mapboxMap = mockk<MapboxMap>()
-        every { mapboxMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        val maplibreMap = mockk<MaplibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
         every { mapView.addOnCameraDidChangeListener(any()) } answers { transform.onCameraDidChange(true) }
         every { mapView.removeOnCameraDidChangeListener(any()) } answers {}
 
-        val callback = mockk<MapboxMap.CancelableCallback>()
+        val callback = mockk<MaplibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
 
-        transform.easeCamera(mapboxMap, update, 100, false, callback)
+        transform.easeCamera(maplibreMap, update, 100, false, callback)
 
         mainLooper.idle()
         verify { nativeMapView.easeTo(target, -1.0, -1.0, -1.0, null, 100, false) }
@@ -104,17 +104,17 @@ class TransformTest {
 
     @Test
     fun testEaseCameraToSamePosition() {
-        val mapboxMap = mockk<MapboxMap>()
-        every { mapboxMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        val maplibreMap = mockk<MaplibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MapboxMap.CancelableCallback>()
+        val callback = mockk<MaplibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val expected = CameraPosition.DEFAULT
         val update = CameraUpdateFactory.newCameraPosition(expected)
-        transform.moveCamera(mapboxMap, update, null)
+        transform.moveCamera(maplibreMap, update, null)
 
-        transform.easeCamera(mapboxMap, update, 100, false, callback)
+        transform.easeCamera(maplibreMap, update, 100, false, callback)
 
         verify(exactly = 0, verifyBlock = { nativeMapView.easeTo(any(), any(), any(), any(), any(), any(), any()) })
         verify { callback.onFinish() }
@@ -122,20 +122,20 @@ class TransformTest {
 
     @Test
     fun testAnimateCamera() {
-        val mapboxMap = mockk<MapboxMap>()
-        every { mapboxMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        val maplibreMap = mockk<MaplibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
         every { mapView.addOnCameraDidChangeListener(any()) } answers { transform.onCameraDidChange(true) }
         every { mapView.removeOnCameraDidChangeListener(any()) } answers {}
 
-        val callback = mockk<MapboxMap.CancelableCallback>()
+        val callback = mockk<MaplibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
 
-        transform.animateCamera(mapboxMap, update, 100, callback)
+        transform.animateCamera(maplibreMap, update, 100, callback)
 
         mainLooper.idle()
         verify { nativeMapView.flyTo(target, -1.0, -1.0, -1.0, null, 100) }
@@ -144,17 +144,17 @@ class TransformTest {
 
     @Test
     fun testAnimateCameraToSamePosition() {
-        val mapboxMap = mockk<MapboxMap>()
-        every { mapboxMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        val maplibreMap = mockk<MaplibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MapboxMap.CancelableCallback>()
+        val callback = mockk<MaplibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val expected = CameraPosition.DEFAULT
         val update = CameraUpdateFactory.newCameraPosition(expected)
-        transform.moveCamera(mapboxMap, update, null)
+        transform.moveCamera(maplibreMap, update, null)
 
-        transform.animateCamera(mapboxMap, update, 100, callback)
+        transform.animateCamera(maplibreMap, update, 100, callback)
 
         verify(exactly = 0, verifyBlock = { nativeMapView.flyTo(any(), any(), any(), any(), any(), any()) })
         verify { callback.onFinish() }
@@ -190,21 +190,21 @@ class TransformTest {
         every { mapView.addOnCameraDidChangeListener(capture(slot)) } answers { slot.captured.onCameraDidChange(true) }
         every { mapView.removeOnCameraDidChangeListener(any()) } answers {}
         // regression test for https://github.com/mapbox/mapbox-gl-native/issues/13735
-        val mapboxMap = mockk<MapboxMap>()
-        every { mapboxMap.cameraPosition } answers { CameraPosition.DEFAULT }
+        val maplibreMap = mockk<MaplibreMap>()
+        every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
 
-        val callback = object : MapboxMap.CancelableCallback {
+        val callback = object : MaplibreMap.CancelableCallback {
             override fun onCancel() {
                 throw IllegalStateException("onCancel shouldn't be called from onFinish")
             }
 
             override fun onFinish() {
-                transform.animateCamera(mapboxMap, CameraUpdateFactory.newCameraPosition(expected), 500, null)
+                transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, null)
             }
         }
-        transform.animateCamera(mapboxMap, CameraUpdateFactory.newCameraPosition(expected), 500, callback)
+        transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, callback)
     }
 }

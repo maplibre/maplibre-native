@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.activity.maplayout.MapInDialogActivity.MapDialogFragment
 
 /**
  * Test activity showcasing showing a Map inside of a DialogFragment.
@@ -41,8 +40,8 @@ class MapInDialogActivity : AppCompatActivity() {
             mapView = view.findViewById(R.id.mapView)
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync(
-                OnMapReadyCallback { mapboxMap: MapboxMap ->
-                    mapboxMap.setStyle(
+                OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                    maplibreMap.setStyle(
                         Style.getPredefinedStyle("Outdoor")
                     )
                 }
