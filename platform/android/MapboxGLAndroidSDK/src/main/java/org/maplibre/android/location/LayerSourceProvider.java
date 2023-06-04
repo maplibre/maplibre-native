@@ -3,34 +3,19 @@ package org.maplibre.android.location;
 import androidx.annotation.NonNull;
 
 import com.mapbox.geojson.Feature;
+
+import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.CircleLayer;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.Property;
+import org.maplibre.android.style.layers.PropertyFactory;
 import org.maplibre.android.style.layers.SymbolLayer;
 import org.maplibre.android.style.layers.TransitionOptions;
+import org.maplibre.android.style.sources.GeoJsonOptions;
+import org.maplibre.android.style.sources.GeoJsonSource;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.maplibre.android.style.expressions.Expression.get;
-import static org.maplibre.android.style.expressions.Expression.literal;
-import static org.maplibre.android.style.expressions.Expression.match;
-import static org.maplibre.android.style.layers.PropertyFactory.circleColor;
-import static org.maplibre.android.style.layers.PropertyFactory.circleOpacity;
-import static org.maplibre.android.style.layers.PropertyFactory.circlePitchAlignment;
-import static org.maplibre.android.style.layers.PropertyFactory.circleRadius;
-import static org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor;
-import static org.maplibre.android.style.layers.PropertyFactory.iconAllowOverlap;
-import static org.maplibre.android.style.layers.PropertyFactory.iconIgnorePlacement;
-import static org.maplibre.android.style.layers.PropertyFactory.iconImage;
-import static org.maplibre.android.style.layers.PropertyFactory.iconOffset;
-import static org.maplibre.android.style.layers.PropertyFactory.iconRotate;
-import static org.maplibre.android.style.layers.PropertyFactory.iconRotationAlignment;
-
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.PropertyFactory;
-import org.maplibre.android.style.sources.GeoJsonOptions;
-import org.maplibre.android.style.sources.GeoJsonSource;
 
 class LayerSourceProvider {
 
@@ -54,28 +39,38 @@ class LayerSourceProvider {
       PropertyFactory.iconRotationAlignment(Property.ICON_ROTATION_ALIGNMENT_MAP),
       PropertyFactory.iconRotate(
         Expression.match(Expression.literal(layerId), Expression.literal(0f),
-          Expression.stop(LocationComponentConstants.FOREGROUND_LAYER, Expression.get(LocationComponentConstants.PROPERTY_GPS_BEARING)),
-          Expression.stop(LocationComponentConstants.BACKGROUND_LAYER, Expression.get(LocationComponentConstants.PROPERTY_GPS_BEARING)),
-          Expression.stop(LocationComponentConstants.SHADOW_LAYER, Expression.get(LocationComponentConstants.PROPERTY_GPS_BEARING)),
-          Expression.stop(LocationComponentConstants.BEARING_LAYER, Expression.get(LocationComponentConstants.PROPERTY_COMPASS_BEARING))
+          Expression.stop(LocationComponentConstants.FOREGROUND_LAYER,
+            Expression.get(LocationComponentConstants.PROPERTY_GPS_BEARING)),
+          Expression.stop(LocationComponentConstants.BACKGROUND_LAYER,
+            Expression.get(LocationComponentConstants.PROPERTY_GPS_BEARING)),
+          Expression.stop(LocationComponentConstants.SHADOW_LAYER,
+            Expression.get(LocationComponentConstants.PROPERTY_GPS_BEARING)),
+          Expression.stop(LocationComponentConstants.BEARING_LAYER,
+            Expression.get(LocationComponentConstants.PROPERTY_COMPASS_BEARING))
         )
       ),
       PropertyFactory.iconImage(
         Expression.match(Expression.literal(layerId), Expression.literal(EMPTY_STRING),
           Expression.stop(LocationComponentConstants.FOREGROUND_LAYER, Expression.switchCase(
-            Expression.get(LocationComponentConstants.PROPERTY_LOCATION_STALE), Expression.get(LocationComponentConstants.PROPERTY_FOREGROUND_STALE_ICON),
+            Expression.get(LocationComponentConstants.PROPERTY_LOCATION_STALE),
+            Expression.get(LocationComponentConstants.PROPERTY_FOREGROUND_STALE_ICON),
             Expression.get(LocationComponentConstants.PROPERTY_FOREGROUND_ICON))),
           Expression.stop(LocationComponentConstants.BACKGROUND_LAYER, Expression.switchCase(
-            Expression.get(LocationComponentConstants.PROPERTY_LOCATION_STALE), Expression.get(LocationComponentConstants.PROPERTY_BACKGROUND_STALE_ICON),
+            Expression.get(LocationComponentConstants.PROPERTY_LOCATION_STALE),
+            Expression.get(LocationComponentConstants.PROPERTY_BACKGROUND_STALE_ICON),
             Expression.get(LocationComponentConstants.PROPERTY_BACKGROUND_ICON))),
-          Expression.stop(LocationComponentConstants.SHADOW_LAYER, Expression.literal(LocationComponentConstants.SHADOW_ICON)),
-          Expression.stop(LocationComponentConstants.BEARING_LAYER, Expression.get(LocationComponentConstants.PROPERTY_BEARING_ICON))
+          Expression.stop(LocationComponentConstants.SHADOW_LAYER,
+            Expression.literal(LocationComponentConstants.SHADOW_ICON)),
+          Expression.stop(LocationComponentConstants.BEARING_LAYER,
+            Expression.get(LocationComponentConstants.PROPERTY_BEARING_ICON))
         )
       ),
       PropertyFactory.iconOffset(
         Expression.match(Expression.literal(layerId), Expression.literal(new Float[] {0f, 0f}),
-          Expression.stop(Expression.literal(LocationComponentConstants.FOREGROUND_LAYER), Expression.get(LocationComponentConstants.PROPERTY_FOREGROUND_ICON_OFFSET)),
-          Expression.stop(Expression.literal(LocationComponentConstants.SHADOW_LAYER), Expression.get(LocationComponentConstants.PROPERTY_SHADOW_ICON_OFFSET))
+          Expression.stop(Expression.literal(LocationComponentConstants.FOREGROUND_LAYER),
+            Expression.get(LocationComponentConstants.PROPERTY_FOREGROUND_ICON_OFFSET)),
+          Expression.stop(Expression.literal(LocationComponentConstants.SHADOW_LAYER),
+            Expression.get(LocationComponentConstants.PROPERTY_SHADOW_ICON_OFFSET))
         )
       )
     );

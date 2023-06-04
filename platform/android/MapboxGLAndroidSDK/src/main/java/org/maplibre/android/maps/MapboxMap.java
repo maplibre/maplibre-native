@@ -2094,7 +2094,8 @@ public final class MapboxMap {
   /**
    * Returns the {@link LocationComponent} that can be used to display user's location on the map.
    * <p>
-   * Use {@link LocationComponent#activateLocationComponent(LocationComponentActivationOptions)} or any overload to activate the component,
+   * Use {@link LocationComponent#activateLocationComponent(LocationComponentActivationOptions)} or
+   * any overload to activate the component,
    * then, enable it with {@link LocationComponent#setLocationComponentEnabled(boolean)}.
    * <p>
    * You can customize the location icon and more with {@link org.maplibre.android.location.LocationComponentOptions}.

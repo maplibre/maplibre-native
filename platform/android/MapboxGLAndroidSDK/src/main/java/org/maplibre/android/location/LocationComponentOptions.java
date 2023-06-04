@@ -1730,8 +1730,10 @@ public class LocationComponentOptions implements Parcelable {
      * </p>
      *
      * @param padding The margins for the map in pixels (left, top, right, bottom).
-     * @deprecated Use {@link org.maplibre.android.camera.CameraPosition.Builder#padding(double, double, double, double)}
-     * or {@link org.maplibre.android.camera.CameraUpdateFactory#paddingTo(double, double, double, double)} instead.
+     * @deprecated Use
+     * {@link org.maplibre.android.camera.CameraPosition.Builder#padding(double, double, double, double)} or
+     * {@link org.maplibre.android.camera.CameraUpdateFactory#paddingTo(double, double, double, double)}
+     * instead.
      */
     @NonNull
     @Deprecated

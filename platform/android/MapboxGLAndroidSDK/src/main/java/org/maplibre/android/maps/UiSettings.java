@@ -27,7 +27,6 @@ import org.maplibre.android.constants.MapboxConstants;
 import org.maplibre.android.maps.widgets.CompassView;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.utils.ColorUtils;
-import org.maplibre.android.camera.CameraPosition;
 
 /**
  * Settings for the user interface of a MapboxMap. To obtain this interface, call getUiSettings().

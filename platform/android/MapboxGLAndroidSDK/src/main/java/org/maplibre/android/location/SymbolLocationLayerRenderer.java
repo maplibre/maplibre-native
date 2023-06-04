@@ -1,24 +1,5 @@
 package org.maplibre.android.location;
 
-import android.graphics.Bitmap;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Point;
-import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.location.modes.RenderMode;
-import org.maplibre.android.maps.Style;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.Layer;
-import org.maplibre.android.style.layers.SymbolLayer;
-import org.maplibre.android.style.sources.GeoJsonSource;
-
-import java.util.Set;
-
 import static org.maplibre.android.location.LocationComponentConstants.ACCURACY_LAYER;
 import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_ICON;
 import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_LAYER;
@@ -58,11 +39,25 @@ import static org.maplibre.android.style.layers.PropertyFactory.iconSize;
 import static org.maplibre.android.style.layers.PropertyFactory.visibility;
 import static org.maplibre.android.utils.ColorUtils.colorToRgbaString;
 
+import android.graphics.Bitmap;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.Point;
+
 import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.style.layers.Property;
-import org.maplibre.android.style.layers.PropertyFactory;
+import org.maplibre.android.location.modes.RenderMode;
+import org.maplibre.android.maps.Style;
+import org.maplibre.android.style.expressions.Expression;
+import org.maplibre.android.style.layers.Layer;
+import org.maplibre.android.style.layers.SymbolLayer;
 import org.maplibre.android.style.sources.GeoJsonSource;
-import org.maplibre.android.utils.ColorUtils;
+
+import java.util.Set;
 
 final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   private Style style;
