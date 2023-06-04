@@ -134,7 +134,7 @@ public class AttributionTest extends EspressoTest {
   }
 
   private void buildUrlSpans() {
-    onView(withId(R.id.mapView)).perform(new MapboxMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
       for (Source source : maplibreMap.getStyle().getSources()) {
         String attributionSource = source.getAttribution();
         if (!TextUtils.isEmpty(attributionSource)) {
@@ -169,11 +169,11 @@ public class AttributionTest extends EspressoTest {
     }
   }
 
-  private class MapboxMapAction implements ViewAction {
+  private class MaplibreMapAction implements ViewAction {
 
     private InvokeViewAction invokeViewAction;
 
-    MapboxMapAction(InvokeViewAction invokeViewAction) {
+    MaplibreMapAction(InvokeViewAction invokeViewAction) {
       this.invokeViewAction = invokeViewAction;
     }
 

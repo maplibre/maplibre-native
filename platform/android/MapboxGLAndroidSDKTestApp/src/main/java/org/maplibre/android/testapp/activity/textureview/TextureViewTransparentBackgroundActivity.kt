@@ -33,16 +33,16 @@ class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
     }
 
     private fun setupMapView(savedInstanceState: Bundle?) {
-        val mapboxMapOptions = MapboxMapOptions.createFromAttributes(this, null)
-        mapboxMapOptions.translucentTextureSurface(true)
-        mapboxMapOptions.textureMode(true)
-        mapboxMapOptions.camera(
+        val maplibreMapOptions = MaplibreMapOptions.createFromAttributes(this, null)
+        maplibreMapOptions.translucentTextureSurface(true)
+        maplibreMapOptions.textureMode(true)
+        maplibreMapOptions.camera(
             CameraPosition.Builder()
                 .zoom(2.0)
                 .target(LatLng(48.507879, 8.363795))
                 .build()
         )
-        mapView = MapView(this, mapboxMapOptions)
+        mapView = MapView(this, maplibreMapOptions)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { maplibreMap: MaplibreMap -> initMap(maplibreMap) }
         (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView)

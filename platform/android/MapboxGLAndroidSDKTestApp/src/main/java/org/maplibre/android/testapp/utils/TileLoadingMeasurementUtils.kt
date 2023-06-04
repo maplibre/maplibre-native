@@ -14,7 +14,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import org.maplibre.android.MapStrictMode
 import org.maplibre.android.Maplibre
-import org.maplibre.android.constants.MapboxConstants
+import org.maplibre.android.constants.MaplibreConstants
 import org.maplibre.android.module.http.HttpRequestUtil
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
@@ -42,8 +42,8 @@ class TileLoadingMeasurementUtils {
 
         private val isTileLoadingMeasurementOn: Boolean
             private get() = isBooleanMetaDataValueOn(
-                MapboxConstants.KEY_META_DATA_MEASURE_TILE_DOWNLOAD_ON,
-                MapboxConstants.DEFAULT_MEASURE_TILE_DOWNLOAD_ON
+                MaplibreConstants.KEY_META_DATA_MEASURE_TILE_DOWNLOAD_ON,
+                MaplibreConstants.DEFAULT_MEASURE_TILE_DOWNLOAD_ON
             )
 
         private fun isBooleanMetaDataValueOn(propKey: String, defaultValue: Boolean): Boolean {

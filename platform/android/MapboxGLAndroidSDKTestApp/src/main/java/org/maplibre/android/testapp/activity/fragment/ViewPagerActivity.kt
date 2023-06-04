@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapboxMapOptions
+import org.maplibre.android.maps.MaplibreMapOptions
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.databinding.ActivityViewpagerBinding
@@ -45,7 +45,7 @@ class ViewPagerActivity : AppCompatActivity() {
         }
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
-            val options = MapboxMapOptions.createFromAttributes(context)
+            val options = MaplibreMapOptions.createFromAttributes(context)
             options.textureMode(true)
             options.camera(
                 CameraPosition.Builder()

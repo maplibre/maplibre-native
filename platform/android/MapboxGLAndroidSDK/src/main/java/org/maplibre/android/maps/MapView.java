@@ -26,12 +26,12 @@ import org.maplibre.android.Maplibre;
 import org.maplibre.android.R;
 import org.maplibre.android.WellKnownTileServer;
 import org.maplibre.android.annotations.Annotation;
-import org.maplibre.android.constants.MapboxConstants;
-import org.maplibre.android.exceptions.MapboxConfigurationException;
+import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.exceptions.MaplibreConfigurationException;
 import org.maplibre.android.location.LocationComponent;
 import org.maplibre.android.maps.renderer.MapRenderer;
 import org.maplibre.android.maps.renderer.glsurfaceview.GLSurfaceViewMapRenderer;
-import org.maplibre.android.maps.renderer.glsurfaceview.MapboxGLSurfaceView;
+import org.maplibre.android.maps.renderer.glsurfaceview.MaplibreGLSurfaceView;
 import org.maplibre.android.maps.renderer.textureview.TextureViewMapRenderer;
 import org.maplibre.android.maps.widgets.CompassView;
 import org.maplibre.android.net.ConnectivityReceiver;
@@ -75,7 +75,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   private View renderView;
 
   private AttributionClickListener attributionClickListener;
-  MapboxMapOptions mapboxMapOptions;
+  MaplibreMapOptions maplibreMapOptions;
   private MapRenderer mapRenderer;
   private boolean destroyed;
 
@@ -102,46 +102,46 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   public MapView(@NonNull Context context) {
     super(context);
     Timber.d("MapView constructed with context");
-    initialize(context, MapboxMapOptions.createFromAttributes(context));
+    initialize(context, MaplibreMapOptions.createFromAttributes(context));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
     Timber.d("MapView constructed with context and attribute set");
-    initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
+    initialize(context, MaplibreMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
   public MapView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     Timber.d( "MapView constructed with context, attributeSet and defStyleAttr");
-    initialize(context, MapboxMapOptions.createFromAttributes(context, attrs));
+    initialize(context, MaplibreMapOptions.createFromAttributes(context, attrs));
   }
 
   @UiThread
-  public MapView(@NonNull Context context, @Nullable MapboxMapOptions options) {
+  public MapView(@NonNull Context context, @Nullable MaplibreMapOptions options) {
     super(context);
     Timber.d("MapView constructed with context and MapboxMapOptions");
-    initialize(context, options == null ? MapboxMapOptions.createFromAttributes(context) : options);
+    initialize(context, options == null ? MaplibreMapOptions.createFromAttributes(context) : options);
   }
 
   @CallSuper
   @UiThread
-  protected void initialize(@NonNull final Context context, @NonNull final MapboxMapOptions options) {
+  protected void initialize(@NonNull final Context context, @NonNull final MaplibreMapOptions options) {
     if (isInEditMode()) {
       // in IDE layout editor, just return
       return;
     }
 
     if (!Maplibre.hasInstance()) {
-      throw new MapboxConfigurationException();
+      throw new MaplibreConfigurationException();
     }
 
     // hide surface until map is fully loaded #10990
     setForeground(new ColorDrawable(options.getForegroundLoadColor()));
 
-    mapboxMapOptions = options;
+    maplibreMapOptions = options;
 
     // add accessibility support
     setContentDescription(context.getString(R.string.maplibre_mapActionDescription));
@@ -195,7 +195,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     // initialise MapboxMap
     if (savedInstanceState == null) {
-      maplibreMap.initialise(context, mapboxMapOptions);
+      maplibreMap.initialise(context, maplibreMapOptions);
     } else {
       maplibreMap.onRestoreInstanceState(savedInstanceState);
     }
@@ -276,7 +276,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
           if (focalPoint != null) {
             maplibreMap.setFocalBearing(0, focalPoint.x, focalPoint.y, TIME_MAP_NORTH_ANIMATION);
           } else {
-            maplibreMap.setFocalBearing(0, maplibreMap.getWidth() / 2, maplibreMap.getHeight() / 2, TIME_MAP_NORTH_ANIMATION);
+            maplibreMap.setFocalBearing(
+              0, maplibreMap.getWidth() / 2, maplibreMap.getHeight() / 2,
+              TIME_MAP_NORTH_ANIMATION);
           }
           cameraChangeDispatcher.onCameraMoveStarted(MaplibreMap.OnCameraMoveStartedListener.REASON_API_ANIMATION);
           compassView.isAnimating(true);
@@ -304,12 +306,12 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
    */
   @UiThread
   public void onCreate(@Nullable Bundle savedInstanceState) {
-    if (savedInstanceState != null && savedInstanceState.getBoolean(MapboxConstants.STATE_HAS_SAVED_STATE)) {
+    if (savedInstanceState != null && savedInstanceState.getBoolean(MaplibreConstants.STATE_HAS_SAVED_STATE)) {
       this.savedInstanceState = savedInstanceState;
     }
   }
 
-  private void initialiseDrawingSurface(MapboxMapOptions options) {
+  private void initialiseDrawingSurface(MaplibreMapOptions options) {
     String localFontFamily = options.getLocalIdeographFontFamily();
     if (options.getTextureMode()) {
       TextureView textureView = new TextureView(getContext());
@@ -326,8 +328,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       addView(textureView, 0);
       renderView = textureView;
     } else {
-      MapboxGLSurfaceView glSurfaceView = new MapboxGLSurfaceView(getContext());
-      glSurfaceView.setZOrderMediaOverlay(mapboxMapOptions.getRenderSurfaceOnTop());
+      MaplibreGLSurfaceView glSurfaceView = new MaplibreGLSurfaceView(getContext());
+      glSurfaceView.setZOrderMediaOverlay(maplibreMapOptions.getRenderSurfaceOnTop());
       mapRenderer = new GLSurfaceViewMapRenderer(getContext(), glSurfaceView, localFontFamily) {
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -340,7 +342,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       renderView = glSurfaceView;
     }
 
-    boolean crossSourceCollisions = mapboxMapOptions.getCrossSourceCollisions();
+    boolean crossSourceCollisions = maplibreMapOptions.getCrossSourceCollisions();
     nativeMapView = new NativeMapView(
             getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
     );
@@ -368,7 +370,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @UiThread
   public void onSaveInstanceState(@NonNull Bundle outState) {
     if (maplibreMap != null) {
-      outState.putBoolean(MapboxConstants.STATE_HAS_SAVED_STATE, true);
+      outState.putBoolean(MaplibreConstants.STATE_HAS_SAVED_STATE, true);
       maplibreMap.onSaveInstanceState(outState);
     }
   }
@@ -594,13 +596,13 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
   /**
    * Returns the map pixel ratio, by default it returns the device pixel ratio.
-   * Can be overwritten using {@link MapboxMapOptions#pixelRatio(float)}.
+   * Can be overwritten using {@link MaplibreMapOptions#pixelRatio(float)}.
    *
    * @return the current map pixel ratio
    */
   public float getPixelRatio() {
     // check is user defined his own pixel ratio value
-    float pixelRatio = mapboxMapOptions.getPixelRatio();
+    float pixelRatio = maplibreMapOptions.getPixelRatio();
     if (pixelRatio == 0) {
       // if not, get the one defined by the system
       pixelRatio = getResources().getDisplayMetrics().density;

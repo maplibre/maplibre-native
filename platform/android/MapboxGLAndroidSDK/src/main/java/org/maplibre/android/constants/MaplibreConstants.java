@@ -3,19 +3,19 @@ package org.maplibre.android.constants;
 import java.util.Locale;
 
 /**
- * MapboxConstants exposes Maplibre related constants
+ * MaplibreConstants exposes MapLibre related constants
  */
-public class MapboxConstants {
+public class MaplibreConstants {
 
   /**
    * Default Locale for data processing (ex: String.toLowerCase(MAPBOX_LOCALE, "foo"))
    */
-  public static final Locale MAPBOX_LOCALE = Locale.US;
+  public static final Locale MAPLIBRE_LOCALE = Locale.US;
 
   /**
    * The name of the desired preferences file for Android's SharedPreferences.
    */
-  public static final String MAPBOX_SHARED_PREFERENCES = "MapboxSharedPreferences";
+  public static final String MAPLIBRE_SHARED_PREFERENCES = "MapboxSharedPreferences";
 
   /**
    * Key used to switch storage to external in AndroidManifest.xml
@@ -192,7 +192,7 @@ public class MapboxConstants {
   /**
    * Fragment Argument Key for MapboxMapOptions
    */
-  public static final String FRAG_ARG_MAPBOXMAPOPTIONS = "MapboxMapOptions";
+  public static final String FRAG_ARG_MAPLIBREMAPOPTIONS = "MapboxMapOptions";
 
   /**
    * Layer Id of annotations layer

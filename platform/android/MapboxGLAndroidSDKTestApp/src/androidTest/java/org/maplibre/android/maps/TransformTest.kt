@@ -3,7 +3,7 @@ package org.maplibre.android.maps
 import androidx.test.espresso.UiController
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.testapp.action.MapboxMapAction.invoke
+import org.maplibre.android.testapp.action.MaplibreMapAction.invoke
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

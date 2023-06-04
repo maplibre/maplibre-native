@@ -155,7 +155,8 @@ class AnnotationManager {
     return markers.addBy(markerOptions, maplibreMap);
   }
 
-  List<Marker> addMarkers(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MaplibreMap maplibreMap) {
+  List<Marker> addMarkers(@NonNull List<? extends BaseMarkerOptions> markerOptionsList,
+                          @NonNull MaplibreMap maplibreMap) {
     return markers.addBy(markerOptionsList, maplibreMap);
   }
 

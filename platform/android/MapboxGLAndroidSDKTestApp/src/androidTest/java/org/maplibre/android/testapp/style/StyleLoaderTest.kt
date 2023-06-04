@@ -6,7 +6,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.action.MapboxMapAction
+import org.maplibre.android.testapp.action.MaplibreMapAction
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.maplibre.android.testapp.utils.ResourceUtils.readRawResource
 import org.junit.Assert
@@ -20,7 +20,7 @@ class StyleLoaderTest : EspressoTest() {
     @Test
     fun testSetGetStyleJsonString() {
         validateTestSetup()
-        MapboxMapAction.invoke(
+        MaplibreMapAction.invoke(
             maplibreMap
         ) { uiController: UiController?, maplibreMap: MaplibreMap ->
             try {
@@ -41,7 +41,7 @@ class StyleLoaderTest : EspressoTest() {
     @Test
     fun testDefaultStyleLoadWithActivityLifecycleChange() {
         validateTestSetup()
-        MapboxMapAction.invoke(
+        MaplibreMapAction.invoke(
             maplibreMap
         ) { uiController: UiController?, maplibreMap: MaplibreMap ->
             try {

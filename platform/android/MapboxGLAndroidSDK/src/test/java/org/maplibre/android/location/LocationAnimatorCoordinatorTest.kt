@@ -9,7 +9,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_TILT_ANIM_DURATION
 import org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION
-import org.maplibre.android.location.MapboxAnimator.*
+import org.maplibre.android.location.MaplibreAnimator.*
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Projection
@@ -28,8 +28,8 @@ class LocationAnimatorCoordinatorTest {
     private lateinit var locationAnimatorCoordinator: LocationAnimatorCoordinator
     private val cameraPosition: CameraPosition = CameraPosition.DEFAULT
 
-    private val animatorProvider: MapboxAnimatorProvider = mockk()
-    private val animatorSetProvider: MapboxAnimatorSetProvider = mockk()
+    private val animatorProvider: MaplibreAnimatorProvider = mockk()
+    private val animatorSetProvider: MaplibreAnimatorSetProvider = mockk()
 
     private val projection: Projection = mockk()
 
@@ -73,26 +73,42 @@ class LocationAnimatorCoordinatorTest {
         every {
             animatorProvider.floatAnimator(capture(floatsSlot), capture(listenerSlot), capture(maxFpsSlot))
         } answers {
-            MapboxFloatAnimator(floatsSlot.captured, listenerSlot.captured, maxFpsSlot.captured)
+            MaplibreFloatAnimator(
+                floatsSlot.captured,
+                listenerSlot.captured,
+                maxFpsSlot.captured
+            )
         }
 
         val latLngsSlot = slot<Array<LatLng>>()
         every {
             animatorProvider.latLngAnimator(capture(latLngsSlot), capture(listenerSlot), capture(maxFpsSlot))
         } answers {
-            MapboxLatLngAnimator(latLngsSlot.captured, listenerSlot.captured, maxFpsSlot.captured)
+            MaplibreLatLngAnimator(
+                latLngsSlot.captured,
+                listenerSlot.captured,
+                maxFpsSlot.captured
+            )
         }
 
         val callback = slot<MaplibreMap.CancelableCallback>()
         every {
             animatorProvider.cameraAnimator(capture(floatsSlot), capture(listenerSlot), capture(callback))
         } answers {
-            MapboxCameraAnimatorAdapter(floatsSlot.captured, listenerSlot.captured, callback.captured)
+            MaplibreCameraAnimatorAdapter(
+                floatsSlot.captured,
+                listenerSlot.captured,
+                callback.captured
+            )
         }
         every {
             animatorProvider.cameraAnimator(capture(floatsSlot), capture(listenerSlot), null)
         } answers {
-            MapboxCameraAnimatorAdapter(floatsSlot.captured, listenerSlot.captured, null)
+            MaplibreCameraAnimatorAdapter(
+                floatsSlot.captured,
+                listenerSlot.captured,
+                null
+            )
         }
     }
 
@@ -279,7 +295,7 @@ class LocationAnimatorCoordinatorTest {
         location.longitude = 17.0
         location.bearing = 0f
 
-        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        val animator = mockk<MaplibreFloatAnimator>(relaxed = true)
         every { animator.animatedValue } returns 270f
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
@@ -296,7 +312,7 @@ class LocationAnimatorCoordinatorTest {
         location.longitude = 17.0
         location.bearing = 90f
 
-        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        val animator = mockk<MaplibreFloatAnimator>(relaxed = true)
         every { animator.animatedValue } returns 280f
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
@@ -313,7 +329,7 @@ class LocationAnimatorCoordinatorTest {
         location.longitude = 17.0
         location.bearing = 300f
 
-        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        val animator = mockk<MaplibreFloatAnimator>(relaxed = true)
         every { animator.animatedValue } returns 450f
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
@@ -330,7 +346,7 @@ class LocationAnimatorCoordinatorTest {
         location.longitude = 17.0
         location.bearing = 350f
 
-        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        val animator = mockk<MaplibreFloatAnimator>(relaxed = true)
         every { animator.animatedValue } returns 10f
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
@@ -347,7 +363,7 @@ class LocationAnimatorCoordinatorTest {
         location.longitude = 17.0
         location.bearing = 90f
 
-        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        val animator = mockk<MaplibreFloatAnimator>(relaxed = true)
         every { animator.animatedValue } returns -280f
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
@@ -364,7 +380,7 @@ class LocationAnimatorCoordinatorTest {
         location.longitude = 17.0
         location.bearing = 270f
 
-        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        val animator = mockk<MaplibreFloatAnimator>(relaxed = true)
         every { animator.animatedValue } returns -350f
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
@@ -708,7 +724,7 @@ class LocationAnimatorCoordinatorTest {
 
     @Test
     fun remove_gps_animator() {
-        val animator = mockk<MapboxFloatAnimator>(relaxed = true)
+        val animator = mockk<MaplibreFloatAnimator>(relaxed = true)
         locationAnimatorCoordinator.animatorArray.put(ANIMATOR_LAYER_GPS_BEARING, animator)
 
         locationAnimatorCoordinator.cancelAndRemoveGpsBearingAnimation()

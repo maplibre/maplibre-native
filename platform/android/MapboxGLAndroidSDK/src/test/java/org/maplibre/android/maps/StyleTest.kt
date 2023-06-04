@@ -3,8 +3,8 @@ package org.maplibre.android.maps
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.ShapeDrawable
-import org.maplibre.android.MapboxInjector
-import org.maplibre.android.constants.MapboxConstants
+import org.maplibre.android.MaplibreInjector
+import org.maplibre.android.constants.MaplibreConstants
 import org.maplibre.android.style.layers.CannotAddLayerException
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.layers.TransitionOptions
@@ -39,7 +39,7 @@ class StyleTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        MapboxInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
+        MaplibreInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
         nativeMapView = mockk(relaxed = true)
         maplibreMap = MaplibreMap(
             nativeMapView,
@@ -85,7 +85,7 @@ class StyleTest {
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
                 layer,
-                MapboxConstants.LAYER_ID_ANNOTATIONS
+                MaplibreConstants.LAYER_ID_ANNOTATIONS
             )
         }
     }
@@ -162,7 +162,7 @@ class StyleTest {
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
                 layer,
-                MapboxConstants.LAYER_ID_ANNOTATIONS
+                MaplibreConstants.LAYER_ID_ANNOTATIONS
             )
         }
     }

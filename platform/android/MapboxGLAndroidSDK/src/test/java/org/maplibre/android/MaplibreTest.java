@@ -6,7 +6,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 
-import org.maplibre.android.exceptions.MapboxConfigurationException;
+import org.maplibre.android.exceptions.MaplibreConfigurationException;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.utils.ConfigUtils;
 
@@ -46,13 +46,13 @@ public class MaplibreTest {
   @Test
   public void testGetApiKey() {
     final String apiKey = "pk.0000000001";
-    MapboxInjector.inject(context, apiKey, ConfigUtils.getMockedOptions());
+    MaplibreInjector.inject(context, apiKey, ConfigUtils.getMockedOptions());
     assertSame(apiKey, Maplibre.getApiKey());
   }
 
   @Test
   public void testApplicationContext() {
-    MapboxInjector.inject(context, "pk.0000000001", ConfigUtils.getMockedOptions());
+    MaplibreInjector.inject(context, "pk.0000000001", ConfigUtils.getMockedOptions());
     assertNotNull(Maplibre.getApplicationContext());
     assertNotEquals(context, appContext);
     assertEquals(appContext, appContext);
@@ -83,7 +83,7 @@ public class MaplibreTest {
     when(context.obtainStyledAttributes(nullable(AttributeSet.class), any(int[].class), anyInt(), anyInt()))
       .thenReturn(typedArray);
 
-    expectedException.expect(MapboxConfigurationException.class);
+    expectedException.expect(MaplibreConfigurationException.class);
     expectedException.expectMessage(
       "\nUsing MapView requires calling Maplibre.getInstance(Context context, String apiKey,"
               + " WellKnownTileServer wellKnownTileServer) before inflating or creating the view."
@@ -93,6 +93,6 @@ public class MaplibreTest {
 
   @After
   public void after() {
-    MapboxInjector.clear();
+    MaplibreInjector.clear();
   }
 }

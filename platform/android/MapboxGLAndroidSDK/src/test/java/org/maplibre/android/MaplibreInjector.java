@@ -8,7 +8,7 @@ import org.maplibre.android.util.TileServerOptions;
 
 import java.lang.reflect.Field;
 
-public class MapboxInjector {
+public class MaplibreInjector {
 
   private static final String FIELD_INSTANCE = "INSTANCE";
 

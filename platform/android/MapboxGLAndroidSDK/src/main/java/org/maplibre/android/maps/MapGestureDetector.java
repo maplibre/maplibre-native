@@ -22,7 +22,7 @@ import com.mapbox.android.gestures.ShoveGestureDetector;
 import com.mapbox.android.gestures.StandardGestureDetector;
 import com.mapbox.android.gestures.StandardScaleGestureDetector;
 import org.maplibre.android.R;
-import org.maplibre.android.constants.MapboxConstants;
+import org.maplibre.android.constants.MaplibreConstants;
 import org.maplibre.android.utils.MathUtils;
 
 import java.util.ArrayList;
@@ -31,13 +31,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.maplibre.android.constants.MapboxConstants.MAXIMUM_ANGULAR_VELOCITY;
-import static org.maplibre.android.constants.MapboxConstants.MAX_ABSOLUTE_SCALE_VELOCITY_CHANGE;
-import static org.maplibre.android.constants.MapboxConstants.QUICK_ZOOM_MAX_ZOOM_CHANGE;
-import static org.maplibre.android.constants.MapboxConstants.ROTATE_VELOCITY_RATIO_THRESHOLD;
-import static org.maplibre.android.constants.MapboxConstants.SCALE_VELOCITY_ANIMATION_DURATION_MULTIPLIER;
-import static org.maplibre.android.constants.MapboxConstants.SCALE_VELOCITY_RATIO_THRESHOLD;
-import static org.maplibre.android.constants.MapboxConstants.ZOOM_RATE;
+import static org.maplibre.android.constants.MaplibreConstants.MAXIMUM_ANGULAR_VELOCITY;
+import static org.maplibre.android.constants.MaplibreConstants.MAX_ABSOLUTE_SCALE_VELOCITY_CHANGE;
+import static org.maplibre.android.constants.MaplibreConstants.QUICK_ZOOM_MAX_ZOOM_CHANGE;
+import static org.maplibre.android.constants.MaplibreConstants.ROTATE_VELOCITY_RATIO_THRESHOLD;
+import static org.maplibre.android.constants.MaplibreConstants.SCALE_VELOCITY_ANIMATION_DURATION_MULTIPLIER;
+import static org.maplibre.android.constants.MaplibreConstants.SCALE_VELOCITY_RATIO_THRESHOLD;
+import static org.maplibre.android.constants.MaplibreConstants.ZOOM_RATE;
 import static org.maplibre.android.maps.MaplibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE;
 import static org.maplibre.android.utils.MathUtils.normalize;
 
@@ -93,7 +93,7 @@ final class MapGestureDetector {
 
   /**
    * Cancels scheduled velocity animations if user doesn't lift fingers within
-   * {@link MapboxConstants#SCHEDULED_ANIMATION_TIMEOUT}
+   * {@link MaplibreConstants#SCHEDULED_ANIMATION_TIMEOUT}
    */
   @NonNull
   private Handler animationsTimeoutHandler = new Handler();
@@ -284,7 +284,7 @@ final class MapGestureDetector {
   private void scheduleAnimator(Animator animator) {
     scheduledAnimators.add(animator);
     animationsTimeoutHandler.removeCallbacksAndMessages(null);
-    animationsTimeoutHandler.postDelayed(cancelAnimatorsRunnable, MapboxConstants.SCHEDULED_ANIMATION_TIMEOUT);
+    animationsTimeoutHandler.postDelayed(cancelAnimatorsRunnable, MaplibreConstants.SCHEDULED_ANIMATION_TIMEOUT);
   }
 
   /**
@@ -441,7 +441,7 @@ final class MapGestureDetector {
       if (!uiSettings.isHorizontalScrollGesturesEnabled()) {
         // determine if angle of fling is valid for performing a vertical fling
         double angle = Math.abs(Math.toDegrees(Math.atan(offsetX / offsetY)));
-        if (angle > MapboxConstants.ANGLE_THRESHOLD_IGNORE_VERTICAL_FLING) {
+        if (angle > MaplibreConstants.ANGLE_THRESHOLD_IGNORE_VERTICAL_FLING) {
           return false;
         }
         offsetX = 0.0;
@@ -856,8 +856,8 @@ final class MapGestureDetector {
 
       // Get tilt value (scale and clamp)
       double pitch = transform.getTilt();
-      pitch -= MapboxConstants.SHOVE_PIXEL_CHANGE_FACTOR * deltaPixelsSinceLast;
-      pitch = MathUtils.clamp(pitch, MapboxConstants.MINIMUM_TILT, MapboxConstants.MAXIMUM_TILT);
+      pitch -= MaplibreConstants.SHOVE_PIXEL_CHANGE_FACTOR * deltaPixelsSinceLast;
+      pitch = MathUtils.clamp(pitch, MaplibreConstants.MINIMUM_TILT, MaplibreConstants.MAXIMUM_TILT);
 
       // Tilt the map
       transform.setTilt(pitch);
@@ -969,7 +969,7 @@ final class MapGestureDetector {
       currentZoom,
       zoomIn ? 1 : -1,
       zoomFocalPoint,
-      MapboxConstants.ANIMATION_DURATION);
+      MaplibreConstants.ANIMATION_DURATION);
     if (runImmediately) {
       scaleAnimator.start();
     } else {

@@ -14,12 +14,12 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
-public class MapboxMapAction implements ViewAction {
+public class MaplibreMapAction implements ViewAction {
 
   private OnInvokeActionListener invokeViewAction;
   private MaplibreMap maplibreMap;
 
-  public MapboxMapAction(OnInvokeActionListener invokeViewAction, MaplibreMap maplibreMap) {
+  public MaplibreMapAction(OnInvokeActionListener invokeViewAction, MaplibreMap maplibreMap) {
     this.invokeViewAction = invokeViewAction;
     this.maplibreMap = maplibreMap;
   }
@@ -40,7 +40,7 @@ public class MapboxMapAction implements ViewAction {
   }
 
   public static void invoke(MaplibreMap maplibreMap, OnInvokeActionListener invokeViewAction) {
-    onView(withId(android.R.id.content)).perform(new MapboxMapAction(invokeViewAction, maplibreMap));
+    onView(withId(android.R.id.content)).perform(new MaplibreMapAction(invokeViewAction, maplibreMap));
   }
 
   public interface OnInvokeActionListener {

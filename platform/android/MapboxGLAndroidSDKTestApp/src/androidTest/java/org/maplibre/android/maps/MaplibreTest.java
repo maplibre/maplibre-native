@@ -9,7 +9,7 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.maplibre.android.AppCenter;
 import org.maplibre.android.Maplibre;
-import org.maplibre.android.exceptions.MapboxConfigurationException;
+import org.maplibre.android.exceptions.MaplibreConfigurationException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -62,7 +62,7 @@ public class MaplibreTest extends AppCenter {
   @Test
   @UiThreadTest
   public void setNullApiKey() {
-    expectedException.expect(MapboxConfigurationException.class);
+    expectedException.expect(MaplibreConfigurationException.class);
     expectedException.expectMessage(
       "A valid API key is required, currently provided key is: " + null
     );

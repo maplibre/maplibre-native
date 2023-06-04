@@ -10,8 +10,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import timber.log.Timber;
 
-import org.maplibre.android.constants.MapboxConstants;
-import org.maplibre.android.exceptions.MapboxConfigurationException;
+import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.exceptions.MaplibreConfigurationException;
 import org.maplibre.android.net.ConnectivityReceiver;
 import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.util.DefaultStyle;
@@ -236,7 +236,7 @@ public final class Maplibre {
    */
   private static void validateMapbox() {
     if (INSTANCE == null) {
-      throw new MapboxConfigurationException();
+      throw new MaplibreConfigurationException();
     }
   }
 
@@ -251,7 +251,7 @@ public final class Maplibre {
       return false;
     }
 
-    apiKey = apiKey.trim().toLowerCase(MapboxConstants.MAPBOX_LOCALE);
+    apiKey = apiKey.trim().toLowerCase(MaplibreConstants.MAPLIBRE_LOCALE);
     return apiKey.length() != 0;
   }
 
@@ -260,7 +260,7 @@ public final class Maplibre {
    */
   public static void throwIfApiKeyInvalid(@Nullable String apiKey) {
     if (!isApiKeyValid(apiKey)) {
-      throw new MapboxConfigurationException(
+      throw new MaplibreConfigurationException(
               "A valid API key is required, currently provided key is: " + apiKey);
     }
   }

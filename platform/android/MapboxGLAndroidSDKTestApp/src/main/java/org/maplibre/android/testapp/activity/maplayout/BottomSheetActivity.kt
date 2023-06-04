@@ -182,8 +182,8 @@ class BottomSheetActivity : AppCompatActivity() {
                 val bundle = Bundle()
                 bundle.putInt("mapcounter", mapCounter)
                 mapFragment.arguments = bundle
-                val mapboxMapOptions = MapboxMapOptions.createFromAttributes(context!!)
-                mapFragment.arguments = MapFragmentUtils.createFragmentArgs(mapboxMapOptions)
+                val maplibreMapOptions = MaplibreMapOptions.createFromAttributes(context!!)
+                mapFragment.arguments = MapFragmentUtils.createFragmentArgs(maplibreMapOptions)
                 return mapFragment
             }
         }
@@ -257,9 +257,9 @@ class BottomSheetActivity : AppCompatActivity() {
         companion object {
             fun newInstance(context: Context?): BottomSheetFragment {
                 val mapFragment = BottomSheetFragment()
-                val mapboxMapOptions = MapboxMapOptions.createFromAttributes(context!!)
-                mapboxMapOptions.renderSurfaceOnTop(true)
-                mapFragment.arguments = MapFragmentUtils.createFragmentArgs(mapboxMapOptions)
+                val maplibreMapOptions = MaplibreMapOptions.createFromAttributes(context!!)
+                maplibreMapOptions.renderSurfaceOnTop(true)
+                mapFragment.arguments = MapFragmentUtils.createFragmentArgs(maplibreMapOptions)
                 return mapFragment
             }
         }

@@ -7,6 +7,10 @@ object LocationEngineDefault {
      * Returns the default `LocationEngine`.
      */
     fun getDefaultLocationEngine(context: Context): LocationEngine {
-        return LocationEngineProxy(MapboxFusedLocationEngineImpl(context.applicationContext))
+        return LocationEngineProxy(
+            MaplibreFusedLocationEngineImpl(
+                context.applicationContext
+            )
+        )
     }
 }

@@ -1,21 +1,22 @@
 package org.maplibre.android.location;
 
 class AnimatorListenerHolder {
-  @MapboxAnimator.Type
+  @MaplibreAnimator.Type
   private final int animatorType;
-  private final MapboxAnimator.AnimationsValueChangeListener listener;
+  private final MaplibreAnimator.AnimationsValueChangeListener listener;
 
-  AnimatorListenerHolder(@MapboxAnimator.Type int animatorType, MapboxAnimator.AnimationsValueChangeListener listener) {
+  AnimatorListenerHolder(@MaplibreAnimator.Type int animatorType,
+                         MaplibreAnimator.AnimationsValueChangeListener listener) {
     this.animatorType = animatorType;
     this.listener = listener;
   }
 
-  @MapboxAnimator.Type
+  @MaplibreAnimator.Type
   public int getAnimatorType() {
     return animatorType;
   }
 
-  public MapboxAnimator.AnimationsValueChangeListener getListener() {
+  public MaplibreAnimator.AnimationsValueChangeListener getListener() {
     return listener;
   }
 

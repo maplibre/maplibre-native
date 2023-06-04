@@ -1,6 +1,6 @@
 package org.maplibre.android.module.http
 
-import org.maplibre.android.MapboxInjector
+import org.maplibre.android.MaplibreInjector
 import org.maplibre.android.http.HttpRequestUrl
 import org.maplibre.android.utils.ConfigUtils
 import io.mockk.mockk
@@ -16,7 +16,7 @@ class HttpRequestUrlTest {
 
     @Before
     fun setUp() {
-        MapboxInjector.inject(mockk(relaxed = true), "pk.foobar", ConfigUtils.getMockedOptions())
+        MaplibreInjector.inject(mockk(relaxed = true), "pk.foobar", ConfigUtils.getMockedOptions())
     }
 
     @Test
@@ -49,6 +49,6 @@ class HttpRequestUrlTest {
 
     @After
     fun tearDown() {
-        MapboxInjector.clear()
+        MaplibreInjector.clear()
     }
 }

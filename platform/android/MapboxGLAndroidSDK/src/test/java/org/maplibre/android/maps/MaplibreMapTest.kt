@@ -1,10 +1,10 @@
 package org.maplibre.android.maps
 
 import android.content.Context
-import org.maplibre.android.MapboxInjector
+import org.maplibre.android.MaplibreInjector
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.constants.MapboxConstants
+import org.maplibre.android.constants.MaplibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.style.layers.TransitionOptions
@@ -40,7 +40,7 @@ class MaplibreMapTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        MapboxInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
+        MaplibreInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
         cameraChangeDispatcher = spyk()
         developerAnimationListener = mockk(relaxed = true)
         nativeMapView = mockk(relaxed = true)
@@ -86,7 +86,7 @@ class MaplibreMapTest {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.easeCamera(update, callback)
-        verify { transform.easeCamera(maplibreMap, update, MapboxConstants.ANIMATION_DURATION, true, callback) }
+        verify { transform.easeCamera(maplibreMap, update, MaplibreConstants.ANIMATION_DURATION, true, callback) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 
@@ -97,7 +97,7 @@ class MaplibreMapTest {
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.animateCamera(update, callback)
-        verify { transform.animateCamera(maplibreMap, update, MapboxConstants.ANIMATION_DURATION, callback) }
+        verify { transform.animateCamera(maplibreMap, update, MaplibreConstants.ANIMATION_DURATION, callback) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 

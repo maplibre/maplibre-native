@@ -11,7 +11,7 @@ import org.maplibre.android.R
 import org.maplibre.android.camera.CameraPosition.Builder
 import org.maplibre.android.camera.CameraUpdateFactory.CameraPositionUpdate
 import org.maplibre.android.camera.CameraUpdateFactory.ZoomUpdate
-import org.maplibre.android.constants.MapboxConstants
+import org.maplibre.android.constants.MaplibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.utils.MathUtils
 import java.util.Arrays
@@ -291,14 +291,14 @@ class CameraPosition
          * Set the tilt of the camera in degrees
          *
          *
-         * value is clamped to [MapboxConstants.MINIMUM_TILT] and [MapboxConstants.MAXIMUM_TILT].
+         * value is clamped to [MaplibreConstants.MINIMUM_TILT] and [MaplibreConstants.MAXIMUM_TILT].
          *
          *
          * @param tilt Tilt value of the camera
          * @return this
          */
-        fun tilt(@FloatRange(from = MapboxConstants.MINIMUM_TILT, to = MapboxConstants.MAXIMUM_TILT) tilt: Double): Builder {
-            this.tilt = MathUtils.clamp(tilt, MapboxConstants.MINIMUM_TILT, MapboxConstants.MAXIMUM_TILT)
+        fun tilt(@FloatRange(from = MaplibreConstants.MINIMUM_TILT, to = MaplibreConstants.MAXIMUM_TILT) tilt: Double): Builder {
+            this.tilt = MathUtils.clamp(tilt, MaplibreConstants.MINIMUM_TILT, MaplibreConstants.MAXIMUM_TILT)
             return this
         }
 
@@ -306,13 +306,13 @@ class CameraPosition
          * Set the zoom of the camera
          *
          *
-         * Zoom ranges from [MapboxConstants.MINIMUM_ZOOM] to [MapboxConstants.MAXIMUM_ZOOM]
+         * Zoom ranges from [MaplibreConstants.MINIMUM_ZOOM] to [MaplibreConstants.MAXIMUM_ZOOM]
          *
          *
          * @param zoom Zoom value of the camera
          * @return this
          */
-        fun zoom(@FloatRange(from = MapboxConstants.MINIMUM_ZOOM.toDouble(), to = MapboxConstants.MAXIMUM_ZOOM.toDouble()) zoom: Double): Builder {
+        fun zoom(@FloatRange(from = MaplibreConstants.MINIMUM_ZOOM.toDouble(), to = MaplibreConstants.MAXIMUM_ZOOM.toDouble()) zoom: Double): Builder {
             this.zoom = zoom
             return this
         }

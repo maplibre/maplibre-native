@@ -8,16 +8,16 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
-class MapboxAnimatorSetProvider {
-  private static MapboxAnimatorSetProvider instance;
+class MaplibreAnimatorSetProvider {
+  private static MaplibreAnimatorSetProvider instance;
 
-  private MapboxAnimatorSetProvider() {
+  private MaplibreAnimatorSetProvider() {
     // private constructor
   }
 
-  static MapboxAnimatorSetProvider getInstance() {
+  static MaplibreAnimatorSetProvider getInstance() {
     if (instance == null) {
-      instance = new MapboxAnimatorSetProvider();
+      instance = new MaplibreAnimatorSetProvider();
     }
     return instance;
   }

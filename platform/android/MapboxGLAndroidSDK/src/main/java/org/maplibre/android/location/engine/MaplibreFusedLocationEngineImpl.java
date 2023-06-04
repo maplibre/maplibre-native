@@ -20,17 +20,17 @@ import static org.maplibre.android.location.engine.Utils.isBetterLocation;
  * <p>
  * Note: fusion will not work in background mode.
  */
-public class MapboxFusedLocationEngineImpl extends AndroidLocationEngineImpl {
-  private static final String TAG = "MapboxLocationEngine";
+public class MaplibreFusedLocationEngineImpl extends AndroidLocationEngineImpl {
+  private static final String TAG = "MaplibreLocationEngine";
 
-  public MapboxFusedLocationEngineImpl(@NonNull Context context) {
+  public MaplibreFusedLocationEngineImpl(@NonNull Context context) {
     super(context);
   }
 
   @NonNull
   @Override
   public LocationListener createListener(LocationEngineCallback<LocationEngineResult> callback) {
-    return new MapboxLocationEngineCallbackTransport(callback);
+    return new MaplibreLocationEngineCallbackTransport(callback);
   }
 
   @Override
@@ -100,11 +100,11 @@ public class MapboxFusedLocationEngineImpl extends AndroidLocationEngineImpl {
       && currentProvider.equals(LocationManager.GPS_PROVIDER);
   }
 
-  private static final class MapboxLocationEngineCallbackTransport implements LocationListener {
+  private static final class MaplibreLocationEngineCallbackTransport implements LocationListener {
     private final LocationEngineCallback<LocationEngineResult> callback;
     private Location currentBestLocation;
 
-    MapboxLocationEngineCallbackTransport(LocationEngineCallback<LocationEngineResult> callback) {
+    MaplibreLocationEngineCallbackTransport(LocationEngineCallback<LocationEngineResult> callback) {
       this.callback = callback;
     }
 

@@ -6,10 +6,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.maplibre.android.constants.MapboxConstants;
+import org.maplibre.android.constants.MaplibreConstants;
 import org.maplibre.android.maps.MapFragment;
 import org.maplibre.android.maps.SupportMapFragment;
-import org.maplibre.android.maps.MapboxMapOptions;
+import org.maplibre.android.maps.MaplibreMapOptions;
 
 /**
  * MapFragment utility class.
@@ -27,9 +27,9 @@ public class MapFragmentUtils {
    * @return a bundle of converted fragment arguments
    */
   @NonNull
-  public static Bundle createFragmentArgs(MapboxMapOptions options) {
+  public static Bundle createFragmentArgs(MaplibreMapOptions options) {
     Bundle bundle = new Bundle();
-    bundle.putParcelable(MapboxConstants.FRAG_ARG_MAPBOXMAPOPTIONS, options);
+    bundle.putParcelable(MaplibreConstants.FRAG_ARG_MAPLIBREMAPOPTIONS, options);
     return bundle;
   }
 
@@ -41,13 +41,13 @@ public class MapFragmentUtils {
    * @return converted MapboxMapOptions
    */
   @Nullable
-  public static MapboxMapOptions resolveArgs(@NonNull Context context, @Nullable Bundle args) {
-    MapboxMapOptions options;
-    if (args != null && args.containsKey(MapboxConstants.FRAG_ARG_MAPBOXMAPOPTIONS)) {
-      options = args.getParcelable(MapboxConstants.FRAG_ARG_MAPBOXMAPOPTIONS);
+  public static MaplibreMapOptions resolveArgs(@NonNull Context context, @Nullable Bundle args) {
+    MaplibreMapOptions options;
+    if (args != null && args.containsKey(MaplibreConstants.FRAG_ARG_MAPLIBREMAPOPTIONS)) {
+      options = args.getParcelable(MaplibreConstants.FRAG_ARG_MAPLIBREMAPOPTIONS);
     } else {
       // load default options
-      options = MapboxMapOptions.createFromAttributes(context);
+      options = MaplibreMapOptions.createFromAttributes(context);
     }
     return options;
   }

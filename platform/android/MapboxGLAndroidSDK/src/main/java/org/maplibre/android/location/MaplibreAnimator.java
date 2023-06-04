@@ -17,7 +17,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @param <K> Data type that will be animated.
  */
-abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.AnimatorUpdateListener {
+abstract class MaplibreAnimator<K> extends ValueAnimator implements ValueAnimator.AnimatorUpdateListener {
   @Retention(RetentionPolicy.SOURCE)
   @IntDef( {
     ANIMATOR_LAYER_LATLNG,
@@ -59,8 +59,8 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
    */
   private boolean invalid;
 
-  MapboxAnimator(@NonNull @Size(min = 2) K[] values, @NonNull AnimationsValueChangeListener<K> updateListener,
-                 int maxAnimationFps) {
+  MaplibreAnimator(@NonNull @Size(min = 2) K[] values, @NonNull AnimationsValueChangeListener<K> updateListener,
+                   int maxAnimationFps) {
     minUpdateInterval = 1E9 / maxAnimationFps;
     setObjectValues((Object[]) values);
     setEvaluator(provideEvaluator());
@@ -70,8 +70,8 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
     addListener(new AnimatorListener());
   }
 
-  public MapboxAnimator(AnimationsValueChangeListener<K> updateListener, K target, K animatedValue,
-                        double minUpdateInterval, long timeElapsed) {
+  public MaplibreAnimator(AnimationsValueChangeListener<K> updateListener, K target, K animatedValue,
+                          double minUpdateInterval, long timeElapsed) {
     this.updateListener = updateListener;
     this.target = target;
     this.animatedValue = animatedValue;

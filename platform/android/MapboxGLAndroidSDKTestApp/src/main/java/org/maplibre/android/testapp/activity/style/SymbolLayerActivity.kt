@@ -18,7 +18,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
-import org.maplibre.android.maps.MapboxMapOptions
+import org.maplibre.android.maps.MaplibreMapOptions
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -58,8 +58,8 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
         setContentView(R.layout.activity_symbollayer)
 
         // Create map configuration
-        val mapboxMapOptions = MapboxMapOptions.createFromAttributes(this)
-        mapboxMapOptions.camera(
+        val maplibreMapOptions = MaplibreMapOptions.createFromAttributes(this)
+        maplibreMapOptions.camera(
             CameraPosition.Builder().target(
                 LatLng(52.35273, 4.91638)
             )
@@ -68,7 +68,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
         )
 
         // Create map programmatically, add to view hierarchy
-        mapView = MapView(this, mapboxMapOptions)
+        mapView = MapView(this, maplibreMapOptions)
         mapView.getMapAsync(this)
         mapView.onCreate(savedInstanceState)
         (findViewById<View>(R.id.container) as ViewGroup).addView(mapView)

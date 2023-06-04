@@ -258,32 +258,32 @@ final class LocationLayerController {
     return !features.isEmpty();
   }
 
-  private final MapboxAnimator.AnimationsValueChangeListener<LatLng> latLngValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<LatLng>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<LatLng> latLngValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<LatLng>() {
       @Override
       public void onNewAnimationValue(LatLng value) {
         locationLayerRenderer.setLatLng(value);
       }
   };
 
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setGpsBearing(value);
       }
   };
 
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> compassBearingValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> compassBearingValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setCompassBearing(value);
       }
   };
 
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> accuracyValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> accuracyValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setAccuracyRadius(value);
@@ -293,8 +293,8 @@ final class LocationLayerController {
   /**
    * The listener that handles the updating of the pulsing circle's radius and opacity.
    */
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> pulsingCircleRadiusListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> pulsingCircleRadiusListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float newPulseRadiusValue) {
         Float newPulseOpacityValue = null;
@@ -307,21 +307,21 @@ final class LocationLayerController {
 
   Set<AnimatorListenerHolder> getAnimationListeners() {
     Set<AnimatorListenerHolder> holders = new HashSet<>();
-    holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_LAYER_LATLNG, latLngValueListener));
+    holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_LATLNG, latLngValueListener));
 
     if (renderMode == RenderMode.GPS) {
-      holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_LAYER_GPS_BEARING, gpsBearingValueListener));
+      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_GPS_BEARING, gpsBearingValueListener));
     } else if (renderMode == RenderMode.COMPASS) {
       holders.add(
-        new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_LAYER_COMPASS_BEARING, compassBearingValueListener));
+        new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING, compassBearingValueListener));
     }
 
     if (renderMode == RenderMode.COMPASS || renderMode == RenderMode.NORMAL) {
-      holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_LAYER_ACCURACY, accuracyValueListener));
+      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_ACCURACY, accuracyValueListener));
     }
 
     if (options.pulseEnabled()) {
-      holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_PULSING_CIRCLE,
+      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_PULSING_CIRCLE,
           pulsingCircleRadiusListener));
     }
     return holders;

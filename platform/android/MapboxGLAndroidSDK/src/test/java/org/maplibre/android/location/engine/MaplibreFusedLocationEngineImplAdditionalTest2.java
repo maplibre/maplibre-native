@@ -67,7 +67,7 @@ public class MaplibreFusedLocationEngineImplAdditionalTest2 {
       }
     }).when(mockLocationManager)
       .requestLocationUpdates(anyString(), anyLong(), anyFloat(), any(LocationListener.class), any(Looper.class));
-    engines.add(new LocationEngineProxy<>(new MapboxFusedLocationEngineImpl(mockContext)));
+    engines.add(new LocationEngineProxy<>(new MaplibreFusedLocationEngineImpl(mockContext)));
     engines.add(new LocationEngineProxy<>(new AndroidLocationEngineImpl(mockContext)));
   }
 

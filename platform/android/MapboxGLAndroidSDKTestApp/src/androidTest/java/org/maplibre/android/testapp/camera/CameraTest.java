@@ -16,7 +16,7 @@ import org.junit.Test;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.maplibre.android.testapp.action.MapboxMapAction.invoke;
+import static org.maplibre.android.testapp.action.MaplibreMapAction.invoke;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -194,21 +194,22 @@ public abstract class CameraTest extends BaseTest {
   public void testToZoomOut() throws InterruptedException {
     float zoom = 10.0f;
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
-      executeCameraMovement(CameraUpdateFactory.newLatLngZoom(new LatLng(), zoom), new MaplibreMap.CancelableCallback() {
-        @Override
-        public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
-          latch.countDown();
-        }
+    invoke(maplibreMap, (uiController, mapboxMap) ->
+      executeCameraMovement(CameraUpdateFactory.newLatLngZoom(new LatLng(), zoom),
+        new MaplibreMap.CancelableCallback() {
+          @Override
+          public void onCancel() {
+            verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
+            latch.countDown();
+          }
 
-        @Override
-        public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
-          latch.countDown();
-        }
-      });
-    });
+          @Override
+          public void onFinish() {
+            verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
+            latch.countDown();
+          }
+        })
+    );
 
     if (!latch.await(10, TimeUnit.SECONDS)) {
       Assert.fail("timeout");

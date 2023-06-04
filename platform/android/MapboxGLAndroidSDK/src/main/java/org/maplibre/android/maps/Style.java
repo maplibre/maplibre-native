@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.maplibre.android.Maplibre;
-import org.maplibre.android.constants.MapboxConstants;
+import org.maplibre.android.constants.MaplibreConstants;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
@@ -741,7 +741,7 @@ public class Style {
           addLayerBelow(layerWrapper.layer, ((Builder.LayerBelowWrapper) layerWrapper).belowLayer);
         } else {
           // just add layer to map, but below annotations
-          addLayerBelow(layerWrapper.layer, MapboxConstants.LAYER_ID_ANNOTATIONS);
+          addLayerBelow(layerWrapper.layer, MaplibreConstants.LAYER_ID_ANNOTATIONS);
         }
       }
 

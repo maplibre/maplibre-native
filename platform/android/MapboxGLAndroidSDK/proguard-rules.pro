@@ -14,7 +14,7 @@
 -dontnote org.maplibre.android.maps.MaplibreMap$OnFpsChangedListener
 -dontnote org.maplibre.android.style.layers.PropertyValue
 -dontnote org.maplibre.android.maps.MaplibreMap
--dontnote org.maplibre.android.maps.MapboxMapOptions
+-dontnote org.maplibre.android.maps.MaplibreMapOptions
 -dontnote org.maplibre.android.log.LoggerDefinition
 
 # config for okhttp 3.11.0, https://github.com/square/okhttp/pull/3354

@@ -27,7 +27,7 @@ fun MaplibreMap.isLayerVisible(layerId: String): Boolean {
     return this.style!!.getLayer(layerId)?.visibility?.value?.equals(Property.VISIBLE)!!
 }
 
-class MapboxTestingUtils {
+class MaplibreTestingUtils {
     companion object {
 
         /**

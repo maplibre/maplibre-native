@@ -25,7 +25,7 @@ import org.maplibre.android.location.engine.LocationEngineRequest;
 import org.maplibre.android.location.engine.LocationEngineResult;
 import org.maplibre.android.location.modes.CameraMode;
 import org.maplibre.android.location.modes.RenderMode;
-import org.maplibre.android.location.engine.MapboxFusedLocationEngineImpl;
+import org.maplibre.android.location.engine.MaplibreFusedLocationEngineImpl;
 import org.maplibre.android.location.permissions.PermissionsManager;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.maps.MapView;
@@ -80,7 +80,7 @@ import static org.maplibre.android.location.modes.RenderMode.GPS;
  * this component to work as expected.
  * <p>
  * This component offers a default, built-in {@link LocationEngine} called
- * {@link MapboxFusedLocationEngineImpl}.
+ * {@link MaplibreFusedLocationEngineImpl}.
  * If you'd like to utilize the previously available Google Play Services for more precise location updates,
  * refer to the migration guide of 10.0.0 in the changelog.
  * After a custom engine is passed to the component, or the built-in is initialized,
@@ -553,7 +553,9 @@ public final class LocationComponent {
         "LocationComponent#zoomWhileTracking method call is ignored because the camera mode is transitioning");
       return;
     }
-    locationAnimatorCoordinator.feedNewZoomLevel(zoomLevel, maplibreMap.getCameraPosition(), animationDuration, callback);
+    locationAnimatorCoordinator.feedNewZoomLevel(
+      zoomLevel, maplibreMap.getCameraPosition(), animationDuration, callback
+    );
   }
 
   /**
@@ -1099,8 +1101,8 @@ public final class LocationComponent {
 
     locationAnimatorCoordinator = new LocationAnimatorCoordinator(
       maplibreMap.getProjection(),
-      MapboxAnimatorSetProvider.getInstance(),
-      MapboxAnimatorProvider.getInstance()
+      MaplibreAnimatorSetProvider.getInstance(),
+      MaplibreAnimatorProvider.getInstance()
     );
     locationAnimatorCoordinator.setTrackingAnimationDurationMultiplier(options
       .trackingAnimationDurationMultiplier());

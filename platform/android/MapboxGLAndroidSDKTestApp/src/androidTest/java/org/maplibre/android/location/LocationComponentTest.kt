@@ -20,8 +20,8 @@ import org.maplibre.android.location.LocationComponentConstants.*
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.utils.*
-import org.maplibre.android.location.utils.MapboxTestingUtils.Companion.MAPBOX_HEAVY_STYLE
-import org.maplibre.android.location.utils.MapboxTestingUtils.Companion.pushSourceUpdates
+import org.maplibre.android.location.utils.MaplibreTestingUtils.Companion.MAPBOX_HEAVY_STYLE
+import org.maplibre.android.location.utils.MaplibreTestingUtils.Companion.pushSourceUpdates
 import org.maplibre.android.maps.MaplibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.activity.EspressoTest

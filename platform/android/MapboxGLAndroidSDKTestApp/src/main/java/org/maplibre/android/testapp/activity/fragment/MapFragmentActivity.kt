@@ -41,8 +41,8 @@ class MapFragmentActivity :
         mapFragment.getMapAsync(this)
     }
 
-    private fun createFragmentOptions(): MapboxMapOptions {
-        val options = MapboxMapOptions.createFromAttributes(this, null)
+    private fun createFragmentOptions(): MaplibreMapOptions {
+        val options = MaplibreMapOptions.createFromAttributes(this, null)
         options.scrollGesturesEnabled(false)
         options.zoomGesturesEnabled(false)
         options.tiltGesturesEnabled(false)

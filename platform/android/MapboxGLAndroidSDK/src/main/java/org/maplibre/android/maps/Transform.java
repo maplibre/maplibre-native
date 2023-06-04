@@ -10,7 +10,7 @@ import androidx.annotation.UiThread;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.camera.CameraUpdate;
 import org.maplibre.android.camera.CameraUpdateFactory;
-import org.maplibre.android.constants.MapboxConstants;
+import org.maplibre.android.constants.MaplibreConstants;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.log.Logger;
 
@@ -55,7 +55,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
     this.cameraChangeDispatcher = cameraChangeDispatcher;
   }
 
-  void initialise(@NonNull MaplibreMap maplibreMap, @NonNull MapboxMapOptions options) {
+  void initialise(@NonNull MaplibreMap maplibreMap, @NonNull MaplibreMapOptions options) {
     CameraPosition position = options.getCamera();
     if (position != null && !position.equals(CameraPosition.DEFAULT)) {
       moveCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(position), null);
@@ -129,7 +129,8 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   @UiThread
-  final void easeCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update, int durationMs, boolean easingInterpolator,
+  final void easeCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update, int durationMs,
+                        boolean easingInterpolator,
                         @Nullable final MaplibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
@@ -319,7 +320,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   //
 
   void setMinZoom(double minZoom) {
-    if ((minZoom < MapboxConstants.MINIMUM_ZOOM) || (minZoom > MapboxConstants.MAXIMUM_ZOOM)) {
+    if ((minZoom < MaplibreConstants.MINIMUM_ZOOM) || (minZoom > MaplibreConstants.MAXIMUM_ZOOM)) {
       Logger.e(TAG, String.format("Not setting minZoomPreference, value is in unsupported range: %s", minZoom));
       return;
     }
@@ -331,7 +332,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMaxZoom(double maxZoom) {
-    if ((maxZoom < MapboxConstants.MINIMUM_ZOOM) || (maxZoom > MapboxConstants.MAXIMUM_ZOOM)) {
+    if ((maxZoom < MaplibreConstants.MINIMUM_ZOOM) || (maxZoom > MaplibreConstants.MAXIMUM_ZOOM)) {
       Logger.e(TAG, String.format("Not setting maxZoomPreference, value is in unsupported range: %s", maxZoom));
       return;
     }
@@ -343,7 +344,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMinPitch(double minPitch) {
-    if ((minPitch < MapboxConstants.MINIMUM_PITCH) || (minPitch > MapboxConstants.MAXIMUM_PITCH)) {
+    if ((minPitch < MaplibreConstants.MINIMUM_PITCH) || (minPitch > MaplibreConstants.MAXIMUM_PITCH)) {
       Logger.e(TAG, String.format("Not setting minPitchPreference, value is in unsupported range: %s", minPitch));
       return;
     }
@@ -355,7 +356,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMaxPitch(double maxPitch) {
-    if ((maxPitch < MapboxConstants.MINIMUM_PITCH) || (maxPitch > MapboxConstants.MAXIMUM_PITCH)) {
+    if ((maxPitch < MaplibreConstants.MINIMUM_PITCH) || (maxPitch > MaplibreConstants.MAXIMUM_PITCH)) {
       Logger.e(TAG, String.format("Not setting maxPitchPreference, value is in unsupported range: %s", maxPitch));
       return;
     }

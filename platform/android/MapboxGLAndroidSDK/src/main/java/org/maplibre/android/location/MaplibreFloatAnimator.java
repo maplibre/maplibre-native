@@ -6,9 +6,9 @@ import android.animation.TypeEvaluator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Size;
 
-class MapboxFloatAnimator extends MapboxAnimator<Float> {
-  MapboxFloatAnimator(@NonNull @Size(min = 2) Float[] values,
-                      @NonNull AnimationsValueChangeListener updateListener, int maxAnimationFps) {
+class MaplibreFloatAnimator extends MaplibreAnimator<Float> {
+  MaplibreFloatAnimator(@NonNull @Size(min = 2) Float[] values,
+                        @NonNull AnimationsValueChangeListener updateListener, int maxAnimationFps) {
     super(values, updateListener, maxAnimationFps);
   }
 

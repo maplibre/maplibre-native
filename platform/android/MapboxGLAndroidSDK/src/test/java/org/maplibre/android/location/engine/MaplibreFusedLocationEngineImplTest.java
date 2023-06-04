@@ -43,14 +43,14 @@ public class MaplibreFusedLocationEngineImplTest {
   private LocationManager locationManagerMock;
 
   private LocationEngine engine;
-  private MapboxFusedLocationEngineImpl mapboxFusedLocationEngineImpl;
+  private MaplibreFusedLocationEngineImpl maplibreFusedLocationEngineImpl;
 
   @Before
   public void setUp() {
     Context context = mock(Context.class);
     when(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(locationManagerMock);
-    mapboxFusedLocationEngineImpl = new MapboxFusedLocationEngineImpl(context);
-    engine = new LocationEngineProxy<>(mapboxFusedLocationEngineImpl);
+    maplibreFusedLocationEngineImpl = new MaplibreFusedLocationEngineImpl(context);
+    engine = new LocationEngineProxy<>(maplibreFusedLocationEngineImpl);
   }
 
   @Test
@@ -75,7 +75,7 @@ public class MaplibreFusedLocationEngineImplTest {
   @Test
   public void createListener() {
     LocationEngineCallback<LocationEngineResult> callback = mock(LocationEngineCallback.class);
-    LocationListener locationListener = mapboxFusedLocationEngineImpl.createListener(callback);
+    LocationListener locationListener = maplibreFusedLocationEngineImpl.createListener(callback);
     Location mockLocation = getMockLocation(LATITUDE, LONGITUDE);
     locationListener.onLocationChanged(mockLocation);
     ArgumentCaptor<LocationEngineResult> argument = ArgumentCaptor.forClass(LocationEngineResult.class);

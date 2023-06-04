@@ -70,8 +70,8 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         mapView.addOnDidFinishLoadingStyleListener { Timber.d("Style loaded") }
     }
 
-    protected open fun setupMapboxMapOptions(): MapboxMapOptions {
-        return MapboxMapOptions.createFromAttributes(this, null)
+    protected open fun setupMapboxMapOptions(): MaplibreMapOptions {
+        return MaplibreMapOptions.createFromAttributes(this, null)
     }
 
     override fun onMapReady(map: MaplibreMap) {

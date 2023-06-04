@@ -34,7 +34,7 @@ import org.maplibre.android.annotations.PolylineOptions;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.camera.CameraUpdate;
 import org.maplibre.android.camera.CameraUpdateFactory;
-import org.maplibre.android.constants.MapboxConstants;
+import org.maplibre.android.constants.MaplibreConstants;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.location.LocationComponent;
@@ -103,7 +103,7 @@ public final class MaplibreMap {
     nativeMapView.triggerRepaint();
   }
 
-  void initialise(@NonNull Context context, @NonNull MapboxMapOptions options) {
+  void initialise(@NonNull Context context, @NonNull MaplibreMapOptions options) {
     transform.initialise(this, options);
     uiSettings.initialise(context, options);
 
@@ -163,8 +163,8 @@ public final class MaplibreMap {
    * @param outState the bundle to save the state to.
    */
   void onSaveInstanceState(@NonNull Bundle outState) {
-    outState.putParcelable(MapboxConstants.STATE_CAMERA_POSITION, transform.getCameraPosition());
-    outState.putBoolean(MapboxConstants.STATE_DEBUG_ACTIVE, isDebugActive());
+    outState.putParcelable(MaplibreConstants.STATE_CAMERA_POSITION, transform.getCameraPosition());
+    outState.putBoolean(MaplibreConstants.STATE_DEBUG_ACTIVE, isDebugActive());
     uiSettings.onSaveInstanceState(outState);
   }
 
@@ -174,7 +174,7 @@ public final class MaplibreMap {
    * @param savedInstanceState the bundle containing the saved state
    */
   void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-    final CameraPosition cameraPosition = savedInstanceState.getParcelable(MapboxConstants.STATE_CAMERA_POSITION);
+    final CameraPosition cameraPosition = savedInstanceState.getParcelable(MaplibreConstants.STATE_CAMERA_POSITION);
 
     uiSettings.onRestoreInstanceState(savedInstanceState);
 
@@ -184,7 +184,7 @@ public final class MaplibreMap {
       );
     }
 
-    nativeMapView.setDebug(savedInstanceState.getBoolean(MapboxConstants.STATE_DEBUG_ACTIVE));
+    nativeMapView.setDebug(savedInstanceState.getBoolean(MaplibreConstants.STATE_DEBUG_ACTIVE));
   }
 
   /**
@@ -263,7 +263,7 @@ public final class MaplibreMap {
    *
    * @param options the options object
    */
-  private void setPrefetchesTiles(@NonNull MapboxMapOptions options) {
+  private void setPrefetchesTiles(@NonNull MaplibreMapOptions options) {
     if (!options.getPrefetchesTiles()) {
       setPrefetchZoomDelta(0);
     } else {
@@ -332,7 +332,7 @@ public final class MaplibreMap {
    * @param minZoom The new minimum zoom level.
    */
   public void setMinZoomPreference(
-    @FloatRange(from = MapboxConstants.MINIMUM_ZOOM, to = MapboxConstants.MAXIMUM_ZOOM) double minZoom) {
+    @FloatRange(from = MaplibreConstants.MINIMUM_ZOOM, to = MaplibreConstants.MAXIMUM_ZOOM) double minZoom) {
     transform.setMinZoom(minZoom);
   }
 
@@ -361,8 +361,8 @@ public final class MaplibreMap {
    *
    * @param maxZoom The new maximum zoom level.
    */
-  public void setMaxZoomPreference(@FloatRange(from = MapboxConstants.MINIMUM_ZOOM,
-    to = MapboxConstants.MAXIMUM_ZOOM) double maxZoom) {
+  public void setMaxZoomPreference(@FloatRange(from = MaplibreConstants.MINIMUM_ZOOM,
+    to = MaplibreConstants.MAXIMUM_ZOOM) double maxZoom) {
     transform.setMaxZoom(maxZoom);
   }
 
@@ -392,7 +392,7 @@ public final class MaplibreMap {
    * @param minPitch The new minimum Pitch.
    */
   public void setMinPitchPreference(
-    @FloatRange(from = MapboxConstants.MINIMUM_PITCH, to = MapboxConstants.MAXIMUM_PITCH) double minPitch) {
+    @FloatRange(from = MaplibreConstants.MINIMUM_PITCH, to = MaplibreConstants.MAXIMUM_PITCH) double minPitch) {
     transform.setMinPitch(minPitch);
   }
 
@@ -421,8 +421,8 @@ public final class MaplibreMap {
    *
    * @param maxPitch The new maximum Pitch.
    */
-  public void setMaxPitchPreference(@FloatRange(from = MapboxConstants.MINIMUM_PITCH,
-    to = MapboxConstants.MAXIMUM_PITCH) double maxPitch) {
+  public void setMaxPitchPreference(@FloatRange(from = MaplibreConstants.MINIMUM_PITCH,
+    to = MaplibreConstants.MAXIMUM_PITCH) double maxPitch) {
     transform.setMaxPitch(maxPitch);
   }
 
@@ -537,7 +537,7 @@ public final class MaplibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void easeCamera(@NonNull CameraUpdate update) {
-    easeCamera(update, MapboxConstants.ANIMATION_DURATION);
+    easeCamera(update, MaplibreConstants.ANIMATION_DURATION);
   }
 
   /**
@@ -554,7 +554,7 @@ public final class MaplibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void easeCamera(@NonNull CameraUpdate update, @Nullable final MaplibreMap.CancelableCallback callback) {
-    easeCamera(update, MapboxConstants.ANIMATION_DURATION, callback);
+    easeCamera(update, MaplibreConstants.ANIMATION_DURATION, callback);
   }
 
   /**
@@ -650,7 +650,7 @@ public final class MaplibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void animateCamera(@NonNull CameraUpdate update) {
-    animateCamera(update, MapboxConstants.ANIMATION_DURATION, null);
+    animateCamera(update, MaplibreConstants.ANIMATION_DURATION, null);
   }
 
   /**
@@ -666,7 +666,7 @@ public final class MaplibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void animateCamera(@NonNull CameraUpdate update, @Nullable MaplibreMap.CancelableCallback callback) {
-    animateCamera(update, MapboxConstants.ANIMATION_DURATION, callback);
+    animateCamera(update, MaplibreConstants.ANIMATION_DURATION, callback);
   }
 
   /**
@@ -859,7 +859,7 @@ public final class MaplibreMap {
   // API endpoint config
   //
 
-  private void setApiBaseUrl(@NonNull MapboxMapOptions options) {
+  private void setApiBaseUrl(@NonNull MaplibreMapOptions options) {
     String apiBaseUrl = options.getApiBaseUrl();
     if (!TextUtils.isEmpty(apiBaseUrl)) {
       nativeMapView.setApiBaseUrl(apiBaseUrl);
@@ -1543,10 +1543,10 @@ public final class MaplibreMap {
    */
   @Nullable
   public CameraPosition getCameraForLatLngBounds(@NonNull LatLngBounds latLngBounds,
-                                                 @FloatRange(from = MapboxConstants.MINIMUM_DIRECTION,
-                                                   to = MapboxConstants.MAXIMUM_DIRECTION) double bearing,
-                                                 @FloatRange(from = MapboxConstants.MINIMUM_TILT,
-                                                   to = MapboxConstants.MAXIMUM_TILT) double tilt) {
+                                                 @FloatRange(from = MaplibreConstants.MINIMUM_DIRECTION,
+                                                   to = MaplibreConstants.MAXIMUM_DIRECTION) double bearing,
+                                                 @FloatRange(from = MaplibreConstants.MINIMUM_TILT,
+                                                   to = MaplibreConstants.MAXIMUM_TILT) double tilt) {
     return getCameraForLatLngBounds(latLngBounds, new int[] {0, 0, 0, 0}, bearing, tilt);
   }
 
@@ -1563,10 +1563,10 @@ public final class MaplibreMap {
   @Nullable
   public CameraPosition getCameraForLatLngBounds(@NonNull LatLngBounds latLngBounds,
                                                  @NonNull @Size(value = 4) int[] padding,
-                                                 @FloatRange(from = MapboxConstants.MINIMUM_DIRECTION,
-                                                   to = MapboxConstants.MAXIMUM_DIRECTION) double bearing,
-                                                 @FloatRange(from = MapboxConstants.MINIMUM_TILT,
-                                                   to = MapboxConstants.MAXIMUM_TILT) double tilt) {
+                                                 @FloatRange(from = MaplibreConstants.MINIMUM_DIRECTION,
+                                                   to = MaplibreConstants.MAXIMUM_DIRECTION) double bearing,
+                                                 @FloatRange(from = MaplibreConstants.MINIMUM_TILT,
+                                                   to = MaplibreConstants.MAXIMUM_TILT) double tilt) {
     return nativeMapView.getCameraForLatLngBounds(latLngBounds, padding, bearing, tilt);
   }
 
@@ -1606,10 +1606,10 @@ public final class MaplibreMap {
    */
   @Nullable
   public CameraPosition getCameraForGeometry(@NonNull Geometry geometry,
-                                             @FloatRange(from = MapboxConstants.MINIMUM_DIRECTION,
-                                               to = MapboxConstants.MAXIMUM_DIRECTION) double bearing,
-                                             @FloatRange(from = MapboxConstants.MINIMUM_TILT,
-                                               to = MapboxConstants.MAXIMUM_TILT) double tilt) {
+                                             @FloatRange(from = MaplibreConstants.MINIMUM_DIRECTION,
+                                               to = MaplibreConstants.MAXIMUM_DIRECTION) double bearing,
+                                             @FloatRange(from = MaplibreConstants.MINIMUM_TILT,
+                                               to = MaplibreConstants.MAXIMUM_TILT) double tilt) {
     return getCameraForGeometry(geometry, new int[] {0, 0, 0, 0}, bearing, tilt);
   }
 
@@ -1625,10 +1625,10 @@ public final class MaplibreMap {
   @Nullable
   public CameraPosition getCameraForGeometry(@NonNull Geometry geometry,
                                              @NonNull @Size(value = 4) int[] padding,
-                                             @FloatRange(from = MapboxConstants.MINIMUM_DIRECTION,
-                                               to = MapboxConstants.MAXIMUM_DIRECTION) double bearing,
-                                             @FloatRange(from = MapboxConstants.MINIMUM_TILT,
-                                               to = MapboxConstants.MAXIMUM_TILT) double tilt) {
+                                             @FloatRange(from = MaplibreConstants.MINIMUM_DIRECTION,
+                                               to = MaplibreConstants.MAXIMUM_DIRECTION) double bearing,
+                                             @FloatRange(from = MaplibreConstants.MINIMUM_TILT,
+                                               to = MaplibreConstants.MAXIMUM_TILT) double tilt) {
     return nativeMapView.getCameraForGeometry(geometry, padding, bearing, tilt);
   }
 

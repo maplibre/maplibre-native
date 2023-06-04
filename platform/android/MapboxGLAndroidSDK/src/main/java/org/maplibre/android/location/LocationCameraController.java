@@ -233,16 +233,16 @@ final class LocationCameraController {
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 
-  private final MapboxAnimator.AnimationsValueChangeListener<LatLng> latLngValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<LatLng>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<LatLng> latLngValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<LatLng>() {
       @Override
       public void onNewAnimationValue(LatLng value) {
         setLatLng(value);
       }
     };
 
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         boolean trackingNorth = cameraMode == CameraMode.TRACKING_GPS_NORTH
@@ -254,8 +254,8 @@ final class LocationCameraController {
       }
     };
 
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> compassBearingValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> compassBearingValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         if (cameraMode == CameraMode.TRACKING_COMPASS
@@ -265,16 +265,16 @@ final class LocationCameraController {
       }
     };
 
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> zoomValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> zoomValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         setZoom(value);
       }
     };
 
-  private final MapboxAnimator.AnimationsValueChangeListener<Float> tiltValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
+  private final MaplibreAnimator.AnimationsValueChangeListener<Float> tiltValueListener =
+    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         setTilt(value);
@@ -284,21 +284,21 @@ final class LocationCameraController {
   Set<AnimatorListenerHolder> getAnimationListeners() {
     Set<AnimatorListenerHolder> holders = new HashSet<>();
     if (isLocationTracking()) {
-      holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_CAMERA_LATLNG, latLngValueListener));
+      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_CAMERA_LATLNG, latLngValueListener));
     }
 
     if (isLocationBearingTracking()) {
-      holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_CAMERA_GPS_BEARING, gpsBearingValueListener));
+      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_CAMERA_GPS_BEARING, gpsBearingValueListener));
     }
 
     if (isConsumingCompass()) {
       holders.add(new AnimatorListenerHolder(
-        MapboxAnimator.ANIMATOR_CAMERA_COMPASS_BEARING,
+        MaplibreAnimator.ANIMATOR_CAMERA_COMPASS_BEARING,
         compassBearingValueListener));
     }
 
-    holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_ZOOM, zoomValueListener));
-    holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_TILT, tiltValueListener));
+    holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_ZOOM, zoomValueListener));
+    holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_TILT, tiltValueListener));
     return holders;
   }
 

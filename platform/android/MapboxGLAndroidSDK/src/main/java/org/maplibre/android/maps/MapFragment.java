@@ -49,13 +49,13 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
   /**
    * Creates a MapFragment instance
    *
-   * @param mapboxMapOptions The configuration options to be used.
+   * @param maplibreMapOptions The configuration options to be used.
    * @return MapFragment instantiated.
    */
   @NonNull
-  public static MapFragment newInstance(@Nullable MapboxMapOptions mapboxMapOptions) {
+  public static MapFragment newInstance(@Nullable MaplibreMapOptions maplibreMapOptions) {
     MapFragment mapFragment = new MapFragment();
-    mapFragment.setArguments(MapFragmentUtils.createFragmentArgs(mapboxMapOptions));
+    mapFragment.setArguments(MapFragmentUtils.createFragmentArgs(maplibreMapOptions));
     return mapFragment;
   }
 
@@ -69,7 +69,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
   @Override
   public void onInflate(@NonNull Context context, AttributeSet attrs, Bundle savedInstanceState) {
     super.onInflate(context, attrs, savedInstanceState);
-    setArguments(MapFragmentUtils.createFragmentArgs(MapboxMapOptions.createFromAttributes(context, attrs)));
+    setArguments(MapFragmentUtils.createFragmentArgs(MaplibreMapOptions.createFromAttributes(context, attrs)));
   }
 
   /**

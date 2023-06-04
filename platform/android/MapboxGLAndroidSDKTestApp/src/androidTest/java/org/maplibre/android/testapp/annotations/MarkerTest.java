@@ -3,7 +3,7 @@ package org.maplibre.android.testapp.annotations;
 import org.maplibre.android.annotations.Marker;
 import org.maplibre.android.annotations.MarkerOptions;
 import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.testapp.action.MapboxMapAction;
+import org.maplibre.android.testapp.action.MaplibreMapAction;
 import org.maplibre.android.testapp.activity.EspressoTest;
 import org.maplibre.android.testapp.utils.TestConstants;
 
@@ -14,7 +14,7 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static org.maplibre.android.testapp.action.MapboxMapAction.invoke;
+import static org.maplibre.android.testapp.action.MaplibreMapAction.invoke;
 import static org.junit.Assert.assertEquals;
 
 public class MarkerTest extends EspressoTest {
@@ -25,7 +25,7 @@ public class MarkerTest extends EspressoTest {
   @Ignore
   public void addMarkerTest() {
     validateTestSetup();
-    MapboxMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       assertEquals("Markers should be empty", 0, mapboxMap.getMarkers().size());
 
       MarkerOptions options = new MarkerOptions();
