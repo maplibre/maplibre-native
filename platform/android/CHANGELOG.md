@@ -6,6 +6,24 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ✨ Features and improvements
 
+* 💥 Breaking: Change package of all classes from `com.mapbox.mapboxsdk` to `org.maplibre.android` ([#1201](https://github.com/maplibre/maplibre-native/pull/1201)). This means you will need to fix your imports.
+
+  > To migrate:  
+  > In your imports in each of your project files, replace `com.mapbox.mapboxsdk.` with `org.maplibre.android.*`.
+
+* 💥 Breaking: Rename several classes to no longer contain the word "Mapbox". You will need to migrate by renaming references.
+
+  > To migrate:  
+  > Each affected occurrence will be marked as an error during compilation. Replace each occurrence of "Mapbox" with "Maplibre" and let your IDE do the import.
+  >
+  > These are the most important classes that have been renamed:
+  >
+  > * `Mapbox` → `Maplibre`
+  > * `MapboxMap` → `MaplibreMap`
+  > * `MapboxConstants` → `MaplibreConstants`
+  > * `MapboxMapOptions` → `MaplibreMapOptions`
+  > * but also others, less frequently used ones, like `MapboxGLSurfaceView` → `MaplibreGLSurfaceView`.
+
 ### 🐞 Bug fixes
 
 ### ⛵ Dependencies
