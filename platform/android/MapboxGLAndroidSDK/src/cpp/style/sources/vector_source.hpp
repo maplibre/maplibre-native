@@ -11,7 +11,7 @@ namespace android {
 class VectorSource : public Source {
 public:
     using SuperTag = Source;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/sources/VectorSource"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/sources/VectorSource"; };
 
     static void registerNative(jni::JNIEnv&);
 

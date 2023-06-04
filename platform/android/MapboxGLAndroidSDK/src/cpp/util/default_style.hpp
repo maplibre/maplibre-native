@@ -10,7 +10,7 @@ namespace android {
 
 class DefaultStyle : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/util/DefaultStyle"; };
+    static constexpr auto Name() { return "org/maplibre/android/util/DefaultStyle"; };
 
     static jni::Local<jni::Object<DefaultStyle>> New(jni::JNIEnv&, const mbgl::util::DefaultStyle&);
     static mbgl::util::DefaultStyle getDefaultStyle(jni::JNIEnv&, const jni::Object<DefaultStyle>&);

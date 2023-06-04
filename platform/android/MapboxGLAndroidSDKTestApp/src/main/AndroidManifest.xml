@@ -976,7 +976,7 @@
                 android:value="@string/category_camera" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mapbox.mapboxsdk.testapp.activity.FeatureOverviewActivity" />
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.offline.MergeOfflineRegionsActivity"
@@ -988,7 +988,7 @@
                 android:value="@string/category_offline" />
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mapbox.mapboxsdk.testapp.activity.FeatureOverviewActivity" />
+                android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
             android:name=".activity.location.LocationMapChangeActivity"

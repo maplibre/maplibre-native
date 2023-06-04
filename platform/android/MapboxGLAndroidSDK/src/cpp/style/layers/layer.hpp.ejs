@@ -19,9 +19,9 @@ class <%- camelize(type) %>Layer : public Layer {
 public:
     using SuperTag = Layer;
 <% if (type === 'location-indicator') { -%>
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/location/<%- camelize(type) %>Layer"; };
+    static constexpr auto Name() { return "org/maplibre/android/location/<%- camelize(type) %>Layer"; };
 <% } else { -%>
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/<%- camelize(type) %>Layer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/<%- camelize(type) %>Layer"; };
 <% } -%>
 
 <% if (type === 'background' || type === 'location-indicator') { -%>

@@ -13,7 +13,7 @@
         android:layout_marginRight="5dp"
         android:layout_marginTop="5dp">
 
-        <com.mapbox.mapboxsdk.maps.MapView
+        <org.maplibre.android.maps.MapView
             android:id="@+id/mini_map"
             android:layout_width="100dp"
             maps:maplibre_enableZMediaOverlay="true"

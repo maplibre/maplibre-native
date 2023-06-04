@@ -17,7 +17,7 @@
         <!-- DC -->
         <fragment
             android:id="@+id/map1"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
@@ -28,7 +28,7 @@
         <!-- SF -->
         <fragment
             android:id="@+id/map2"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
@@ -47,7 +47,7 @@
         <!-- Bangalore -->
         <fragment
             android:id="@+id/map3"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
@@ -58,7 +58,7 @@
         <!-- Ayacucho -->
         <fragment
             android:id="@+id/map4"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
