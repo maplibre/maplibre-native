@@ -56,7 +56,7 @@ public:
 
 }; // class FillExtrusionLayer
 
-class FillExtrusionJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::FillExtrusionLayerFactory {
+class FillExtrusionJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::FillExtrusionLayerFactory {
 public:
     ~FillExtrusionJavaLayerPeerFactory() override;
 
@@ -68,7 +68,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class FillExtrusionJavaLayerPeerFactory
+}; // class FillExtrusionJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl
