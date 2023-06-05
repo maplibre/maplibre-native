@@ -515,8 +515,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                 if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
                     const auto count = binder->getVertexCount();
-                    for (auto& attrs :
-                         {std::reference_wrapper(patternVertexAttrs), std::reference_wrapper(patternOutlineVertexAttrs)}) {
+                    for (auto& attrs : {std::reference_wrapper(patternVertexAttrs),
+                                        std::reference_wrapper(patternOutlineVertexAttrs)}) {
                         if (auto& attr = attrs.get().getOrAdd("a_opacity")) {
                             for (std::size_t i = 0; i < count; ++i) {
                                 const auto& opacity =
@@ -528,21 +528,23 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                         }
                     }
                 }
-//                if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
-//                    const auto count = binder->getVertexCount();
-//                    for (auto& attrs :
-//                         {std::reference_wrapper(patternVertexAttrs), std::reference_wrapper(patternOutlineVertexAttrs)}) {
-//                        if (auto& attr = attrs.get().getOrAdd("a_pattern_from")) {
-//                            for (std::size_t i = 0; i < count; ++i) {
-//                                const auto& opacity =
-//                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 4>>*>(
-//                                        binder->getVertexValue(i))
-//                                        ->a1;
-//                                attr->set<gfx::VertexAttribute::float2>(i, {});
-//                            }
-//                        }
-//                    }
-//                }
+                //                if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
+                //                    const auto count = binder->getVertexCount();
+                //                    for (auto& attrs :
+                //                         {std::reference_wrapper(patternVertexAttrs),
+                //                         std::reference_wrapper(patternOutlineVertexAttrs)}) {
+                //                        if (auto& attr = attrs.get().getOrAdd("a_pattern_from")) {
+                //                            for (std::size_t i = 0; i < count; ++i) {
+                //                                const auto& opacity =
+                //                                    static_cast<const
+                //                                    gfx::detail::VertexType<gfx::AttributeType<float, 4>>*>(
+                //                                        binder->getVertexValue(i))
+                //                                        ->a1;
+                //                                attr->set<gfx::VertexAttribute::float2>(i, {});
+                //                            }
+                //                        }
+                //                    }
+                //                }
 
                 if (!patternBuilder && patternShader) {
                     patternBuilder = context.createDrawableBuilder("fill-pattern");
