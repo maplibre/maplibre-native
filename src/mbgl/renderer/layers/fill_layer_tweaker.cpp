@@ -45,12 +45,11 @@ struct alignas(16) FillDrawableUBO {
 static_assert(sizeof(FillDrawableUBO) == 208);
 
 // move to utils, or does it already exist somewhere?
-template<typename T, std::size_t N, std::size_t M>
-auto concat(const std::array<T, N>& a1, const std::array<T, M>& a2)
-{
-    std::array<T, N+M> result;
-    std::copy (a1.cbegin(), a1.cend(), result.begin());
-    std::copy (a2.cbegin(), a2.cend(), result.begin() + N);
+template <typename T, std::size_t N, std::size_t M>
+auto concat(const std::array<T, N>& a1, const std::array<T, M>& a2) {
+    std::array<T, N + M> result;
+    std::copy(a1.cbegin(), a1.cend(), result.begin());
+    std::copy(a2.cbegin(), a2.cend(), result.begin() + N);
     return result;
 }
 
@@ -84,13 +83,17 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         const auto& colorProperty = evaluated.get<FillColor>();
-        const auto color = (colorProperty.isConstant() && colorProperty.constant()) ? *colorProperty.constant() : Color(0.0f, 0.0f, 0.0f, 0.0f);
+        const auto color = (colorProperty.isConstant() && colorProperty.constant()) ? *colorProperty.constant()
+                                                                                    : Color(0.0f, 0.0f, 0.0f, 0.0f);
 
         const auto& outlineColorProperty = evaluated.get<FillOutlineColor>();
-        const auto outlineColor = (outlineColorProperty.isConstant() && outlineColorProperty.constant()) ? *outlineColorProperty.constant() : Color(0.0f, 0.0f, 0.0f, 0.0f);
+        const auto outlineColor = (outlineColorProperty.isConstant() && outlineColorProperty.constant())
+                                      ? *outlineColorProperty.constant()
+                                      : Color(0.0f, 0.0f, 0.0f, 0.0f);
 
         const auto& opacityProperty = evaluated.get<FillOpacity>();
-        const auto opacity = (opacityProperty.isConstant() && opacityProperty.constant()) ? *opacityProperty.constant() : 1.0f;
+        const auto opacity = (opacityProperty.isConstant() && opacityProperty.constant()) ? *opacityProperty.constant()
+                                                                                          : 1.0f;
 
         const auto& fillPatternProperty = evaluated.get<FillPattern>();
         if (fillPatternProperty.isConstant() && fillPatternProperty.constant()) {
@@ -121,7 +124,7 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
 
         const auto& textures = drawable.getTextures();
         const auto hasTex = !textures.empty() && textures[0].texture;
-        const Size textureSize = hasTex ? textures[0].texture->getSize() : Size(0,0);
+        const Size textureSize = hasTex ? textures[0].texture->getSize() : Size(0, 0);
 
         const FillDrawableUBO drawableUBO = {
             /*.matrix=*/util::cast<float>(matrix),
@@ -129,17 +132,17 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
             /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
             /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
             /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-            /*.texsize=*/ { static_cast<float>(textureSize.width), static_cast<float>(textureSize.height) },
+            /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
             /*.fade=*/crossfade.t,
             /*.color_t=*/crossfade.t,
             /*.opacity_t=*/crossfade.t,
             /*.outline_color_t=*/crossfade.t,
             /*.pattern_from_t=*/crossfade.t,
             /*.pattern_to_t=*/crossfade.t,
-            /*.color=*/ attributeValue(color),
-            /*.opacity=*/ {opacity, opacity},
+            /*.color=*/attributeValue(color),
+            /*.opacity=*/{opacity, opacity},
             /*.outline_color_pad=*/{0.0f},
-            /*.outline_color=*/ util::cast<float>(outlineColor.toArray()),
+            /*.outline_color=*/util::cast<float>(outlineColor.toArray()),
             /*.pattern_from=*/{0.0f},
             /*.pattern_to=*/{0.0f},
         };
