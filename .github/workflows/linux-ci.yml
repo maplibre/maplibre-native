@@ -192,6 +192,7 @@ jobs:
       - name: Run Xorg with xserver-xorg-video-dummy
         run: |
           sudo X -config .github/xorg.conf &
+          sleep 5s
           xrandr -d :0 -q
           echo DISPLAY="$DISPLAY"
 
