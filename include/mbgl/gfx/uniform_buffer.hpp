@@ -18,6 +18,7 @@ protected:
 
 public:
     virtual ~UniformBuffer() = default;
+    virtual void update(const void* data, std::size_t size_) = 0;
 
     std::size_t getSize() const { return size; }
 
@@ -51,8 +52,7 @@ public:
     const std::shared_ptr<UniformBuffer>& get(const std::string& name) const;
 
     /// Add a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& addOrReplace(std::string name,
-                                                       const std::shared_ptr<UniformBuffer>& uniformBuffer);
+    const std::shared_ptr<UniformBuffer>& addOrReplace(std::string name, std::shared_ptr<UniformBuffer> uniformBuffer);
 
     UniformBufferArray& operator=(UniformBufferArray&&);
     UniformBufferArray& operator=(const UniformBufferArray&);

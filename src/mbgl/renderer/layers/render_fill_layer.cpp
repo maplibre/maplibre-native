@@ -20,6 +20,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 
 namespace mbgl {
@@ -194,7 +195,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                         tile.translatedMatrix(
                             evaluated.get<FillTranslate>(), evaluated.get<FillTranslateAnchor>(), parameters.state),
                         parameters.backend.getDefaultRenderable().getSize(),
-                        tile.getIconAtlasTexture().size,
+                        tile.getIconAtlasTexture()->getSize(),
                         crossfade,
                         tile.id,
                         parameters.state,
@@ -229,8 +230,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                      *bucket.triangleIndexBuffer,
                      bucket.triangleSegments,
                      FillPatternProgram::TextureBindings{
-                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
-                                                gfx::TextureFilterType::Linear},
+                         tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
                      });
             }
             if (evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined()) {
@@ -240,8 +240,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                      *bucket.lineIndexBuffer,
                      bucket.lineSegments,
                      FillOutlinePatternProgram::TextureBindings{
-                         textures::image::Value{tile.getIconAtlasTexture().getResource(),
-                                                gfx::TextureFilterType::Linear},
+                         tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
                      });
             }
         }
@@ -287,8 +286,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!renderTiles || renderTiles->empty()) {
         if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
+            stats.tileDrawablesRemoved += tileLayerGroup->clearDrawables();
         }
         return;
     }
@@ -359,7 +357,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
 
-            auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID);
+            // If we already have drawables for this tile, skip.
+            // If a drawable needs to be updated, that's handled in the layer tweaker.
+            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+                continue;
+            }
 
             const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
             if (!renderData) {
@@ -449,10 +451,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     }
                 }
 
-                if (tileDrawable) {
-                    continue;
-                }
-
                 if (doFill && !fillBuilder && fillShader) {
                     fillBuilder = context.createDrawableBuilder("fill");
                     fillBuilder->setShader(fillShader);
@@ -519,6 +517,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     patternBuilder->setSubLayerIndex(1);
+                    // patternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
                     outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
@@ -528,6 +527,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlinePatternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     outlinePatternBuilder->setSubLayerIndex(2);
+                    // outlinePatternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
                 }
 
                 //                             parameters.stencilModeForClipping(tile.id),

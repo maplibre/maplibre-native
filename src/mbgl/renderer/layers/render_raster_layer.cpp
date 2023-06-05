@@ -296,7 +296,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
             if (!bucket.hasData()) continue;
 
-            if (auto& tileDrawable = tileLayerGroup->getDrawable(renderPass, tileID)) continue;
+            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
 
             if (bucket.image) {
                 std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};

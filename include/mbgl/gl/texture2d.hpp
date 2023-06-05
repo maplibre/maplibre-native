@@ -26,19 +26,24 @@ public: // gfx::Texture2D
 
     Texture2D& setImage(std::shared_ptr<PremultipliedImage> image_) noexcept override;
 
+    Size getSize() const noexcept override { return size; }
+
     size_t getDataSize() const noexcept override;
 
     size_t getPixelStride() const noexcept override;
 
     size_t numChannels() const noexcept override;
 
-    void create(const std::vector<uint8_t>& pixelData, gfx::UploadPass& uploadPass) noexcept override;
     void create() noexcept override;
 
-    void upload(const PremultipliedImage& image, gfx::UploadPass& uploadPass) const noexcept override;
-    void upload(gfx::UploadPass& uploadPass) noexcept override;
+    void upload(const void* pixelData, const Size& size_) noexcept override;
+    void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
+    void upload() noexcept override;
 
-    gfx::TextureResource& getResource() override { return *textureResource; }
+    gfx::TextureResource& getResource() override {
+        assert(textureResource);
+        return *textureResource;
+    }
 
     bool needsUpload() const noexcept override { return !!image; };
 
@@ -46,6 +51,8 @@ public:
     /// @brief Get the OpenGL handle ID for the underlying resource
     /// @return GLuint
     platform::GLuint getTextureID() const noexcept;
+
+    void updateSamplerConfiguration() noexcept;
 
     /// @brief Bind this texture to the specified texture unit
     /// @param location Location index of texture sampler in a shader
@@ -57,16 +64,20 @@ public:
     void unbind() noexcept;
 
 private:
+    void createObject() noexcept;
+    void createStorage(const void* data = nullptr) noexcept;
+
+private:
     gl::Context& context;
     std::unique_ptr<gfx::TextureResource> textureResource{nullptr};
 
     SamplerState samplerState{};
-    gfx::TexturePixelType pixelFormat;
-    gfx::TextureChannelDataType channelType;
+    gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
+    gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
 
     std::shared_ptr<PremultipliedImage> image{nullptr};
     Size size{0, 0};
-    mutable bool samplerStateDirty{false};
+    bool samplerStateDirty{false};
 
     int32_t boundTextureUnit{-1};
     int32_t boundLocation{-1};

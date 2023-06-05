@@ -68,10 +68,9 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
                                                                         gfx::TexturePixelType format,
                                                                         gfx::TextureChannelDataType type) {
     auto obj = commandEncoder.context.createUniqueTexture();
-    int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
+    const int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
     commandEncoder.context.renderingStats().memTextures += textureByteSize;
-    std::unique_ptr<gfx::TextureResource> resource = std::make_unique<gl::TextureResource>(std::move(obj),
-                                                                                           textureByteSize);
+    auto resource = std::make_unique<gl::TextureResource>(std::move(obj), textureByteSize);
     commandEncoder.context.pixelStoreUnpack = {1};
     updateTextureResource(*resource, size, data, format, type);
     // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
@@ -210,19 +209,20 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     return {};
 }
 
-std::shared_ptr<gfx::Texture2D> UploadPass::createTexture2D(const PremultipliedImage& image) {
-    auto tex = std::make_shared<gl::Texture2D>(commandEncoder.context);
-    tex->setSize(image.size).setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte).create();
-    tex->upload(image, *this);
-    return tex;
-}
-
 void UploadPass::pushDebugGroup(const char* name) {
     commandEncoder.pushDebugGroup(name);
 }
 
 void UploadPass::popDebugGroup() {
     commandEncoder.popDebugGroup();
+}
+
+gfx::Context& UploadPass::getContext() {
+    return commandEncoder.context;
+}
+
+const gfx::Context& UploadPass::getContext() const {
+    return commandEncoder.context;
 }
 
 } // namespace gl

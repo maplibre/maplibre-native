@@ -15,7 +15,6 @@ class Segment;
 
 namespace gfx {
 
-class Context;
 class IndexBuffer;
 class UploadPass;
 class VertexBufferResource;
@@ -51,7 +50,7 @@ public:
     /// Reset a single color attribute for all vertexes
     void resetColor(const Color&) override;
 
-    void upload(gfx::Context&, gfx::UploadPass&);
+    void upload(gfx::UploadPass&);
 
 protected:
     class Impl;
@@ -61,7 +60,7 @@ protected:
     DrawableGL(std::unique_ptr<Impl>);
 
 private:
-    void uploadTextures(gfx::UploadPass&) const;
+    void uploadTextures() const;
 
     void bindUniformBuffers() const;
     void unbindUniformBuffers() const;

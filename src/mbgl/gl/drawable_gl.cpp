@@ -126,7 +126,7 @@ void DrawableGL::unbindUniformBuffers() const {
     }
 }
 
-void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
+void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     if (!shader) {
         return;
     }
@@ -137,6 +137,7 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
                        });
 
     if (build) {
+        auto& context = uploadPass.getContext();
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
@@ -178,13 +179,13 @@ void DrawableGL::upload(gfx::Context& context, gfx::UploadPass& uploadPass) {
         textures.begin(), textures.end(), [](const auto& tex) { return tex.texture->needsUpload(); });
 
     if (texturesNeedUpload) {
-        uploadTextures(uploadPass);
+        uploadTextures();
     }
 }
 
-void DrawableGL::uploadTextures(gfx::UploadPass& uploadPass) const {
+void DrawableGL::uploadTextures() const {
     for (const auto& tex : textures) {
-        std::static_pointer_cast<gl::Texture2D>(tex.texture)->upload(uploadPass);
+        std::static_pointer_cast<gl::Texture2D>(tex.texture)->upload();
     }
 }
 

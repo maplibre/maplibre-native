@@ -115,9 +115,12 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
             /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
         };
 
-        auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-        drawable.mutableUniformBuffers().addOrReplace("FillDrawableUBO", drawableUniformBuffer);
+        if (auto& ubo = drawable.mutableUniformBuffers().get("FillDrawableUBO")) {
+            ubo->update(&drawableUBO, sizeof(drawableUBO));
+        } else {
+            drawable.mutableUniformBuffers().addOrReplace(
+                "FillDrawableUBO", parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
+        }
     });
 }
-
 } // namespace mbgl
