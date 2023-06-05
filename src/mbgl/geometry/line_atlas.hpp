@@ -1,13 +1,14 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
+#include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/util/image.hpp>
-#include <mbgl/util/variant.hpp>
 
 #include <map>
 #include <memory>
 #include <vector>
-#include <optional>
+#include <variant>
 
 namespace mbgl {
 
@@ -54,7 +55,7 @@ public:
 
 private:
     LinePatternPos from, to;
-    variant<AlphaImage, gfx::Texture> texture;
+    std::variant<AlphaImage, gfx::Texture2DPtr> texture;
 };
 
 class LineAtlas {
@@ -75,7 +76,7 @@ public:
 private:
     std::map<size_t, DashPatternTexture> textures;
 
-    // Stores a list of hashes of texture objcts that need uploading.
+    // Stores a list of hashes of texture objects that need uploading.
     std::vector<size_t> needsUpload;
 };
 
