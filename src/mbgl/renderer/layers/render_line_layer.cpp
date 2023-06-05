@@ -59,6 +59,11 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+    
+    // push evaluated properties to the tweaker
+    if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
+        tileLayerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
+    }
 }
 
 bool RenderLineLayer::hasTransition() const {
