@@ -87,21 +87,22 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     assert(atlasTextures);
 
     if (layoutResult->glyphAtlasImage) {
-        atlasTextures->glyph = uploadPass.createTexture(*layoutResult->glyphAtlasImage);
+        atlasTextures->glyph = uploadPass.getContext().createTexture2D();
+        atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
         layoutResult->glyphAtlasImage = {};
     }
 
     if (layoutResult->iconAtlas.image.valid()) {
-        atlasTextures->icon = uploadPass.createTexture(layoutResult->iconAtlas.image);
+        atlasTextures->icon = uploadPass.getContext().createTexture2D();
+        atlasTextures->icon->upload(layoutResult->iconAtlas.image);
         layoutResult->iconAtlas.image = {};
     }
 
     if (atlasTextures->icon && !imagePatches.empty()) {
         for (const auto& imagePatch : imagePatches) { // patch updated images.
-            uploadPass.updateTextureSub(*atlasTextures->icon,
-                                        imagePatch.image->image,
-                                        imagePatch.paddedRect.x + ImagePosition::padding,
-                                        imagePatch.paddedRect.y + ImagePosition::padding);
+            atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
+                                                 imagePatch.paddedRect.x + ImagePosition::padding,
+                                                 imagePatch.paddedRect.y + ImagePosition::padding);
         }
         imagePatches.clear();
     }

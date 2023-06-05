@@ -27,14 +27,14 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
 }
 
-void Drawable::setTexture(std::shared_ptr<gfx::Texture2D>& texture, int32_t location) {
+void Drawable::setTexture(std::shared_ptr<gfx::Texture2D> texture, int32_t location) {
     for (auto& tex : textures) {
         if (tex.location == location) {
-            tex.texture = texture;
+            tex.texture = std::move(texture);
             return;
         }
     }
-    textures.emplace_back(texture, location);
+    textures.emplace_back(std::move(texture), location);
 }
 
 void Drawable::removeTexture(int32_t location) {

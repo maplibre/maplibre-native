@@ -173,7 +173,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
 
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
             const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
-            const Size& texsize = tile.getIconAtlasTexture().size;
+            const Size& texsize = tile.getIconAtlasTexture()->getSize();
 
             std::optional<ImagePosition> posA = tile.getPattern(linePatternValue.from.id());
             std::optional<ImagePosition> posB = tile.getPattern(linePatternValue.to.id());
@@ -189,7 +189,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
                  posA,
                  posB,
                  LinePatternProgram::TextureBindings{
-                     textures::image::Value{tile.getIconAtlasTexture().getResource(), gfx::TextureFilterType::Linear},
+                     tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear),
                  });
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             assert(colorRampTexture);

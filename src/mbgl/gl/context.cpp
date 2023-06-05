@@ -475,6 +475,10 @@ TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t 
     return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity);
 }
 
+gfx::Texture2DPtr Context::createTexture2D() {
+    return std::make_shared<gl::Texture2D>(*this);
+}
+
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     GLbitfield mask = 0;
 
@@ -603,10 +607,10 @@ void Context::performCleanup() {
     // TODO: Find a better way to unbind VAOs after we're done with them without
     // introducing unnecessary bind(0)/bind(N) sequences.
     {
-        activeTextureUnit = 1;
-        texture[1] = 0;
-        activeTextureUnit = 0;
-        texture[0] = 0;
+        for (auto i = 0; i < gfx::MaxActiveTextureUnits; i++) {
+            activeTextureUnit = i;
+            texture[i] = 0;
+        }
 
         bindVertexArray = 0;
     }
