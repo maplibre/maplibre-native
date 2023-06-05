@@ -210,7 +210,7 @@ jobs:
     
       - name: Generate coverage report
         run: | 
-          bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --spawn_strategy=local
+          bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --test-env --spawn_strategy=local --test_env=DISPLAY=0
           echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
 
       - name: Upload coverage report
