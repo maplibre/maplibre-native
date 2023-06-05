@@ -77,8 +77,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroup& layerGroup,
                                       /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
                                       /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
                                       0,
-                                      0
-        };
+                                      0};
         auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("RasterDrawableUBO", drawableUniformBuffer);
     });
