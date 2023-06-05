@@ -60,7 +60,6 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
     
-    // push evaluated properties to the tweaker
     if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
         tileLayerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
     }
