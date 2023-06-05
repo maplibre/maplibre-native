@@ -45,7 +45,9 @@ struct alignas(16) BackgroundPatternLayerUBO {
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
 
+#if !defined(NDEBUG)
 static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatternShader";
+#endif
 static constexpr std::string_view BackgroundDrawableUBOName = "BackgroundDrawableUBO";
 static constexpr std::string_view BackgroundLayerUBOName = "BackgroundLayerUBO";
 

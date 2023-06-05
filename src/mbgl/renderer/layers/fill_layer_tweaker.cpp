@@ -100,8 +100,8 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
             Faded<style::expression::Image> pattern = *fillPatternProperty.constant();
             const auto& patternFrom = pattern.from;
             const auto& patternTo = pattern.to;
-            __unused const auto& idFrom = patternFrom.id();
-            __unused const auto& idTo = patternTo.id();
+            [[maybe_unused]] const auto& idFrom = patternFrom.id();
+            [[maybe_unused]] const auto& idTo = patternTo.id();
         }
 
         const auto& translation = evaluated.get<FillTranslate>();
