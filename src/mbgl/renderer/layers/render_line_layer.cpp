@@ -430,8 +430,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
                     size_t index{0};
                     for (const auto& vert : bucket.vertices.vector()) {
-                        attr->set(index++,
-                                  gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+                        attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
                     }
                 }
 

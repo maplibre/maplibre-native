@@ -59,8 +59,7 @@ void LineLayerTweaker::execute(LayerGroup& layerGroup,
     evaluatedPropsUBO.gapwidth = evaluated.get<LineGapWidth>().constantOr(0);
     evaluatedPropsUBO.offset = evaluated.get<LineOffset>().constantOr(0);
     evaluatedPropsUBO.width = evaluated.get<LineWidth>().constantOr(0);
-    evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
-                                                                         sizeof(evaluatedPropsUBO));
+    evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
 
     LineInterpolatedPropsUBO interpolatedUBO;
     interpolatedUBO.color_t = 1;
