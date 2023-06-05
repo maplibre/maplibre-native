@@ -93,29 +93,30 @@ namespace {
 
 // Detects a difference in keys of renderTiles and tileClippingMaskIDs
 template <typename TIter>
-bool tileIDsIdentical(TIter beg, TIter end,
+bool tileIDsIdentical(TIter beg,
+                      TIter end,
                       std::function<const UnwrappedTileID&(typename TIter::value_type)> f,
                       const std::map<UnwrappedTileID, int32_t>& idMap) {
     if (static_cast<std::size_t>(std::distance(beg, end)) != idMap.size()) {
         return false;
     }
-    assert(std::is_sorted(beg, end, [&f](const auto& a, const auto& b){ return f(a)<f(b); }));
-    return std::equal(beg, end, idMap.cbegin(), [&f](const auto& ii, const auto& pair){ return f(ii) == pair.first; });
+    assert(std::is_sorted(beg, end, [&f](const auto& a, const auto& b) { return f(a) < f(b); }));
+    return std::equal(beg, end, idMap.cbegin(), [&f](const auto& ii, const auto& pair) { return f(ii) == pair.first; });
 }
 
 } // namespace
 
 void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
-    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), [](const auto& ii){ return ii; });
+    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), [](const auto& ii) { return ii; });
 }
 
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), [](const auto& ii){ return ii.get().id; });
+    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), [](const auto& ii) { return ii.get().id; });
 }
 
 template <typename TIter>
-void PaintParameters::renderTileClippingMasks(TIter beg, TIter end,
-                                              std::function<UnwrappedTileID(const typename std::iterator_traits<TIter>::value_type&)> f) {
+void PaintParameters::renderTileClippingMasks(
+    TIter beg, TIter end, std::function<UnwrappedTileID(const typename std::iterator_traits<TIter>::value_type&)> f) {
     if (tileIDsIdentical(beg, end, f, tileClippingMaskIDs)) {
         // The current stencil mask is for this source already; no need to draw another one.
         return;

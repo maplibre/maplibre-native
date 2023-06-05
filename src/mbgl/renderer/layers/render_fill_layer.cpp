@@ -339,7 +339,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
-    const auto commonInit = [](gfx::DrawableBuilder& builder){
+    const auto commonInit = [](gfx::DrawableBuilder& builder) {
         builder.setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
         builder.setNeedsStencil(true);

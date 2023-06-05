@@ -48,13 +48,13 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
     std::set<UnwrappedTileID> tileIDs;
     observeDrawables([&](const gfx::Drawable& drawable) {
-        if (drawable.getEnabled() && drawable.getNeedsStencil() &&
-            drawable.getTileID() && drawable.hasRenderPass(parameters.pass)) {
+        if (drawable.getEnabled() && drawable.getNeedsStencil() && drawable.getTileID() &&
+            drawable.hasRenderPass(parameters.pass)) {
             tileIDs.emplace(drawable.getTileID()->toUnwrapped());
         }
     });
     parameters.renderTileClippingMasks(tileIDs);
-    
+
     observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
