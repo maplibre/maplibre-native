@@ -45,6 +45,10 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     passes = properties->evaluated.get<style::RasterOpacity>() > 0 ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+    if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
+        tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+    }
 }
 
 bool RenderRasterLayer::hasTransition() const {
