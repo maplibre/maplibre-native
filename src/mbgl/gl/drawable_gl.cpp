@@ -7,6 +7,7 @@
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -28,8 +29,11 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
         if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
             context.program = shaderGL.getGLProgramID();
         }
-    } else {
-        context.program = value::Program::Default;
+    }
+    if (!shader || context.program.getCurrentValue() == 0) {
+        mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getId()) + "/" + getName());
+        assert(false);
+        return;
     }
 
     context.setDepthMode(parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));

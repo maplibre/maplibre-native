@@ -45,55 +45,48 @@ struct alignas(16) BackgroundPatternLayerUBO {
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
 
+static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatternShader";
+static constexpr std::string_view BackgroundDrawableUBOName = "BackgroundDrawableUBO";
+static constexpr std::string_view BackgroundLayerUBOName = "BackgroundLayerUBO";
+
 void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& state = parameters.state;
+    auto& context = parameters.context;
     const auto& evaluated = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).crossfade;
-
     const bool hasPattern = !evaluated.get<BackgroundPattern>().to.empty();
-    const std::optional<ImagePosition> imagePosA = hasPattern ? parameters.patternAtlas.getPattern(
-                                                                    evaluated.get<BackgroundPattern>().from.id())
-                                                              : std::nullopt;
-    const std::optional<ImagePosition> imagePosB = hasPattern ? parameters.patternAtlas.getPattern(
-                                                                    evaluated.get<BackgroundPattern>().to.id())
-                                                              : std::nullopt;
+    const auto imagePosA = hasPattern ? parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().from.id())
+                                      : std::nullopt;
+    const auto imagePosB = hasPattern ? parameters.patternAtlas.getPattern(evaluated.get<BackgroundPattern>().to.id())
+                                      : std::nullopt;
 
     if (hasPattern && (!imagePosA || !imagePosB)) {
+        // The pattern isn't valid, disable the whole thing.
+        layerGroup.setEnabled(false);
         return;
     }
+    layerGroup.setEnabled(true);
 
-    if (!shader) {
-        shader = parameters.context.getGenericShader(parameters.shaders, "BackgroundShader");
-    }
-    if (!patternShader) {
-        patternShader = parameters.context.getGenericShader(parameters.shaders, "BackgroundPatternShader");
-    }
-    const auto& curShader = hasPattern ? patternShader : shader;
-    if (!curShader) {
-        return;
-    }
-
+    constexpr int32_t samplerLocation = 0;
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
+
+        // We assume that drawables don't change between pattern and non-pattern.
+        assert(hasPattern == (drawable.getShader() ==
+                              context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
+
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = parameters.matrixForTile(tileID);
 
-        drawable.setShader(curShader);
+        BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
-        BackgroundDrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(matrix);
-
-        if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundDrawableUBO")) {
-            ubo->update(&drawableUBO, sizeof(drawableUBO));
-        } else {
-            drawable.mutableUniformBuffers().addOrReplace(
-                "BackgroundDrawableUBO", parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO)));
-        }
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.createOrUpdate(BackgroundDrawableUBOName, &drawableUBO, context);
 
         if (hasPattern) {
             // TODO: add when raster is merged
-            // curShader->getSamplerLocation("u_image");
-            drawable.setTexture(parameters.patternAtlas.texture(), 0);
+            // if (samplerLocation < 0) curShader->getSamplerLocation("u_image");
+            drawable.setTexture(parameters.patternAtlas.texture(), samplerLocation);
 
             // from BackgroundPatternProgram::layoutUniformValues
             const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(
@@ -121,28 +114,14 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ {0},
             };
-
-            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO");
-                ubo->getSize() == sizeof(layerUBO)) {
-                ubo->update(&drawableUBO, sizeof(drawableUBO));
-            } else {
-                drawable.mutableUniformBuffers().addOrReplace(
-                    "BackgroundLayerUBO", parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
-            }
+            uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
         } else {
             const BackgroundLayerUBO layerUBO = {
                 /* .color = */ evaluated.get<BackgroundColor>(),
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ {0, 0, 0},
             };
-
-            if (auto& ubo = drawable.mutableUniformBuffers().get("BackgroundLayerUBO");
-                ubo->getSize() == sizeof(layerUBO)) {
-                ubo->update(&drawableUBO, sizeof(drawableUBO));
-            } else {
-                drawable.mutableUniformBuffers().addOrReplace(
-                    "BackgroundLayerUBO", parameters.context.createUniformBuffer(&layerUBO, sizeof(layerUBO)));
-            }
+            uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
         }
     });
 }

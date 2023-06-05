@@ -28,8 +28,6 @@ public:
     void execute(LayerGroup&, const RenderTree&, const PaintParameters&) override;
 
 protected:
-    gfx::ShaderProgramBasePtr shader;
-    gfx::ShaderProgramBasePtr patternShader;
 };
 
 } // namespace mbgl

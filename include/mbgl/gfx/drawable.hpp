@@ -104,6 +104,10 @@ public:
     /// @param location A sampler location in the shader being used with this drawable.
     void setTexture(std::shared_ptr<gfx::Texture2D> texture, int32_t location);
 
+    /// Whether the drawble should be drawn
+    bool getEnabled() const { return enabled; }
+    void setEnabled(bool value) { enabled = value; }
+
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
@@ -150,6 +154,7 @@ public:
     }
 
 protected:
+    bool enabled = true;
     std::string name;
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
