@@ -326,6 +326,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::vector<gfx::DrawablePtr> newTiles;
     gfx::VertexAttributeArray fillVertexAttrs;
     gfx::VertexAttributeArray outlineVertexAttrs;
+    gfx::VertexAttributeArray patternVertexAttrs;
+    gfx::VertexAttributeArray patternOutlineVertexAttrs;
 
     const auto finish = [&](gfx::DrawableBuilder& builder, RenderPass pass, const OverscaledTileID& tileID) {
         builder.flush();
@@ -352,7 +354,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
         });
 
-        // parameters.renderTileClippingMasks(renderTiles);
+        constexpr auto samplerLocation = 0;
 
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
@@ -507,8 +509,40 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     Faded<expression::Image>{"", ""});
                 const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
                 const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
-
                 paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
+
+                // if (samplerLocation < 0) curShader->getSamplerLocation("u_image");
+
+                if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
+                    const auto count = binder->getVertexCount();
+                    for (auto& attrs :
+                         {std::reference_wrapper(patternVertexAttrs), std::reference_wrapper(patternOutlineVertexAttrs)}) {
+                        if (auto& attr = attrs.get().getOrAdd("a_opacity")) {
+                            for (std::size_t i = 0; i < count; ++i) {
+                                const auto& opacity =
+                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
+                                        binder->getVertexValue(i))
+                                        ->a1;
+                                attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
+                            }
+                        }
+                    }
+                }
+//                if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
+//                    const auto count = binder->getVertexCount();
+//                    for (auto& attrs :
+//                         {std::reference_wrapper(patternVertexAttrs), std::reference_wrapper(patternOutlineVertexAttrs)}) {
+//                        if (auto& attr = attrs.get().getOrAdd("a_pattern_from")) {
+//                            for (std::size_t i = 0; i < count; ++i) {
+//                                const auto& opacity =
+//                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 4>>*>(
+//                                        binder->getVertexValue(i))
+//                                        ->a1;
+//                                attr->set<gfx::VertexAttribute::float2>(i, {});
+//                            }
+//                        }
+//                    }
+//                }
 
                 if (!patternBuilder && patternShader) {
                     patternBuilder = context.createDrawableBuilder("fill-pattern");
@@ -517,7 +551,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     patternBuilder->setSubLayerIndex(1);
-                    // patternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
+                    if (auto& tex = tile.getIconAtlasTexture()) {
+                        patternBuilder->setTexture(tex, samplerLocation);
+                    }
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
                     outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
@@ -527,21 +563,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     outlinePatternBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     outlinePatternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     outlinePatternBuilder->setSubLayerIndex(2);
-                    // outlinePatternBuilder->setTexture(tile.getIconAtlasTexture(), 0);
+                    if (auto& tex = tile.getIconAtlasTexture()) {
+                        patternBuilder->setTexture(tex, samplerLocation);
+                    }
                 }
-
-                //                             parameters.stencilModeForClipping(tile.id),
-                //                             parameters.colorModeForRenderPass(),
-                //                             gfx::CullFaceMode::disabled(),
-                //                             std::forward<decltype(textureBindings)>(textureBindings),
 
                 if (patternBuilder) {
                     patternBuilder->setRenderPass(renderPass);
-                    // patternBuilder->setVertexAttributes(fillVertexAttrs);
+                    patternBuilder->setVertexAttributes(fillVertexAttrs);
                 }
                 if (outlinePatternBuilder) {
                     outlinePatternBuilder->setRenderPass(renderPass);
-                    // outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
+                    outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
                 }
 
                 if (patternBuilder) {
@@ -563,56 +596,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     finish(*outlinePatternBuilder, renderPass, tileID);
                 }
 
-                //    auto draw = [&](auto& programInstance,
-                //                    const auto& drawMode,
-                //                    const auto& depthMode,
-                //                    const auto& indexBuffer,
-                //                    const auto& segments,
-                //                    auto&& textureBindings) {
-                //        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
-                //        paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
-                //
-                //        const auto allUniformValues = programInstance.computeAllUniformValues(
-                //            FillPatternProgram::layoutUniformValues(
-                //                parameters.backend.getDefaultRenderable().getSize(),
-                //                tile.getIconAtlasTexture().size,
-                //                crossfade,
-                //                tile.id,
-                //                parameters.state,
-                //                parameters.pixelRatio),
-                //            paintPropertyBinders,
-                //            evaluated,
-                //            static_cast<float>(parameters.state.getZoom()));
-                //        const auto allAttributeBindings = programInstance.computeAllAttributeBindings(
-                //            *bucket.vertexBuffer, paintPropertyBinders, evaluated);
-                //
                 //        checkRenderability(parameters, programInstance.activeBindingCount(allAttributeBindings));
-                //
-                //    };
-                //
-                //    if (bucket.triangleIndexBuffer) {
-                //        draw(*fillPatternProgram,
-                //             gfx::Triangles(),
-                //             parameters.depthModeForSublayer(1, gfx::DepthMaskType::ReadWrite),
-                //             *bucket.triangleIndexBuffer,
-                //             bucket.triangleSegments,
-                //             FillPatternProgram::TextureBindings{
-                //                 textures::image::Value{tile.getIconAtlasTexture().getResource(),
-                //                                        gfx::TextureFilterType::Linear},
-                //             });
-                //    }
-                //    if (evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined()) {
-                //        draw(*fillOutlinePatternProgram,
-                //             gfx::Lines{2.0f},
-                //             parameters.depthModeForSublayer(2, gfx::DepthMaskType::ReadOnly),
-                //             *bucket.lineIndexBuffer,
-                //             bucket.lineSegments,
-                //             FillOutlinePatternProgram::TextureBindings{
-                //                 textures::image::Value{tile.getIconAtlasTexture().getResource(),
-                //                                        gfx::TextureFilterType::Linear},
-                //             });
-                //    }
-                //}
             }
         }
     }

@@ -7,6 +7,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
@@ -38,13 +39,20 @@ struct alignas(16) FillDrawableUBO {
     /* 176 */ std::array<float, 4> pattern_from;
     /* 208 */ std::array<float, 4> pattern_to;
 
-    // Pattern texture
-    /* ? */ // Drawable::TextureAttachment? image;
-
     /*  */ // std::array<float, 3> padding;
     /* 208 */
 };
 static_assert(sizeof(FillDrawableUBO) == 208);
+
+// move to utils, or does it already exist somewhere?
+template<typename T, std::size_t N, std::size_t M>
+auto concat(const std::array<T, N>& a1, const std::array<T, M>& a2)
+{
+    std::array<T, N+M> result;
+    std::copy (a1.cbegin(), a1.cend(), result.begin());
+    std::copy (a2.cbegin(), a2.cend(), result.begin() + N);
+    return result;
+}
 
 void FillLayerTweaker::execute(LayerGroup& layerGroup,
                                const RenderTree& renderTree,
@@ -75,6 +83,24 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
+        const auto& colorProperty = evaluated.get<FillColor>();
+        const auto color = (colorProperty.isConstant() && colorProperty.constant()) ? *colorProperty.constant() : Color(0.0f, 0.0f, 0.0f, 0.0f);
+
+        const auto& outlineColorProperty = evaluated.get<FillOutlineColor>();
+        const auto outlineColor = (outlineColorProperty.isConstant() && outlineColorProperty.constant()) ? *outlineColorProperty.constant() : Color(0.0f, 0.0f, 0.0f, 0.0f);
+
+        const auto& opacityProperty = evaluated.get<FillOpacity>();
+        const auto opacity = (opacityProperty.isConstant() && opacityProperty.constant()) ? *opacityProperty.constant() : 1.0f;
+
+        const auto& fillPatternProperty = evaluated.get<FillPattern>();
+        if (fillPatternProperty.isConstant() && fillPatternProperty.constant()) {
+            Faded<style::expression::Image> pattern = *fillPatternProperty.constant();
+            const auto& patternFrom = pattern.from;
+            const auto& patternTo = pattern.to;
+            __unused const auto& idFrom = patternFrom.id();
+            __unused const auto& idTo = patternTo.id();
+        }
+
         const auto& translation = evaluated.get<FillTranslate>();
         const auto anchor = evaluated.get<FillTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
@@ -93,26 +119,29 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
         const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
         const auto pixelRatio = parameters.pixelRatio;
 
+        const auto& textures = drawable.getTextures();
+        const auto hasTex = !textures.empty() && textures[0].texture;
+        const Size textureSize = hasTex ? textures[0].texture->getSize() : Size(0,0);
+
         const FillDrawableUBO drawableUBO = {
             /*.matrix=*/util::cast<float>(matrix),
             /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
             /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
             /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
             /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-            /*.texsize=*/{0.0f, 0.0f}, // tile.getIconAtlasTexture().size
+            /*.texsize=*/ { static_cast<float>(textureSize.width), static_cast<float>(textureSize.height) },
             /*.fade=*/crossfade.t,
-            /*.color_t=*/0.0f,
-            /*.opacity_t=*/0.0f,
-            /*.outline_color_t=*/0.0f,
-            /*.pattern_from_t=*/0.0f,
-            /*.pattern_to_t=*/0.0f,
-            /*.color=*/{0.0f},
-            /*.opacity=*/{0.0f},
+            /*.color_t=*/crossfade.t,
+            /*.opacity_t=*/crossfade.t,
+            /*.outline_color_t=*/crossfade.t,
+            /*.pattern_from_t=*/crossfade.t,
+            /*.pattern_to_t=*/crossfade.t,
+            /*.color=*/ attributeValue(color),
+            /*.opacity=*/ {opacity, opacity},
             /*.outline_color_pad=*/{0.0f},
-            /*.outline_color=*/{0.0f},
+            /*.outline_color=*/ util::cast<float>(outlineColor.toArray()),
             /*.pattern_from=*/{0.0f},
             /*.pattern_to=*/{0.0f},
-            /*.image=*/ // TextureAttachment(tile.getIconAtlasTexture().getResource(), Linear)
         };
 
         if (auto& ubo = drawable.mutableUniformBuffers().get("FillDrawableUBO")) {
