@@ -10,6 +10,8 @@ layout (std140) uniform RasterDrawableUBO {
     highp float u_brightness_high;
     highp float u_saturation_factor;
     highp float u_contrast_factor;
+    highp float pad1;
+    highp float pad2;
 };
 
 layout (location = 0) in vec2 a_pos;

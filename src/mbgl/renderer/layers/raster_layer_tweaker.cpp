@@ -24,6 +24,8 @@ struct alignas(16) RasterDrawableUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
+    float pad1;
+    float pad2;
 };
 static_assert(sizeof(RasterDrawableUBO) == 128);
 static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
@@ -73,7 +75,10 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroup& layerGroup,
                                       /*.brightness_low = */ evaluated.get<RasterBrightnessMin>(),
                                       /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
                                       /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
-                                      /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>())};
+                                      /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
+                                      0,
+                                      0
+        };
         auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
         drawable.mutableUniformBuffers().addOrReplace("RasterDrawableUBO", drawableUniformBuffer);
     });

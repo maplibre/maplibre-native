@@ -6,6 +6,7 @@
 #include <mbgl/util/identity.hpp>
 
 #include <string>
+#include <optional>
 
 namespace mbgl {
 namespace gfx {
