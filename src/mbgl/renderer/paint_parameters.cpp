@@ -95,7 +95,7 @@ namespace {
 template <typename TIter>
 bool tileIDsIdentical(TIter beg,
                       TIter end,
-                      std::function<const UnwrappedTileID&(typename TIter::value_type)> f,
+                      std::function<const UnwrappedTileID&(const typename TIter::value_type&)> f,
                       const std::map<UnwrappedTileID, int32_t>& idMap) {
     if (static_cast<std::size_t>(std::distance(beg, end)) != idMap.size()) {
         return false;
