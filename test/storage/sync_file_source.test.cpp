@@ -7,6 +7,7 @@
 #include <mbgl/test/map_adapter.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <stdexcept>
 #include <unordered_map>
 
 #include <gtest/gtest.h>
@@ -33,6 +34,14 @@ public:
     void add(std::string const& key, std::string const& data) {
         assets.emplace(key, std::make_shared<std::string>(data));
     };
+
+    virtual void setResourceOptions(ResourceOptions _) override { throw std::runtime_error("Not implemented"); }
+
+    virtual ResourceOptions getResourceOptions() override { throw std::runtime_error("Not implemented"); }
+
+    virtual void setClientOptions(ClientOptions) override { throw std::runtime_error("Not implemented"); }
+
+    virtual ClientOptions getClientOptions() { throw std::runtime_error("Not implemented"); }
 
 private:
     std::unordered_map<std::string, std::shared_ptr<std::string>> assets;

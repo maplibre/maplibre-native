@@ -72,7 +72,9 @@ void RasterSource::loadDescription(FileSource& fileSource) {
                 return;
             }
             const auto& tileServerOptions = fileSource.getResourceOptions().tileServerOptions();
-            util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), getTileSize());
+            if (tileServerOptions.uriSchemeAlias() == "mapbox") {
+                util::mapbox::canonicalizeTileset(tileServerOptions, *tileset, url, getType(), getTileSize());
+            }
             bool changed = impl().tileset != *tileset;
 
             baseImpl = makeMutable<Impl>(impl(), *tileset);

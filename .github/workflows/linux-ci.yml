@@ -2,6 +2,20 @@ name: linux-ci
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "test/**"
+      - "render-test/**"
+      - "expression-test/**"
+      - "include/**"
+      - ".github/workflows/linux-ci.yml"
+      - "vendor/**"
+      - "CMakeLists.txt"
+      - metrics/linux-gcc8-release-style.json
+
   pull_request:
     branches:
       - main
@@ -154,3 +168,46 @@ jobs:
           path: |
             metrics/linux-gcc8-release-style.html
             ./pr_number
+
+  coverage:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libuv1-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libglfw3-dev
+
+      - name: Cache Bazel
+        uses: actions/cache@v2
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
+      
+      - name: Start server
+        run: |
+          npm install --ignore-scripts
+          node test/storage/server.js &
+    
+      - name: Generate coverage report
+        run: | 
+          bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --run_under="xvfb-run -a"
+          echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ${{ env.coverage_report }}
+          fail_ci_if_error: true
+          verbose: true
