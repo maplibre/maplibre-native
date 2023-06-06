@@ -262,13 +262,13 @@ TileServerOptions TileServerOptions::MapboxConfiguration() {
 
 TileServerOptions TileServerOptions::MapTilerConfiguration() {
     std::vector<mbgl::util::DefaultStyle> styles{
-        mbgl::util::DefaultStyle("maptiler://maps/hybrid", "Satellite Hybrid", 1),
-        mbgl::util::DefaultStyle("maptiler://maps/topo", "Satellite Topo", 1),
         mbgl::util::DefaultStyle("maptiler://maps/streets", "Streets", 1),
         mbgl::util::DefaultStyle("maptiler://maps/outdoor", "Outdoor", 1),
         mbgl::util::DefaultStyle("maptiler://maps/basic", "Basic", 1),
         mbgl::util::DefaultStyle("maptiler://maps/bright", "Bright", 1),
-        mbgl::util::DefaultStyle("maptiler://maps/pastel", "Pastel", 1)};
+        mbgl::util::DefaultStyle("maptiler://maps/pastel", "Pastel", 1),
+        mbgl::util::DefaultStyle("maptiler://maps/hybrid", "Satellite Hybrid", 1),
+        mbgl::util::DefaultStyle("maptiler://maps/topo", "Satellite Topo", 1)};
 
     TileServerOptions options = TileServerOptions()
                                     .withBaseURL("https://api.maptiler.com")
