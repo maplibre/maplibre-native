@@ -186,8 +186,8 @@ jobs:
             libjpeg-dev \
             libpng-dev \
             libglfw3-dev \
-            x11-xserver-utils \
-            xserver-xorg-video-dummy
+            xserver-xorg-video-dummy \
+            xinit
 
       - name: Cache Bazel
         uses: actions/cache@v2
