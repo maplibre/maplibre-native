@@ -259,7 +259,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     if (imageData && !imageData->bucket->needsUpload()) {
         // TODO: implement arbitrary image
-        //RasterBucket& bucket = *imageData->bucket;
+        // RasterBucket& bucket = *imageData->bucket;
         assert(imageData->bucket->texture);
 
         //        size_t i = 0;
