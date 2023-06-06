@@ -60,6 +60,15 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
     const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
 
+    if (layerGroup.empty()) {
+        return;
+    }
+
+#if !defined(NDEBUG)
+    const auto label = layerGroup.getName() + "-update-uniforms";
+    const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
+#endif
+
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID()) {
             return;
