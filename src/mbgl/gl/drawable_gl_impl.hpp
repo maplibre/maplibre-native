@@ -53,6 +53,8 @@ struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
         : gfx::Drawable::DrawSegment(mode_, std::move(segment_)),
           vertexArray(std::move(vertexArray_)) {}
 
+   ~DrawSegmentGL() override = default;
+
     const VertexArray& getVertexArray() const { return vertexArray; }
     void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
 
