@@ -37,10 +37,16 @@ Run the following on linux to build the render test runner:
 git submodule update --init --recursive --depth 1
 
 sudo apt update
-sudo apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri libjpeg-turbo8 libicu66 libjpeg-dev
+sudo apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-dev libc++abi-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri libjpeg-turbo8 libicu-dev libjpeg-dev
 
 cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+```
+
+Also, if your system supports OpenGL ES 3+, you can now execute the GLFW demo with:
+
+```
+MLN_API_KEY=add_maptiler_api_key_here ./build/platform/glfw/mbgl-glfw
 ```
 
 

@@ -48,6 +48,10 @@ private:
     // Programs
     std::shared_ptr<BackgroundProgram> backgroundProgram;
     std::shared_ptr<BackgroundPatternProgram> backgroundPatternProgram;
+
+    // Drawable shaders
+    gfx::ShaderProgramBasePtr plainShader;
+    gfx::ShaderProgramBasePtr patternShader;
 };
 
 } // namespace mbgl
