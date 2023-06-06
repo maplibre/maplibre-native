@@ -70,7 +70,9 @@ public:
         return *this;
     }
 
-    bool isValid() const { return state.operator bool(); }
+    bool isValid() const {
+        return state && state->vertexArray && state->vertexArray.get();
+    }
 
     VertexArrayID getID() const { return state->vertexArray; }
 
