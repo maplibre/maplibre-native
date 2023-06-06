@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+script=$(realpath "$0")
+scriptpath=$(dirname "$script")
+
+startx "$PWD/$@" -- -xf86config "$scriptpath/xorg.conf"

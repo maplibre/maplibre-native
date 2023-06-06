@@ -88,7 +88,7 @@ jobs:
           name: mbgl-expression-test
           path: build/expression-test/mbgl-expression-test
           retention-days: 1
-  
+
   test:
     needs: build
     runs-on: ubuntu-22.04
@@ -107,7 +107,7 @@ jobs:
           name: mbgl-test-runner
 
       - run: chmod +x ./mbgl-test-runner
-      
+
       - name: Install npm packages and run test server in background
         run: |
           npm install
@@ -125,7 +125,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mbgl-expression-test
-      
+
       - run: chmod +x ./mbgl-expression-test
 
       - name: Run expression test
@@ -147,7 +147,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: mbgl-render-test-runner
-      
+
       - run: chmod +x ./mbgl-render-test-runner
 
       - name: Run render test
@@ -202,15 +202,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
-      
+
       - name: Start server
         run: |
           npm install --ignore-scripts
           node test/storage/server.js &
-    
+
       - name: Generate coverage report
-        run: | 
-          bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --test-env --spawn_strategy=local --test_env=DISPLAY=0
+        run: |
+          bazel coverage --test_output=all --combined_report=l^Cv --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --run_under=//platform/linux:startxwrapper
           echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
 
       - name: Upload coverage report
