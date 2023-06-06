@@ -225,7 +225,7 @@ gfx::TextureBinding DashPatternTexture::textureBinding() const {
 }
 
 Size DashPatternTexture::getSize() const {
-    if(std::holds_alternative<AlphaImage>(texture)) {
+    if (std::holds_alternative<AlphaImage>(texture)) {
         return std::get<AlphaImage>(texture).size;
     }
     return std::get<gfx::Texture2DPtr>(texture)->getSize();
