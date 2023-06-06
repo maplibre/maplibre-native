@@ -293,7 +293,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }
@@ -361,6 +361,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         });
 
         constexpr auto samplerLocation = 0;
+        const auto layerPrefix = getID() + "/";
 
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
@@ -460,7 +461,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
 
                 if (doFill && !fillBuilder && fillShader) {
-                    if (auto builder = context.createDrawableBuilder("fill")) {
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                         commonInit(*builder);
                         builder->setShader(fillShader);
                         builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
@@ -470,7 +471,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     }
                 }
                 if (doOutline && !outlineBuilder && outlineShader) {
-                    if (auto builder = context.createDrawableBuilder("fill-outline")) {
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline")) {
                         commonInit(*builder);
                         builder->setShader(outlineShader);
                         builder->setLineWidth(2.0f);
@@ -551,7 +552,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 //                }
 
                 if (!patternBuilder && patternShader) {
-                    if (auto builder = context.createDrawableBuilder("fill-pattern")) {
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
                         commonInit(*builder);
                         builder->setShader(fillShader);
                         builder->setDepthType(gfx::DepthMaskType::ReadWrite);
@@ -563,7 +564,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     }
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
-                    if (auto builder = context.createDrawableBuilder("fill-outline-pattern")) {
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline-pattern")) {
                         commonInit(*builder);
                         builder->setShader(outlineShader);
                         builder->setLineWidth(2.0f);

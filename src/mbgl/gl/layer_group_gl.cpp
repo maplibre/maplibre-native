@@ -12,8 +12,8 @@
 namespace mbgl {
 namespace gl {
 
-TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity)
-    : TileLayerGroup(layerIndex_, initialCapacity) {}
+TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
+    : TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
 
 void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
     if (!enabled) {
@@ -45,15 +45,23 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         return;
     }
 
-    // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
-    std::set<UnwrappedTileID> tileIDs;
-    observeDrawables([&](const gfx::Drawable& drawable) {
-        if (drawable.getEnabled() && drawable.getNeedsStencil() && drawable.getTileID() &&
-            drawable.hasRenderPass(parameters.pass)) {
-            tileIDs.emplace(drawable.getTileID()->toUnwrapped());
-        }
-    });
-    parameters.renderTileClippingMasks(tileIDs);
+    if (getDrawableCount())
+    {
+#if !defined(NDEBUG)
+        const auto label = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
+        const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
+#endif
+        
+        // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
+        std::set<UnwrappedTileID> tileIDs;
+        observeDrawables([&](const gfx::Drawable& drawable) {
+            if (drawable.getEnabled() && drawable.getNeedsStencil() && drawable.getTileID() &&
+                drawable.hasRenderPass(parameters.pass)) {
+                tileIDs.emplace(drawable.getTileID()->toUnwrapped());
+            }
+        });
+        parameters.renderTileClippingMasks(tileIDs);
+    }
 
     observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
