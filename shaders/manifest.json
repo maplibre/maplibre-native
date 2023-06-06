@@ -48,6 +48,13 @@
         "glsl_frag": "drawable.fill_outline_pattern.fragment.glsl",
         "uses_ubos": true
     },
+    {
+        "name": "RasterShader",
+        "header": "drawable_raster",
+        "glsl_vert": "drawable.raster.vertex.glsl",
+        "glsl_frag": "drawable.raster.fragment.glsl",
+        "uses_ubos": true
+    },
 
     {
         "name": "Prelude",
