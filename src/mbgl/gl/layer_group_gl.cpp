@@ -45,13 +45,12 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         return;
     }
 
-    if (getDrawableCount())
-    {
+    if (getDrawableCount()) {
 #if !defined(NDEBUG)
         const auto label = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
         const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
-        
+
         // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
         std::set<UnwrappedTileID> tileIDs;
         observeDrawables([&](const gfx::Drawable& drawable) {

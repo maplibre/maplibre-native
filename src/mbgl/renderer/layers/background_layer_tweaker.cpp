@@ -58,7 +58,7 @@ void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, 
     if (layerGroup.empty()) {
         return;
     }
-    
+
 #if defined(DEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());

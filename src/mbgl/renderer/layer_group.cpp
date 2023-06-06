@@ -30,7 +30,8 @@ struct TileLayerGroup::Impl {
 };
 
 LayerGroup::LayerGroup(int32_t layerIndex_, std::string name_)
-    : layerIndex(layerIndex_), name(std::move(name_)) {}
+    : layerIndex(layerIndex_),
+      name(std::move(name_)) {}
 
 TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
     : LayerGroup(layerIndex_, std::move(name_)),

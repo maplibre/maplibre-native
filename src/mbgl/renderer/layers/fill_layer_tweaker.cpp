@@ -63,7 +63,7 @@ void FillLayerTweaker::execute(LayerGroup& layerGroup,
     if (layerGroup.empty()) {
         return;
     }
-    
+
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
