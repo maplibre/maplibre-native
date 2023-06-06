@@ -11,7 +11,10 @@
 #include <mbgl/util/mat4.hpp>
 
 #include <array>
+#include <functional>
+#include <iterator>
 #include <map>
+#include <set>
 #include <vector>
 
 namespace mbgl {
@@ -92,11 +95,17 @@ public:
     // Stencil handling
 public:
     void renderTileClippingMasks(const RenderTiles&);
+    void renderTileClippingMasks(const std::set<UnwrappedTileID>&);
+
     gfx::StencilMode stencilModeForClipping(const UnwrappedTileID&) const;
     gfx::StencilMode stencilModeFor3D();
 
 private:
     void clearStencil();
+
+    template <typename TIter>
+    void renderTileClippingMasks(
+        TIter beg, TIter end, std::function<UnwrappedTileID(const typename std::iterator_traits<TIter>::value_type&)>);
 
     // This needs to be an ordered map so that we have the same order as the renderTiles.
     std::map<UnwrappedTileID, int32_t> tileClippingMaskIDs;
@@ -106,7 +115,8 @@ public:
     int numSublayers = 3;
     uint32_t currentLayer;
     float depthRangeSize;
-    const float depthEpsilon = 1.0f / (1 << 16);
+    static constexpr float depthEpsilon = 1.0f / (1 << 16);
+    static constexpr int maxStencilValue = 255;
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
 };

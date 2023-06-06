@@ -54,6 +54,16 @@ static constexpr std::string_view BackgroundLayerUBOName = "BackgroundLayerUBO";
 void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& state = parameters.state;
     auto& context = parameters.context;
+
+    if (layerGroup.empty()) {
+        return;
+    }
+
+#if defined(DEBUG)
+    const auto label = layerGroup.getName() + "-update-uniforms";
+    const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
+#endif
+
     const auto& evaluated = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const BackgroundLayerProperties&>(*evaluatedProperties).crossfade;
     const bool hasPattern = !evaluated.get<BackgroundPattern>().to.empty();

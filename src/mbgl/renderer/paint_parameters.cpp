@@ -92,29 +92,44 @@ void PaintParameters::clearStencil() {
 namespace {
 
 // Detects a difference in keys of renderTiles and tileClippingMaskIDs
-bool tileIDsIdentical(const RenderTiles& renderTiles, const std::map<UnwrappedTileID, int32_t>& tileClippingMaskIDs) {
-    assert(renderTiles);
-    assert(std::is_sorted(renderTiles->begin(), renderTiles->end(), [](const RenderTile& a, const RenderTile& b) {
-        return a.id < b.id;
-    }));
-    if (renderTiles->size() != tileClippingMaskIDs.size()) {
+template <typename TIter>
+bool tileIDsIdentical(TIter beg,
+                      TIter end,
+                      std::function<const UnwrappedTileID&(const typename TIter::value_type&)> f,
+                      const std::map<UnwrappedTileID, int32_t>& idMap) {
+    if (static_cast<std::size_t>(std::distance(beg, end)) != idMap.size()) {
         return false;
     }
-    return std::equal(
-        renderTiles->begin(), renderTiles->end(), tileClippingMaskIDs.begin(), [](const RenderTile& a, const auto& b) {
-            return a.id == b.first;
-        });
+    assert(std::is_sorted(beg, end, [&f](const auto& a, const auto& b) { return f(a) < f(b); }));
+    return std::equal(beg, end, idMap.cbegin(), [&f](const auto& ii, const auto& pair) { return f(ii) == pair.first; });
 }
 
 } // namespace
 
+void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
+    renderTileClippingMasks(
+        tileIDs.cbegin(), tileIDs.cend(), [](const UnwrappedTileID& ii) -> const UnwrappedTileID& { return ii; });
+}
+
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    if (!renderTiles || renderTiles->empty() || tileIDsIdentical(renderTiles, tileClippingMaskIDs)) {
+    renderTileClippingMasks((*renderTiles).cbegin(),
+                            (*renderTiles).cend(),
+                            [](const std::reference_wrapper<const RenderTile>& ii) -> const UnwrappedTileID& {
+                                const RenderTile& tile = ii.get();
+                                return tile.id;
+                            });
+}
+
+template <typename TIter>
+void PaintParameters::renderTileClippingMasks(
+    TIter beg, TIter end, std::function<UnwrappedTileID(const typename std::iterator_traits<TIter>::value_type&)> f) {
+    if (tileIDsIdentical(beg, end, f, tileClippingMaskIDs)) {
         // The current stencil mask is for this source already; no need to draw another one.
         return;
     }
 
-    if (nextStencilID + renderTiles->size() > 256) {
+    const auto count = std::distance(beg, end);
+    if (nextStencilID + count > maxStencilValue) {
         // we'll run out of fresh IDs so we need to clear and start from scratch
         clearStencil();
     }
@@ -129,9 +144,11 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     const style::Properties<>::PossiblyEvaluated properties{};
     const ClippingMaskProgram::Binders paintAttributeData(properties, 0);
 
-    for (const RenderTile& renderTile : *renderTiles) {
+    for (auto i = beg; i != end; ++i) {
+        const auto& tileID = f(*i);
+
         const int32_t stencilID = nextStencilID++;
-        tileClippingMaskIDs.emplace(renderTile.id, stencilID);
+        tileClippingMaskIDs.emplace(tileID, stencilID);
 
         program->draw(context,
                       *renderPass,
@@ -149,7 +166,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                       staticData.clippingMaskSegments,
                       ClippingMaskProgram::computeAllUniformValues(
                           ClippingMaskProgram::LayoutUniformValues{
-                              uniforms::matrix::Value(matrixForTile(renderTile.id)),
+                              uniforms::matrix::Value(matrixForTile(tileID)),
                           },
                           paintAttributeData,
                           properties,
@@ -174,7 +191,7 @@ gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& 
 }
 
 gfx::StencilMode PaintParameters::stencilModeFor3D() {
-    if (nextStencilID + 1 > 256) {
+    if (nextStencilID + 1 > maxStencilValue) {
         clearStencil();
     }
 
@@ -193,7 +210,7 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     if (debugOptions & MapDebugOptions::Overdraw) {
-        const float overdraw = 1.0f / 8.0f;
+        constexpr float overdraw = 1.0f / 8.0f;
         return gfx::ColorMode{
             gfx::ColorMode::Add{gfx::ColorBlendFactorType::ConstantColor, gfx::ColorBlendFactorType::One},
             Color{overdraw, overdraw, overdraw, 0.0f},
