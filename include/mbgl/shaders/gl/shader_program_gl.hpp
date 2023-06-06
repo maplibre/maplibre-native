@@ -28,6 +28,8 @@ public:
                                                    const std::string& fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);
 
+    std::optional<uint32_t> getSamplerLocation(const std::string& name) const override;
+
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }

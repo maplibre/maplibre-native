@@ -6,6 +6,7 @@
 #include <mbgl/util/identity.hpp>
 
 #include <string>
+#include <optional>
 
 namespace mbgl {
 namespace gfx {
@@ -28,6 +29,10 @@ protected:
 
 public:
     const util::SimpleIdentity& getID() const { return shaderProgramID; }
+
+    /// @brief Gets the sampler location
+    /// @param name uniform name
+    virtual std::optional<uint32_t> getSamplerLocation(const std::string& name) const = 0;
 
     /// Get the available uniform blocks attached to this shader
     virtual const gfx::UniformBlockArray& getUniformBlocks() const = 0;

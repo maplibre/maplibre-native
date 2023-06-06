@@ -111,7 +111,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     });
 
     // Give the layers a chance to do setup
-    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters); });
+    //    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
+    //    });
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
@@ -320,7 +321,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     }
 #endif
 
-    // Give the layers a chance to do cleanup
+    //     Give the layers a chance to do cleanup
     orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 
     // Ends the RenderPass

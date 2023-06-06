@@ -111,6 +111,11 @@ static void addAttr(
     }
 }
 
+std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string& name) const {
+    GLint sampler_location = MBGL_CHECK_ERROR(glGetUniformLocation(glProgram, name.c_str()));
+    return (sampler_location == -1) ? std::optional<uint32_t>{} : sampler_location;
+}
+
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
                                                          const ProgramParameters& programParameters,
                                                          const std::string& /*name*/,

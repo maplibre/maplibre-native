@@ -148,6 +148,7 @@ void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
 
     // Link the bound texture unit with the requested sampler in the active shader
     glUniform1i(location, textureUnit);
+    boundLocation = location;
 }
 
 void Texture2D::unbind() noexcept {
