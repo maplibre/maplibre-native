@@ -67,7 +67,7 @@ wget https://github.com/acalcutt/tileserver-gl/releases/download/test_data/zuric
 wget https://gist.githubusercontent.com/louwers/d7607270cbd6e3faa05222a09bcb8f7d/raw/4e9532e1760717865df8aeff08f9bcf100f9e8c4/style.json
 ```
 
-Note that this style is totally inadequate for any real use beyond testing your custom setup. Replace the source URL `"mbtiles:///path/to/zurich_switzerland.mbtiles"` with the actual path to your mbtiles file. You can use this command if you downloaded both files to the working directory:
+Note that this style is totally inadequate for any real use beyond testing your custom setup. Replace the source URL `mbtiles:///path/to/zurich_switzerland.mbtiles` with the actual path to your `.mbtiles` file. You can use this command if you downloaded both files to the working directory:
 
 ```bash
 sed -i "s#/path/to#$PWD#" style.json 
