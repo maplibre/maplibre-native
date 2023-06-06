@@ -200,13 +200,13 @@ ipackage%:
 	@echo make ipackage is deprecated — use make iframework.
 
 .PHONY: iframework
-iframework: $(IOS_PROJ_PATH)
+iframework: $(IOS_PROJ_PATH) style-code
 	FORMAT=$(FORMAT) BUILD_DEVICE=$(BUILD_DEVICE) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/package.sh
 
 #  make xcframework
 .PHONY: xcframework
-xcframework: $(IOS_PROJ_PATH)
+xcframework: $(IOS_PROJ_PATH) style-code
 	FORMAT=$(FORMAT) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/xcpackage.sh
 
