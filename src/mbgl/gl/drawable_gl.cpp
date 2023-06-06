@@ -178,6 +178,19 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
             glSeg.setVertexArray(std::move(vertexArray));
         };
     }
+
+    const bool texturesNeedUpload = std::any_of(
+        textures.begin(), textures.end(), [](const auto& tex) { return tex.texture->needsUpload(); });
+
+    if (texturesNeedUpload) {
+        uploadTextures();
+    }
+}
+
+void DrawableGL::uploadTextures() const {
+    for (const auto& tex : textures) {
+        std::static_pointer_cast<gl::Texture2D>(tex.texture)->upload();
+    }
 }
 
 void DrawableGL::bindTextures() const {
