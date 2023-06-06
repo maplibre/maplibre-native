@@ -30,3 +30,8 @@ cc_library(
         "//platform/default:mbgl-default",
     ],
 )
+
+sh_binary(
+    name = "startxwrapper",
+    srcs = ["xorg/startxwrapper"],
+)
