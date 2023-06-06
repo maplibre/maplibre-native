@@ -56,18 +56,17 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     bindTextures();
 
     auto& glContext = static_cast<gl::Context&>(parameters.context);
-    const auto saveVertexArray = glContext.bindVertexArray.getCurrentValue();
 
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
         if (glSeg.getVertexArray().isValid()) {
             glContext.bindVertexArray = glSeg.getVertexArray().getID();
+            glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
-        glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
     }
 
-    glContext.bindVertexArray = saveVertexArray;
+    glContext.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
     unbindUniformBuffers();
