@@ -215,8 +215,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto renderLayerOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
         parameters.pass = RenderPass::Opaque;
-        parameters.depthRangeSize = 1 -
-                                    (layerRenderItems.size() + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         uint32_t i = 0;
         for (auto it = layerRenderItems.rbegin(); it != layerRenderItems.rend(); ++it, ++i) {
@@ -233,8 +233,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto renderLayerTranslucentPass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("translucent"));
         parameters.pass = RenderPass::Translucent;
-        parameters.depthRangeSize = 1 -
-                                    (layerRenderItems.size() + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers *
+                                            PaintParameters::depthEpsilon;
 
         int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
         for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
