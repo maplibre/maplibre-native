@@ -123,7 +123,7 @@ void PaintParameters::renderTileClippingMasks(
     }
 
     const auto count = std::distance(beg, end);
-    if (nextStencilID + count > 256) {
+    if (nextStencilID + count > maxStencilValue) {
         // we'll run out of fresh IDs so we need to clear and start from scratch
         clearStencil();
     }
@@ -185,7 +185,7 @@ gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& 
 }
 
 gfx::StencilMode PaintParameters::stencilModeFor3D() {
-    if (nextStencilID + 1 > 256) {
+    if (nextStencilID + 1 > maxStencilValue) {
         clearStencil();
     }
 
@@ -204,7 +204,7 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     if (debugOptions & MapDebugOptions::Overdraw) {
-        const float overdraw = 1.0f / 8.0f;
+        constexpr float overdraw = 1.0f / 8.0f;
         return gfx::ColorMode{
             gfx::ColorMode::Add{gfx::ColorBlendFactorType::ConstantColor, gfx::ColorBlendFactorType::One},
             Color{overdraw, overdraw, overdraw, 0.0f},
