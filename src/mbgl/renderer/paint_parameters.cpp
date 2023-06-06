@@ -107,16 +107,17 @@ bool tileIDsIdentical(TIter beg,
 } // namespace
 
 void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
-    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(),
-                            [](const UnwrappedTileID& ii)->const UnwrappedTileID& { return ii; });
+    renderTileClippingMasks(
+        tileIDs.cbegin(), tileIDs.cend(), [](const UnwrappedTileID& ii) -> const UnwrappedTileID& { return ii; });
 }
 
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(),
-                            [](const std::reference_wrapper<const RenderTile>& ii)->const UnwrappedTileID& {
-        const RenderTile& tile = ii.get();
-        return tile.id;
-    });
+    renderTileClippingMasks((*renderTiles).cbegin(),
+                            (*renderTiles).cend(),
+                            [](const std::reference_wrapper<const RenderTile>& ii) -> const UnwrappedTileID& {
+                                const RenderTile& tile = ii.get();
+                                return tile.id;
+                            });
 }
 
 template <typename TIter>
