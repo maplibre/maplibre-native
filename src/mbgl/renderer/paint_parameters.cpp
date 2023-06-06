@@ -95,7 +95,7 @@ namespace {
 template <typename TIter>
 bool tileIDsIdentical(TIter beg,
                       TIter end,
-                      std::function<const UnwrappedTileID&(const typename TIter::value_type&)> f,
+                      std::function<const UnwrappedTileID&(const typename TIter::value_type&)>& f,
                       const std::map<UnwrappedTileID, int32_t>& idMap) {
     if (static_cast<std::size_t>(std::distance(beg, end)) != idMap.size()) {
         return false;
@@ -122,7 +122,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 
 template <typename TIter>
 void PaintParameters::renderTileClippingMasks(
-    TIter beg, TIter end, std::function<UnwrappedTileID(const typename std::iterator_traits<TIter>::value_type&)> f) {
+    TIter beg, TIter end, std::function<const UnwrappedTileID&(const typename std::iterator_traits<TIter>::value_type&)>&& f) {
     if (tileIDsIdentical(beg, end, f, tileClippingMaskIDs)) {
         // The current stencil mask is for this source already; no need to draw another one.
         return;
