@@ -202,6 +202,9 @@ jobs:
           npm install --ignore-scripts
           node test/storage/server.js &
 
+      - name: Set permissions /var/log
+        run: sudo chown 666 /var/log
+
       - name: Generate coverage report
         run: |
           bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --run_under=//platform/linux:startxwrapper
