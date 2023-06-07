@@ -3,6 +3,12 @@
 script=$(realpath "$0")
 scriptpath=$(dirname "$script")
 
+script=$(mktemp)
 exit_code=$(mktemp)
-XAUTHORITY=$(mktemp) startx "$PWD/$@ && echo $? > $exit_code" -- -xf86config "$scriptpath/xorg.conf" -logfile /dev/null
+
+chmod +x $script
+
+echo "$PWD/$@ && echo \$? > $exit_code' > $script
+
+XAUTHORITY=$(mktemp) startx "$script" -- -xf86config "$scriptpath/xorg.conf" -logfile /dev/null
 exit $(cat $exit_code)
