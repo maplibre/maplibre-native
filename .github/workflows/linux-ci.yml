@@ -62,7 +62,7 @@ jobs:
             libpng-dev \
             libglfw3-dev
 
-      - name: Build Maplibre GL Core
+      - name: Build MapLibre Native Core
         run: |
           cmake --version
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
@@ -204,7 +204,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          bazel coverage --test_output=all --combined_report=lcov --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --run_under=//platform/linux:startxwrapper
+          bazel coverage --test_output=all --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core //render-test:render-test --//:maplibre_platform=linux --run_under=//platform/linux:startxwrapper
           echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
 
       - name: Upload coverage report

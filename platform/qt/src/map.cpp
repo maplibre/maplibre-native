@@ -1243,7 +1243,7 @@ void Map::render() {
 }
 
 /*!
-    If MapLibre GL needs to rebind the default \a fbo, it will use the
+    If MapLibre Native needs to rebind the default \a fbo, it will use the
     ID supplied here. \a size is the size of the framebuffer, which
     on high DPI screens is usually bigger than the map size.
 
