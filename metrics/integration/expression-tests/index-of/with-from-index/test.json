@@ -11,6 +11,9 @@
       [{}, {"properties": {"needle": 7, "hay": [9, 8, 7, 8, 7, 7], "i": 3}}],
       [{}, {"properties": {"needle": 9, "hay": [9, 8, 7, 8, 7, 7], "i": 1}}],
       [{}, {"properties": {"needle": 8, "hay": [9, 8, 7, 8, 7, 7], "i": 1}}],
+      [{}, {"properties": {"needle": 8, "hay": [9, 8, 7, 8, 7, 7], "i": -1}}],
+      [{}, {"properties": {"needle": "foo", "hay": ["foo", "foo"], "i": -100}}],
+      [{}, {"properties": {"needle": "foo", "hay": "__foo__foo", "i": -100}}],
       [{}, {"properties": {"needle": 8, "hay": [9, 8, 7, 8, 7, 7], "i": 10000}}],
       [{}, {"properties": {"needle": 8, "hay": [9, 8, 7, 8, 7, 7], "i": "wrong"}}]
     ],
@@ -35,6 +38,9 @@
         4,
         -1,
         1,
+        1,
+        0,
+        2,
         -1,
         {
           "error": "Expected third argument to be of type number, but found string instead."
