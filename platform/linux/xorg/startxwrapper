@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+
+script=$(realpath "$0")
+scriptpath=$(dirname "$script")
+
+exit_code=$(mktemp)
+XAUTHORITY=$(mktemp) startx "$PWD/$@ && echo $? > $exit_code" -- -xf86config "$scriptpath/xorg.conf" -logfile /dev/null
+exit $(cat $exit_code)
