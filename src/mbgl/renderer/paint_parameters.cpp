@@ -149,8 +149,15 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
     for (auto i = beg; i != end; ++i) {
         const auto& tileID = f(*i);
 
-        const int32_t stencilID = nextStencilID++;
-        tileClippingMaskIDs.emplace(tileID, stencilID);
+        const int32_t stencilID = nextStencilID + 1;
+        const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
+        if (result.second) {
+            // inserted
+            nextStencilID++;
+        } else {
+            // already present
+            continue;
+        }
 
         program->draw(context,
                       *renderPass,
