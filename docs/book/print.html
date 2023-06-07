@@ -155,13 +155,13 @@ MapLibre Style Spec. Since it is derived from Mapbox's original work it also use
 <p><img src="design/media/ten-thousand-foot-view-diagram.png" alt="" /><br />
 <em>Figure 1: MapLibre Native Components – Ten Thousand Foot view</em></p>
 <p>From ten thousand foot, MapLibre Native is composed of <em>Map View</em> and a
-<em>Renderer</em>. MapLibre Native GL supports iOS, Android, Linux, QT, MacOS,
+<em>Renderer</em>. MapLibre Native supports iOS, Android, Linux, QT, MacOS,
 and nodeJS at the time of writing. Each of these <em>platforms</em> have their
 own <em>Map View</em> and <em>Map Renderer</em> component. A <em>Map Renderer</em> talks to a
 shared codebase that renders map by using device GPU. This shared piece
 of code at the time of writing supports OpenGL as its choice of
 rendering API.</p>
-<p>Apart from the platform code, <em>MapLibre Native GL</em> offers shared
+<p>Apart from the platform code, <em>MapLibre Native</em> offers shared
 implementation for <em>Style, Layers, Text, Glyphs</em>, and <em>Tiles</em>.</p>
 <p>To summarize:</p>
 <ol>
@@ -299,7 +299,7 @@ processing. The platforms also include worker threads for processing for
 platform-specific tasks such as running HTTP requests in the background.
 But the core code is agnostic about where those tasks get performed.
 Each platform is required to provide its own implementation of
-concurrency/threading primitives for MapLibre GL core to use. The
+concurrency/threading primitives for MapLibre Native core to use. The
 platform code is also free to use its own threading model. For example,
 Android uses a <em>GLSurfaceView</em> with a <em>GLThread</em> where the iOS SDK uses
 <em>Grand Central Dispatch</em> for running asynchronous tasks.</p>
@@ -311,14 +311,14 @@ simplify, there is only one thread allocated for rendering loop,
 background or foreground<sup class="footnote-reference"><a href="#7">7</a></sup>. A <em>Tile Worker</em> is a thread that prepares
 a tile of a specific type. Geometry Tile Worker by the name of it,
 prepares a tile for rendering tiles that contains vector geometry.
-Following that same trend, MapLibre Native GL offers tile worker for
+Following that same trend, MapLibre Native offers tile worker for
 raster tiles and elevation tiles. Messages sent to a tile worker can be
 processed by any thread, with the assumption that only one thread at a
 time will work with a tile worker instance.</p>
 <p>Tile workers are not based on a common interface or base class. Tiles
-are. MapLibre Native GL offers a base Tile class. Raster, Geometry, and
+are. MapLibre Native offers a base Tile class. Raster, Geometry, and
 Elevation tile instances are inherited from Tile base class. Through
-this inheritance MapLibre Native GL maintains the association of Tile
+this inheritance MapLibre Native maintains the association of Tile
 types and tile workers. Any Tile Worker is an actor that accepts
 messages of a specific Tile type. For a Geometry Tile Worker, the type
 is a Geometry Tile.</p>
@@ -363,7 +363,7 @@ battery capacity. Hence, Android prefers to use a background thread
 for rendering loop.</p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="coordinate-system"><a class="header" href="#coordinate-system">Coordinate System</a></h1>
-<p>Before we jump into the coordinate system of MapLibre Native GL, let's
+<p>Before we jump into the coordinate system of MapLibre Native, let's
 quickly review the concepts of translating a position on the face of
 Earth to a map tile. This is not a comprehensive refresher of coordinate
 reference systems or rendering basics. Rather this intends to guide the
@@ -380,7 +380,7 @@ Native.</p>
 <h4 id="world-vs-earth"><a class="header" href="#world-vs-earth">World vs Earth</a></h4>
 <p>This document uses the word <em>Earth</em> when it refers to the planet in
 which we all live in and make map tiles for. This document uses the word
-<em>World</em> to denote the world MapLibre Native GL renders. The word <em>world</em>
+<em>World</em> to denote the world MapLibre Native renders. The word <em>world</em>
 in rendering terms mean the <em>world</em> to render. It could be a set of
 cones and boxes, a modeled city, anything composed of 3D objects.
 MapLibre Native renders map tiles in a range of zoom levels on a 3D
@@ -388,14 +388,14 @@ plane. Map tiles are already produced from a WGS84 ellipsoid. Therefore,
 when this document uses the word <em>World,</em> it means the 3D plane
 containing a set of map tiles to be rendered, not the <em>Earth</em>.</p>
 <h4 id="transformations"><a class="header" href="#transformations">Transformations</a></h4>
-<p>MapLibre GL requires a series of coordinate transformations to render a
+<p>MapLibre Native requires a series of coordinate transformations to render a
 geometry from map tile. This is where we refresh our rendering knowledge
 a bit. To render anything through a GPU:</p>
 <ol>
 <li>
 <p>Design and define model in the <em>Local Space</em>. We call anything that
 needs to be renderer a <em>model.</em> In the Local space, a model lives in
-its own coordinate system. For MapLibre Native GL, in local space
+its own coordinate system. For MapLibre Native, in local space
 each individual tile is modeled. This map tile is already populated
 by a map tile generation process. The longitude, latitude bound per
 tile is now translated to pixel bounds in this local space.</p>
@@ -547,7 +547,7 @@ rendering workflow is to translate object coordinates to world
 coordinates. This is important to understand if we are to render
 multiple objects in the world. If we treat all tiles in a zoom level
 being rendered in a single 3D horizontal plane, then the World Space has
-only one object. And in MapLibre GL, this plane has an origin of (0,0),
+only one object. And in MapLibre Native, this plane has an origin of (0,0),
 positioned on the top left.</p>
 <h2 id="device-coordinates"><a class="header" href="#device-coordinates">Device Coordinates</a></h2>
 <p>World space for MapLibre Native contains a plane in 3D with all the
@@ -581,7 +581,7 @@ Perspective projection matrix introduces the sense of depth perspective
 through the camera. As in objects further from the camera will look
 smaller and objects closer to the camera will look bigger. This
 perspective component is defined by parameter <em>w.</em> That is why the
-shaders that MapLibre Native GL at the time of writing uses 4
+shaders that MapLibre Native at the time of writing uses 4
 dimensional vectors over 3 dimensional vectors. The 4^th^ dimension is
 this parameter <em>w</em>. Therefore, theoretically a GL coordinate is of the
 form <code>(x, y, z, w)</code>.</p>
@@ -755,13 +755,13 @@ expression, and takes two number expressions as input. The
 implementation follows right after. Another part to notice here is the
 implementation evaluates both inputs because they are expressions too.
 Expressions can be nested.</p>
-<p><strong>Although it looks like JavaScript, for MapLibre Native GL</strong>, <strong>the
+<p><strong>Although it looks like JavaScript, for MapLibre Native</strong>, <strong>the
 parser for any expression is written in MapLibre Native Core</strong>. Each
 platform such as iOS, Android has their own Expression class which
 provides builders to build an expression and add it to a layer. When an
 expression is added to a layer, the rendering part of the code picks it
-up in the MapLibre Native GL Core.</p>
-<p>Also, inside MapLibre GL Core, this definition mechanism allows
+up in the MapLibre Native Core.</p>
+<p>Also, inside MapLibre Native Core, this definition mechanism allows
 extending expressions library with custom expressions if desired.</p>
 <h2 id="expression-types"><a class="header" href="#expression-types">Expression Types</a></h2>
 <p>In the example expression, we saw how one expression is defined. The
@@ -1040,9 +1040,9 @@ dictated by the style and the layers are sent for rendering through the
 actors.</p>
 <p>The key philosophy of rendering tiles is tiles are rendered layer by
 layer. A collection of tiles is called a tile set. To optimize tile
-rendering, MapLibre Native GL only renders <em>dirty</em> tiles. A dirty tile
+rendering, MapLibre Native only renders <em>dirty</em> tiles. A dirty tile
 is a tile rendered in the viewport that has changed due to user
-interaction. To initiate this process, MapLibre Native GL loads the
+interaction. To initiate this process, MapLibre Native loads the
 tileset to be rendered first. In a rendering request, if the tileset is
 already loaded, MapLibre Native will use a cached tile set.</p>
 <p>The next decision to make here is which tiles are to be rendered on the

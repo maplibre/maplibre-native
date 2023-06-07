@@ -145,7 +145,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="coordinate-system"><a class="header" href="#coordinate-system">Coordinate System</a></h1>
-<p>Before we jump into the coordinate system of MapLibre Native GL, let's
+<p>Before we jump into the coordinate system of MapLibre Native, let's
 quickly review the concepts of translating a position on the face of
 Earth to a map tile. This is not a comprehensive refresher of coordinate
 reference systems or rendering basics. Rather this intends to guide the
@@ -162,7 +162,7 @@ Native.</p>
 <h4 id="world-vs-earth"><a class="header" href="#world-vs-earth">World vs Earth</a></h4>
 <p>This document uses the word <em>Earth</em> when it refers to the planet in
 which we all live in and make map tiles for. This document uses the word
-<em>World</em> to denote the world MapLibre Native GL renders. The word <em>world</em>
+<em>World</em> to denote the world MapLibre Native renders. The word <em>world</em>
 in rendering terms mean the <em>world</em> to render. It could be a set of
 cones and boxes, a modeled city, anything composed of 3D objects.
 MapLibre Native renders map tiles in a range of zoom levels on a 3D
@@ -170,14 +170,14 @@ plane. Map tiles are already produced from a WGS84 ellipsoid. Therefore,
 when this document uses the word <em>World,</em> it means the 3D plane
 containing a set of map tiles to be rendered, not the <em>Earth</em>.</p>
 <h4 id="transformations"><a class="header" href="#transformations">Transformations</a></h4>
-<p>MapLibre GL requires a series of coordinate transformations to render a
+<p>MapLibre Native requires a series of coordinate transformations to render a
 geometry from map tile. This is where we refresh our rendering knowledge
 a bit. To render anything through a GPU:</p>
 <ol>
 <li>
 <p>Design and define model in the <em>Local Space</em>. We call anything that
 needs to be renderer a <em>model.</em> In the Local space, a model lives in
-its own coordinate system. For MapLibre Native GL, in local space
+its own coordinate system. For MapLibre Native, in local space
 each individual tile is modeled. This map tile is already populated
 by a map tile generation process. The longitude, latitude bound per
 tile is now translated to pixel bounds in this local space.</p>
@@ -329,7 +329,7 @@ rendering workflow is to translate object coordinates to world
 coordinates. This is important to understand if we are to render
 multiple objects in the world. If we treat all tiles in a zoom level
 being rendered in a single 3D horizontal plane, then the World Space has
-only one object. And in MapLibre GL, this plane has an origin of (0,0),
+only one object. And in MapLibre Native, this plane has an origin of (0,0),
 positioned on the top left.</p>
 <h2 id="device-coordinates"><a class="header" href="#device-coordinates">Device Coordinates</a></h2>
 <p>World space for MapLibre Native contains a plane in 3D with all the
@@ -363,7 +363,7 @@ Perspective projection matrix introduces the sense of depth perspective
 through the camera. As in objects further from the camera will look
 smaller and objects closer to the camera will look bigger. This
 perspective component is defined by parameter <em>w.</em> That is why the
-shaders that MapLibre Native GL at the time of writing uses 4
+shaders that MapLibre Native at the time of writing uses 4
 dimensional vectors over 3 dimensional vectors. The 4^th^ dimension is
 this parameter <em>w</em>. Therefore, theoretically a GL coordinate is of the
 form <code>(x, y, z, w)</code>.</p>
