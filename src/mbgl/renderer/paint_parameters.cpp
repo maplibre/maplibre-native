@@ -87,16 +87,18 @@ gfx::DepthMode PaintParameters::depthModeFor3D() const {
 void PaintParameters::clearStencil() {
     nextStencilID = 1;
     context.clearStencilBuffer(0b00000000);
+    tileClippingMaskIDs.clear();
 }
 
 namespace {
 
+template <typename TIter>
+using GetTileIDFunc = std::function<const UnwrappedTileID&(const typename TIter::value_type&)>;
+using TileMaskIDMap = std::map<UnwrappedTileID, int32_t>;
+
 // Detects a difference in keys of renderTiles and tileClippingMaskIDs
 template <typename TIter>
-bool tileIDsIdentical(TIter beg,
-                      TIter end,
-                      std::function<const UnwrappedTileID&(const typename TIter::value_type&)>& f,
-                      const std::map<UnwrappedTileID, int32_t>& idMap) {
+bool tileIDsIdentical(TIter beg, TIter end, GetTileIDFunc<TIter>& f, const TileMaskIDMap& idMap) {
     if (static_cast<std::size_t>(std::distance(beg, end)) != idMap.size()) {
         return false;
     }
@@ -108,23 +110,23 @@ bool tileIDsIdentical(TIter beg,
 
 void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
     renderTileClippingMasks(
-        tileIDs.cbegin(), tileIDs.cend(), [](const UnwrappedTileID& ii) -> const UnwrappedTileID& { return ii; });
+        tileIDs.cbegin(), tileIDs.cend(), [](const auto& ii) -> const UnwrappedTileID& { return ii; });
 }
 
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     renderTileClippingMasks((*renderTiles).cbegin(),
                             (*renderTiles).cend(),
-                            [](const std::reference_wrapper<const RenderTile>& ii) -> const UnwrappedTileID& {
-                                const RenderTile& tile = ii.get();
-                                return tile.id;
-                            });
+                            [](const auto& ii) -> const UnwrappedTileID& { return ii.get().id; });
+}
+
+void PaintParameters::clearTileClippingMasks() {
+    if (!tileClippingMaskIDs.empty()) {
+        clearStencil();
+    }
 }
 
 template <typename TIter>
-void PaintParameters::renderTileClippingMasks(
-    TIter beg,
-    TIter end,
-    std::function<const UnwrappedTileID&(const typename std::iterator_traits<TIter>::value_type&)>&& f) {
+void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&& f) {
     if (tileIDsIdentical(beg, end, f, tileClippingMaskIDs)) {
         // The current stencil mask is for this source already; no need to draw another one.
         return;
@@ -135,8 +137,6 @@ void PaintParameters::renderTileClippingMasks(
         // we'll run out of fresh IDs so we need to clear and start from scratch
         clearStencil();
     }
-
-    tileClippingMaskIDs.clear();
 
     auto program = staticData.shaders->get<ClippingMaskProgram>();
     if (!program) {
