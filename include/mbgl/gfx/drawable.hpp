@@ -120,8 +120,8 @@ public:
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
-    std::optional<OverscaledTileID> getTileID() const { return tileID; }
-    void setTileID(OverscaledTileID value) { tileID = value; }
+    const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
+    void setTileID(const OverscaledTileID& value) { tileID = value; }
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }

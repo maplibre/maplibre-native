@@ -62,6 +62,11 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         parameters.renderTileClippingMasks(tileIDs);
     }
 
+#if !defined(NDEBUG)
+    const auto label = getName() + (getName().empty() ? "" : "-") + "render";
+    const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
+#endif
+
     observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;

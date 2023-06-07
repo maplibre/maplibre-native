@@ -22,6 +22,7 @@
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
+#include <mbgl/util/std.hpp>
 
 namespace mbgl {
 
@@ -277,6 +278,88 @@ void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
+using FloatAttr = gfx::AttributeType<float, 1>;
+using FloatPairAttr = gfx::AttributeType<float, 2>;
+using FloatPair = FloatPairAttr::Value;
+using UShortQuadAttr = gfx::AttributeType<uint16_t, 4>;
+using UShortQuad = UShortQuadAttr::Value;
+using FloatVertex = gfx::detail::VertexType<FloatAttr>;
+using FloatPairVertex = gfx::detail::VertexType<FloatPairAttr>;
+using UShortQuadVertex = gfx::detail::VertexType<UShortQuadAttr>;
+using FloatBinder = PaintPropertyBinder<float, float, mbgl::PossiblyEvaluatedPropertyValue<float>, FloatAttr>;
+using FloatPairBinder = PaintPropertyBinder<FloatPair, FloatPair, mbgl::PossiblyEvaluatedPropertyValue<FloatPair>, FloatPairAttr>;
+using ColorBinder = PaintPropertyBinder<Color, Color, mbgl::PossiblyEvaluatedPropertyValue<Color>, FloatPairAttr>;
+using ImageBinder = PaintPropertyBinder<style::expression::Image, UShortQuad, PossiblyEvaluatedPropertyValue<mbgl::Faded<mbgl::style::expression::Image>>, UShortQuadAttr, UShortQuadAttr>;
+
+bool bindFloat(const FloatBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    const auto count = binder.getVertexCount();
+    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto& value = static_cast<const FloatVertex*>(binder.getVertexValue(i))->a1;
+            const auto& from = value;   // TODO: should be two different values, right?
+            const auto& to = value;
+            attr->set(i, util::concat(from, to));
+        }
+        return true;
+    }
+    return false;
+}
+bool bindFloat(const std::unique_ptr<FloatBinder>& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    return binder && bindFloat(*binder, attrs, std::move(attributeName));
+}
+
+bool bindFloatPair(const FloatPairBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    const auto count = binder.getVertexCount();
+    // check that vertexVector.elements() == sum(segments.vertexLength)
+    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto& value = static_cast<const FloatPairVertex*>(binder.getVertexValue(i))->a1;
+            const auto& from = value;   // TODO: should be two different values, right?
+            const auto& to = value;
+            attr->set(i, util::concat(from, to));
+        }
+        return true;
+    }
+    return false;
+}
+bool bindFloatPair(const std::unique_ptr<FloatPairBinder>& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    return binder && bindFloatPair(*binder, attrs, std::move(attributeName));
+}
+
+bool bindColor(const ColorBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    const auto count = binder.getVertexCount();
+    // check that vertexVector.elements() == sum(segments.vertexLength)
+    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto& value = static_cast<const FloatPairVertex*>(binder.getVertexValue(i))->a1;
+            const auto& from = value;  // TODO: should be two different values, right?
+            const auto& to = value;
+            attr->set(i, util::concat(from, to));
+        }
+        return true;
+    }
+    return false;
+}
+bool bindColor(const std::unique_ptr<ColorBinder>& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    return binder && bindColor(*binder, attrs, std::move(attributeName));
+}
+
+bool bindImage(const ImageBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    const auto count = binder.getVertexCount();
+    // check that vertexVector.elements() == sum(segments.vertexLength)
+    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto& value = static_cast<const UShortQuadVertex*>(binder.getVertexValue(i))->a1;
+            attr->set(i, util::cast<int32_t>(value));
+        }
+        return true;
+    }
+    return false;
+}
+bool bindImage(const std::unique_ptr<ImageBinder>& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
+    return binder && bindImage(*binder, attrs, std::move(attributeName));
+}
+
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& /*state*/,
@@ -363,8 +446,17 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         // If we already have drawables for this tile, skip.
-        // If a drawable needs to be updated, that's handled in the layer tweaker.
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            
+            // This belongs in the tweaker, but we don't have access to the tiles there.
+            if (!unevaluated.get<FillPattern>().isUndefined()) {
+                if (auto& tex = tile.getIconAtlasTexture()) {
+                    tileLayerGroup->observeDrawables(renderPass, tileID, [&tex](gfx::Drawable& drawable){
+                        drawable.setTexture(tex, samplerLocation);
+                    });
+                }
+            }
+
             continue;
         }
 
@@ -394,59 +486,19 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
-            // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`
-            constexpr auto doFill = true;
+            // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
             // Outline always occurs in translucent pass, defaults to fill color
             const auto doOutline = evaluated.get<FillAntialias>();
 
-            if (doFill) {
-                if (auto& binder = paintPropertyBinders.get<FillColor>()) {
-                    const auto count = binder->getVertexCount();
-                    // check that vertexVector.elements() == sum(segments.vertexLength)
-                    if (auto& attr = fillVertexAttrs.getOrAdd("a_color")) {
-                        for (std::size_t i = 0; i < count; ++i) {
-                            const auto& packed =
-                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
-                                    binder->getVertexValue(i))
-                                    ->a1;
-                            attr->set<gfx::VertexAttribute::float4>(i,
-                                                                    {packed[0], packed[1], packed[0], packed[1]});
-                        }
-                    }
-                }
-            }
+            bindColor(paintPropertyBinders.get<FillColor>(), fillVertexAttrs, "a_color");
+            bindFloat(paintPropertyBinders.get<FillOpacity>(), fillVertexAttrs, "a_opacity");
+
             if (doOutline) {
-                if (auto& binder = paintPropertyBinders.get<FillOutlineColor>()) {
-                    const auto count = binder->getVertexCount();
-                    if (auto& attr = outlineVertexAttrs.getOrAdd("a_outline_color")) {
-                        for (std::size_t i = 0; i < count; ++i) {
-                            const auto& packed =
-                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
-                                    binder->getVertexValue(i))
-                                    ->a1;
-                            attr->set<gfx::VertexAttribute::float4>(i,
-                                                                    {packed[0], packed[1], packed[0], packed[1]});
-                        }
-                    }
-                }
-            }
-            if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
-                const auto count = binder->getVertexCount();
-                for (auto& attrs :
-                     {std::reference_wrapper(fillVertexAttrs), std::reference_wrapper(outlineVertexAttrs)}) {
-                    if (auto& attr = attrs.get().getOrAdd("a_opacity")) {
-                        for (std::size_t i = 0; i < count; ++i) {
-                            const auto& opacity =
-                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                    binder->getVertexValue(i))
-                                    ->a1;
-                            attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
-                        }
-                    }
-                }
+                bindColor(paintPropertyBinders.get<FillOutlineColor>(), outlineVertexAttrs, "a_outline_color");
+                bindFloat(paintPropertyBinders.get<FillOpacity>(), outlineVertexAttrs, "a_opacity");
             }
 
-            if (doFill && !fillBuilder && fillShader) {
+            if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                     commonInit(*builder);
                     builder->setShader(fillShader);
@@ -505,43 +557,20 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             // if (samplerLocation < 0) curShader->getSamplerLocation("u_image");
 
-            if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
-                const auto count = binder->getVertexCount();
-                for (auto& attrs : {std::reference_wrapper(patternVertexAttrs),
-                                    std::reference_wrapper(patternOutlineVertexAttrs)}) {
-                    if (auto& attr = attrs.get().getOrAdd("a_opacity")) {
-                        for (std::size_t i = 0; i < count; ++i) {
-                            const auto& opacity =
-                                static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                    binder->getVertexValue(i))
-                                    ->a1;
-                            attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
-                        }
-                    }
-                }
+            bindFloat(paintPropertyBinders.get<FillOpacity>(), fillVertexAttrs, "a_opacity");
+            bindImage(paintPropertyBinders.get<FillPattern>(), fillVertexAttrs, "a_pattern_from");
+            bindImage(paintPropertyBinders.get<FillPattern>(), fillVertexAttrs, "a_pattern_to");
+
+            if (doOutline) {
+                bindFloat(paintPropertyBinders.get<FillOpacity>(), outlineVertexAttrs, "a_opacity");
+                bindImage(paintPropertyBinders.get<FillPattern>(), outlineVertexAttrs, "a_pattern_from");
+                bindImage(paintPropertyBinders.get<FillPattern>(), outlineVertexAttrs, "a_pattern_to");
             }
-            //                if (auto& binder = paintPropertyBinders.get<FillOpacity>()) {
-            //                    const auto count = binder->getVertexCount();
-            //                    for (auto& attrs :
-            //                         {std::reference_wrapper(patternVertexAttrs),
-            //                         std::reference_wrapper(patternOutlineVertexAttrs)}) {
-            //                        if (auto& attr = attrs.get().getOrAdd("a_pattern_from")) {
-            //                            for (std::size_t i = 0; i < count; ++i) {
-            //                                const auto& opacity =
-            //                                    static_cast<const
-            //                                    gfx::detail::VertexType<gfx::AttributeType<float, 4>>*>(
-            //                                        binder->getVertexValue(i))
-            //                                        ->a1;
-            //                                attr->set<gfx::VertexAttribute::float2>(i, {});
-            //                            }
-            //                        }
-            //                    }
-            //                }
 
             if (!patternBuilder && patternShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
                     commonInit(*builder);
-                    builder->setShader(fillShader);
+                    builder->setShader(patternShader);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
@@ -554,7 +583,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline-pattern")) {
                     commonInit(*builder);
-                    builder->setShader(outlineShader);
+                    builder->setShader(outlinePatternShader);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setSubLayerIndex(2);
