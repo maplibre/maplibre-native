@@ -329,8 +329,8 @@ Map::~Map() {
     \brief the map style JSON.
 
     Sets a new \a style from a JSON that must conform to the
-    \l {https://www.mapbox.com/mapbox-gl-style-spec/}
-    {Mapbox style specification}.
+    \l {https://maplibre.org/maplibre-style-spec/}
+    {MapLibre Style spec}.
 
     \note In case of a invalid style it will trigger a mapChanged
     signal with QMapLibreGL::Map::MapChangeDidFailLoadingMap as argument.
@@ -633,7 +633,7 @@ void Map::removeAnnotation(AnnotationID id) {
 /*!
     Sets a layout \a property_ \a value to an existing \a layer. The \a
    property_ string can be any as defined by the \l
-   {https://www.mapbox.com/mapbox-gl-style-spec/} {Mapbox style specification}
+   {https://maplibre.org/maplibre-style-spec/} {MapLibre Style Spec}
     for layout properties. Returns true if the operation succeeds, and false
    otherwise.
 
@@ -648,12 +648,12 @@ void Map::removeAnnotation(AnnotationID id) {
     \endcode
 
     This table describes the mapping between \l
-   {https://www.mapbox.com/mapbox-gl-style-spec/#types} {style types} and Qt
+   {https://maplibre.org/maplibre-style-spec/#types} {style types} and Qt
    types accepted by setLayoutProperty():
 
     \table
     \header
-        \li Mapbox style type
+        \li MapLibre style type
         \li Qt type
     \row
         \li Enum
@@ -679,7 +679,7 @@ bool Map::setLayoutProperty(const QString &layer, const QString &propertyName, c
 /*!
     Sets a paint \a property_ \a value to an existing \a layer. The \a property_
    string can be any as defined by the \l
-   {https://www.mapbox.com/mapbox-gl-style-spec/} {Mapbox style specification}
+   {https://maplibre.org/maplibre-style-spec/} {MapLibre Style Spec}
     for paint properties. Returns true if the operation succeeds, and false
    otherwise.
 
@@ -695,12 +695,12 @@ bool Map::setLayoutProperty(const QString &layer, const QString &propertyName, c
     \endcode
 
     This table describes the mapping between \l
-   {https://www.mapbox.com/mapbox-gl-style-spec/#types} {style types} and Qt
+   {https://maplibre.org/maplibre-style-spec/#types} {style types} and Qt
    types accepted by setPaintProperty():
 
     \table
     \header
-        \li Mapbox style type
+        \li MapLibre style type
         \li Qt type
     \row
         \li Color
@@ -878,8 +878,8 @@ QMargins Map::margins() const {
 
 /*!
     Adds a source \a id to the map as specified by the \l
-    {https://www.mapbox.com/mapbox-gl-style-spec/#root-sources}{Mapbox style
-   specification} with \a params.
+    {https://maplibre.org/maplibre-style-spec/#root-sources}{MapLibre Style
+   Specification} with \a params.
 
     This example reads a GeoJSON from the Qt resource system and adds it as
    source:
@@ -1007,7 +1007,7 @@ void Map::addCustomLayer(const QString &id, std::unique_ptr<CustomLayerHostInter
 
 /*!
     Adds a style layer to the map as specified by the \l
-    {https://www.mapbox.com/mapbox-gl-style-spec/#root-layers}{Mapbox style
+    {https://maplibre.org/maplibre-style-spec/#root-layers}{MapLibre style
    specification} with \a params. The layer will be added under the layer
    specified by \a before, if specified. Otherwise it will be added as the
    topmost layer.
@@ -1098,8 +1098,8 @@ void Map::removeImage(const QString &id) {
 
 /*!
     Adds a \a filter to a style \a layer using the format described in the \l
-    {https://maplibre.org/maplibre-gl-js-docs/style-spec/#other-filter}{Mapbox
-   style specification}.
+    {https://maplibre.org/maplibre-style-spec/deprecations/#other-filter}{Mapbox
+   Style Spec}.
 
     Given a layer \c marker from an arbitrary GeoJSON source containing features
    of type \b "Point" and \b "LineString", this example shows how to make sure
@@ -1168,8 +1168,8 @@ QVariant QVariantFromValue(const mbgl::Value &value) {
     \layer, if any.
 
     Filter value types are described in the
-   {https://maplibre.org/maplibre-gl-js-docs/style-spec/#types}{Mapbox style
-   specification}.
+   {https://maplibre.org/maplibre-style-spec/types/}{MapLibre Style
+   Spec}.
 */
 QVariant Map::getFilter(const QString &layer) const {
     using namespace mbgl::style;

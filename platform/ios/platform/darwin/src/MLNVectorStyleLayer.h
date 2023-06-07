@@ -32,7 +32,7 @@ MLN_EXPORT
  Use the style layer’s predicate to include only the features in the source
  layer that satisfy a condition that you define. If the style layer initially
  comes from the style, its predicate corresponds to the
- <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layer-filter">`filter`</a>
+ <a href="https://maplibre.org/maplibre-style-spec/#layer-filter">`filter`</a>
  property in the style JSON.
  
  See the “<a href="../predicates-and-expressions.html">Predicates and Expressions</a>”
