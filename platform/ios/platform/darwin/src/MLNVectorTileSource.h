@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
  class may be a suitable alternative.
 
  Each
- <a href="https://www.mapbox.com/mapbox-gl-style-spec/#sources-vector"><code>vector</code></a>
+ <a href="https://maplibre.org/maplibre-style-spec/#sources-vector"><code>vector</code></a>
  source defined by the style JSON file is represented at runtime by an
  `MLNVectorTileSource` object that you can use to initialize new style layers.
  You can also add and remove sources dynamically using methods such as
