@@ -5,7 +5,7 @@ scriptpath=$(dirname "$script")
 
 script=$(mktemp)
 exit_code=$(mktemp)
-echo "$PWD/$@ && echo \$? > $exit_code' > $script
+echo "$PWD/$@ && echo \$? > $exit_code" > $script
 chmod +x $script
 
 XAUTHORITY=$(mktemp) startx "$script" -- -xf86config "$scriptpath/xorg.conf" -logfile /dev/null
