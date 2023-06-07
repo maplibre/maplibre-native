@@ -263,7 +263,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     // Composite (Opaque+Translucent) on bottom
     platform::glScissor(0, 0, halfW, halfH);
-    // Clipping masks were drawn only on the other side 
+    // Clipping masks were drawn only on the other side
     parameters.clearTileClippingMasks();
     drawableTranslucentPass();
 
