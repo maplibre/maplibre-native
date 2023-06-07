@@ -14,6 +14,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
@@ -447,16 +448,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, skip.
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            
-            // This belongs in the tweaker, but we don't have access to the tiles there.
-            if (!unevaluated.get<FillPattern>().isUndefined()) {
-                if (auto& tex = tile.getIconAtlasTexture()) {
-                    tileLayerGroup->observeDrawables(renderPass, tileID, [&tex](gfx::Drawable& drawable){
-                        drawable.setTexture(tex, samplerLocation);
-                    });
-                }
-            }
-
             continue;
         }
 
@@ -574,8 +565,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (auto& tex = tile.getIconAtlasTexture()) {
-                        builder->setTexture(tex, samplerLocation);
+                    if (const auto& atlases = tile.getAtlasTextures()) {
+                        builder->setTextureSource(samplerLocation, [=](){
+                            return atlases ? atlases->icon : nullptr;
+                        });
                     }
                     patternBuilder = std::move(builder);
                 }
@@ -588,8 +581,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setSubLayerIndex(2);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (auto& tex = tile.getIconAtlasTexture()) {
-                        builder->setTexture(tex, samplerLocation);
+                    if (const auto& atlases = tile.getAtlasTextures()) {
+                        builder->setTextureSource(samplerLocation, [=](){
+                            return atlases ? atlases->icon : nullptr;
+                        });
                     }
                     outlinePatternBuilder = std::move(builder);
                 }

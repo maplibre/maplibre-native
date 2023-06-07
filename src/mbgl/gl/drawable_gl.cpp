@@ -176,6 +176,12 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         };
     }
 
+    for (std::size_t i = 0; i < textureSources.size(); ++i) {
+        if (const auto& source = textureSources[i]) {
+            setTexture(source(), static_cast<int32_t>(i));
+        }
+    }
+    
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& tex) { return tex.texture->needsUpload(); });
 

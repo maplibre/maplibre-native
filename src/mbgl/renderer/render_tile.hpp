@@ -27,6 +27,7 @@ class PaintParameters;
 class DebugBucket;
 class SourcePrepareParameters;
 class FeatureIndex;
+class TileAtlasTextures;
 class TileRenderData;
 
 class RenderTile final {
@@ -65,6 +66,8 @@ public:
     bool hasIconAtlasTexture() const;
     const gfx::Texture2DPtr& getIconAtlasTexture() const;
     gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
+
+    const std::shared_ptr<TileAtlasTextures>& getAtlasTextures() const;
 
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
