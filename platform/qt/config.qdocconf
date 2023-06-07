@@ -7,7 +7,7 @@ include($QT_INSTALL_DOCS/global/qt-html-templates-online.qdocconf)
 Cpp.ignoretokens = Q_MAPLIBRE_EXPORT
 
 project     = QMapLibreGL
-description = MapLibre GL Maps SDK for Qt
+description = MapLibre Native SDK for Qt
 language    = Cpp
 
 outputdir   = docs
