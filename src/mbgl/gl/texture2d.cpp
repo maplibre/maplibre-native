@@ -6,7 +6,6 @@
 
 #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -30,11 +29,13 @@ Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::Texture
     assert(!textureResource);
     pixelFormat = pixelFormat_;
     channelType = channelType_;
+    storageDirty = true;
     return *this;
 }
 
 Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     size = size_;
+    storageDirty = true;
     return *this;
 }
 
@@ -89,7 +90,7 @@ void Texture2D::createStorage(const void* data) noexcept {
     // Bind to TU 0 and upload
     context.activeTextureUnit = 0;
     context.texture[0] = getTextureID();
-    updateSamplerConfiguration();
+    context.pixelStoreUnpack = {1};
     MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
                                   0,
                                   Enum<gfx::TexturePixelType>::to(pixelFormat),
@@ -99,6 +100,8 @@ void Texture2D::createStorage(const void* data) noexcept {
                                   Enum<gfx::TexturePixelType>::to(pixelFormat),
                                   Enum<gfx::TextureChannelDataType>::to(channelType),
                                   data));
+    storageDirty = false;
+    updateSamplerConfiguration();
 }
 
 void Texture2D::create() noexcept {
@@ -114,20 +117,24 @@ void Texture2D::updateSamplerConfiguration() noexcept {
     using namespace platform;
     samplerStateDirty = false;
 
-    MBGL_CHECK_ERROR(
-        glTexParameteri(GL_TEXTURE_2D,
-                        GL_TEXTURE_MIN_FILTER,
-                        samplerState.minification == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
-    MBGL_CHECK_ERROR(
-        glTexParameteri(GL_TEXTURE_2D,
-                        GL_TEXTURE_MAG_FILTER,
-                        samplerState.magnification == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
+    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
+                                     GL_TEXTURE_MIN_FILTER,
+                                     samplerState.filter == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
+    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
+                                     GL_TEXTURE_MAG_FILTER,
+                                     samplerState.filter == gfx::TextureFilterType::Nearest ? GL_NEAREST : GL_LINEAR));
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
                                      GL_TEXTURE_WRAP_S,
                                      samplerState.wrapU == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
     MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D,
                                      GL_TEXTURE_WRAP_T,
                                      samplerState.wrapV == gfx::TextureWrapType::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
+
+    // Keep the resource sampler configuration in sync
+    auto& glResource = static_cast<gl::TextureResource&>(*textureResource);
+    glResource.filter = samplerState.filter;
+    glResource.wrapX = samplerState.wrapU;
+    glResource.wrapY = samplerState.wrapV;
 }
 
 void Texture2D::bind(int32_t location, int32_t textureUnit) noexcept {
@@ -170,20 +177,21 @@ void Texture2D::unbind() noexcept {
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
-    using namespace platform;
+    if (!textureResource || storageDirty || size_ == Size{0, 0} || size_ != size) {
+        size = size_;
 
-    if (!textureResource || size_ == Size{0, 0} || size_ != size) {
         // Create the texture object if we don't already have one
         if (!textureResource) {
             createObject();
         }
 
-        size = size_;
         createStorage(pixelData);
 
     } else {
-        // Upload to existing memory
-        uploadSubRegion(pixelData, size, 0, 0);
+        if (pixelData) {
+            // Upload to existing memory
+            uploadSubRegion(pixelData, size, 0, 0);
+        }
     }
 }
 
@@ -196,6 +204,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     // Bind to TU 0 and upload
     context.activeTextureUnit = 0;
     context.texture[0] = getTextureID();
+    context.pixelStoreUnpack = {1};
     MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
                                      0,
                                      xOffset,
@@ -210,7 +219,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
 void Texture2D::upload() noexcept {
     if (image && image->valid()) {
         setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
-        upload(&(*image).data[0], image->size);
+        upload(image->data.get(), image->size);
         image.reset();
     }
 }
