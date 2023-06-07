@@ -75,8 +75,6 @@ jobs:
         with:
           header: size-test-result
           number: ${{ env.pr_number }}
-          hide_and_recreate: true
-          hide_classify: "OUTDATED"
           message: |
             ### Size test result
 
