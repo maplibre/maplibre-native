@@ -1,6 +1,5 @@
 package org.maplibre.android.testapp.adapter
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.SparseArray
 import android.view.LayoutInflater
@@ -25,7 +24,6 @@ class FeatureSectionAdapter(
 
     private val adapterDataObserver: RecyclerView.AdapterDataObserver =
         object : RecyclerView.AdapterDataObserver() {
-            @SuppressLint("NotifyDataSetChanged")
             override fun onChanged() {
                 valid = adapter.itemCount > 0
                 notifyDataSetChanged()
@@ -89,7 +87,6 @@ class FeatureSectionAdapter(
         return if (valid) adapter.itemCount + sections.size() else 0
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setSections(sections: Array<Section>) {
         this.sections.clear()
         Arrays.sort(sections) { section, section1 ->
