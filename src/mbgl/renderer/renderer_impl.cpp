@@ -329,7 +329,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 #endif
 
     //     Give the layers a chance to do cleanup
-    orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+    orchestrator.observeLayerGroups(
+        [&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 
     // Ends the RenderPass
     parameters.renderPass.reset();

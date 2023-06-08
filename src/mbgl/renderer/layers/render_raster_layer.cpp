@@ -232,7 +232,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             tileLayerGroup->clearDrawables();
         }
         if (imageLayerGroup) {
-//            stats.tileDrawablesRemoved += layerScene->getDrawableCount();
+            //            stats.tileDrawablesRemoved += layerScene->getDrawableCount();
             imageLayerGroup->clearDrawables();
         }
         return;
@@ -252,7 +252,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                               : gfx::TextureFilterType::Linear;
     // TODO: apply filter to texture
     (void)filter;
-    
+
     auto buildDrawables = [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
@@ -350,7 +350,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (location1.has_value()) {
             builder->setTexture(tex1, location1.value());
         }
-        
+
         return builder;
     };
 

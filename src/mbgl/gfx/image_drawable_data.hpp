@@ -12,7 +12,7 @@ namespace gfx {
 class ImageDrawableData : public DrawableData {
 public:
     ImageDrawableData(mat4 matrix_)
-    : matrix(matrix_) {}
+        : matrix(matrix_) {}
 
     mat4 matrix;
 };

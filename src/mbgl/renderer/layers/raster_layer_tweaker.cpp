@@ -66,7 +66,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             // this is an image drawable
             if (const auto& data = drawable.getData()) {
                 const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data.value());
-                
+
                 matrix = imageData.matrix;
             } else {
                 Log::Error(Event::General, "Invalid raster layer drawable: neither tile id nor image data is set.");
