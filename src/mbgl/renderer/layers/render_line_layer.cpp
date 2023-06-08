@@ -349,7 +349,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, "line");
         if (!tileLayerGroup) {
             return;
         }
