@@ -253,7 +253,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     // TODO: apply filter to texture
     (void)filter;
 
-    auto buildTileDrawables = [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
+    auto buildTileDrawables =
+        [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
@@ -355,7 +356,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     };
     (void)buildTileDrawables;
 
-    auto buildImageDrawables = [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
+    auto buildImageDrawables =
+        [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
@@ -367,10 +369,15 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         builder->setVertexAttrName("a_pos");
 
         std::vector<std::array<int16_t, 2>> vertices(bucket.vertices.vector().size());
-        std::transform(bucket.vertices.vector().begin(), bucket.vertices.vector().end(), vertices.begin(), [](const auto& x) { return x.a1; });
+        std::transform(
+            bucket.vertices.vector().begin(), bucket.vertices.vector().end(), vertices.begin(), [](const auto& x) {
+                return x.a1;
+            });
         builder->addVertices(vertices, 0, vertices.size());
 
-        builder->setSegments(gfx::Triangles(), bucket.indices.vector(), reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
+        builder->setSegments(gfx::Triangles(),
+                             bucket.indices.vector(),
+                             reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
 
         // attributes
         {
@@ -400,7 +407,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
         return builder;
     };
-    
+
     if (imageData) {
         RasterBucket& bucket = *imageData->bucket;
         if (!bucket.vertices.empty()) {
@@ -409,14 +416,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
             for (const auto& matrix_ : imageData->matrices) {
                 auto builder = buildImageDrawables(bucket);
-                
+
                 // Set up a layer scene
                 if (!imageLayerGroup) {
                     imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
                     imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
                     changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
                 }
-                
+
                 // finish
                 builder->flush();
                 for (auto& drawable : builder->clearDrawables()) {
@@ -433,8 +440,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 if (const auto it = std::find_if(renderTiles->begin(),
                                                  renderTiles->end(),
                                                  [&drawable](const auto& renderTile) {
-                    return drawable->getTileID() == renderTile.get().getOverscaledTileID();
-                });
+                                                     return drawable->getTileID() ==
+                                                            renderTile.get().getOverscaledTileID();
+                                                 });
                     it == renderTiles->end()) {
                     // remove it
                     drawable.reset();
@@ -451,9 +459,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
             if (!bucket.hasData()) continue;
-            
+
             if (tileLayerGroup && tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
-            
+
             if (bucket.image) {
                 auto builder = buildTileDrawables(bucket);
 
