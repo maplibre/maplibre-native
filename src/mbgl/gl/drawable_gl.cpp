@@ -39,7 +39,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     context.setDepthMode(parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
 
     // force disable depth test for debugging
-    //context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
+    // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
     if (needsStencil && tileID) {
         context.setStencilMode(parameters.stencilModeForClipping(tileID->toUnwrapped()));
@@ -174,6 +174,12 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
             glSeg.setVertexArray(std::move(vertexArray));
         };
+    }
+
+    for (std::size_t i = 0; i < textureSources.size(); ++i) {
+        if (const auto& source = textureSources[i]) {
+            setTexture(source(), static_cast<int32_t>(i));
+        }
     }
 
     const bool texturesNeedUpload = std::any_of(
