@@ -8,7 +8,7 @@ object LocationEngineDefault {
      */
     fun getDefaultLocationEngine(context: Context): LocationEngine {
         return LocationEngineProxy(
-            MaplibreFusedLocationEngineImpl(
+            MapLibreFusedLocationEngineImpl(
                 context.applicationContext
             )
         )

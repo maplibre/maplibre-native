@@ -19,9 +19,9 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.LocationComponentConstants.*
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.utils.*
-import org.maplibre.android.location.utils.MaplibreTestingUtils.Companion.MAPBOX_HEAVY_STYLE
-import org.maplibre.android.location.utils.MaplibreTestingUtils.Companion.pushSourceUpdates
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.location.utils.MapLibreTestingUtils.Companion.MAPBOX_HEAVY_STYLE
+import org.maplibre.android.location.utils.MapLibreTestingUtils.Companion.pushSourceUpdates
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
@@ -73,7 +73,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -103,7 +103,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -135,7 +135,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -174,7 +174,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -205,7 +205,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -236,7 +236,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -262,7 +262,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -304,7 +304,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -346,7 +346,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -377,7 +377,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -409,7 +409,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -442,7 +442,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -481,7 +481,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -520,7 +520,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -556,7 +556,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -586,7 +586,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -619,7 +619,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -652,7 +652,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -699,7 +699,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context
@@ -745,7 +745,7 @@ class LocationLayerControllerTest : EspressoTest() {
         val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
             override fun onLocationComponentAction(
                 component: LocationComponent,
-                maplibreMap: MaplibreMap,
+                maplibreMap: MapLibreMap,
                 style: Style,
                 uiController: UiController,
                 context: Context

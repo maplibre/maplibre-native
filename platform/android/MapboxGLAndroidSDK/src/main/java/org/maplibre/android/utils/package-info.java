@@ -1,4 +1,4 @@
 /**
- * Contains the Maplibre Maps Android Utility API classes.
+ * Contains the MapLibre Maps Android Utility API classes.
  */
 package org.maplibre.android.utils;

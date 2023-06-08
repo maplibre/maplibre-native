@@ -4,9 +4,9 @@ import android.graphics.Bitmap
 import com.google.gson.JsonElement
 import com.mapbox.geojson.Feature
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.location.MaplibreAnimator.AnimationsValueChangeListener
+import org.maplibre.android.location.MapLibreAnimator.AnimationsValueChangeListener
 import org.maplibre.android.location.modes.RenderMode
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.sources.GeoJsonSource
@@ -17,7 +17,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 
 class LocationLayerControllerTest {
-    private val maplibreMap = Mockito.mock(MaplibreMap::class.java)
+    private val maplibreMap = Mockito.mock(MapLibreMap::class.java)
     private val style = Mockito.mock(
         Style::class.java
     )
@@ -994,7 +994,7 @@ class LocationLayerControllerTest {
             false
         )
         getAnimationListener<Any>(
-            MaplibreAnimator.ANIMATOR_LAYER_LATLNG,
+            MapLibreAnimator.ANIMATOR_LAYER_LATLNG,
             layer.animationListeners
         )!!.onNewAnimationValue(LatLng())
 
@@ -1040,7 +1040,7 @@ class LocationLayerControllerTest {
         layer.renderMode = RenderMode.GPS
         val gpsBearing = 2f
         getAnimationListener<Any>(
-            MaplibreAnimator.ANIMATOR_LAYER_GPS_BEARING,
+            MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING,
             layer.animationListeners
         )!!.onNewAnimationValue(gpsBearing)
         Mockito.verify(locationFeature)
@@ -1086,7 +1086,7 @@ class LocationLayerControllerTest {
         val gpsBearing = 2f
         Assert.assertNull(
             getAnimationListener<Any>(
-                MaplibreAnimator.ANIMATOR_LAYER_GPS_BEARING,
+                MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING,
                 layer.animationListeners
             )
         )
@@ -1132,7 +1132,7 @@ class LocationLayerControllerTest {
         layer.renderMode = RenderMode.COMPASS
         val compassBearing = 2f
         getAnimationListener<Any>(
-            MaplibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
+            MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
             layer.animationListeners
         )
             ?.onNewAnimationValue(compassBearing)
@@ -1179,7 +1179,7 @@ class LocationLayerControllerTest {
         val compassBearing = 2f
         Assert.assertNull(
             getAnimationListener<Any>(
-                MaplibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
+                MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
                 layer.animationListeners
             )
         )
@@ -1224,7 +1224,7 @@ class LocationLayerControllerTest {
         )
         layer.renderMode = RenderMode.NORMAL
         val accuracyRadiusValue = 2f
-        getAnimationListener<Any>(MaplibreAnimator.ANIMATOR_LAYER_ACCURACY, layer.animationListeners)
+        getAnimationListener<Any>(MapLibreAnimator.ANIMATOR_LAYER_ACCURACY, layer.animationListeners)
             ?.onNewAnimationValue(accuracyRadiusValue)
         Mockito.verify(locationFeature).addNumberProperty(
             LocationComponentConstants.PROPERTY_ACCURACY_RADIUS,
@@ -1271,7 +1271,7 @@ class LocationLayerControllerTest {
         val accuracyRadiusValue = 2f
         Assert.assertNull(
             getAnimationListener<Any>(
-                MaplibreAnimator.ANIMATOR_LAYER_ACCURACY,
+                MapLibreAnimator.ANIMATOR_LAYER_ACCURACY,
                 layer.animationListeners
             )
         )
@@ -1490,11 +1490,11 @@ class LocationLayerControllerTest {
     }
 
     private fun <T> getAnimationListener(
-        @MaplibreAnimator.Type animatorType: Int,
+        @MapLibreAnimator.Type animatorType: Int,
         holders: Set<AnimatorListenerHolder>
     ): AnimationsValueChangeListener<Any>? {
         for (holder in holders) {
-            @MaplibreAnimator.Type val type = holder.animatorType
+            @MapLibreAnimator.Type val type = holder.animatorType
             if (type == animatorType) {
                 return holder.listener
             }

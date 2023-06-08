@@ -27,7 +27,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
     private val animators = LongSparseArray<Animator>()
     private lateinit var set: Animator
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_animator)
@@ -38,7 +38,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Streets"))
         initFab()

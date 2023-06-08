@@ -14,7 +14,7 @@ import org.maplibre.android.testapp.R
  */
 class RuntimeStyleTimingTestActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var maplibreMap: MaplibreMap
+    lateinit var maplibreMap: MapLibreMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +24,7 @@ class RuntimeStyleTimingTestActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+        mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@RuntimeStyleTimingTestActivity.maplibreMap = maplibreMap
             val parksLayer = CircleLayer("parks", "parks_source")
             parksLayer.sourceLayer = "parks"

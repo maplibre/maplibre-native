@@ -21,7 +21,7 @@ import kotlin.math.abs
  *
  *
  *
- * Maplibre GL displays maps in the Mercator Projection and projects geographical
+ * MapLibre GL displays maps in the Mercator Projection and projects geographical
  * data automatically, so all data enters in the WGS84 datum.
  *
  */

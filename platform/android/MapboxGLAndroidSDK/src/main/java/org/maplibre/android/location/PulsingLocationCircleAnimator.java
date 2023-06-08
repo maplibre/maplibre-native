@@ -3,7 +3,7 @@ package org.maplibre.android.location;
 /**
  * Manages the logic of the interpolated animation which is applied to the LocationComponent's pulsing circle
  */
-public class PulsingLocationCircleAnimator extends MaplibreFloatAnimator {
+public class PulsingLocationCircleAnimator extends MapLibreFloatAnimator {
 
   /**
    *

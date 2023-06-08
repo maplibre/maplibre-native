@@ -9,7 +9,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.Style
@@ -243,7 +243,7 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
     }
 
     private fun initSeekbars() {
-        val maxZoom = MaplibreConstants.MAXIMUM_ZOOM.toInt()
+        val maxZoom = MapLibreConstants.MAXIMUM_ZOOM.toInt()
         binding.seekbarMinZoom.max = maxZoom
         binding.seekbarMinZoom.progress = 1
         binding.seekbarMaxZoom.max = maxZoom

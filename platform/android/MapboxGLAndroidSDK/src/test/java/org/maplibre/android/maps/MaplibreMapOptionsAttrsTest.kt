@@ -14,10 +14,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class MaplibreMapOptionsAttrsTest {
+class MapLibreMapOptionsAttrsTest {
 
     @RelaxedMockK
-    private lateinit var options: MaplibreMapOptions
+    private lateinit var options: MapLibreMapOptions
 
     @RelaxedMockK
     private lateinit var typedArray: TypedArray
@@ -40,7 +40,7 @@ class MaplibreMapOptionsAttrsTest {
     fun enabledLocalIdeographFontFamily() {
         mockEnableLocalIdeograph(enabled = true)
 
-        val options = MaplibreMapOptions.createFromAttributes(options, context, typedArray)
+        val options = MapLibreMapOptions.createFromAttributes(options, context, typedArray)
 
         verify(exactly = 1) {
             options.localIdeographFontFamily(any())
@@ -54,7 +54,7 @@ class MaplibreMapOptionsAttrsTest {
         val font = "foo"
         mockLocalIdeographString(font)
 
-        val options = MaplibreMapOptions.createFromAttributes(options, context, typedArray)
+        val options = MapLibreMapOptions.createFromAttributes(options, context, typedArray)
 
         verify(exactly = 1) {
             options.localIdeographFontFamily(font)
@@ -68,7 +68,7 @@ class MaplibreMapOptionsAttrsTest {
         val fonts = arrayOf("foo", "bar")
         mockLocalIdeographStringArray(fonts)
 
-        val options = MaplibreMapOptions.createFromAttributes(options, context, typedArray)
+        val options = MapLibreMapOptions.createFromAttributes(options, context, typedArray)
 
         verify(exactly = 1) {
             options.localIdeographFontFamily(*fonts)

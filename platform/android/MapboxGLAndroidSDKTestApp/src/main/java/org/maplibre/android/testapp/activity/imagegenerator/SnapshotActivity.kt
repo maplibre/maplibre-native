@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.databinding.ActivitySnapshotBinding
@@ -17,7 +17,7 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivitySnapshotBinding
 
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
 
     private val idleListener = object : MapView.OnDidFinishRenderingFrameListener {
         override fun onDidFinishRenderingFrame(fully: Boolean) {
@@ -40,7 +40,7 @@ class SnapshotActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))) { binding.mapView.addOnDidFinishRenderingFrameListener(idleListener) }
     }

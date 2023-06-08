@@ -8,7 +8,7 @@ import org.maplibre.android.style.layers.CircleLayer;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.android.testapp.R;
-import org.maplibre.android.testapp.action.MaplibreMapAction;
+import org.maplibre.android.testapp.action.MapLibreMapAction;
 import org.maplibre.android.testapp.activity.EspressoTest;
 import org.maplibre.android.testapp.utils.ResourceUtils;
 import org.maplibre.android.testapp.utils.TestingAsyncUtils;
@@ -38,7 +38,7 @@ public class GeoJsonSourceTests extends EspressoTest {
   @Test
   public void testFeatureCollection() {
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = null;
       source = new GeoJsonSource("source", FeatureCollection
               .fromJson(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_collection)));
@@ -50,7 +50,7 @@ public class GeoJsonSourceTests extends EspressoTest {
   @Test
   public void testPointGeometry() {
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = new GeoJsonSource("source", Point.fromLngLat(0d, 0d));
       mapboxMap.getStyle().addSource(source);
       mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
@@ -60,7 +60,7 @@ public class GeoJsonSourceTests extends EspressoTest {
   @Test
   public void testFeatureProperties() {
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = null;
       source = new GeoJsonSource("source",
               ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
@@ -72,7 +72,7 @@ public class GeoJsonSourceTests extends EspressoTest {
   @Test
   public void testUpdateCoalescing() {
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = new GeoJsonSource("source");
       mapboxMap.getStyle().addSource(source);
       mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
@@ -93,7 +93,7 @@ public class GeoJsonSourceTests extends EspressoTest {
   public void testClearCollectionDuringConversion() {
     // https://github.com/mapbox/mapbox-gl-native/issues/14565
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       for (int j = 0; j < 1000; j++) {
         List<Feature> features = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -142,7 +142,7 @@ public class GeoJsonSourceTests extends EspressoTest {
 
   protected void testFeatureFromResource(final @RawRes int resource) {
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       GeoJsonSource source = new GeoJsonSource("source");
       mapboxMap.getStyle().addSource(source);
       Layer layer = new CircleLayer("layer", source.getId());

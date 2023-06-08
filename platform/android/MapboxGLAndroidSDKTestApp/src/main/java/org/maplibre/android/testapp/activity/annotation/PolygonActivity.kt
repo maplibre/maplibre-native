@@ -23,7 +23,7 @@ import java.util.ArrayList
  */
 class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var polygon: Polygon? = null
     private var fullAlpha = true
     private var polygonIsVisible = true
@@ -34,7 +34,7 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
 
         // configure inital map state
-        val options = MaplibreMapOptions.createFromAttributes(this, null)
+        val options = MapLibreMapOptions.createFromAttributes(this, null)
             .attributionTintColor(Config.RED_COLOR)
             .compassFadesWhenFacingNorth(false)
             .camera(
@@ -53,7 +53,7 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(mapView)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Streets"))
         map.setOnPolygonClickListener { polygon: Polygon ->

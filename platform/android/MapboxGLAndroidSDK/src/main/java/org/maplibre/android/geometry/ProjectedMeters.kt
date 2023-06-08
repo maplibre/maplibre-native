@@ -8,7 +8,7 @@ import androidx.annotation.Keep
  * ProjectedMeters is a projection of longitude, latitude points in Mercator meters.
  *
  *
- * these have been projected into Maplibre GL's Mercator projection. Instead of decimal
+ * these have been projected into MapLibre GL's Mercator projection. Instead of decimal
  * degrees, it uses Mercator meters (which are notably not equivalent to SI meters)
  * except at the equator.
  *

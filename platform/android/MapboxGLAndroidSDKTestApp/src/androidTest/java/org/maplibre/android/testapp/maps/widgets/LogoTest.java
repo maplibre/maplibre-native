@@ -5,7 +5,7 @@ import android.view.View;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.testapp.activity.EspressoTest;
 
 import org.hamcrest.Matcher;
@@ -37,9 +37,9 @@ public class LogoTest extends EspressoTest {
 
   private class DisableAction implements ViewAction {
 
-    private MaplibreMap maplibreMap;
+    private MapLibreMap maplibreMap;
 
-    DisableAction(MaplibreMap map) {
+    DisableAction(MapLibreMap map) {
       maplibreMap = map;
     }
 

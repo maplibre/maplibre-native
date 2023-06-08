@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.maplibre.android.maps.MapView;
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 
 /**
  * Annotation is an overlay on top of a Map.
@@ -17,7 +17,7 @@ import org.maplibre.android.maps.MaplibreMap;
  * </p>
  * @deprecated As of 7.0.0,
  * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
- *   Maplibre Annotation Plugin</a> instead
+ *   MapLibre Annotation Plugin</a> instead
  */
 @Deprecated
 public abstract class Annotation implements Comparable<Annotation> {
@@ -29,7 +29,7 @@ public abstract class Annotation implements Comparable<Annotation> {
    * Internal C++ id is stored as unsigned int.
    */
   private long id = -1; // -1 unless added to a MapView
-  protected MaplibreMap maplibreMap;
+  protected MapLibreMap maplibreMap;
   protected MapView mapView;
 
   protected Annotation() {
@@ -72,7 +72,7 @@ public abstract class Annotation implements Comparable<Annotation> {
    *
    * @param maplibreMap the hosting mapbox map
    */
-  public void setMapboxMap(MaplibreMap maplibreMap) {
+  public void setMapboxMap(MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
   }
 
@@ -81,7 +81,7 @@ public abstract class Annotation implements Comparable<Annotation> {
    *
    * @return the MapboxMap
    */
-  protected MaplibreMap getMapboxMap() {
+  protected MapLibreMap getMapboxMap() {
     return maplibreMap;
   }
 

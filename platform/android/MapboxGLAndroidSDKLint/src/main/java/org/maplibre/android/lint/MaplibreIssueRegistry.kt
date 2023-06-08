@@ -4,7 +4,7 @@ import com.android.tools.lint.client.api.IssueRegistry
 import com.android.tools.lint.detector.api.CURRENT_API
 import com.android.tools.lint.detector.api.Issue
 
-class MaplibreIssueRegistry : IssueRegistry() {
+class MapLibreIssueRegistry : IssueRegistry() {
     override val issues: List<Issue>
         get() = listOf(KeepDetector.ISSUE_NOT_KEPT)
 

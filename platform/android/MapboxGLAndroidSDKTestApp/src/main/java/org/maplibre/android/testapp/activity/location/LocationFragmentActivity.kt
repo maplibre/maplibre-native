@@ -16,7 +16,7 @@ import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityLocationLayerFragmentBinding
@@ -94,7 +94,7 @@ class LocationFragmentActivity : AppCompatActivity() {
         }
 
         private lateinit var mapView: MapView
-        private lateinit var maplibreMap: MaplibreMap
+        private lateinit var maplibreMap: MapLibreMap
 
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             mapView = MapView(inflater.context)

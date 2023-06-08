@@ -8,8 +8,8 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.maplibre.android.AppCenter;
-import org.maplibre.android.Maplibre;
-import org.maplibre.android.exceptions.MaplibreConfigurationException;
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.exceptions.MapLibreConfigurationException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -19,7 +19,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4ClassRunner.class)
-public class MaplibreTest extends AppCenter {
+public class MapLibreTest extends AppCenter {
 
   private static final String API_KEY = "pk.0000000001";
   private static final String API_KEY_2 = "pk.0000000002";
@@ -31,47 +31,47 @@ public class MaplibreTest extends AppCenter {
 
   @Before
   public void setup() {
-    realToken = Maplibre.getApiKey();
+    realToken = MapLibre.getApiKey();
   }
 
   @Test
   @UiThreadTest
   public void testConnected() {
-    assertTrue(Maplibre.isConnected());
+    assertTrue(MapLibre.isConnected());
 
     // test manual connectivity
-    Maplibre.setConnected(true);
-    assertTrue(Maplibre.isConnected());
-    Maplibre.setConnected(false);
-    assertFalse(Maplibre.isConnected());
+    MapLibre.setConnected(true);
+    assertTrue(MapLibre.isConnected());
+    MapLibre.setConnected(false);
+    assertFalse(MapLibre.isConnected());
 
     // reset to Android connectivity
-    Maplibre.setConnected(null);
-    assertTrue(Maplibre.isConnected());
+    MapLibre.setConnected(null);
+    assertTrue(MapLibre.isConnected());
   }
 
   @Test
   @UiThreadTest
   public void setApiKey() {
-    Maplibre.setApiKey(API_KEY);
-    assertSame(API_KEY, Maplibre.getApiKey());
-    Maplibre.setApiKey(API_KEY_2);
-    assertSame(API_KEY_2, Maplibre.getApiKey());
+    MapLibre.setApiKey(API_KEY);
+    assertSame(API_KEY, MapLibre.getApiKey());
+    MapLibre.setApiKey(API_KEY_2);
+    assertSame(API_KEY_2, MapLibre.getApiKey());
   }
 
   @Test
   @UiThreadTest
   public void setNullApiKey() {
-    expectedException.expect(MaplibreConfigurationException.class);
+    expectedException.expect(MapLibreConfigurationException.class);
     expectedException.expectMessage(
       "A valid API key is required, currently provided key is: " + null
     );
 
-    Maplibre.setApiKey(null);
+    MapLibre.setApiKey(null);
   }
 
   @After
   public void tearDown() {
-    Maplibre.setApiKey(realToken);
+    MapLibre.setApiKey(realToken);
   }
 }

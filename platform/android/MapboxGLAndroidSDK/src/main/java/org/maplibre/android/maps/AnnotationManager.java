@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.LongSparseArray;
 
-import org.maplibre.android.Maplibre;
+import org.maplibre.android.MapLibre;
 import org.maplibre.android.R;
 import org.maplibre.android.annotations.Annotation;
 import org.maplibre.android.annotations.BaseMarkerOptions;
@@ -26,7 +26,7 @@ import java.util.List;
 
 /**
  * Responsible for managing and tracking state of Annotations linked to Map. All events related to
- * annotations that occur on {@link MaplibreMap} are forwarded to this class.
+ * annotations that occur on {@link MapLibreMap} are forwarded to this class.
  * <p>
  * Responsible for referencing {@link InfoWindowManager}.
  * </p>
@@ -48,13 +48,13 @@ class AnnotationManager {
   private final LongSparseArray<Annotation> annotationsArray;
   private final List<Marker> selectedMarkers = new ArrayList<>();
 
-  private MaplibreMap maplibreMap;
+  private MapLibreMap maplibreMap;
   @Nullable
-  private MaplibreMap.OnMarkerClickListener onMarkerClickListener;
+  private MapLibreMap.OnMarkerClickListener onMarkerClickListener;
   @Nullable
-  private MaplibreMap.OnPolygonClickListener onPolygonClickListener;
+  private MapLibreMap.OnPolygonClickListener onPolygonClickListener;
   @Nullable
-  private MaplibreMap.OnPolylineClickListener onPolylineClickListener;
+  private MapLibreMap.OnPolylineClickListener onPolylineClickListener;
 
   private Annotations annotations;
   private ShapeAnnotations shapeAnnotations;
@@ -78,7 +78,7 @@ class AnnotationManager {
   // TODO refactor MapboxMap out for Projection and Transform
   // Requires removing MapboxMap from Annotations by using Peer model from #6912
   @NonNull
-  AnnotationManager bind(MaplibreMap maplibreMap) {
+  AnnotationManager bind(MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
     return this;
   }
@@ -151,16 +151,16 @@ class AnnotationManager {
   // Markers
   //
 
-  Marker addMarker(@NonNull BaseMarkerOptions markerOptions, @NonNull MaplibreMap maplibreMap) {
+  Marker addMarker(@NonNull BaseMarkerOptions markerOptions, @NonNull MapLibreMap maplibreMap) {
     return markers.addBy(markerOptions, maplibreMap);
   }
 
   List<Marker> addMarkers(@NonNull List<? extends BaseMarkerOptions> markerOptionsList,
-                          @NonNull MaplibreMap maplibreMap) {
+                          @NonNull MapLibreMap maplibreMap) {
     return markers.addBy(markerOptionsList, maplibreMap);
   }
 
-  void updateMarker(@NonNull Marker updatedMarker, @NonNull MaplibreMap maplibreMap) {
+  void updateMarker(@NonNull Marker updatedMarker, @NonNull MapLibreMap maplibreMap) {
     if (!isAddedToMap(updatedMarker)) {
       logNonAdded(updatedMarker);
       return;
@@ -185,11 +185,11 @@ class AnnotationManager {
   // Polygons
   //
 
-  Polygon addPolygon(@NonNull PolygonOptions polygonOptions, @NonNull MaplibreMap maplibreMap) {
+  Polygon addPolygon(@NonNull PolygonOptions polygonOptions, @NonNull MapLibreMap maplibreMap) {
     return polygons.addBy(polygonOptions, maplibreMap);
   }
 
-  List<Polygon> addPolygons(@NonNull List<PolygonOptions> polygonOptionsList, @NonNull MaplibreMap maplibreMap) {
+  List<Polygon> addPolygons(@NonNull List<PolygonOptions> polygonOptionsList, @NonNull MapLibreMap maplibreMap) {
     return polygons.addBy(polygonOptionsList, maplibreMap);
   }
 
@@ -209,11 +209,11 @@ class AnnotationManager {
   // Polylines
   //
 
-  Polyline addPolyline(@NonNull PolylineOptions polylineOptions, @NonNull MaplibreMap maplibreMap) {
+  Polyline addPolyline(@NonNull PolylineOptions polylineOptions, @NonNull MapLibreMap maplibreMap) {
     return polylines.addBy(polylineOptions, maplibreMap);
   }
 
-  List<Polyline> addPolylines(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MaplibreMap maplibreMap) {
+  List<Polyline> addPolylines(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MapLibreMap maplibreMap) {
     return polylines.addBy(polylineOptionsList, maplibreMap);
   }
 
@@ -230,15 +230,15 @@ class AnnotationManager {
   }
 
   // TODO Refactor from here still in progress
-  void setOnMarkerClickListener(@Nullable MaplibreMap.OnMarkerClickListener listener) {
+  void setOnMarkerClickListener(@Nullable MapLibreMap.OnMarkerClickListener listener) {
     onMarkerClickListener = listener;
   }
 
-  void setOnPolygonClickListener(@Nullable MaplibreMap.OnPolygonClickListener listener) {
+  void setOnPolygonClickListener(@Nullable MapLibreMap.OnPolygonClickListener listener) {
     onPolygonClickListener = listener;
   }
 
-  void setOnPolylineClickListener(@Nullable MaplibreMap.OnPolylineClickListener listener) {
+  void setOnPolylineClickListener(@Nullable MapLibreMap.OnPolylineClickListener listener) {
     onPolylineClickListener = listener;
   }
 
@@ -298,7 +298,7 @@ class AnnotationManager {
     return infoWindowManager;
   }
 
-  void adjustTopOffsetPixels(@NonNull MaplibreMap maplibreMap) {
+  void adjustTopOffsetPixels(@NonNull MapLibreMap maplibreMap) {
     int count = annotationsArray.size();
     for (int i = 0; i < count; i++) {
       Annotation annotation = annotationsArray.get(i);
@@ -346,7 +346,7 @@ class AnnotationManager {
   }
 
   private ShapeAnnotationHit getShapeAnnotationHitFromTap(PointF tapPoint) {
-    float touchTargetSide = Maplibre.getApplicationContext().getResources().getDimension(R.dimen.maplibre_eight_dp);
+    float touchTargetSide = MapLibre.getApplicationContext().getResources().getDimension(R.dimen.maplibre_eight_dp);
     RectF tapRect = new RectF(
       tapPoint.x - touchTargetSide,
       tapPoint.y - touchTargetSide,
@@ -441,9 +441,9 @@ class AnnotationManager {
 
     private long closestMarkerId = NO_ANNOTATION_ID;
 
-    MarkerHitResolver(@NonNull MaplibreMap maplibreMap) {
+    MarkerHitResolver(@NonNull MapLibreMap maplibreMap) {
       this.projection = maplibreMap.getProjection();
-      this.minimalTouchSize = (int) (32 * Maplibre.getApplicationContext().getResources().getDisplayMetrics().density);
+      this.minimalTouchSize = (int) (32 * MapLibre.getApplicationContext().getResources().getDisplayMetrics().density);
     }
 
     public long execute(@NonNull MarkerHit markerHit) {

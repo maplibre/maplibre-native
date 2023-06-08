@@ -11,7 +11,7 @@ import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.PropertyFactory;
 import org.maplibre.android.style.layers.SymbolLayer;
 import org.maplibre.android.style.sources.GeoJsonSource;
-import org.maplibre.android.testapp.action.MaplibreMapAction;
+import org.maplibre.android.testapp.action.MapLibreMapAction;
 import org.maplibre.android.testapp.activity.EspressoTest;
 import org.maplibre.android.testapp.utils.TestingAsyncUtils;
 
@@ -123,7 +123,7 @@ public class GeoJsonConversionTest extends EspressoTest {
   @Test
   public void testNegativeNumberPropertyConversion() {
     validateTestSetup();
-    onView(isRoot()).perform(new MaplibreMapAction((uiController, mapboxMap) -> {
+    onView(isRoot()).perform(new MapLibreMapAction((uiController, mapboxMap) -> {
       LatLng latLng = new LatLng();
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
 

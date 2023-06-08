@@ -284,7 +284,7 @@ class OfflineManager private constructor(context: Context) {
      * Forces re-validation of the ambient cache.
      *
      *
-     * Forces Maplibre GL Native to revalidate resources stored in the ambient
+     * Forces MapLibre GL Native to revalidate resources stored in the ambient
      * cache with the tile server before using them, making sure they
      * are the latest version. This is more efficient than cleaning the
      * cache because if the resource is considered valid after the server
@@ -521,7 +521,7 @@ class OfflineManager private constructor(context: Context) {
     }
 
     /**
-     * Sets the maximum number of Maplibre-hosted tiles that may be downloaded and stored on the current device.
+     * Sets the maximum number of MapLibre-hosted tiles that may be downloaded and stored on the current device.
      * By default, the limit is set to 6,000.
      *
      *

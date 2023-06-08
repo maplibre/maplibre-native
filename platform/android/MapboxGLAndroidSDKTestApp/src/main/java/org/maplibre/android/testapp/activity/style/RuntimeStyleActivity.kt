@@ -14,8 +14,8 @@ import com.mapbox.geojson.Polygon
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.CancelableCallback
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -45,7 +45,7 @@ import java.util.Collections
  */
 class RuntimeStyleActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var styleLoaded = false
     var lngLats = listOf(
         Arrays.asList(
@@ -80,7 +80,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MaplibreMap? ->
+            OnMapReadyCallback { map: MapLibreMap? ->
                 // Store for later
                 if (map != null) {
                     maplibreMap = map

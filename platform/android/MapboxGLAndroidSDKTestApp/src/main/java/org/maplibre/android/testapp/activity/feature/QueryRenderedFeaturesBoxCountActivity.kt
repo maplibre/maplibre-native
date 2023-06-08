@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.Feature
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.utils.NavUtils
@@ -20,7 +20,7 @@ import timber.log.Timber
  */
 class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var maplibreMap: MaplibreMap
+    lateinit var maplibreMap: MapLibreMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +31,7 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+        mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@QueryRenderedFeaturesBoxCountActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
             selectionBox.setOnClickListener { view: View? ->

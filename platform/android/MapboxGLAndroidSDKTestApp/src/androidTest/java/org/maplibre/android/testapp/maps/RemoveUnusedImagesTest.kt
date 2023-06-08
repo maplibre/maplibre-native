@@ -7,7 +7,7 @@ import org.maplibre.android.AppCenter
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
@@ -28,7 +28,7 @@ class RemoveUnusedImagesTest : AppCenter() {
     var rule = ActivityTestRule(EspressoTestActivity::class.java)
 
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private val latch = CountDownLatch(1)
 
     @Before
@@ -107,7 +107,7 @@ class RemoveUnusedImagesTest : AppCenter() {
             """
     {
       "version": 8,
-      "name": "Maplibre Streets",
+      "name": "MapLibre Streets",
       "sources": {
         "geojson": {
           "type": "geojson",

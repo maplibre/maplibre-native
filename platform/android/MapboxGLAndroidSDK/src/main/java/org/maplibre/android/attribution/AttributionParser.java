@@ -130,10 +130,10 @@ public class AttributionParser {
   }
 
   /**
-   * Invoked to validate if an url is valid for the Maplibre configuration.
+   * Invoked to validate if an url is valid for the MapLibre configuration.
    *
    * @param url the url to be validated
-   * @return if the url is valid for Maplibre
+   * @return if the url is valid for MapLibre
    */
   private boolean isValidForMapbox(@NonNull String url) {
     return withMapboxAttribution || !url.equals(Attribution.MAPBOX_URL);
@@ -191,7 +191,7 @@ public class AttributionParser {
    * <p>
    * AttributionData, set with {@link #withAttributionData(String...)}, is the only required property to build
    * the underlying AttributionParser. Other properties include trimming the copyright sign, hiding
-   * attribution as improve this map and Maplibre.
+   * attribution as improve this map and MapLibre.
    * </p>
    */
   public static class Options {

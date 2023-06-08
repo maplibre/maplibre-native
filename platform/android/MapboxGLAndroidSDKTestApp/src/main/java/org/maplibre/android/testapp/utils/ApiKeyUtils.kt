@@ -1,7 +1,7 @@
 package org.maplibre.android.testapp.utils
 
 import android.content.Context
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import java.lang.Exception
 
 object ApiKeyUtils {
@@ -10,7 +10,7 @@ object ApiKeyUtils {
      *
      * Returns the ApiKey set in the app resources.
      *
-     * It will first search for a api key in the Maplibre object. If not found it
+     * It will first search for a api key in the MapLibre object. If not found it
      * will then attempt to load the api key from the
      * `res/values/dev.xml` development file.
      *
@@ -20,7 +20,7 @@ object ApiKeyUtils {
     fun getApiKey(context: Context): String? {
         return try {
             // Read out AndroidManifest
-            val apiKey = Maplibre.getApiKey()
+            val apiKey = MapLibre.getApiKey()
             require(!(apiKey == null || apiKey.isEmpty()))
             apiKey
         } catch (exception: Exception) {

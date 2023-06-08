@@ -11,14 +11,14 @@ import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 
 class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var permissionsManager: PermissionsManager? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +64,7 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    override fun onMapReady(maplibreMap: MaplibreMap) {
+    override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(
             Style.Builder().fromUri(Utils.nextStyle())

@@ -30,12 +30,12 @@ import static android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY;
  * {@link GLSurfaceView} extension that notifies a listener when the view is detached from window,
  * which is the point of destruction of the GL thread.
  */
-public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
+public class MapLibreGLSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
 
   private static final String TAG = "GLSurfaceView";
   private static final GLThreadManager glThreadManager = new GLThreadManager();
 
-  private final WeakReference<MaplibreGLSurfaceView> viewWeakReference = new WeakReference<>(this);
+  private final WeakReference<MapLibreGLSurfaceView> viewWeakReference = new WeakReference<>(this);
   private GLThread glThread;
   private GLSurfaceView.Renderer renderer;
   private GLSurfaceView.EGLConfigChooser eglConfigChooser;
@@ -50,7 +50,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
    * Standard View constructor. In order to render something, you
    * must call {@link #setRenderer} to register a renderer.
    */
-  public MaplibreGLSurfaceView(Context context) {
+  public MapLibreGLSurfaceView(Context context) {
     super(context);
     init();
   }
@@ -59,7 +59,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
    * Standard View constructor. In order to render something, you
    * must call {@link #setRenderer} to register a renderer.
    */
-  public MaplibreGLSurfaceView(Context context, AttributeSet attrs) {
+  public MapLibreGLSurfaceView(Context context, AttributeSet attrs) {
     super(context, attrs);
     init();
   }
@@ -354,7 +354,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
    * An EGL helper class.
    */
   private static class EglHelper {
-    private EglHelper(WeakReference<MaplibreGLSurfaceView> glSurfaceViewWeakRef) {
+    private EglHelper(WeakReference<MapLibreGLSurfaceView> glSurfaceViewWeakRef) {
       mGLSurfaceViewWeakRef = glSurfaceViewWeakRef;
     }
 
@@ -386,7 +386,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
           Log.e(TAG, "eglInitialize failed");
           return;
         }
-        MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+        MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
         if (view == null) {
           mEglConfig = null;
           mEglContext = null;
@@ -442,7 +442,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
       /*
        * Create an EGL surface we can render into.
        */
-      MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+      MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
       if (view != null) {
         mEglSurface = view.eglWindowSurfaceFactory.createWindowSurface(mEgl,
           mEglDisplay, mEglConfig, view.getHolder());
@@ -502,7 +502,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
         mEgl.eglMakeCurrent(mEglDisplay, EGL10.EGL_NO_SURFACE,
           EGL10.EGL_NO_SURFACE,
           EGL10.EGL_NO_CONTEXT);
-        MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+        MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
         if (view != null) {
           view.eglWindowSurfaceFactory.destroySurface(mEgl, mEglDisplay, mEglSurface);
         }
@@ -512,7 +512,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
 
     public void finish() {
       if (mEglContext != null) {
-        MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+        MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
         if (view != null) {
           view.eglContextFactory.destroyContext(mEgl, mEglDisplay, mEglContext);
         }
@@ -532,7 +532,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
       return function + " failed: " + EGLLogWrapper.getErrorString(error);
     }
 
-    private WeakReference<MaplibreGLSurfaceView> mGLSurfaceViewWeakRef;
+    private WeakReference<MapLibreGLSurfaceView> mGLSurfaceViewWeakRef;
     EGL10 mEgl;
     EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
@@ -550,7 +550,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
    * sGLThreadManager object. This avoids multiple-lock ordering issues.
    */
   static class GLThread extends Thread {
-    GLThread(WeakReference<MaplibreGLSurfaceView> glSurfaceViewWeakRef) {
+    GLThread(WeakReference<MapLibreGLSurfaceView> glSurfaceViewWeakRef) {
       super();
       width = 0;
       height = 0;
@@ -659,7 +659,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
 
               // When pausing, optionally release the EGL Context:
               if (pausing && haveEglContext) {
-                MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+                MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
                 boolean preserveEglContextOnPause = view != null && view.preserveEGLContextOnPause;
                 if (!preserveEglContextOnPause) {
                   stopEglContextLocked();
@@ -784,7 +784,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
           }
 
           if (createEglContext) {
-            MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+            MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
             if (view != null) {
               view.renderer.onSurfaceCreated(gl, eglHelper.mEglConfig);
             }
@@ -792,14 +792,14 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
           }
 
           if (sizeChanged) {
-            MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+            MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
             if (view != null) {
               view.renderer.onSurfaceChanged(gl, w, h);
             }
             sizeChanged = false;
           }
 
-          MaplibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
+          MapLibreGLSurfaceView view = mGLSurfaceViewWeakRef.get();
           if (view != null) {
             view.renderer.onDrawFrame(gl);
             if (finishDrawingRunnable != null) {
@@ -1050,7 +1050,7 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
      * called. This weak reference allows the GLSurfaceView to be garbage collected while
      * the GLThread is still alive.
      */
-    private WeakReference<MaplibreGLSurfaceView> mGLSurfaceViewWeakRef;
+    private WeakReference<MapLibreGLSurfaceView> mGLSurfaceViewWeakRef;
 
   }
 
@@ -1111,12 +1111,12 @@ public class MaplibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
   }
 
   /**
-   * Listener interface that notifies when a {@link MaplibreGLSurfaceView} is detached from window.
+   * Listener interface that notifies when a {@link MapLibreGLSurfaceView} is detached from window.
    */
   public interface OnGLSurfaceViewDetachedListener {
 
     /**
-     * Called when a {@link MaplibreGLSurfaceView} is detached from window.
+     * Called when a {@link MapLibreGLSurfaceView} is detached from window.
      */
     void onGLSurfaceViewDetached();
   }

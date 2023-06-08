@@ -1,4 +1,4 @@
 /**
- * Contains the Maplibre Maps Android Text API classes.
+ * Contains the MapLibre Maps Android Text API classes.
  */
 package org.maplibre.android.text;

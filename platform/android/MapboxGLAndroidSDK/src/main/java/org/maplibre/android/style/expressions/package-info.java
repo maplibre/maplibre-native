@@ -1,4 +1,4 @@
 /**
- * Contains the Maplibre Maps Android Expression API classes.
+ * Contains the MapLibre Maps Android Expression API classes.
  */
 package org.maplibre.android.style.expressions;

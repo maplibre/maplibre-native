@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.action.MaplibreMapAction
+import org.maplibre.android.testapp.action.MapLibreMapAction
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -25,7 +25,7 @@ class ImageTest : EspressoTest() {
     @Test
     fun testAddGetImage() {
         validateTestSetup()
-        MaplibreMapAction.invoke(maplibreMap) { uiController, mapboxMap ->
+        MapLibreMapAction.invoke(maplibreMap) { uiController, mapboxMap ->
             val drawable = rule.activity.resources.getDrawable(R.drawable.ic_launcher_round)
             assertTrue(drawable is BitmapDrawable)
 

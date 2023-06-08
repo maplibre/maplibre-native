@@ -3,7 +3,7 @@ package org.maplibre.android.testapp.activity.offline
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.Style
 import org.maplibre.android.offline.OfflineManager
@@ -90,7 +90,7 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // forcing offline state
-        Maplibre.setConnected(false)
+        MapLibre.setConnected(false)
 
         binding.mapView.onCreate(savedInstanceState)
         binding.loadRegionBtn.setOnClickListener {
@@ -145,7 +145,7 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
         binding.mapView.onDestroy()
 
         // restoring connectivity state
-        Maplibre.setConnected(null)
+        MapLibre.setConnected(null)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

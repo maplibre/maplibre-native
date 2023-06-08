@@ -6,7 +6,7 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  * Polygon is a geometry annotation that's a closed loop of coordinates.
  * @deprecated As of 7.0.0,
  * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
- *   Maplibre Annotation Plugin</a> instead
+ *   MapLibre Annotation Plugin</a> instead
  */
 @Deprecated
 public final class Polygon extends BasePointCollection {
@@ -103,7 +103,7 @@ public final class Polygon extends BasePointCollection {
 
   @Override
   void update() {
-    MaplibreMap maplibreMap = getMapboxMap();
+    MapLibreMap maplibreMap = getMapboxMap();
     if (maplibreMap != null) {
       maplibreMap.updatePolygon(this);
     }

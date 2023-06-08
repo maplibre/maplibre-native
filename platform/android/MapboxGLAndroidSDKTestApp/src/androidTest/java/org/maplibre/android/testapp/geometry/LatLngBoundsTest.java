@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.maplibre.android.camera.CameraUpdateFactory;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
-import org.maplibre.android.testapp.action.MaplibreMapAction;
+import org.maplibre.android.testapp.action.MapLibreMapAction;
 import org.maplibre.android.testapp.activity.BaseTest;
 import org.maplibre.android.testapp.activity.feature.QueryRenderedFeaturesBoxHighlightActivity;
 import org.maplibre.android.testapp.utils.TestConstants;
@@ -28,7 +28,7 @@ public class LatLngBoundsTest extends BaseTest {
   public void testLatLngBounds() {
     // regression test for #9322
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLngBounds bounds = new LatLngBounds.Builder()
         .include(new LatLng(48.8589506, 2.2773457))
         .include(new LatLng(47.2383171, -1.6309316))
@@ -41,7 +41,7 @@ public class LatLngBoundsTest extends BaseTest {
   public void testLatLngBoundsBearing() {
     // regression test for #12549
     validateTestSetup();
-    MaplibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
       LatLngBounds bounds = new LatLngBounds.Builder()
         .include(new LatLng(48.8589506, 2.2773457))
         .include(new LatLng(47.2383171, -1.6309316))

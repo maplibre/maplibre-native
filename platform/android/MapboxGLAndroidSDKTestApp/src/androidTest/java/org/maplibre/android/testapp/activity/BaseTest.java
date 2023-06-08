@@ -8,9 +8,9 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
 import org.maplibre.android.AppCenter;
-import org.maplibre.android.Maplibre;
+import org.maplibre.android.MapLibre;
 import org.maplibre.android.maps.MapView;
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.testapp.R;
 
 import org.junit.After;
@@ -43,7 +43,7 @@ public abstract class BaseTest extends AppCenter {
   public GrantPermissionRule grantLocationPermissionRule = GrantPermissionRule
           .grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
-  protected MaplibreMap maplibreMap;
+  protected MapLibreMap maplibreMap;
   protected MapView mapView;
   private final CountDownLatch latch = new CountDownLatch(1);
 
@@ -62,13 +62,13 @@ public abstract class BaseTest extends AppCenter {
 
   @UiThread
   @CallSuper
-  protected void initMap(MaplibreMap maplibreMap) {
+  protected void initMap(MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
     maplibreMap.getStyle(style -> latch.countDown());
   }
 
   protected void validateTestSetup() {
-    if (!Maplibre.isConnected()) {
+    if (!MapLibre.isConnected()) {
       Timber.e("Not connected to the internet while running test");
     }
     assertNotNull("MapView isn't initialised", mapView);

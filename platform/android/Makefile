@@ -229,7 +229,7 @@ android-ui-test:
 #Run instrumentations tests on MicroSoft App Center, ${devices} can be "xiaomi","huawei","OnePlus","htc"
 .PHONY: run-android-test-app-center
 run-android-test-app-center:
-	appcenter test run espresso --app "Maplibre-mobile/Maps-sdk" --devices "Maplibre-mobile/${devices}" --app-path MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk  --test-series "master" --locale "en_US" --build-dir MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug --token ${APPCENTER_ACCESS_TOKEN}
+	appcenter test run espresso --app "MapLibre-mobile/Maps-sdk" --devices "MapLibre-mobile/${devices}" --app-path MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk  --test-series "master" --locale "en_US" --build-dir MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug --token ${APPCENTER_ACCESS_TOKEN}
 
 # Uploads the compiled Android SDK to Maven Central Staging
 .PHONY: run-android-publish

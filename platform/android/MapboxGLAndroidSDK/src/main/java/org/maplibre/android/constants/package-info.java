@@ -1,4 +1,4 @@
 /**
- * Contains the Maplibre Maps Android Constant API classes.
+ * Contains the MapLibre Maps Android Constant API classes.
  */
 package org.maplibre.android.constants;

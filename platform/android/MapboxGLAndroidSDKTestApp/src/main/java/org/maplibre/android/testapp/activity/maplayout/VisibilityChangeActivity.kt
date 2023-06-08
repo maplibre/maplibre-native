@@ -14,7 +14,7 @@ import org.maplibre.android.testapp.R
  */
 class VisibilityChangeActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private val handler = Handler()
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,7 +23,7 @@ class VisibilityChangeActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MaplibreMap? ->
+            OnMapReadyCallback { map: MapLibreMap? ->
                 if (map != null) {
                     maplibreMap = map
                 }

@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 
 import org.hamcrest.Matcher;
 
@@ -14,12 +14,12 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
-public class MaplibreMapAction implements ViewAction {
+public class MapLibreMapAction implements ViewAction {
 
   private OnInvokeActionListener invokeViewAction;
-  private MaplibreMap maplibreMap;
+  private MapLibreMap maplibreMap;
 
-  public MaplibreMapAction(OnInvokeActionListener invokeViewAction, MaplibreMap maplibreMap) {
+  public MapLibreMapAction(OnInvokeActionListener invokeViewAction, MapLibreMap maplibreMap) {
     this.invokeViewAction = invokeViewAction;
     this.maplibreMap = maplibreMap;
   }
@@ -39,12 +39,12 @@ public class MaplibreMapAction implements ViewAction {
     invokeViewAction.onInvokeAction(uiController, maplibreMap);
   }
 
-  public static void invoke(MaplibreMap maplibreMap, OnInvokeActionListener invokeViewAction) {
-    onView(withId(android.R.id.content)).perform(new MaplibreMapAction(invokeViewAction, maplibreMap));
+  public static void invoke(MapLibreMap maplibreMap, OnInvokeActionListener invokeViewAction) {
+    onView(withId(android.R.id.content)).perform(new MapLibreMapAction(invokeViewAction, maplibreMap));
   }
 
   public interface OnInvokeActionListener {
-    void onInvokeAction(@NonNull UiController uiController, @NonNull MaplibreMap maplibreMap);
+    void onInvokeAction(@NonNull UiController uiController, @NonNull MapLibreMap maplibreMap);
   }
 }
 

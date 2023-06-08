@@ -13,8 +13,8 @@ import androidx.annotation.StringDef
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import org.maplibre.android.MapStrictMode
-import org.maplibre.android.Maplibre
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.MapLibre
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.module.http.HttpRequestUtil
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
@@ -42,14 +42,14 @@ class TileLoadingMeasurementUtils {
 
         private val isTileLoadingMeasurementOn: Boolean
             private get() = isBooleanMetaDataValueOn(
-                MaplibreConstants.KEY_META_DATA_MEASURE_TILE_DOWNLOAD_ON,
-                MaplibreConstants.DEFAULT_MEASURE_TILE_DOWNLOAD_ON
+                MapLibreConstants.KEY_META_DATA_MEASURE_TILE_DOWNLOAD_ON,
+                MapLibreConstants.DEFAULT_MEASURE_TILE_DOWNLOAD_ON
             )
 
         private fun isBooleanMetaDataValueOn(propKey: String, defaultValue: Boolean): Boolean {
             try {
                 // Try getting a custom value from the app Manifest
-                val context = Maplibre.getApplicationContext()
+                val context = MapLibre.getApplicationContext()
                 val appInfo = context.packageManager.getApplicationInfo(
                     context.packageName,
                     PackageManager.GET_META_DATA
@@ -134,7 +134,7 @@ class TileLoadingMeasurementUtils {
 
                 private val ram: String
                     private get() {
-                        val actManager = Maplibre.getApplicationContext()
+                        val actManager = MapLibre.getApplicationContext()
                             .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
                         val memInfo = ActivityManager.MemoryInfo()
                         actManager.getMemoryInfo(memInfo)
@@ -142,7 +142,7 @@ class TileLoadingMeasurementUtils {
                     }
                 private val windowSize: String
                     private get() {
-                        val windowManager = Maplibre.getApplicationContext()
+                        val windowManager = MapLibre.getApplicationContext()
                             .getSystemService(Context.WINDOW_SERVICE) as WindowManager
                         val display = windowManager.defaultDisplay
                         val metrics = DisplayMetrics()
@@ -155,7 +155,7 @@ class TileLoadingMeasurementUtils {
                 @get:ConnectionState
                 private val connectionState: String
                     private get() {
-                        val appContext = Maplibre.getApplicationContext()
+                        val appContext = MapLibre.getApplicationContext()
                         val connectivityManager =
                             appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

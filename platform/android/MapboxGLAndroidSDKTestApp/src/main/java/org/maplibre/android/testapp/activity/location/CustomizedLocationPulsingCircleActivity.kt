@@ -23,7 +23,7 @@ import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -38,7 +38,7 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
     private lateinit var pulsingCircleColorButton: Button
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var currentPulseDuration = 0f
 
     //endregion
@@ -85,7 +85,7 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
     }
 
     @SuppressLint("MissingPermission")
-    override fun onMapReady(maplibreMap: MaplibreMap) {
+    override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
             locationComponent = maplibreMap.locationComponent

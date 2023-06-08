@@ -6,7 +6,7 @@ import com.mapbox.android.gestures.RotateGestureDetector
 import com.mapbox.android.gestures.ShoveGestureDetector
 import com.mapbox.android.gestures.StandardScaleGestureDetector
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MaplibreMap.*
+import org.maplibre.android.maps.MapLibreMap.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito

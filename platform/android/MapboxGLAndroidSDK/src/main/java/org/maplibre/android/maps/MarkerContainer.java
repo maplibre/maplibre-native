@@ -29,7 +29,7 @@ class MarkerContainer implements Markers {
   }
 
   @Override
-  public Marker addBy(@NonNull BaseMarkerOptions markerOptions, @NonNull MaplibreMap maplibreMap) {
+  public Marker addBy(@NonNull BaseMarkerOptions markerOptions, @NonNull MapLibreMap maplibreMap) {
     Marker marker = prepareMarker(markerOptions);
     long id = nativeMapView != null ? nativeMapView.addMarker(marker) : 0;
     marker.setMapboxMap(maplibreMap);
@@ -40,7 +40,7 @@ class MarkerContainer implements Markers {
 
   @NonNull
   @Override
-  public List<Marker> addBy(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MaplibreMap
+  public List<Marker> addBy(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MapLibreMap
       maplibreMap) {
     int count = markerOptionsList.size();
     List<Marker> markers = new ArrayList<>(count);
@@ -67,7 +67,7 @@ class MarkerContainer implements Markers {
   }
 
   @Override
-  public void update(@NonNull Marker updatedMarker, @NonNull MaplibreMap maplibreMap) {
+  public void update(@NonNull Marker updatedMarker, @NonNull MapLibreMap maplibreMap) {
     ensureIconLoaded(updatedMarker, maplibreMap);
     nativeMapView.updateMarker(updatedMarker);
     annotations.setValueAt(annotations.indexOfKey(updatedMarker.getId()), updatedMarker);
@@ -132,7 +132,7 @@ class MarkerContainer implements Markers {
     return marker;
   }
 
-  private void ensureIconLoaded(Marker marker, @NonNull MaplibreMap maplibreMap) {
+  private void ensureIconLoaded(Marker marker, @NonNull MapLibreMap maplibreMap) {
     iconManager.ensureIconLoaded(marker, maplibreMap);
   }
 

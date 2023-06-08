@@ -2,7 +2,7 @@ package org.maplibre.android.testapp.activity.fragment
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.R
@@ -44,7 +44,7 @@ class FragmentBackStackActivity : AppCompatActivity() {
         binding.button.setOnClickListener { handleClick() }
     }
 
-    private fun initMap(maplibreMap: MaplibreMap) {
+    private fun initMap(maplibreMap: MapLibreMap) {
         maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) {
             maplibreMap.setPadding(300, 300, 300, 300)
         }

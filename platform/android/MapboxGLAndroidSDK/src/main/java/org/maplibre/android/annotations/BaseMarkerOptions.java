@@ -13,7 +13,7 @@ import org.maplibre.android.geometry.LatLng;
  * @param <T> Type of the builder to be used for composing a custom Marker
  * @deprecated As of 7.0.0,
  * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
- *   Maplibre Annotation Plugin</a> instead
+ *   MapLibre Annotation Plugin</a> instead
  */
 @Deprecated
 public abstract class BaseMarkerOptions<U extends Marker, T extends BaseMarkerOptions<U, T>> implements Parcelable {

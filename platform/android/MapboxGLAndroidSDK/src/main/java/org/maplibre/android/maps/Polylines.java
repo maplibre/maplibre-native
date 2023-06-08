@@ -12,9 +12,9 @@ import java.util.List;
  * Interface that defines convenient methods for working with a {@link Polyline}'s collection.
  */
 interface Polylines {
-  Polyline addBy(@NonNull PolylineOptions polylineOptions, @NonNull MaplibreMap maplibreMap);
+  Polyline addBy(@NonNull PolylineOptions polylineOptions, @NonNull MapLibreMap maplibreMap);
 
-  List<Polyline> addBy(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MaplibreMap maplibreMap);
+  List<Polyline> addBy(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MapLibreMap maplibreMap);
 
   void update(Polyline polyline);
 

@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.Maplibre;
+import org.maplibre.android.MapLibre;
 import org.maplibre.android.log.Logger;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ class LocalRequestTask extends AsyncTask<String, Void, byte[]> {
   @Nullable
   @Override
   protected byte[] doInBackground(String... strings) {
-    return loadFile(Maplibre.getApplicationContext().getAssets(),
+    return loadFile(MapLibre.getApplicationContext().getAssets(),
       "integration/" + strings[0]
         .substring(8)
         .replaceAll("%20", " ")

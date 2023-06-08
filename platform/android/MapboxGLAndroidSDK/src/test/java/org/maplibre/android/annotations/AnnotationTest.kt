@@ -1,6 +1,6 @@
 package org.maplibre.android.annotations
 
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -9,7 +9,7 @@ import org.mockito.Mockito
 
 class AnnotationTest {
     @InjectMocks
-    private val maplibreMap = Mockito.mock(MaplibreMap::class.java)
+    private val maplibreMap = Mockito.mock(MapLibreMap::class.java)
     private var annotation: Annotation? = null
     private val compare: Annotation = object : Annotation() {
         override fun getId(): Long {

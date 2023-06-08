@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.storage.FileSource
 import org.maplibre.android.storage.FileSource.ResourceTransformCallback
@@ -42,7 +42,7 @@ class UrlTransformActivity : AppCompatActivity() {
 
         // Get a handle to the file source and set the resource transform
         FileSource.getInstance(this@UrlTransformActivity).setResourceTransform(Transform())
-        mapView.getMapAsync { map: MaplibreMap ->
+        mapView.getMapAsync { map: MapLibreMap ->
             Timber.i("Map loaded")
             map.setStyle(Style.getPredefinedStyle("Streets"))
         }

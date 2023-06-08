@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.Maplibre;
+import org.maplibre.android.MapLibre;
 import org.maplibre.android.R;
 import org.maplibre.android.attribution.Attribution;
 import org.maplibre.android.attribution.AttributionParser;
@@ -47,11 +47,11 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
   @NonNull
   private final Context context;
   @NonNull
-  private final MaplibreMap maplibreMap;
+  private final MapLibreMap maplibreMap;
   private Set<Attribution> attributionSet;
   private AlertDialog dialog;
 
-  public AttributionDialogManager(@NonNull Context context, @NonNull MaplibreMap maplibreMap) {
+  public AttributionDialogManager(@NonNull Context context, @NonNull MapLibreMap maplibreMap) {
     this.context = context;
     this.maplibreMap = maplibreMap;
   }
@@ -108,7 +108,7 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
     Attribution[] attributions = attributionSet.toArray(new Attribution[attributionSet.size()]);
     String url = attributions[which].getUrl();
     if (url.contains(MAP_FEEDBACK_URL_OLD) || url.contains(MAP_FEEDBACK_URL)) {
-      url = buildMapFeedbackMapUrl(Maplibre.getApiKey());
+      url = buildMapFeedbackMapUrl(MapLibre.getApiKey());
     }
     showWebPage(url);
   }
@@ -169,11 +169,11 @@ public class AttributionDialogManager implements View.OnClickListener, DialogInt
 
   private static class AttributionBuilder {
 
-    private final MaplibreMap maplibreMap;
+    private final MapLibreMap maplibreMap;
     @NonNull
     private final WeakReference<Context> context;
 
-    AttributionBuilder(MaplibreMap maplibreMap, Context context) {
+    AttributionBuilder(MapLibreMap maplibreMap, Context context) {
       this.maplibreMap = maplibreMap;
       this.context = new WeakReference<>(context);
     }

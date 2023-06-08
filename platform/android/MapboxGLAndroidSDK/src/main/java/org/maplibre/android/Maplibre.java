@@ -10,8 +10,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import timber.log.Timber;
 
-import org.maplibre.android.constants.MaplibreConstants;
-import org.maplibre.android.exceptions.MaplibreConfigurationException;
+import org.maplibre.android.constants.MapLibreConstants;
+import org.maplibre.android.exceptions.MapLibreConfigurationException;
 import org.maplibre.android.net.ConnectivityReceiver;
 import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.util.DefaultStyle;
@@ -29,11 +29,11 @@ import org.maplibre.android.utils.ThreadUtils;
 @UiThread
 @SuppressLint("StaticFieldLeak")
 @Keep
-public final class Maplibre {
+public final class MapLibre {
 
-  private static final String TAG = "Mbgl-Maplibre";
+  private static final String TAG = "Mbgl-MapLibre";
   private static ModuleProvider moduleProvider;
-  private static Maplibre INSTANCE;
+  private static MapLibre INSTANCE;
 
   private Context context;
   @Nullable
@@ -42,23 +42,23 @@ public final class Maplibre {
   private TileServerOptions tileServerOptions;
 
   /**
-   * Get an instance of Maplibre.
+   * Get an instance of MapLibre.
    * <p>
    * This class manages the API key, application context, and connectivity state.
    * </p>
    *
    * @param context Android context which holds or is an application context
-   * @return the single instance of Maplibre
+   * @return the single instance of MapLibre
    */
   @UiThread
   @NonNull
-  public static synchronized Maplibre getInstance(@NonNull Context context) {
+  public static synchronized MapLibre getInstance(@NonNull Context context) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new Maplibre(appContext, null);
+      INSTANCE = new MapLibre(appContext, null);
       ConnectivityReceiver.instance(appContext);
     }
 
@@ -73,7 +73,7 @@ public final class Maplibre {
   }
 
   /**
-   * Get an instance of Maplibre.
+   * Get an instance of MapLibre.
    * <p>
    * This class manages the API key, application context, and connectivity state.
    * </p>
@@ -84,11 +84,11 @@ public final class Maplibre {
    *                   bootstrap the SDK. The predefined configuration includes
    *                   rules for converting resource URLs between normal and canonical forms
    *                   and set of predefined styles available on the server.
-   * @return the single instance of Maplibre
+   * @return the single instance of MapLibre
    */
   @UiThread
   @NonNull
-  public static synchronized Maplibre getInstance(@NonNull Context context, @Nullable String apiKey,
+  public static synchronized MapLibre getInstance(@NonNull Context context, @Nullable String apiKey,
                                                   WellKnownTileServer tileServer) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
@@ -96,7 +96,7 @@ public final class Maplibre {
       Timber.plant();
       Context appContext = context.getApplicationContext();
       FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new Maplibre(appContext, apiKey);
+      INSTANCE = new MapLibre(appContext, apiKey);
       ConnectivityReceiver.instance(appContext);
     } else {
       INSTANCE.apiKey = apiKey;
@@ -110,12 +110,12 @@ public final class Maplibre {
     return INSTANCE;
   }
 
-  Maplibre(@NonNull Context context, @Nullable String apiKey) {
+  MapLibre(@NonNull Context context, @Nullable String apiKey) {
     this.context = context;
     this.apiKey = apiKey;
   }
 
-  Maplibre(@NonNull Context context, @Nullable String apiKey, @NonNull TileServerOptions options) {
+  MapLibre(@NonNull Context context, @Nullable String apiKey, @NonNull TileServerOptions options) {
     this.context = context;
     this.apiKey = apiKey;
     this.tileServerOptions = options;
@@ -232,16 +232,16 @@ public final class Maplibre {
   }
 
   /**
-   * Runtime validation of Maplibre creation.
+   * Runtime validation of MapLibre creation.
    */
   private static void validateMapbox() {
     if (INSTANCE == null) {
-      throw new MaplibreConfigurationException();
+      throw new MapLibreConfigurationException();
     }
   }
 
   /**
-   * Runtime validation of Maplibre access token
+   * Runtime validation of MapLibre access token
    *
    * @param apiKey the access token to validate
    * @return true is valid, false otherwise
@@ -251,7 +251,7 @@ public final class Maplibre {
       return false;
     }
 
-    apiKey = apiKey.trim().toLowerCase(MaplibreConstants.MAPLIBRE_LOCALE);
+    apiKey = apiKey.trim().toLowerCase(MapLibreConstants.MAPLIBRE_LOCALE);
     return apiKey.length() != 0;
   }
 
@@ -260,14 +260,14 @@ public final class Maplibre {
    */
   public static void throwIfApiKeyInvalid(@Nullable String apiKey) {
     if (!isApiKeyValid(apiKey)) {
-      throw new MaplibreConfigurationException(
+      throw new MapLibreConfigurationException(
               "A valid API key is required, currently provided key is: " + apiKey);
     }
   }
 
 
   /**
-   * Internal use. Check if the {@link Maplibre#INSTANCE} is present.
+   * Internal use. Check if the {@link MapLibre#INSTANCE} is present.
    */
   public static boolean hasInstance() {
     return INSTANCE != null;

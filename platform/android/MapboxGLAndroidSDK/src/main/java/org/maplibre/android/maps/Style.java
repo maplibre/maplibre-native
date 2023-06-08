@@ -10,8 +10,8 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.maplibre.android.Maplibre;
-import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
@@ -31,7 +31,7 @@ import java.util.Map;
  * The proxy object for current map style.
  * <p>
  * To create new instances of this object, create a new instance using a {@link Builder} and load the style with
- * MapboxMap. This object is returned from {@link MaplibreMap#getStyle()} once the style
+ * MapboxMap. This object is returned from {@link MapLibreMap#getStyle()} once the style
  * has been loaded by underlying map.
  * </p>
  */
@@ -741,7 +741,7 @@ public class Style {
           addLayerBelow(layerWrapper.layer, ((Builder.LayerBelowWrapper) layerWrapper).belowLayer);
         } else {
           // just add layer to map, but below annotations
-          addLayerBelow(layerWrapper.layer, MaplibreConstants.LAYER_ID_ANNOTATIONS);
+          addLayerBelow(layerWrapper.layer, MapLibreConstants.LAYER_ID_ANNOTATIONS);
         }
       }
 
@@ -851,7 +851,7 @@ public class Style {
      * <p>
      * This method is asynchronous and will return before the style finishes loading.
      * If you wish to wait for the map to finish loading, listen to the {@link MapView.OnDidFinishLoadingStyleListener}
-     * callback or use {@link MaplibreMap#setStyle(String, OnStyleLoaded)} instead.
+     * callback or use {@link MapLibreMap#setStyle(String, OnStyleLoaded)} instead.
      * </p>
      * If the style fails to load or an invalid style URI is set, the map view will become blank.
      * An error message will be logged in the Android logcat and {@link MapView.OnDidFailLoadingMapListener} callback
@@ -1413,7 +1413,7 @@ public class Style {
    *  @return The list of predefined styles
    */
   public static DefaultStyle[] getPredefinedStyles() {
-    return Maplibre.getPredefinedStyles();
+    return MapLibre.getPredefinedStyles();
   }
 
   /**
@@ -1423,7 +1423,7 @@ public class Style {
    */
   @NonNull
   public static String getPredefinedStyle(String name) {
-    DefaultStyle style = Maplibre.getPredefinedStyle(name);
+    DefaultStyle style = MapLibre.getPredefinedStyle(name);
     if (style != null) {
       return style.getUrl();
     }

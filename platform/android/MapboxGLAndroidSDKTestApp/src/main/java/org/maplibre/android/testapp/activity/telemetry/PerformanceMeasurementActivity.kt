@@ -8,9 +8,9 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.module.http.HttpRequestUtil
@@ -37,7 +37,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
             .build()
         HttpRequestUtil.setOkHttpClient(okHttpClient)
         mapView.getMapAsync(
-            OnMapReadyCallback { maplibreMap: MaplibreMap ->
+            OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 maplibreMap.setStyle(
                     Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
                 )
@@ -135,7 +135,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
 
         private val ram: String
             private get() {
-                val actManager = Maplibre.getApplicationContext()
+                val actManager = MapLibre.getApplicationContext()
                     .getSystemService(ACTIVITY_SERVICE) as ActivityManager
                 val memInfo = ActivityManager.MemoryInfo()
                 actManager.getMemoryInfo(memInfo)
@@ -144,7 +144,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
         private val windowSize: String
             private get() {
                 val windowManager =
-                    Maplibre.getApplicationContext().getSystemService(WINDOW_SERVICE) as WindowManager
+                    MapLibre.getApplicationContext().getSystemService(WINDOW_SERVICE) as WindowManager
                 val display = windowManager.defaultDisplay
                 val metrics = DisplayMetrics()
                 display.getMetrics(metrics)

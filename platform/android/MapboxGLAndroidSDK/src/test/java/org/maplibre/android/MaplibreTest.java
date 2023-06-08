@@ -6,7 +6,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 
-import org.maplibre.android.exceptions.MaplibreConfigurationException;
+import org.maplibre.android.exceptions.MapLibreConfigurationException;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.utils.ConfigUtils;
 
@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MaplibreTest {
+public class MapLibreTest {
 
   private Context context;
   private Context appContext;
@@ -46,31 +46,31 @@ public class MaplibreTest {
   @Test
   public void testGetApiKey() {
     final String apiKey = "pk.0000000001";
-    MaplibreInjector.inject(context, apiKey, ConfigUtils.getMockedOptions());
-    assertSame(apiKey, Maplibre.getApiKey());
+    MapLibreInjector.inject(context, apiKey, ConfigUtils.getMockedOptions());
+    assertSame(apiKey, MapLibre.getApiKey());
   }
 
   @Test
   public void testApplicationContext() {
-    MaplibreInjector.inject(context, "pk.0000000001", ConfigUtils.getMockedOptions());
-    assertNotNull(Maplibre.getApplicationContext());
+    MapLibreInjector.inject(context, "pk.0000000001", ConfigUtils.getMockedOptions());
+    assertNotNull(MapLibre.getApplicationContext());
     assertNotEquals(context, appContext);
     assertEquals(appContext, appContext);
   }
 
   @Test
   public void testPlainTokenValid() {
-    assertTrue(Maplibre.isApiKeyValid("apiKey"));
+    assertTrue(MapLibre.isApiKeyValid("apiKey"));
   }
 
   @Test
   public void testEmptyToken() {
-    assertFalse(Maplibre.isApiKeyValid(""));
+    assertFalse(MapLibre.isApiKeyValid(""));
   }
 
   @Test
   public void testNullToken() {
-    assertFalse(Maplibre.isApiKeyValid(null));
+    assertFalse(MapLibre.isApiKeyValid(null));
   }
 
   @Test
@@ -83,9 +83,9 @@ public class MaplibreTest {
     when(context.obtainStyledAttributes(nullable(AttributeSet.class), any(int[].class), anyInt(), anyInt()))
       .thenReturn(typedArray);
 
-    expectedException.expect(MaplibreConfigurationException.class);
+    expectedException.expect(MapLibreConfigurationException.class);
     expectedException.expectMessage(
-      "\nUsing MapView requires calling Maplibre.getInstance(Context context, String apiKey,"
+      "\nUsing MapView requires calling MapLibre.getInstance(Context context, String apiKey,"
               + " WellKnownTileServer wellKnownTileServer) before inflating or creating the view."
     );
     new MapView(context);
@@ -93,6 +93,6 @@ public class MaplibreTest {
 
   @After
   public void after() {
-    MaplibreInjector.clear();
+    MapLibreInjector.clear();
   }
 }

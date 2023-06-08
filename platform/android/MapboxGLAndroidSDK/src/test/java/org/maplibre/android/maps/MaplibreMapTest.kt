@@ -1,10 +1,10 @@
 package org.maplibre.android.maps
 
 import android.content.Context
-import org.maplibre.android.MaplibreInjector
+import org.maplibre.android.MapLibreInjector
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.style.layers.TransitionOptions
@@ -19,9 +19,9 @@ import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class MaplibreMapTest {
+class MapLibreMapTest {
 
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
 
     private lateinit var nativeMapView: NativeMap
 
@@ -29,7 +29,7 @@ class MaplibreMapTest {
 
     private lateinit var cameraChangeDispatcher: CameraChangeDispatcher
 
-    private lateinit var developerAnimationListener: MaplibreMap.OnDeveloperAnimationListener
+    private lateinit var developerAnimationListener: MapLibreMap.OnDeveloperAnimationListener
 
     @Mock
     private lateinit var context: Context
@@ -40,12 +40,12 @@ class MaplibreMapTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        MaplibreInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
+        MapLibreInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
         cameraChangeDispatcher = spyk()
         developerAnimationListener = mockk(relaxed = true)
         nativeMapView = mockk(relaxed = true)
         transform = mockk(relaxed = true)
-        maplibreMap = MaplibreMap(
+        maplibreMap = MapLibreMap(
             nativeMapView,
             transform,
             mockk(relaxed = true),
@@ -70,7 +70,7 @@ class MaplibreMapTest {
 
     @Test
     fun testMoveCamera() {
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
@@ -81,23 +81,23 @@ class MaplibreMapTest {
 
     @Test
     fun testEaseCamera() {
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.easeCamera(update, callback)
-        verify { transform.easeCamera(maplibreMap, update, MaplibreConstants.ANIMATION_DURATION, true, callback) }
+        verify { transform.easeCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, true, callback) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 
     @Test
     fun testAnimateCamera() {
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
         val update = CameraUpdateFactory.newCameraPosition(expected)
         maplibreMap.animateCamera(update, callback)
-        verify { transform.animateCamera(maplibreMap, update, MaplibreConstants.ANIMATION_DURATION, callback) }
+        verify { transform.animateCamera(maplibreMap, update, MapLibreConstants.ANIMATION_DURATION, callback) }
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
     }
 
@@ -148,7 +148,7 @@ class MaplibreMapTest {
 
     @Test
     fun testFpsListener() {
-        val fpsChangedListener = mockk<MaplibreMap.OnFpsChangedListener>()
+        val fpsChangedListener = mockk<MapLibreMap.OnFpsChangedListener>()
         maplibreMap.onFpsChangedListener = fpsChangedListener
         assertEquals("Listener should match", fpsChangedListener, maplibreMap.onFpsChangedListener)
     }

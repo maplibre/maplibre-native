@@ -34,7 +34,7 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
 
   private final List<OnMapReadyCallback> mapReadyCallbackList = new ArrayList<>();
   private MapFragment.OnMapViewReadyCallback mapViewReadyCallback;
-  private MaplibreMap maplibreMap;
+  private MapLibreMap maplibreMap;
   private MapView map;
 
   /**
@@ -53,7 +53,7 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
    * @return MapFragment created.
    */
   @NonNull
-  public static SupportMapFragment newInstance(@Nullable MaplibreMapOptions maplibreMapOptions) {
+  public static SupportMapFragment newInstance(@Nullable MapLibreMapOptions maplibreMapOptions) {
     SupportMapFragment mapFragment = new SupportMapFragment();
     mapFragment.setArguments(MapFragmentUtils.createFragmentArgs(maplibreMapOptions));
     return mapFragment;
@@ -82,7 +82,7 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
   @Override
   public void onInflate(@NonNull Context context, AttributeSet attrs, Bundle savedInstanceState) {
     super.onInflate(context, attrs, savedInstanceState);
-    setArguments(MapFragmentUtils.createFragmentArgs(MaplibreMapOptions.createFromAttributes(context, attrs)));
+    setArguments(MapFragmentUtils.createFragmentArgs(MapLibreMapOptions.createFromAttributes(context, attrs)));
   }
 
   /**
@@ -120,7 +120,7 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
   }
 
   @Override
-  public void onMapReady(@NonNull MaplibreMap maplibreMap) {
+  public void onMapReady(@NonNull MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
     for (OnMapReadyCallback onMapReadyCallback : mapReadyCallbackList) {
       onMapReadyCallback.onMapReady(maplibreMap);

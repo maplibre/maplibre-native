@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.maplibre.android.constants.MaplibreConstants.DEFAULT_FONT;
+import static org.maplibre.android.constants.MapLibreConstants.DEFAULT_FONT;
 
 /**
  * Utility class to select a font from a range of font names based on the availability of fonts on the device.

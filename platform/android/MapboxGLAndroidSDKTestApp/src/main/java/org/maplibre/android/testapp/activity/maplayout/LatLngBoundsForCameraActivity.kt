@@ -16,7 +16,7 @@ import org.maplibre.android.testapp.R
  */
 class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_restricted_bounds)
@@ -25,7 +25,7 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(maplibreMap: MaplibreMap) {
+    override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
         maplibreMap.setMinZoomPreference(2.0)

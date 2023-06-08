@@ -4,7 +4,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import org.maplibre.android.style.sources.CustomGeometrySource.Companion.THREAD_POOL_LIMIT
 import org.maplibre.android.style.sources.CustomGeometrySource.Companion.THREAD_PREFIX
-import org.maplibre.android.testapp.action.MaplibreMapAction.invoke
+import org.maplibre.android.testapp.action.MapLibreMapAction.invoke
 import org.maplibre.android.testapp.action.OrientationAction.orientationLandscape
 import org.maplibre.android.testapp.action.OrientationAction.orientationPortrait
 import org.maplibre.android.testapp.action.WaitAction

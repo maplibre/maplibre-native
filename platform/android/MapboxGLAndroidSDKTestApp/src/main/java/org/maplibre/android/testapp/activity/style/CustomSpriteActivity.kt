@@ -12,7 +12,7 @@ import com.mapbox.geojson.Point
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.Layer
@@ -27,7 +27,7 @@ import timber.log.Timber
  */
 class CustomSpriteActivity : AppCompatActivity() {
     private var source: GeoJsonSource? = null
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private lateinit var layer: Layer
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +36,7 @@ class CustomSpriteActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MaplibreMap ->
+            OnMapReadyCallback { map: MapLibreMap ->
                 maplibreMap = map
                 map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
                     val fab = findViewById<FloatingActionButton>(R.id.fab)

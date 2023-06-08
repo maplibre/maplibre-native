@@ -13,7 +13,7 @@ import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.intent.Intents;
 
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.testapp.R;
 import org.maplibre.android.testapp.activity.EspressoTest;
@@ -134,7 +134,7 @@ public class AttributionTest extends EspressoTest {
   }
 
   private void buildUrlSpans() {
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       for (Source source : maplibreMap.getStyle().getSources()) {
         String attributionSource = source.getAttribution();
         if (!TextUtils.isEmpty(attributionSource)) {
@@ -147,9 +147,9 @@ public class AttributionTest extends EspressoTest {
 
   private class DisableAction implements ViewAction {
 
-    private MaplibreMap maplibreMap;
+    private MapLibreMap maplibreMap;
 
-    DisableAction(MaplibreMap map) {
+    DisableAction(MapLibreMap map) {
       maplibreMap = map;
     }
 
@@ -169,11 +169,11 @@ public class AttributionTest extends EspressoTest {
     }
   }
 
-  private class MaplibreMapAction implements ViewAction {
+  private class MapLibreMapAction implements ViewAction {
 
     private InvokeViewAction invokeViewAction;
 
-    MaplibreMapAction(InvokeViewAction invokeViewAction) {
+    MapLibreMapAction(InvokeViewAction invokeViewAction) {
       this.invokeViewAction = invokeViewAction;
     }
 

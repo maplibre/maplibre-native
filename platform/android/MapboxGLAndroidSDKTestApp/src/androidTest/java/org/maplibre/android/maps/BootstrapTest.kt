@@ -4,7 +4,7 @@ import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import org.maplibre.android.AppCenter
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import org.maplibre.android.WellKnownTileServer
 import org.maplibre.android.storage.FileSource
 import org.maplibre.android.util.TileServerOptions
@@ -19,14 +19,14 @@ class BootstrapTest : AppCenter() {
     @Before
     @UiThreadTest
     fun before() {
-        apiKeyBackup = Maplibre.getApiKey()
+        apiKeyBackup = MapLibre.getApiKey()
     }
 
     @After
     @UiThreadTest
     fun after() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        Maplibre.getInstance(context)
+        MapLibre.getInstance(context)
     }
 
     @Test
@@ -34,7 +34,7 @@ class BootstrapTest : AppCenter() {
     fun defaultBootstrap() {
         val context = InstrumentationRegistry.getInstrumentation().context
 
-        Maplibre.getInstance(context)
+        MapLibre.getInstance(context)
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre)
         Assert.assertTrue(
@@ -54,7 +54,7 @@ class BootstrapTest : AppCenter() {
         val context = InstrumentationRegistry.getInstrumentation().context
 
         val key = "abcdef"
-        Maplibre.getInstance(context, key, WellKnownTileServer.MapTiler)
+        MapLibre.getInstance(context, key, WellKnownTileServer.MapTiler)
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapTiler)
         Assert.assertTrue(
@@ -76,9 +76,9 @@ class BootstrapTest : AppCenter() {
 
         val key = "pk.abcdef"
 
-        Maplibre.getInstance(context, key, WellKnownTileServer.MapTiler)
-        Maplibre.getInstance(context)
-        Maplibre.getInstance(context, key, WellKnownTileServer.Mapbox)
+        MapLibre.getInstance(context, key, WellKnownTileServer.MapTiler)
+        MapLibre.getInstance(context)
+        MapLibre.getInstance(context, key, WellKnownTileServer.Mapbox)
 
         val tileServerOptions = TileServerOptions.get(WellKnownTileServer.Mapbox)
         Assert.assertTrue(

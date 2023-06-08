@@ -31,7 +31,7 @@ import static org.maplibre.android.style.layers.PropertyFactory.fillExtrusionCol
 import static org.maplibre.android.style.layers.PropertyFactory.fillExtrusionHeight;
 import static org.maplibre.android.style.layers.PropertyFactory.fillExtrusionOpacity;
 
-import static org.maplibre.android.testapp.action.MaplibreMapAction.invoke;
+import static org.maplibre.android.testapp.action.MapLibreMapAction.invoke;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

@@ -35,7 +35,7 @@ import timber.log.Timber;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static org.maplibre.android.testapp.action.MaplibreMapAction.invoke;
+import static org.maplibre.android.testapp.action.MapLibreMapAction.invoke;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

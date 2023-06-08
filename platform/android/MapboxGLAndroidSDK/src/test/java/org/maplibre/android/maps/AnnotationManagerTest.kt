@@ -45,9 +45,9 @@ class AnnotationManagerTest {
         val aMarkerOptions = Mockito.mock(
             BaseMarkerOptions::class.java
         )
-        val aMaplibreMap = Mockito.mock(MaplibreMap::class.java)
+        val aMapLibreMap = Mockito.mock(MapLibreMap::class.java)
         Mockito.`when`(aMarkerOptions.marker).thenReturn(aMarker)
-        annotationManager.addMarker(aMarkerOptions, aMaplibreMap)
+        annotationManager.addMarker(aMarkerOptions, aMapLibreMap)
         Assert.assertEquals(aMarker, annotationManager.annotations[0])
         Assert.assertEquals(aMarker, annotationManager.getAnnotation(aId))
     }
@@ -84,7 +84,7 @@ class AnnotationManagerTest {
         val secondMarkerOption = MarkerOptions().position(LatLng()).title("second")
         markerList.add(firstMarkerOption)
         markerList.add(secondMarkerOption)
-        val aMaplibreMap = Mockito.mock(MaplibreMap::class.java)
+        val aMapLibreMap = Mockito.mock(MapLibreMap::class.java)
         Mockito.`when`(
             aNativeMapView.addMarker(
                 ArgumentMatchers.any(
@@ -94,7 +94,7 @@ class AnnotationManagerTest {
         ).thenReturn(firstId, secondId)
         Mockito.`when`(aNativeMapView.addMarkers(ArgumentMatchers.anyList()))
             .thenReturn(longArrayOf(firstId, secondId))
-        annotationManager.addMarkers(markerList, aMaplibreMap)
+        annotationManager.addMarkers(markerList, aMapLibreMap)
         Assert.assertEquals(2, annotationManager.annotations.size)
         Assert.assertEquals("first", (annotationManager.annotations[0] as Marker).title)
         Assert.assertEquals("second", (annotationManager.annotations[1] as Marker).title)

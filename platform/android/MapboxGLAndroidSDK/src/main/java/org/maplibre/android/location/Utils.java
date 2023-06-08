@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.Projection;
 
 import static org.maplibre.android.location.LocationComponentConstants.INSTANT_LOCATION_TRANSITION_THRESHOLD;
@@ -95,7 +95,7 @@ public final class Utils {
     }
   }
 
-  static float calculateZoomLevelRadius(@NonNull MaplibreMap maplibreMap, @Nullable Location location) {
+  static float calculateZoomLevelRadius(@NonNull MapLibreMap maplibreMap, @Nullable Location location) {
     if (location == null) {
       return 0;
     }

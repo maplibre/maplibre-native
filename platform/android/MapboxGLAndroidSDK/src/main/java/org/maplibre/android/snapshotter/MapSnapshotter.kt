@@ -16,7 +16,7 @@ import org.maplibre.android.attribution.AttributionLayout
 import org.maplibre.android.attribution.AttributionMeasure
 import org.maplibre.android.attribution.AttributionParser
 import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.Image
@@ -133,9 +133,9 @@ open class MapSnapshotter(context: Context, options: Options) {
 
         /**
          * @return the font family used for locally generating ideographs,
-         * Default font for local ideograph font family is [MaplibreConstants.DEFAULT_FONT].
+         * Default font for local ideograph font family is [MapLibreConstants.DEFAULT_FONT].
          */
-        var localIdeographFontFamily = MaplibreConstants.DEFAULT_FONT
+        var localIdeographFontFamily = MapLibreConstants.DEFAULT_FONT
             private set
 
         /**
@@ -222,7 +222,7 @@ open class MapSnapshotter(context: Context, options: Options) {
         }
 
         /**
-         * @param showLogo The flag indicating to show the Maplibre logo.
+         * @param showLogo The flag indicating to show the MapLibre logo.
          * @return the mutated [Options]
          */
         fun withLogo(showLogo: Boolean): Options {
@@ -237,7 +237,7 @@ open class MapSnapshotter(context: Context, options: Options) {
          *
          * The font family argument is passed to [android.graphics.Typeface.create].
          * Default system fonts are defined in &#x27;/system/etc/fonts.xml&#x27;
-         * Default font for local ideograph font family is [MaplibreConstants.DEFAULT_FONT].
+         * Default font for local ideograph font family is [MapLibreConstants.DEFAULT_FONT].
          *
          *
          * @param fontFamily font family for local ideograph generation.
@@ -255,7 +255,7 @@ open class MapSnapshotter(context: Context, options: Options) {
          *
          * The font families are checked against the default system fonts defined in
          * &#x27;/system/etc/fonts.xml&#x27;. Default font for local ideograph font family is
-         * [MaplibreConstants.DEFAULT_FONT].
+         * [MapLibreConstants.DEFAULT_FONT].
          *
          *
          * @param fontFamilies font families for local ideograph generation.
@@ -663,7 +663,7 @@ open class MapSnapshotter(context: Context, options: Options) {
                     } else if (layerWrapper is LayerBelowWrapper) {
                         addLayerBelow(layerWrapper.getLayer(), layerWrapper.belowLayer)
                     } else {
-                        addLayerBelow(layerWrapper.layer, MaplibreConstants.LAYER_ID_ANNOTATIONS)
+                        addLayerBelow(layerWrapper.layer, MapLibreConstants.LAYER_ID_ANNOTATIONS)
                     }
                 }
                 for (image in builder.images) {

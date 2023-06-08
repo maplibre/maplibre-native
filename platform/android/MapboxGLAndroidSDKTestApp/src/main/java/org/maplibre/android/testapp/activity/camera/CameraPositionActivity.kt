@@ -20,8 +20,8 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.constants.GeometryConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.*
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.*
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -30,7 +30,7 @@ import timber.log.Timber
 /** Test activity showcasing how to listen to camera change events. */
 class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnClickListener, OnMapLongClickListener {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var fab: FloatingActionButton
     private var logCameraChanges = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +45,7 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) { style: Style? ->
             // add a listener to FAB
@@ -190,7 +190,7 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
         }
     }
 
-    private class DialogClickListener(private val maplibreMap: MaplibreMap?, private val dialogContent: View) : DialogInterface.OnClickListener {
+    private class DialogClickListener(private val maplibreMap: MapLibreMap?, private val dialogContent: View) : DialogInterface.OnClickListener {
         override fun onClick(dialog: DialogInterface, which: Int) {
             val latitude = (dialogContent.findViewById<View>(R.id.value_lat) as TextView).text.toString().toDouble()
             val longitude = (dialogContent.findViewById<View>(R.id.value_lon) as TextView).text.toString().toDouble()

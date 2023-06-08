@@ -12,9 +12,9 @@ public class IconManagerResolver {
 
   private IconManager iconManager;
 
-  public IconManagerResolver(MaplibreMap maplibreMap) {
+  public IconManagerResolver(MapLibreMap maplibreMap) {
     try {
-      Field annotationManagerField = MaplibreMap.class.getDeclaredField("annotationManager");
+      Field annotationManagerField = MapLibreMap.class.getDeclaredField("annotationManager");
       annotationManagerField.setAccessible(true);
       AnnotationManager annotationManager = (AnnotationManager) annotationManagerField.get(maplibreMap);
 

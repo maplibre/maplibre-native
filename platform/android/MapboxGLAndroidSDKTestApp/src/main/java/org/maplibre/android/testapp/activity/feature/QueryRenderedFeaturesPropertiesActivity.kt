@@ -12,9 +12,9 @@ import com.mapbox.geojson.Feature
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.InfoWindowAdapter
-import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import timber.log.Timber
@@ -24,7 +24,7 @@ import timber.log.Timber
  */
 class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var maplibreMap: MaplibreMap
+    lateinit var maplibreMap: MapLibreMap
         private set
     private var marker: Marker? = null
     private val mapClickListener = OnMapClickListener { point ->
@@ -60,7 +60,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+        mapView.getMapAsync { maplibreMap: MapLibreMap ->
             maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
                 this@QueryRenderedFeaturesPropertiesActivity.maplibreMap = maplibreMap
 
@@ -99,7 +99,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         }
     }
 
-    private fun addCustomInfoWindowAdapter(maplibreMap: MaplibreMap) {
+    private fun addCustomInfoWindowAdapter(maplibreMap: MapLibreMap) {
         maplibreMap.infoWindowAdapter = object : InfoWindowAdapter {
             private fun row(text: String): TextView {
                 val view = TextView(this@QueryRenderedFeaturesPropertiesActivity)

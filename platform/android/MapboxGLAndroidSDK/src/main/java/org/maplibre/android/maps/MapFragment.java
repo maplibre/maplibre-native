@@ -34,7 +34,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
 
   private final List<OnMapReadyCallback> mapReadyCallbackList = new ArrayList<>();
   private OnMapViewReadyCallback mapViewReadyCallback;
-  private MaplibreMap maplibreMap;
+  private MapLibreMap maplibreMap;
   private MapView map;
 
   /**
@@ -53,7 +53,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
    * @return MapFragment instantiated.
    */
   @NonNull
-  public static MapFragment newInstance(@Nullable MaplibreMapOptions maplibreMapOptions) {
+  public static MapFragment newInstance(@Nullable MapLibreMapOptions maplibreMapOptions) {
     MapFragment mapFragment = new MapFragment();
     mapFragment.setArguments(MapFragmentUtils.createFragmentArgs(maplibreMapOptions));
     return mapFragment;
@@ -69,7 +69,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
   @Override
   public void onInflate(@NonNull Context context, AttributeSet attrs, Bundle savedInstanceState) {
     super.onInflate(context, attrs, savedInstanceState);
-    setArguments(MapFragmentUtils.createFragmentArgs(MaplibreMapOptions.createFromAttributes(context, attrs)));
+    setArguments(MapFragmentUtils.createFragmentArgs(MapLibreMapOptions.createFromAttributes(context, attrs)));
   }
 
   /**
@@ -125,7 +125,7 @@ public final class MapFragment extends Fragment implements OnMapReadyCallback {
    * @param maplibreMap The public api controller of the map
    */
   @Override
-  public void onMapReady(@NonNull MaplibreMap maplibreMap) {
+  public void onMapReady(@NonNull MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
     for (OnMapReadyCallback onMapReadyCallback : mapReadyCallbackList) {
       onMapReadyCallback.onMapReady(maplibreMap);

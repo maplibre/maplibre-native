@@ -33,8 +33,8 @@ FileSource::FileSource(jni::JNIEnv& _env,
         [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
             auto env{android::AttachEnv()};
             std::unique_ptr<mbgl::FileSource> assetFileSource;
-            if (android::Maplibre::hasInstance(*env)) {
-                auto assetManager = android::Maplibre::getAssetManager(*env);
+            if (android::MapLibre::hasInstance(*env)) {
+                auto assetManager = android::MapLibre::getAssetManager(*env);
                 assetFileSource = std::make_unique<AssetManagerFileSource>(
                     *env, assetManager, resourceOptions.clone(), clientOptions.clone());
             }

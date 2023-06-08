@@ -7,21 +7,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 
-class MaplibreCameraAnimatorAdapter extends MaplibreFloatAnimator {
+class MapLibreCameraAnimatorAdapter extends MapLibreFloatAnimator {
   @Nullable
-  private final MaplibreMap.CancelableCallback cancelableCallback;
+  private final MapLibreMap.CancelableCallback cancelableCallback;
 
-  MaplibreCameraAnimatorAdapter(@NonNull @Size(min = 2) Float[] values,
+  MapLibreCameraAnimatorAdapter(@NonNull @Size(min = 2) Float[] values,
                                 AnimationsValueChangeListener updateListener,
-                                @Nullable MaplibreMap.CancelableCallback cancelableCallback) {
+                                @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
     super(values, updateListener, Integer.MAX_VALUE);
     this.cancelableCallback = cancelableCallback;
-    addListener(new MaplibreAnimatorListener());
+    addListener(new MapLibreAnimatorListener());
   }
 
-  private final class MaplibreAnimatorListener extends AnimatorListenerAdapter {
+  private final class MapLibreAnimatorListener extends AnimatorListenerAdapter {
     @Override
     public void onAnimationCancel(Animator animation) {
       if (cancelableCallback != null) {

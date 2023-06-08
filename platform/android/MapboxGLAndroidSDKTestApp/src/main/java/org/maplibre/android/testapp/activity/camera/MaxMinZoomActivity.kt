@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapView.OnDidFinishLoadingStyleListener
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -14,7 +14,7 @@ import timber.log.Timber
 /** Test activity showcasing using maximum and minimum zoom levels to restrict camera movement. */
 class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private val clickListener = OnMapClickListener {
         if (maplibreMap != null) {
             maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor")))
@@ -33,7 +33,7 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
         maplibreMap.setMinZoomPreference(3.0)

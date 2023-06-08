@@ -25,7 +25,7 @@ class PolylineContainer implements Polylines {
   }
 
   @Override
-  public Polyline addBy(@NonNull PolylineOptions polylineOptions, @NonNull MaplibreMap maplibreMap) {
+  public Polyline addBy(@NonNull PolylineOptions polylineOptions, @NonNull MapLibreMap maplibreMap) {
     Polyline polyline = polylineOptions.getPolyline();
     if (!polyline.getPoints().isEmpty()) {
       long id = nativeMap != null ? nativeMap.addPolyline(polyline) : 0;
@@ -38,7 +38,7 @@ class PolylineContainer implements Polylines {
 
   @NonNull
   @Override
-  public List<Polyline> addBy(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MaplibreMap maplibreMap) {
+  public List<Polyline> addBy(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MapLibreMap maplibreMap) {
     int count = polylineOptionsList.size();
     Polyline polyline;
     List<Polyline> polylines = new ArrayList<>(count);

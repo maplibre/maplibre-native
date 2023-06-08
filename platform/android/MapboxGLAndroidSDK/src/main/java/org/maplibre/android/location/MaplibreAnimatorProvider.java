@@ -5,38 +5,38 @@ import android.view.animation.Interpolator;
 
 import androidx.annotation.Nullable;
 
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.geometry.LatLng;
 
-final class MaplibreAnimatorProvider {
+final class MapLibreAnimatorProvider {
 
-  private static MaplibreAnimatorProvider INSTANCE;
+  private static MapLibreAnimatorProvider INSTANCE;
 
-  private MaplibreAnimatorProvider() {
+  private MapLibreAnimatorProvider() {
     // private constructor
   }
 
-  public static MaplibreAnimatorProvider getInstance() {
+  public static MapLibreAnimatorProvider getInstance() {
     if (INSTANCE == null) {
-      INSTANCE = new MaplibreAnimatorProvider();
+      INSTANCE = new MapLibreAnimatorProvider();
     }
     return INSTANCE;
   }
 
-  MaplibreLatLngAnimator latLngAnimator(LatLng[] values, MaplibreAnimator.AnimationsValueChangeListener updateListener,
+  MapLibreLatLngAnimator latLngAnimator(LatLng[] values, MapLibreAnimator.AnimationsValueChangeListener updateListener,
                                         int maxAnimationFps) {
-    return new MaplibreLatLngAnimator(values, updateListener, maxAnimationFps);
+    return new MapLibreLatLngAnimator(values, updateListener, maxAnimationFps);
   }
 
-  MaplibreFloatAnimator floatAnimator(Float[] values, MaplibreAnimator.AnimationsValueChangeListener updateListener,
+  MapLibreFloatAnimator floatAnimator(Float[] values, MapLibreAnimator.AnimationsValueChangeListener updateListener,
                                       int maxAnimationFps) {
-    return new MaplibreFloatAnimator(values, updateListener, maxAnimationFps);
+    return new MapLibreFloatAnimator(values, updateListener, maxAnimationFps);
   }
 
-  MaplibreCameraAnimatorAdapter cameraAnimator(Float[] values,
-                                               MaplibreAnimator.AnimationsValueChangeListener updateListener,
-                                               @Nullable MaplibreMap.CancelableCallback cancelableCallback) {
-    return new MaplibreCameraAnimatorAdapter(values, updateListener, cancelableCallback);
+  MapLibreCameraAnimatorAdapter cameraAnimator(Float[] values,
+                                               MapLibreAnimator.AnimationsValueChangeListener updateListener,
+                                               @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
+    return new MapLibreCameraAnimatorAdapter(values, updateListener, cancelableCallback);
   }
 
   /**
@@ -52,7 +52,7 @@ final class MaplibreAnimatorProvider {
    *                                       the pulsing animation (linear, accelerate, bounce, etc.)
    * @return a built {@link PulsingLocationCircleAnimator} object.
    */
-  PulsingLocationCircleAnimator pulsingCircleAnimator(MaplibreAnimator.AnimationsValueChangeListener updateListener,
+  PulsingLocationCircleAnimator pulsingCircleAnimator(MapLibreAnimator.AnimationsValueChangeListener updateListener,
                                                       int maxAnimationFps,
                                                       float pulseSingleDuration,
                                                       float pulseMaxRadius,

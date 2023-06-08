@@ -10,11 +10,11 @@ import androidx.annotation.UiThread;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.camera.CameraUpdate;
 import org.maplibre.android.camera.CameraUpdateFactory;
-import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.log.Logger;
 
-import static org.maplibre.android.maps.MaplibreMap.OnCameraMoveStartedListener;
+import static org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener;
 
 /**
  * Internal use.
@@ -36,7 +36,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   @Nullable
   private CameraPosition cameraPosition;
   @Nullable
-  private MaplibreMap.CancelableCallback cameraCancelableCallback;
+  private MapLibreMap.CancelableCallback cameraCancelableCallback;
   private CameraChangeDispatcher cameraChangeDispatcher;
 
   private final MapView.OnCameraDidChangeListener moveByChangeListener = new MapView.OnCameraDidChangeListener() {
@@ -55,7 +55,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
     this.cameraChangeDispatcher = cameraChangeDispatcher;
   }
 
-  void initialise(@NonNull MaplibreMap maplibreMap, @NonNull MaplibreMapOptions options) {
+  void initialise(@NonNull MapLibreMap maplibreMap, @NonNull MapLibreMapOptions options) {
     CameraPosition position = options.getCamera();
     if (position != null && !position.equals(CameraPosition.DEFAULT)) {
       moveCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(position), null);
@@ -84,7 +84,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
     if (animated) {
       invalidateCameraPosition();
       if (cameraCancelableCallback != null) {
-        final MaplibreMap.CancelableCallback callback = cameraCancelableCallback;
+        final MapLibreMap.CancelableCallback callback = cameraCancelableCallback;
 
         // nullification has to happen before Handler#post, see https://github.com/robolectric/robolectric/issues/1306
         cameraCancelableCallback = null;
@@ -105,8 +105,8 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
    * Internal use.
    */
   @UiThread
-  public final void moveCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update,
-                               @Nullable final MaplibreMap.CancelableCallback callback) {
+  public final void moveCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update,
+                               @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
       cancelTransitions();
@@ -129,9 +129,9 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   @UiThread
-  final void easeCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update, int durationMs,
+  final void easeCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
                         boolean easingInterpolator,
-                        @Nullable final MaplibreMap.CancelableCallback callback) {
+                        @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
       cancelTransitions();
@@ -152,8 +152,8 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
    * Internal use.
    */
   @UiThread
-  public final void animateCamera(@NonNull MaplibreMap maplibreMap, CameraUpdate update, int durationMs,
-                                  @Nullable final MaplibreMap.CancelableCallback callback) {
+  public final void animateCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
+                                  @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
       cancelTransitions();
@@ -194,7 +194,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
 
     // notify animateCamera and easeCamera about cancelling
     if (cameraCancelableCallback != null) {
-      final MaplibreMap.CancelableCallback callback = cameraCancelableCallback;
+      final MapLibreMap.CancelableCallback callback = cameraCancelableCallback;
       cameraChangeDispatcher.onCameraIdle();
 
       // nullification has to happen before Handler#post, see https://github.com/robolectric/robolectric/issues/1306
@@ -320,7 +320,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   //
 
   void setMinZoom(double minZoom) {
-    if ((minZoom < MaplibreConstants.MINIMUM_ZOOM) || (minZoom > MaplibreConstants.MAXIMUM_ZOOM)) {
+    if ((minZoom < MapLibreConstants.MINIMUM_ZOOM) || (minZoom > MapLibreConstants.MAXIMUM_ZOOM)) {
       Logger.e(TAG, String.format("Not setting minZoomPreference, value is in unsupported range: %s", minZoom));
       return;
     }
@@ -332,7 +332,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMaxZoom(double maxZoom) {
-    if ((maxZoom < MaplibreConstants.MINIMUM_ZOOM) || (maxZoom > MaplibreConstants.MAXIMUM_ZOOM)) {
+    if ((maxZoom < MapLibreConstants.MINIMUM_ZOOM) || (maxZoom > MapLibreConstants.MAXIMUM_ZOOM)) {
       Logger.e(TAG, String.format("Not setting maxZoomPreference, value is in unsupported range: %s", maxZoom));
       return;
     }
@@ -344,7 +344,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMinPitch(double minPitch) {
-    if ((minPitch < MaplibreConstants.MINIMUM_PITCH) || (minPitch > MaplibreConstants.MAXIMUM_PITCH)) {
+    if ((minPitch < MapLibreConstants.MINIMUM_PITCH) || (minPitch > MapLibreConstants.MAXIMUM_PITCH)) {
       Logger.e(TAG, String.format("Not setting minPitchPreference, value is in unsupported range: %s", minPitch));
       return;
     }
@@ -356,7 +356,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
   }
 
   void setMaxPitch(double maxPitch) {
-    if ((maxPitch < MaplibreConstants.MINIMUM_PITCH) || (maxPitch > MaplibreConstants.MAXIMUM_PITCH)) {
+    if ((maxPitch < MapLibreConstants.MINIMUM_PITCH) || (maxPitch > MapLibreConstants.MAXIMUM_PITCH)) {
       Logger.e(TAG, String.format("Not setting maxPitchPreference, value is in unsupported range: %s", maxPitch));
       return;
     }

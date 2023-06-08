@@ -5,7 +5,7 @@ import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.DrawableRes
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLngQuad
 import org.maplibre.android.utils.BitmapUtils
 import java.net.URI
@@ -196,7 +196,7 @@ class ImageSource : Source {
     @Throws(IllegalArgumentException::class)
     fun setImage(@DrawableRes resourceId: Int) {
         checkThread()
-        val context = Maplibre.getApplicationContext()
+        val context = MapLibre.getApplicationContext()
         val drawable = BitmapUtils.getDrawableFromRes(context, resourceId)
         if (drawable is BitmapDrawable) {
             nativeSetImage(drawable.bitmap)

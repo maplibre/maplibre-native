@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.FeatureCollection
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.FillLayer
@@ -23,7 +23,7 @@ import timber.log.Timber
  */
 class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    lateinit var maplibreMap: MaplibreMap
+    lateinit var maplibreMap: MapLibreMap
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+        mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@QueryRenderedFeaturesBoxHighlightActivity.maplibreMap = maplibreMap
 
             // Add layer / source

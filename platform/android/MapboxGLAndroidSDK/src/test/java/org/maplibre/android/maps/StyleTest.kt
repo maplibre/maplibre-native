@@ -3,8 +3,8 @@ package org.maplibre.android.maps
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.ShapeDrawable
-import org.maplibre.android.MaplibreInjector
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.MapLibreInjector
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.style.layers.CannotAddLayerException
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.layers.TransitionOptions
@@ -26,7 +26,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class StyleTest {
 
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
 
     private lateinit var nativeMapView: NativeMap
 
@@ -39,9 +39,9 @@ class StyleTest {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        MaplibreInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
+        MapLibreInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
         nativeMapView = mockk(relaxed = true)
-        maplibreMap = MaplibreMap(
+        maplibreMap = MapLibreMap(
             nativeMapView,
             null,
             null,
@@ -85,7 +85,7 @@ class StyleTest {
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
                 layer,
-                MaplibreConstants.LAYER_ID_ANNOTATIONS
+                MapLibreConstants.LAYER_ID_ANNOTATIONS
             )
         }
     }
@@ -162,7 +162,7 @@ class StyleTest {
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
                 layer,
-                MaplibreConstants.LAYER_ID_ANNOTATIONS
+                MapLibreConstants.LAYER_ID_ANNOTATIONS
             )
         }
     }

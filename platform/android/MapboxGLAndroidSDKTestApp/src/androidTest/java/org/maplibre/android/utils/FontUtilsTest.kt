@@ -1,7 +1,7 @@
 package org.maplibre.android.utils
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.constants.MapLibreConstants
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,7 +12,7 @@ class FontUtilsTest {
     fun testExtractedFontShouldMatchDefault() {
         val fonts = arrayOf("foo", "bar")
         val actual = FontUtils.extractValidFont(*fonts)
-        Assert.assertEquals("Selected font should match", MaplibreConstants.DEFAULT_FONT, actual)
+        Assert.assertEquals("Selected font should match", MapLibreConstants.DEFAULT_FONT, actual)
     }
 
     @Test

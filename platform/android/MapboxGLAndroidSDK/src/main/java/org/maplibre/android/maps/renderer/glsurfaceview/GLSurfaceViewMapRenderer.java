@@ -24,10 +24,10 @@ import static android.opengl.GLSurfaceView.RENDERMODE_WHEN_DIRTY;
 public class GLSurfaceViewMapRenderer extends MapRenderer implements GLSurfaceView.Renderer {
 
   @NonNull
-  private final MaplibreGLSurfaceView glSurfaceView;
+  private final MapLibreGLSurfaceView glSurfaceView;
 
   public GLSurfaceViewMapRenderer(Context context,
-                                  MaplibreGLSurfaceView glSurfaceView,
+                                  MapLibreGLSurfaceView glSurfaceView,
                                   String localIdeographFontFamily) {
     super(context, localIdeographFontFamily);
     this.glSurfaceView = glSurfaceView;
@@ -37,7 +37,7 @@ public class GLSurfaceViewMapRenderer extends MapRenderer implements GLSurfaceVi
     glSurfaceView.setRenderer(this);
     glSurfaceView.setRenderMode(RENDERMODE_WHEN_DIRTY);
     glSurfaceView.setPreserveEGLContextOnPause(true);
-    glSurfaceView.setDetachedListener(new MaplibreGLSurfaceView.OnGLSurfaceViewDetachedListener() {
+    glSurfaceView.setDetachedListener(new MapLibreGLSurfaceView.OnGLSurfaceViewDetachedListener() {
       @Override
       public void onGLSurfaceViewDetached() {
         // because the GL thread is destroyed when the view is detached from window,

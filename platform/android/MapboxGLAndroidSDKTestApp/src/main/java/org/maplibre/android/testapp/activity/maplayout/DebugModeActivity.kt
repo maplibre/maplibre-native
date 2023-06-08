@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.*
-import org.maplibre.android.maps.MaplibreMap.OnCameraMoveListener
-import org.maplibre.android.maps.MaplibreMap.OnFpsChangedListener
+import org.maplibre.android.maps.MapLibreMap.OnCameraMoveListener
+import org.maplibre.android.maps.MapLibreMap.OnFpsChangedListener
 import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
@@ -23,7 +23,7 @@ import java.util.*
  */
 open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsChangedListener {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var cameraMoveListener: OnCameraMoveListener? = null
     private var actionBarDrawerToggle: ActionBarDrawerToggle? = null
     private var currentStyleIndex = 0
@@ -70,11 +70,11 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         mapView.addOnDidFinishLoadingStyleListener { Timber.d("Style loaded") }
     }
 
-    protected open fun setupMapboxMapOptions(): MaplibreMapOptions {
-        return MaplibreMapOptions.createFromAttributes(this, null)
+    protected open fun setupMapboxMapOptions(): MapLibreMapOptions {
+        return MapLibreMapOptions.createFromAttributes(this, null)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         maplibreMap.setStyle(
             Style.Builder().fromUri(STYLES[currentStyleIndex])

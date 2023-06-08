@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -24,7 +24,7 @@ import java.lang.ref.WeakReference
  * Test activity showcasing how to use a file:// resource for the style.json and how to use MapboxMap#setStyleJson.
  */
 class StyleFileActivity : AppCompatActivity() {
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +32,7 @@ class StyleFileActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MaplibreMap? ->
+            OnMapReadyCallback { map: MapLibreMap? ->
                 if (map != null) {
                     maplibreMap = map
                 }
@@ -66,10 +66,10 @@ class StyleFileActivity : AppCompatActivity() {
     /**
      * Task to read a style file from the raw folder
      */
-    private class LoadStyleFileTask internal constructor(context: Context, maplibreMap: MaplibreMap?) :
+    private class LoadStyleFileTask internal constructor(context: Context, maplibreMap: MapLibreMap?) :
         AsyncTask<Void?, Void?, String>() {
         private val context: WeakReference<Context>
-        private val maplibreMap: WeakReference<MaplibreMap?>
+        private val maplibreMap: WeakReference<MapLibreMap?>
         protected override fun doInBackground(vararg p0: Void?): String? {
             var styleJson = ""
             try {
@@ -98,11 +98,11 @@ class StyleFileActivity : AppCompatActivity() {
      */
     private class CreateStyleFileTask internal constructor(
         context: Context,
-        maplibreMap: MaplibreMap?
+        maplibreMap: MapLibreMap?
     ) : AsyncTask<Void?, Int?, Long>() {
         private lateinit var cacheStyleFile: File
         private val context: WeakReference<Context>
-        private val maplibreMap: WeakReference<MaplibreMap?>
+        private val maplibreMap: WeakReference<MapLibreMap?>
         protected override fun doInBackground(vararg p0: Void?): Long? {
             try {
                 cacheStyleFile = File.createTempFile("my-", ".style.json")

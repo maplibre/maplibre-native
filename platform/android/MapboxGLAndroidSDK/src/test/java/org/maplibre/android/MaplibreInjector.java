@@ -8,15 +8,15 @@ import org.maplibre.android.util.TileServerOptions;
 
 import java.lang.reflect.Field;
 
-public class MaplibreInjector {
+public class MapLibreInjector {
 
   private static final String FIELD_INSTANCE = "INSTANCE";
 
   public static void inject(@NonNull Context context, @NonNull String apiKey,
                             @NonNull TileServerOptions options) {
-    Maplibre maplibre = new Maplibre(context, apiKey, options);
+    MapLibre maplibre = new MapLibre(context, apiKey, options);
     try {
-      Field instance = Maplibre.class.getDeclaredField(FIELD_INSTANCE);
+      Field instance = MapLibre.class.getDeclaredField(FIELD_INSTANCE);
       instance.setAccessible(true);
       instance.set(maplibre, maplibre);
     } catch (Exception exception) {
@@ -26,7 +26,7 @@ public class MaplibreInjector {
 
   public static void clear() {
     try {
-      Field field = Maplibre.class.getDeclaredField(FIELD_INSTANCE);
+      Field field = MapLibre.class.getDeclaredField(FIELD_INSTANCE);
       field.setAccessible(true);
       field.set(field, null);
     } catch (Exception exception) {

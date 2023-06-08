@@ -40,7 +40,7 @@ class MapInDialogActivity : AppCompatActivity() {
             mapView = view.findViewById(R.id.mapView)
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync(
-                OnMapReadyCallback { maplibreMap: MaplibreMap ->
+                OnMapReadyCallback { maplibreMap: MapLibreMap ->
                     maplibreMap.setStyle(
                         Style.getPredefinedStyle("Outdoor")
                     )

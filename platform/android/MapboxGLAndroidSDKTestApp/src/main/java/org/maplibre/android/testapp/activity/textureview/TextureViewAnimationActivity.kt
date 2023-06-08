@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
-import org.maplibre.android.maps.MaplibreMap.CancelableCallback
+import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.testapp.R
 import java.util.*
 
@@ -18,7 +18,7 @@ import java.util.*
  */
 class TextureViewAnimationActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var handler: Handler? = null
     private var delayed: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +39,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
 
     private fun setupMapView(savedInstanceState: Bundle?) {
         mapView = findViewById<View>(R.id.mapView) as MapView
-        mapView.getMapAsync { maplibreMap: MaplibreMap ->
+        mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@TextureViewAnimationActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
             setFpsView(maplibreMap)
@@ -55,7 +55,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
         }
     }
 
-    private fun flyTo(maplibreMap: MaplibreMap, place: Int, zoom: Double) {
+    private fun flyTo(maplibreMap: MapLibreMap, place: Int, zoom: Double) {
         maplibreMap.animateCamera(
             CameraUpdateFactory.newLatLngZoom(PLACES[place], zoom),
             10000,
@@ -77,7 +77,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
         )
     }
 
-    private fun setFpsView(maplibreMap: MaplibreMap) {
+    private fun setFpsView(maplibreMap: MapLibreMap) {
         val fpsView = findViewById<View>(R.id.fpsView) as TextView
         maplibreMap.setOnFpsChangedListener { fps: Double ->
             fpsView.text = String.format(Locale.US, "FPS: %4.2f", fps)

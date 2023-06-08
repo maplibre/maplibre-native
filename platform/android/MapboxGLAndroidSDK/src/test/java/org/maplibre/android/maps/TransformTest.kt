@@ -42,10 +42,10 @@ class TransformTest {
 
     @Test
     fun testMoveCamera() {
-        val maplibreMap = mockk<MaplibreMap>()
+        val maplibreMap = mockk<MapLibreMap>()
         every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val target = LatLng(1.0, 2.0)
@@ -64,10 +64,10 @@ class TransformTest {
 
     @Test
     fun testMoveCameraToSamePosition() {
-        val maplibreMap = mockk<MaplibreMap>()
+        val maplibreMap = mockk<MapLibreMap>()
         every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val expected = CameraPosition.DEFAULT
@@ -82,13 +82,13 @@ class TransformTest {
 
     @Test
     fun testEaseCamera() {
-        val maplibreMap = mockk<MaplibreMap>()
+        val maplibreMap = mockk<MapLibreMap>()
         every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
         every { mapView.addOnCameraDidChangeListener(any()) } answers { transform.onCameraDidChange(true) }
         every { mapView.removeOnCameraDidChangeListener(any()) } answers {}
 
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val target = LatLng(1.0, 2.0)
@@ -104,10 +104,10 @@ class TransformTest {
 
     @Test
     fun testEaseCameraToSamePosition() {
-        val maplibreMap = mockk<MaplibreMap>()
+        val maplibreMap = mockk<MapLibreMap>()
         every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val expected = CameraPosition.DEFAULT
@@ -122,13 +122,13 @@ class TransformTest {
 
     @Test
     fun testAnimateCamera() {
-        val maplibreMap = mockk<MaplibreMap>()
+        val maplibreMap = mockk<MapLibreMap>()
         every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
         every { mapView.addOnCameraDidChangeListener(any()) } answers { transform.onCameraDidChange(true) }
         every { mapView.removeOnCameraDidChangeListener(any()) } answers {}
 
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val target = LatLng(1.0, 2.0)
@@ -144,10 +144,10 @@ class TransformTest {
 
     @Test
     fun testAnimateCameraToSamePosition() {
-        val maplibreMap = mockk<MaplibreMap>()
+        val maplibreMap = mockk<MapLibreMap>()
         every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
-        val callback = mockk<MaplibreMap.CancelableCallback>()
+        val callback = mockk<MapLibreMap.CancelableCallback>()
         every { callback.onFinish() } answers {}
 
         val expected = CameraPosition.DEFAULT
@@ -190,13 +190,13 @@ class TransformTest {
         every { mapView.addOnCameraDidChangeListener(capture(slot)) } answers { slot.captured.onCameraDidChange(true) }
         every { mapView.removeOnCameraDidChangeListener(any()) } answers {}
         // regression test for https://github.com/mapbox/mapbox-gl-native/issues/13735
-        val maplibreMap = mockk<MaplibreMap>()
+        val maplibreMap = mockk<MapLibreMap>()
         every { maplibreMap.cameraPosition } answers { CameraPosition.DEFAULT }
 
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
 
-        val callback = object : MaplibreMap.CancelableCallback {
+        val callback = object : MapLibreMap.CancelableCallback {
             override fun onCancel() {
                 throw IllegalStateException("onCancel shouldn't be called from onFinish")
             }

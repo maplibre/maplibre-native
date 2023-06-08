@@ -3,10 +3,10 @@ package org.maplibre.android.testapp.style
 import android.view.View
 import androidx.test.espresso.UiController
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.action.MaplibreMapAction
+import org.maplibre.android.testapp.action.MapLibreMapAction
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.maplibre.android.testapp.utils.ResourceUtils.readRawResource
 import org.junit.Assert
@@ -20,9 +20,9 @@ class StyleLoaderTest : EspressoTest() {
     @Test
     fun testSetGetStyleJsonString() {
         validateTestSetup()
-        MaplibreMapAction.invoke(
+        MapLibreMapAction.invoke(
             maplibreMap
-        ) { uiController: UiController?, maplibreMap: MaplibreMap ->
+        ) { uiController: UiController?, maplibreMap: MapLibreMap ->
             try {
                 val expected =
                     readRawResource(
@@ -41,9 +41,9 @@ class StyleLoaderTest : EspressoTest() {
     @Test
     fun testDefaultStyleLoadWithActivityLifecycleChange() {
         validateTestSetup()
-        MaplibreMapAction.invoke(
+        MapLibreMapAction.invoke(
             maplibreMap
-        ) { uiController: UiController?, maplibreMap: MaplibreMap ->
+        ) { uiController: UiController?, maplibreMap: MapLibreMap ->
             try {
                 val expected =
                     readRawResource(

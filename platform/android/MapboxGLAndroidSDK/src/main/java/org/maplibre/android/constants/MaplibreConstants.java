@@ -3,9 +3,9 @@ package org.maplibre.android.constants;
 import java.util.Locale;
 
 /**
- * MaplibreConstants exposes MapLibre related constants
+ * MapLibreConstants exposes MapLibre related constants
  */
-public class MaplibreConstants {
+public class MapLibreConstants {
 
   /**
    * Default Locale for data processing (ex: String.toLowerCase(MAPBOX_LOCALE, "foo"))

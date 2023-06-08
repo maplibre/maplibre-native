@@ -5,11 +5,11 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.Maplibre
+import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngQuad
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.RasterLayer
@@ -37,7 +37,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         val quad = LatLngQuad(
             LatLng(46.437, -80.425),
             LatLng(46.437, -71.516),
@@ -99,7 +99,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         private val drawables: Array<Bitmap?>
         private var drawableIndex: Int
         fun getBitmap(resourceId: Int): Bitmap? {
-            val context = Maplibre.getApplicationContext()
+            val context = MapLibre.getApplicationContext()
             val drawable = BitmapUtils.getDrawableFromRes(context, resourceId)
             if (drawable is BitmapDrawable) {
                 return drawable.bitmap

@@ -5,7 +5,7 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 
-import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.log.Logger;
 
 import java.util.ArrayList;
@@ -88,7 +88,7 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
     int[] numConfigs = new int[1];
     if (!egl.eglChooseConfig(display, configAttributes, null, 0, numConfigs)) {
       Logger.e(TAG, String.format(
-        MaplibreConstants.MAPLIBRE_LOCALE, "eglChooseConfig(NULL) returned error %d", egl.eglGetError())
+        MapLibreConstants.MAPLIBRE_LOCALE, "eglChooseConfig(NULL) returned error %d", egl.eglGetError())
       );
     }
     return numConfigs;
@@ -100,7 +100,7 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
     EGLConfig[] configs = new EGLConfig[numConfigs[0]];
     if (!egl.eglChooseConfig(display, configAttributes, configs, numConfigs[0], numConfigs)) {
       Logger.e(TAG, String.format(
-        MaplibreConstants.MAPLIBRE_LOCALE, "eglChooseConfig() returned error %d", egl.eglGetError())
+        MapLibreConstants.MAPLIBRE_LOCALE, "eglChooseConfig() returned error %d", egl.eglGetError())
       );
     }
     return configs;
@@ -258,7 +258,7 @@ public class EGLConfigChooser implements GLSurfaceView.EGLConfigChooser {
     int[] attributevalue = new int[1];
     if (!egl.eglGetConfigAttrib(display, config, attributeName, attributevalue)) {
       Logger.e(TAG, String.format(
-        MaplibreConstants.MAPLIBRE_LOCALE, "eglGetConfigAttrib(%d) returned error %d", attributeName, egl.eglGetError())
+        MapLibreConstants.MAPLIBRE_LOCALE, "eglGetConfigAttrib(%d) returned error %d", attributeName, egl.eglGetError())
       );
     }
     return attributevalue[0];

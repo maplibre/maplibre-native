@@ -14,7 +14,7 @@ import androidx.core.view.MenuItemCompat
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -29,7 +29,7 @@ import java.util.*
  * Test activity showcasing adding a large amount of Markers.
  */
 class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var locations: List<LatLng>? = null
     private var progressDialog: ProgressDialog? = null
@@ -38,10 +38,10 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         setContentView(R.layout.activity_marker_bulk)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MaplibreMap -> initMap(maplibreMap) })
+        mapView.getMapAsync(OnMapReadyCallback { maplibreMap: MapLibreMap -> initMap(maplibreMap) })
     }
 
-    private fun initMap(maplibreMap: MaplibreMap) {
+    private fun initMap(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
     }

@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 
-import org.maplibre.android.Maplibre;
+import org.maplibre.android.MapLibre;
 import org.maplibre.android.annotations.Icon;
 import org.maplibre.android.annotations.IconFactory;
 import org.maplibre.android.annotations.Marker;
@@ -60,7 +60,7 @@ class IconManager {
   }
 
   private Icon loadDefaultIconForMarker(Marker marker) {
-    Icon icon = IconFactory.getInstance(Maplibre.getApplicationContext()).defaultMarker();
+    Icon icon = IconFactory.getInstance(MapLibre.getApplicationContext()).defaultMarker();
     Bitmap bitmap = icon.getBitmap();
     updateHighestIconSize(bitmap.getWidth(), bitmap.getHeight() / 2);
     marker.setIcon(icon);
@@ -115,7 +115,7 @@ class IconManager {
     }
   }
 
-  void ensureIconLoaded(@NonNull Marker marker, @NonNull MaplibreMap maplibreMap) {
+  void ensureIconLoaded(@NonNull Marker marker, @NonNull MapLibreMap maplibreMap) {
     Icon icon = marker.getIcon();
     if (icon == null) {
       icon = loadDefaultIconForMarker(marker);
@@ -124,7 +124,7 @@ class IconManager {
     setTopOffsetPixels(marker, maplibreMap, icon);
   }
 
-  private void setTopOffsetPixels(Marker marker, @NonNull MaplibreMap maplibreMap, @NonNull Icon icon) {
+  private void setTopOffsetPixels(Marker marker, @NonNull MapLibreMap maplibreMap, @NonNull Icon icon) {
     // this seems to be a costly operation according to the profiler so I'm trying to save some calls
     Marker previousMarker = marker.getId() != -1 ? (Marker) maplibreMap.getAnnotation(marker.getId()) : null;
     if (previousMarker == null || previousMarker.getIcon() == null || previousMarker.getIcon() != marker.getIcon()) {

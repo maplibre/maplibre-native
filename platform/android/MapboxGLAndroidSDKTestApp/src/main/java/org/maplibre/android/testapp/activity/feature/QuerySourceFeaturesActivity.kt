@@ -12,7 +12,7 @@ import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -24,7 +24,7 @@ import org.maplibre.android.testapp.R
  */
 class QuerySourceFeaturesActivity : AppCompatActivity() {
     lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_query_source_features)
@@ -32,7 +32,7 @@ class QuerySourceFeaturesActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { map: MaplibreMap? ->
+        mapView.getMapAsync { map: MapLibreMap? ->
             if (map != null) {
                 maplibreMap = map
             }

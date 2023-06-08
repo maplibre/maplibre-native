@@ -5,7 +5,7 @@ import android.graphics.PointF
 import androidx.annotation.IntDef
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import timber.log.Timber
 import java.lang.Double.max
 import java.util.Arrays
@@ -267,7 +267,7 @@ object CameraUpdateFactory {
     //
     class CameraPositionUpdate(val bearing: Double, val target: LatLng?, val tilt: Double, val zoom: Double, val padding: DoubleArray?) : CameraUpdate {
 
-        override fun getCameraPosition(maplibreMap: MaplibreMap): CameraPosition {
+        override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition {
             if (target == null) {
                 val previousPosition = maplibreMap.cameraPosition
                 return CameraPosition.Builder(this).target(previousPosition.target).build()
@@ -327,7 +327,7 @@ object CameraUpdateFactory {
         ) {
         }
 
-        override fun getCameraPosition(maplibreMap: MaplibreMap): CameraPosition? {
+        override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition? {
             return if (bearing == null && tilt == null) {
                 // use current camera position tilt and bearing
                 maplibreMap.getCameraForLatLngBounds(bounds, padding)
@@ -460,7 +460,7 @@ object CameraUpdateFactory {
             }
         }
 
-        override fun getCameraPosition(maplibreMap: MaplibreMap): CameraPosition {
+        override fun getCameraPosition(maplibreMap: MapLibreMap): CameraPosition {
             val cameraPosition = maplibreMap.cameraPosition
             return if (type != ZOOM_TO_POINT) {
                 CameraPosition.Builder(cameraPosition).zoom(transformZoom(cameraPosition.zoom)).build()

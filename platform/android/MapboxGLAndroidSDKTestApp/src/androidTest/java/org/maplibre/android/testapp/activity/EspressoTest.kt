@@ -1,7 +1,7 @@
 package org.maplibre.android.testapp.activity
 
 import androidx.annotation.UiThread
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
 
@@ -18,7 +18,7 @@ open class EspressoTest : BaseTest() {
     }
 
     @UiThread
-    override fun initMap(maplibreMap: MaplibreMap) {
+    override fun initMap(maplibreMap: MapLibreMap) {
         maplibreMap.setStyle(Style.Builder().fromUri("asset://streets.json"))
         super.initMap(maplibreMap)
     }

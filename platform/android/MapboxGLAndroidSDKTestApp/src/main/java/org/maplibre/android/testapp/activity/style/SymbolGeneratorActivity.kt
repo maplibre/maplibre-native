@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.geojson.FeatureCollection
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -34,7 +34,7 @@ import java.lang.ref.WeakReference
  */
 class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_symbol_generator)
@@ -43,7 +43,7 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Outdoor")) { style: Style? ->
             addSymbolClickListener()
@@ -301,7 +301,7 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private class GenerateSymbolTask internal constructor(
-        private val maplibreMap: MaplibreMap?,
+        private val maplibreMap: MapLibreMap?,
         context: Context
     ) : AsyncTask<FeatureCollection?, Void?, HashMap<String, Bitmap>>() {
         private val context: WeakReference<Context>

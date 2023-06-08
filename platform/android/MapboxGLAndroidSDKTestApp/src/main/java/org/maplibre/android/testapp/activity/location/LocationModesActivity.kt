@@ -26,8 +26,8 @@ import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.CancelableCallback
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -43,7 +43,7 @@ class LocationModesActivity :
     private var protectedGestureArea: View? = null
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var defaultStyle = false
 
     @CameraMode.Mode
@@ -115,7 +115,7 @@ class LocationModesActivity :
     }
 
     @SuppressLint("MissingPermission")
-    override fun onMapReady(maplibreMap: MaplibreMap) {
+    override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
             locationComponent = maplibreMap.locationComponent

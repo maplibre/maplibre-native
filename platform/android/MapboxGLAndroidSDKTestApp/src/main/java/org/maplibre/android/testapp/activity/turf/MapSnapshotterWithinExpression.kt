@@ -9,7 +9,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.snapshotter.MapSnapshot
 import org.maplibre.android.snapshotter.MapSnapshotter
@@ -29,7 +29,7 @@ import org.maplibre.android.testapp.databinding.ActivityMapsnapshotterWithinExpr
  */
 class MapSnapshotterWithinExpression : AppCompatActivity() {
     private lateinit var binding: ActivityMapsnapshotterWithinExpressionBinding
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var snapshotter: MapSnapshotter
     private var snapshotInProgress = false
 

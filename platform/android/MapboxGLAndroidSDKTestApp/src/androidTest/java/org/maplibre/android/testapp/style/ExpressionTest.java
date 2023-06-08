@@ -61,7 +61,7 @@ import static org.maplibre.android.style.layers.PropertyFactory.fillColor;
 import static org.maplibre.android.style.layers.PropertyFactory.fillOutlineColor;
 import static org.maplibre.android.style.layers.PropertyFactory.textColor;
 import static org.maplibre.android.style.layers.PropertyFactory.textField;
-import static org.maplibre.android.testapp.action.MaplibreMapAction.invoke;
+import static org.maplibre.android.testapp.action.MapLibreMapAction.invoke;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -4,7 +4,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.GesturesUiTestUtils.move
 import org.maplibre.android.maps.GesturesUiTestUtils.quickScale
@@ -115,7 +115,7 @@ class MapGestureDetectorTest : BaseTest() {
             initialZoom = maplibreMap.cameraPosition.zoom
         }
         onView(withId(R.id.mapView)).perform(quickScale(-(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold * 2), withVelocity = false, duration = 1000L))
-        R.id.mapView.loopFor(MaplibreConstants.ANIMATION_DURATION.toLong())
+        R.id.mapView.loopFor(MapLibreConstants.ANIMATION_DURATION.toLong())
         rule.runOnUiThread {
             Assert.assertTrue(maplibreMap.cameraPosition.zoom < initialZoom!!)
         }
@@ -129,7 +129,7 @@ class MapGestureDetectorTest : BaseTest() {
             initialZoom = maplibreMap.cameraPosition.zoom
         }
         onView(withId(R.id.mapView)).perform(quickScale(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold / 2, withVelocity = false, duration = 50L))
-        R.id.mapView.loopFor(MaplibreConstants.ANIMATION_DURATION.toLong())
+        R.id.mapView.loopFor(MapLibreConstants.ANIMATION_DURATION.toLong())
         rule.runOnUiThread {
             Assert.assertEquals(initialZoom!! + 1, maplibreMap.cameraPosition.zoom, 0.1)
         }
@@ -145,7 +145,7 @@ class MapGestureDetectorTest : BaseTest() {
             maplibreMap.uiSettings.isQuickZoomGesturesEnabled = false
         }
         onView(withId(R.id.mapView)).perform(quickScale(maplibreMap.gesturesManager.standardScaleGestureDetector.spanSinceStartThreshold * 2, withVelocity = false, duration = 50L))
-        R.id.mapView.loopFor(MaplibreConstants.ANIMATION_DURATION.toLong())
+        R.id.mapView.loopFor(MapLibreConstants.ANIMATION_DURATION.toLong())
         rule.runOnUiThread {
             Assert.assertEquals(initialZoom!!, maplibreMap.cameraPosition.zoom, 0.01)
         }

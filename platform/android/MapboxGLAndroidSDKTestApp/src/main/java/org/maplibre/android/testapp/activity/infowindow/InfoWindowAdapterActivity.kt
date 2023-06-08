@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -22,14 +22,14 @@ import org.maplibre.android.testapp.utils.IconUtils
  */
 class InfoWindowAdapterActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_infowindow_adapter)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MaplibreMap ->
+            OnMapReadyCallback { map: MapLibreMap ->
                 maplibreMap = map
                 map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
                     addMarkers()

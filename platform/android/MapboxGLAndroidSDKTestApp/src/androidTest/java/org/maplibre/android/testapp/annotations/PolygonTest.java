@@ -10,7 +10,7 @@ import org.maplibre.android.testapp.activity.EspressoTest;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.maplibre.android.testapp.action.MaplibreMapAction.invoke;
+import static org.maplibre.android.testapp.action.MapLibreMapAction.invoke;
 import static org.junit.Assert.assertEquals;
 
 public class PolygonTest extends EspressoTest {

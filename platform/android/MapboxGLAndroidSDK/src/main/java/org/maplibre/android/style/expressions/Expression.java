@@ -31,7 +31,7 @@ import static org.maplibre.android.utils.ColorUtils.colorToRgbaArray;
 /**
  * The value for any layout property, paint property, or filter may be specified as an expression.
  * An expression defines a formula for computing the value of the property using the operators described below.
- * The set of expression operators provided by Maplibre GL includes:
+ * The set of expression operators provided by MapLibre GL includes:
  * <ul>
  * <li>Element</li>
  * <li>Mathematical operators for performing arithmetic and other operations on numeric values</li>
@@ -2975,7 +2975,7 @@ public class Expression {
    * Returns true if the input string is expected to render legibly.
    * Returns false if the input string contains sections that cannot be rendered without potential loss of meaning
    * (e.g. Indic scripts that require complex text shaping,
-   * or right-to-left scripts if the the mapbox-gl-rtl-text plugin is not in use in Maplibre GL JS).
+   * or right-to-left scripts if the the mapbox-gl-rtl-text plugin is not in use in MapLibre GL JS).
    * <p>
    * Example usage:
    * </p>
@@ -3006,7 +3006,7 @@ public class Expression {
    * Returns true if the input string is expected to render legibly.
    * Returns false if the input string contains sections that cannot be rendered without potential loss of meaning
    * (e.g. Indic scripts that require complex text shaping,
-   * or right-to-left scripts if the the mapbox-gl-rtl-text plugin is not in use in Maplibre GL JS).
+   * or right-to-left scripts if the the mapbox-gl-rtl-text plugin is not in use in MapLibre GL JS).
    * <p>
    * Example usage:
    * </p>

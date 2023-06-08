@@ -1,7 +1,7 @@
 package org.maplibre.android.location.utils
 
 import androidx.test.espresso.IdlingResource
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 
 /**
@@ -31,7 +31,7 @@ class StyleChangeIdlingResource : IdlingResource {
         callback?.onTransitionToIdle()
     }
 
-    fun waitForStyle(maplibreMap: MaplibreMap, styleUrl: String) {
+    fun waitForStyle(maplibreMap: MapLibreMap, styleUrl: String) {
         isIdle = false
         maplibreMap.setStyle(Style.Builder().fromUri(styleUrl)) {
             setIdle()

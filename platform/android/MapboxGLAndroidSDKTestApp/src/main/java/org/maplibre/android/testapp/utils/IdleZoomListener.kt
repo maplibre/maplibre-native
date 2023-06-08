@@ -1,11 +1,11 @@
 package org.maplibre.android.testapp.utils
 
 import android.widget.TextView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.OnCameraIdleListener
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.testapp.R
 
-class IdleZoomListener(private val maplibreMap: MaplibreMap, private val textView: TextView) :
+class IdleZoomListener(private val maplibreMap: MapLibreMap, private val textView: TextView) :
     OnCameraIdleListener {
     override fun onCameraIdle() {
         val context = textView.context

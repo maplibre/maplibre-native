@@ -13,7 +13,7 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.constants.MaplibreConstants
+import org.maplibre.android.constants.MapLibreConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.Style
@@ -83,7 +83,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
             grid.measuredHeight / grid.rowCount
         ) // Optionally the pixel ratio
             .withPixelRatio(1f)
-            .withLocalIdeographFontFamily(MaplibreConstants.DEFAULT_FONT)
+            .withLocalIdeographFontFamily(MapLibreConstants.DEFAULT_FONT)
 
         // Optionally the visible region
         if (row % 2 == 0) {

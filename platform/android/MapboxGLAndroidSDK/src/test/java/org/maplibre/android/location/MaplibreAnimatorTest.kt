@@ -9,15 +9,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class MaplibreAnimatorTest {
+class MapLibreAnimatorTest {
 
     @Test
     fun fps_unlimited() {
         val valueAnimator = mockk<ValueAnimator>()
         every { valueAnimator.animatedValue } answers { 5f }
-        val listener = mockk<MaplibreAnimator.AnimationsValueChangeListener<Float>>()
+        val listener = mockk<MapLibreAnimator.AnimationsValueChangeListener<Float>>()
         every { listener.onNewAnimationValue(any()) } answers {}
-        val mapboxAnimator = MaplibreFloatAnimator(
+        val mapboxAnimator = MapLibreFloatAnimator(
             floatArrayOf(
                 0f,
                 10f
@@ -34,9 +34,9 @@ class MaplibreAnimatorTest {
     fun fps_limited() {
         val valueAnimator = mockk<ValueAnimator>()
         every { valueAnimator.animatedValue } answers { 5f }
-        val listener = mockk<MaplibreAnimator.AnimationsValueChangeListener<Float>>()
+        val listener = mockk<MapLibreAnimator.AnimationsValueChangeListener<Float>>()
         every { listener.onNewAnimationValue(any()) } answers {}
-        val mapboxAnimator = MaplibreFloatAnimator(
+        val mapboxAnimator = MapLibreFloatAnimator(
             floatArrayOf(
                 0f,
                 10f

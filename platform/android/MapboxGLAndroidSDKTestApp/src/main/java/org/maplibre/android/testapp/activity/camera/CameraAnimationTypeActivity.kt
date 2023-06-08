@@ -8,9 +8,9 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.CancelableCallback
-import org.maplibre.android.maps.MaplibreMap.OnCameraIdleListener
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.CancelableCallback
+import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -45,7 +45,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
                     .show()
             }
         }
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var cameraState = false
     private val cameraIdleListener = OnCameraIdleListener {
@@ -62,7 +62,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
         maplibreMap.uiSettings.isAttributionEnabled = false

@@ -2,11 +2,11 @@ package org.maplibre.android.testapp.maps
 
 import androidx.test.espresso.UiController
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.android.testapp.action.MaplibreMapAction
+import org.maplibre.android.testapp.action.MapLibreMapAction
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.maplibre.android.testapp.utils.TestingAsyncUtils
 import org.junit.Test
@@ -18,7 +18,7 @@ class StyleLoadTest : EspressoTest() {
     @Test
     fun updateSourceAfterStyleLoad() {
         validateTestSetup()
-        MaplibreMapAction.invoke(maplibreMap) { uiController: UiController, maplibreMap: MaplibreMap ->
+        MapLibreMapAction.invoke(maplibreMap) { uiController: UiController, maplibreMap: MapLibreMap ->
             val source = GeoJsonSource("id")
             val layer = SymbolLayer("id", "id")
             maplibreMap.setStyle(Style.Builder().withSource(source).withLayer(layer))

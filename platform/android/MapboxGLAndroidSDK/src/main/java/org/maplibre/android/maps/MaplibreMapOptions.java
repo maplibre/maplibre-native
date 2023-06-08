@@ -20,21 +20,21 @@ import androidx.core.content.res.ResourcesCompat;
 
 import org.maplibre.android.R;
 import org.maplibre.android.camera.CameraPosition;
-import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.utils.FontUtils;
 
 import java.util.Arrays;
 
 /**
- * Defines configuration MaplibreMapOptions for a MaplibreMap. These options can be used when adding a
+ * Defines configuration MapLibreMapOptions for a MapLibreMap. These options can be used when adding a
  * map to your application programmatically (as opposed to via XML). If you are using a MapFragment,
  * you can pass these options in using the static factory method newInstance(MapboxMapOptions).
  * If you are using a MapView, you can pass these options in using the constructor
  * MapView(Context, MapboxMapOptions). If you add a map using XML, then you can apply these options
  * using custom XML tags.
  */
-public class MaplibreMapOptions implements Parcelable {
+public class MapLibreMapOptions implements Parcelable {
 
   private static final int LIGHT_GRAY = 0xFFF0E9E1; // RGB(240, 233, 225))
   private static final float FOUR_DP = 4f;
@@ -61,10 +61,10 @@ public class MaplibreMapOptions implements Parcelable {
   private int attributionGravity = Gravity.BOTTOM | Gravity.START;
   private int[] attributionMargins;
 
-  private double minZoom = MaplibreConstants.MINIMUM_ZOOM;
-  private double maxZoom = MaplibreConstants.MAXIMUM_ZOOM;
-  private double minPitch = MaplibreConstants.MINIMUM_PITCH;
-  private double maxPitch = MaplibreConstants.MAXIMUM_PITCH;
+  private double minZoom = MapLibreConstants.MINIMUM_ZOOM;
+  private double maxZoom = MapLibreConstants.MAXIMUM_ZOOM;
+  private double minPitch = MapLibreConstants.MINIMUM_PITCH;
+  private double maxPitch = MapLibreConstants.MAXIMUM_PITCH;
 
   private boolean rotateGesturesEnabled = true;
   private boolean scrollGesturesEnabled = true;
@@ -100,10 +100,10 @@ public class MaplibreMapOptions implements Parcelable {
    * @deprecated Use {@link #createFromAttributes(Context, AttributeSet)} instead.
    */
   @Deprecated
-  public MaplibreMapOptions() {
+  public MapLibreMapOptions() {
   }
 
-  private MaplibreMapOptions(Parcel in) {
+  private MapLibreMapOptions(Parcel in) {
     cameraPosition = in.readParcelable(CameraPosition.class.getClassLoader());
     debugActive = in.readByte() != 0;
 
@@ -160,7 +160,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return the MapboxMapOptions created from attributes
    */
   @NonNull
-  public static MaplibreMapOptions createFromAttributes(@NonNull Context context) {
+  public static MapLibreMapOptions createFromAttributes(@NonNull Context context) {
     return createFromAttributes(context, null);
   }
 
@@ -172,13 +172,13 @@ public class MaplibreMapOptions implements Parcelable {
    * @return the MapboxMapOptions created from attributes
    */
   @NonNull
-  public static MaplibreMapOptions createFromAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
+  public static MapLibreMapOptions createFromAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
     TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.maplibre_MapView, 0, 0);
-    return createFromAttributes(new MaplibreMapOptions(), context, typedArray);
+    return createFromAttributes(new MapLibreMapOptions(), context, typedArray);
   }
 
   @VisibleForTesting
-  static MaplibreMapOptions createFromAttributes(@NonNull MaplibreMapOptions maplibreMapOptions,
+  static MapLibreMapOptions createFromAttributes(@NonNull MapLibreMapOptions maplibreMapOptions,
                                                  @NonNull Context context,
                                                  @Nullable TypedArray typedArray) {
     float pxlRatio = context.getResources().getDisplayMetrics().density;
@@ -210,13 +210,13 @@ public class MaplibreMapOptions implements Parcelable {
         typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiQuickZoomGestures, true));
 
       maplibreMapOptions.maxZoomPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoomMax,
-        MaplibreConstants.MAXIMUM_ZOOM));
+        MapLibreConstants.MAXIMUM_ZOOM));
       maplibreMapOptions.minZoomPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoomMin,
-        MaplibreConstants.MINIMUM_ZOOM));
+        MapLibreConstants.MINIMUM_ZOOM));
       maplibreMapOptions.maxPitchPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraPitchMax,
-        MaplibreConstants.MAXIMUM_PITCH));
+        MapLibreConstants.MAXIMUM_PITCH));
       maplibreMapOptions.minPitchPreference(typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraPitchMin,
-        MaplibreConstants.MINIMUM_PITCH));
+        MapLibreConstants.MINIMUM_PITCH));
 
       maplibreMapOptions.compassEnabled(typedArray.getBoolean(R.styleable.maplibre_MapView_maplibre_uiCompass, true));
       maplibreMapOptions.compassGravity(typedArray.getInt(R.styleable.maplibre_MapView_maplibre_uiCompassGravity,
@@ -292,7 +292,7 @@ public class MaplibreMapOptions implements Parcelable {
         String localIdeographFontFamily =
           typedArray.getString(R.styleable.maplibre_MapView_maplibre_localIdeographFontFamily);
         if (localIdeographFontFamily == null) {
-          localIdeographFontFamily = MaplibreConstants.DEFAULT_FONT;
+          localIdeographFontFamily = MapLibreConstants.DEFAULT_FONT;
         }
         maplibreMapOptions.localIdeographFontFamily(localIdeographFontFamily);
       }
@@ -320,7 +320,7 @@ public class MaplibreMapOptions implements Parcelable {
    */
   @Deprecated
   @NonNull
-  public MaplibreMapOptions apiBaseUrl(String apiBaseUrl) {
+  public MapLibreMapOptions apiBaseUrl(String apiBaseUrl) {
     this.apiBaseUri = apiBaseUrl;
     return this;
   }
@@ -332,7 +332,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions apiBaseUri(String apiBaseUri) {
+  public MapLibreMapOptions apiBaseUri(String apiBaseUri) {
     this.apiBaseUri = apiBaseUri;
     return this;
   }
@@ -344,7 +344,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions camera(CameraPosition cameraPosition) {
+  public MapLibreMapOptions camera(CameraPosition cameraPosition) {
     this.cameraPosition = cameraPosition;
     return this;
   }
@@ -356,7 +356,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions debugActive(boolean enabled) {
+  public MapLibreMapOptions debugActive(boolean enabled) {
     debugActive = enabled;
     return this;
   }
@@ -368,7 +368,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions minZoomPreference(double minZoom) {
+  public MapLibreMapOptions minZoomPreference(double minZoom) {
     this.minZoom = minZoom;
     return this;
   }
@@ -380,7 +380,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions maxZoomPreference(double maxZoom) {
+  public MapLibreMapOptions maxZoomPreference(double maxZoom) {
     this.maxZoom = maxZoom;
     return this;
   }
@@ -393,7 +393,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions minPitchPreference(double minPitch) {
+  public MapLibreMapOptions minPitchPreference(double minPitch) {
     this.minPitch = minPitch;
     return this;
   }
@@ -405,7 +405,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions maxPitchPreference(double maxPitch) {
+  public MapLibreMapOptions maxPitchPreference(double maxPitch) {
     this.maxPitch = maxPitch;
     return this;
   }
@@ -417,7 +417,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions compassEnabled(boolean enabled) {
+  public MapLibreMapOptions compassEnabled(boolean enabled) {
     compassEnabled = enabled;
     return this;
   }
@@ -429,7 +429,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions compassGravity(int gravity) {
+  public MapLibreMapOptions compassGravity(int gravity) {
     compassGravity = gravity;
     return this;
   }
@@ -441,7 +441,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions compassMargins(int[] margins) {
+  public MapLibreMapOptions compassMargins(int[] margins) {
     compassMargins = margins;
     return this;
   }
@@ -456,7 +456,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions compassFadesWhenFacingNorth(boolean compassFadeWhenFacingNorth) {
+  public MapLibreMapOptions compassFadesWhenFacingNorth(boolean compassFadeWhenFacingNorth) {
     this.fadeCompassFacingNorth = compassFadeWhenFacingNorth;
     return this;
   }
@@ -471,7 +471,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions compassImage(Drawable compass) {
+  public MapLibreMapOptions compassImage(Drawable compass) {
     this.compassImage = compass;
     return this;
   }
@@ -483,7 +483,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions logoEnabled(boolean enabled) {
+  public MapLibreMapOptions logoEnabled(boolean enabled) {
     logoEnabled = enabled;
     return this;
   }
@@ -495,7 +495,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions logoGravity(int gravity) {
+  public MapLibreMapOptions logoGravity(int gravity) {
     logoGravity = gravity;
     return this;
   }
@@ -507,7 +507,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions logoMargins(int[] margins) {
+  public MapLibreMapOptions logoMargins(int[] margins) {
     logoMargins = margins;
     return this;
   }
@@ -519,7 +519,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions attributionEnabled(boolean enabled) {
+  public MapLibreMapOptions attributionEnabled(boolean enabled) {
     attributionEnabled = enabled;
     return this;
   }
@@ -531,7 +531,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions attributionGravity(int gravity) {
+  public MapLibreMapOptions attributionGravity(int gravity) {
     attributionGravity = gravity;
     return this;
   }
@@ -543,7 +543,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions attributionMargins(int[] margins) {
+  public MapLibreMapOptions attributionMargins(int[] margins) {
     attributionMargins = margins;
     return this;
   }
@@ -555,7 +555,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions attributionTintColor(@ColorInt int color) {
+  public MapLibreMapOptions attributionTintColor(@ColorInt int color) {
     attributionTintColor = color;
     return this;
   }
@@ -567,7 +567,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions rotateGesturesEnabled(boolean enabled) {
+  public MapLibreMapOptions rotateGesturesEnabled(boolean enabled) {
     rotateGesturesEnabled = enabled;
     return this;
   }
@@ -579,7 +579,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions scrollGesturesEnabled(boolean enabled) {
+  public MapLibreMapOptions scrollGesturesEnabled(boolean enabled) {
     scrollGesturesEnabled = enabled;
     return this;
   }
@@ -591,7 +591,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions horizontalScrollGesturesEnabled(boolean enabled) {
+  public MapLibreMapOptions horizontalScrollGesturesEnabled(boolean enabled) {
     horizontalScrollGesturesEnabled = enabled;
     return this;
   }
@@ -603,7 +603,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions tiltGesturesEnabled(boolean enabled) {
+  public MapLibreMapOptions tiltGesturesEnabled(boolean enabled) {
     tiltGesturesEnabled = enabled;
     return this;
   }
@@ -615,7 +615,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions zoomGesturesEnabled(boolean enabled) {
+  public MapLibreMapOptions zoomGesturesEnabled(boolean enabled) {
     zoomGesturesEnabled = enabled;
     return this;
   }
@@ -627,7 +627,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions doubleTapGesturesEnabled(boolean enabled) {
+  public MapLibreMapOptions doubleTapGesturesEnabled(boolean enabled) {
     doubleTapGesturesEnabled = enabled;
     return this;
   }
@@ -639,7 +639,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions quickZoomGesturesEnabled(boolean enabled) {
+  public MapLibreMapOptions quickZoomGesturesEnabled(boolean enabled) {
     quickZoomGesturesEnabled = enabled;
     return this;
   }
@@ -658,13 +658,13 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions textureMode(boolean textureMode) {
+  public MapLibreMapOptions textureMode(boolean textureMode) {
     this.textureMode = textureMode;
     return this;
   }
 
   @NonNull
-  public MaplibreMapOptions translucentTextureSurface(boolean translucentTextureSurface) {
+  public MapLibreMapOptions translucentTextureSurface(boolean translucentTextureSurface) {
     this.translucentTextureSurface = translucentTextureSurface;
     return this;
   }
@@ -676,7 +676,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions foregroundLoadColor(@ColorInt int loadColor) {
+  public MapLibreMapOptions foregroundLoadColor(@ColorInt int loadColor) {
     this.foregroundLoadColor = loadColor;
     return this;
   }
@@ -692,7 +692,7 @@ public class MaplibreMapOptions implements Parcelable {
    */
   @Deprecated
   @NonNull
-  public MaplibreMapOptions setPrefetchesTiles(boolean enable) {
+  public MapLibreMapOptions setPrefetchesTiles(boolean enable) {
     this.prefetchesTiles = enable;
     return this;
   }
@@ -709,7 +709,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions setPrefetchZoomDelta(@IntRange(from = 0) int delta) {
+  public MapLibreMapOptions setPrefetchZoomDelta(@IntRange(from = 0) int delta) {
     this.prefetchZoomDelta = delta;
     return this;
   }
@@ -725,7 +725,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions crossSourceCollisions(boolean crossSourceCollisions) {
+  public MapLibreMapOptions crossSourceCollisions(boolean crossSourceCollisions) {
     this.crossSourceCollisions = crossSourceCollisions;
     return this;
   }
@@ -737,7 +737,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions localIdeographFontFamilyEnabled(boolean enabled) {
+  public MapLibreMapOptions localIdeographFontFamilyEnabled(boolean enabled) {
     this.localIdeographFontFamilyEnabled = enabled;
     return this;
   }
@@ -748,13 +748,13 @@ public class MaplibreMapOptions implements Parcelable {
    * <p>
    * The font family argument is passed to {@link android.graphics.Typeface#create(String, int)}.
    * Default system fonts are defined in &#x27;/system/etc/fonts.xml&#x27;
-   * Default font for local ideograph font family is {@link MaplibreConstants#DEFAULT_FONT}.
+   * Default font for local ideograph font family is {@link MapLibreConstants#DEFAULT_FONT}.
    *
    * @param fontFamily font family for local ideograph generation.
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions localIdeographFontFamily(String fontFamily) {
+  public MapLibreMapOptions localIdeographFontFamily(String fontFamily) {
     this.localIdeographFontFamily = FontUtils.extractValidFont(fontFamily);
     return this;
   }
@@ -762,18 +762,18 @@ public class MaplibreMapOptions implements Parcelable {
   /**
    * Set a font family from range of font families for generating glyphs locally for ideographs in the
    * &#x27;CJK Unified Ideographs&#x27; and &#x27;Hangul Syllables&#x27; ranges. The first matching font
-   * will be selected. If no valid font found, it defaults to {@link MaplibreConstants#DEFAULT_FONT}.
+   * will be selected. If no valid font found, it defaults to {@link MapLibreConstants#DEFAULT_FONT}.
    * <p>
    * The font families are checked against the default system fonts defined in
    * &#x27;/system/etc/fonts.xml&#x27; Default font for local ideograph font family is
-   * {@link MaplibreConstants#DEFAULT_FONT}.
+   * {@link MapLibreConstants#DEFAULT_FONT}.
    * </p>
    *
    * @param fontFamilies an array of font families for local ideograph generation.
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions localIdeographFontFamily(String... fontFamilies) {
+  public MapLibreMapOptions localIdeographFontFamily(String... fontFamilies) {
     this.localIdeographFontFamily = FontUtils.extractValidFont(fontFamilies);
     return this;
   }
@@ -786,7 +786,7 @@ public class MaplibreMapOptions implements Parcelable {
    * @return This
    */
   @NonNull
-  public MaplibreMapOptions pixelRatio(float pixelRatio) {
+  public MapLibreMapOptions pixelRatio(float pixelRatio) {
     this.pixelRatio = pixelRatio;
     return this;
   }
@@ -1116,7 +1116,7 @@ public class MaplibreMapOptions implements Parcelable {
   /**
    * Returns the font-family for locally overriding generation of glyphs in the
    * &#x27;CJK Unified Ideographs&#x27; and &#x27;Hangul Syllables&#x27; ranges.
-   * Default font for local ideograph font family is {@link MaplibreConstants#DEFAULT_FONT}.
+   * Default font for local ideograph font family is {@link MapLibreConstants#DEFAULT_FONT}.
    * Returns null if local ideograph font families are disabled.
    *
    * @return Local ideograph font family name.
@@ -1144,13 +1144,13 @@ public class MaplibreMapOptions implements Parcelable {
     return pixelRatio;
   }
 
-  public static final Parcelable.Creator<MaplibreMapOptions> CREATOR = new Parcelable.Creator<MaplibreMapOptions>() {
-    public MaplibreMapOptions createFromParcel(@NonNull Parcel in) {
-      return new MaplibreMapOptions(in);
+  public static final Parcelable.Creator<MapLibreMapOptions> CREATOR = new Parcelable.Creator<MapLibreMapOptions>() {
+    public MapLibreMapOptions createFromParcel(@NonNull Parcel in) {
+      return new MapLibreMapOptions(in);
     }
 
-    public MaplibreMapOptions[] newArray(int size) {
-      return new MaplibreMapOptions[size];
+    public MapLibreMapOptions[] newArray(int size) {
+      return new MapLibreMapOptions[size];
     }
   };
 
@@ -1216,7 +1216,7 @@ public class MaplibreMapOptions implements Parcelable {
       return false;
     }
 
-    MaplibreMapOptions options = (MaplibreMapOptions) o;
+    MapLibreMapOptions options = (MapLibreMapOptions) o;
 
     if (debugActive != options.debugActive) {
       return false;

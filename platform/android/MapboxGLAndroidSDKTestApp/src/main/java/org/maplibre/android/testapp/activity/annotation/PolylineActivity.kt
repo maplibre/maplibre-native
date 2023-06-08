@@ -11,7 +11,7 @@ import org.maplibre.android.annotations.Polyline
 import org.maplibre.android.annotations.PolylineOptions
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -28,7 +28,7 @@ class PolylineActivity : AppCompatActivity() {
     private var polylines: MutableList<Polyline>? = null
     private var polylineOptions: ArrayList<PolylineOptions?>? = ArrayList()
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var fullAlpha = true
     private var showPolylines = true
     private var width = true
@@ -44,7 +44,7 @@ class PolylineActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { maplibreMap: MaplibreMap ->
+            OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 this@PolylineActivity.maplibreMap = maplibreMap
                 maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
                 maplibreMap.setOnPolylineClickListener { polyline: Polyline ->

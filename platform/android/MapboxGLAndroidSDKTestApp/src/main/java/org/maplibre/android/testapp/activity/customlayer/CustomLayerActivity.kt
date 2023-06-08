@@ -10,7 +10,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CustomLayer
@@ -25,7 +25,7 @@ import org.maplibre.android.testapp.model.customlayer.ExampleCustomLayer
  *
  */
 class CustomLayerActivity : AppCompatActivity() {
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var customLayer: CustomLayer? = null
     private lateinit var fab: FloatingActionButton
@@ -35,7 +35,7 @@ class CustomLayerActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MaplibreMap? ->
+            OnMapReadyCallback { map: MapLibreMap? ->
                 maplibreMap = map!!
                 maplibreMap.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(

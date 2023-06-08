@@ -13,8 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
 import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.Maplibre;
-import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.util.TileServerOptions;
 import org.maplibre.android.utils.FileUtils;
@@ -107,7 +107,7 @@ public class FileSource {
   @NonNull
   private static String getCachePath(@NonNull Context context) {
     SharedPreferences preferences = context.getSharedPreferences(
-      MaplibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+      MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
     String cachePath = preferences.getString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, null);
 
     if (!isPathWritable(cachePath)) {
@@ -116,7 +116,7 @@ public class FileSource {
 
       // Reset stored cache path
       SharedPreferences.Editor editor =
-        context.getSharedPreferences(MaplibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
+        context.getSharedPreferences(MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
       editor.remove(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH).apply();
     }
 
@@ -142,7 +142,7 @@ public class FileSource {
 
   private static boolean isExternalStorageConfiguration(@NonNull Context context) {
     // Default value
-    boolean isExternalStorageConfiguration = MaplibreConstants.DEFAULT_SET_STORAGE_EXTERNAL;
+    boolean isExternalStorageConfiguration = MapLibreConstants.DEFAULT_SET_STORAGE_EXTERNAL;
 
     try {
       // Try getting a custom value from the app Manifest
@@ -150,8 +150,8 @@ public class FileSource {
         PackageManager.GET_META_DATA);
       if (appInfo.metaData != null) {
         isExternalStorageConfiguration = appInfo.metaData.getBoolean(
-          MaplibreConstants.KEY_META_DATA_SET_STORAGE_EXTERNAL,
-          MaplibreConstants.DEFAULT_SET_STORAGE_EXTERNAL
+          MapLibreConstants.KEY_META_DATA_SET_STORAGE_EXTERNAL,
+          MapLibreConstants.DEFAULT_SET_STORAGE_EXTERNAL
         );
       }
     } catch (PackageManager.NameNotFoundException exception) {
@@ -293,7 +293,7 @@ public class FileSource {
    */
   public static void setResourcesCachePath(@NonNull final String path,
                                            @NonNull final ResourcesCachePathChangeCallback callback) {
-    final Context applicationContext = Maplibre.getApplicationContext();
+    final Context applicationContext = MapLibre.getApplicationContext();
     final FileSource fileSource = FileSource.getInstance(applicationContext);
 
     if (path.equals(getResourcesCachePath(applicationContext))) {
@@ -304,7 +304,7 @@ public class FileSource {
         @Override
         public void onWritePermissionGranted() {
           final SharedPreferences.Editor editor =
-            applicationContext.getSharedPreferences(MaplibreConstants.MAPLIBRE_SHARED_PREFERENCES,
+            applicationContext.getSharedPreferences(MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES,
               Context.MODE_PRIVATE).edit();
           editor.putString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, path);
           editor.apply();
@@ -372,8 +372,8 @@ public class FileSource {
   private long nativePtr;
 
   private FileSource(String cachePath) {
-    TileServerOptions options = Maplibre.getTileServerOptions();
-    initialize(Maplibre.getApiKey(), cachePath, options);
+    TileServerOptions options = MapLibre.getTileServerOptions();
+    initialize(MapLibre.getApiKey(), cachePath, options);
   }
 
   @Keep

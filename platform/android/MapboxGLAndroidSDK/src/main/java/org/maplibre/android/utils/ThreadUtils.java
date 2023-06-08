@@ -21,7 +21,7 @@ public class ThreadUtils {
   /**
    * Initialises the thread utils, verifies debug state of the consuming app.
    *
-   * @param context Context hosting the Maplibre Maps SDK for Android
+   * @param context Context hosting the MapLibre Maps SDK for Android
    * @return this
    */
   public static ThreadUtils init(@NonNull Context context) {

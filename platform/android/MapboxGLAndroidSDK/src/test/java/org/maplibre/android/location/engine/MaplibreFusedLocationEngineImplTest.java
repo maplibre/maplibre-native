@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MaplibreFusedLocationEngineImplTest {
+public class MapLibreFusedLocationEngineImplTest {
   private static final double LATITUDE = 37.7749;
   private static final double LONGITUDE = 122.4194;
 
@@ -43,13 +43,13 @@ public class MaplibreFusedLocationEngineImplTest {
   private LocationManager locationManagerMock;
 
   private LocationEngine engine;
-  private MaplibreFusedLocationEngineImpl maplibreFusedLocationEngineImpl;
+  private MapLibreFusedLocationEngineImpl maplibreFusedLocationEngineImpl;
 
   @Before
   public void setUp() {
     Context context = mock(Context.class);
     when(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(locationManagerMock);
-    maplibreFusedLocationEngineImpl = new MaplibreFusedLocationEngineImpl(context);
+    maplibreFusedLocationEngineImpl = new MapLibreFusedLocationEngineImpl(context);
     engine = new LocationEngineProxy<>(maplibreFusedLocationEngineImpl);
   }
 

@@ -10,9 +10,9 @@ import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
-import org.maplibre.android.maps.MaplibreMap.InfoWindowAdapter
-import org.maplibre.android.maps.MaplibreMap.OnMapClickListener
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -23,7 +23,7 @@ import java.util.*
  * Test activity showcasing how to dynamically update InfoWindow when Using an MapboxMap.InfoWindowAdapter.
  */
 class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var marker: Marker? = null
     private val mapClickListener = OnMapClickListener { point ->
@@ -56,7 +56,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
         mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Streets"))
 
@@ -77,7 +77,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
         maplibreMap.animateCamera(CameraUpdateFactory.newLatLng(PARIS))
     }
 
-    private fun addMarker(maplibreMap: MaplibreMap): Marker {
+    private fun addMarker(maplibreMap: MapLibreMap): Marker {
         return maplibreMap.addMarker(
             MarkerOptions()
                 .position(PARIS)
@@ -91,7 +91,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
         )
     }
 
-    private fun addCustomInfoWindowAdapter(maplibreMap: MaplibreMap) {
+    private fun addCustomInfoWindowAdapter(maplibreMap: MapLibreMap) {
         val padding = resources.getDimension(R.dimen.attr_margin).toInt()
         maplibreMap.infoWindowAdapter = InfoWindowAdapter { marker: Marker ->
             val textView = TextView(this@DynamicInfoWindowAdapterActivity)

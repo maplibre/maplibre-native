@@ -12,7 +12,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 /**
  * Generic location engine interface wrapper for the location providers.
- * Default providers bundled with Maplibre location library:
+ * Default providers bundled with MapLibre location library:
  * Android location provider and Google Play Services fused location provider
  *
  * @since 1.0.0

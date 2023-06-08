@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MaplibreMapOptions
+import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.R
@@ -102,7 +102,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
         class MapPagerAdapter(private val context: Context, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
 
             override fun getItem(position: Int): androidx.fragment.app.Fragment {
-                val options = MaplibreMapOptions.createFromAttributes(context)
+                val options = MapLibreMapOptions.createFromAttributes(context)
                 options.textureMode(true)
                 options.doubleTapGesturesEnabled(false)
                 options.rotateGesturesEnabled(false)

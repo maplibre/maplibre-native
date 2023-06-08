@@ -162,7 +162,7 @@ void registerNatives(JavaVM* vm) {
     Logger::registerNative(env);
 
     // AssetManager
-    Maplibre::registerNative(env);
+    MapLibre::registerNative(env);
 
     // Util
     DefaultStyle::registerNative(env);

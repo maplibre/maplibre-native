@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import org.maplibre.android.BuildConfig;
-import org.maplibre.android.constants.MaplibreConstants;
+import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.http.HttpIdentifier;
 import org.maplibre.android.http.HttpLogger;
 import org.maplibre.android.http.HttpRequest;
@@ -66,12 +66,12 @@ public class HttpRequestImpl implements HttpRequest {
         return;
       }
 
-      final String host = httpUrl.host().toLowerCase(MaplibreConstants.MAPLIBRE_LOCALE);
+      final String host = httpUrl.host().toLowerCase(MapLibreConstants.MAPLIBRE_LOCALE);
       resourceUrl = HttpRequestUrl.buildResourceUrl(host, resourceUrl, httpUrl.querySize(), offlineUsage);
 
       final Request.Builder builder = new Request.Builder()
         .url(resourceUrl)
-        .tag(resourceUrl.toLowerCase(MaplibreConstants.MAPLIBRE_LOCALE))
+        .tag(resourceUrl.toLowerCase(MapLibreConstants.MAPLIBRE_LOCALE))
         .addHeader("User-Agent", userAgentString);
       if (etag.length() > 0) {
         builder.addHeader("If-None-Match", etag);

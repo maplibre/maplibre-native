@@ -12,7 +12,7 @@ import com.mapbox.geojson.Feature
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MaplibreMap
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
@@ -33,7 +33,7 @@ import java.util.Objects
  */
 class GeoJsonClusteringActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private var clusterSource: GeoJsonSource? = null
     private var clickOptionCounter = 0
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +45,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
         // noinspection ConstantConditions
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { map: MaplibreMap? ->
+            OnMapReadyCallback { map: MapLibreMap? ->
                 if (map != null) {
                     maplibreMap = map
                 }

@@ -22,7 +22,7 @@ class SupportMapFragmentActivity :
     OnMapViewReadyCallback,
     OnMapReadyCallback,
     OnDidFinishRenderingFrameListener {
-    private lateinit var maplibreMap: MaplibreMap
+    private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var initialCameraAnimation = true
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,8 +41,8 @@ class SupportMapFragmentActivity :
         mapFragment!!.getMapAsync(this)
     }
 
-    private fun createFragmentOptions(): MaplibreMapOptions {
-        val options = MaplibreMapOptions.createFromAttributes(this, null)
+    private fun createFragmentOptions(): MapLibreMapOptions {
+        val options = MapLibreMapOptions.createFromAttributes(this, null)
         options.scrollGesturesEnabled(false)
         options.zoomGesturesEnabled(false)
         options.tiltGesturesEnabled(false)
@@ -65,7 +65,7 @@ class SupportMapFragmentActivity :
         mapView.addOnDidFinishRenderingFrameListener(this)
     }
 
-    override fun onMapReady(map: MaplibreMap) {
+    override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
     }

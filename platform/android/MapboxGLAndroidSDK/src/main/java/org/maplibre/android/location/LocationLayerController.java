@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import com.mapbox.geojson.Feature;
 import org.maplibre.android.location.modes.RenderMode;
 import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MaplibreMap;
+import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.style.expressions.Expression;
 
@@ -39,7 +39,7 @@ final class LocationLayerController {
   @RenderMode.Mode
   private int renderMode;
 
-  private final MaplibreMap maplibreMap;
+  private final MapLibreMap maplibreMap;
   private final LayerBitmapProvider bitmapProvider;
   private LocationComponentOptions options;
   private final OnRenderModeChangedListener internalRenderModeChangedListener;
@@ -52,7 +52,7 @@ final class LocationLayerController {
 
   private LocationLayerRenderer locationLayerRenderer;
 
-  LocationLayerController(MaplibreMap maplibreMap, Style style,
+  LocationLayerController(MapLibreMap maplibreMap, Style style,
                           LayerSourceProvider layerSourceProvider,
                           LayerFeatureProvider featureProvider,
                           LayerBitmapProvider bitmapProvider,
@@ -258,32 +258,32 @@ final class LocationLayerController {
     return !features.isEmpty();
   }
 
-  private final MaplibreAnimator.AnimationsValueChangeListener<LatLng> latLngValueListener =
-    new MaplibreAnimator.AnimationsValueChangeListener<LatLng>() {
+  private final MapLibreAnimator.AnimationsValueChangeListener<LatLng> latLngValueListener =
+    new MapLibreAnimator.AnimationsValueChangeListener<LatLng>() {
       @Override
       public void onNewAnimationValue(LatLng value) {
         locationLayerRenderer.setLatLng(value);
       }
   };
 
-  private final MaplibreAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
-    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
+  private final MapLibreAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
+    new MapLibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setGpsBearing(value);
       }
   };
 
-  private final MaplibreAnimator.AnimationsValueChangeListener<Float> compassBearingValueListener =
-    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
+  private final MapLibreAnimator.AnimationsValueChangeListener<Float> compassBearingValueListener =
+    new MapLibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setCompassBearing(value);
       }
   };
 
-  private final MaplibreAnimator.AnimationsValueChangeListener<Float> accuracyValueListener =
-    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
+  private final MapLibreAnimator.AnimationsValueChangeListener<Float> accuracyValueListener =
+    new MapLibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         locationLayerRenderer.setAccuracyRadius(value);
@@ -293,8 +293,8 @@ final class LocationLayerController {
   /**
    * The listener that handles the updating of the pulsing circle's radius and opacity.
    */
-  private final MaplibreAnimator.AnimationsValueChangeListener<Float> pulsingCircleRadiusListener =
-    new MaplibreAnimator.AnimationsValueChangeListener<Float>() {
+  private final MapLibreAnimator.AnimationsValueChangeListener<Float> pulsingCircleRadiusListener =
+    new MapLibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float newPulseRadiusValue) {
         Float newPulseOpacityValue = null;
@@ -307,21 +307,21 @@ final class LocationLayerController {
 
   Set<AnimatorListenerHolder> getAnimationListeners() {
     Set<AnimatorListenerHolder> holders = new HashSet<>();
-    holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_LATLNG, latLngValueListener));
+    holders.add(new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_LAYER_LATLNG, latLngValueListener));
 
     if (renderMode == RenderMode.GPS) {
-      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_GPS_BEARING, gpsBearingValueListener));
+      holders.add(new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING, gpsBearingValueListener));
     } else if (renderMode == RenderMode.COMPASS) {
       holders.add(
-        new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING, compassBearingValueListener));
+        new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING, compassBearingValueListener));
     }
 
     if (renderMode == RenderMode.COMPASS || renderMode == RenderMode.NORMAL) {
-      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_LAYER_ACCURACY, accuracyValueListener));
+      holders.add(new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_LAYER_ACCURACY, accuracyValueListener));
     }
 
     if (options.pulseEnabled()) {
-      holders.add(new AnimatorListenerHolder(MaplibreAnimator.ANIMATOR_PULSING_CIRCLE,
+      holders.add(new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_PULSING_CIRCLE,
           pulsingCircleRadiusListener));
     }
     return holders;

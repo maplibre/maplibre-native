@@ -41,7 +41,7 @@ import static org.junit.Assert.assertTrue;
  * @deprecated remove this file when removing deprecated annotations
  */
 @Deprecated
-public class MaplibreMapTest extends EspressoTest {
+public class MapLibreMapTest extends EspressoTest {
 
   //
   // InfoWindow
@@ -50,7 +50,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testConcurrentInfoWindowEnabled() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       maplibreMap.setAllowConcurrentMultipleOpenInfoWindows(true);
       assertTrue("ConcurrentWindows should be true", maplibreMap.isAllowConcurrentMultipleOpenInfoWindows());
     }));
@@ -59,7 +59,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testConcurrentInfoWindowDisabled() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       maplibreMap.setAllowConcurrentMultipleOpenInfoWindows(false);
       assertFalse("ConcurrentWindows should be false", maplibreMap.isAllowConcurrentMultipleOpenInfoWindows());
     }));
@@ -68,8 +68,8 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testInfoWindowAdapter() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
-      MaplibreMap.InfoWindowAdapter infoWindowAdapter = marker -> null;
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
+      MapLibreMap.InfoWindowAdapter infoWindowAdapter = marker -> null;
       maplibreMap.setInfoWindowAdapter(infoWindowAdapter);
       assertEquals("InfoWindowAdpter should be the same", infoWindowAdapter, maplibreMap.getInfoWindowAdapter());
     }));
@@ -82,7 +82,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddMarker() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       Marker marker = maplibreMap.addMarker(markerOptions);
       assertTrue("Marker should be contained", maplibreMap.getMarkers().contains(marker));
@@ -97,7 +97,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddMarkers() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
       MarkerOptions markerOptions1 = new MarkerOptions().position(new LatLng()).title("a");
       MarkerOptions markerOptions2 = new MarkerOptions().position(new LatLng()).title("b");
@@ -113,7 +113,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddMarkersEmpty() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
       maplibreMap.addMarkers(markerList);
       assertEquals("Markers size should be 0", 0, maplibreMap.getMarkers().size());
@@ -123,7 +123,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddMarkersSingleMarker() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
       MarkerOptions markerOptions = new MarkerOptions().title("a").position(new LatLng());
       markerList.add(markerOptions);
@@ -136,7 +136,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddPolygon() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       PolygonOptions polygonOptions = new PolygonOptions().add(new LatLng());
       Polygon polygon = maplibreMap.addPolygon(polygonOptions);
       assertTrue("Polygon should be contained", maplibreMap.getPolygons().contains(polygon));
@@ -146,7 +146,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddEmptyPolygon() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       PolygonOptions polygonOptions = new PolygonOptions();
       Polygon polygon = maplibreMap.addPolygon(polygonOptions);
       assertTrue("Polygon should be ignored", !maplibreMap.getPolygons().contains(polygon));
@@ -156,7 +156,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddPolygons() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<PolygonOptions> polygonList = new ArrayList<>();
       PolygonOptions polygonOptions1 = new PolygonOptions().fillColor(Color.BLACK).add(new LatLng());
       PolygonOptions polygonOptions2 = new PolygonOptions().fillColor(Color.WHITE).add(new LatLng());
@@ -175,7 +175,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void addPolygonsEmpty() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       maplibreMap.addPolygons(new ArrayList<PolygonOptions>());
       assertEquals("Polygons size should be 0", 0, maplibreMap.getPolygons().size());
     }));
@@ -184,7 +184,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void addPolygonsSingle() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<PolygonOptions> polygonList = new ArrayList<>();
       PolygonOptions polygonOptions = new PolygonOptions().fillColor(Color.BLACK).add(new LatLng());
       polygonList.add(polygonOptions);
@@ -197,7 +197,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddPolyline() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       PolylineOptions polylineOptions = new PolylineOptions().add(new LatLng());
       Polyline polyline = maplibreMap.addPolyline(polylineOptions);
       assertTrue("Polyline should be contained", maplibreMap.getPolylines().contains(polyline));
@@ -207,7 +207,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddEmptyPolyline() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       PolylineOptions polylineOptions = new PolylineOptions();
       Polyline polyline = maplibreMap.addPolyline(polylineOptions);
       assertTrue("Polyline should be ignored", !maplibreMap.getPolylines().contains(polyline));
@@ -217,7 +217,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddPolylines() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<PolylineOptions> polylineList = new ArrayList<>();
       PolylineOptions polygonOptions1 = new PolylineOptions().color(Color.BLACK).add(new LatLng());
       PolylineOptions polygonOptions2 = new PolylineOptions().color(Color.WHITE).add(new LatLng());
@@ -238,7 +238,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddPolylinesEmpty() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       maplibreMap.addPolylines(new ArrayList<PolylineOptions>());
       assertEquals("Polygons size should be 0", 0, maplibreMap.getPolylines().size());
     }));
@@ -247,7 +247,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testAddPolylinesSingle() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<PolylineOptions> polylineList = new ArrayList<>();
       PolylineOptions polygonOptions = new PolylineOptions().color(Color.BLACK).add(new LatLng());
       polylineList.add(polygonOptions);
@@ -260,7 +260,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testRemoveMarker() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       Marker marker = maplibreMap.addMarker(markerOptions);
       maplibreMap.removeMarker(marker);
@@ -271,7 +271,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testRemovePolygon() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       PolygonOptions polygonOptions = new PolygonOptions();
       Polygon polygon = maplibreMap.addPolygon(polygonOptions);
       maplibreMap.removePolygon(polygon);
@@ -282,7 +282,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testRemovePolyline() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       PolylineOptions polylineOptions = new PolylineOptions();
       Polyline polyline = maplibreMap.addPolyline(polylineOptions);
       maplibreMap.removePolyline(polyline);
@@ -293,7 +293,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testRemoveAnnotation() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       Marker marker = maplibreMap.addMarker(markerOptions);
       maplibreMap.removeAnnotation(marker);
@@ -304,7 +304,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testRemoveAnnotationById() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       maplibreMap.addMarker(markerOptions);
       // id will always be 0 in unit tests
@@ -316,7 +316,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testRemoveAnnotations() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
       MarkerOptions markerOptions1 = new MarkerOptions().title("a").position(new LatLng());
       MarkerOptions markerOptions2 = new MarkerOptions().title("b").position(new LatLng());
@@ -331,7 +331,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testClear() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
       MarkerOptions markerOptions1 = new MarkerOptions().title("a").position(new LatLng());
       MarkerOptions markerOptions2 = new MarkerOptions().title("b").position(new LatLng());
@@ -346,7 +346,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testRemoveAnnotationsByList() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       List<BaseMarkerOptions> markerList = new ArrayList<>();
       MarkerOptions markerOptions1 = new MarkerOptions().title("a").position(new LatLng());
       MarkerOptions markerOptions2 = new MarkerOptions().title("b").position(new LatLng());
@@ -363,7 +363,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testGetAnnotationById() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       Marker initialMarker = maplibreMap.addMarker(markerOptions);
       Marker retrievedMarker = (Marker) maplibreMap.getAnnotation(0);
@@ -375,7 +375,7 @@ public class MaplibreMapTest extends EspressoTest {
   public void testGetAnnotations() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(
-      new MaplibreMapAction((uiController, view) ->
+      new MapLibreMapAction((uiController, view) ->
         assertNotNull("Annotations should be non null", maplibreMap.getAnnotations()))
     );
   }
@@ -384,7 +384,7 @@ public class MaplibreMapTest extends EspressoTest {
   public void testGetMarkers() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(
-      new MaplibreMapAction((uiController, view) ->
+      new MapLibreMapAction((uiController, view) ->
         assertNotNull("Markers should be non null", maplibreMap.getMarkers()))
     );
   }
@@ -392,7 +392,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testGetPolygons() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) ->
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) ->
       assertNotNull("Polygons should be non null", maplibreMap.getPolygons()))
     );
   }
@@ -400,7 +400,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testGetPolylines() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) ->
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) ->
       assertNotNull("Polylines should be non null", maplibreMap.getPolylines()))
     );
   }
@@ -408,7 +408,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testGetSelectedMarkers() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) ->
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) ->
       assertNotNull("Selected markers should be non null", maplibreMap.getSelectedMarkers()))
     );
   }
@@ -416,7 +416,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testSelectMarker() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       Marker marker = maplibreMap.addMarker(markerOptions);
       maplibreMap.selectMarker(marker);
@@ -427,7 +427,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testDeselectMarker() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       Marker marker = maplibreMap.addMarker(markerOptions);
       maplibreMap.selectMarker(marker);
@@ -439,7 +439,7 @@ public class MaplibreMapTest extends EspressoTest {
   @Test
   public void testDeselectMarkers() {
     validateTestSetup();
-    onView(withId(R.id.mapView)).perform(new MaplibreMapAction((uiController, view) -> {
+    onView(withId(R.id.mapView)).perform(new MapLibreMapAction((uiController, view) -> {
       MarkerOptions markerOptions = new MarkerOptions().position(new LatLng());
       Marker marker1 = maplibreMap.addMarker(markerOptions);
       Marker marker2 = maplibreMap.addMarker(markerOptions);
@@ -450,11 +450,11 @@ public class MaplibreMapTest extends EspressoTest {
     }));
   }
 
-  public class MaplibreMapAction implements ViewAction {
+  public class MapLibreMapAction implements ViewAction {
 
     private InvokeViewAction invokeViewAction;
 
-    MaplibreMapAction(InvokeViewAction invokeViewAction) {
+    MapLibreMapAction(InvokeViewAction invokeViewAction) {
       this.invokeViewAction = invokeViewAction;
     }
 
