@@ -116,7 +116,9 @@ public:
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
 
     /// Create a layer group implementation
-    virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) = 0;
+    virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
+                                                   std::size_t initialCapacity,
+                                                   std::string name) = 0;
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;

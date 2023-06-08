@@ -28,7 +28,7 @@ Code and build scripts belonging to platform SDKs are contained in the `platform
   - iOS SDK runs benchmark test through a separate app named `BenchmarkApp`.
   - Android SDK does not have benchmark test.
 - `bin` contains the code for tools like `mbgl-cache`, `mbgl-offline`, and `mbgl-render`.
-- `expression-test` contains tests for the expression feature in the map style (see more details about expression [here](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/).
+- `expression-test` contains tests for the expression feature in the map style (see more details about expression [here](https://maplibre.org/maplibre-style-spec/expressions/).
 - `metrics` contains test manifest files and ground truth for graphic comparison based render test.
 - `misc` contains protobuf for style, vector tile, and glyphs. It also icons and pictures used in documents.
 - `render-test` contains image diff based render tests. These tests verify if the rendering results match with expectations by capturing the rendering results and compare with the groundtruth images in the `metrics` directory.
@@ -77,7 +77,7 @@ See the relevant platform-specific `README.md` / `INSTALL.md` for details.
 ## Map
 ## Style
 
-The "Style" component of MapLibre Native contains an implementation of the [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/), defining what data to draw, the order to draw it in, and how to style the data when drawing it.
+The "Style" component of MapLibre Native contains an implementation of the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/), defining what data to draw, the order to draw it in, and how to style the data when drawing it.
 
 In addition to supporting styles loaded from a URL, MapLibre Native includes a runtime styling API, which allows users to dynamically modify the current style: add and remove layers, modify layer properties, and so on. As appropriate for a C++ API, the runtime styling API API is _strongly typed_: there are subclasses for each layer type, with correctly-typed accessors for each style property. This results in a large API surface area. Fortunately, this is automated, by generating the API – and the regular portion of the implementation – from the style specification.
 
@@ -92,7 +92,7 @@ For each subclass of `Layer` or source, there's a corresponding `Impl` subclass.
 
 The `Layer::Impl` and `Source::Impl` reference held by `Layer` and `Source` base classes is _immutable_: it's a shared reference to a `const` (read only) pointer. Immutability permits the `Impl` objects to be shared safely between threads when needed -- for example, between the main thread and worker thread that performs computation in the background, or between the main thread and a dedicated renderer thread. See the "Threading" section below for further details on the threading model.
 
-Immutability is an alternative to several other strategies for safe intra-thread communication. One alternative strategy is to insert locks whenever data is shared between threads and at least one thread may be modifying the data. This strategy is prone to problems such as race conditions (if you forget to use a lock), deadlocks (if locks are acquired in conflicting orders), and poor performance due to lock contention. Another strategy is to copy data whenever it's needed by another thread. For complex structures such as a Mapbox Style, copying can be an expensive operation. With immutability, the approach is to share data without copying, but ensure that any data so shared cannot be modified by any thread, and that the data is not destroyed until the last thread using it relinquishes its reference.
+Immutability is an alternative to several other strategies for safe intra-thread communication. One alternative strategy is to insert locks whenever data is shared between threads and at least one thread may be modifying the data. This strategy is prone to problems such as race conditions (if you forget to use a lock), deadlocks (if locks are acquired in conflicting orders), and poor performance due to lock contention. Another strategy is to copy data whenever it's needed by another thread. For complex structures such as a MapLibre Style, copying can be an expensive operation. With immutability, the approach is to share data without copying, but ensure that any data so shared cannot be modified by any thread, and that the data is not destroyed until the last thread using it relinquishes its reference.
 
 Immutability is implemented by the `Immutable<T>` template, which acts as a non-nullable shared reference to a `const T`. It has behavior similar to `std::shared_ptr<const T>`, but indicates its intent as an immutable reference that is safe to share between threads.
 

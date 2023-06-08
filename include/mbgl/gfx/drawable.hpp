@@ -108,6 +108,10 @@ public:
     bool getEnabled() const { return enabled; }
     void setEnabled(bool value) { enabled = value; }
 
+    /// Whether to do stenciling (based on the Tile ID)
+    bool getNeedsStencil() const { return needsStencil; }
+    void setNeedsStencil(bool value) { needsStencil = value; }
+
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
@@ -155,6 +159,7 @@ public:
 
 protected:
     bool enabled = true;
+    bool needsStencil = false;
     std::string name;
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;

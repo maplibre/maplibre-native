@@ -5,7 +5,7 @@ import androidx.annotation.Keep;
 /**
  * Resembles transition property from the style specification.
  *
- * @see <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#transition">Transition documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/transition/">Transition documentation</a>
  */
 public class TransitionOptions {
 

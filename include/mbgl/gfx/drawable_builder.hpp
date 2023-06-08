@@ -84,6 +84,10 @@ public:
     float getLineWidth() const { return lineWidth; }
     void setLineWidth(float value) { lineWidth = value; }
 
+    /// Whether to do stenciling (based on the Tile ID)
+    bool getNeedsStencil() const { return needsStencil; }
+    void setNeedsStencil(bool value) { needsStencil = value; }
+
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
 
@@ -156,6 +160,7 @@ protected:
     std::string vertexAttrName;
     std::string colorAttrName;
     mbgl::RenderPass renderPass;
+    bool needsStencil = false;
     float lineWidth = 1.0f;
     DrawPriority drawPriority = 0;
     int32_t subLayerIndex = 0;

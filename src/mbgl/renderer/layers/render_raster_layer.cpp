@@ -235,7 +235,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }
@@ -259,8 +259,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     if (imageData && !imageData->bucket->needsUpload()) {
         // TODO: implement arbitrary image
-        RasterBucket& bucket = *imageData->bucket;
-        assert(bucket.texture);
+        // RasterBucket& bucket = *imageData->bucket;
+        assert(imageData->bucket->texture);
 
         //        size_t i = 0;
         for (const auto& matrix_ : imageData->matrices) {
