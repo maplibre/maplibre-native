@@ -1,0 +1,150 @@
+#pragma once
+
+#include <mbgl/gfx/shader.hpp>
+
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <unordered_map>
+
+namespace mbgl {
+namespace gfx {
+
+class Context;
+
+/// @brief A ShaderGroup contains a collection of gfx::Shader.
+/// Using the group, shaders may be dynamically registered or replaced
+/// at runtime.
+class ShaderGroup {
+public:
+    ShaderGroup() = default;
+    ShaderGroup(const ShaderGroup&) = delete;
+    ShaderGroup(ShaderGroup&&) noexcept = delete;
+    ShaderGroup& operator=(const ShaderGroup&) = delete;
+    ShaderGroup& operator=(ShaderGroup&&) noexcept = delete;
+    virtual ~ShaderGroup() = default;
+    
+    /// @brief Checks if a shader exists in the group for the given name.
+    /// @param shaderName Name of shader
+    /// @return If a shader is found, true
+    [[nodiscard]] virtual bool isShader(const std::string& shaderName) const noexcept;
+
+    /// @brief Get a shader from the group by name.
+    /// @param shaderName Name of shader
+    /// @return A `gfx::Shader` or `nullptr` if no shader is found with the
+    /// given name
+    [[nodiscard]] virtual const std::shared_ptr<gfx::Shader> getShader(const std::string& shaderName) const noexcept;
+
+    /// @brief Replace a matching shader in the group with the provided
+    /// instance. Shader type-names must match.
+    /// @param shader A `gfx::Shader`. The ShaderGroup will take ownership.
+    /// @return True if a match was found and the shader was replaced, false
+    /// otherwise.
+    [[nodiscard]] virtual bool replaceShader(std::shared_ptr<Shader>&& shader) noexcept;
+
+    /// @brief Replace a matching shader in the group with the provided
+    /// instance. Shader type-names must match.
+    /// This variant replaces by explicit name.
+    /// @param shader A `gfx::Shader`. The ShaderGroup will take ownership.
+    /// @param shaderName Unique name to register the shader under.
+    /// @return True if a match was found and the shader was replaced, false
+    /// otherwise.
+    [[nodiscard]] virtual bool replaceShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept;
+
+    /// @brief Register a new shader with the group. If a shader is present
+    /// in the group with a conflicting name, registration will fail.
+    /// @param shader A `gfx::Shader` to register. The ShaderGroup will
+    /// take ownership.
+    /// @return True if the shader was registered, false if another shader is
+    /// already present with a conflicting name.
+    [[nodiscard]] virtual bool registerShader(std::shared_ptr<Shader>&& shader) noexcept;
+
+    /// @brief Register a new shader with the group. If a shader is present
+    /// in the group with a conflicting name, registration will fail.
+    /// This variant registers using an explicit name.
+    /// @param shader A `gfx::Shader` to register. The ShaderGroup will
+    /// take ownership.
+    /// @param shaderName Unique name to register the shader under.
+    /// @return True if the shader was registered, false if another shader is
+    /// already present with a conflicting name.
+    [[nodiscard]] virtual bool registerShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept;
+
+    /// @brief Shorthand helper to quickly get a derived type from the group.
+    /// @tparam T Derived type, inheriting `gfx::Shader`
+    /// @param shaderName The group name to look up
+    /// @return T or nullptr if not found in the group
+    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
+    std::shared_ptr<T> get(const std::string& shaderName) noexcept {
+        auto shader = getShader(shaderName);
+        if (!shader || shader->typeName() != T::Name) {
+            return nullptr;
+        }
+        return std::static_pointer_cast<T>(shader);
+    }
+
+    /// @brief Shorthand helper to quickly get a derived type from the group.
+    /// This variant looks up shaders only by type name.
+    /// @tparam T Derived type, inheriting `gfx::Shader`
+    /// @return T or nullptr if not found in the group
+    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
+    std::shared_ptr<T> get() noexcept {
+        auto shader = getShader(std::string(T::Name));
+        if (!shader || shader->typeName() != T::Name) {
+            return nullptr;
+        }
+        return std::static_pointer_cast<T>(shader);
+    }
+
+    /// @brief Ensure the destination 'to' is populated with the requested
+    /// shader. If already non-null, does nothing.
+    /// @tparam T Derived type, inheriting `gfx::Shader`
+    /// @param to Location to store the shader
+    /// @param shaderName The group name to look up
+    /// @return True if 'to' has a valid program object, false otherwise.
+    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
+    bool populate(std::shared_ptr<T>& to, const std::string& shaderName) noexcept {
+        if (to) {
+            return true;
+        }
+
+        auto shader = getShader(shaderName);
+        if (!shader || shader->typeName() != T::Name) {
+            return false;
+        }
+        to = std::static_pointer_cast<T>(shader);
+        return true;
+    }
+
+    /// @brief Ensure the destination 'to' is populated with the requested
+    /// shader. If already non-null, does nothing. This variant looks up
+    /// shaders only by type name.
+    /// @tparam T Derived type, inheriting `gfx::Shader`
+    /// @param to Location to store the shader
+    /// @return True if 'to' has a valid program object, false otherwise.
+    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
+    bool populate(std::shared_ptr<T>& to) noexcept {
+        if (to) {
+            return true;
+        }
+
+        auto shader = getShader(std::string(T::Name));
+        if (!shader || shader->typeName() != T::Name) {
+            return false;
+        }
+        to = std::static_pointer_cast<T>(shader);
+        return true;
+    }
+    
+    /// @brief Get a shader from the group by its set of data driven properties as uniforms.
+    /// if no shader is found, create and register the shader.
+    /// @param propertiesAsUniforms Vector of data driven properties as uniforms.
+    /// @return A `gfx::Shader`
+    virtual const std::shared_ptr<gfx::Shader> getOrCreateShader(gfx::Context&, const std::vector<std::string>&) { return nullptr; }
+
+private:
+    std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
+    mutable std::shared_mutex programLock;
+};
+
+} // namespace gfx
+} // namespace mbgl

@@ -82,7 +82,7 @@ class StubShaderConsumer {
 public:
     template <typename T>
     uint32_t useShader(gfx::ShaderRegistry& registry) {
-        auto program = registry.get<T>();
+        auto program = registry.getLegacyGroup().get<T>();
         return program ? program->draw() : 0;
     }
 };
@@ -94,17 +94,17 @@ TEST(ShaderRegistry, RegisterShader) {
     gfx::ShaderRegistry registry;
 
     // The registry should start empty
-    ASSERT_FALSE(registry.isShader(std::string{StubProgram_1::Name}));
+    ASSERT_FALSE(registry.getLegacyGroup().isShader(std::string{StubProgram_1::Name}));
 
     // Register the program
     auto program = std::make_shared<StubProgram_1>();
-    ASSERT_TRUE(registry.registerShader(program));
+    ASSERT_TRUE(registry.getLegacyGroup().registerShader(program));
     // We can't re-register the same program name
-    ASSERT_FALSE(registry.registerShader(program));
+    ASSERT_FALSE(registry.getLegacyGroup().registerShader(program));
     // Ensure the shader is present in the registry now
-    ASSERT_TRUE(registry.isShader(std::string{StubProgram_1::Name}));
+    ASSERT_TRUE(registry.getLegacyGroup().isShader(std::string{StubProgram_1::Name}));
     // And we can fetch it
-    ASSERT_EQ(registry.get<StubProgram_1>(), program);
+    ASSERT_EQ(registry.getLegacyGroup().get<StubProgram_1>(), program);
 
     // Make sure downcasting to program1 works as expected
     StubShaderConsumer consumer;
@@ -115,13 +115,13 @@ TEST(ShaderRegistry, RegisterShader) {
 TEST(ShaderRegistry, ReplaceShaderType) {
     gfx::ShaderRegistry registry;
 
-    ASSERT_FALSE(registry.isShader(std::string{StubProgram_1::Name}));
+    ASSERT_FALSE(registry.getLegacyGroup().isShader(std::string{StubProgram_1::Name}));
 
     auto program = std::make_shared<StubProgram_1>();
-    ASSERT_TRUE(registry.registerShader(program));
+    ASSERT_TRUE(registry.getLegacyGroup().registerShader(program));
     // Ensure the shader is present in the registry now
-    ASSERT_TRUE(registry.isShader(std::string{StubProgram_1::Name}));
-    ASSERT_TRUE(registry.isShader(std::string{program->typeName()}));
+    ASSERT_TRUE(registry.getLegacyGroup().isShader(std::string{StubProgram_1::Name}));
+    ASSERT_TRUE(registry.getLegacyGroup().isShader(std::string{program->typeName()}));
 
     // Make sure downcasting to program1 works as expected
     StubShaderConsumer consumer;
@@ -131,13 +131,13 @@ TEST(ShaderRegistry, ReplaceShaderType) {
     // and as such this replacement should fail as StubProgram_2
     // has never been registered.
     auto program2 = std::make_shared<StubProgram_2>();
-    ASSERT_FALSE(registry.replaceShader(program2));
+    ASSERT_FALSE(registry.getLegacyGroup().replaceShader(program2));
 
     // Make a second instance of program1 and change the token
     auto program3 = std::make_shared<StubProgram_1>();
     program3->setToken(30);
     // Replace it in the registry
-    ASSERT_TRUE(registry.replaceShader(program3));
+    ASSERT_TRUE(registry.getLegacyGroup().replaceShader(program3));
     // Assert the new program downcasts from the registry as expected
     ASSERT_EQ(consumer.useShader<StubProgram_1>(registry), 30);
 }
@@ -156,28 +156,28 @@ TEST(ShaderRegistry, ShaderRTTI) {
 TEST(ShaderRegistry, MultiRegister) {
     gfx::ShaderRegistry registry;
 
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>()));
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(), "SecondProgram"));
+    ASSERT_TRUE(registry.getLegacyGroup().registerShader(std::make_shared<StubProgram_1>()));
+    ASSERT_TRUE(registry.getLegacyGroup().registerShader(std::make_shared<StubProgram_1>(), "SecondProgram"));
 
     // Default option, register as the type name
-    ASSERT_NE(registry.get<StubProgram_1>(), nullptr);
+    ASSERT_NE(registry.getLegacyGroup().get<StubProgram_1>(), nullptr);
     // Register with an explicit name
-    ASSERT_NE(registry.get<StubProgram_1>("SecondProgram"), nullptr);
-    ASSERT_NE(registry.get<StubProgram_1>(), registry.get<StubProgram_1>("SecondProgram"));
+    ASSERT_NE(registry.getLegacyGroup().get<StubProgram_1>("SecondProgram"), nullptr);
+    ASSERT_NE(registry.getLegacyGroup().get<StubProgram_1>(), registry.getLegacyGroup().get<StubProgram_1>("SecondProgram"));
 }
 
 // Test fetching
 TEST(ShaderRegistry, RegistryFetch) {
     gfx::ShaderRegistry registry;
 
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>()));
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(), "SecondProgram"));
+    ASSERT_TRUE(registry.getLegacyGroup().registerShader(std::make_shared<StubProgram_1>()));
+    ASSERT_TRUE(registry.getLegacyGroup().registerShader(std::make_shared<StubProgram_1>(), "SecondProgram"));
 
     std::shared_ptr<StubProgram_1> progA;
     std::shared_ptr<StubProgram_1> progB;
 
-    ASSERT_TRUE(registry.populate(progA));
-    ASSERT_TRUE(registry.populate(progB, "SecondProgram"));
+    ASSERT_TRUE(registry.getLegacyGroup().populate(progA));
+    ASSERT_TRUE(registry.getLegacyGroup().populate(progB, "SecondProgram"));
     ASSERT_NE(progA, progB);
     ASSERT_NE(progA, nullptr);
     ASSERT_NE(progB, nullptr);
@@ -188,17 +188,17 @@ TEST(ShaderRegistry, NamedReplace) {
     gfx::ShaderRegistry registry;
 
     // Register
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(), "CustomName"));
+    ASSERT_TRUE(registry.getLegacyGroup().registerShader(std::make_shared<StubProgram_1>(), "CustomName"));
 
     std::shared_ptr<StubProgram_1> progA;
-    ASSERT_TRUE(registry.populate(progA, "CustomName"));
+    ASSERT_TRUE(registry.getLegacyGroup().populate(progA, "CustomName"));
     ASSERT_NE(progA, nullptr);
 
     // Replace it with a new instance
-    ASSERT_TRUE(registry.replaceShader(std::make_shared<StubProgram_1>(), "CustomName"));
+    ASSERT_TRUE(registry.getLegacyGroup().replaceShader(std::make_shared<StubProgram_1>(), "CustomName"));
 
     std::shared_ptr<StubProgram_1> progB;
-    ASSERT_TRUE(registry.populate(progB, "CustomName"));
+    ASSERT_TRUE(registry.getLegacyGroup().populate(progB, "CustomName"));
     ASSERT_NE(progB, nullptr);
 
     // Should be different instances
@@ -213,7 +213,7 @@ TEST(ShaderRegistry, GLSLReplacement_NoOp) {
 
     // Just replace with a default instance
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.replaceShader(std::make_shared<FillProgram>(ProgramParameters(1.0f, false)))) {
+        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(ProgramParameters(1.0f, false)))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };
@@ -239,7 +239,7 @@ TEST(ShaderRegistry, GLSLReplacement1) {
 
     // Replace with an instance that only renders blue
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.replaceShader(std::make_shared<FillProgram>(
+        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(
                 ProgramParameters(1.0f, false)
                     .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
                                                                        "",
@@ -273,7 +273,7 @@ TEST(ShaderRegistry, GLSLReplacement2) {
 
     // Replace with an instance that adds some red and green
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.replaceShader(std::make_shared<FillProgram>(
+        if (!registry.getLegacyGroup().replaceShader(std::make_shared<FillProgram>(
                 ProgramParameters(1.0f, false)
                     .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
                                                                        "",

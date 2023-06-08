@@ -4,7 +4,7 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/extension.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mbgl/shaders/gl/shader_group_gl.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <cassert>
@@ -69,10 +69,9 @@ RendererBackend::~RendererBackend() = default;
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
 /// @param registry A shader registry instance
-/// @param glContext The GL context instance
 /// @param programParameters ProgramParameters used to initialize each instance
 template <shaders::BuiltIn... ShaderID>
-void registerTypes(gfx::ShaderRegistry& registry, gl::Context& glContext, const ProgramParameters& programParameters) {
+void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& programParameters) {
     /// The following fold expression will create a shader for every type
     /// in the parameter pack and register it with the shader registry.
 
@@ -80,16 +79,14 @@ void registerTypes(gfx::ShaderRegistry& registry, gl::Context& glContext, const 
     /// failure, we shouldn't expect registration to faill unless the shader
     /// registry instance provided already has conflicting programs present.
     (
-        [&](const std::string& name, const std::string& vert, const std::string& frag) {
+        [&]() {
             using Ty = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>;
-            if (!registry.registerShader(gl::ShaderProgramGL::create(glContext, programParameters, name, vert, frag),
-                                         name)) {
+            if (!registry.registerShaderGroup(std::make_shared<ShaderGroupGL<ShaderID>>(programParameters), Ty::name)) {
                 throw std::runtime_error("Failed to register " + std::string(Ty::name) + " with shader registry!");
             }
-        }(shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name,
-          shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex,
-          shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::fragment),
-        ...);
+        }(),
+        ...
+     );
 }
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
@@ -100,7 +97,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillOutlineShader,
                   shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillPatternShader,
-                  shaders::BuiltIn::RasterShader>(shaders, static_cast<gl::Context&>(*context), programParameters);
+                  shaders::BuiltIn::RasterShader>(shaders, programParameters);
 }
 
 } // namespace gl

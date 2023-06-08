@@ -121,7 +121,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 
     tileClippingMaskIDs.clear();
 
-    auto program = staticData.shaders->get<ClippingMaskProgram>();
+    auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
     if (!program) {
         return;
     }

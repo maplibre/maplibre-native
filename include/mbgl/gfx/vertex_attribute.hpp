@@ -218,6 +218,33 @@ public:
         newAttrs->copy(*this);
         return newAttrs;
     }
+    
+    template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
+    std::vector<std::string> readDataDrivenPaintProperties(const Binders& binders, const Evaluated& evaluated) {
+        int index = 0;
+        std::vector<std::string> attributesAsUniforms(sizeof...(DataDrivenPaintProperty));
+        (
+            [&](const std::string& attributeName) {
+                if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
+                    const auto vertexCount = binder->getVertexCount();
+                    const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
+                    if (vertexCount > 0 && !isConstant) {
+                        if (auto& attr = getOrAdd("a_" + attributeName)) {
+                            for (std::size_t i = 0; i < vertexCount; ++i) {
+                                const auto& value = std::get<0>(binder->getVertexValue(i)).a1;
+                                attr->set(i, value);
+                            }
+                        }
+                    } else {
+                        attributesAsUniforms[index] = attributeName;
+                    }
+                }
+                index++;
+            }(DataDrivenPaintProperty::Attribute::name()),
+            ...
+        );
+        return attributesAsUniforms;
+    }
 
 protected:
     const std::unique_ptr<VertexAttribute>& add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {

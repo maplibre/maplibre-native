@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/shader.hpp>
+#include <mbgl/gfx/shader_group.hpp>
 
 #include <memory>
 #include <mutex>
@@ -10,8 +10,10 @@
 namespace mbgl {
 namespace gfx {
 
-/// @brief A ShaderRegistry contains a collection of gfx::Shader instances.
-/// Using the registry, shaders may be dynamically registered or replaced
+using ShaderGroupPtr = std::shared_ptr<gfx::ShaderGroup>;
+
+/// @brief A ShaderRegistry contains a collection of gfx::ShaderGroup instances.
+/// Using the registry, shader groups may be dynamically registered or replaced
 /// at runtime.
 class ShaderRegistry {
 public:
@@ -22,120 +24,43 @@ public:
     ShaderRegistry& operator=(ShaderRegistry&&) noexcept = delete;
     virtual ~ShaderRegistry() = default;
 
-    /// @brief Checks if a shader exists in the registry for the given name.
-    /// @param shaderName Name of shader
-    /// @return If a shader is found, true
-    [[nodiscard]] virtual bool isShader(const std::string& shaderName) const noexcept;
+    /// @brief Get the legacy shader group.
+    /// @return A `gfx::ShaderGroup`
+    [[nodiscard]] ShaderGroup& getLegacyGroup() noexcept;
+    
+    /// @brief Checks if a shader group exists in the registry for the given name.
+    /// @param shaderGroupName Name of shader group
+    /// @return If a shader group is found, true
+    [[nodiscard]] virtual bool isShaderGroup(const std::string& shaderGroupName) const noexcept;
 
-    /// @brief Get a shader from the registry by name.
-    /// @param shaderName Name of shader
-    /// @return A `gfx::Shader` or `nullptr` if no shader is found with the
+    /// @brief Get a shader group from the registry by name.
+    /// @param shaderGroupName Name of shader group
+    /// @return A `gfx::ShaderGroup` or `nullptr` if no shader group is found with the
     /// given name
-    [[nodiscard]] virtual const std::shared_ptr<gfx::Shader> getShader(const std::string& shaderName) const noexcept;
+    [[nodiscard]] virtual const ShaderGroupPtr getShaderGroup(const std::string& shaderGroupName) const noexcept;
 
-    /// @brief Replace a matching shader in the registry with the provided
-    /// instance. Shader type-names must match.
-    /// @param shader A `gfx::Shader`. The ShaderRegistry will take ownership.
-    /// @return True if a match was found and the shader was replaced, false
+    /// @brief Replace a matching shader group in the registry with the provided
+    /// name.
+    /// @param shaderGroup A `gfx::ShaderGroup`. The ShaderRegistry will take ownership.
+    /// @param shaderGroupName Unique name to register the shader group under.
+    /// @return True if a match was found and the shader group was replaced, false
     /// otherwise.
-    [[nodiscard]] virtual bool replaceShader(std::shared_ptr<Shader>&& shader) noexcept;
+    [[nodiscard]] virtual bool replaceShader(ShaderGroupPtr&& shaderGroup, const std::string& shaderName) noexcept;
 
-    /// @brief Replace a matching shader in the registry with the provided
-    /// instance. Shader type-names must match.
-    /// This variant replaces by explicit name.
-    /// @param shader A `gfx::Shader`. The ShaderRegistry will take ownership.
-    /// @param shaderName Unique name to register the shader under.
-    /// @return True if a match was found and the shader was replaced, false
-    /// otherwise.
-    [[nodiscard]] virtual bool replaceShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept;
-
-    /// @brief Register a new shader with the registry. If a shader is present
-    /// in the registry with a conflicting name, registration will fail.
-    /// @param shader A `gfx::Shader` to register. The ShaderRegistry will
+    /// @brief Register a new shader group with the registry for the given name.
+    /// If a shader group is present in the registry with a conflicting name,
+    /// registration will fail.
+    /// @param shaderGroup A `gfx::ShaderGroup` to register. The ShaderRegistry will
     /// take ownership.
-    /// @return True if the shader was registered, false if another shader is
+    /// @param shaderGroupName Unique name to register the shader group under.
+    /// @return True if the shader group was registered, false if another shader group is
     /// already present with a conflicting name.
-    [[nodiscard]] virtual bool registerShader(std::shared_ptr<Shader>&& shader) noexcept;
-
-    /// @brief Register a new shader with the registry. If a shader is present
-    /// in the registry with a conflicting name, registration will fail.
-    /// This variant registers using an explicit name.
-    /// @param shader A `gfx::Shader` to register. The ShaderRegistry will
-    /// take ownership.
-    /// @param shaderName Unique name to register the shader under.
-    /// @return True if the shader was registered, false if another shader is
-    /// already present with a conflicting name.
-    [[nodiscard]] virtual bool registerShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept;
-
-    /// @brief Shorthand helper to quickly get a derived type from the registry.
-    /// @tparam T Derived type, inheriting `gfx::Shader`
-    /// @param shaderName The registry name to look up
-    /// @return T or nullptr if not found in the registry
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    std::shared_ptr<T> get(const std::string& shaderName) noexcept {
-        auto shader = getShader(shaderName);
-        if (!shader || shader->typeName() != T::Name) {
-            return nullptr;
-        }
-        return std::static_pointer_cast<T>(shader);
-    }
-
-    /// @brief Shorthand helper to quickly get a derived type from the registry.
-    /// This variant looks up shaders only by type name.
-    /// @tparam T Derived type, inheriting `gfx::Shader`
-    /// @return T or nullptr if not found in the registry
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    std::shared_ptr<T> get() noexcept {
-        auto shader = getShader(std::string(T::Name));
-        if (!shader || shader->typeName() != T::Name) {
-            return nullptr;
-        }
-        return std::static_pointer_cast<T>(shader);
-    }
-
-    /// @brief Ensure the destination 'to' is populated with the requested
-    /// shader. If already non-null, does nothing.
-    /// @tparam T Derived type, inheriting `gfx::Shader`
-    /// @param to Location to store the shader
-    /// @param shaderName The registry name to look up
-    /// @return True if 'to' has a valid program object, false otherwise.
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    bool populate(std::shared_ptr<T>& to, const std::string& shaderName) noexcept {
-        if (to) {
-            return true;
-        }
-
-        auto shader = getShader(shaderName);
-        if (!shader || shader->typeName() != T::Name) {
-            return false;
-        }
-        to = std::static_pointer_cast<T>(shader);
-        return true;
-    }
-
-    /// @brief Ensure the destination 'to' is populated with the requested
-    /// shader. If already non-null, does nothing. This variant looks up
-    /// shaders only by type name.
-    /// @tparam T Derived type, inheriting `gfx::Shader`
-    /// @param to Location to store the shader
-    /// @return True if 'to' has a valid program object, false otherwise.
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    bool populate(std::shared_ptr<T>& to) noexcept {
-        if (to) {
-            return true;
-        }
-
-        auto shader = getShader(std::string(T::Name));
-        if (!shader || shader->typeName() != T::Name) {
-            return false;
-        }
-        to = std::static_pointer_cast<T>(shader);
-        return true;
-    }
+    [[nodiscard]] virtual bool registerShaderGroup(ShaderGroupPtr&& shaderGroup, const std::string& shaderGroupName) noexcept;
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
-    mutable std::shared_mutex programLock;
+    gfx::ShaderGroup legacyGroup;
+    std::unordered_map<std::string, ShaderGroupPtr> shaderGroups;
+    mutable std::shared_mutex shaderGroupLock;
 };
 
 } // namespace gfx
