@@ -253,7 +253,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     // TODO: apply filter to texture
     (void)filter;
 
-    auto buildDrawables = [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
+    auto buildTileDrawables = [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
@@ -353,41 +353,95 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
         return builder;
     };
+    (void)buildTileDrawables;
 
+    auto buildImageDrawables = [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
+        std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
+        builder->setShader(rasterShader);
+        builder->setRenderPass(renderPass);
+        builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
+        builder->setSubLayerIndex(0);
+        builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                 : gfx::DepthMaskType::ReadOnly);
+        builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+        builder->setVertexAttrName("a_pos");
+
+        std::vector<std::array<int16_t, 2>> vertices(bucket.vertices.vector().size());
+        std::transform(bucket.vertices.vector().begin(), bucket.vertices.vector().end(), vertices.begin(), [](const auto& x) { return x.a1; });
+        builder->addVertices(vertices, 0, vertices.size());
+
+        builder->setSegments(gfx::Triangles(), bucket.indices.vector(), reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
+
+        // attributes
+        {
+            gfx::VertexAttributeArray vertexAttrs;
+            if (auto& attr = vertexAttrs.getOrAdd("a_texture_pos")) {
+                std::size_t index{0};
+                for (auto& v : bucket.vertices.vector()) {
+                    attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
+                }
+            }
+            builder->setVertexAttributes(std::move(vertexAttrs));
+        }
+
+        // textures
+        std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
+        tex0->setImage(bucket.image);
+        auto location0 = rasterShader->getSamplerLocation("u_image0");
+        if (location0.has_value()) {
+            builder->setTexture(tex0, location0.value());
+        }
+        std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
+        tex1->setImage(bucket.image);
+        auto location1 = rasterShader->getSamplerLocation("u_image1");
+        if (location1.has_value()) {
+            builder->setTexture(tex1, location1.value());
+        }
+
+        return builder;
+    };
+    
     if (imageData) {
         RasterBucket& bucket = *imageData->bucket;
-        for (const auto& matrix_ : imageData->matrices) {
-            auto builder = buildDrawables(bucket);
-
-            // Set up a layer scene
-            if (!imageLayerGroup) {
-                imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-                imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-                changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
+        if (!bucket.vertices.empty()) {
+            if (imageLayerGroup) {
+                imageLayerGroup->clearDrawables();
             }
-
-            // finish
-            builder->flush();
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
-                imageLayerGroup->addDrawable(std::move(drawable));
-                ++stats.tileDrawablesAdded;
+            for (const auto& matrix_ : imageData->matrices) {
+                auto builder = buildImageDrawables(bucket);
+                
+                // Set up a layer scene
+                if (!imageLayerGroup) {
+                    imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+                    imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+                    changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
+                }
+                
+                // finish
+                builder->flush();
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
+                    imageLayerGroup->addDrawable(std::move(drawable));
+                    ++stats.tileDrawablesAdded;
+                }
             }
         }
     } else if (renderTiles) {
-        tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
-            // Has this tile dropped out of the cover set?
-            if (const auto it = std::find_if(renderTiles->begin(),
-                                             renderTiles->end(),
-                                             [&drawable](const auto& renderTile) {
-                                                 return drawable->getTileID() == renderTile.get().getOverscaledTileID();
-                                             });
-                it == renderTiles->end()) {
-                // remove it
-                drawable.reset();
-                ++stats.tileDrawablesRemoved;
-            }
-        });
+        if (tileLayerGroup) {
+            tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+                // Has this tile dropped out of the cover set?
+                if (const auto it = std::find_if(renderTiles->begin(),
+                                                 renderTiles->end(),
+                                                 [&drawable](const auto& renderTile) {
+                    return drawable->getTileID() == renderTile.get().getOverscaledTileID();
+                });
+                    it == renderTiles->end()) {
+                    // remove it
+                    drawable.reset();
+                    ++stats.tileDrawablesRemoved;
+                }
+            });
+        }
 
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
@@ -397,9 +451,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
             if (!bucket.hasData()) continue;
-            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
+            
+            if (tileLayerGroup && tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
+            
             if (bucket.image) {
-                auto builder = buildDrawables(bucket);
+                auto builder = buildTileDrawables(bucket);
 
                 // Set up a layer group
                 if (!tileLayerGroup) {
