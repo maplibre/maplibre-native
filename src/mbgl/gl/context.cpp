@@ -475,6 +475,10 @@ TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t 
     return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name));
 }
 
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+}
+
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<gl::Texture2D>(*this);
 }

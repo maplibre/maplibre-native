@@ -10,12 +10,12 @@
 #include <vector>
 
 namespace mbgl {
-class LayerGroup;
+class LayerGroupBase;
 class PaintParameters;
 class RenderOrchestrator;
 class TileLayerGroup;
 
-using LayerGroupPtr = std::shared_ptr<LayerGroup>;
+using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 
 namespace gfx {
 class Context;
@@ -32,13 +32,15 @@ using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
 /**
     A layer-like group of drawables, not a group of layers.
  */
-class LayerGroup : public util::SimpleIdentifiable {
+class LayerGroupBase : public util::SimpleIdentifiable {
 protected:
-    LayerGroup(int32_t layerIndex, std::string name = std::string());
+    LayerGroupBase(int32_t layerIndex, std::string name = std::string());
 
 public:
-    LayerGroup(const LayerGroup&) = delete;
-    LayerGroup& operator=(const LayerGroup&) = delete;
+    LayerGroupBase(const LayerGroupBase&) = delete;
+    LayerGroupBase& operator=(const LayerGroupBase&) = delete;
+    virtual ~LayerGroupBase() = default;
+    
 
     /// Whether the drawables should be drawn
     bool getEnabled() const { return enabled; }
@@ -84,7 +86,7 @@ protected:
 /**
     A layer group for tile-based drawables.
  */
-class TileLayerGroup : public LayerGroup {
+class TileLayerGroup : public LayerGroupBase {
 public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~TileLayerGroup() override;
@@ -103,6 +105,33 @@ public:
 
     /// Call the provided function for each drawable for the given tile
     void observeDrawables(mbgl::RenderPass, const OverscaledTileID&, std::function<void(const gfx::Drawable&)>) const;
+
+    std::size_t clearDrawables();
+
+protected:
+    struct Impl;
+    std::unique_ptr<Impl> impl;
+};
+
+/**
+    A layer group for non-tile-based drawables.
+ */
+class LayerGroup : public LayerGroupBase {
+public:
+    LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    ~LayerGroup() override;
+
+    void updateLayerIndex(int32_t newLayerIndex);
+
+    std::size_t getDrawableCount() const override;
+    std::size_t getDrawableCount(mbgl::RenderPass) const;
+
+    std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass);
+    void addDrawable(gfx::UniqueDrawable&&);
+
+    void observeDrawables(std::function<void(gfx::Drawable&)>) override;
+    void observeDrawables(std::function<void(const gfx::Drawable&)>) const override;
+    void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) override;
 
     std::size_t clearDrawables();
 

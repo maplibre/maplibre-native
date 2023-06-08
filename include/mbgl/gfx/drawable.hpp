@@ -7,6 +7,7 @@
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gfx/drawable_data.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -157,6 +158,9 @@ public:
                 static_cast<float>(components[3])};
     }
 
+    virtual const std::optional<UniqueDrawableData>& getData() const { return drawableData; }
+    virtual void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
+
 protected:
     bool enabled = true;
     bool needsStencil = false;
@@ -169,6 +173,7 @@ protected:
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
+    std::optional<UniqueDrawableData> drawableData{};
 
     struct Impl;
     std::unique_ptr<Impl> impl;

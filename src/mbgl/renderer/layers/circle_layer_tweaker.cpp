@@ -52,7 +52,7 @@ struct alignas(16) CircleInterpolateUBO {
 };
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
-void CircleLayerTweaker::execute(LayerGroup& layerGroup,
+void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;

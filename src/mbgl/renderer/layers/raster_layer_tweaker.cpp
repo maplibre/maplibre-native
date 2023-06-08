@@ -7,6 +7,8 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/gfx/image_drawable_data.hpp>
+#include <mbgl/util/logging.hpp>
 
 namespace mbgl {
 
@@ -30,18 +32,12 @@ struct alignas(16) RasterDrawableUBO {
 static_assert(sizeof(RasterDrawableUBO) == 128);
 static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
 
-void RasterLayerTweaker::execute([[maybe_unused]] LayerGroup& layerGroup,
+void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const RenderTree& renderTree,
                                  [[maybe_unused]] const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID()) {
-            return;
-        }
-        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto matrix = parameters.matrixForTile(tileID, !parameters.state.isChanging());
-
         auto spinWeights = [](float spin) -> std::array<float, 4> {
             spin = util::deg2radf(spin);
             float s = std::sin(spin);
@@ -64,6 +60,23 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroup& layerGroup,
                 return 1 + contrast;
             }
         };
+
+        mat4 matrix;
+        if (!drawable.getTileID()) {
+            // this is an image drawable
+            if (const auto& data = drawable.getData()) {
+                const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data.value());
+                
+                matrix = imageData.matrix;
+            } else {
+                Log::Error(Event::General, "Invalid raster layer drawable: neither tile id nor image data is set.");
+                return;
+            }
+        } else {
+            // this is a tile drawable
+            const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+            matrix = parameters.matrixForTile(tileID, !parameters.state.isChanging());
+        }
 
         RasterDrawableUBO drawableUBO{/*.matrix = */ util::cast<float>(matrix),
                                       /*.spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),

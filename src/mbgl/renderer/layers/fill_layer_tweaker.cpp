@@ -53,7 +53,7 @@ auto concat(const std::array<T, N>& a1, const std::array<T, M>& a2) {
     return result;
 }
 
-void FillLayerTweaker::execute(LayerGroup& layerGroup,
+void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
                                const PaintParameters& parameters) {
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
