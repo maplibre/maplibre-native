@@ -354,9 +354,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    if (imageData && !imageData->bucket->needsUpload()) {
+    if (imageData) {
         RasterBucket& bucket = *imageData->bucket;
-        assert(bucket.texture);
         for (const auto& matrix_ : imageData->matrices) {
             auto builder = buildDrawables(bucket);
 
