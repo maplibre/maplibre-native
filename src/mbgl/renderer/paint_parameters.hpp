@@ -96,6 +96,7 @@ public:
 public:
     void renderTileClippingMasks(const RenderTiles&);
     void renderTileClippingMasks(const std::set<UnwrappedTileID>&);
+    void clearTileClippingMasks();
 
     gfx::StencilMode stencilModeForClipping(const UnwrappedTileID&) const;
     gfx::StencilMode stencilModeFor3D();
@@ -104,10 +105,9 @@ private:
     void clearStencil();
 
     template <typename TIter>
-    void renderTileClippingMasks(
-        TIter beg,
-        TIter end,
-        std::function<const UnwrappedTileID&(const typename std::iterator_traits<TIter>::value_type&)>&&);
+    using GetTileIDFunc = std::function<const UnwrappedTileID&(const typename TIter::value_type&)>;
+    template <typename TIter>
+    void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&&);
 
     // This needs to be an ordered map so that we have the same order as the renderTiles.
     std::map<UnwrappedTileID, int32_t> tileClippingMaskIDs;

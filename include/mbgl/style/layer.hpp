@@ -88,8 +88,8 @@ struct LayerTypeInfo {
 };
 
 /**
- * The runtime representation of a [layer](https://www.mapbox.com/mapbox-gl-style-spec/#layers)
- * from the Mapbox Style Specification.
+ * The runtime representation of a [layer](https://maplibre.org/maplibre-style-spec/#layers)
+ * from the MapLibre Style Spec.
  *
  * `Layer` is an abstract base class; concrete derived classes are provided for
  * each layer type. `Layer` contains functionality that is common to all layer types:

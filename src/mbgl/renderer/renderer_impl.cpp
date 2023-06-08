@@ -263,24 +263,30 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     // Composite (Opaque+Translucent) on bottom
     platform::glScissor(0, 0, halfW, halfH);
+    // Clipping masks were drawn only on the other side
+    parameters.clearTileClippingMasks();
     drawableTranslucentPass();
 
     // RenderLayers on the right
     // Opaque only on top
     platform::glScissor(halfW, 0, halfW, H);
+    parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
 
     // Composite (Opaque+Translucent) on bottom
     platform::glScissor(halfW, 0, halfW, halfH);
+    parameters.clearTileClippingMasks();
     renderLayerTranslucentPass();
 #else
     // Drawable LayerGroups on the left
     platform::glScissor(0, 0, halfW, H);
+    parameters.clearTileClippingMasks();
     drawableOpaquePass();
     drawableTranslucentPass();
 
     // RenderLayers on the right
     platform::glScissor(halfW, 0, W, H);
+    parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
 #endif
