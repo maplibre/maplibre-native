@@ -57,7 +57,7 @@ void MapWindow::changeStyle() {
     auto &styles = m_map->defaultStyles();
 
     m_map->setStyleUrl(styles[currentStyleIndex].first);
-    setWindowTitle(QString("MapLibre GL: ") + styles[currentStyleIndex].second);
+    setWindowTitle(QString("MapLibre Native: ") + styles[currentStyleIndex].second);
 
     if (++currentStyleIndex == styles.size()) {
         currentStyleIndex = 0;
@@ -456,7 +456,7 @@ void MapWindow::initializeGL() {
         changeStyle();
     } else {
         m_map->setStyleUrl(styleUrl);
-        setWindowTitle(QString("MapLibre GL: ") + styleUrl);
+        setWindowTitle(QString("MapLibre Native: ") + styleUrl);
     }
 
     m_bearingAnimation = new QPropertyAnimation(m_map.get(), "bearing");

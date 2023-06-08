@@ -20,6 +20,7 @@ enum class BuiltIn {
     LineShader,
     FillPatternShader,
     FillOutlinePatternShader,
+    RasterShader,
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,

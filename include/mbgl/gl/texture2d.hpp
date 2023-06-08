@@ -78,6 +78,7 @@ private:
     std::shared_ptr<PremultipliedImage> image{nullptr};
     Size size{0, 0};
     bool samplerStateDirty{false};
+    bool storageDirty{false};
 
     int32_t boundTextureUnit{-1};
     int32_t boundLocation{-1};

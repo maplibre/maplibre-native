@@ -103,7 +103,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::FillOutlinePatternShader,
-                  shaders::BuiltIn::FillPatternShader>(shaders, static_cast<gl::Context&>(*context), programParameters);
+                  shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::RasterShader>(shaders, static_cast<gl::Context&>(*context), programParameters);
 }
 
 } // namespace gl

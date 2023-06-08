@@ -41,10 +41,8 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     // force disable depth test for debugging
     // setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    if (tileID) {
-        // Doesn't work until the clipping masks are generated
-        // parameters.stencilModeForClipping(tileID->toUnwrapped());
-        context.setStencilMode(gfx::StencilMode::disabled());
+    if (needsStencil && tileID) {
+        context.setStencilMode(parameters.stencilModeForClipping(tileID->toUnwrapped()));
     } else {
         context.setStencilMode(gfx::StencilMode::disabled());
     }
@@ -56,18 +54,17 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     bindTextures();
 
     auto& glContext = static_cast<gl::Context&>(parameters.context);
-    const auto saveVertexArray = glContext.bindVertexArray.getCurrentValue();
 
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
         if (glSeg.getVertexArray().isValid()) {
             glContext.bindVertexArray = glSeg.getVertexArray().getID();
+            glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
-        glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
     }
 
-    glContext.bindVertexArray = saveVertexArray;
+    glContext.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
     unbindUniformBuffers();
@@ -180,6 +177,19 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
             glSeg.setVertexArray(std::move(vertexArray));
         };
+    }
+
+    const bool texturesNeedUpload = std::any_of(
+        textures.begin(), textures.end(), [](const auto& tex) { return tex.texture->needsUpload(); });
+
+    if (texturesNeedUpload) {
+        uploadTextures();
+    }
+}
+
+void DrawableGL::uploadTextures() const {
+    for (const auto& tex : textures) {
+        std::static_pointer_cast<gl::Texture2D>(tex.texture)->upload();
     }
 }
 

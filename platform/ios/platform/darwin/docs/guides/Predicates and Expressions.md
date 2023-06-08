@@ -352,7 +352,7 @@ NSExpression(format: "MLN_LET(floorCount, 2, $floorCount + 1)")
 
 ## Mapbox-specific functions
 
-For compatibility with the Mapbox Style Specification, the following functions
+For compatibility with the MapLibre Style Spec, the following functions
 are defined by this SDK. When setting a style layer property, you can call these
 functions just like the predefined functions above, using either the
 `+[NSExpression expressionForFunction:arguments:]` method or a convenient format
@@ -431,8 +431,8 @@ expression containing the strings to concatenate.
 Returns the arccosine of the number.
 
 This function corresponds to the
-[`acos`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-acos)
-operator in the Mapbox Style Specification.
+[`acos`](https://maplibre.org/maplibre-style-spec/expressions/#acos)
+operator in the MapLibre Style Spec.
 
 ### `mgl_asin:`
 
@@ -446,8 +446,8 @@ operator in the Mapbox Style Specification.
 Returns the arcsine of the number.
 
 This function corresponds to the
-[`asin`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-asin)
-operator in the Mapbox Style Specification.
+[`asin`](https://maplibre.org/maplibre-style-spec/expressions/#asin)
+operator in the MapLibre Style Spec.
 
 ### `mgl_atan:`
 
@@ -461,8 +461,8 @@ operator in the Mapbox Style Specification.
 Returns the arctangent of the number.
 
 This function corresponds to the
-[`atan`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-atan)
-operator in the Mapbox Style Specification.
+[`atan`](https://maplibre.org/maplibre-style-spec/expressions/#atan)
+operator in the MapLibre Style Spec.
 
 ### `mgl_cos:`
 
@@ -476,8 +476,8 @@ operator in the Mapbox Style Specification.
 Returns the cosine of the number.
 
 This function corresponds to the
-[`cos`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-cos)
-operator in the Mapbox Style Specification.
+[`cos`](https://maplibre.org/maplibre-style-spec/expressions/#cos)
+operator in the MapLibre Style Spec.
 
 ### `mgl_log2:`
 
@@ -491,8 +491,8 @@ operator in the Mapbox Style Specification.
 Returns the base-2 logarithm of the number.
 
 This function corresponds to the
-[`log2`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-log2)
-operator in the Mapbox Style Specification.
+[`log2`](https://maplibre.org/maplibre-style-spec/expressions/#log2)
+operator in the MapLibre Style Spec.
 
 ### `mgl_round:`
 
@@ -507,8 +507,8 @@ Returns the number rounded to the nearest integer. If the number is halfway
 between two integers, this function rounds it away from zero.
 
 This function corresponds to the
-[`round`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-round)
-operator in the Mapbox Style Specification.
+[`round`](https://maplibre.org/maplibre-style-spec/expressions/#round)
+operator in the MapLibre Style Spec.
 
 ### `mgl_sin:`
 
@@ -522,8 +522,8 @@ operator in the Mapbox Style Specification.
 Returns the sine of the number.
 
 This function corresponds to the
-[`sin`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-sin)
-operator in the Mapbox Style Specification.
+[`sin`](https://maplibre.org/maplibre-style-spec/expressions/#sin)
+operator in the MapLibre Style Spec.
 
 ### `mgl_tan:`
 
@@ -537,8 +537,8 @@ operator in the Mapbox Style Specification.
 Returns the tangent of the number.
 
 This function corresponds to the
-[`tan`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-tan)
-operator in the Mapbox Style Specification.
+[`tan`](https://maplibre.org/maplibre-style-spec/expressions/#tan)
+operator in the MapLibre Style Spec.
 
 ### `mgl_distanceFrom:`
 
@@ -553,7 +553,7 @@ Returns the straight-line distance from the evaluated object to the given shape.
 
 This function corresponds to the
 [`distance`](https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#distance)
-operator in the Mapbox Style Specification.
+operator in the MapLibre Style Spec.
 
 ### `mgl_coalesce:`
 
@@ -567,8 +567,8 @@ operator in the Mapbox Style Specification.
 Returns the first non-`nil` value from an array of expressions.
 
 This function corresponds to the
-[`coalesce`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-coalesce)
-operator in the Mapbox Style Specification.
+[`coalesce`](https://maplibre.org/maplibre-style-spec/expressions/#coalesce)
+operator in the MapLibre Style Spec.
 
 ### `mgl_attributed:`
 
@@ -591,8 +591,8 @@ with the `MLNSymbolStyleLayer.text` property.
  `MLNFontColorAttribute` | An `NSExpression` evaluating to an `UIColor` (iOS) or `NSColor` (macOS).
 
 This function corresponds to the
-[`format`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-format)
-operator in the Mapbox Style Specification.
+[`format`](https://maplibre.org/maplibre-style-spec/expressions/#types-format)
+operator in the MapLibre Style Spec.
 
 ### `MLN_LET`
 
@@ -640,8 +640,8 @@ values.
 This function corresponds to the
 `+[NSExpression(MLNAdditions) mgl_expressionForMatchingExpression:inDictionary:defaultExpression:]`
 method and the
-[`match`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-match)
-operator in the Mapbox Style Specification.
+[`match`](https://maplibre.org/maplibre-style-spec/expressions/#match)
+operator in the MapLibre Style Spec.
 
 ### `MLN_IF`
 
@@ -667,8 +667,8 @@ passed into this function must be wrapped in a constant expression.
 This function corresponds to the
 `+[NSExpression(MLNAdditions) mgl_expressionForConditional:trueExpression:falseExpresssion:]`
 method and the
-[`case`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-case)
-operator in the Mapbox Style Specification.
+[`case`](https://maplibre.org/maplibre-style-spec/expressions/#case)
+operator in the MapLibre Style Spec.
 
 ### `MLN_FUNCTION`
 
@@ -684,7 +684,7 @@ operator in the Mapbox Style Specification.
 </dl>
 
 An expression exactly as defined by the
-[Mapbox Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions).
+[MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/expressions/).
 
 ## Custom functions
 
@@ -697,7 +697,7 @@ classes, but you should not call them directly outside the context of an
 expression, because the result may differ from the evaluated expression’s result
 or may result in undefined behavior.
 
-The Mapbox Style Specification defines some operators for which no custom
+The MapLibre Style Spec defines some operators for which no custom
 function is available. To use these operators in an `NSExpression`, call the
 [`MLN_FUNCTION()`](#code-mgl_function-code) function with the same arguments
 that the operator expects.
@@ -745,8 +745,8 @@ otherwise <code>TRUE</code>.
 object has a value for the feature attribute.
 
 This function corresponds to the
-[`has`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-has)
-operator in the Mapbox Style Specification. See also the
+[`has`](https://maplibre.org/maplibre-style-spec/expressions/#has)
+operator in the MapLibre Style Spec. See also the
 [`mgl_does:have:`](#code-mgl_does-have-code) function, which is used on its own
 without the `FUNCTION()` operator. You can also check whether an object has an
 attribute by comparing the key path to `NIL`, for example `cheeseburger != NIL`
@@ -779,8 +779,8 @@ The target expression with variable subexpressions replaced with the values
 defined in the context dictionary.
 
 This function corresponds to the
-[`let`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-let)
-operator in the Mapbox Style Specification. See also the
+[`let`](https://maplibre.org/maplibre-style-spec/expressions/#let)
+operator in the MapLibre Style Spec. See also the
 [`MLN_LET`](#code-mgl_let-code) function, which is used on its own without the
 `FUNCTION()` operator.
 
@@ -839,8 +839,8 @@ yellow, orange, and red as the values.
 This function corresponds to the
 `+[NSExpression(MLNAdditions) mgl_expressionForInterpolatingExpression:withCurveType:parameters:stops:]`
 method and the
-[`interpolate`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate)
-operator in the Mapbox Style Specification. See also the
+[`interpolate`](https://maplibre.org/maplibre-style-spec/expressions/#interpolate)
+operator in the MapLibre Style Spec. See also the
 [`mgl_interpolate:withCurveType:parameters:stops:`](#code-mgl_interpolate-withcurvetype-parameters-stops-code)
 function, which is used on its own without the `FUNCTION()` operator.
 
@@ -879,8 +879,8 @@ A numeric representation of the target:
     first successful conversion is obtained.
 
 This function corresponds to the
-[`to-number`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-to-number)
-operator in the Mapbox Style Specification. You can also cast a value to a
+[`to-number`](https://maplibre.org/maplibre-style-spec/expressions/#types-to-number)
+operator in the MapLibre Style Spec. You can also cast a value to a
 number by passing the value and the string `NSNumber` into the `CAST()`
 operator.
 
@@ -923,8 +923,8 @@ yellow, orange, and red as the values.
 This function corresponds to the
 `+[NSExpression(MLNAdditions) mgl_expressionForSteppingExpression:fromExpression:stops:]`
 method and the
-[`step`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-step)
-operator in the Mapbox Style Specification.
+[`step`](https://maplibre.org/maplibre-style-spec/expressions/#step)
+operator in the MapLibre Style Spec.
 
 ### `stringByAppendingString:`
 
@@ -944,8 +944,8 @@ The target string with each of the argument strings appended in order.
 This function corresponds to the
 `-[NSExpression(MLNAdditions) mgl_expressionByAppendingExpression:]`
 method and is similar to the
-[`concat`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-concat)
-operator in the Mapbox Style Specification. See also the
+[`concat`](https://maplibre.org/maplibre-style-spec/expressions/#concat)
+operator in the MapLibre Style Spec. See also the
 [`mgl_join:`](#code-mgl_join-code) function, which concatenates multiple
 expressions and is used on its own without the `FUNCTION()` operator.
 
@@ -980,7 +980,7 @@ A string representation of the target:
   function of the ECMAScript Language Specification.
 
 This function corresponds to the
-[`to-string`](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-types-to-string)
-operator in the Mapbox Style Specification. You can also cast a value to a
+[`to-string`](https://maplibre.org/maplibre-style-spec/expressions/#types-to-string)
+operator in the MapLibre Style Spec. You can also cast a value to a
 string by passing the value and the string `NSString` into the `CAST()`
 operator.

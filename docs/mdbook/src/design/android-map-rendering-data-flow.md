@@ -66,9 +66,9 @@ actors.
 
 The key philosophy of rendering tiles is tiles are rendered layer by
 layer. A collection of tiles is called a tile set. To optimize tile
-rendering, MapLibre Native GL only renders *dirty* tiles. A dirty tile
+rendering, MapLibre Native only renders *dirty* tiles. A dirty tile
 is a tile rendered in the viewport that has changed due to user
-interaction. To initiate this process, MapLibre Native GL loads the
+interaction. To initiate this process, MapLibre Native loads the
 tileset to be rendered first. In a rendering request, if the tileset is
 already loaded, MapLibre Native will use a cached tile set.
 

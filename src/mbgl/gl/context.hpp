@@ -109,7 +109,7 @@ public:
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
-    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) override;
+    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
     gfx::Texture2DPtr createTexture2D() override;
 

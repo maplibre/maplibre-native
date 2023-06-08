@@ -20,10 +20,8 @@ class TextureResource;
 class Texture2D {
 public:
     struct SamplerState {
-        /// Minification filter within a single mip level
-        TextureFilterType minification{TextureFilterType::Nearest};
-        /// Magnification filter within a single mip level
-        TextureFilterType magnification{TextureFilterType::Nearest};
+        /// Minification and magnification filter within a single mip level
+        TextureFilterType filter{TextureFilterType::Nearest};
         /// Wrapping behavior along U coordinate
         TextureWrapType wrapU{TextureWrapType::Clamp};
         /// Wrapping behavior along V coordinate
@@ -78,11 +76,15 @@ public:
     /// @brief Upload image data to the texture resource
     /// @param pixelData Image data to transfer
     virtual void upload(const void* pixelData, const Size& size_) noexcept = 0;
+
+    /// @brief Upload image data to the texture resource
+    /// @tparam Image Image object type
+    /// @param img Image to transfer
     template <typename Image>
     void upload(const Image& img) noexcept {
         setFormat(Image::channels == 1 ? gfx::TexturePixelType::Alpha : gfx::TexturePixelType::RGBA,
                   gfx::TextureChannelDataType::UnsignedByte);
-        upload(&img.data[0], img.size);
+        upload(img.data ? img.data.get() : nullptr, img.size);
     }
 
     virtual void uploadSubRegion(const void* pixelData,
@@ -95,7 +97,7 @@ public:
         assert(Image::channels == getPixelStride());
         assert(img.size.width + xOffset <= getSize().width);
         assert(img.size.height + yOffset <= getSize().height);
-        uploadSubRegion(&img.data[0], img.size, xOffset, yOffset);
+        uploadSubRegion(img.data ? img.data.get() : nullptr, img.size, xOffset, yOffset);
     }
 
     /// @brief Upload staged image data if present and required.

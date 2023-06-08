@@ -292,7 +292,7 @@ NSString * const MLNLastMapDebugMaskDefaultsKey = @"MLNLastMapDebugMask";
 
 - (IBAction)showShortcuts:(id)sender {
     NSAlert *alert = [[NSAlert alloc] init];
-    alert.messageText = @"MapLibre GL Help";
+    alert.messageText = @"MapLibre Native Help";
     alert.informativeText = @"\
 • To scroll, swipe with two fingers on a trackpad, or drag the cursor, or press the arrow keys.\n\
 • To zoom in, pinch two fingers apart on a trackpad, or double-click, or hold down Shift while dragging the cursor down, or hold down Option while pressing the up key.\n\

@@ -68,7 +68,7 @@ for ((i=0; i<${TOTAL_TESTS}; i++)); do
   fi
 
   # The path to the maplibre dynamic lib
-  LIB_PATH="${OUTPUT_DIR}/${ARCHIVE_NAME}/Products/Applications/MapLibre GL.app/Frameworks/Mapbox.framework/Mapbox"
+  LIB_PATH="${OUTPUT_DIR}/${ARCHIVE_NAME}/Products/Applications/MapLibre Native.app/Frameworks/Mapbox.framework/Mapbox"
   if [[ ! -f "$LIB_PATH" ]]; then
       echo "${RED}MapLibre dynamic lib not found: $LIB_PATH${NORMAL}"
       exit 6
