@@ -222,9 +222,9 @@ public:
         return constantPatternPositions;
     }
 
-    std::size_t getVertexCount() const override { return 0; }
+    std::size_t getVertexCount() const override { return 1; }
     const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
-        return nullptr; // ?
+        return &constantPatternPositions;
     }
 
 private:
