@@ -1907,7 +1907,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+    [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/c76c58bf-2292-428d-b9bd-4ac43398dd5d/style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];

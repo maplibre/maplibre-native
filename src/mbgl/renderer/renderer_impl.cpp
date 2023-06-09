@@ -23,7 +23,7 @@
 
 // DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
 // Drawables will be on the left, vanilla rendering on the right
-// #define SPLIT_VIEW
+#define SPLIT_VIEW
 // If using SPLIT_VIEW, QUAD_SPLIT_VIEW will split each half, showing just the opaque
 // pass on top and then a composited opaque+translucent pass on the bottom
 // #define QUAD_SPLIT_VIEW
