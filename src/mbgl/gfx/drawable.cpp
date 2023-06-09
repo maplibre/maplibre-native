@@ -46,5 +46,22 @@ void Drawable::removeTexture(int32_t location) {
     }
 }
 
+/// @brief Provide a function to get the current texture
+void Drawable::setTextureSource(int32_t location, TexSourceFunc source) {
+    textureSources.resize(std::max(textureSources.size(), static_cast<size_t>(location + 1)));
+    textureSources[location] = std::move(source);
+}
+
+static const Drawable::TexSourceFunc noSource;
+
+const Drawable::TexSourceFunc& Drawable::getTextureSource(int32_t location) const {
+    return (static_cast<std::size_t>(location) < textureSources.size()) ? textureSources[location] : noSource;
+}
+
+/// @brief Provide all texture sources at once
+void Drawable::setTextureSources(std::vector<TexSourceFunc> sources) {
+    textureSources = std::move(sources);
+}
+
 } // namespace gfx
 } // namespace mbgl
