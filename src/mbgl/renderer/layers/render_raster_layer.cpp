@@ -97,7 +97,7 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
         return;
     }
 
-    if (!parameters.shaders.populate(rasterProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(rasterProgram)) return;
 
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
     RasterProgram::Binders paintAttributeData{evaluated, 0};
