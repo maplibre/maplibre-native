@@ -371,14 +371,14 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         circleVertexAttrs.clear();
 
-        auto propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
-                                                                                    CircleRadius,
-                                                                                    CircleBlur,
-                                                                                    CircleOpacity,
-                                                                                    CircleStrokeColor,
-                                                                                    CircleStrokeWidth,
-                                                                                    CircleStrokeOpacity>(
-            paintPropertyBinders, evaluated);
+        auto propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<
+            CircleColor,
+            CircleRadius,
+            CircleBlur,
+            CircleOpacity,
+            CircleStrokeColor,
+            CircleStrokeWidth,
+            CircleStrokeOpacity>(paintPropertyBinders, evaluated);
 
         auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!circleShader) {
