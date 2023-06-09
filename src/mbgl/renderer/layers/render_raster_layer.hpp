@@ -3,6 +3,7 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
+#include <mbgl/gfx/context.hpp>
 
 namespace mbgl {
 
@@ -42,6 +43,7 @@ private:
     std::shared_ptr<RasterProgram> rasterProgram;
 
     gfx::ShaderProgramBasePtr rasterShader;
+    LayerGroupPtr imageLayerGroup;
 };
 
 } // namespace mbgl

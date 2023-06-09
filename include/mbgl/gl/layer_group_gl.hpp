@@ -19,5 +19,19 @@ public:
 protected:
 };
 
+/**
+ A layer group for non-tile-based drawables
+ */
+class LayerGroupGL : public LayerGroup {
+public:
+    LayerGroupGL(int32_t layerIndex, std::size_t initialCapacity, std::string name);
+    ~LayerGroupGL() override {}
+
+    void upload(gfx::UploadPass&) override;
+    void render(RenderOrchestrator&, PaintParameters&) override;
+
+protected:
+};
+
 } // namespace gl
 } // namespace mbgl

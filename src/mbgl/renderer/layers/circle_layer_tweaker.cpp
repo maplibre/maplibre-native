@@ -44,7 +44,7 @@ static constexpr std::string_view CircleDrawableUBOName = "CircleDrawableUBO";
 static constexpr std::string_view CirclePaintParamsUBOName = "CirclePaintParamsUBO";
 static constexpr std::string_view CircleEvaluatedPropsUBOName = "CircleEvaluatedPropsUBO";
 
-void CircleLayerTweaker::execute(LayerGroup& layerGroup,
+void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
