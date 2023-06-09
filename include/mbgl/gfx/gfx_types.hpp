@@ -41,6 +41,7 @@ enum class AttributeDataType : uint8_t {
     UShort2,
     UShort3,
     UShort4,
+    UShort8,
 
     Int,
     Int2,

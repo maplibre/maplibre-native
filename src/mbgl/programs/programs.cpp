@@ -37,7 +37,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
             if (!expr) {
                 throw std::runtime_error("Failed to register " + std::string(T::Name) + " with shader registry!");
             }
-        }(registry.registerShader(std::make_shared<T>(programParameters_))),
+        }(registry.getLegacyGroup().registerShader(std::make_shared<T>(programParameters_))),
         ...);
 }
 

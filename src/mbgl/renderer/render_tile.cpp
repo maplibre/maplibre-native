@@ -171,7 +171,7 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
     static const style::Properties<>::PossiblyEvaluated properties{};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
-    auto program = parameters.shaders.get<DebugProgram>();
+    auto program = parameters.shaders.getLegacyGroup().get<DebugProgram>();
     if (!program) {
         return;
     }
