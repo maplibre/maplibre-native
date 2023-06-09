@@ -45,7 +45,7 @@ struct alignas(16) FillDrawableUBO {
 };
 static_assert(sizeof(FillDrawableUBO) == 208);
 
-void FillLayerTweaker::execute(LayerGroup& layerGroup,
+void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
                                const PaintParameters& parameters) {
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);

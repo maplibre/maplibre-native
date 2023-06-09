@@ -51,7 +51,7 @@ static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatte
 static constexpr std::string_view BackgroundDrawableUBOName = "BackgroundDrawableUBO";
 static constexpr std::string_view BackgroundLayerUBOName = "BackgroundLayerUBO";
 
-void BackgroundLayerTweaker::execute(LayerGroup& layerGroup, const RenderTree&, const PaintParameters& parameters) {
+void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& state = parameters.state;
     auto& context = parameters.context;
 
