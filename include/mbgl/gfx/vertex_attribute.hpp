@@ -35,7 +35,8 @@ public:
     using int4 = std::array<std::int32_t, 4>;
     using ushort8 = std::array<std::uint16_t, 8>;
 
-    using ElementType = std::variant<std::int32_t, ushort8, int2, int3, int4, float, float2, float3, float4, matf3, matf4>;
+    using ElementType =
+        std::variant<std::int32_t, ushort8, int2, int3, int4, float, float2, float3, float4, matf3, matf4>;
 
     VertexAttribute(int index_, AttributeDataType dataType_, int size_, std::size_t count_, std::size_t stride_)
         : index(index_),
@@ -107,20 +108,19 @@ public:
         rawData.clear();
     }
 
-    template<std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<I == sizeof...(Tp), void>::type
-    set(std::size_t, std::tuple<Tp...>, std::size_t) {}
+    template <std::size_t I = 0, typename... Tp>
+    inline typename std::enable_if<I == sizeof...(Tp), void>::type set(std::size_t, std::tuple<Tp...>, std::size_t) {}
 
-    template<std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<I < sizeof...(Tp), void>::type
-    set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex) {
+    template <std::size_t I = 0, typename... Tp>
+        inline typename std::enable_if <
+        I<sizeof...(Tp), void>::type set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex) {
         if (tupleIndex == 0) {
             set(i, std::get<I>(tuple).a1);
         } else {
             set<I + 1, Tp...>(i, tuple, tupleIndex - 1);
         }
     }
-    
+
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
     VertexAttribute& operator=(VertexAttribute&& other) {
@@ -239,7 +239,7 @@ public:
         std::vector<std::string> propertiesAsUniforms;
         (
             [&](const auto& attributeNames) {
-                for(std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
+                for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
                     const auto& attributeName = std::string(attributeNames[attrIndex]);
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
                         const auto vertexCount = binder->getVertexCount();

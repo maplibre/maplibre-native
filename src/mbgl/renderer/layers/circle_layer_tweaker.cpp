@@ -80,8 +80,7 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
             /* .opacity = */ evaluated.get<CircleOpacity>().constantOr(CircleOpacity::defaultValue()),
             /* .stroke_width = */ evaluated.get<CircleStrokeWidth>().constantOr(CircleStrokeWidth::defaultValue()),
             /* .stroke_opacity = */
-            evaluated.get<CircleStrokeOpacity>()
-                .constantOr(CircleStrokeOpacity::defaultValue()),
+            evaluated.get<CircleStrokeOpacity>().constantOr(CircleStrokeOpacity::defaultValue()),
             /* .scale_with_map = */ evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map,
             /* .pitch_with_map = */ pitchWithMap,
             /* .padding = */ 0};
@@ -106,11 +105,11 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
 
-        CircleDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
-                                         /* .extrude_scale = */
-                                             pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits}}
-                                                          : parameters.pixelsToGLUnits,
-                                         /* .padding = */ {0}};
+        CircleDrawableUBO drawableUBO = {
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .extrude_scale = */
+            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits}} : parameters.pixelsToGLUnits,
+            /* .padding = */ {0}};
 
         drawable.mutableUniformBuffers().createOrUpdate(CircleDrawableUBOName, &drawableUBO, parameters.context);
     });

@@ -39,8 +39,8 @@ public:
     using AttributeList = TypeList<A>;
     using Uniform = U;
     using UniformList = TypeList<U>;
-    
-    static constexpr const std::array<std::string_view, 1> AttributeNames = { A::name() };
+
+    static constexpr const std::array<std::string_view, 1> AttributeNames = {A::name()};
 };
 
 template <class T, class A1, class U1, class A2, class U2>
@@ -58,8 +58,8 @@ public:
     using AttributeList = TypeList<A1, A2>;
     using Uniform = U1;
     using UniformList = TypeList<U1, U2>;
-    
-    static constexpr const std::array<std::string_view, 2> AttributeNames = { A1::name(), A2::name() };
+
+    static constexpr const std::array<std::string_view, 2> AttributeNames = {A1::name(), A2::name()};
 };
 
 template <class T>
