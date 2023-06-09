@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>NSValue(MLNRasterStyleLayerAdditions) Category Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+    <meta class="swiftype" name="type" data-type="enum" content="MapLibre Reference" />
+    <meta class="swiftype" name="title" data-type="string" content="NSValue(MLNRasterStyleLayerAdditions)" />
+    <style type="text/css">
+      .nav-group-name[data-name="NSValue(MLNRasterStyleLayerAdditions)"] > .small-heading,
+      .nav-group-task[data-name="NSValue(MLNRasterStyleLayerAdditions)"] {
+        background-color: #f5f8fc;
+        font-family: "Open Sans Bold";
+        border-left: 3px solid #3a68d8;
+        padding-left: 5px
+      }
+    </style>
+  </head>
+  <body>
+
+    <a name="//apple_ref/objc/Extension/NSValue(MLNRasterStyleLayerAdditions)" class="dashAnchor"></a>
+
+    <a title="NSValue(MLNRasterStyleLayerAdditions) Category Reference"></a>
+
+    <header class="header-container">
+      <div class="limiter">
+        <div class="header">
+        <p class="header-col header-col--primary">
+          <a class="header-link" href="../index.html">
+            <img style="height: 25px;"  class="header-icon" src="https://maplibre.org/img/maplibre-logo.svg" alt="MapLibre Docs"/>
+            <span class='header-tag'>MapLibre Native for iOS Reference (5.13.0)</span>
+          </a>
+          
+        </p>
+    
+          <p class="header-col header-col--secondary">
+            <a class="header-link space-right2" href="https://github.com/maplibre/maplibre-native">
+              <svg style="margin-bottom: 1px;" class="header-icon" viewBox="0 0 33 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      		      <path stroke="none" stroke-width="1" fill="white" fill-rule="evenodd" d="M16.6,0.4 C7.6,0.4 0.3,7.7 0.3,16.7 C0.3,23.9 5,30 11.4,32.2 C12.2,32.3 12.5,31.8 12.5,31.4 L12.5,28.6 C8,29.6 7,26.4 7,26.4 C6.3,24.5 5.2,24 5.2,24 C3.7,23 5.3,23 5.3,23 C6.9,23.1 7.8,24.7 7.8,24.7 C9.3,27.2 11.6,26.5 12.5,26.1 C12.6,25 13.1,24.3 13.5,23.9 C9.9,23.5 6.1,22.1 6.1,15.8 C6.1,14 6.7,12.6 7.8,11.4 C7.6,11 7.1,9.3 8,7.1 C8,7.1 9.4,6.7 12.5,8.8 C13.8,8.4 15.2,8.3 16.6,8.3 C18,8.3 19.4,8.5 20.7,8.8 C23.8,6.7 25.2,7.1 25.2,7.1 C26.1,9.3 25.5,11 25.4,11.4 C26.4,12.5 27.1,14 27.1,15.8 C27.1,22.1 23.3,23.4 19.7,23.8 C20.3,24.3 20.8,25.3 20.8,26.8 L20.8,31.3 C20.8,31.7 21.1,32.2 21.9,32.1 C28.4,29.9 33,23.8 33,16.6 C32.9,7.7 25.6,0.4 16.6,0.4 L16.6,0.4 Z"></path>
+              </svg>
+              View on GitHub
+            </a>
+          </p>
+    
+          <p class="header-col header-col--secondary">
+            <a class="header-link bold" href="dash-feed://https%3A%2F%2Fmaplibre.org%2Fmaplibre-native%2Fios%2Fapi%2Fdocsets%2FMapLibre.xml">
+              <img style="margin-bottom: 1px;" class="header-icon" src="../img/dash.png"/>
+              Install in Dash
+            </a>
+          </p>
+      </div>
+      </div>
+    </header>
+
+    <div class="breadcrumbs">
+      <div class="limiter">
+        <a class="breadcrumb" href="../index.html">MapLibre Reference</a>
+        <img class="carat" src="../img/carat.png" />
+        NSValue(MLNRasterStyleLayerAdditions) Category Reference
+      </div>
+    </div>
+
+    <div class="content-wrapper limiter">
+      <nav class="navigation">
+          <div class="header-col--secondary">
+            <form role="search" action="../search.json">
+              <input type="text" placeholder="Search documentation" data-typeahead>
+            </form>
+          </div>
+        <ul class="nav-groups">
+          <li class="nav-group-name" data-name="Appendices">
+            <a class="small-heading" href="../Appendices.html">Appendices<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="Working with GeoJSON Data" data-url="working-with-geojson-data.html">
+                <a title="Working with GeoJSON Data" class="nav-group-task-link" href="../working-with-geojson-data.html">Working with GeoJSON Data</a>
+              </li>
+              <li class="nav-group-task" data-name="Predicates and Expressions" data-url="predicates-and-expressions.html">
+                <a title="Predicates and Expressions" class="nav-group-task-link" href="../predicates-and-expressions.html">Predicates and Expressions</a>
+              </li>
+              <li class="nav-group-task" data-name="Migrating to Expressions" data-url="migrating-to-expressions.html">
+                <a title="Migrating to Expressions" class="nav-group-task-link" href="../migrating-to-expressions.html">Migrating to Expressions</a>
+              </li>
+              <li class="nav-group-task" data-name="For Style Authors" data-url="for-style-authors.html">
+                <a title="For Style Authors" class="nav-group-task-link" href="../for-style-authors.html">For Style Authors</a>
+              </li>
+              <li class="nav-group-task" data-name="Tile URL Templates" data-url="tile-url-templates.html">
+                <a title="Tile URL Templates" class="nav-group-task-link" href="../tile-url-templates.html">Tile URL Templates</a>
+              </li>
+              <li class="nav-group-task" data-name="Customizing Fonts" data-url="customizing-fonts.html">
+                <a title="Customizing Fonts" class="nav-group-task-link" href="../customizing-fonts.html">Customizing Fonts</a>
+              </li>
+              <li class="nav-group-task" data-name="Info.plist Keys" data-url="infoplist-keys.html">
+                <a title="Info.plist Keys" class="nav-group-task-link" href="../infoplist-keys.html">Info.plist Keys</a>
+              </li>
+              <li class="nav-group-task" data-name="Gesture Recognizers" data-url="gesture-recognizers.html">
+                <a title="Gesture Recognizers" class="nav-group-task-link" href="../gesture-recognizers.html">Gesture Recognizers</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Maps">
+            <a class="small-heading" href="../Maps.html">Maps<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNSettings" data-url="Classes/MLNSettings.html">
+                <a title="MLNSettings" class="nav-group-task-link" href="../Classes/MLNSettings.html">MLNSettings</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapCamera" data-url="Classes/MLNMapCamera.html">
+                <a title="MLNMapCamera" class="nav-group-task-link" href="../Classes/MLNMapCamera.html">MLNMapCamera</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapView" data-url="Classes/MLNMapView.html">
+                <a title="MLNMapView" class="nav-group-task-link" href="../Classes/MLNMapView.html">MLNMapView</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewDelegate" data-url="Protocols/MLNMapViewDelegate.html">
+                <a title="MLNMapViewDelegate" class="nav-group-task-link" href="../Protocols/MLNMapViewDelegate.html">MLNMapViewDelegate</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapSnapshot" data-url="Classes/MLNMapSnapshot.html">
+                <a title="MLNMapSnapshot" class="nav-group-task-link" href="../Classes/MLNMapSnapshot.html">MLNMapSnapshot</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapSnapshotOptions" data-url="Classes/MLNMapSnapshotOptions.html">
+                <a title="MLNMapSnapshotOptions" class="nav-group-task-link" href="../Classes/MLNMapSnapshotOptions.html">MLNMapSnapshotOptions</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapSnapshotter" data-url="Classes/MLNMapSnapshotter.html">
+                <a title="MLNMapSnapshotter" class="nav-group-task-link" href="../Classes/MLNMapSnapshotter.html">MLNMapSnapshotter</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNUserTrackingMode" data-url="Enums/MLNUserTrackingMode.html">
+                <a title="MLNUserTrackingMode" class="nav-group-task-link" href="../Enums/MLNUserTrackingMode.html">MLNUserTrackingMode</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Primitive Shapes">
+            <a class="small-heading" href="../Primitive Shapes.html">Primitive Shapes<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNAnnotation" data-url="Protocols/MLNAnnotation.html">
+                <a title="MLNAnnotation" class="nav-group-task-link" href="../Protocols/MLNAnnotation.html">MLNAnnotation</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOverlay" data-url="Protocols/MLNOverlay.html">
+                <a title="MLNOverlay" class="nav-group-task-link" href="../Protocols/MLNOverlay.html">MLNOverlay</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShape" data-url="Classes/MLNShape.html">
+                <a title="MLNShape" class="nav-group-task-link" href="../Classes/MLNShape.html">MLNShape</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMultiPoint" data-url="Classes/MLNMultiPoint.html">
+                <a title="MLNMultiPoint" class="nav-group-task-link" href="../Classes/MLNMultiPoint.html">MLNMultiPoint</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPointAnnotation" data-url="Classes/MLNPointAnnotation.html">
+                <a title="MLNPointAnnotation" class="nav-group-task-link" href="../Classes/MLNPointAnnotation.html">MLNPointAnnotation</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPointCollection" data-url="Classes/MLNPointCollection.html">
+                <a title="MLNPointCollection" class="nav-group-task-link" href="../Classes/MLNPointCollection.html">MLNPointCollection</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPolygon" data-url="Classes/MLNPolygon.html">
+                <a title="MLNPolygon" class="nav-group-task-link" href="../Classes/MLNPolygon.html">MLNPolygon</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPolyline" data-url="Classes/MLNPolyline.html">
+                <a title="MLNPolyline" class="nav-group-task-link" href="../Classes/MLNPolyline.html">MLNPolyline</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMultiPolygon" data-url="Classes/MLNMultiPolygon.html">
+                <a title="MLNMultiPolygon" class="nav-group-task-link" href="../Classes/MLNMultiPolygon.html">MLNMultiPolygon</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMultiPolyline" data-url="Classes/MLNMultiPolyline.html">
+                <a title="MLNMultiPolyline" class="nav-group-task-link" href="../Classes/MLNMultiPolyline.html">MLNMultiPolyline</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeCollection" data-url="Classes/MLNShapeCollection.html">
+                <a title="MLNShapeCollection" class="nav-group-task-link" href="../Classes/MLNShapeCollection.html">MLNShapeCollection</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Annotations">
+            <a class="small-heading" href="../Annotations.html">Annotations<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNAnnotationImage" data-url="Classes/MLNAnnotationImage.html">
+                <a title="MLNAnnotationImage" class="nav-group-task-link" href="../Classes/MLNAnnotationImage.html">MLNAnnotationImage</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNAnnotationView" data-url="Classes/MLNAnnotationView.html">
+                <a title="MLNAnnotationView" class="nav-group-task-link" href="../Classes/MLNAnnotationView.html">MLNAnnotationView</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNUserLocation" data-url="Classes/MLNUserLocation.html">
+                <a title="MLNUserLocation" class="nav-group-task-link" href="../Classes/MLNUserLocation.html">MLNUserLocation</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNUserLocationAnnotationView" data-url="Classes/MLNUserLocationAnnotationView.html">
+                <a title="MLNUserLocationAnnotationView" class="nav-group-task-link" href="../Classes/MLNUserLocationAnnotationView.html">MLNUserLocationAnnotationView</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="User Interaction">
+            <a class="small-heading" href="../User Interaction.html">User Interaction<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNCalloutView" data-url="Protocols/MLNCalloutView.html">
+                <a title="MLNCalloutView" class="nav-group-task-link" href="../Protocols/MLNCalloutView.html">MLNCalloutView</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCalloutViewDelegate" data-url="Protocols/MLNCalloutViewDelegate.html">
+                <a title="MLNCalloutViewDelegate" class="nav-group-task-link" href="../Protocols/MLNCalloutViewDelegate.html">MLNCalloutViewDelegate</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCompassButton" data-url="Classes/MLNCompassButton.html">
+                <a title="MLNCompassButton" class="nav-group-task-link" href="../Classes/MLNCompassButton.html">MLNCompassButton</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Location Updates">
+            <a class="small-heading" href="../Location Updates.html">Location Updates<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNLocationManager" data-url="Protocols/MLNLocationManager.html">
+                <a title="MLNLocationManager" class="nav-group-task-link" href="../Protocols/MLNLocationManager.html">MLNLocationManager</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLocationManagerDelegate" data-url="Protocols/MLNLocationManagerDelegate.html">
+                <a title="MLNLocationManagerDelegate" class="nav-group-task-link" href="../Protocols/MLNLocationManagerDelegate.html">MLNLocationManagerDelegate</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Styling the Map">
+            <a class="small-heading" href="../Styling the Map.html">Styling the Map<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNStyle" data-url="Classes/MLNStyle.html">
+                <a title="MLNStyle" class="nav-group-task-link" href="../Classes/MLNStyle.html">MLNStyle</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLight" data-url="Classes/MLNLight.html">
+                <a title="MLNLight" class="nav-group-task-link" href="../Classes/MLNLight.html">MLNLight</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Style Primitives">
+            <a class="small-heading" href="../Style Primitives.html">Style Primitives<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNFeature" data-url="Protocols/MLNFeature.html">
+                <a title="MLNFeature" class="nav-group-task-link" href="../Protocols/MLNFeature.html">MLNFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPointFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNPointFeature">
+                <a title="MLNPointFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNPointFeature">MLNPointFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPointFeatureCluster" data-url="Style%20Primitives.html#/c:objc(cs)MLNPointFeatureCluster">
+                <a title="MLNPointFeatureCluster" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNPointFeatureCluster">MLNPointFeatureCluster</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPolygonFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNPolygonFeature">
+                <a title="MLNPolygonFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNPolygonFeature">MLNPolygonFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPolylineFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNPolylineFeature">
+                <a title="MLNPolylineFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNPolylineFeature">MLNPolylineFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMultiPolygonFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNMultiPolygonFeature">
+                <a title="MLNMultiPolygonFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNMultiPolygonFeature">MLNMultiPolygonFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMultiPolylineFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNMultiPolylineFeature">
+                <a title="MLNMultiPolylineFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNMultiPolylineFeature">MLNMultiPolylineFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNPointCollectionFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNPointCollectionFeature">
+                <a title="MLNPointCollectionFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNPointCollectionFeature">MLNPointCollectionFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeCollectionFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNShapeCollectionFeature">
+                <a title="MLNShapeCollectionFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNShapeCollectionFeature">MLNShapeCollectionFeature</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNEmptyFeature" data-url="Style%20Primitives.html#/c:objc(cs)MLNEmptyFeature">
+                <a title="MLNEmptyFeature" class="nav-group-task-link" href="../Style%20Primitives.html#/c:objc(cs)MLNEmptyFeature">MLNEmptyFeature</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Style Content">
+            <a class="small-heading" href="../Style Content.html">Style Content<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNSource" data-url="Classes/MLNSource.html">
+                <a title="MLNSource" class="nav-group-task-link" href="../Classes/MLNSource.html">MLNSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSource" data-url="Classes/MLNShapeSource.html">
+                <a title="MLNShapeSource" class="nav-group-task-link" href="../Classes/MLNShapeSource.html">MLNShapeSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNComputedShapeSource" data-url="Classes/MLNComputedShapeSource.html">
+                <a title="MLNComputedShapeSource" class="nav-group-task-link" href="../Classes/MLNComputedShapeSource.html">MLNComputedShapeSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSource" data-url="Classes/MLNTileSource.html">
+                <a title="MLNTileSource" class="nav-group-task-link" href="../Classes/MLNTileSource.html">MLNTileSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNRasterTileSource" data-url="Classes/MLNRasterTileSource.html">
+                <a title="MLNRasterTileSource" class="nav-group-task-link" href="../Classes/MLNRasterTileSource.html">MLNRasterTileSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNRasterDEMSource" data-url="Style%20Content.html#/c:objc(cs)MLNRasterDEMSource">
+                <a title="MLNRasterDEMSource" class="nav-group-task-link" href="../Style%20Content.html#/c:objc(cs)MLNRasterDEMSource">MLNRasterDEMSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNVectorTileSource" data-url="Classes/MLNVectorTileSource.html">
+                <a title="MLNVectorTileSource" class="nav-group-task-link" href="../Classes/MLNVectorTileSource.html">MLNVectorTileSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNImageSource" data-url="Classes/MLNImageSource.html">
+                <a title="MLNImageSource" class="nav-group-task-link" href="../Classes/MLNImageSource.html">MLNImageSource</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Style Layers">
+            <a class="small-heading" href="../Style Layers.html">Style Layers<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNStyleLayer" data-url="Classes/MLNStyleLayer.html">
+                <a title="MLNStyleLayer" class="nav-group-task-link" href="../Classes/MLNStyleLayer.html">MLNStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNForegroundStyleLayer" data-url="Classes/MLNForegroundStyleLayer.html">
+                <a title="MLNForegroundStyleLayer" class="nav-group-task-link" href="../Classes/MLNForegroundStyleLayer.html">MLNForegroundStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNBackgroundStyleLayer" data-url="Classes/MLNBackgroundStyleLayer.html">
+                <a title="MLNBackgroundStyleLayer" class="nav-group-task-link" href="../Classes/MLNBackgroundStyleLayer.html">MLNBackgroundStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNRasterStyleLayer" data-url="Classes/MLNRasterStyleLayer.html">
+                <a title="MLNRasterStyleLayer" class="nav-group-task-link" href="../Classes/MLNRasterStyleLayer.html">MLNRasterStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNVectorStyleLayer" data-url="Classes/MLNVectorStyleLayer.html">
+                <a title="MLNVectorStyleLayer" class="nav-group-task-link" href="../Classes/MLNVectorStyleLayer.html">MLNVectorStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCircleStyleLayer" data-url="Classes/MLNCircleStyleLayer.html">
+                <a title="MLNCircleStyleLayer" class="nav-group-task-link" href="../Classes/MLNCircleStyleLayer.html">MLNCircleStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillStyleLayer" data-url="Classes/MLNFillStyleLayer.html">
+                <a title="MLNFillStyleLayer" class="nav-group-task-link" href="../Classes/MLNFillStyleLayer.html">MLNFillStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillExtrusionStyleLayer" data-url="Classes/MLNFillExtrusionStyleLayer.html">
+                <a title="MLNFillExtrusionStyleLayer" class="nav-group-task-link" href="../Classes/MLNFillExtrusionStyleLayer.html">MLNFillExtrusionStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNHeatmapStyleLayer" data-url="Classes/MLNHeatmapStyleLayer.html">
+                <a title="MLNHeatmapStyleLayer" class="nav-group-task-link" href="../Classes/MLNHeatmapStyleLayer.html">MLNHeatmapStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNHillshadeStyleLayer" data-url="Classes/MLNHillshadeStyleLayer.html">
+                <a title="MLNHillshadeStyleLayer" class="nav-group-task-link" href="../Classes/MLNHillshadeStyleLayer.html">MLNHillshadeStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineStyleLayer" data-url="Classes/MLNLineStyleLayer.html">
+                <a title="MLNLineStyleLayer" class="nav-group-task-link" href="../Classes/MLNLineStyleLayer.html">MLNLineStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSymbolStyleLayer" data-url="Classes/MLNSymbolStyleLayer.html">
+                <a title="MLNSymbolStyleLayer" class="nav-group-task-link" href="../Classes/MLNSymbolStyleLayer.html">MLNSymbolStyleLayer</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Offline Maps">
+            <a class="small-heading" href="../Offline Maps.html">Offline Maps<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNOfflineRegion" data-url="Protocols/MLNOfflineRegion.html">
+                <a title="MLNOfflineRegion" class="nav-group-task-link" href="../Protocols/MLNOfflineRegion.html">MLNOfflineRegion</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflineStorage" data-url="Classes/MLNOfflineStorage.html">
+                <a title="MLNOfflineStorage" class="nav-group-task-link" href="../Classes/MLNOfflineStorage.html">MLNOfflineStorage</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePack" data-url="Classes/MLNOfflinePack.html">
+                <a title="MLNOfflinePack" class="nav-group-task-link" href="../Classes/MLNOfflinePack.html">MLNOfflinePack</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackProgress" data-url="Structs/MLNOfflinePackProgress.html">
+                <a title="MLNOfflinePackProgress" class="nav-group-task-link" href="../Structs/MLNOfflinePackProgress.html">MLNOfflinePackProgress</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackProgress" data-url="Type%20Definitions/MLNOfflinePackProgress.html">
+                <a title="MLNOfflinePackProgress" class="nav-group-task-link" href="../Type%20Definitions/MLNOfflinePackProgress.html">MLNOfflinePackProgress</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackState" data-url="Enums/MLNOfflinePackState.html">
+                <a title="MLNOfflinePackState" class="nav-group-task-link" href="../Enums/MLNOfflinePackState.html">MLNOfflinePackState</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTilePyramidOfflineRegion" data-url="Classes/MLNTilePyramidOfflineRegion.html">
+                <a title="MLNTilePyramidOfflineRegion" class="nav-group-task-link" href="../Classes/MLNTilePyramidOfflineRegion.html">MLNTilePyramidOfflineRegion</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeOfflineRegion" data-url="Classes/MLNShapeOfflineRegion.html">
+                <a title="MLNShapeOfflineRegion" class="nav-group-task-link" href="../Classes/MLNShapeOfflineRegion.html">MLNShapeOfflineRegion</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Geometry">
+            <a class="small-heading" href="../Geometry.html">Geometry<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNCoordinateBounds" data-url="Structs/MLNCoordinateBounds.html">
+                <a title="MLNCoordinateBounds" class="nav-group-task-link" href="../Structs/MLNCoordinateBounds.html">MLNCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateBounds" data-url="Type%20Definitions/MLNCoordinateBounds.html">
+                <a title="MLNCoordinateBounds" class="nav-group-task-link" href="../Type%20Definitions/MLNCoordinateBounds.html">MLNCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateBoundsEqualToCoordinateBounds" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsEqualToCoordinateBounds">
+                <a title="MLNCoordinateBoundsEqualToCoordinateBounds" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsEqualToCoordinateBounds">MLNCoordinateBoundsEqualToCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateBoundsGetCoordinateSpan" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsGetCoordinateSpan">
+                <a title="MLNCoordinateBoundsGetCoordinateSpan" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsGetCoordinateSpan">MLNCoordinateBoundsGetCoordinateSpan</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateBoundsIntersectsCoordinateBounds" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsIntersectsCoordinateBounds">
+                <a title="MLNCoordinateBoundsIntersectsCoordinateBounds" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsIntersectsCoordinateBounds">MLNCoordinateBoundsIntersectsCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateBoundsIsEmpty" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsIsEmpty">
+                <a title="MLNCoordinateBoundsIsEmpty" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsIsEmpty">MLNCoordinateBoundsIsEmpty</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateBoundsMake" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsMake">
+                <a title="MLNCoordinateBoundsMake" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsMake">MLNCoordinateBoundsMake</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateBoundsOffset" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsOffset">
+                <a title="MLNCoordinateBoundsOffset" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateBoundsOffset">MLNCoordinateBoundsOffset</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateInCoordinateBounds" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateInCoordinateBounds">
+                <a title="MLNCoordinateInCoordinateBounds" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateInCoordinateBounds">MLNCoordinateInCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateQuad" data-url="Structs/MLNCoordinateQuad.html">
+                <a title="MLNCoordinateQuad" class="nav-group-task-link" href="../Structs/MLNCoordinateQuad.html">MLNCoordinateQuad</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateQuad" data-url="Type%20Definitions/MLNCoordinateQuad.html">
+                <a title="MLNCoordinateQuad" class="nav-group-task-link" href="../Type%20Definitions/MLNCoordinateQuad.html">MLNCoordinateQuad</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateQuadMake" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateQuadMake">
+                <a title="MLNCoordinateQuadMake" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateQuadMake">MLNCoordinateQuadMake</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateQuadFromCoordinateBounds" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateQuadFromCoordinateBounds">
+                <a title="MLNCoordinateQuadFromCoordinateBounds" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateQuadFromCoordinateBounds">MLNCoordinateQuadFromCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateSpan" data-url="Structs/MLNCoordinateSpan.html">
+                <a title="MLNCoordinateSpan" class="nav-group-task-link" href="../Structs/MLNCoordinateSpan.html">MLNCoordinateSpan</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateSpan" data-url="Type%20Definitions/MLNCoordinateSpan.html">
+                <a title="MLNCoordinateSpan" class="nav-group-task-link" href="../Type%20Definitions/MLNCoordinateSpan.html">MLNCoordinateSpan</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateSpanEqualToCoordinateSpan" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateSpanEqualToCoordinateSpan">
+                <a title="MLNCoordinateSpanEqualToCoordinateSpan" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateSpanEqualToCoordinateSpan">MLNCoordinateSpanEqualToCoordinateSpan</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateSpanMake" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateSpanMake">
+                <a title="MLNCoordinateSpanMake" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNCoordinateSpanMake">MLNCoordinateSpanMake</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateSpanZero" data-url="Geometry.html#/c:@MLNCoordinateSpanZero">
+                <a title="MLNCoordinateSpanZero" class="nav-group-task-link" href="../Geometry.html#/c:@MLNCoordinateSpanZero">MLNCoordinateSpanZero</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNDegreesFromRadians" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNDegreesFromRadians">
+                <a title="MLNDegreesFromRadians" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNDegreesFromRadians">MLNDegreesFromRadians</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNRadiansFromDegrees" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNRadiansFromDegrees">
+                <a title="MLNRadiansFromDegrees" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNRadiansFromDegrees">MLNRadiansFromDegrees</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNStringFromCoordinateBounds" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNStringFromCoordinateBounds">
+                <a title="MLNStringFromCoordinateBounds" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNStringFromCoordinateBounds">MLNStringFromCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNStringFromCoordinateQuad" data-url="Geometry.html#/c:MLNGeometry.h@F@MLNStringFromCoordinateQuad">
+                <a title="MLNStringFromCoordinateQuad" class="nav-group-task-link" href="../Geometry.html#/c:MLNGeometry.h@F@MLNStringFromCoordinateQuad">MLNStringFromCoordinateQuad</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Formatters">
+            <a class="small-heading" href="../Formatters.html">Formatters<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNClockDirectionFormatter" data-url="Classes/MLNClockDirectionFormatter.html">
+                <a title="MLNClockDirectionFormatter" class="nav-group-task-link" href="../Classes/MLNClockDirectionFormatter.html">MLNClockDirectionFormatter</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCompassDirectionFormatter" data-url="Classes/MLNCompassDirectionFormatter.html">
+                <a title="MLNCompassDirectionFormatter" class="nav-group-task-link" href="../Classes/MLNCompassDirectionFormatter.html">MLNCompassDirectionFormatter</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCoordinateFormatter" data-url="Classes/MLNCoordinateFormatter.html">
+                <a title="MLNCoordinateFormatter" class="nav-group-task-link" href="../Classes/MLNCoordinateFormatter.html">MLNCoordinateFormatter</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNDistanceFormatter" data-url="Classes/MLNDistanceFormatter.html">
+                <a title="MLNDistanceFormatter" class="nav-group-task-link" href="../Classes/MLNDistanceFormatter.html">MLNDistanceFormatter</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Categories">
+            <a class="small-heading" href="../Other Categories.html">Other Categories<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="NSExpression(MLNAdditions)" data-url="Categories/NSExpression%28MLNAdditions%29.html">
+                <a title="NSExpression(MLNAdditions)" class="nav-group-task-link" href="../Categories/NSExpression%28MLNAdditions%29.html">NSExpression(MLNAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNAdditions)" data-url="Categories/NSValue%28MLNAdditions%29.html">
+                <a title="NSValue(MLNAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNAdditions%29.html">NSValue(MLNAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNCircleStyleLayerAdditions)" data-url="Categories/NSValue%28MLNCircleStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNCircleStyleLayerAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNCircleStyleLayerAdditions%29.html">NSValue(MLNCircleStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNFillExtrusionStyleLayerAdditions)" data-url="Categories/NSValue%28MLNFillExtrusionStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNFillExtrusionStyleLayerAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNFillExtrusionStyleLayerAdditions%29.html">NSValue(MLNFillExtrusionStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNFillStyleLayerAdditions)" data-url="Categories/NSValue%28MLNFillStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNFillStyleLayerAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNFillStyleLayerAdditions%29.html">NSValue(MLNFillStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNHillshadeStyleLayerAdditions)" data-url="Categories/NSValue%28MLNHillshadeStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNHillshadeStyleLayerAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNHillshadeStyleLayerAdditions%29.html">NSValue(MLNHillshadeStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNLineStyleLayerAdditions)" data-url="Categories/NSValue%28MLNLineStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNLineStyleLayerAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNLineStyleLayerAdditions%29.html">NSValue(MLNLineStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNRasterStyleLayerAdditions)" data-url="Categories/NSValue%28MLNRasterStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNRasterStyleLayerAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNRasterStyleLayerAdditions%29.html">NSValue(MLNRasterStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNSymbolStyleLayerAdditions)" data-url="Categories/NSValue%28MLNSymbolStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNSymbolStyleLayerAdditions)" class="nav-group-task-link" href="../Categories/NSValue%28MLNSymbolStyleLayerAdditions%29.html">NSValue(MLNSymbolStyleLayerAdditions)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Classes">
+            <a class="small-heading" href="../Other Classes.html">Other Classes<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNAttributedExpression" data-url="Classes/MLNAttributedExpression.html">
+                <a title="MLNAttributedExpression" class="nav-group-task-link" href="../Classes/MLNAttributedExpression.html">MLNAttributedExpression</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNAttributionInfo" data-url="Classes/MLNAttributionInfo.html">
+                <a title="MLNAttributionInfo" class="nav-group-task-link" href="../Classes/MLNAttributionInfo.html">MLNAttributionInfo</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNDefaultStyle" data-url="Classes/MLNDefaultStyle.html">
+                <a title="MLNDefaultStyle" class="nav-group-task-link" href="../Classes/MLNDefaultStyle.html">MLNDefaultStyle</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLoggingConfiguration" data-url="Classes/MLNLoggingConfiguration.html">
+                <a title="MLNLoggingConfiguration" class="nav-group-task-link" href="../Classes/MLNLoggingConfiguration.html">MLNLoggingConfiguration</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapProjection" data-url="Classes/MLNMapProjection.html">
+                <a title="MLNMapProjection" class="nav-group-task-link" href="../Classes/MLNMapProjection.html">MLNMapProjection</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapSnapshotOverlay" data-url="Classes/MLNMapSnapshotOverlay.html">
+                <a title="MLNMapSnapshotOverlay" class="nav-group-task-link" href="../Classes/MLNMapSnapshotOverlay.html">MLNMapSnapshotOverlay</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNNetworkConfiguration" data-url="Classes/MLNNetworkConfiguration.html">
+                <a title="MLNNetworkConfiguration" class="nav-group-task-link" href="../Classes/MLNNetworkConfiguration.html">MLNNetworkConfiguration</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileServerOptions" data-url="Classes/MLNTileServerOptions.html">
+                <a title="MLNTileServerOptions" class="nav-group-task-link" href="../Classes/MLNTileServerOptions.html">MLNTileServerOptions</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNUserLocationAnnotationViewStyle" data-url="Classes/MLNUserLocationAnnotationViewStyle.html">
+                <a title="MLNUserLocationAnnotationViewStyle" class="nav-group-task-link" href="../Classes/MLNUserLocationAnnotationViewStyle.html">MLNUserLocationAnnotationViewStyle</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Constants">
+            <a class="small-heading" href="../Other Constants.html">Other Constants<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNClusterIdentifierInvalid" data-url="Other%20Constants.html#/c:@MLNClusterIdentifierInvalid">
+                <a title="MLNClusterIdentifierInvalid" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNClusterIdentifierInvalid">MLNClusterIdentifierInvalid</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNErrorDomain" data-url="Other%20Constants.html#/c:@MLNErrorDomain">
+                <a title="MLNErrorDomain" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNErrorDomain">MLNErrorDomain</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNExpressionInterpolationModeCubicBezier" data-url="Other%20Constants.html#/c:@MLNExpressionInterpolationModeCubicBezier">
+                <a title="MLNExpressionInterpolationModeCubicBezier" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNExpressionInterpolationModeCubicBezier">MLNExpressionInterpolationModeCubicBezier</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNExpressionInterpolationModeExponential" data-url="Other%20Constants.html#/c:@MLNExpressionInterpolationModeExponential">
+                <a title="MLNExpressionInterpolationModeExponential" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNExpressionInterpolationModeExponential">MLNExpressionInterpolationModeExponential</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNExpressionInterpolationModeLinear" data-url="Other%20Constants.html#/c:@MLNExpressionInterpolationModeLinear">
+                <a title="MLNExpressionInterpolationModeLinear" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNExpressionInterpolationModeLinear">MLNExpressionInterpolationModeLinear</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFontColorAttribute" data-url="Other%20Constants.html#/c:@MLNFontColorAttribute">
+                <a title="MLNFontColorAttribute" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNFontColorAttribute">MLNFontColorAttribute</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFontNamesAttribute" data-url="Other%20Constants.html#/c:@MLNFontNamesAttribute">
+                <a title="MLNFontNamesAttribute" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNFontNamesAttribute">MLNFontNamesAttribute</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFontScaleAttribute" data-url="Other%20Constants.html#/c:@MLNFontScaleAttribute">
+                <a title="MLNFontScaleAttribute" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNFontScaleAttribute">MLNFontScaleAttribute</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewDecelerationRateFast" data-url="Other%20Constants.html#/c:@MLNMapViewDecelerationRateFast">
+                <a title="MLNMapViewDecelerationRateFast" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNMapViewDecelerationRateFast">MLNMapViewDecelerationRateFast</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewDecelerationRateImmediate" data-url="Other%20Constants.html#/c:@MLNMapViewDecelerationRateImmediate">
+                <a title="MLNMapViewDecelerationRateImmediate" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNMapViewDecelerationRateImmediate">MLNMapViewDecelerationRateImmediate</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewDecelerationRateNormal" data-url="Other%20Constants.html#/c:@MLNMapViewDecelerationRateNormal">
+                <a title="MLNMapViewDecelerationRateNormal" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNMapViewDecelerationRateNormal">MLNMapViewDecelerationRateNormal</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewPreferredFramesPerSecondDefault" data-url="Other%20Constants.html#/c:@MLNMapViewPreferredFramesPerSecondDefault">
+                <a title="MLNMapViewPreferredFramesPerSecondDefault" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNMapViewPreferredFramesPerSecondDefault">MLNMapViewPreferredFramesPerSecondDefault</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewPreferredFramesPerSecondLowPower" data-url="Other%20Constants.html#/c:@MLNMapViewPreferredFramesPerSecondLowPower">
+                <a title="MLNMapViewPreferredFramesPerSecondLowPower" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNMapViewPreferredFramesPerSecondLowPower">MLNMapViewPreferredFramesPerSecondLowPower</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewPreferredFramesPerSecondMaximum" data-url="Other%20Constants.html#/c:@MLNMapViewPreferredFramesPerSecondMaximum">
+                <a title="MLNMapViewPreferredFramesPerSecondMaximum" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNMapViewPreferredFramesPerSecondMaximum">MLNMapViewPreferredFramesPerSecondMaximum</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackErrorNotification" data-url="Other%20Constants.html#/c:@MLNOfflinePackErrorNotification">
+                <a title="MLNOfflinePackErrorNotification" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNOfflinePackErrorNotification">MLNOfflinePackErrorNotification</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackMaximumMapboxTilesReachedNotification" data-url="Other%20Constants.html#/c:@MLNOfflinePackMaximumMapboxTilesReachedNotification">
+                <a title="MLNOfflinePackMaximumMapboxTilesReachedNotification" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNOfflinePackMaximumMapboxTilesReachedNotification">MLNOfflinePackMaximumMapboxTilesReachedNotification</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackProgressChangedNotification" data-url="Other%20Constants.html#/c:@MLNOfflinePackProgressChangedNotification">
+                <a title="MLNOfflinePackProgressChangedNotification" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNOfflinePackProgressChangedNotification">MLNOfflinePackProgressChangedNotification</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackUserInfoKeyError" data-url="Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyError">
+                <a title="MLNOfflinePackUserInfoKeyError" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyError">MLNOfflinePackUserInfoKeyError</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackUserInfoKeyMaximumCount" data-url="Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyMaximumCount">
+                <a title="MLNOfflinePackUserInfoKeyMaximumCount" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyMaximumCount">MLNOfflinePackUserInfoKeyMaximumCount</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackUserInfoKeyProgress" data-url="Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyProgress">
+                <a title="MLNOfflinePackUserInfoKeyProgress" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyProgress">MLNOfflinePackUserInfoKeyProgress</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackUserInfoKeyState" data-url="Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyState">
+                <a title="MLNOfflinePackUserInfoKeyState" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNOfflinePackUserInfoKeyState">MLNOfflinePackUserInfoKeyState</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionBuffer" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionBuffer">
+                <a title="MLNShapeSourceOptionBuffer" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionBuffer">MLNShapeSourceOptionBuffer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionClipsCoordinates" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionClipsCoordinates">
+                <a title="MLNShapeSourceOptionClipsCoordinates" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionClipsCoordinates">MLNShapeSourceOptionClipsCoordinates</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionClusterProperties" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionClusterProperties">
+                <a title="MLNShapeSourceOptionClusterProperties" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionClusterProperties">MLNShapeSourceOptionClusterProperties</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionClusterRadius" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionClusterRadius">
+                <a title="MLNShapeSourceOptionClusterRadius" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionClusterRadius">MLNShapeSourceOptionClusterRadius</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionClustered" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionClustered">
+                <a title="MLNShapeSourceOptionClustered" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionClustered">MLNShapeSourceOptionClustered</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionLineDistanceMetrics" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionLineDistanceMetrics">
+                <a title="MLNShapeSourceOptionLineDistanceMetrics" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionLineDistanceMetrics">MLNShapeSourceOptionLineDistanceMetrics</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionMaximumZoomLevel" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionMaximumZoomLevel">
+                <a title="MLNShapeSourceOptionMaximumZoomLevel" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionMaximumZoomLevel">MLNShapeSourceOptionMaximumZoomLevel</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionMaximumZoomLevelForClustering" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionMaximumZoomLevelForClustering">
+                <a title="MLNShapeSourceOptionMaximumZoomLevelForClustering" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionMaximumZoomLevelForClustering">MLNShapeSourceOptionMaximumZoomLevelForClustering</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionMinimumZoomLevel" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionMinimumZoomLevel">
+                <a title="MLNShapeSourceOptionMinimumZoomLevel" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionMinimumZoomLevel">MLNShapeSourceOptionMinimumZoomLevel</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionSimplificationTolerance" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionSimplificationTolerance">
+                <a title="MLNShapeSourceOptionSimplificationTolerance" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionSimplificationTolerance">MLNShapeSourceOptionSimplificationTolerance</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOptionWrapsCoordinates" data-url="Other%20Constants.html#/c:@MLNShapeSourceOptionWrapsCoordinates">
+                <a title="MLNShapeSourceOptionWrapsCoordinates" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNShapeSourceOptionWrapsCoordinates">MLNShapeSourceOptionWrapsCoordinates</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionAttributionHTMLString" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionAttributionHTMLString">
+                <a title="MLNTileSourceOptionAttributionHTMLString" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionAttributionHTMLString">MLNTileSourceOptionAttributionHTMLString</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionAttributionInfos" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionAttributionInfos">
+                <a title="MLNTileSourceOptionAttributionInfos" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionAttributionInfos">MLNTileSourceOptionAttributionInfos</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionCoordinateBounds" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionCoordinateBounds">
+                <a title="MLNTileSourceOptionCoordinateBounds" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionCoordinateBounds">MLNTileSourceOptionCoordinateBounds</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionDEMEncoding" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionDEMEncoding">
+                <a title="MLNTileSourceOptionDEMEncoding" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionDEMEncoding">MLNTileSourceOptionDEMEncoding</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionMaximumZoomLevel" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionMaximumZoomLevel">
+                <a title="MLNTileSourceOptionMaximumZoomLevel" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionMaximumZoomLevel">MLNTileSourceOptionMaximumZoomLevel</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionMinimumZoomLevel" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionMinimumZoomLevel">
+                <a title="MLNTileSourceOptionMinimumZoomLevel" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionMinimumZoomLevel">MLNTileSourceOptionMinimumZoomLevel</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionTileCoordinateSystem" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionTileCoordinateSystem">
+                <a title="MLNTileSourceOptionTileCoordinateSystem" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionTileCoordinateSystem">MLNTileSourceOptionTileCoordinateSystem</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOptionTileSize" data-url="Other%20Constants.html#/c:@MLNTileSourceOptionTileSize">
+                <a title="MLNTileSourceOptionTileSize" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MLNTileSourceOptionTileSize">MLNTileSourceOptionTileSize</a>
+              </li>
+              <li class="nav-group-task" data-name="MapboxVersionNumber" data-url="Other%20Constants.html#/c:@MapboxVersionNumber">
+                <a title="MapboxVersionNumber" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MapboxVersionNumber">MapboxVersionNumber</a>
+              </li>
+              <li class="nav-group-task" data-name="MapboxVersionString" data-url="Other%20Constants.html#/c:@MapboxVersionString">
+                <a title="MapboxVersionString" class="nav-group-task-link" href="../Other%20Constants.html#/c:@MapboxVersionString">MapboxVersionString</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Enumerations">
+            <a class="small-heading" href="../Other Enumerations.html">Other Enumerations<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNAnnotationVerticalAlignment" data-url="Enums/MLNAnnotationVerticalAlignment.html">
+                <a title="MLNAnnotationVerticalAlignment" class="nav-group-task-link" href="../Enums/MLNAnnotationVerticalAlignment.html">MLNAnnotationVerticalAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNAnnotationViewDragState" data-url="Enums/MLNAnnotationViewDragState.html">
+                <a title="MLNAnnotationViewDragState" class="nav-group-task-link" href="../Enums/MLNAnnotationViewDragState.html">MLNAnnotationViewDragState</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNAttributionInfoStyle" data-url="Enums/MLNAttributionInfoStyle.html">
+                <a title="MLNAttributionInfoStyle" class="nav-group-task-link" href="../Enums/MLNAttributionInfoStyle.html">MLNAttributionInfoStyle</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCirclePitchAlignment" data-url="Enums/MLNCirclePitchAlignment.html">
+                <a title="MLNCirclePitchAlignment" class="nav-group-task-link" href="../Enums/MLNCirclePitchAlignment.html">MLNCirclePitchAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCircleScaleAlignment" data-url="Enums/MLNCircleScaleAlignment.html">
+                <a title="MLNCircleScaleAlignment" class="nav-group-task-link" href="../Enums/MLNCircleScaleAlignment.html">MLNCircleScaleAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCircleTranslationAnchor" data-url="Enums/MLNCircleTranslationAnchor.html">
+                <a title="MLNCircleTranslationAnchor" class="nav-group-task-link" href="../Enums/MLNCircleTranslationAnchor.html">MLNCircleTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNDEMEncoding" data-url="Enums/MLNDEMEncoding.html">
+                <a title="MLNDEMEncoding" class="nav-group-task-link" href="../Enums/MLNDEMEncoding.html">MLNDEMEncoding</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNErrorCode" data-url="Enums/MLNErrorCode.html">
+                <a title="MLNErrorCode" class="nav-group-task-link" href="../Enums/MLNErrorCode.html">MLNErrorCode</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillExtrusionTranslationAnchor" data-url="Enums/MLNFillExtrusionTranslationAnchor.html">
+                <a title="MLNFillExtrusionTranslationAnchor" class="nav-group-task-link" href="../Enums/MLNFillExtrusionTranslationAnchor.html">MLNFillExtrusionTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillTranslationAnchor" data-url="Enums/MLNFillTranslationAnchor.html">
+                <a title="MLNFillTranslationAnchor" class="nav-group-task-link" href="../Enums/MLNFillTranslationAnchor.html">MLNFillTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNHillshadeIlluminationAnchor" data-url="Enums/MLNHillshadeIlluminationAnchor.html">
+                <a title="MLNHillshadeIlluminationAnchor" class="nav-group-task-link" href="../Enums/MLNHillshadeIlluminationAnchor.html">MLNHillshadeIlluminationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconAnchor" data-url="Enums/MLNIconAnchor.html">
+                <a title="MLNIconAnchor" class="nav-group-task-link" href="../Enums/MLNIconAnchor.html">MLNIconAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconPitchAlignment" data-url="Enums/MLNIconPitchAlignment.html">
+                <a title="MLNIconPitchAlignment" class="nav-group-task-link" href="../Enums/MLNIconPitchAlignment.html">MLNIconPitchAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconRotationAlignment" data-url="Enums/MLNIconRotationAlignment.html">
+                <a title="MLNIconRotationAlignment" class="nav-group-task-link" href="../Enums/MLNIconRotationAlignment.html">MLNIconRotationAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconTextFit" data-url="Enums/MLNIconTextFit.html">
+                <a title="MLNIconTextFit" class="nav-group-task-link" href="../Enums/MLNIconTextFit.html">MLNIconTextFit</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconTranslationAnchor" data-url="Enums/MLNIconTranslationAnchor.html">
+                <a title="MLNIconTranslationAnchor" class="nav-group-task-link" href="../Enums/MLNIconTranslationAnchor.html">MLNIconTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLightAnchor" data-url="Enums/MLNLightAnchor.html">
+                <a title="MLNLightAnchor" class="nav-group-task-link" href="../Enums/MLNLightAnchor.html">MLNLightAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineCap" data-url="Enums/MLNLineCap.html">
+                <a title="MLNLineCap" class="nav-group-task-link" href="../Enums/MLNLineCap.html">MLNLineCap</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineJoin" data-url="Enums/MLNLineJoin.html">
+                <a title="MLNLineJoin" class="nav-group-task-link" href="../Enums/MLNLineJoin.html">MLNLineJoin</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineTranslationAnchor" data-url="Enums/MLNLineTranslationAnchor.html">
+                <a title="MLNLineTranslationAnchor" class="nav-group-task-link" href="../Enums/MLNLineTranslationAnchor.html">MLNLineTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLoggingLevel" data-url="Enums/MLNLoggingLevel.html">
+                <a title="MLNLoggingLevel" class="nav-group-task-link" href="../Enums/MLNLoggingLevel.html">MLNLoggingLevel</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapDebugMaskOptions" data-url="Enums/MLNMapDebugMaskOptions.html">
+                <a title="MLNMapDebugMaskOptions" class="nav-group-task-link" href="../Enums/MLNMapDebugMaskOptions.html">MLNMapDebugMaskOptions</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOrnamentPosition" data-url="Enums/MLNOrnamentPosition.html">
+                <a title="MLNOrnamentPosition" class="nav-group-task-link" href="../Enums/MLNOrnamentPosition.html">MLNOrnamentPosition</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOrnamentVisibility" data-url="Enums/MLNOrnamentVisibility.html">
+                <a title="MLNOrnamentVisibility" class="nav-group-task-link" href="../Enums/MLNOrnamentVisibility.html">MLNOrnamentVisibility</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNRasterResamplingMode" data-url="Enums/MLNRasterResamplingMode.html">
+                <a title="MLNRasterResamplingMode" class="nav-group-task-link" href="../Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNResourceKind" data-url="Enums/MLNResourceKind.html">
+                <a title="MLNResourceKind" class="nav-group-task-link" href="../Enums/MLNResourceKind.html">MLNResourceKind</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSymbolPlacement" data-url="Enums/MLNSymbolPlacement.html">
+                <a title="MLNSymbolPlacement" class="nav-group-task-link" href="../Enums/MLNSymbolPlacement.html">MLNSymbolPlacement</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSymbolZOrder" data-url="Enums/MLNSymbolZOrder.html">
+                <a title="MLNSymbolZOrder" class="nav-group-task-link" href="../Enums/MLNSymbolZOrder.html">MLNSymbolZOrder</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextAnchor" data-url="Enums/MLNTextAnchor.html">
+                <a title="MLNTextAnchor" class="nav-group-task-link" href="../Enums/MLNTextAnchor.html">MLNTextAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextJustification" data-url="Enums/MLNTextJustification.html">
+                <a title="MLNTextJustification" class="nav-group-task-link" href="../Enums/MLNTextJustification.html">MLNTextJustification</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextPitchAlignment" data-url="Enums/MLNTextPitchAlignment.html">
+                <a title="MLNTextPitchAlignment" class="nav-group-task-link" href="../Enums/MLNTextPitchAlignment.html">MLNTextPitchAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextRotationAlignment" data-url="Enums/MLNTextRotationAlignment.html">
+                <a title="MLNTextRotationAlignment" class="nav-group-task-link" href="../Enums/MLNTextRotationAlignment.html">MLNTextRotationAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextTransform" data-url="Enums/MLNTextTransform.html">
+                <a title="MLNTextTransform" class="nav-group-task-link" href="../Enums/MLNTextTransform.html">MLNTextTransform</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextTranslationAnchor" data-url="Enums/MLNTextTranslationAnchor.html">
+                <a title="MLNTextTranslationAnchor" class="nav-group-task-link" href="../Enums/MLNTextTranslationAnchor.html">MLNTextTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextWritingMode" data-url="Enums/MLNTextWritingMode.html">
+                <a title="MLNTextWritingMode" class="nav-group-task-link" href="../Enums/MLNTextWritingMode.html">MLNTextWritingMode</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileCoordinateSystem" data-url="Enums/MLNTileCoordinateSystem.html">
+                <a title="MLNTileCoordinateSystem" class="nav-group-task-link" href="../Enums/MLNTileCoordinateSystem.html">MLNTileCoordinateSystem</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNWellKnownTileServer" data-url="Enums/MLNWellKnownTileServer.html">
+                <a title="MLNWellKnownTileServer" class="nav-group-task-link" href="../Enums/MLNWellKnownTileServer.html">MLNWellKnownTileServer</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Protocols">
+            <a class="small-heading" href="../Other Protocols.html">Other Protocols<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNCluster" data-url="Protocols/MLNCluster.html">
+                <a title="MLNCluster" class="nav-group-task-link" href="../Protocols/MLNCluster.html">MLNCluster</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNComputedShapeSourceDataSource" data-url="Protocols/MLNComputedShapeSourceDataSource.html">
+                <a title="MLNComputedShapeSourceDataSource" class="nav-group-task-link" href="../Protocols/MLNComputedShapeSourceDataSource.html">MLNComputedShapeSourceDataSource</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapSnapshotterDelegate" data-url="Protocols/MLNMapSnapshotterDelegate.html">
+                <a title="MLNMapSnapshotterDelegate" class="nav-group-task-link" href="../Protocols/MLNMapSnapshotterDelegate.html">MLNMapSnapshotterDelegate</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflineStorageDelegate" data-url="Protocols/MLNOfflineStorageDelegate.html">
+                <a title="MLNOfflineStorageDelegate" class="nav-group-task-link" href="../Protocols/MLNOfflineStorageDelegate.html">MLNOfflineStorageDelegate</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNStylable" data-url="Protocols/MLNStylable.html">
+                <a title="MLNStylable" class="nav-group-task-link" href="../Protocols/MLNStylable.html">MLNStylable</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Type Definitions">
+            <a class="small-heading" href="../Other Type Definitions.html">Other Type Definitions<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNAttributedExpressionKey" data-url="Other%20Type%20Definitions.html#/c:MLNAttributedExpression.h@T@MLNAttributedExpressionKey">
+                <a title="MLNAttributedExpressionKey" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNAttributedExpression.h@T@MLNAttributedExpressionKey">MLNAttributedExpressionKey</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNBatchedOfflinePackAdditionCompletionHandler" data-url="Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNBatchedOfflinePackAdditionCompletionHandler">
+                <a title="MLNBatchedOfflinePackAdditionCompletionHandler" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNBatchedOfflinePackAdditionCompletionHandler">MLNBatchedOfflinePackAdditionCompletionHandler</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLoggingBlockHandler" data-url="Other%20Type%20Definitions.html#/c:MLNLoggingConfiguration.h@T@MLNLoggingBlockHandler">
+                <a title="MLNLoggingBlockHandler" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNLoggingConfiguration.h@T@MLNLoggingBlockHandler">MLNLoggingBlockHandler</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapSnapshotCompletionHandler" data-url="Other%20Type%20Definitions.html#/c:MLNMapSnapshotter.h@T@MLNMapSnapshotCompletionHandler">
+                <a title="MLNMapSnapshotCompletionHandler" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNMapSnapshotter.h@T@MLNMapSnapshotCompletionHandler">MLNMapSnapshotCompletionHandler</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapSnapshotOverlayHandler" data-url="Other%20Type%20Definitions.html#/c:MLNMapSnapshotter.h@T@MLNMapSnapshotOverlayHandler">
+                <a title="MLNMapSnapshotOverlayHandler" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNMapSnapshotter.h@T@MLNMapSnapshotOverlayHandler">MLNMapSnapshotOverlayHandler</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewDecelerationRate" data-url="Other%20Type%20Definitions.html#/c:MLNMapView.h@T@MLNMapViewDecelerationRate">
+                <a title="MLNMapViewDecelerationRate" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNMapView.h@T@MLNMapViewDecelerationRate">MLNMapViewDecelerationRate</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapViewPreferredFramesPerSecond" data-url="Other%20Type%20Definitions.html#/c:MLNMapView.h@T@MLNMapViewPreferredFramesPerSecond">
+                <a title="MLNMapViewPreferredFramesPerSecond" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNMapView.h@T@MLNMapViewPreferredFramesPerSecond">MLNMapViewPreferredFramesPerSecond</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackAdditionCompletionHandler" data-url="Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePackAdditionCompletionHandler">
+                <a title="MLNOfflinePackAdditionCompletionHandler" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePackAdditionCompletionHandler">MLNOfflinePackAdditionCompletionHandler</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackRemovalCompletionHandler" data-url="Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePackRemovalCompletionHandler">
+                <a title="MLNOfflinePackRemovalCompletionHandler" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePackRemovalCompletionHandler">MLNOfflinePackRemovalCompletionHandler</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePackUserInfoKey" data-url="Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePackUserInfoKey">
+                <a title="MLNOfflinePackUserInfoKey" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePackUserInfoKey">MLNOfflinePackUserInfoKey</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNOfflinePreloadDataCompletionHandler" data-url="Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePreloadDataCompletionHandler">
+                <a title="MLNOfflinePreloadDataCompletionHandler" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNOfflineStorage.h@T@MLNOfflinePreloadDataCompletionHandler">MLNOfflinePreloadDataCompletionHandler</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNShapeSourceOption" data-url="Other%20Type%20Definitions.html#/c:MLNShapeSource.h@T@MLNShapeSourceOption">
+                <a title="MLNShapeSourceOption" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNShapeSource.h@T@MLNShapeSourceOption">MLNShapeSourceOption</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSphericalPosition" data-url="Type%20Definitions/MLNSphericalPosition.html">
+                <a title="MLNSphericalPosition" class="nav-group-task-link" href="../Type%20Definitions/MLNSphericalPosition.html">MLNSphericalPosition</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTileSourceOption" data-url="Other%20Type%20Definitions.html#/c:MLNTileSource.h@T@MLNTileSourceOption">
+                <a title="MLNTileSourceOption" class="nav-group-task-link" href="../Other%20Type%20Definitions.html#/c:MLNTileSource.h@T@MLNTileSourceOption">MLNTileSourceOption</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTransition" data-url="Type%20Definitions/MLNTransition.html">
+                <a title="MLNTransition" class="nav-group-task-link" href="../Type%20Definitions/MLNTransition.html">MLNTransition</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Functions">
+            <a class="small-heading" href="../Other Functions.html">Other Functions<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNAltitudeForZoomLevel" data-url="Other%20Functions.html#/c:@F@MLNAltitudeForZoomLevel">
+                <a title="MLNAltitudeForZoomLevel" class="nav-group-task-link" href="../Other%20Functions.html#/c:@F@MLNAltitudeForZoomLevel">MLNAltitudeForZoomLevel</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapPointForCoordinate" data-url="Other%20Functions.html#/c:@F@MLNMapPointForCoordinate">
+                <a title="MLNMapPointForCoordinate" class="nav-group-task-link" href="../Other%20Functions.html#/c:@F@MLNMapPointForCoordinate">MLNMapPointForCoordinate</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNMapPointMake" data-url="Other%20Functions.html#/c:MLNGeometry.h@F@MLNMapPointMake">
+                <a title="MLNMapPointMake" class="nav-group-task-link" href="../Other%20Functions.html#/c:MLNGeometry.h@F@MLNMapPointMake">MLNMapPointMake</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSphericalPositionMake" data-url="Other%20Functions.html#/c:MLNLight.h@F@MLNSphericalPositionMake">
+                <a title="MLNSphericalPositionMake" class="nav-group-task-link" href="../Other%20Functions.html#/c:MLNLight.h@F@MLNSphericalPositionMake">MLNSphericalPositionMake</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTransitionMake" data-url="Other%20Functions.html#/c:MLNTypes.h@F@MLNTransitionMake">
+                <a title="MLNTransitionMake" class="nav-group-task-link" href="../Other%20Functions.html#/c:MLNTypes.h@F@MLNTransitionMake">MLNTransitionMake</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNZoomLevelForAltitude" data-url="Other%20Functions.html#/c:@F@MLNZoomLevelForAltitude">
+                <a title="MLNZoomLevelForAltitude" class="nav-group-task-link" href="../Other%20Functions.html#/c:@F@MLNZoomLevelForAltitude">MLNZoomLevelForAltitude</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name" data-name="Other Structures">
+            <a class="small-heading" href="../Other Structures.html">Other Structures<span class="anchor-icon" /></a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNSphericalPosition" data-url="Structs/MLNSphericalPosition.html">
+                <a title="MLNSphericalPosition" class="nav-group-task-link" href="../Structs/MLNSphericalPosition.html">MLNSphericalPosition</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTransition" data-url="Structs/MLNTransition.html">
+                <a title="MLNTransition" class="nav-group-task-link" href="../Structs/MLNTransition.html">MLNTransition</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            <a href="#/NSValue(MLNRasterStyleLayerAdditions)"><h1 id="NSValue(MLNRasterStyleLayerAdditions)">NSValue(MLNRasterStyleLayerAdditions)<span class="anchor-icon" /></h1></a>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight objective_c"><code><span class="k">@interface</span> <span class="nc">NSValue</span> <span class="p">(</span><span class="nl">MLNRasterStyleLayerAdditions</span><span class="p">)</span></code></pre>
+
+                </div>
+              </div>
+            <p>Methods for wrapping an enumeration value for a style layer attribute in an
+<code><a href="../Classes/MLNRasterStyleLayer.html">MLNRasterStyleLayer</a></code> object and unwrapping its raw value.</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)NSValue(cm)valueWithMLNRasterResamplingMode:"></a>
+                    <a name="//apple_ref/objc/Method/+valueWithMLNRasterResamplingMode:" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)NSValue(cm)valueWithMLNRasterResamplingMode:"><span class="token-name">+valueWithMLNRasterResamplingMode:</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Creates a new value object containing the given <code><a href="../Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a></code> enumeration.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">+</span> <span class="p">(</span><span class="n">nonnull</span> <span class="n">instancetype</span><span class="p">)</span><span class="nf">valueWithMLNRasterResamplingMode</span><span class="p">:</span>
+    <span class="p">(</span><span class="n"><a href="../Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a></span><span class="p">)</span><span class="nv">rasterResamplingMode</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="n">convenience</span> <span class="nf">init</span><span class="p">(</span><span class="n">mlnRasterResamplingMode</span> <span class="nv">rasterResamplingMode</span><span class="p">:</span> <span class="kt"><a href="../Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                  rasterResamplingMode
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The value for the new object.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>A new value object that contains the enumeration value.</p>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNRasterStyleLayer.h#L338">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:objc(cs)NSValue(py)MLNRasterResamplingModeValue"></a>
+                    <a name="//apple_ref/objc/Property/MLNRasterResamplingModeValue" class="dashAnchor"></a>
+                    <a class="token" href="#/c:objc(cs)NSValue(py)MLNRasterResamplingModeValue"><span class="token-name">MLNRasterResamplingModeValue</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>The <code><a href="../Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a></code> enumeration representation of the value.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">@property</span> <span class="p">(</span><span class="n">readonly</span><span class="p">)</span> <span class="n"><a href="../Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a></span> <span class="n">MLNRasterResamplingModeValue</span><span class="p">;</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="k">var</span> <span class="nv">mlnRasterResamplingModeValue</span><span class="p">:</span> <span class="kt"><a href="../Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a></span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNRasterStyleLayer.h#L343">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="../img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer limiter">
+      <p><a class="link" href="https://github.com/maplibre/maplibre-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
+    </section>
+  </body>
+</div>
+</html>

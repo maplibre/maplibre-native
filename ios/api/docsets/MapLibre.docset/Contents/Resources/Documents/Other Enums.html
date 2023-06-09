@@ -41,7 +41,7 @@
         </p>
     
           <p class="header-col header-col--secondary">
-            <a class="header-link space-right2" href="https://github.com/maplibre/maplibre-gl-native">
+            <a class="header-link space-right2" href="https://github.com/maplibre/maplibre-native">
               <svg style="margin-bottom: 1px;" class="header-icon" viewBox="0 0 33 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
       		      <path stroke="none" stroke-width="1" fill="white" fill-rule="evenodd" d="M16.6,0.4 C7.6,0.4 0.3,7.7 0.3,16.7 C0.3,23.9 5,30 11.4,32.2 C12.2,32.3 12.5,31.8 12.5,31.4 L12.5,28.6 C8,29.6 7,26.4 7,26.4 C6.3,24.5 5.2,24 5.2,24 C3.7,23 5.3,23 5.3,23 C6.9,23.1 7.8,24.7 7.8,24.7 C9.3,27.2 11.6,26.5 12.5,26.1 C12.6,25 13.1,24.3 13.5,23.9 C9.9,23.5 6.1,22.1 6.1,15.8 C6.1,14 6.7,12.6 7.8,11.4 C7.6,11 7.1,9.3 8,7.1 C8,7.1 9.4,6.7 12.5,8.8 C13.8,8.4 15.2,8.3 16.6,8.3 C18,8.3 19.4,8.5 20.7,8.8 C23.8,6.7 25.2,7.1 25.2,7.1 C26.1,9.3 25.5,11 25.4,11.4 C26.4,12.5 27.1,14 27.1,15.8 C27.1,22.1 23.3,23.4 19.7,23.8 C20.3,24.3 20.8,25.3 20.8,26.8 L20.8,31.3 C20.8,31.7 21.1,32.2 21.9,32.1 C28.4,29.9 33,23.8 33,16.6 C32.9,7.7 25.6,0.4 16.6,0.4 L16.6,0.4 Z"></path>
               </svg>
@@ -50,7 +50,7 @@
           </p>
     
           <p class="header-col header-col--secondary">
-            <a class="header-link bold" href="dash-feed://https%3A%2F%2Fmaplibre.org%2Fmaplibre-gl-native%2Fios%2Fapi%2Fdocsets%2FMapLibre.xml">
+            <a class="header-link bold" href="dash-feed://https%3A%2F%2Fmaplibre.org%2Fmaplibre-native%2Fios%2Fapi%2Fdocsets%2FMapLibre.xml">
               <img style="margin-bottom: 1px;" class="header-icon" src="img/dash.png"/>
               Install in Dash
             </a>
@@ -83,6 +83,15 @@
               </li>
               <li class="nav-group-task" data-name="Predicates and Expressions" data-url="predicates-and-expressions.html">
                 <a title="Predicates and Expressions" class="nav-group-task-link" href="predicates-and-expressions.html">Predicates and Expressions</a>
+              </li>
+              <li class="nav-group-task" data-name="Migrating to Expressions" data-url="migrating-to-expressions.html">
+                <a title="Migrating to Expressions" class="nav-group-task-link" href="migrating-to-expressions.html">Migrating to Expressions</a>
+              </li>
+              <li class="nav-group-task" data-name="For Style Authors" data-url="for-style-authors.html">
+                <a title="For Style Authors" class="nav-group-task-link" href="for-style-authors.html">For Style Authors</a>
+              </li>
+              <li class="nav-group-task" data-name="Tile URL Templates" data-url="tile-url-templates.html">
+                <a title="Tile URL Templates" class="nav-group-task-link" href="tile-url-templates.html">Tile URL Templates</a>
               </li>
               <li class="nav-group-task" data-name="Customizing Fonts" data-url="customizing-fonts.html">
                 <a title="Customizing Fonts" class="nav-group-task-link" href="customizing-fonts.html">Customizing Fonts</a>
@@ -210,6 +219,9 @@
               <li class="nav-group-task" data-name="MLNStyle" data-url="Classes/MLNStyle.html">
                 <a title="MLNStyle" class="nav-group-task-link" href="Classes/MLNStyle.html">MLNStyle</a>
               </li>
+              <li class="nav-group-task" data-name="MLNLight" data-url="Classes/MLNLight.html">
+                <a title="MLNLight" class="nav-group-task-link" href="Classes/MLNLight.html">MLNLight</a>
+              </li>
             </ul>
           </li>
           <li class="nav-group-name" data-name="Style Primitives">
@@ -285,8 +297,35 @@
               <li class="nav-group-task" data-name="MLNForegroundStyleLayer" data-url="Classes/MLNForegroundStyleLayer.html">
                 <a title="MLNForegroundStyleLayer" class="nav-group-task-link" href="Classes/MLNForegroundStyleLayer.html">MLNForegroundStyleLayer</a>
               </li>
+              <li class="nav-group-task" data-name="MLNBackgroundStyleLayer" data-url="Classes/MLNBackgroundStyleLayer.html">
+                <a title="MLNBackgroundStyleLayer" class="nav-group-task-link" href="Classes/MLNBackgroundStyleLayer.html">MLNBackgroundStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNRasterStyleLayer" data-url="Classes/MLNRasterStyleLayer.html">
+                <a title="MLNRasterStyleLayer" class="nav-group-task-link" href="Classes/MLNRasterStyleLayer.html">MLNRasterStyleLayer</a>
+              </li>
               <li class="nav-group-task" data-name="MLNVectorStyleLayer" data-url="Classes/MLNVectorStyleLayer.html">
                 <a title="MLNVectorStyleLayer" class="nav-group-task-link" href="Classes/MLNVectorStyleLayer.html">MLNVectorStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCircleStyleLayer" data-url="Classes/MLNCircleStyleLayer.html">
+                <a title="MLNCircleStyleLayer" class="nav-group-task-link" href="Classes/MLNCircleStyleLayer.html">MLNCircleStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillStyleLayer" data-url="Classes/MLNFillStyleLayer.html">
+                <a title="MLNFillStyleLayer" class="nav-group-task-link" href="Classes/MLNFillStyleLayer.html">MLNFillStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillExtrusionStyleLayer" data-url="Classes/MLNFillExtrusionStyleLayer.html">
+                <a title="MLNFillExtrusionStyleLayer" class="nav-group-task-link" href="Classes/MLNFillExtrusionStyleLayer.html">MLNFillExtrusionStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNHeatmapStyleLayer" data-url="Classes/MLNHeatmapStyleLayer.html">
+                <a title="MLNHeatmapStyleLayer" class="nav-group-task-link" href="Classes/MLNHeatmapStyleLayer.html">MLNHeatmapStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNHillshadeStyleLayer" data-url="Classes/MLNHillshadeStyleLayer.html">
+                <a title="MLNHillshadeStyleLayer" class="nav-group-task-link" href="Classes/MLNHillshadeStyleLayer.html">MLNHillshadeStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineStyleLayer" data-url="Classes/MLNLineStyleLayer.html">
+                <a title="MLNLineStyleLayer" class="nav-group-task-link" href="Classes/MLNLineStyleLayer.html">MLNLineStyleLayer</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSymbolStyleLayer" data-url="Classes/MLNSymbolStyleLayer.html">
+                <a title="MLNSymbolStyleLayer" class="nav-group-task-link" href="Classes/MLNSymbolStyleLayer.html">MLNSymbolStyleLayer</a>
               </li>
             </ul>
           </li>
@@ -415,6 +454,27 @@
               </li>
               <li class="nav-group-task" data-name="NSValue(MLNAdditions)" data-url="Categories/NSValue%28MLNAdditions%29.html">
                 <a title="NSValue(MLNAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNAdditions%29.html">NSValue(MLNAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNCircleStyleLayerAdditions)" data-url="Categories/NSValue%28MLNCircleStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNCircleStyleLayerAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNCircleStyleLayerAdditions%29.html">NSValue(MLNCircleStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNFillExtrusionStyleLayerAdditions)" data-url="Categories/NSValue%28MLNFillExtrusionStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNFillExtrusionStyleLayerAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNFillExtrusionStyleLayerAdditions%29.html">NSValue(MLNFillExtrusionStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNFillStyleLayerAdditions)" data-url="Categories/NSValue%28MLNFillStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNFillStyleLayerAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNFillStyleLayerAdditions%29.html">NSValue(MLNFillStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNHillshadeStyleLayerAdditions)" data-url="Categories/NSValue%28MLNHillshadeStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNHillshadeStyleLayerAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNHillshadeStyleLayerAdditions%29.html">NSValue(MLNHillshadeStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNLineStyleLayerAdditions)" data-url="Categories/NSValue%28MLNLineStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNLineStyleLayerAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNLineStyleLayerAdditions%29.html">NSValue(MLNLineStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNRasterStyleLayerAdditions)" data-url="Categories/NSValue%28MLNRasterStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNRasterStyleLayerAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNRasterStyleLayerAdditions%29.html">NSValue(MLNRasterStyleLayerAdditions)</a>
+              </li>
+              <li class="nav-group-task" data-name="NSValue(MLNSymbolStyleLayerAdditions)" data-url="Categories/NSValue%28MLNSymbolStyleLayerAdditions%29.html">
+                <a title="NSValue(MLNSymbolStyleLayerAdditions)" class="nav-group-task-link" href="Categories/NSValue%28MLNSymbolStyleLayerAdditions%29.html">NSValue(MLNSymbolStyleLayerAdditions)</a>
               </li>
             </ul>
           </li>
@@ -593,11 +653,56 @@
               <li class="nav-group-task" data-name="MLNAttributionInfoStyle" data-url="Enums/MLNAttributionInfoStyle.html">
                 <a title="MLNAttributionInfoStyle" class="nav-group-task-link" href="Enums/MLNAttributionInfoStyle.html">MLNAttributionInfoStyle</a>
               </li>
+              <li class="nav-group-task" data-name="MLNCirclePitchAlignment" data-url="Enums/MLNCirclePitchAlignment.html">
+                <a title="MLNCirclePitchAlignment" class="nav-group-task-link" href="Enums/MLNCirclePitchAlignment.html">MLNCirclePitchAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCircleScaleAlignment" data-url="Enums/MLNCircleScaleAlignment.html">
+                <a title="MLNCircleScaleAlignment" class="nav-group-task-link" href="Enums/MLNCircleScaleAlignment.html">MLNCircleScaleAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNCircleTranslationAnchor" data-url="Enums/MLNCircleTranslationAnchor.html">
+                <a title="MLNCircleTranslationAnchor" class="nav-group-task-link" href="Enums/MLNCircleTranslationAnchor.html">MLNCircleTranslationAnchor</a>
+              </li>
               <li class="nav-group-task" data-name="MLNDEMEncoding" data-url="Enums/MLNDEMEncoding.html">
                 <a title="MLNDEMEncoding" class="nav-group-task-link" href="Enums/MLNDEMEncoding.html">MLNDEMEncoding</a>
               </li>
               <li class="nav-group-task" data-name="MLNErrorCode" data-url="Enums/MLNErrorCode.html">
                 <a title="MLNErrorCode" class="nav-group-task-link" href="Enums/MLNErrorCode.html">MLNErrorCode</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillExtrusionTranslationAnchor" data-url="Enums/MLNFillExtrusionTranslationAnchor.html">
+                <a title="MLNFillExtrusionTranslationAnchor" class="nav-group-task-link" href="Enums/MLNFillExtrusionTranslationAnchor.html">MLNFillExtrusionTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNFillTranslationAnchor" data-url="Enums/MLNFillTranslationAnchor.html">
+                <a title="MLNFillTranslationAnchor" class="nav-group-task-link" href="Enums/MLNFillTranslationAnchor.html">MLNFillTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNHillshadeIlluminationAnchor" data-url="Enums/MLNHillshadeIlluminationAnchor.html">
+                <a title="MLNHillshadeIlluminationAnchor" class="nav-group-task-link" href="Enums/MLNHillshadeIlluminationAnchor.html">MLNHillshadeIlluminationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconAnchor" data-url="Enums/MLNIconAnchor.html">
+                <a title="MLNIconAnchor" class="nav-group-task-link" href="Enums/MLNIconAnchor.html">MLNIconAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconPitchAlignment" data-url="Enums/MLNIconPitchAlignment.html">
+                <a title="MLNIconPitchAlignment" class="nav-group-task-link" href="Enums/MLNIconPitchAlignment.html">MLNIconPitchAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconRotationAlignment" data-url="Enums/MLNIconRotationAlignment.html">
+                <a title="MLNIconRotationAlignment" class="nav-group-task-link" href="Enums/MLNIconRotationAlignment.html">MLNIconRotationAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconTextFit" data-url="Enums/MLNIconTextFit.html">
+                <a title="MLNIconTextFit" class="nav-group-task-link" href="Enums/MLNIconTextFit.html">MLNIconTextFit</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNIconTranslationAnchor" data-url="Enums/MLNIconTranslationAnchor.html">
+                <a title="MLNIconTranslationAnchor" class="nav-group-task-link" href="Enums/MLNIconTranslationAnchor.html">MLNIconTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLightAnchor" data-url="Enums/MLNLightAnchor.html">
+                <a title="MLNLightAnchor" class="nav-group-task-link" href="Enums/MLNLightAnchor.html">MLNLightAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineCap" data-url="Enums/MLNLineCap.html">
+                <a title="MLNLineCap" class="nav-group-task-link" href="Enums/MLNLineCap.html">MLNLineCap</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineJoin" data-url="Enums/MLNLineJoin.html">
+                <a title="MLNLineJoin" class="nav-group-task-link" href="Enums/MLNLineJoin.html">MLNLineJoin</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNLineTranslationAnchor" data-url="Enums/MLNLineTranslationAnchor.html">
+                <a title="MLNLineTranslationAnchor" class="nav-group-task-link" href="Enums/MLNLineTranslationAnchor.html">MLNLineTranslationAnchor</a>
               </li>
               <li class="nav-group-task" data-name="MLNLoggingLevel" data-url="Enums/MLNLoggingLevel.html">
                 <a title="MLNLoggingLevel" class="nav-group-task-link" href="Enums/MLNLoggingLevel.html">MLNLoggingLevel</a>
@@ -611,8 +716,38 @@
               <li class="nav-group-task" data-name="MLNOrnamentVisibility" data-url="Enums/MLNOrnamentVisibility.html">
                 <a title="MLNOrnamentVisibility" class="nav-group-task-link" href="Enums/MLNOrnamentVisibility.html">MLNOrnamentVisibility</a>
               </li>
+              <li class="nav-group-task" data-name="MLNRasterResamplingMode" data-url="Enums/MLNRasterResamplingMode.html">
+                <a title="MLNRasterResamplingMode" class="nav-group-task-link" href="Enums/MLNRasterResamplingMode.html">MLNRasterResamplingMode</a>
+              </li>
               <li class="nav-group-task" data-name="MLNResourceKind" data-url="Enums/MLNResourceKind.html">
                 <a title="MLNResourceKind" class="nav-group-task-link" href="Enums/MLNResourceKind.html">MLNResourceKind</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSymbolPlacement" data-url="Enums/MLNSymbolPlacement.html">
+                <a title="MLNSymbolPlacement" class="nav-group-task-link" href="Enums/MLNSymbolPlacement.html">MLNSymbolPlacement</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNSymbolZOrder" data-url="Enums/MLNSymbolZOrder.html">
+                <a title="MLNSymbolZOrder" class="nav-group-task-link" href="Enums/MLNSymbolZOrder.html">MLNSymbolZOrder</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextAnchor" data-url="Enums/MLNTextAnchor.html">
+                <a title="MLNTextAnchor" class="nav-group-task-link" href="Enums/MLNTextAnchor.html">MLNTextAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextJustification" data-url="Enums/MLNTextJustification.html">
+                <a title="MLNTextJustification" class="nav-group-task-link" href="Enums/MLNTextJustification.html">MLNTextJustification</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextPitchAlignment" data-url="Enums/MLNTextPitchAlignment.html">
+                <a title="MLNTextPitchAlignment" class="nav-group-task-link" href="Enums/MLNTextPitchAlignment.html">MLNTextPitchAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextRotationAlignment" data-url="Enums/MLNTextRotationAlignment.html">
+                <a title="MLNTextRotationAlignment" class="nav-group-task-link" href="Enums/MLNTextRotationAlignment.html">MLNTextRotationAlignment</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextTransform" data-url="Enums/MLNTextTransform.html">
+                <a title="MLNTextTransform" class="nav-group-task-link" href="Enums/MLNTextTransform.html">MLNTextTransform</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextTranslationAnchor" data-url="Enums/MLNTextTranslationAnchor.html">
+                <a title="MLNTextTranslationAnchor" class="nav-group-task-link" href="Enums/MLNTextTranslationAnchor.html">MLNTextTranslationAnchor</a>
+              </li>
+              <li class="nav-group-task" data-name="MLNTextWritingMode" data-url="Enums/MLNTextWritingMode.html">
+                <a title="MLNTextWritingMode" class="nav-group-task-link" href="Enums/MLNTextWritingMode.html">MLNTextWritingMode</a>
               </li>
               <li class="nav-group-task" data-name="MLNTileCoordinateSystem" data-url="Enums/MLNTileCoordinateSystem.html">
                 <a title="MLNTileCoordinateSystem" class="nav-group-task-link" href="Enums/MLNTileCoordinateSystem.html">MLNTileCoordinateSystem</a>
@@ -681,6 +816,9 @@
               <li class="nav-group-task" data-name="MLNShapeSourceOption" data-url="Other%20Type%20Definitions.html#/c:MLNShapeSource.h@T@MLNShapeSourceOption">
                 <a title="MLNShapeSourceOption" class="nav-group-task-link" href="Other%20Type%20Definitions.html#/c:MLNShapeSource.h@T@MLNShapeSourceOption">MLNShapeSourceOption</a>
               </li>
+              <li class="nav-group-task" data-name="MLNSphericalPosition" data-url="Type%20Definitions/MLNSphericalPosition.html">
+                <a title="MLNSphericalPosition" class="nav-group-task-link" href="Type%20Definitions/MLNSphericalPosition.html">MLNSphericalPosition</a>
+              </li>
               <li class="nav-group-task" data-name="MLNTileSourceOption" data-url="Other%20Type%20Definitions.html#/c:MLNTileSource.h@T@MLNTileSourceOption">
                 <a title="MLNTileSourceOption" class="nav-group-task-link" href="Other%20Type%20Definitions.html#/c:MLNTileSource.h@T@MLNTileSourceOption">MLNTileSourceOption</a>
               </li>
@@ -701,6 +839,9 @@
               <li class="nav-group-task" data-name="MLNMapPointMake" data-url="Other%20Functions.html#/c:MLNGeometry.h@F@MLNMapPointMake">
                 <a title="MLNMapPointMake" class="nav-group-task-link" href="Other%20Functions.html#/c:MLNGeometry.h@F@MLNMapPointMake">MLNMapPointMake</a>
               </li>
+              <li class="nav-group-task" data-name="MLNSphericalPositionMake" data-url="Other%20Functions.html#/c:MLNLight.h@F@MLNSphericalPositionMake">
+                <a title="MLNSphericalPositionMake" class="nav-group-task-link" href="Other%20Functions.html#/c:MLNLight.h@F@MLNSphericalPositionMake">MLNSphericalPositionMake</a>
+              </li>
               <li class="nav-group-task" data-name="MLNTransitionMake" data-url="Other%20Functions.html#/c:MLNTypes.h@F@MLNTransitionMake">
                 <a title="MLNTransitionMake" class="nav-group-task-link" href="Other%20Functions.html#/c:MLNTypes.h@F@MLNTransitionMake">MLNTransitionMake</a>
               </li>
@@ -712,6 +853,9 @@
           <li class="nav-group-name" data-name="Other Structures">
             <a class="small-heading" href="Other Structures.html">Other Structures<span class="anchor-icon" /></a>
             <ul class="nav-group-tasks">
+              <li class="nav-group-task" data-name="MLNSphericalPosition" data-url="Structs/MLNSphericalPosition.html">
+                <a title="MLNSphericalPosition" class="nav-group-task-link" href="Structs/MLNSphericalPosition.html">MLNSphericalPosition</a>
+              </li>
               <li class="nav-group-task" data-name="MLNTransition" data-url="Structs/MLNTransition.html">
                 <a title="MLNTransition" class="nav-group-task-link" href="Structs/MLNTransition.html">MLNTransition</a>
               </li>
@@ -763,6 +907,404 @@
                       </div>
                       <div class="show-on-github">
                         <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNAttributionInfo.h#L13-L26">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNCirclePitchAlignment"></a>
+                    <a name="//apple_ref/objc/Enum/MLNCirclePitchAlignment" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNCirclePitchAlignment"><span class="token-name">MLNCirclePitchAlignment</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Orientation of circle when map is pitched.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNCircleStyleLayer.html#/c:objc(cs)MLNCircleStyleLayer(py)circlePitchAlignment">MLNCircleStyleLayer.circlePitchAlignment</a></code>
+property.</p>
+
+                        <a href="Enums/MLNCirclePitchAlignment.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNCirclePitchAlignment</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNCirclePitchAlignment</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNCircleStyleLayer.h#L15-L24">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNCircleScaleAlignment"></a>
+                    <a name="//apple_ref/objc/Enum/MLNCircleScaleAlignment" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNCircleScaleAlignment"><span class="token-name">MLNCircleScaleAlignment</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the scaling behavior of the circle when the map is pitched.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNCircleStyleLayer.html#/c:objc(cs)MLNCircleStyleLayer(py)circleScaleAlignment">MLNCircleStyleLayer.circleScaleAlignment</a></code>
+property.</p>
+
+                        <a href="Enums/MLNCircleScaleAlignment.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNCircleScaleAlignment</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNCircleScaleAlignment</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNCircleStyleLayer.h#L32-L41">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNCircleTranslationAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNCircleTranslationAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNCircleTranslationAnchor"><span class="token-name">MLNCircleTranslationAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the frame of reference for <code><a href="Classes/MLNCircleStyleLayer.html#/c:objc(cs)MLNCircleStyleLayer(py)circleTranslation">MLNCircleStyleLayer.circleTranslation</a></code>.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNCircleStyleLayer.html#/c:objc(cs)MLNCircleStyleLayer(py)circleTranslationAnchor">MLNCircleStyleLayer.circleTranslationAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNCircleTranslationAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNCircleTranslationAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNCircleTranslationAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNCircleStyleLayer.h#L49-L58">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNFillExtrusionTranslationAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNFillExtrusionTranslationAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNFillExtrusionTranslationAnchor"><span class="token-name">MLNFillExtrusionTranslationAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the frame of reference for
+<code><a href="Classes/MLNFillExtrusionStyleLayer.html#/c:objc(cs)MLNFillExtrusionStyleLayer(py)fillExtrusionTranslation">MLNFillExtrusionStyleLayer.fillExtrusionTranslation</a></code>.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNFillExtrusionStyleLayer.html#/c:objc(cs)MLNFillExtrusionStyleLayer(py)fillExtrusionTranslationAnchor">MLNFillExtrusionStyleLayer.fillExtrusionTranslationAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNFillExtrusionTranslationAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNFillExtrusionTranslationAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNFillExtrusionTranslationAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNFillExtrusionStyleLayer.h#L16-L25">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNFillTranslationAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNFillTranslationAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNFillTranslationAnchor"><span class="token-name">MLNFillTranslationAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the frame of reference for <code><a href="Classes/MLNFillStyleLayer.html#/c:objc(cs)MLNFillStyleLayer(py)fillTranslation">MLNFillStyleLayer.fillTranslation</a></code>.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNFillStyleLayer.html#/c:objc(cs)MLNFillStyleLayer(py)fillTranslationAnchor">MLNFillStyleLayer.fillTranslationAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNFillTranslationAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNFillTranslationAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNFillTranslationAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNFillStyleLayer.h#L15-L24">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNHillshadeIlluminationAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNHillshadeIlluminationAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNHillshadeIlluminationAnchor"><span class="token-name">MLNHillshadeIlluminationAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Direction of light source when map is rotated.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNHillshadeStyleLayer.html#/c:objc(cs)MLNHillshadeStyleLayer(py)hillshadeIlluminationAnchor">MLNHillshadeStyleLayer.hillshadeIlluminationAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNHillshadeIlluminationAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNHillshadeIlluminationAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNHillshadeIlluminationAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNHillshadeStyleLayer.h#L15-L24">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNLightAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNLightAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNLightAnchor"><span class="token-name">MLNLightAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Whether extruded geometries are lit relative to the map or viewport.</p>
+
+                        <a href="Enums/MLNLightAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNLightAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNLightAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNLight.h#L14-L24">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNLineCap"></a>
+                    <a name="//apple_ref/objc/Enum/MLNLineCap" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNLineCap"><span class="token-name">MLNLineCap</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>The display of line endings.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNLineStyleLayer.html#/c:objc(cs)MLNLineStyleLayer(py)lineCap">MLNLineStyleLayer.lineCap</a></code>
+property.</p>
+
+                        <a href="Enums/MLNLineCap.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNLineCap</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNLineCap</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNLineStyleLayer.h#L15-L32">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNLineJoin"></a>
+                    <a name="//apple_ref/objc/Enum/MLNLineJoin" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNLineJoin"><span class="token-name">MLNLineJoin</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>The display of lines when joining.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNLineStyleLayer.html#/c:objc(cs)MLNLineStyleLayer(py)lineJoin">MLNLineStyleLayer.lineJoin</a></code>
+property.</p>
+
+                        <a href="Enums/MLNLineJoin.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNLineJoin</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNLineJoin</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNLineStyleLayer.h#L40-L57">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNLineTranslationAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNLineTranslationAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNLineTranslationAnchor"><span class="token-name">MLNLineTranslationAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the frame of reference for <code><a href="Classes/MLNLineStyleLayer.html#/c:objc(cs)MLNLineStyleLayer(py)lineTranslation">MLNLineStyleLayer.lineTranslation</a></code>.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNLineStyleLayer.html#/c:objc(cs)MLNLineStyleLayer(py)lineTranslationAnchor">MLNLineStyleLayer.lineTranslationAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNLineTranslationAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNLineTranslationAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNLineTranslationAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNLineStyleLayer.h#L65-L74">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -847,6 +1389,47 @@
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/c:@E@MLNRasterResamplingMode"></a>
+                    <a name="//apple_ref/objc/Enum/MLNRasterResamplingMode" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNRasterResamplingMode"><span class="token-name">MLNRasterResamplingMode</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>The resampling/interpolation method to use for overscaling, also known as
+texture magnification filter</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNRasterStyleLayer.html#/c:objc(cs)MLNRasterStyleLayer(py)rasterResamplingMode">MLNRasterStyleLayer.rasterResamplingMode</a></code>
+property.</p>
+
+                        <a href="Enums/MLNRasterResamplingMode.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNRasterResamplingMode</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNRasterResamplingMode</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNRasterStyleLayer.h#L16-L28">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/c:@E@MLNWellKnownTileServer"></a>
                     <a name="//apple_ref/objc/Enum/MLNWellKnownTileServer" class="dashAnchor"></a>
                     <a class="token" href="#/c:@E@MLNWellKnownTileServer"><span class="token-name">MLNWellKnownTileServer</span><span class="token-icon" /></a>
@@ -874,6 +1457,575 @@
                       </div>
                       <div class="show-on-github">
                         <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSettings.h#L11-L24">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNIconAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNIconAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNIconAnchor"><span class="token-name">MLNIconAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Part of the icon placed closest to the anchor.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)iconAnchor">MLNSymbolStyleLayer.iconAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNIconAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNIconAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNIconAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L15-L52">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNIconPitchAlignment"></a>
+                    <a name="//apple_ref/objc/Enum/MLNIconPitchAlignment" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNIconPitchAlignment"><span class="token-name">MLNIconPitchAlignment</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Orientation of icon when map is pitched.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)iconPitchAlignment">MLNSymbolStyleLayer.iconPitchAlignment</a></code>
+property.</p>
+
+                        <a href="Enums/MLNIconPitchAlignment.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNIconPitchAlignment</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNIconPitchAlignment</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L60-L74">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNIconRotationAlignment"></a>
+                    <a name="//apple_ref/objc/Enum/MLNIconRotationAlignment" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNIconRotationAlignment"><span class="token-name">MLNIconRotationAlignment</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>In combination with <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)symbolPlacement">MLNSymbolStyleLayer.symbolPlacement</a></code>, determines the
+rotation behavior of icons.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)iconRotationAlignment">MLNSymbolStyleLayer.iconRotationAlignment</a></code>
+property.</p>
+
+                        <a href="Enums/MLNIconRotationAlignment.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNIconRotationAlignment</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNIconRotationAlignment</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L83-L102">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNIconTextFit"></a>
+                    <a name="//apple_ref/objc/Enum/MLNIconTextFit" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNIconTextFit"><span class="token-name">MLNIconTextFit</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>The directions in which the icon stretches to fit around the text. If the icon
+image is a resizable image, the resizable areas may be stretched, while the cap
+insets are always drawn at the original scale.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)iconTextFit">MLNSymbolStyleLayer.iconTextFit</a></code>
+property.</p>
+
+                        <a href="Enums/MLNIconTextFit.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNIconTextFit</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNIconTextFit</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L112-L129">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNSymbolPlacement"></a>
+                    <a name="//apple_ref/objc/Enum/MLNSymbolPlacement" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNSymbolPlacement"><span class="token-name">MLNSymbolPlacement</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Label placement relative to its geometry.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)symbolPlacement">MLNSymbolStyleLayer.symbolPlacement</a></code>
+property.</p>
+
+                        <a href="Enums/MLNSymbolPlacement.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNSymbolPlacement</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNSymbolPlacement</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L137-L153">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNSymbolZOrder"></a>
+                    <a name="//apple_ref/objc/Enum/MLNSymbolZOrder" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNSymbolZOrder"><span class="token-name">MLNSymbolZOrder</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the order in which overlapping symbols in the same layer are rendered</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)symbolZOrder">MLNSymbolStyleLayer.symbolZOrder</a></code>
+property.</p>
+
+                        <a href="Enums/MLNSymbolZOrder.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNSymbolZOrder</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNSymbolZOrder</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L161-L178">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNTextAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNTextAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNTextAnchor"><span class="token-name">MLNTextAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Part of the text placed closest to the anchor.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textAnchor">MLNSymbolStyleLayer.textAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNTextAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNTextAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNTextAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L186-L223">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNTextJustification"></a>
+                    <a name="//apple_ref/objc/Enum/MLNTextJustification" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNTextJustification"><span class="token-name">MLNTextJustification</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Text justification options.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textJustification">MLNSymbolStyleLayer.textJustification</a></code>
+property.</p>
+
+                        <a href="Enums/MLNTextJustification.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNTextJustification</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNTextJustification</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L231-L248">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNTextPitchAlignment"></a>
+                    <a name="//apple_ref/objc/Enum/MLNTextPitchAlignment" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNTextPitchAlignment"><span class="token-name">MLNTextPitchAlignment</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Orientation of text when map is pitched.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textPitchAlignment">MLNSymbolStyleLayer.textPitchAlignment</a></code>
+property.</p>
+
+                        <a href="Enums/MLNTextPitchAlignment.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNTextPitchAlignment</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNTextPitchAlignment</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L256-L270">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNTextRotationAlignment"></a>
+                    <a name="//apple_ref/objc/Enum/MLNTextRotationAlignment" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNTextRotationAlignment"><span class="token-name">MLNTextRotationAlignment</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>In combination with <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)symbolPlacement">MLNSymbolStyleLayer.symbolPlacement</a></code>, determines the
+rotation behavior of the individual glyphs forming the text.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textRotationAlignment">MLNSymbolStyleLayer.textRotationAlignment</a></code>
+property.</p>
+
+                        <a href="Enums/MLNTextRotationAlignment.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNTextRotationAlignment</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNTextRotationAlignment</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L279-L298">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNTextTransform"></a>
+                    <a name="//apple_ref/objc/Enum/MLNTextTransform" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNTextTransform"><span class="token-name">MLNTextTransform</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Specifies how to capitalize text.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textTransform">MLNSymbolStyleLayer.textTransform</a></code>
+property.</p>
+
+                        <a href="Enums/MLNTextTransform.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNTextTransform</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNTextTransform</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L306-L319">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNTextWritingMode"></a>
+                    <a name="//apple_ref/objc/Enum/MLNTextWritingMode" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNTextWritingMode"><span class="token-name">MLNTextWritingMode</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>The property allows control over a symbol&rsquo;s orientation. Note that the property
+values act as a hint, so that a symbol whose language doesn’t support the
+provided orientation will be laid out in its natural orientation. Example:
+English point symbol will be rendered horizontally even if array value contains
+single &lsquo;vertical&rsquo; enum value. The order of elements in an array define priority
+order for the placement of an orientation variant.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textWritingModes">MLNSymbolStyleLayer.textWritingModes</a></code>
+property.</p>
+
+                        <a href="Enums/MLNTextWritingMode.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNTextWritingMode</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNTextWritingMode</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L332-L343">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNIconTranslationAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNIconTranslationAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNIconTranslationAnchor"><span class="token-name">MLNIconTranslationAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the frame of reference for <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)iconTranslation">MLNSymbolStyleLayer.iconTranslation</a></code>.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)iconTranslationAnchor">MLNSymbolStyleLayer.iconTranslationAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNIconTranslationAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNIconTranslationAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNIconTranslationAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L351-L360">
+                          <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
+                          View Source on GitHub
+                        </a>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@E@MLNTextTranslationAnchor"></a>
+                    <a name="//apple_ref/objc/Enum/MLNTextTranslationAnchor" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@E@MLNTextTranslationAnchor"><span class="token-name">MLNTextTranslationAnchor</span><span class="token-icon" /></a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <section class="section">
+                      <div class="abstract">
+                        <p>Controls the frame of reference for <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textTranslation">MLNSymbolStyleLayer.textTranslation</a></code>.</p>
+
+<p>Values of this type are used in the <code><a href="Classes/MLNSymbolStyleLayer.html#/c:objc(cs)MLNSymbolStyleLayer(py)textTranslationAnchor">MLNSymbolStyleLayer.textTranslationAnchor</a></code>
+property.</p>
+
+                        <a href="Enums/MLNTextTranslationAnchor.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language keyline-blue">
+                          <p  style="background: rgba(65, 131, 196, 0.15);" class="aside-title text-blue">Objective-C</p>
+                          <pre class="highlight objective_c"><code><span class="k">enum</span> <span class="n">MLNTextTranslationAnchor</span> <span class="o">:</span> <span class="n">NSUInteger</span> <span class="p">{}</span></code></pre>
+
+                        </div>
+                        <div class="language keyline-purple">
+                          <p style="background: rgba(149, 149, 209, 0.21);" class="aside-title text-purple">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">enum</span> <span class="kt">MLNTextTranslationAnchor</span> <span class="p">:</span> <span class="kt">UInt</span><span class="p">,</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div class="show-on-github">
+                        <a href="https://github.com/mapbox/mapbox-gl-native-ios/tree/ios-v5.13.0/platform/darwin/src/MLNSymbolStyleLayer.h#L368-L377">
                           <img style="margin-bottom: 1px;" class="show-on-github-icon" src="img/github.svg"/>
                           View Source on GitHub
                         </a>
@@ -1191,7 +2343,7 @@ interpreted.</p>
       </article>
     </div>
     <section class="footer limiter">
-      <p><a class="link" href="https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
+      <p><a class="link" href="https://github.com/maplibre/maplibre-native/blob/main/platform/ios/LICENSE.md" target="_blank" rel="external noopener">License</a></p> Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.14.3</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.
     </section>
   </body>
 </div>

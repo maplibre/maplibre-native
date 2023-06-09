@@ -17,6 +17,6 @@
     <key>DashDocSetFamily</key>
       <string>dashtoc</string>
     <key>DashDocSetFallbackURL</key>
-      <string>https://maplibre.org/maplibre-gl-native/ios/api/</string>
+      <string>https://maplibre.org/maplibre-native/ios/api/</string>
   </dict>
 </plist>
