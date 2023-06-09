@@ -10,6 +10,7 @@
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/std.hpp>
 
 namespace mbgl {
 
@@ -43,15 +44,6 @@ struct alignas(16) FillDrawableUBO {
     /* 208 */
 };
 static_assert(sizeof(FillDrawableUBO) == 208);
-
-// move to utils, or does it already exist somewhere?
-template <typename T, std::size_t N, std::size_t M>
-auto concat(const std::array<T, N>& a1, const std::array<T, M>& a2) {
-    std::array<T, N + M> result;
-    std::copy(a1.cbegin(), a1.cend(), result.begin());
-    std::copy(a2.cbegin(), a2.cend(), result.begin() + N);
-    return result;
-}
 
 void FillLayerTweaker::execute(LayerGroup& layerGroup,
                                const RenderTree& renderTree,
