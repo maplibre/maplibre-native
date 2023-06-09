@@ -261,10 +261,10 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                                                  : gfx::DepthMaskType::ReadOnly);
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrName("a_pos");
-        
+
         return builder;
     };
-    
+
     auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
         // textures
         auto location0 = rasterShader->getSamplerLocation("u_image0");
@@ -282,7 +282,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             builder->setTexture(tex1, location1.value());
         }
     };
-    
+
     auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
         auto buildRenderData = [](const TileMask& mask,
                                   std::vector<std::array<int16_t, 2>>& vertices,
@@ -399,7 +399,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
                 changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
             }
-            
+
             auto builder = createBuilder();
             for (const auto& matrix_ : imageData->matrices) {
                 buildImageDrawables(builder, bucket);
