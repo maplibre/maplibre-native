@@ -124,6 +124,11 @@ gfx::TextureBinding RenderTile::getIconAtlasTextureBinding(gfx::TextureFilterTyp
     return {getIconAtlasTexture()->getResource(), filter};
 }
 
+static const std::shared_ptr<TileAtlasTextures> noAtlas;
+const std::shared_ptr<TileAtlasTextures>& RenderTile::getAtlasTextures() const {
+    return renderData ? renderData->getAtlasTextures() : noAtlas;
+}
+
 void RenderTile::upload(gfx::UploadPass& uploadPass) const {
     assert(renderData);
     renderData->upload(uploadPass);
