@@ -250,11 +250,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     const gfx::TextureFilterType filter = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest
                                               ? gfx::TextureFilterType::Nearest
                                               : gfx::TextureFilterType::Linear;
-    // TODO: apply filter to texture
-    (void)filter;
 
     auto buildTileDrawables =
-        [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
+        [&context, &renderPass, &filter, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
@@ -339,25 +337,26 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // textures
-        std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
-        tex0->setImage(bucket.image);
         auto location0 = rasterShader->getSamplerLocation("u_image0");
         if (location0.has_value()) {
+            std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
+            tex0->setImage(bucket.image);
+            tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             builder->setTexture(tex0, location0.value());
         }
-        std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
-        tex1->setImage(bucket.image);
         auto location1 = rasterShader->getSamplerLocation("u_image1");
         if (location1.has_value()) {
+            std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
+            tex1->setImage(bucket.image);
+            tex1->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             builder->setTexture(tex1, location1.value());
         }
 
         return builder;
     };
-    (void)buildTileDrawables;
 
     auto buildImageDrawables =
-        [&context, &renderPass, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
+        [&context, &renderPass, &filter, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
@@ -392,16 +391,18 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // textures
-        std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
-        tex0->setImage(bucket.image);
         auto location0 = rasterShader->getSamplerLocation("u_image0");
         if (location0.has_value()) {
+            std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
+            tex0->setImage(bucket.image);
+            tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             builder->setTexture(tex0, location0.value());
         }
-        std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
-        tex1->setImage(bucket.image);
         auto location1 = rasterShader->getSamplerLocation("u_image1");
         if (location1.has_value()) {
+            std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
+            tex1->setImage(bucket.image);
+            tex1->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             builder->setTexture(tex1, location1.value());
         }
 
