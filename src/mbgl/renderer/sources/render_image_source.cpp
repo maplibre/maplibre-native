@@ -39,7 +39,7 @@ void ImageSourceRenderData::render(PaintParameters& parameters) const {
     static const style::Properties<>::PossiblyEvaluated properties{};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
-    auto programInstance = parameters.shaders.get<DebugProgram>();
+    auto programInstance = parameters.shaders.getLegacyGroup().get<DebugProgram>();
     if (!programInstance) {
         return;
     }

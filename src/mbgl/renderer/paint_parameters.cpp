@@ -138,7 +138,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         clearStencil();
     }
 
-    auto program = staticData.shaders->get<ClippingMaskProgram>();
+    auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
+
     if (!program) {
         return;
     }

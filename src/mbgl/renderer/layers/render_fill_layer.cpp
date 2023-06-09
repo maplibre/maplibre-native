@@ -84,10 +84,10 @@ bool RenderFillLayer::hasCrossfade() const {
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
 
-    if (!parameters.shaders.populate(fillProgram)) return;
-    if (!parameters.shaders.populate(fillPatternProgram)) return;
-    if (!parameters.shaders.populate(fillOutlineProgram)) return;
-    if (!parameters.shaders.populate(fillOutlinePatternProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillPatternProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillOutlineProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillOutlinePatternProgram)) return;
 
     if (unevaluated.get<FillPattern>().isUndefined()) {
         parameters.renderTileClippingMasks(renderTiles);
@@ -301,10 +301,8 @@ bool bindFloat(const FloatBinder& binder, gfx::VertexAttributeArray& attrs, std:
     const auto count = binder.getVertexCount();
     if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
         for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = static_cast<const FloatVertex*>(binder.getVertexValue(i))->a1;
-            const auto& from = value; // TODO: should be two different values, right?
-            const auto& to = value;
-            attr->set(i, util::concat(from, to));
+            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
+            attr->set(i, value);
         }
         return true;
     }
@@ -321,10 +319,8 @@ bool bindFloatPair(const FloatPairBinder& binder, gfx::VertexAttributeArray& att
     // check that vertexVector.elements() == sum(segments.vertexLength)
     if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
         for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = static_cast<const FloatPairVertex*>(binder.getVertexValue(i))->a1;
-            const auto& from = value; // TODO: should be two different values, right?
-            const auto& to = value;
-            attr->set(i, util::concat(from, to));
+            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
+            attr->set(i, value);
         }
         return true;
     }
@@ -341,10 +337,8 @@ bool bindColor(const ColorBinder& binder, gfx::VertexAttributeArray& attrs, std:
     // check that vertexVector.elements() == sum(segments.vertexLength)
     if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
         for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = static_cast<const FloatPairVertex*>(binder.getVertexValue(i))->a1;
-            const auto& from = value; // TODO: should be two different values, right?
-            const auto& to = value;
-            attr->set(i, util::concat(from, to));
+            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
+            attr->set(i, value);
         }
         return true;
     }
@@ -361,8 +355,8 @@ bool bindImage(const ImageBinder& binder, gfx::VertexAttributeArray& attrs, std:
     // check that vertexVector.elements() == sum(segments.vertexLength)
     if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
         for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = static_cast<const UShortQuadVertex*>(binder.getVertexValue(i))->a1;
-            attr->set(i, util::cast<int32_t>(value));
+            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
+            attr->set(i, value);
         }
         return true;
     }

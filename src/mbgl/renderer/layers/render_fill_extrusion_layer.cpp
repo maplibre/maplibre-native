@@ -71,8 +71,8 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
         return;
     }
 
-    if (!parameters.shaders.populate(fillExtrusionProgram)) return;
-    if (!parameters.shaders.populate(fillExtrusionPatternProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillExtrusionProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillExtrusionPatternProgram)) return;
 
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).crossfade;
