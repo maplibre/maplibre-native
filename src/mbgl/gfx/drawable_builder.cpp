@@ -50,6 +50,7 @@ void DrawableBuilder::flush() {
         draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
         draw->setTextures(textures);
+        draw->setTextureSources(textureSources);
 
         if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
@@ -110,6 +111,11 @@ void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture,
         }
     }
     textures.emplace_back(texture, location);
+}
+
+void DrawableBuilder::setTextureSource(int32_t location, TexSourceFunc source) {
+    textureSources.resize(std::max(textureSources.size(), static_cast<size_t>(location + 1)));
+    textureSources[location] = std::move(source);
 }
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {

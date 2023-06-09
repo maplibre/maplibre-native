@@ -21,6 +21,7 @@ class ShaderProgramBase;
 
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 /**
     Base class for drawable builders, which construct Drawables from primitives
@@ -111,7 +112,12 @@ public:
     /// @brief Attach the given texture at the given sampler location.
     /// @param texture Texture2D instance
     /// @param location A sampler location in the shader being used.
-    void setTexture(const std::shared_ptr<gfx::Texture2D>& texture, int32_t location);
+    void setTexture(const gfx::Texture2DPtr&, int32_t location);
+
+    using TexSourceFunc = std::function<gfx::Texture2DPtr()>;
+
+    /// @brief Provide a function to get the current texture
+    void setTextureSource(int32_t location, TexSourceFunc);
 
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
@@ -171,6 +177,7 @@ protected:
     ColorAttrMode colorAttrMode = ColorAttrMode::PerVertex;
     VertexAttributeArray vertexAttrs;
     gfx::Drawable::Textures textures;
+    std::vector<TexSourceFunc> textureSources;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

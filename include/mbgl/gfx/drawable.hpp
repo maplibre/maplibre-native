@@ -30,6 +30,7 @@ class ShaderProgramBase;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class Drawable {
 public:
@@ -105,6 +106,15 @@ public:
     /// @param location A sampler location in the shader being used with this drawable.
     void setTexture(std::shared_ptr<gfx::Texture2D> texture, int32_t location);
 
+    using TexSourceFunc = std::function<gfx::Texture2DPtr()>;
+
+    /// @brief Provide a function to get the current texture
+    void setTextureSource(int32_t location, TexSourceFunc);
+    const TexSourceFunc& getTextureSource(int32_t location) const;
+
+    /// @brief Provide all texture sources at once
+    void setTextureSources(std::vector<TexSourceFunc>);
+
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
     void setEnabled(bool value) { enabled = value; }
@@ -121,8 +131,8 @@ public:
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
-    std::optional<OverscaledTileID> getTileID() const { return tileID; }
-    void setTileID(OverscaledTileID value) { tileID = value; }
+    const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
+    void setTileID(const OverscaledTileID& value) { tileID = value; }
 
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
@@ -179,6 +189,7 @@ protected:
     std::unique_ptr<Impl> impl;
 
     Textures textures;
+    std::vector<TexSourceFunc> textureSources;
     std::vector<DrawableTweakerPtr> tweakers;
 };
 
