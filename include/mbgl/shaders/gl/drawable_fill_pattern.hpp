@@ -8,25 +8,33 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillPatternShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform FillDrawableUBO {
+    static constexpr const char* vertex = R"(layout (std140) uniform FillInterpolateUBO {
+    highp float u_color_t;
+    highp float u_opacity_t;
+    highp float u_outline_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+    highp float u_fade;
+    highp float u_padding_interp1;
+    highp float u_padding_interp2;
+};
+layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
     highp vec2 u_world;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
-    highp float u_fade;
-
-    highp float u_color_t;
-    highp float u_opacity_t;
-    highp float u_outline_color_t;
-    highp float u_pattern_from_t;
-    highp float u_pattern_to_t;
-
-    highp vec2 u_color;
-    highp vec2 u_opacity;
-    highp vec2 u_outline_color_pad;
+};
+layout (std140) uniform FillDrawablePropsUBO {
+    highp vec4 u_color;
     highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float padding_props1;
+    highp float padding_props2;
+    highp float padding_props3;
+};
+layout (std140) uniform FillDrawableTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
 };
@@ -84,25 +92,33 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileZoomRatio, a_pos);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillDrawableUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform FillInterpolateUBO {
+    highp float u_color_t;
+    highp float u_opacity_t;
+    highp float u_outline_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+    highp float u_fade;
+    highp float u_padding_interp1;
+    highp float u_padding_interp2;
+};
+layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
     highp vec2 u_world;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
-    highp float u_fade;
-
-    highp float u_color_t;
-    highp float u_opacity_t;
-    highp float u_outline_color_t;
-    highp float u_pattern_from_t;
-    highp float u_pattern_to_t;
-
-    highp vec2 u_color;
-    highp vec2 u_opacity;
-    highp vec2 u_outline_color_pad;
+};
+layout (std140) uniform FillDrawablePropsUBO {
+    highp vec4 u_color;
     highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float padding_props1;
+    highp float padding_props2;
+    highp float padding_props3;
+};
+layout (std140) uniform FillDrawableTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
 };
@@ -137,6 +153,10 @@ mediump vec4 pattern_to = u_pattern_to;
     vec2 pattern_br_a = pattern_from.zw;
     vec2 pattern_tl_b = pattern_to.xy;
     vec2 pattern_br_b = pattern_to.zw;
+
+    if (u_texsize.x < 1.0 || u_texsize.y < 1.0) {
+        discard;
+    }
 
     vec2 imagecoord = mod(v_pos_a, 1.0);
     vec2 pos = mix(pattern_tl_a / u_texsize, pattern_br_a / u_texsize, imagecoord);

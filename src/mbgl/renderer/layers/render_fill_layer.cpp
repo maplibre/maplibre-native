@@ -15,6 +15,7 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
@@ -30,6 +31,11 @@ namespace mbgl {
 using namespace style;
 
 namespace {
+
+static constexpr std::string_view FillShaderName = "FillShader";
+static constexpr std::string_view FillOutlineShaderName = "FillOutlineShader";
+static constexpr std::string_view FillPatternShaderName = "FillPatternShader";
+static constexpr std::string_view FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillLayer::Impl::staticTypeInfo());
@@ -279,98 +285,9 @@ void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
-using FloatAttr = gfx::AttributeType<float, 1>;
-using FloatPairAttr = gfx::AttributeType<float, 2>;
-using FloatPair = FloatPairAttr::Value;
-using UShortQuadAttr = gfx::AttributeType<uint16_t, 4>;
-using UShortQuad = UShortQuadAttr::Value;
-using FloatVertex = gfx::detail::VertexType<FloatAttr>;
-using FloatPairVertex = gfx::detail::VertexType<FloatPairAttr>;
-using UShortQuadVertex = gfx::detail::VertexType<UShortQuadAttr>;
-using FloatBinder = PaintPropertyBinder<float, float, mbgl::PossiblyEvaluatedPropertyValue<float>, FloatAttr>;
-using FloatPairBinder =
-    PaintPropertyBinder<FloatPair, FloatPair, mbgl::PossiblyEvaluatedPropertyValue<FloatPair>, FloatPairAttr>;
-using ColorBinder = PaintPropertyBinder<Color, Color, mbgl::PossiblyEvaluatedPropertyValue<Color>, FloatPairAttr>;
-using ImageBinder = PaintPropertyBinder<style::expression::Image,
-                                        UShortQuad,
-                                        PossiblyEvaluatedPropertyValue<mbgl::Faded<mbgl::style::expression::Image>>,
-                                        UShortQuadAttr,
-                                        UShortQuadAttr>;
-
-bool bindFloat(const FloatBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
-    const auto count = binder.getVertexCount();
-    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
-        for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
-            attr->set(i, value);
-        }
-        return true;
-    }
-    return false;
-}
-bool bindFloat(const std::unique_ptr<FloatBinder>& binder,
-               gfx::VertexAttributeArray& attrs,
-               std::string attributeName) {
-    return binder && bindFloat(*binder, attrs, std::move(attributeName));
-}
-
-bool bindFloatPair(const FloatPairBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
-    const auto count = binder.getVertexCount();
-    // check that vertexVector.elements() == sum(segments.vertexLength)
-    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
-        for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
-            attr->set(i, value);
-        }
-        return true;
-    }
-    return false;
-}
-bool bindFloatPair(const std::unique_ptr<FloatPairBinder>& binder,
-                   gfx::VertexAttributeArray& attrs,
-                   std::string attributeName) {
-    return binder && bindFloatPair(*binder, attrs, std::move(attributeName));
-}
-
-bool bindColor(const ColorBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
-    const auto count = binder.getVertexCount();
-    // check that vertexVector.elements() == sum(segments.vertexLength)
-    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
-        for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
-            attr->set(i, value);
-        }
-        return true;
-    }
-    return false;
-}
-bool bindColor(const std::unique_ptr<ColorBinder>& binder,
-               gfx::VertexAttributeArray& attrs,
-               std::string attributeName) {
-    return binder && bindColor(*binder, attrs, std::move(attributeName));
-}
-
-bool bindImage(const ImageBinder& binder, gfx::VertexAttributeArray& attrs, std::string attributeName) {
-    const auto count = binder.getVertexCount();
-    // check that vertexVector.elements() == sum(segments.vertexLength)
-    if (auto& attr = attrs.getOrAdd(std::move(attributeName))) {
-        for (std::size_t i = 0; i < count; ++i) {
-            const auto& value = std::get<0>(binder.getVertexValue(i)).a1;
-            attr->set(i, value);
-        }
-        return true;
-    }
-    return false;
-}
-bool bindImage(const std::unique_ptr<ImageBinder>& binder,
-               gfx::VertexAttributeArray& attrs,
-               std::string attributeName) {
-    return binder && bindImage(*binder, attrs, std::move(attributeName));
-}
-
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& /*state*/,
+                             const TransformState& state,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -391,17 +308,28 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
     }
 
-    if (!fillShader) {
-        fillShader = context.getGenericShader(shaders, "FillShader");
+    const auto removeAll = [&]() {
+        if (tileLayerGroup) {
+            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
+            tileLayerGroup->clearDrawables();
+        }
+    };
+
+    if (!fillShaderGroup) {
+        fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
     }
-    if (!outlineShader) {
-        outlineShader = context.getGenericShader(shaders, "FillOutlineShader");
+    if (!outlineShaderGroup) {
+        outlineShaderGroup = shaders.getShaderGroup(std::string(FillOutlineShaderName));
     }
-    if (!patternShader) {
-        patternShader = context.getGenericShader(shaders, "FillPatternShader");
+    if (!patternShaderGroup) {
+        patternShaderGroup = shaders.getShaderGroup(std::string(FillPatternShaderName));
     }
-    if (!outlinePatternShader) {
-        outlinePatternShader = context.getGenericShader(shaders, "FillOutlinePatternShader");
+    if (!outlinePatternShaderGroup) {
+        outlinePatternShaderGroup = shaders.getShaderGroup(std::string(FillOutlinePatternShaderName));
+    }
+    if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
+        removeAll();
+        return;
     }
 
     std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
@@ -420,15 +348,20 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     gfx::VertexAttributeArray patternVertexAttrs;
     gfx::VertexAttributeArray patternOutlineVertexAttrs;
 
-    constexpr auto samplerLocation = 0;
     const auto layerPrefix = getID() + "/";
     const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
 
-    const auto finish = [&](gfx::DrawableBuilder& builder, const OverscaledTileID& tileID) {
+    const auto finish = [&](gfx::DrawableBuilder& builder,
+                            const OverscaledTileID& tileID,
+                            const FillInterpolateUBO& interpUBO,
+                            const FillDrawableTilePropsUBO& tileUBO) {
         builder.flush();
 
         for (auto& drawable : builder.clearDrawables()) {
             drawable->setTileID(tileID);
+            auto& uniforms = drawable->mutableUniformBuffers();
+            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpUBO, context);
+            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileUBO, context);
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.tileDrawablesAdded;
         }
@@ -452,11 +385,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        // If we already have drawables for this tile, skip.
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            continue;
-        }
-
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData) {
             removeTile(renderPass, tileID);
@@ -464,8 +392,42 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
+
+        const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
+        const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
+        const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
+        paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
+
+        const FillInterpolateUBO interpolateUBO = {
+            /* .color_t = */ std::get<0>(paintPropertyBinders.get<FillColor>()->interpolationFactor(state.getZoom())),
+            /* .opacity_t = */ std::get<0>(paintPropertyBinders.get<FillOpacity>()->interpolationFactor(state.getZoom())),
+            /* .outline_color_t = */ std::get<0>(paintPropertyBinders.get<FillOutlineColor>()->interpolationFactor(state.getZoom())),
+            /* .pattern_from_t = */ std::get<0>(paintPropertyBinders.get<FillPattern>()->interpolationFactor(state.getZoom())),
+            /* .pattern_to_t = */ std::get<0>(paintPropertyBinders.get<FillColor>()->interpolationFactor(state.getZoom())),
+            /* .fade = */ crossfade.t,
+            /* .padding = */ {0},
+        };
+
+        // TODO: only update if properties re-evaluated?
+        const FillDrawableTilePropsUBO tileProps = {
+            /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
+            /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
+        };
+
+        // If we already have drawables for this tile, update them.
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            // TODO: Share buffers
+            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                drawable.mutableUniformBuffers().createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
+                drawable.mutableUniformBuffers().createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
+            });
+
+            continue;
+        }
 
         std::vector<std::array<int16_t, 2>> rawVerts;
         const auto buildVertices = [&]() {
@@ -480,25 +442,29 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         fillVertexAttrs.clear();
         outlineVertexAttrs.clear();
 
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        // `Fill*Program` all use `style::FillPaintProperties`
+        const auto fillUniformProps = fillVertexAttrs.readDataDrivenPaintProperties<
+            FillColor,
+            FillOpacity,
+            FillOutlineColor,
+            FillPattern>(paintPropertyBinders, evaluated);
+        const auto outlineUniformProps = outlineVertexAttrs.readDataDrivenPaintProperties<
+            FillColor,
+            FillOpacity,
+            FillOutlineColor,
+            FillPattern>(paintPropertyBinders, evaluated);
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
             // Outline always occurs in translucent pass, defaults to fill color
             const auto doOutline = evaluated.get<FillAntialias>();
 
-            bindColor(paintPropertyBinders.get<FillColor>(), fillVertexAttrs, "a_color");
-            bindFloat(paintPropertyBinders.get<FillOpacity>(), fillVertexAttrs, "a_opacity");
-
-            if (doOutline) {
-                bindColor(paintPropertyBinders.get<FillOutlineColor>(), outlineVertexAttrs, "a_outline_color");
-                bindFloat(paintPropertyBinders.get<FillOpacity>(), outlineVertexAttrs, "a_opacity");
-            }
+            const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(fillShaderGroup->getOrCreateShader(context, fillUniformProps));
+            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(outlineShaderGroup->getOrCreateShader(context, outlineUniformProps)) : nullptr;
 
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                     commonInit(*builder);
-                    builder->setShader(fillShader);
                     builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                              : gfx::DepthMaskType::ReadOnly);
                     builder->setSubLayerIndex(0);
@@ -509,7 +475,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (doOutline && !outlineBuilder && outlineShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline")) {
                     commonInit(*builder);
-                    builder->setShader(outlineShader);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
@@ -520,21 +485,23 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (fillBuilder) {
                 buildVertices();
+                fillBuilder->setShader(fillShader);
                 fillBuilder->setVertexAttributes(fillVertexAttrs);
                 fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 fillBuilder->setSegments(gfx::Triangles(),
                                          bucket.triangles.vector(),
                                          reinterpret_cast<const std::vector<Segment<void>>&>(bucket.triangleSegments));
-                finish(*fillBuilder, tileID);
+                finish(*fillBuilder, tileID, interpolateUBO, tileProps);
             }
             if (outlineBuilder) {
                 buildVertices();
+                outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setVertexAttributes(outlineVertexAttrs);
                 outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 outlineBuilder->setSegments(gfx::Lines(2),
                                             bucket.lines.vector(),
                                             reinterpret_cast<const std::vector<Segment<void>>&>(bucket.lineSegments));
-                finish(*outlineBuilder, tileID);
+                finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
             }
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {
@@ -543,53 +510,33 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             // Outline does not default to fill in the pattern case
             const auto doOutline = evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined();
-            const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
-            const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
-            const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
-            paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
 
-            // if (samplerLocation < 0) curShader->getSamplerLocation("u_image");
+            const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(patternShaderGroup->getOrCreateShader(context, fillUniformProps));
+            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(outlinePatternShaderGroup->getOrCreateShader(context, outlineUniformProps)) : nullptr;
 
-            bindFloat(paintPropertyBinders.get<FillOpacity>(), fillVertexAttrs, "a_opacity");
-            bindImage(paintPropertyBinders.get<FillPattern>(), fillVertexAttrs, "a_pattern_from");
-            bindImage(paintPropertyBinders.get<FillPattern>(), fillVertexAttrs, "a_pattern_to");
-
-            if (doOutline) {
-                bindFloat(paintPropertyBinders.get<FillOpacity>(), outlineVertexAttrs, "a_opacity");
-                bindImage(paintPropertyBinders.get<FillPattern>(), outlineVertexAttrs, "a_pattern_from");
-                bindImage(paintPropertyBinders.get<FillPattern>(), outlineVertexAttrs, "a_pattern_to");
-            }
-
-            if (!patternBuilder && patternShader) {
+            if (!patternBuilder) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
                     commonInit(*builder);
-                    builder->setShader(patternShader);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (const auto& atlases = tile.getAtlasTextures()) {
-                        builder->setTextureSource(samplerLocation, [=]() { return atlases ? atlases->icon : nullptr; });
-                    }
                     patternBuilder = std::move(builder);
                 }
             }
-            if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
+            if (doOutline && !outlinePatternBuilder) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline-pattern")) {
                     commonInit(*builder);
-                    builder->setShader(outlinePatternShader);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setSubLayerIndex(2);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (const auto& atlases = tile.getAtlasTextures()) {
-                        builder->setTextureSource(samplerLocation, [=]() { return atlases ? atlases->icon : nullptr; });
-                    }
                     outlinePatternBuilder = std::move(builder);
                 }
             }
 
             if (patternBuilder) {
                 buildVertices();
+                patternBuilder->setShader(fillShader);
                 patternBuilder->setRenderPass(renderPass);
                 patternBuilder->setVertexAttributes(fillVertexAttrs);
                 patternBuilder->addVertices(rawVerts, 0, rawVerts.size());
@@ -597,10 +544,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     gfx::Triangles(),
                     bucket.triangles.vector(),
                     reinterpret_cast<const std::vector<Segment<void>>&>(bucket.triangleSegments));
-                finish(*patternBuilder, tileID);
+               
+                if (const auto& atlases = tile.getAtlasTextures()) {
+                    if (const auto samplerLocation = fillShader->getSamplerLocation("u_image")) {
+                        patternBuilder->setTextureSource(*samplerLocation, [=]() { return atlases->icon; });
+                    }
+                }
+
+                finish(*patternBuilder, tileID, interpolateUBO, tileProps);
             }
             if (outlinePatternBuilder) {
                 buildVertices();
+                outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
                 outlinePatternBuilder->addVertices(rawVerts, 0, rawVerts.size());
@@ -608,7 +563,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     gfx::Lines(2),
                     bucket.lines.vector(),
                     reinterpret_cast<const std::vector<Segment<void>>&>(bucket.lineSegments));
-                finish(*outlinePatternBuilder, tileID);
+
+                if (const auto& atlases = tile.getAtlasTextures()) {
+                    if (const auto samplerLocation = outlineShader->getSamplerLocation("u_image")) {
+                        outlinePatternBuilder->setTextureSource(*samplerLocation, [=]() { return atlases->icon; });
+                    }
+                }
+
+                finish(*outlinePatternBuilder, tileID, interpolateUBO, tileProps);
             }
         }
     }
