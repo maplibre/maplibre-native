@@ -59,9 +59,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     if (!propsBuffer) {
         const FillDrawablePropsUBO paramsUBO = {
-            /* .color = */evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
-            /* .outline_color = */evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-            /* .opacity = */evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
+            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
             /* .padding = */ {0},
         };
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
@@ -94,7 +94,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
         const auto pixelRatio = parameters.pixelRatio;
 
-        Size textureSize = {0,0};
+        Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
             if (const auto index = shader->getSamplerLocation("u_image")) {
                 const auto& textures = drawable.getTextures();
@@ -107,7 +107,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                     textureSize = tex->getSize();
                 }
             }
-            
         }
         const FillDrawableUBO drawableUBO = {
             /*.matrix=*/util::cast<float>(matrix),
@@ -121,5 +120,5 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         drawable.mutableUniformBuffers().createOrUpdate(FillDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
-    
+
 } // namespace mbgl

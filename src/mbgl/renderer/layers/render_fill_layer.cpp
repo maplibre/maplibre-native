@@ -404,10 +404,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         const FillInterpolateUBO interpolateUBO = {
             /* .color_t = */ std::get<0>(paintPropertyBinders.get<FillColor>()->interpolationFactor(state.getZoom())),
-            /* .opacity_t = */ std::get<0>(paintPropertyBinders.get<FillOpacity>()->interpolationFactor(state.getZoom())),
-            /* .outline_color_t = */ std::get<0>(paintPropertyBinders.get<FillOutlineColor>()->interpolationFactor(state.getZoom())),
-            /* .pattern_from_t = */ std::get<0>(paintPropertyBinders.get<FillPattern>()->interpolationFactor(state.getZoom())),
-            /* .pattern_to_t = */ std::get<0>(paintPropertyBinders.get<FillColor>()->interpolationFactor(state.getZoom())),
+            /* .opacity_t = */
+            std::get<0>(paintPropertyBinders.get<FillOpacity>()->interpolationFactor(state.getZoom())),
+            /* .outline_color_t = */
+            std::get<0>(paintPropertyBinders.get<FillOutlineColor>()->interpolationFactor(state.getZoom())),
+            /* .pattern_from_t = */
+            std::get<0>(paintPropertyBinders.get<FillPattern>()->interpolationFactor(state.getZoom())),
+            /* .pattern_to_t = */
+            std::get<0>(paintPropertyBinders.get<FillColor>()->interpolationFactor(state.getZoom())),
             /* .fade = */ crossfade.t,
             /* .padding = */ {0},
         };
@@ -422,8 +426,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
             // TODO: Share buffers
             tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                drawable.mutableUniformBuffers().createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
-                drawable.mutableUniformBuffers().createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
+                drawable.mutableUniformBuffers().createOrUpdate(
+                    FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
+                drawable.mutableUniformBuffers().createOrUpdate(
+                    FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
             });
 
             continue;
@@ -443,24 +449,24 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         outlineVertexAttrs.clear();
 
         // `Fill*Program` all use `style::FillPaintProperties`
-        const auto fillUniformProps = fillVertexAttrs.readDataDrivenPaintProperties<
-            FillColor,
-            FillOpacity,
-            FillOutlineColor,
-            FillPattern>(paintPropertyBinders, evaluated);
-        const auto outlineUniformProps = outlineVertexAttrs.readDataDrivenPaintProperties<
-            FillColor,
-            FillOpacity,
-            FillOutlineColor,
-            FillPattern>(paintPropertyBinders, evaluated);
+        const auto fillUniformProps =
+            fillVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+                paintPropertyBinders, evaluated);
+        const auto outlineUniformProps =
+            outlineVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+                paintPropertyBinders, evaluated);
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
             // Outline always occurs in translucent pass, defaults to fill color
             const auto doOutline = evaluated.get<FillAntialias>();
 
-            const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(fillShaderGroup->getOrCreateShader(context, fillUniformProps));
-            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(outlineShaderGroup->getOrCreateShader(context, outlineUniformProps)) : nullptr;
+            const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                fillShaderGroup->getOrCreateShader(context, fillUniformProps));
+            const auto outlineShader = doOutline
+                                           ? std::static_pointer_cast<gfx::ShaderProgramBase>(
+                                                 outlineShaderGroup->getOrCreateShader(context, outlineUniformProps))
+                                           : nullptr;
 
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
@@ -511,8 +517,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             // Outline does not default to fill in the pattern case
             const auto doOutline = evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined();
 
-            const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(patternShaderGroup->getOrCreateShader(context, fillUniformProps));
-            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(outlinePatternShaderGroup->getOrCreateShader(context, outlineUniformProps)) : nullptr;
+            const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                patternShaderGroup->getOrCreateShader(context, fillUniformProps));
+            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
+                                                       outlinePatternShaderGroup->getOrCreateShader(
+                                                           context, outlineUniformProps))
+                                                 : nullptr;
 
             if (!patternBuilder) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
@@ -544,7 +554,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     gfx::Triangles(),
                     bucket.triangles.vector(),
                     reinterpret_cast<const std::vector<Segment<void>>&>(bucket.triangleSegments));
-               
+
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     if (const auto samplerLocation = fillShader->getSamplerLocation("u_image")) {
                         patternBuilder->setTextureSource(*samplerLocation, [=]() { return atlases->icon; });
