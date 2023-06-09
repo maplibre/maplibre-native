@@ -163,7 +163,8 @@ TEST(ShaderRegistry, MultiRegister) {
     ASSERT_NE(registry.getLegacyGroup().get<StubProgram_1>(), nullptr);
     // Register with an explicit name
     ASSERT_NE(registry.getLegacyGroup().get<StubProgram_1>("SecondProgram"), nullptr);
-    ASSERT_NE(registry.getLegacyGroup().get<StubProgram_1>(), registry.getLegacyGroup().get<StubProgram_1>("SecondProgram"));
+    ASSERT_NE(registry.getLegacyGroup().get<StubProgram_1>(),
+              registry.getLegacyGroup().get<StubProgram_1>("SecondProgram"));
 }
 
 // Test fetching

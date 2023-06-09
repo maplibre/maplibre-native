@@ -27,7 +27,7 @@ public:
     /// @brief Get the legacy shader group.
     /// @return A `gfx::ShaderGroup`
     [[nodiscard]] ShaderGroup& getLegacyGroup() noexcept;
-    
+
     /// @brief Checks if a shader group exists in the registry for the given name.
     /// @param shaderGroupName Name of shader group
     /// @return If a shader group is found, true
@@ -55,7 +55,8 @@ public:
     /// @param shaderGroupName Unique name to register the shader group under.
     /// @return True if the shader group was registered, false if another shader group is
     /// already present with a conflicting name.
-    [[nodiscard]] virtual bool registerShaderGroup(ShaderGroupPtr&& shaderGroup, const std::string& shaderGroupName) noexcept;
+    [[nodiscard]] virtual bool registerShaderGroup(ShaderGroupPtr&& shaderGroup,
+                                                   const std::string& shaderGroupName) noexcept;
 
 private:
     gfx::ShaderGroup legacyGroup;

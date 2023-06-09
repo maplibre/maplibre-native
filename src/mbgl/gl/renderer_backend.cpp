@@ -85,8 +85,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
                 throw std::runtime_error("Failed to register " + std::string(Ty::name) + " with shader registry!");
             }
         }(),
-        ...
-     );
+        ...);
 }
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {

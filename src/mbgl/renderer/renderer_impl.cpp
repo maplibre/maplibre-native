@@ -76,7 +76,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
         // Initialize shaders for drawables
         const auto programParameters = ProgramParameters{pixelRatio, false};
-        backend.initShaders(*staticData ->shaders, programParameters);
+        backend.initShaders(*staticData->shaders, programParameters);
 
         // Notify post-shader registration
         observer->onRegisterShaders(*staticData->shaders);

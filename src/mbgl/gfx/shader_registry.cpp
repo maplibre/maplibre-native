@@ -4,7 +4,8 @@
 namespace mbgl {
 namespace gfx {
 
-ShaderRegistry::ShaderRegistry() : legacyGroup() {}
+ShaderRegistry::ShaderRegistry()
+    : legacyGroup() {}
 
 ShaderGroup& ShaderRegistry::getLegacyGroup() noexcept {
     return legacyGroup;

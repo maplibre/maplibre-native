@@ -139,7 +139,7 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
     }
 
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
-    
+
     if (!program) {
         return;
     }

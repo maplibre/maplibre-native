@@ -218,7 +218,7 @@ public:
         newAttrs->copy(*this);
         return newAttrs;
     }
-    
+
     template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
     std::vector<std::string> readDataDrivenPaintProperties(const Binders& binders, const Evaluated& evaluated) {
         int index = 0;
@@ -241,8 +241,7 @@ public:
                 }
                 index++;
             }(DataDrivenPaintProperty::Attribute::name()),
-            ...
-        );
+            ...);
         return attributesAsUniforms;
     }
 

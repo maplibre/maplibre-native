@@ -175,7 +175,7 @@ public:
     std::size_t getVertexCount() const override { return 0; }
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t) const override {
-        return { ZoomInterpolatedVertexType<A>{0} };
+        return {ZoomInterpolatedVertexType<A>{0}};
     }
 
 private:
@@ -227,7 +227,7 @@ public:
     std::size_t getVertexCount() const override { return 0; }
 
     std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t) const override {
-        return { ZoomInterpolatedVertexType<As>{0}... };
+        return {ZoomInterpolatedVertexType<As>{0}...};
     }
 
 private:
@@ -330,7 +330,7 @@ public:
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
         const BaseVertex& value = vertexVector.at(index);
-        return { ZoomInterpolatedVertexType<A>{ concatenate(value.a1, value.a1) } };
+        return {ZoomInterpolatedVertexType<A>{concatenate(value.a1, value.a1)}};
     }
 
 private:
@@ -455,7 +455,7 @@ public:
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
-        return { vertexVector.at(index) };
+        return {vertexVector.at(index)};
     }
 
 private:
@@ -567,15 +567,14 @@ public:
 
     std::size_t getVertexCount() const override { return patternToVertexVector.elements(); }
 
-    std::tuple<ZoomInterpolatedVertexType<A1>, ZoomInterpolatedVertexType<A2>> getVertexValue(std::size_t index) const override {
+    std::tuple<ZoomInterpolatedVertexType<A1>, ZoomInterpolatedVertexType<A2>> getVertexValue(
+        std::size_t index) const override {
         const Vertex& patternValue = patternToVertexVector.at(index);
-        const Vertex2& zoomValue = crossfade.fromScale == 2 ? zoomInVertexVector.at(index) : zoomOutVertexVector.at(index);
-        return {
-            ZoomInterpolatedVertexType<A1>{ concatenate(patternValue.a1, patternValue.a1) },
-            ZoomInterpolatedVertexType<A2>{ concatenate(zoomValue.a1, zoomValue.a1) }
-        };
+        const Vertex2& zoomValue = crossfade.fromScale == 2 ? zoomInVertexVector.at(index)
+                                                            : zoomOutVertexVector.at(index);
+        return {ZoomInterpolatedVertexType<A1>{concatenate(patternValue.a1, patternValue.a1)},
+                ZoomInterpolatedVertexType<A2>{concatenate(zoomValue.a1, zoomValue.a1)}};
     }
-
 
 private:
     style::PropertyExpression<T> expression;

@@ -285,7 +285,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             tileLayerGroup->clearDrawables();
         }
     };
-    
+
     if (!renderTiles || renderTiles->empty()) {
         removeAll();
         return;
@@ -332,7 +332,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             ++stats.tileDrawablesRemoved;
         }
     });
-    
+
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
     for (const RenderTile& tile : *renderTiles) {
@@ -346,41 +346,46 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         auto& bucket = static_cast<CircleBucket&>(*renderData->bucket);
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
-        
+
         const CircleInterpolateUBO interpolateUBO = {
             /* .color_t = */ std::get<0>(paintPropertyBinders.get<CircleColor>()->interpolationFactor(state.getZoom())),
-            /* .radius_t = */ std::get<0>(paintPropertyBinders.get<CircleRadius>()->interpolationFactor(state.getZoom())),
+            /* .radius_t = */
+            std::get<0>(paintPropertyBinders.get<CircleRadius>()->interpolationFactor(state.getZoom())),
             /* .blur_t = */ std::get<0>(paintPropertyBinders.get<CircleBlur>()->interpolationFactor(state.getZoom())),
-            /* .opacity_t = */ std::get<0>(paintPropertyBinders.get<CircleOpacity>()->interpolationFactor(state.getZoom())),
-            /* .stroke_color_t = */ std::get<0>(paintPropertyBinders.get<CircleStrokeColor>()->interpolationFactor(state.getZoom())),
-            /* .stroke_width_t = */ std::get<0>(paintPropertyBinders.get<CircleStrokeWidth>()->interpolationFactor(state.getZoom())),
-            /* .stroke_opacity_t = */ std::get<0>(paintPropertyBinders.get<CircleStrokeOpacity>()->interpolationFactor(state.getZoom())),
-            /* .padding = */ 0
-        };
-        
+            /* .opacity_t = */
+            std::get<0>(paintPropertyBinders.get<CircleOpacity>()->interpolationFactor(state.getZoom())),
+            /* .stroke_color_t = */
+            std::get<0>(paintPropertyBinders.get<CircleStrokeColor>()->interpolationFactor(state.getZoom())),
+            /* .stroke_width_t = */
+            std::get<0>(paintPropertyBinders.get<CircleStrokeWidth>()->interpolationFactor(state.getZoom())),
+            /* .stroke_opacity_t = */
+            std::get<0>(paintPropertyBinders.get<CircleStrokeOpacity>()->interpolationFactor(state.getZoom())),
+            /* .padding = */ 0};
+
         tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             drawable.mutableUniformBuffers().createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
         });
-        
+
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
             continue;
         }
-        
+
         circleVertexAttrs.clear();
-        
+
         auto propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
                                                                                     CircleRadius,
                                                                                     CircleBlur,
                                                                                     CircleOpacity,
                                                                                     CircleStrokeColor,
                                                                                     CircleStrokeWidth,
-                                                                                    CircleStrokeOpacity>(paintPropertyBinders, evaluated);
+                                                                                    CircleStrokeOpacity>(
+            paintPropertyBinders, evaluated);
 
         auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
-        if( !circleShader ) {
+        if (!circleShader) {
             continue;
         }
-        
+
         std::vector<std::array<int16_t, 2>> rawVerts;
         const auto buildVertices = [&]() {
             const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
@@ -390,7 +395,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                 std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
             }
         };
-        
+
         circleBuilder = context.createDrawableBuilder("circle");
         circleBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(circleShader));
         circleBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
@@ -404,10 +409,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         buildVertices();
         circleBuilder->addVertices(rawVerts, 0, rawVerts.size());
 
-        circleBuilder->setSegments(
-            gfx::Triangles(),
-            bucket.triangles.vector(),
-            reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
+        circleBuilder->setSegments(gfx::Triangles(),
+                                   bucket.triangles.vector(),
+                                   reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
 
         circleBuilder->flush();
 

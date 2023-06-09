@@ -23,7 +23,7 @@ public:
     ShaderGroup& operator=(const ShaderGroup&) = delete;
     ShaderGroup& operator=(ShaderGroup&&) noexcept = delete;
     virtual ~ShaderGroup() = default;
-    
+
     /// @brief Checks if a shader exists in the group for the given name.
     /// @param shaderName Name of shader
     /// @return If a shader is found, true
@@ -134,12 +134,14 @@ public:
         to = std::static_pointer_cast<T>(shader);
         return true;
     }
-    
+
     /// @brief Get a shader from the group by its set of data driven properties as uniforms.
     /// if no shader is found, create and register the shader.
     /// @param propertiesAsUniforms Vector of data driven properties as uniforms.
     /// @return A `gfx::Shader`
-    virtual const std::shared_ptr<gfx::Shader> getOrCreateShader(gfx::Context&, const std::vector<std::string>&) { return nullptr; }
+    virtual const std::shared_ptr<gfx::Shader> getOrCreateShader(gfx::Context&, const std::vector<std::string>&) {
+        return nullptr;
+    }
 
 private:
     std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
