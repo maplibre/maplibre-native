@@ -8,6 +8,13 @@ namespace mbgl {
 
 class CircleProgram;
 
+namespace gfx {
+class ShaderGroup;
+class UniformBuffer;
+using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+} // namespace gfx
+
 class RenderCircleLayer final : public RenderLayer {
 public:
     explicit RenderCircleLayer(Immutable<style::CircleLayer::Impl>);
@@ -46,7 +53,7 @@ private:
     // Programs
     std::shared_ptr<CircleProgram> circleProgram;
 
-    gfx::ShaderProgramBasePtr circleShader;
+    gfx::ShaderGroupPtr circleShaderGroup;
 };
 
 } // namespace mbgl

@@ -1,21 +1,20 @@
 #pragma once
 
+#include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gfx/attribute.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/layout/pattern_layout.hpp>
 #include <mbgl/programs/attributes.hpp>
+#include <mbgl/renderer/cross_faded_property_evaluator.hpp>
+#include <mbgl/renderer/image_atlas.hpp>
+#include <mbgl/renderer/paint_property_statistics.hpp>
+#include <mbgl/renderer/possibly_evaluated_property_value.hpp>
+#include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/literal.hpp>
 #include <mbgl/util/type_list.hpp>
-#include <mbgl/renderer/possibly_evaluated_property_value.hpp>
-#include <mbgl/renderer/paint_property_statistics.hpp>
-#include <mbgl/renderer/cross_faded_property_evaluator.hpp>
 #include <mbgl/util/variant.hpp>
-#include <mbgl/renderer/image_atlas.hpp>
-#include <mbgl/util/indexed_tuple.hpp>
-#include <mbgl/layout/pattern_layout.hpp>
-
-#include <bitset>
+#include <mbgl/util/vectors.hpp>
 
 namespace mbgl {
 
@@ -37,6 +36,9 @@ using FeatureVertexRangeMap = std::map<std::string, std::vector<FeatureVertexRan
 template <class AttributeType>
 using ZoomInterpolatedAttributeType =
     gfx::AttributeType<typename AttributeType::ElementType, AttributeType::Dimensions * 2>;
+
+template <class A>
+using ZoomInterpolatedVertexType = typename gfx::detail::VertexType<ZoomInterpolatedAttributeType<A>>;
 
 inline std::array<float, 1> attributeValue(float v) {
     return {{v}};
@@ -129,8 +131,8 @@ public:
         const PossiblyEvaluatedType& currentValue) const = 0;
 
     virtual std::size_t getVertexCount() const = 0;
-    virtual const /*std::tuple<ExpandToType<As, UniformValueType>...>&*/ void* getVertexValue(
-        std::size_t index) const = 0;
+
+    virtual std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t index) const = 0;
 
     static std::unique_ptr<PaintPropertyBinder> create(const PossiblyEvaluatedType& value, float zoom, T defaultValue);
 
@@ -170,10 +172,10 @@ public:
     using BaseAttributeType = A;
     using BaseVertex = gfx::VertexType<BaseAttributeType>;
 
-    std::size_t getVertexCount() const override { return 1; }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
-        convertedValue = BaseVertex{attributeValue(constant)};
-        return &convertedValue;
+    std::size_t getVertexCount() const override { return 0; }
+
+    std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t) const override {
+        return {ZoomInterpolatedVertexType<A>{0}};
     }
 
 private:
@@ -222,9 +224,10 @@ public:
         return constantPatternPositions;
     }
 
-    std::size_t getVertexCount() const override { return 1; }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override {
-        return &constantPatternPositions;
+    std::size_t getVertexCount() const override { return 0; }
+
+    std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t) const override {
+        return {ZoomInterpolatedVertexType<As>{0}...};
     }
 
 private:
@@ -237,8 +240,6 @@ class SourceFunctionPaintPropertyBinder final : public PaintPropertyBinder<T, T,
 public:
     using BaseAttributeType = A;
     using BaseVertex = gfx::VertexType<BaseAttributeType>;
-
-    using AttributeType = ZoomInterpolatedAttributeType<A>;
 
     SourceFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_, T defaultValue_)
         : expression(std::move(expression_)),
@@ -326,8 +327,10 @@ public:
     }
 
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t index) const override {
-        return &vertexVector.at(index);
+
+    std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
+        const BaseVertex& value = vertexVector.at(index);
+        return {ZoomInterpolatedVertexType<A>{concatenate(value.a1, value.a1)}};
     }
 
 private:
@@ -450,8 +453,9 @@ public:
     }
 
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t index) const override {
-        return &vertexVector.at(index);
+
+    std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
+        return {vertexVector.at(index)};
     }
 
 private:
@@ -467,9 +471,6 @@ template <class T, class A1, class A2>
 class CompositeCrossFadedPaintPropertyBinder final
     : public PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2> {
 public:
-    using AttributeType = ZoomInterpolatedAttributeType<A1>;
-    using AttributeType2 = ZoomInterpolatedAttributeType<A2>;
-
     using BaseAttributeType = A1;
     using BaseAttributeType2 = A2;
 
@@ -564,8 +565,16 @@ public:
         return {};
     }
 
-    std::size_t getVertexCount() const override { return 0; }
-    const /*std::tuple<ExpandToType<A, T>>&*/ void* getVertexValue(std::size_t) const override { return nullptr; }
+    std::size_t getVertexCount() const override { return patternToVertexVector.elements(); }
+
+    std::tuple<ZoomInterpolatedVertexType<A1>, ZoomInterpolatedVertexType<A2>> getVertexValue(
+        std::size_t index) const override {
+        const Vertex& patternValue = patternToVertexVector.at(index);
+        const Vertex2& zoomValue = crossfade.fromScale == 2 ? zoomInVertexVector.at(index)
+                                                            : zoomOutVertexVector.at(index);
+        return {ZoomInterpolatedVertexType<A1>{concatenate(patternValue.a1, patternValue.a1)},
+                ZoomInterpolatedVertexType<A2>{concatenate(zoomValue.a1, zoomValue.a1)}};
+    }
 
 private:
     style::PropertyExpression<T> expression;

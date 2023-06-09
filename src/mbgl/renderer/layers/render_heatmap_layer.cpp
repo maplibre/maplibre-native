@@ -69,8 +69,8 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
         return;
     }
 
-    if (!parameters.shaders.populate(heatmapProgram)) return;
-    if (!parameters.shaders.populate(heatmapTextureProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(heatmapProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(heatmapTextureProgram)) return;
 
     if (parameters.pass == RenderPass::Pass3D) {
         const auto& viewportSize = parameters.staticData.backendSize;

@@ -79,8 +79,8 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
     // is drawn with glClear rather than this method.
 
     // Ensure programs are available
-    if (!parameters.shaders.populate(backgroundProgram)) return;
-    if (!parameters.shaders.populate(backgroundPatternProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(backgroundProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(backgroundPatternProgram)) return;
 
     const Properties<>::PossiblyEvaluated properties;
     const BackgroundProgram::Binders paintAttributeData(properties, 0);
