@@ -10,6 +10,8 @@ struct Drawable::DrawSegment {
         : mode(mode_),
           segment(std::move(segment_)) {}
 
+    virtual ~DrawSegment() = default;
+
     const gfx::DrawMode& getMode() const { return mode; }
 
     Segment<void>& getSegment() { return segment; }

@@ -293,7 +293,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }
@@ -339,6 +339,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
+    const auto commonInit = [](gfx::DrawableBuilder& builder) {
+        builder.setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
+        builder.setCullFaceMode(gfx::CullFaceMode::disabled());
+        builder.setNeedsStencil(true);
+    };
+
     for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
         if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
             continue;
@@ -355,6 +361,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         });
 
         constexpr auto samplerLocation = 0;
+        const auto layerPrefix = getID() + "/";
 
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
@@ -443,34 +450,30 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
 
                 if (doFill && !fillBuilder && fillShader) {
-                    fillBuilder = context.createDrawableBuilder("fill");
-                    fillBuilder->setShader(fillShader);
-                    fillBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-                    fillBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
+                        commonInit(*builder);
+                        builder->setShader(fillShader);
+                        builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                                  : gfx::DepthMaskType::ReadOnly);
-                    fillBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+                        builder->setSubLayerIndex(0);
+                        fillBuilder = std::move(builder);
+                    }
                 }
                 if (doOutline && !outlineBuilder && outlineShader) {
-                    outlineBuilder = context.createDrawableBuilder("fill-outline");
-                    outlineBuilder->setShader(outlineShader);
-                    outlineBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-                    outlineBuilder->setLineWidth(2.0f);
-                    outlineBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                    outlineBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                    outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
-                }
-
-                if (fillBuilder) {
-                    fillBuilder->setRenderPass(renderPass);
-                    fillBuilder->setVertexAttributes(fillVertexAttrs);
-                }
-                if (outlineBuilder) {
-                    outlineBuilder->setRenderPass(renderPass);
-                    outlineBuilder->setVertexAttributes(outlineVertexAttrs);
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline")) {
+                        commonInit(*builder);
+                        builder->setShader(outlineShader);
+                        builder->setLineWidth(2.0f);
+                        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                        builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
+                        outlineBuilder = std::move(builder);
+                    }
                 }
 
                 if (fillBuilder) {
                     buildVertices();
+                    fillBuilder->setRenderPass(renderPass);
+                    fillBuilder->setVertexAttributes(fillVertexAttrs);
                     fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
                     fillBuilder->setSegments(
                         gfx::Triangles(),
@@ -480,6 +483,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 if (outlineBuilder) {
                     buildVertices();
+                    outlineBuilder->setRenderPass(renderPass);
+                    outlineBuilder->setVertexAttributes(outlineVertexAttrs);
                     outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
                     outlineBuilder->setSegments(
                         gfx::Lines(2),
@@ -533,40 +538,35 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 //                }
 
                 if (!patternBuilder && patternShader) {
-                    patternBuilder = context.createDrawableBuilder("fill-pattern");
-                    patternBuilder->setShader(fillShader);
-                    patternBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-                    patternBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                    patternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                    patternBuilder->setSubLayerIndex(1);
-                    if (auto& tex = tile.getIconAtlasTexture()) {
-                        patternBuilder->setTexture(tex, samplerLocation);
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
+                        commonInit(*builder);
+                        builder->setShader(fillShader);
+                        builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                        builder->setSubLayerIndex(1);
+                        if (auto& tex = tile.getIconAtlasTexture()) {
+                            builder->setTexture(tex, samplerLocation);
+                        }
+                        patternBuilder = std::move(builder);
                     }
                 }
                 if (doOutline && !outlinePatternBuilder && outlinePatternShader) {
-                    outlinePatternBuilder = context.createDrawableBuilder("fill-outline-pattern");
-                    outlinePatternBuilder->setShader(outlineShader);
-                    outlinePatternBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-                    outlinePatternBuilder->setLineWidth(2.0f);
-                    outlinePatternBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                    outlinePatternBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                    outlinePatternBuilder->setSubLayerIndex(2);
-                    if (auto& tex = tile.getIconAtlasTexture()) {
-                        patternBuilder->setTexture(tex, samplerLocation);
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline-pattern")) {
+                        commonInit(*builder);
+                        builder->setShader(outlineShader);
+                        builder->setLineWidth(2.0f);
+                        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                        builder->setSubLayerIndex(2);
+                        if (auto& tex = tile.getIconAtlasTexture()) {
+                            builder->setTexture(tex, samplerLocation);
+                        }
+                        outlinePatternBuilder = std::move(builder);
                     }
-                }
-
-                if (patternBuilder) {
-                    patternBuilder->setRenderPass(renderPass);
-                    patternBuilder->setVertexAttributes(fillVertexAttrs);
-                }
-                if (outlinePatternBuilder) {
-                    outlinePatternBuilder->setRenderPass(renderPass);
-                    outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
                 }
 
                 if (patternBuilder) {
                     buildVertices();
+                    patternBuilder->setRenderPass(renderPass);
+                    patternBuilder->setVertexAttributes(fillVertexAttrs);
                     patternBuilder->addVertices(rawVerts, 0, rawVerts.size());
                     patternBuilder->setSegments(
                         gfx::Triangles(),
@@ -576,6 +576,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 if (outlinePatternBuilder) {
                     buildVertices();
+                    outlinePatternBuilder->setRenderPass(renderPass);
+                    outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
                     outlinePatternBuilder->addVertices(rawVerts, 0, rawVerts.size());
                     outlinePatternBuilder->setSegments(
                         gfx::Lines(2),
@@ -583,8 +585,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                         reinterpret_cast<const std::vector<Segment<void>>&>(bucket.lineSegments));
                     finish(*outlinePatternBuilder, renderPass, tileID);
                 }
-
-                //        checkRenderability(parameters, programInstance.activeBindingCount(allAttributeBindings));
             }
         }
     }

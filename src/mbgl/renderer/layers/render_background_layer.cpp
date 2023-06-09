@@ -250,7 +250,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }

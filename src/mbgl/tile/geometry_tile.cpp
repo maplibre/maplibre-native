@@ -86,8 +86,10 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
 
     assert(atlasTextures);
 
-    if (layoutResult->glyphAtlasImage) {
+    if (layoutResult->glyphAtlasImage && layoutResult->glyphAtlasImage->valid()) {
         atlasTextures->glyph = uploadPass.getContext().createTexture2D();
+        atlasTextures->glyph->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
         layoutResult->glyphAtlasImage = {};
     }

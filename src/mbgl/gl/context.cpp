@@ -472,8 +472,8 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders
     return std::static_pointer_cast<gfx::ShaderProgramBase>(shaders.getShaderGroup(name)->getOrCreateShader(*this, emptyAttributes));
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity) {
-    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity);
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name));
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {

@@ -42,6 +42,7 @@ void DrawableBuilder::flush() {
     if (!impl->vertices.empty()) {
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
+        draw->setNeedsStencil(needsStencil);
         draw->setRenderPass(renderPass);
         draw->setDrawPriority(drawPriority);
         draw->setSubLayerIndex(subLayerIndex);

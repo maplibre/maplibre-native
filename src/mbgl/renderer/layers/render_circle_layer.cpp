@@ -293,7 +293,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64);
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }

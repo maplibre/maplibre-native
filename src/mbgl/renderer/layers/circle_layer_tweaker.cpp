@@ -49,6 +49,15 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
                                  const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
+    if (layerGroup.empty()) {
+        return;
+    }
+
+#if !defined(NDEBUG)
+    const auto label = layerGroup.getName() + "-update-uniforms";
+    const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
+#endif
+
     CirclePaintParamsUBO paintParamsUBO = {
         /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
         /* .device_pixel_ratio = */ parameters.pixelRatio,

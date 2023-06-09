@@ -9,6 +9,8 @@
 #include <mbgl/util/run_loop.hpp>
 #include <stdexcept>
 #include <unordered_map>
+#include "mbgl/storage/resource_options.hpp"
+#include "mbgl/util/client_options.hpp"
 
 #include <gtest/gtest.h>
 
@@ -35,13 +37,13 @@ public:
         assets.emplace(key, std::make_shared<std::string>(data));
     };
 
-    virtual void setResourceOptions(ResourceOptions _) override { throw std::runtime_error("Not implemented"); }
+    virtual void setResourceOptions(ResourceOptions) override {}
 
-    virtual ResourceOptions getResourceOptions() override { throw std::runtime_error("Not implemented"); }
+    virtual ResourceOptions getResourceOptions() override { return ResourceOptions{}; }
 
-    virtual void setClientOptions(ClientOptions) override { throw std::runtime_error("Not implemented"); }
+    virtual void setClientOptions(ClientOptions) override {}
 
-    virtual ClientOptions getClientOptions() { throw std::runtime_error("Not implemented"); }
+    virtual ClientOptions getClientOptions() { return ClientOptions{}; }
 
 private:
     std::unordered_map<std::string, std::shared_ptr<std::string>> assets;

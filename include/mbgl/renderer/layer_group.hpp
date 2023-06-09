@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace mbgl {
@@ -33,7 +34,7 @@ using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
  */
 class LayerGroup : public util::SimpleIdentifiable {
 protected:
-    LayerGroup(int32_t layerIndex);
+    LayerGroup(int32_t layerIndex, std::string name = std::string());
 
 public:
     LayerGroup(const LayerGroup&) = delete;
@@ -43,7 +44,13 @@ public:
     bool getEnabled() const { return enabled; }
     void setEnabled(bool value) { enabled = value; }
 
+    const std::string& getName() const { return name; }
+    void setName(std::string value) { name = std::move(value); }
+
     int32_t getLayerIndex() const { return layerIndex; }
+
+    virtual std::size_t getDrawableCount() const = 0;
+    bool empty() const { return getDrawableCount() == 0; }
 
     /// Called before starting each frame
     virtual void preRender(RenderOrchestrator&, PaintParameters&) {}
@@ -71,6 +78,7 @@ protected:
     bool enabled = true;
     int32_t layerIndex;
     LayerTweakerPtr layerTweaker;
+    std::string name;
 };
 
 /**
@@ -78,12 +86,12 @@ protected:
  */
 class TileLayerGroup : public LayerGroup {
 public:
-    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity);
+    TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~TileLayerGroup() override;
 
     void updateLayerIndex(int32_t newLayerIndex);
 
-    std::size_t getDrawableCount() const;
+    std::size_t getDrawableCount() const override;
     std::size_t getDrawableCount(mbgl::RenderPass, const OverscaledTileID&) const;
 
     std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass, const OverscaledTileID&);
