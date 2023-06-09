@@ -347,19 +347,15 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         auto& bucket = static_cast<CircleBucket&>(*renderData->bucket);
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
+        float zoom = static_cast<float>(state.getZoom());
         const CircleInterpolateUBO interpolateUBO = {
-            /* .color_t = */ std::get<0>(paintPropertyBinders.get<CircleColor>()->interpolationFactor(state.getZoom())),
-            /* .radius_t = */
-            std::get<0>(paintPropertyBinders.get<CircleRadius>()->interpolationFactor(state.getZoom())),
-            /* .blur_t = */ std::get<0>(paintPropertyBinders.get<CircleBlur>()->interpolationFactor(state.getZoom())),
-            /* .opacity_t = */
-            std::get<0>(paintPropertyBinders.get<CircleOpacity>()->interpolationFactor(state.getZoom())),
-            /* .stroke_color_t = */
-            std::get<0>(paintPropertyBinders.get<CircleStrokeColor>()->interpolationFactor(state.getZoom())),
-            /* .stroke_width_t = */
-            std::get<0>(paintPropertyBinders.get<CircleStrokeWidth>()->interpolationFactor(state.getZoom())),
-            /* .stroke_opacity_t = */
-            std::get<0>(paintPropertyBinders.get<CircleStrokeOpacity>()->interpolationFactor(state.getZoom())),
+            /* .color_t = */ std::get<0>(paintPropertyBinders.get<CircleColor>()->interpolationFactor(zoom)),
+            /* .radius_t = */ std::get<0>(paintPropertyBinders.get<CircleRadius>()->interpolationFactor(zoom)),
+            /* .blur_t = */ std::get<0>(paintPropertyBinders.get<CircleBlur>()->interpolationFactor(zoom)),
+            /* .opacity_t = */ std::get<0>(paintPropertyBinders.get<CircleOpacity>()->interpolationFactor(zoom)),
+            /* .stroke_color_t = */ std::get<0>(paintPropertyBinders.get<CircleStrokeColor>()->interpolationFactor(zoom)),
+            /* .stroke_width_t = */ std::get<0>(paintPropertyBinders.get<CircleStrokeWidth>()->interpolationFactor(zoom)),
+            /* .stroke_opacity_t = */ std::get<0>(paintPropertyBinders.get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
             /* .padding = */ 0};
 
         tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
