@@ -47,8 +47,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 
     if (getDrawableCount()) {
 #if !defined(NDEBUG)
-        const auto label = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
-        const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
+        const auto label_clip = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
+        const auto debugGroupClip = parameters.encoder->createDebugGroup(label_clip.c_str());
 #endif
 
         // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
@@ -63,8 +63,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     }
 
 #if !defined(NDEBUG)
-    const auto label = getName() + (getName().empty() ? "" : "-") + "render";
-    const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
+    const auto label_render = getName() + (getName().empty() ? "" : "-") + "render";
+    const auto debugGroupRender = parameters.encoder->createDebugGroup(label_render.c_str());
 #endif
 
     observeDrawables([&](gfx::Drawable& drawable) {
@@ -83,12 +83,12 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         }
 
 #if !defined(NDEBUG)
-        std::string label;
+        std::string label_tile;
         if (const auto& tileID = drawable.getTileID()) {
-            label = drawable.getName() + "/" + util::toString(*tileID);
+            label_tile = drawable.getName() + "/" + util::toString(*tileID);
         }
-        const auto labelPtr = (label.empty() ? drawable.getName() : label).c_str();
-        const auto debugGroup = parameters.encoder->createDebugGroup(labelPtr);
+        const auto labelPtr = (label_tile.empty() ? drawable.getName() : label_tile).c_str();
+        const auto debugGroupTile = parameters.encoder->createDebugGroup(labelPtr);
 #endif
 
         drawable.draw(parameters);
