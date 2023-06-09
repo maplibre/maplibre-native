@@ -111,6 +111,8 @@ public:
 
     TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
+    LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+
     gfx::Texture2DPtr createTexture2D() override;
 
 private:
