@@ -251,8 +251,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                               ? gfx::TextureFilterType::Nearest
                                               : gfx::TextureFilterType::Linear;
 
-    auto buildTileDrawables =
-        [&context, &renderPass, &filter, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
+    auto createBuilder = [&context, &renderPass, this]() -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
@@ -262,8 +261,29 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                                                  : gfx::DepthMaskType::ReadOnly);
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrName("a_pos");
-
-        // render data
+        
+        return builder;
+    };
+    
+    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
+        // textures
+        auto location0 = rasterShader->getSamplerLocation("u_image0");
+        if (location0.has_value()) {
+            std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
+            tex0->setImage(bucket.image);
+            tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            builder->setTexture(tex0, location0.value());
+        }
+        auto location1 = rasterShader->getSamplerLocation("u_image1");
+        if (location1.has_value()) {
+            std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
+            tex1->setImage(bucket.image);
+            tex1->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            builder->setTexture(tex1, location1.value());
+        }
+    };
+    
+    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
         auto buildRenderData = [](const TileMask& mask,
                                   std::vector<std::array<int16_t, 2>>& vertices,
                                   std::vector<std::array<int16_t, 2>>& attributes,
@@ -337,36 +357,10 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // textures
-        auto location0 = rasterShader->getSamplerLocation("u_image0");
-        if (location0.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
-            tex0->setImage(bucket.image);
-            tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex0, location0.value());
-        }
-        auto location1 = rasterShader->getSamplerLocation("u_image1");
-        if (location1.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
-            tex1->setImage(bucket.image);
-            tex1->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex1, location1.value());
-        }
-
-        return builder;
+        setTextures(builder, bucket);
     };
 
-    auto buildImageDrawables =
-        [&context, &renderPass, &filter, this](RasterBucket& bucket) -> std::unique_ptr<gfx::DrawableBuilder> {
-        std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
-        builder->setShader(rasterShader);
-        builder->setRenderPass(renderPass);
-        builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-        builder->setSubLayerIndex(0);
-        builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                 : gfx::DepthMaskType::ReadOnly);
-        builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrName("a_pos");
-
+    auto buildImageDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
         std::vector<std::array<int16_t, 2>> vertices(bucket.vertices.vector().size());
         std::transform(
             bucket.vertices.vector().begin(), bucket.vertices.vector().end(), vertices.begin(), [](const auto& x) {
@@ -391,22 +385,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // textures
-        auto location0 = rasterShader->getSamplerLocation("u_image0");
-        if (location0.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
-            tex0->setImage(bucket.image);
-            tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex0, location0.value());
-        }
-        auto location1 = rasterShader->getSamplerLocation("u_image1");
-        if (location1.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
-            tex1->setImage(bucket.image);
-            tex1->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex1, location1.value());
-        }
-
-        return builder;
+        setTextures(builder, bucket);
     };
 
     if (imageData) {
@@ -414,16 +393,16 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (!bucket.vertices.empty()) {
             if (imageLayerGroup) {
                 imageLayerGroup->clearDrawables();
+            } else {
+                // Set up a layer group
+                imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+                imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+                changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
             }
+            
+            auto builder = createBuilder();
             for (const auto& matrix_ : imageData->matrices) {
-                auto builder = buildImageDrawables(bucket);
-
-                // Set up a layer scene
-                if (!imageLayerGroup) {
-                    imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-                    imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-                    changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
-                }
+                buildImageDrawables(builder, bucket);
 
                 // finish
                 builder->flush();
@@ -450,8 +429,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                     ++stats.tileDrawablesRemoved;
                 }
             });
+        } else {
+            // Set up a tile layer group
+            tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+            tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+            changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
         }
 
+        auto builder = createBuilder();
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
             auto* bucket_ = tile.getBucket(*baseImpl);
@@ -461,17 +446,10 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
             if (!bucket.hasData()) continue;
 
-            if (tileLayerGroup && tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
+            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
 
             if (bucket.image) {
-                auto builder = buildTileDrawables(bucket);
-
-                // Set up a layer group
-                if (!tileLayerGroup) {
-                    tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-                    tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-                    changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
-                }
+                buildTileDrawables(builder, bucket);
 
                 // finish
                 builder->flush();
