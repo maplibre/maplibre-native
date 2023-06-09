@@ -26,7 +26,12 @@ public:
 
     void loadDescription(FileSource&) final;
 
+    /// @brief Gets the tile urls for this vector source.
+    /// @return std::vector<std::string> List of tile urls.
     const std::vector<std::string> getTiles();
+
+    /// @brief Sets the tile urls for this vector source.
+    /// @param std::vector<std::string> List of tile urls.
     void setTiles(const std::vector<std::string>&);
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
