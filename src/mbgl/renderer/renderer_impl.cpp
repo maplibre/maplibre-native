@@ -104,7 +104,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     orchestrator.processChanges();
 
     // Run layer tweakers to update any dynamic elements
-    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
+    orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
             layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
@@ -131,7 +131,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         renderTree.getPatternAtlas().upload(*uploadPass);
 
         // Give the layers a chance to upload
-        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.upload(*uploadPass); });
+        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 
     // - 3D PASS
@@ -189,7 +189,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
+        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             parameters.currentLayer++;
         });
@@ -203,7 +203,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
-        orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) {
+        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             if (parameters.currentLayer != 0) {
                 parameters.currentLayer--;
@@ -328,7 +328,8 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 #endif
 
     //     Give the layers a chance to do cleanup
-    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+    orchestrator.observeLayerGroups(
+        [&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 
     // Ends the RenderPass
     parameters.renderPass.reset();
