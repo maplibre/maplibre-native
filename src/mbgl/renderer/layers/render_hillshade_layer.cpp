@@ -79,8 +79,8 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass != RenderPass::Translucent && parameters.pass != RenderPass::Pass3D) return;
 
-    if (!parameters.shaders.populate(hillshadeProgram)) return;
-    if (!parameters.shaders.populate(hillshadePrepareProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(hillshadeProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(hillshadePrepareProgram)) return;
 
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
     auto draw = [&](const mat4& matrix,

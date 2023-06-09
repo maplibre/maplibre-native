@@ -23,9 +23,8 @@ public:
     void execute(LayerGroup&, const RenderTree&, const PaintParameters&) override;
 
 protected:
-    gfx::UniformBufferPtr paintParamsUniformBuffer = nullptr;
-    gfx::UniformBufferPtr evaluatedPropsUniformBuffer = nullptr;
-    gfx::UniformBufferPtr interpolateUniformBuffer = nullptr;
+    gfx::UniformBufferPtr paintParamsUniformBuffer;
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 };
 
 } // namespace mbgl
