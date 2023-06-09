@@ -11,9 +11,9 @@ namespace gl {
 template <shaders::BuiltIn ShaderID>
 class ShaderGroupGL final : public gfx::ShaderGroup {
 public:
-    ShaderGroupGL(const ProgramParameters& programParameters)
+    ShaderGroupGL(const ProgramParameters& programParameters_)
         : ShaderGroup(),
-          programParameters(programParameters){};
+          programParameters(programParameters_){};
     ~ShaderGroupGL() noexcept override = default;
 
     const std::shared_ptr<gfx::Shader> getOrCreateShader(
