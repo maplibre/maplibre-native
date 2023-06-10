@@ -247,7 +247,7 @@ lowp float halo_blur = u_halo_blur;
         buff = (6.0 - halo_width / fontScale) / SDF_PX;
     }
 
-    lowp float dist = texture(u_texture, tex).a;
+    lowp float dist = texture(u_texture, tex).r;
     highp float gamma_scaled = gamma * gamma_scale;
     highp float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 

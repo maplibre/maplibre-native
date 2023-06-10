@@ -218,14 +218,19 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(const Size 
     activeTextureUnit = 0;
     texture[0] = static_cast<gl::TextureResource&>(*resource).texture;
 
+    auto const glFormat = Enum<gfx::TexturePixelType>::to(format);
+    auto glInternalFormat = Enum<gfx::TexturePixelType>::sizedFor(format, type);
+    if (glFormat == GL_RED)
+        glInternalFormat = GL_R8;
+
     // Creates an empty texture with the specified size and format.
     MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
                                   0,
-                                  Enum<gfx::TexturePixelType>::sizedFor(format, type),
+                                  glInternalFormat,
                                   size.width,
                                   size.height,
                                   0,
-                                  Enum<gfx::TexturePixelType>::to(format),
+                                  glFormat,
                                   Enum<gfx::TextureChannelDataType>::to(type),
                                   nullptr));
 
