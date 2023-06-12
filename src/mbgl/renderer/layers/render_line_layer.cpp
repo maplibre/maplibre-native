@@ -412,15 +412,15 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
         float zoom = static_cast<float>(state.getZoom());
-        LineInterpolatedPropsUBO interpolatedUBO {
-            /*color_t =*/ std::get<0>(paintPropertyBinders.get<LineColor>()->interpolationFactor(zoom)),
-            /*blur_t =*/ std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
-            /*opacity_t =*/ std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
-            /*gapwidth_t =*/ std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
-            /*offset_t =*/ std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
-            /*width_t =*/ std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
-            0, 0
-        };
+        LineInterpolatedPropsUBO interpolatedUBO{
+            /*color_t =*/std::get<0>(paintPropertyBinders.get<LineColor>()->interpolationFactor(zoom)),
+            /*blur_t =*/std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
+            /*opacity_t =*/std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
+            /*gapwidth_t =*/std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
+            /*offset_t =*/std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
+            /*width_t =*/std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
+            0,
+            0};
         tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             drawable.mutableUniformBuffers().createOrUpdate(LineInterpolatedUBOName, &interpolatedUBO, context);
         });
@@ -441,11 +441,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineOpacity,
                                                                                   LineGapWidth,
                                                                                   LineOffset,
-                                                                                  LineWidth>(
-                paintPropertyBinders, evaluated);
+                                                                                  LineWidth>(paintPropertyBinders,
+                                                                                             evaluated);
             auto lineShader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!lineShader) continue;
-            
+
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("line")};
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineShader));
             builder->setRenderPass(renderPass);
@@ -465,7 +465,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                [](const auto& x) { return x.a1; });
                 builder->addVertices(vertices, 0, vertices.size());
             }
-            
+
             // attributes
             if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
                 size_t index{0};
