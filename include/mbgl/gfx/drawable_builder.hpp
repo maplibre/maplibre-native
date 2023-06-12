@@ -136,6 +136,7 @@ public:
                             std::size_t vertexLength);
 
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<SegmentBase>&);
+    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
 
     /// Add lines based on existing vertices
     void addLines(const std::vector<uint16_t>& indexes,

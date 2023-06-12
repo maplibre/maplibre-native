@@ -493,7 +493,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 fillBuilder->setSegments(gfx::Triangles(),
                                          bucket.triangles.vector(),
-                                         reinterpret_cast<const std::vector<SegmentBase>&>(bucket.triangleSegments));
+                                         bucket.triangleSegments.data(),
+                                         bucket.triangleSegments.size());
                 finish(*fillBuilder, tileID, interpolateUBO, tileProps);
             }
             if (outlineBuilder) {
@@ -503,7 +504,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 outlineBuilder->setSegments(gfx::Lines(2),
                                             bucket.lines.vector(),
-                                            reinterpret_cast<const std::vector<SegmentBase>&>(bucket.lineSegments));
+                                            bucket.lineSegments.data(),
+                                            bucket.lineSegments.size());
                 finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
             }
         } else { // FillPattern is defined
@@ -549,7 +551,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 patternBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.triangles.vector(),
-                                            reinterpret_cast<const std::vector<SegmentBase>&>(bucket.triangleSegments));
+                                            bucket.triangleSegments.data(),
+                                            bucket.triangleSegments.size());
 
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     if (const auto samplerLocation = fillShader->getSamplerLocation("u_image")) {
@@ -568,7 +571,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->setSegments(
                     gfx::Lines(2),
                     bucket.lines.vector(),
-                    reinterpret_cast<const std::vector<SegmentBase>&>(bucket.lineSegments));
+                    bucket.lineSegments.data(),
+                    bucket.lineSegments.size());
 
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     if (const auto samplerLocation = outlineShader->getSamplerLocation("u_image")) {
