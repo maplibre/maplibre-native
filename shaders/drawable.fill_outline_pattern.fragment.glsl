@@ -1,3 +1,13 @@
+layout (std140) uniform FillInterpolateUBO {
+    highp float u_color_t;
+    highp float u_opacity_t;
+    highp float u_outline_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+    highp float u_fade;
+    highp float u_padding_interp1;
+    highp float u_padding_interp2;
+};
 layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
@@ -5,18 +15,16 @@ layout (std140) uniform FillDrawableUBO {
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
-    highp float u_fade;
-
-    highp float u_color_t;
-    highp float u_opacity_t;
-    highp float u_outline_color_t;
-    highp float u_pattern_from_t;
-    highp float u_pattern_to_t;
-
-    highp vec2 u_color;
-    highp vec2 u_opacity;
-    highp vec2 u_outline_color_pad;
+};
+layout (std140) uniform FillDrawablePropsUBO {
+    highp vec4 u_color;
     highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float padding_props1;
+    highp float padding_props2;
+    highp float padding_props3;
+};
+layout (std140) uniform FillDrawableTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
 };

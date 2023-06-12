@@ -58,10 +58,10 @@ private:
     std::shared_ptr<FillOutlineProgram> fillOutlineProgram;
     std::shared_ptr<FillOutlinePatternProgram> fillOutlinePatternProgram;
 
-    gfx::ShaderProgramBasePtr fillShader;
-    gfx::ShaderProgramBasePtr outlineShader;
-    gfx::ShaderProgramBasePtr patternShader;
-    gfx::ShaderProgramBasePtr outlinePatternShader;
+    gfx::ShaderGroupPtr fillShaderGroup;
+    gfx::ShaderGroupPtr outlineShaderGroup;
+    gfx::ShaderGroupPtr patternShaderGroup;
+    gfx::ShaderGroupPtr outlinePatternShaderGroup;
 };
 
 } // namespace mbgl
