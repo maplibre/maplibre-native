@@ -131,7 +131,7 @@ public class LightTest extends BaseTest {
       assertNotNull(light);
       // Set and Get
       light.setIntensity(0.3f);
-      assertEquals("Intensity should match", 0.3f, light.getIntensity());
+      assertEquals("Intensity should match", 0.3f, light.getIntensity(), 0f);
     });
   }
 

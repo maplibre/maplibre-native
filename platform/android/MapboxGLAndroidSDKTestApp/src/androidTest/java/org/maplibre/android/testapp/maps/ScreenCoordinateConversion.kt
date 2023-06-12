@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.maps
 import android.graphics.PointF
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import org.junit.Assert.assertArrayEquals
 import org.maplibre.android.AppCenter
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
@@ -86,7 +87,7 @@ class ScreenCoordinateConversion : AppCenter() {
                 val projection = it.projection
                 projection.fromScreenLocations(doubleArrayOf(1.0, 2.0, 3.0, 4.0), actual)
                 // check all values at once
-                assertTrue(expected.contentEquals(actual))
+                assertArrayEquals(expected, actual, DELTA_DOUBLE)
 
                 // check first latlng value
                 val latLngFirst = LatLng(expected[0], expected[1])

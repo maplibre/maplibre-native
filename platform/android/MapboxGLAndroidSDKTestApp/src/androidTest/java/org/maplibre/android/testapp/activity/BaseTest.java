@@ -72,7 +72,7 @@ public abstract class BaseTest extends AppCenter {
       Timber.e("Not connected to the internet while running test");
     }
     assertNotNull("MapView isn't initialised", mapView);
-    assertNotNull("MapboxMap isn't initialised", maplibreMap);
+    assertNotNull("MapLibreMap isn't initialised", maplibreMap);
     assertNotNull("Style isn't initialised", maplibreMap.getStyle());
     assertTrue("Style isn't fully loaded", maplibreMap.getStyle().isFullyLoaded());
   }
