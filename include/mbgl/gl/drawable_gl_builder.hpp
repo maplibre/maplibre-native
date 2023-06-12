@@ -23,7 +23,7 @@ protected:
     gfx::UniqueDrawable createDrawable() const override;
 
     using DrawSegment = gfx::Drawable::DrawSegment;
-    std::unique_ptr<DrawSegment> createSegment(gfx::DrawMode, Segment<void>&&) override;
+    std::unique_ptr<DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) override;
 
     /// Setup the SDK-specific aspects after all the values are present
     void init() override;

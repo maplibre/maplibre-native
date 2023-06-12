@@ -25,7 +25,7 @@ public:
 
     std::optional<T> constant() const {
         return value.match([&](const T& t) { return std::optional<T>(t); },
-                           [&](const auto&) { return std::optional<T>{}; });
+                           [&](const auto&) { return std::nullopt; });
     }
 
     T constantOr(const T& t) const { return constant().value_or(t); }
