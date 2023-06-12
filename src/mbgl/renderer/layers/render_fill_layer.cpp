@@ -502,10 +502,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setVertexAttributes(outlineVertexAttrs);
                 outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
-                outlineBuilder->setSegments(gfx::Lines(2),
-                                            bucket.lines.vector(),
-                                            bucket.lineSegments.data(),
-                                            bucket.lineSegments.size());
+                outlineBuilder->setSegments(
+                    gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
                 finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
             }
         } else { // FillPattern is defined
@@ -569,10 +567,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
                 outlinePatternBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 outlinePatternBuilder->setSegments(
-                    gfx::Lines(2),
-                    bucket.lines.vector(),
-                    bucket.lineSegments.data(),
-                    bucket.lineSegments.size());
+                    gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
 
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     if (const auto samplerLocation = outlineShader->getSamplerLocation("u_image")) {
