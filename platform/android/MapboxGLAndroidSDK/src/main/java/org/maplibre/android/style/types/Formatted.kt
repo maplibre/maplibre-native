@@ -6,7 +6,7 @@ import java.util.*
 /**
  * Represents a string broken into sections annotated with separate formatting options.
  *
- * @see [Style specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/.types-formatted)
+ * @see [Style specification](https://maplibre.org/maplibre-style-spec/.types-formatted)
  */
 @Keep
 class Formatted(vararg formattedSections: FormattedSection) {

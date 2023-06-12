@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * A heatmap.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-heatmap">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-heatmap">The online documentation</a>
  */
 @UiThread
 public class HeatmapLayer extends Layer {

@@ -7,7 +7,7 @@ import org.maplibre.android.style.expressions.Expression.ExpressionLiteral
  *
  * @see GeoJsonSource
  *
- * @see [The online documentation](https://www.mapbox.com/mapbox-gl-style-spec/.sources-geojson)
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/.sources-geojson)
  */
 class GeoJsonOptions : HashMap<String?, Any?>() {
     /**

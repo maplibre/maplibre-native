@@ -2,6 +2,9 @@ name: Build & Deploy mdBook documentation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build-docs:

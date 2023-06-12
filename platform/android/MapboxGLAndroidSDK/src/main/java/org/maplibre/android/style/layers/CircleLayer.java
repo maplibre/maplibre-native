@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * A filled circle.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-circle">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-circle">The online documentation</a>
  */
 @UiThread
 public class CircleLayer extends Layer {

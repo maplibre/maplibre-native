@@ -26,7 +26,7 @@ struct LayerTypeInfo;
 
 /**
  * The runtime representation of a
- * [source](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) from
+ * [source](https://maplibre.org/maplibre-style-spec/sources/) from
  * the MapLibre Style Specification.
  *
  * `Source` is an abstract base class; concrete derived classes are provided for

@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * Raster map textures such as satellite imagery.
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers-raster">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-raster">The online documentation</a>
  */
 @UiThread
 public class RasterLayer extends Layer {

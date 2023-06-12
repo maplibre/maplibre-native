@@ -11,7 +11,7 @@ import static org.maplibre.android.utils.ColorUtils.colorToRgbaString;
 /**
  * Constructs paint/layout properties for Layers
  *
- * @see <a href="https://www.mapbox.com/mapbox-gl-style-spec/#layers">Layer style documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers">Layer style documentation</a>
  */
 public class PropertyFactory {
 
