@@ -14,7 +14,7 @@ android {
         targetSdkVersion androidVersions.targetSdkVersion
         versionCode 14
         versionName "6.0.1"
-        testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
+        testInstrumentationRunner "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
     }
 
