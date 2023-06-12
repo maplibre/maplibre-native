@@ -6,6 +6,10 @@
 #include <memory>
 
 namespace mbgl {
+namespace gfx {
+class UniformBuffer;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+} // namespace gfx
 namespace style {
 class LayerProperties;
 enum class TranslateAnchorType : bool;
