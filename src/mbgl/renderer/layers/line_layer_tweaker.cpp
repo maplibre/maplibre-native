@@ -47,7 +47,7 @@ struct alignas(16) LineInterpolatedPropsUBO {
 static_assert(sizeof(LineInterpolatedPropsUBO) == 32);
 static_assert(sizeof(LineInterpolatedPropsUBO) % 16 == 0);
 
-void LineLayerTweaker::execute(LayerGroup& layerGroup,
+void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
                                const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;

@@ -388,6 +388,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
+        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
@@ -440,81 +441,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
                 // test whether the shader has the extra attributes
                 if (lineShader->getVertexAttributes().size() > 2) {
-                    const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+                    
+                    auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor, LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(paintPropertyBinders, evaluated);
 
-                    if (auto& binder = paintPropertyBinders.get<LineColor>()) {
-                        const auto count = binder->getVertexCount();
-                        if (auto& attr = vertexAttrs.getOrAdd("a_color")) {
-                            for (std::size_t i = 0; i < vertexCount; ++i) {
-                                const auto& packedColor =
-                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 2>>*>(
-                                        binder->getVertexValue(i < count ? i : 0))
-                                        ->a1;
-                                attr->set<gfx::VertexAttribute::float4>(
-                                    i, {packedColor[0], packedColor[1], packedColor[0], packedColor[1]});
-                            }
-                        }
-                    }
-                    if (auto& binder = paintPropertyBinders.get<LineBlur>()) {
-                        const auto count = binder->getVertexCount();
-                        if (auto& attr = vertexAttrs.getOrAdd("a_blur")) {
-                            for (std::size_t i = 0; i < vertexCount; ++i) {
-                                const auto& blur =
-                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                        binder->getVertexValue(i < count ? i : 0))
-                                        ->a1;
-                                attr->set<gfx::VertexAttribute::float2>(i, {blur[0], blur[0]});
-                            }
-                        }
-                    }
-                    if (auto& binder = paintPropertyBinders.get<LineOpacity>()) {
-                        const auto count = binder->getVertexCount();
-                        if (auto& attr = vertexAttrs.getOrAdd("a_opacity")) {
-                            for (std::size_t i = 0; i < vertexCount; ++i) {
-                                const auto& opacity =
-                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                        binder->getVertexValue(i < count ? i : 0))
-                                        ->a1;
-                                attr->set<gfx::VertexAttribute::float2>(i, {opacity[0], opacity[0]});
-                            }
-                        }
-                    }
-                    if (auto& binder = paintPropertyBinders.get<LineGapWidth>()) {
-                        const auto count = binder->getVertexCount();
-                        if (auto& attr = vertexAttrs.getOrAdd("a_gapwidth")) {
-                            for (std::size_t i = 0; i < vertexCount; ++i) {
-                                const auto& gapwidth =
-                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                        binder->getVertexValue(i < count ? i : 0))
-                                        ->a1;
-                                attr->set<gfx::VertexAttribute::float2>(i, {gapwidth[0], gapwidth[0]});
-                            }
-                        }
-                    }
-                    if (auto& binder = paintPropertyBinders.get<LineOffset>()) {
-                        const auto count = binder->getVertexCount();
-                        if (auto& attr = vertexAttrs.getOrAdd("a_offset")) {
-                            for (std::size_t i = 0; i < vertexCount; ++i) {
-                                const auto& offset =
-                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                        binder->getVertexValue(i < count ? i : 0))
-                                        ->a1;
-                                attr->set<gfx::VertexAttribute::float2>(i, {offset[0], offset[0]});
-                            }
-                        }
-                    }
-                    if (auto& binder = paintPropertyBinders.get<LineOffset>()) {
-                        const auto count = binder->getVertexCount();
-                        if (auto& attr = vertexAttrs.getOrAdd("a_width")) {
-                            for (std::size_t i = 0; i < vertexCount; ++i) {
-                                const auto& width =
-                                    static_cast<const gfx::detail::VertexType<gfx::AttributeType<float, 1>>*>(
-                                        binder->getVertexValue(i < count ? i : 0))
-                                        ->a1;
-                                attr->set<gfx::VertexAttribute::float2>(i, {width[0], width[0]});
-                            }
-                        }
-                    }
                 }
 
                 builder->setVertexAttributes(std::move(vertexAttrs));
