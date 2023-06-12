@@ -392,7 +392,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        const auto& binders = bucket.paintPropertyBinders.at(getID());
 
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
@@ -400,18 +400,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
         const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
         const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
-        paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
+        binders.setPatternParameters(patternPosA, patternPosB, crossfade);
 
+        const auto zoom = static_cast<float>(state.getZoom());
         const FillInterpolateUBO interpolateUBO = {
-            /* .color_t = */ std::get<0>(paintPropertyBinders.get<FillColor>()->interpolationFactor(state.getZoom())),
-            /* .opacity_t = */
-            std::get<0>(paintPropertyBinders.get<FillOpacity>()->interpolationFactor(state.getZoom())),
-            /* .outline_color_t = */
-            std::get<0>(paintPropertyBinders.get<FillOutlineColor>()->interpolationFactor(state.getZoom())),
-            /* .pattern_from_t = */
-            std::get<0>(paintPropertyBinders.get<FillPattern>()->interpolationFactor(state.getZoom())),
-            /* .pattern_to_t = */
-            std::get<0>(paintPropertyBinders.get<FillColor>()->interpolationFactor(state.getZoom())),
+            /* .color_t = */ std::get<0>(binders.get<FillColor>()->interpolationFactor(zoom)),
+            /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
+            /* .outline_color_t = */ std::get<0>(binders.get<FillOutlineColor>()->interpolationFactor(zoom)),
+            /* .pattern_from_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
+            /* .pattern_to_t = */ std::get<0>(binders.get<FillColor>()->interpolationFactor(zoom)),
             /* .fade = */ crossfade.t,
             /* .padding = */ {0},
         };
@@ -451,10 +448,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         // `Fill*Program` all use `style::FillPaintProperties`
         const auto fillUniformProps =
             fillVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
-                paintPropertyBinders, evaluated);
+                binders, evaluated);
         const auto outlineUniformProps =
             outlineVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
-                paintPropertyBinders, evaluated);
+                binders, evaluated);
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
