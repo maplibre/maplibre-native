@@ -1,5 +1,7 @@
+scripts/generate-style-code.list
+
 # generated sources. To update this list, run
-# 'make style-code' and copy paste generate-style-code.list
+# 'make style-code' and copy paste the contents of scripts/generate-style-code.list
 
 MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/light/Light.java
 MapboxGLAndroidSDKTestApp/src/androidTest/java/org/maplibre/android/testapp/style/LightTest.java

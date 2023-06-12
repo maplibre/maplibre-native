@@ -121,6 +121,9 @@ jobs:
           restore-keys: |
             - ${{ env.cache-name }}
 
+      - name: Generate sources
+        run: make style-code
+
       - name: Check code style
         run: make android-check
 
