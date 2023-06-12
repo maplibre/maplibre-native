@@ -39,7 +39,7 @@ protected:
 public:
     LayerGroupBase(const LayerGroupBase&) = delete;
     LayerGroupBase& operator=(const LayerGroupBase&) = delete;
-    virtual ~LayerGroupBase() = default;
+    ~LayerGroupBase() override = default;
 
     /// Whether the drawables should be drawn
     bool getEnabled() const { return enabled; }
