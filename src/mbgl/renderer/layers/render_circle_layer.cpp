@@ -410,7 +410,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         circleBuilder->setSegments(gfx::Triangles(),
                                    bucket.triangles.vector(),
-                                   reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
+                                   reinterpret_cast<const std::vector<SegmentBase>&>(bucket.segments));
 
         circleBuilder->flush();
 
