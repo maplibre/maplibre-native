@@ -178,7 +178,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
-        bindings[defaultGL.getIndex()] = {
+        const auto index = static_cast<std::size_t>(defaultGL.getIndex());
+        bindings.resize(std::max(bindings.size(), index + 1));
+        bindings[index] = {
             /*.attribute = */ {defaultAttr.getDataType(), offset},
             /* vertexStride = */ static_cast<uint32_t>(stride),
             /* vertexBufferResource = */ nullptr, // buffer details established later
