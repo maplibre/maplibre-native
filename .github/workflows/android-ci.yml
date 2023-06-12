@@ -207,9 +207,6 @@ jobs:
 
   instrumentation-test:
     needs: build
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: false
 
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
