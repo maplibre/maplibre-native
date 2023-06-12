@@ -25,7 +25,7 @@ public:
 public:
     ~BackgroundLayerTweaker() override = default;
 
-    void execute(LayerGroup&, const RenderTree&, const PaintParameters&) override;
+    void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
 protected:
 };

@@ -141,6 +141,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
@@ -383,6 +384,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_scope.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
@@ -525,6 +527,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/image_manager_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/tile_layer_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.hpp

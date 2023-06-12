@@ -3,7 +3,7 @@
 
 namespace mbgl {
 
-AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupPtr layerGroup_, bool canReplace)
+AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupBasePtr layerGroup_, bool canReplace)
     : layerGroup(std::move(layerGroup_)),
       replace(canReplace) {}
 
