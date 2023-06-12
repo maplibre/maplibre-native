@@ -547,10 +547,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 patternBuilder->setRenderPass(renderPass);
                 patternBuilder->setVertexAttributes(fillVertexAttrs);
                 patternBuilder->addVertices(rawVerts, 0, rawVerts.size());
-                patternBuilder->setSegments(
-                    gfx::Triangles(),
-                    bucket.triangles.vector(),
-                    reinterpret_cast<const std::vector<SegmentBase>&>(bucket.triangleSegments));
+                patternBuilder->setSegments(gfx::Triangles(),
+                                            bucket.triangles.vector(),
+                                            reinterpret_cast<const std::vector<SegmentBase>&>(bucket.triangleSegments));
 
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     if (const auto samplerLocation = fillShader->getSamplerLocation("u_image")) {
