@@ -15,6 +15,13 @@ class LineGradientProgram;
 class LineSDFProgram;
 class LinePatternProgram;
 
+namespace gfx {
+class ShaderGroup;
+class UniformBuffer;
+using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+} // namespace gfx
+
 class RenderLineLayer final : public RenderLayer {
 public:
     explicit RenderLineLayer(Immutable<style::LineLayer::Impl>);
@@ -64,10 +71,10 @@ private:
     std::shared_ptr<LineSDFProgram> lineSDFProgram;
     std::shared_ptr<LinePatternProgram> linePatternProgram;
 
-    gfx::ShaderProgramBasePtr lineShader;
-    gfx::ShaderProgramBasePtr lineGradientShader;
-    gfx::ShaderProgramBasePtr lineSDFShader;
-    gfx::ShaderProgramBasePtr linePatternShader;
+    gfx::ShaderGroupPtr lineShaderGroup;
+    gfx::ShaderGroupPtr lineGradientShaderGroup;
+    gfx::ShaderGroupPtr lineSDFShaderGroup;
+    gfx::ShaderGroupPtr linePatternShaderGroup;
 };
 
 } // namespace mbgl

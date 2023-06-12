@@ -332,29 +332,55 @@ void RenderLineLayer::removeTile(RenderPass renderPass, const OverscaledTileID& 
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
 
+struct alignas(16) LineInterpolatedPropsUBO {
+    float color_t;
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float pad1;
+    float pad2;
+};
+static_assert(sizeof(LineInterpolatedPropsUBO) == 32);
+static_assert(sizeof(LineInterpolatedPropsUBO) % 16 == 0);
+static constexpr std::string_view LineInterpolatedUBOName = "LineInterpolatedPropsUBO";
+
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& /*state*/,
+                             const TransformState& state,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
-    if (!renderTiles || renderTiles->empty()) {
+    const auto removeAll = [&]() {
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
         }
+    };
+
+    if (!renderTiles || renderTiles->empty()) {
+        removeAll();
         return;
     }
 
     // Set up a layer group
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, "line");
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
         changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
+    }
+
+    if (!lineShaderGroup) {
+        lineShaderGroup = shaders.getShaderGroup("LineShader");
+    }
+    if (!lineShaderGroup) {
+        removeAll();
+        return;
     }
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
@@ -375,12 +401,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        // If we already have drawables for this tile, skip.
-        // If a drawable needs to be updated, that's handled in the layer tweaker.
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            continue;
-        }
-
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData) {
             removeTile(renderPass, tileID);
@@ -391,6 +411,22 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
+        float zoom = static_cast<float>(state.getZoom());
+        LineInterpolatedPropsUBO interpolatedUBO {
+            /*color_t =*/ std::get<0>(paintPropertyBinders.get<LineColor>()->interpolationFactor(zoom)),
+            /*blur_t =*/ std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
+            /*opacity_t =*/ std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
+            /*gapwidth_t =*/ std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
+            /*offset_t =*/ std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
+            /*width_t =*/ std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
+            0, 0
+        };
+        tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            drawable.mutableUniformBuffers().createOrUpdate(LineInterpolatedUBOName, &interpolatedUBO, context);
+        });
+
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
+
         if (!evaluated.get<LineDasharray>().from.empty()) {
             // TODO: dash array line: LineSDFShader
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
@@ -399,78 +435,57 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // TODO: gradient line: LineGradientShader
         } else {
             // simple line
+            gfx::VertexAttributeArray vertexAttrs;
+            auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
+                                                                                  LineBlur,
+                                                                                  LineOpacity,
+                                                                                  LineGapWidth,
+                                                                                  LineOffset,
+                                                                                  LineWidth>(
+                paintPropertyBinders, evaluated);
+            auto lineShader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            if (!lineShader) continue;
+            
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("line")};
-            if (!lineShader) {
-                lineShader = context.getGenericShader(shaders, "LineShader");
-            }
-
-            builder->setShader(lineShader);
+            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineShader));
             builder->setRenderPass(renderPass);
             builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
-            builder->setSubLayerIndex(0);
             builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                      : gfx::DepthMaskType::ReadOnly);
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
             builder->setVertexAttrName("a_pos_normal");
 
-            std::vector<std::array<int16_t, 2>> rawVerts;
-            const auto buildVertices = [&rawVerts, &bucket]() {
-                if (rawVerts.size() != bucket.vertices.vector().size()) {
-                    rawVerts.resize(bucket.vertices.vector().size());
-                    std::transform(bucket.vertices.vector().begin(),
-                                   bucket.vertices.vector().end(),
-                                   rawVerts.begin(),
-                                   [](const auto& x) { return x.a1; });
-                }
-            };
-
             // vertices
-            buildVertices();
-            auto vertexCount = rawVerts.size();
-            builder->addVertices(rawVerts, 0, vertexCount);
-
-            // attributes
             {
-                gfx::VertexAttributeArray vertexAttrs;
-                if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
-                    size_t index{0};
-                    for (const auto& vert : bucket.vertices.vector()) {
-                        attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
-                    }
-                }
-
-                // test whether the shader has the extra attributes
-                if (lineShader->getVertexAttributes().size() > 2) {
-                    auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
-                                                                                          LineBlur,
-                                                                                          LineOpacity,
-                                                                                          LineGapWidth,
-                                                                                          LineOffset,
-                                                                                          LineWidth>(
-                        paintPropertyBinders, evaluated);
-                }
-
-                builder->setVertexAttributes(std::move(vertexAttrs));
+                std::vector<std::array<int16_t, 2>> vertices;
+                vertices.resize(bucket.vertices.vector().size());
+                std::transform(bucket.vertices.vector().begin(),
+                               bucket.vertices.vector().end(),
+                               vertices.begin(),
+                               [](const auto& x) { return x.a1; });
+                builder->addVertices(vertices, 0, vertices.size());
             }
+            
+            // attributes
+            if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
+                size_t index{0};
+                for (const auto& vert : bucket.vertices.vector()) {
+                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+                }
+            }
+            builder->setVertexAttributes(std::move(vertexAttrs));
 
             // segments
             builder->setSegments(gfx::Triangles(),
                                  bucket.triangles.vector(),
                                  reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
-            //                using namespace std::string_literals;
-            //                Log::Warning(Event::General,
-            //                             "SEG: "s + util::toString(tileID) +
-            //                             " vertex offset: " + std::to_string(seg.vertexOffset) +
-            //                             " vertex len: " + std::to_string(seg.vertexLength) +
-            //                             " index offset: " + std::to_string(seg.indexOffset) +
-            //                             " index len: " + std::to_string(seg.indexLength) +
-            //                             " max(index): " + std::to_string(builder->maxIndex())
-            //                             );
 
             // finish
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->mutableUniformBuffers().createOrUpdate(LineInterpolatedUBOName, &interpolatedUBO, context);
+
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
             }

@@ -34,19 +34,6 @@ struct alignas(16) LineEvaluatedPropsUBO {
 static_assert(sizeof(LineEvaluatedPropsUBO) == 48);
 static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
 
-struct alignas(16) LineInterpolatedPropsUBO {
-    float color_t;
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float pad1;
-    float pad2;
-};
-static_assert(sizeof(LineInterpolatedPropsUBO) == 32);
-static_assert(sizeof(LineInterpolatedPropsUBO) % 16 == 0);
-
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
                                const PaintParameters& parameters) {
@@ -61,18 +48,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
     evaluatedPropsUBO.width = evaluated.get<LineWidth>().constantOr(0);
     evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
 
-    LineInterpolatedPropsUBO interpolatedUBO;
-    interpolatedUBO.color_t = 1;
-    interpolatedUBO.blur_t = 1;
-    interpolatedUBO.opacity_t = 1;
-    interpolatedUBO.gapwidth_t = 1;
-    interpolatedUBO.offset_t = 1;
-    interpolatedUBO.width_t = 1;
-    auto interpolateUniformBuffer = parameters.context.createUniformBuffer(&interpolatedUBO, sizeof(interpolatedUBO));
-
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         drawable.mutableUniformBuffers().addOrReplace("LineEvaluatedPropsUBO", evaluatedPropsUniformBuffer);
-        drawable.mutableUniformBuffers().addOrReplace("LineInterpolatedPropsUBO", interpolateUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;

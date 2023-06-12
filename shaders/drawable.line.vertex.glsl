@@ -6,15 +6,6 @@
 // #define scale 63.0
 #define scale 0.015873016
 
-// SWITCH BETWEEN THE VERSIONS OF THE SHADER BY CHANGING THE FOLLOWING LINES:
-#define HAS_UNIFORM_u_color
-#define HAS_UNIFORM_u_blur
-#define HAS_UNIFORM_u_opacity
-#define HAS_UNIFORM_u_gapwidth
-#define HAS_UNIFORM_u_offset
-#define HAS_UNIFORM_u_width
-// END SWITCH 
-
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
