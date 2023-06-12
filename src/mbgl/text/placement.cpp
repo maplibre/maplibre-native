@@ -731,7 +731,8 @@ void Placement::commit() {
         }
     }
 
-    fadeStartTime = placementChanged ? commitTime : (getPrevPlacement() ? getPrevPlacement()->fadeStartTime : TimePoint{});
+    fadeStartTime = placementChanged ? commitTime
+                                     : (getPrevPlacement() ? getPrevPlacement()->fadeStartTime : TimePoint{});
 }
 
 void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformState& state, bool updateOpacities) const {
