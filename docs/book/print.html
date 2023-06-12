@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="android/index.html"><strong aria-hidden="true">2.</strong> MapLibre Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="android/index.html"><strong aria-hidden="true">2.</strong> MapLibre Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li><li class="chapter-item expanded "><a href="android/location-component-guide.html"><strong aria-hidden="true">2.2.</strong> Location Component</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -1301,6 +1301,94 @@ class MainActivity : AppCompatActivity() {
 </ol>
 <div style="text-align: center;">
 <img src="https://user-images.githubusercontent.com/32692818/228113379-475e86f5-e3fa-4a36-8b4b-1fcba0f1eb3b.png" alt="Screenshot with the map in demotile style" width="50%" height="50%">
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="locationcomponent"><a class="header" href="#locationcomponent">LocationComponent</a></h1>
+<p>This guide will demonstrate how to utilize the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a> to represent the user's current location.</p>
+<ol>
+<li>
+<p>When implementing the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a>, the application should request location permissions.</p>
+<p>Declare the need for foreground location in the <code>AndroidManifest.xml</code> file.</p>
+<p>For more information, please refer to the <a href="https://developer.android.com/training/location/permissions">Android Developer Documentation</a>.</p>
+</li>
+</ol>
+<pre><code class="language-xml">&lt;manifest ... &gt;
+  &lt;!-- Always include this permission --&gt;
+  &lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+
+  &lt;!-- Include only if your app benefits from precise location access. --&gt;
+  &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+&lt;/manifest&gt;
+</code></pre>
+<ol start="2">
+<li>Create a new activity named <code>BasicLocationPulsingCircleActivity</code>:</li>
+</ol>
+<ul>
+<li>This Activity should implement the <code>OnMapReadyCallback</code> interface. The <code>onMapReady()</code> method is triggered when the map is ready to be used.</li>
+<li>Add a variable <code>permissionsManager</code> to manage permissions.</li>
+<li>Add a variable <code>locationComponent</code> to manage user location.</li>
+<li>At the end of the <code>onCreate()</code> method, call <code>checkPermissions(</code>) to ensure that the application can access the user's location.</li>
+</ul>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:top}}
+</code></pre>
+<ol start="3">
+<li>
+<p>In the <code>checkPermissions()</code> method, the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.permissions/-permissions-manager/index.html">PermissionManager</a> is used to request location permissions at runtime and handle the callbacks for permission granting or rejection.</p>
+<p>Additionally, you should pass the results of <code>Activity.onRequestPermissionResult()</code> to it.</p>
+<p>If the permissions are granted, call <code>mapView.getMapAsync(this)</code> to register the activity as a listener for onMapReady event.</p>
+</li>
+</ol>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:permission}}
+</code></pre>
+<ol start="4">
+<li>
+<p>In the <code>onMapReady()</code> method, first set the style and then handle the user's location using the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a>.</p>
+<p>To configure the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a>, developers should use <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a>.</p>
+<p>In this demonstration, we create an instance of this class.</p>
+<p>In this method:</p>
+<ul>
+<li>Use the annotation <code>@SuppressLint(&quot;MissingPermission&quot;)</code> to suppress warnings related to missing location access permissions.</li>
+<li>In <code>setStyle(),</code> you can utilize other public and token-free styles like <a href="https://demotiles.maplibre.org/style.json">demotiles</a> instead of the <a href="https://github.com/maplibre/maplibre-native/tree/main/src/mbgl/util/tile_server_options.cpp">predefined styles</a>.</li>
+<li>For the builder of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a>, use <code>pulseEnabled(true)</code> to enable the pulse animation, which enhances awareness of the user's location.</li>
+<li>Use method <code>buildLocationComponentActivationOptions()</code> to set <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a>, then activate <code>locatinoComponent</code> with it.</li>
+<li>To apply options, make sure you call <code>activateLocationComponent()</code> of <code>locationComponent</code>. You can also set <code>locationComponent</code>'s various properties like <code>isLocationComponentEnabled</code> , <code>cameraMode</code> , etc...</li>
+<li><code>CameraMode.TRACKING</code><sup class="footnote-reference"><a href="#1">1</a></sup> means that when the user's location is updated, the camera will reposition accordingly.</li>
+<li><code>locationComponent!!.forceLocationUpdate(lastLocation)</code> updates the the user's last known location.</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:onMapReady}}
+</code></pre>
+<ol start="5">
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a> is used to hold the style, <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a> and other locating behaviors.
+<ul>
+<li>It can also be used to configure how to obtain the current location, such as <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.engine/-location-engine/index.html">LocationEngine</a> and intervals.</li>
+<li>In this demonstration, it sets 750ms as the fastest interval for location updates, providing high accuracy location results (but with higher power consumption).</li>
+<li>For more information, please visit the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">documentation page</a>.</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:LocationComponentActivationOptions}}
+</code></pre>
+<ol start="6">
+<li>For further customization, you can also utilize the <code>foregroundTintColor()</code> and <code>pulseColor()</code> methods on the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a> builder:</li>
+</ol>
+<pre><code class="language-kotlin">val locationComponentOptions =
+    LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
+       .pulseEnabled(true)
+       .pulseColor(Color.RED)             // Set color of pulse
+       .foregroundTintColor(Color.BLACK)  // Set color of user location
+       .build()
+</code></pre>
+<ol start="7">
+<li>
+<p>Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a> <sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
+<p><img src="https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63" alt="result" /></p>
+</li>
+</ol>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>A variety of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.modes/-camera-mode/index.html">camera modes</a> determine how the camera will track the user location.<br />
+They provide the right context to your users at the correct time.<br />
+<sup class="footnote-reference"><a href="#2">2</a></sup>: In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
 </div>
 
                     </main>
