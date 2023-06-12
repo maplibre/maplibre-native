@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:maplibre="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,24 +17,24 @@
         <!-- DC -->
         <fragment
             android:id="@+id/map1"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
-            mapbox:maplibre_cameraTargetLat="38.913187"
-            mapbox:maplibre_cameraTargetLng="-77.032546"
-            mapbox:maplibre_cameraZoom="12" />
+            maplibre:maplibre_cameraTargetLat="38.913187"
+            maplibre:maplibre_cameraTargetLng="-77.032546"
+            maplibre:maplibre_cameraZoom="12" />
 
         <!-- SF -->
         <fragment
             android:id="@+id/map2"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
-            mapbox:maplibre_cameraTargetLat="37.775732"
-            mapbox:maplibre_cameraTargetLng="-122.413985"
-            mapbox:maplibre_cameraZoom="13"/>
+            maplibre:maplibre_cameraTargetLat="37.775732"
+            maplibre:maplibre_cameraTargetLng="-122.413985"
+            maplibre:maplibre_cameraZoom="13"/>
     </LinearLayout>
 
     <LinearLayout
@@ -47,23 +47,23 @@
         <!-- Bangalore -->
         <fragment
             android:id="@+id/map3"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
-            mapbox:maplibre_cameraTargetLat="12.97913"
-            mapbox:maplibre_cameraTargetLng="77.59188"
-            mapbox:maplibre_cameraZoom="14" />
+            maplibre:maplibre_cameraTargetLat="12.97913"
+            maplibre:maplibre_cameraTargetLng="77.59188"
+            maplibre:maplibre_cameraZoom="14" />
 
         <!-- Ayacucho -->
         <fragment
             android:id="@+id/map4"
-            class="com.mapbox.mapboxsdk.maps.SupportMapFragment"
+            class="org.maplibre.android.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="0.5"
-            mapbox:maplibre_cameraTargetLat="-13.155980"
-            mapbox:maplibre_cameraTargetLng="-74.217134"
-            mapbox:maplibre_cameraZoom="15" />
+            maplibre:maplibre_cameraTargetLat="-13.155980"
+            maplibre:maplibre_cameraTargetLng="-74.217134"
+            maplibre:maplibre_cameraZoom="15" />
     </LinearLayout>
 </LinearLayout>
