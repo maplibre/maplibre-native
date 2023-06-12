@@ -441,9 +441,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
                 // test whether the shader has the extra attributes
                 if (lineShader->getVertexAttributes().size() > 2) {
-                    
-                    auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor, LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(paintPropertyBinders, evaluated);
-
+                    auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
+                                                                                          LineBlur,
+                                                                                          LineOpacity,
+                                                                                          LineGapWidth,
+                                                                                          LineOffset,
+                                                                                          LineWidth>(
+                        paintPropertyBinders, evaluated);
                 }
 
                 builder->setVertexAttributes(std::move(vertexAttrs));
