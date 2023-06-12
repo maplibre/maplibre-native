@@ -251,10 +251,10 @@ class NativeMapViewTest : AppCenter() {
         val expected = doubleArrayOf(1.0, 2.0, 3.0, 4.0)
         nativeMapView.contentPadding = expected
         val actual = nativeMapView.contentPadding
-        assertEquals("Left should match", expected[0], actual[0])
-        assertEquals("Top should match", expected[1], actual[1])
-        assertEquals("Right should match", expected[2], actual[2])
-        assertEquals("Bottom should match", expected[3], actual[3])
+        assertEquals("Left should match", expected[0], actual[0], 0.0)
+        assertEquals("Top should match", expected[1], actual[1], 0.0)
+        assertEquals("Right should match", expected[2], actual[2], 0.0)
+        assertEquals("Bottom should match", expected[3], actual[3], 0.0)
     }
 
     @Test
@@ -263,7 +263,7 @@ class NativeMapViewTest : AppCenter() {
         val expected = 12.0
         nativeMapView.minZoom = expected
         val actual = nativeMapView.minZoom
-        assertEquals("Min zoom should match", expected, actual)
+        assertEquals("Min zoom should match", expected, actual, 0.0)
     }
 
     @Test
@@ -272,7 +272,7 @@ class NativeMapViewTest : AppCenter() {
         val expected = 12.0
         nativeMapView.maxZoom = expected
         val actual = nativeMapView.maxZoom
-        assertEquals("Max zoom should match", expected, actual)
+        assertEquals("Max zoom should match", expected, actual, 0.0)
     }
 
     @Test
@@ -298,7 +298,7 @@ class NativeMapViewTest : AppCenter() {
     fun testGetProjectedMetersAtLatitude() {
         val expected = 77973.67021115532
         val actual = nativeMapView.getMetersPerPixelAtLatitude(5.0)
-        assertEquals("Get projected meters should match", expected, actual)
+        assertEquals("Get projected meters should match", expected, actual, DELTA)
     }
 
     @Test

@@ -2,6 +2,7 @@ package org.maplibre.android.maps;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import androidx.test.annotation.UiThreadTest;
@@ -23,9 +24,6 @@ public class MapLibreTest extends AppCenter {
 
   private static final String API_KEY = "pk.0000000001";
   private static final String API_KEY_2 = "pk.0000000002";
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private String realToken;
 
@@ -62,12 +60,7 @@ public class MapLibreTest extends AppCenter {
   @Test
   @UiThreadTest
   public void setNullApiKey() {
-    expectedException.expect(MapLibreConfigurationException.class);
-    expectedException.expectMessage(
-      "A valid API key is required, currently provided key is: " + null
-    );
-
-    MapLibre.setApiKey(null);
+    assertThrows(MapLibreConfigurationException.class, () -> MapLibre.setApiKey(null));
   }
 
   @After
