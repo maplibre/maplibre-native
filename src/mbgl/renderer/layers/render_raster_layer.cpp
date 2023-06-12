@@ -370,7 +370,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
         builder->setSegments(gfx::Triangles(),
                              bucket.indices.vector(),
-                             reinterpret_cast<const std::vector<SegmentBase>&>(bucket.segments));
+                             bucket.segments.data(),
+                             bucket.segments.size());
 
         // attributes
         {
