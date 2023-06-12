@@ -19,7 +19,7 @@ public:
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
-    static constexpr std::string_view FillTilePropsUBOName = "FillTilePropsUBO";
+    static constexpr std::string_view FillTilePropsUBOName = "FillDrawableTilePropsUBO";
     static constexpr std::string_view FillInterpolateUBOName = "FillInterpolateUBO";
 
 private:
