@@ -26,7 +26,7 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
   - At the end of the `onCreate()` method, call `checkPermissions(`) to ensure that the application can access the user's location.
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:top}}
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:top}}
 ```
 
 3. In the `checkPermissions()` method, the [PermissionManager] is used to request location permissions at runtime and handle the callbacks for permission granting or rejection.
@@ -36,7 +36,7 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
    If the permissions are granted, call `mapView.getMapAsync(this)` to register the activity as a listener for onMapReady event.
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:permission}}
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:permission}}
 ```
 
 4. In the `onMapReady()` method, first set the style and then handle the user's location using the [LocationComponent].
@@ -55,7 +55,7 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
    - `locationComponent!!.forceLocationUpdate(lastLocation)` updates the the user's last known location.
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:onMapReady}}
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:onMapReady}}
 ```
 
 5. [LocationComponentActivationOptions] is used to hold the style, [LocationComponentOptions] and other locating behaviors.
@@ -64,7 +64,7 @@ This guide will demonstrate how to utilize the [LocationComponent] to represent 
    - For more information, please visit the [documentation page][LocationComponentActivationOptions].
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:LocationComponentActivationOptions}}
+{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:LocationComponentActivationOptions}}
 ```
 
 6. For further customization, you can also utilize the `foregroundTintColor()` and `pulseColor()` methods on the [LocationComponentOptions] builder:
