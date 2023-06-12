@@ -20,6 +20,7 @@ import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 
+/* ANCHOR: top */
 /**
  * This activity shows a basic usage of the LocationComponent's pulsing circle. There's no
  * customization of the pulsing circle's color, radius, speed, etc.
@@ -40,7 +41,9 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
         mapView.onCreate(savedInstanceState)
         checkPermissions()
     }
+    /* ANCHOR_END: top */
 
+    /* ANCHOR: onMapReady */
     @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
@@ -58,7 +61,9 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
             locationComponent!!.forceLocationUpdate(lastLocation)
         }
     }
+    /* ANCHOR_END: onMapReady */
 
+    /* ANCHOR: LocationComponentActivationOptions */
     private fun buildLocationComponentActivationOptions(
         style: Style,
         locationComponentOptions: LocationComponentOptions
@@ -75,6 +80,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
             )
             .build()
     }
+    /* ANCHOR_END: LocationComponentActivationOptions */
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_pulsing_location_mode, menu)
@@ -122,6 +128,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
         maplibreMap.setStyle(Style.Builder().fromUri(Utils.nextStyle()))
     }
 
+    /* ANCHOR: permission */
     private fun checkPermissions() {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)
@@ -155,6 +162,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+    /* ANCHOR_END: permission */
 
     override fun onStart() {
         super.onStart()
