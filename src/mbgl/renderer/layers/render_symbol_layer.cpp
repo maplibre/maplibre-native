@@ -359,12 +359,12 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         return;
     }
 
-    if (!parameters.shaders.populate(programs.symbolIconProgram)) return;
-    if (!parameters.shaders.populate(programs.symbolSDFIconProgram)) return;
-    if (!parameters.shaders.populate(programs.symbolSDFTextProgram)) return;
-    if (!parameters.shaders.populate(programs.symbolTextAndIconProgram)) return;
-    if (!parameters.shaders.populate(programs.collisionBoxProgram)) return;
-    if (!parameters.shaders.populate(programs.collisionCircleProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(programs.symbolIconProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(programs.symbolSDFIconProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(programs.symbolSDFTextProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(programs.symbolTextAndIconProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(programs.collisionBoxProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(programs.collisionCircleProgram)) return;
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
     std::multiset<RenderableSegment> renderableSegments;

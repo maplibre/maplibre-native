@@ -102,12 +102,12 @@ public:
 
     const gfx::DrawablePtr& getDrawable(const util::SimpleIdentity&);
 
-    bool addLayerGroup(LayerGroupPtr, bool replace);
+    bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
-    const LayerGroupPtr& getLayerGroup(const int32_t layerIndex) const;
-    void observeLayerGroups(std::function<void(LayerGroup&)>);
-    void observeLayerGroups(std::function<void(const LayerGroup&)>) const;
+    const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
+    void observeLayerGroups(std::function<void(LayerGroupBase&)>);
+    void observeLayerGroups(std::function<void(const LayerGroupBase&)>) const;
 
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
@@ -153,7 +153,7 @@ private:
     /// Move changes into the pending set, clearing the provided collection
     void addChanges(UniqueChangeRequestVec&);
 
-    void onRemoveLayerGroup(LayerGroup&);
+    void onRemoveLayerGroup(LayerGroupBase&);
 
     void updateLayerGroupOrder();
 
@@ -191,7 +191,7 @@ private:
     DrawableMap drawables;
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
-    using LayerGroupMap = std::map<int32_t, LayerGroupPtr>;
+    using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
 };

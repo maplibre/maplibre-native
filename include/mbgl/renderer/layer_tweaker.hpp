@@ -11,7 +11,7 @@ class LayerProperties;
 enum class TranslateAnchorType : bool;
 } // namespace style
 class TransformState;
-class LayerGroup;
+class LayerGroupBase;
 class PaintParameters;
 class RenderTree;
 class UnwrappedTileID;
@@ -29,7 +29,7 @@ public:
     LayerTweaker() = delete;
     virtual ~LayerTweaker() = default;
 
-    virtual void execute(LayerGroup&, const RenderTree&, const PaintParameters&) = 0;
+    virtual void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) = 0;
 
 protected:
     static mat4 getTileMatrix(const UnwrappedTileID&,

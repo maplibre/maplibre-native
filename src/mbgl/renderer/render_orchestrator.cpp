@@ -791,7 +791,7 @@ const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdenti
     return (hit != drawables.end()) ? hit->second : noDrawable;
 }
 
-void RenderOrchestrator::onRemoveLayerGroup(LayerGroup&) {}
+void RenderOrchestrator::onRemoveLayerGroup(LayerGroupBase&) {}
 
 void RenderOrchestrator::updateLayerGroupOrder() {
     // In the event layer indices change for layer groups, we must re-sort them
@@ -803,9 +803,9 @@ void RenderOrchestrator::updateLayerGroupOrder() {
     layerGroupOrderDirty = false;
 }
 
-bool RenderOrchestrator::addLayerGroup(LayerGroupPtr layerGroup, const bool replace) {
+bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, const bool replace) {
     const auto index = layerGroup->getLayerIndex();
-    const auto result = layerGroupsByLayerIndex.insert(std::make_pair(index, LayerGroupPtr{}));
+    const auto result = layerGroupsByLayerIndex.insert(std::make_pair(index, LayerGroupBasePtr{}));
     if (result.second) {
         // added
         result.first->second = std::move(layerGroup);
@@ -837,14 +837,14 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
     return layerGroupsByLayerIndex.size();
 }
 
-static const LayerGroupPtr no_group;
+static const LayerGroupBasePtr no_group;
 
-const LayerGroupPtr& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
+const LayerGroupBasePtr& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
     const auto hit = layerGroupsByLayerIndex.find(layerIndex);
     return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }
 
-void RenderOrchestrator::observeLayerGroups(std::function<void(LayerGroup&)> f) {
+void RenderOrchestrator::observeLayerGroups(std::function<void(LayerGroupBase&)> f) {
     for (auto& pair : layerGroupsByLayerIndex) {
         if (pair.second) {
             f(*pair.second);
@@ -852,7 +852,7 @@ void RenderOrchestrator::observeLayerGroups(std::function<void(LayerGroup&)> f) 
     }
 }
 
-void RenderOrchestrator::observeLayerGroups(std::function<void(const LayerGroup&)> f) const {
+void RenderOrchestrator::observeLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
     for (const auto& pair : layerGroupsByLayerIndex) {
         if (pair.second) {
             f(*pair.second);

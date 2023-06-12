@@ -103,10 +103,10 @@ void RenderLineLayer::render(PaintParameters& parameters) {
         return;
     }
 
-    if (!parameters.shaders.populate(lineProgram)) return;
-    if (!parameters.shaders.populate(lineGradientProgram)) return;
-    if (!parameters.shaders.populate(lineSDFProgram)) return;
-    if (!parameters.shaders.populate(linePatternProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(lineProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(lineGradientProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(lineSDFProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(linePatternProgram)) return;
 
     parameters.renderTileClippingMasks(renderTiles);
 

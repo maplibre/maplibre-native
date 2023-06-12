@@ -8,14 +8,14 @@
 
 namespace mbgl {
 class ChangeRequest;
-class LayerGroup;
+class LayerGroupBase;
 class TileLayerGroup;
 class RenderOrchestrator;
 
 using ChangeRequestPtr = std::shared_ptr<ChangeRequest>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
-using LayerGroupPtr = std::shared_ptr<LayerGroup>;
+using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 
 namespace gfx {
 class Drawable;
@@ -52,13 +52,13 @@ protected:
  */
 class AddLayerGroupRequest : public ChangeRequest {
 public:
-    AddLayerGroupRequest(LayerGroupPtr layerGroup_, bool canReplace);
+    AddLayerGroupRequest(LayerGroupBasePtr layerGroup_, bool canReplace);
     AddLayerGroupRequest(AddLayerGroupRequest &&other);
 
     void execute(RenderOrchestrator &) override;
 
 protected:
-    LayerGroupPtr layerGroup;
+    LayerGroupBasePtr layerGroup;
     bool replace;
 };
 

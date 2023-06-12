@@ -40,19 +40,11 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) % 16 == 0);
 
-struct alignas(16) CircleInterpolateUBO {
-    float color_t;
-    float radius_t;
-    float blur_t;
-    float opacity_t;
-    float stroke_color_t;
-    float stroke_width_t;
-    float stroke_opacity_t;
-    float padding;
-};
-static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
+static constexpr std::string_view CircleDrawableUBOName = "CircleDrawableUBO";
+static constexpr std::string_view CirclePaintParamsUBOName = "CirclePaintParamsUBO";
+static constexpr std::string_view CircleEvaluatedPropsUBOName = "CircleEvaluatedPropsUBO";
 
-void CircleLayerTweaker::execute(LayerGroup& layerGroup,
+void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
@@ -66,9 +58,10 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    CirclePaintParamsUBO paintParamsUBO;
-    paintParamsUBO.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
-    paintParamsUBO.device_pixel_ratio = parameters.pixelRatio;
+    CirclePaintParamsUBO paintParamsUBO = {
+        /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
+        /* .device_pixel_ratio = */ parameters.pixelRatio,
+        /* .padding = */ {0}};
 
     if (!paintParamsUniformBuffer) {
         paintParamsUniformBuffer = parameters.context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
@@ -79,39 +72,25 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
 
     if (!evaluatedPropsUniformBuffer) {
-        CircleEvaluatedPropsUBO evaluatedPropsUBO;
-        evaluatedPropsUBO.color = evaluated.get<CircleColor>().constantOr(Color());
-        evaluatedPropsUBO.radius = evaluated.get<CircleRadius>().constantOr(0);
-        evaluatedPropsUBO.blur = evaluated.get<CircleBlur>().constantOr(0);
-        evaluatedPropsUBO.opacity = evaluated.get<CircleOpacity>().constantOr(0);
-        evaluatedPropsUBO.stroke_color = evaluated.get<CircleStrokeColor>().constantOr(Color());
-        evaluatedPropsUBO.stroke_width = evaluated.get<CircleStrokeWidth>().constantOr(0);
-        evaluatedPropsUBO.stroke_opacity = evaluated.get<CircleStrokeOpacity>().constantOr(0);
-        evaluatedPropsUBO.scale_with_map = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
-        evaluatedPropsUBO.pitch_with_map = pitchWithMap;
+        CircleEvaluatedPropsUBO evaluatedPropsUBO = {
+            /* .color = */ evaluated.get<CircleColor>().constantOr(CircleColor::defaultValue()),
+            /* .stroke_color = */ evaluated.get<CircleStrokeColor>().constantOr(CircleStrokeColor::defaultValue()),
+            /* .radius = */ evaluated.get<CircleRadius>().constantOr(CircleRadius::defaultValue()),
+            /* .blur = */ evaluated.get<CircleBlur>().constantOr(CircleBlur::defaultValue()),
+            /* .opacity = */ evaluated.get<CircleOpacity>().constantOr(CircleOpacity::defaultValue()),
+            /* .stroke_width = */ evaluated.get<CircleStrokeWidth>().constantOr(CircleStrokeWidth::defaultValue()),
+            /* .stroke_opacity = */
+            evaluated.get<CircleStrokeOpacity>().constantOr(CircleStrokeOpacity::defaultValue()),
+            /* .scale_with_map = */ evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map,
+            /* .pitch_with_map = */ pitchWithMap,
+            /* .padding = */ 0};
         evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
                                                                              sizeof(evaluatedPropsUBO));
     }
 
-    CircleInterpolateUBO interpolateUBO;
-    interpolateUBO.color_t = 0;
-    interpolateUBO.radius_t = 0;
-    interpolateUBO.blur_t = 0;
-    interpolateUBO.opacity_t = 0;
-    interpolateUBO.stroke_color_t = 0;
-    interpolateUBO.stroke_width_t = 0;
-    interpolateUBO.stroke_opacity_t = 0;
-
-    if (!interpolateUniformBuffer) {
-        interpolateUniformBuffer = parameters.context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
-    } else {
-        interpolateUniformBuffer->update(&interpolateUBO, sizeof(CircleInterpolateUBO));
-    }
-
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace("CirclePaintParamsUBO", paintParamsUniformBuffer);
-        drawable.mutableUniformBuffers().addOrReplace("CircleEvaluatedPropsUBO", evaluatedPropsUniformBuffer);
-        drawable.mutableUniformBuffers().addOrReplace("CircleInterpolateUBO", interpolateUniformBuffer);
+        drawable.mutableUniformBuffers().addOrReplace(CirclePaintParamsUBOName, paintParamsUniformBuffer);
+        drawable.mutableUniformBuffers().addOrReplace(CircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -124,20 +103,15 @@ void CircleLayerTweaker::execute(LayerGroup& layerGroup,
         const auto matrix = getTileMatrix(
             tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
 
-        CircleDrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(matrix);
-        drawableUBO.extrude_scale =
-            pitchWithMap
-                ? std::array<float, 2>{{tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-                                        tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()))}}
-                : parameters.pixelsToGLUnits;
+        const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
 
-        if (auto& ubo = drawable.mutableUniformBuffers().get("CircleDrawableUBO")) {
-            ubo->update(&drawableUBO, sizeof(drawableUBO));
-        } else {
-            auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-            drawable.mutableUniformBuffers().addOrReplace("CircleDrawableUBO", drawableUniformBuffer);
-        }
+        CircleDrawableUBO drawableUBO = {
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .extrude_scale = */
+            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits}} : parameters.pixelsToGLUnits,
+            /* .padding = */ {0}};
+
+        drawable.mutableUniformBuffers().createOrUpdate(CircleDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 
