@@ -181,8 +181,16 @@ std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2
 void DrawableBuilder::setSegments(gfx::DrawMode mode,
                                   std::vector<uint16_t> indexes,
                                   const std::vector<SegmentBase>& segments) {
+    setSegments(mode, indexes, segments.data(), segments.size());
+}
+
+void DrawableBuilder::setSegments(gfx::DrawMode mode,
+                                  std::vector<uint16_t> indexes,
+                                  const SegmentBase* segments,
+                                  std::size_t segmentCount) {
     impl->indexes = std::move(indexes);
-    for (const auto& seg : segments) {
+    for (std::size_t i = 0; i < segmentCount; ++i) {
+        const auto& seg = segments[i];
 #if !defined(NDEBUG)
         if (mode.type == DrawModeType::Triangles) {
             assert(seg.indexLength % 3 == 0);
@@ -191,8 +199,8 @@ void DrawableBuilder::setSegments(gfx::DrawMode mode,
         }
         assert(seg.vertexOffset + seg.vertexLength <= impl->vertices.elements());
         assert(seg.indexOffset + seg.indexLength <= impl->indexes.size());
-        for (decltype(seg.indexLength) i = 0; i < seg.indexLength; ++i) {
-            assert(impl->indexes[seg.indexOffset + i] < impl->vertices.elements());
+        for (decltype(seg.indexLength) j = 0; j < seg.indexLength; ++j) {
+            assert(impl->indexes[seg.indexOffset + j] < impl->vertices.elements());
         }
 #endif
 
