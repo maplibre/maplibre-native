@@ -180,7 +180,7 @@ std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2
 
 void DrawableBuilder::setSegments(gfx::DrawMode mode,
                                   std::vector<uint16_t> indexes,
-                                  const std::vector<Segment<void>>& segments) {
+                                  const std::vector<SegmentBase>& segments) {
     impl->indexes = std::move(indexes);
     for (const auto& seg : segments) {
 #if !defined(NDEBUG)
@@ -196,7 +196,7 @@ void DrawableBuilder::setSegments(gfx::DrawMode mode,
         }
 #endif
 
-        auto segCopy = Segment<void>{
+        auto segCopy = SegmentBase{
             // no copy constructor
             seg.vertexOffset,
             seg.indexOffset,
@@ -217,10 +217,10 @@ void DrawableBuilder::addLines(const std::vector<uint16_t>& indexes,
     }
 
     impl->segments.emplace_back(createSegment(Lines(lineWidth),
-                                              Segment<void>{/*.vertexOffset = */ 0,
-                                                            /*.indexOffset = */ indexes.size(),
-                                                            /*.vertexLength = */ 0,
-                                                            /*.indexLength = */ indexLength}));
+                                              SegmentBase{/*.vertexOffset = */ 0,
+                                                          /*.indexOffset = */ indexes.size(),
+                                                          /*.vertexLength = */ 0,
+                                                          /*.indexLength = */ indexLength}));
 
     if (impl->indexes.empty()) {
         impl->indexes.reserve(indexLength);
@@ -241,10 +241,10 @@ void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
     }
 
     impl->segments.emplace_back(createSegment(Triangles(),
-                                              Segment<void>{/*.vertexOffset = */ 0,
-                                                            /*.indexOffset = */ impl->indexes.size(),
-                                                            /*.vertexLength = */ impl->vertices.elements(),
-                                                            /*.indexLength = */ indexLength}));
+                                              SegmentBase{/*.vertexOffset = */ 0,
+                                                          /*.indexOffset = */ impl->indexes.size(),
+                                                          /*.vertexLength = */ impl->vertices.elements(),
+                                                          /*.indexLength = */ indexLength}));
 
     if (impl->indexes.empty()) {
         impl->indexes.reserve(indexLength);
