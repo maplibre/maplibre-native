@@ -398,7 +398,7 @@ global.propertyDoc = function (propertyName, property, layerType, kind) {
                     anchor = `paint-${property.original}`;
                     break;
             }
-            doc += `\n\nThis attribute corresponds to the <a href="https://www.mapbox.com/mapbox-gl-style-spec/#${anchor}"><code>${property.original}</code></a> layout property in the Mapbox Style Specification.`;
+            doc += `\n\nThis attribute corresponds to the <a href="https://maplibre.org/maplibre-style-spec/#${anchor}"><code>${property.original}</code></a> layout property in the MapLibre Style Spec.`;
         }
         doc += '\n\nYou can set this property to an expression containing any of the following:\n\n';
         doc += `* Constant ${describeType(property)} values`;
