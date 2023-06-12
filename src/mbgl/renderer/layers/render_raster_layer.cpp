@@ -368,10 +368,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             });
         builder->addVertices(vertices, 0, vertices.size());
 
-        builder->setSegments(gfx::Triangles(),
-                             bucket.indices.vector(),
-                             bucket.segments.data(),
-                             bucket.segments.size());
+        builder->setSegments(gfx::Triangles(), bucket.indices.vector(), bucket.segments.data(), bucket.segments.size());
 
         // attributes
         {
