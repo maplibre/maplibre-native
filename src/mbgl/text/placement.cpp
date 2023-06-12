@@ -672,9 +672,12 @@ SymbolInstanceReferences Placement::getSortedSymbols(const BucketPlacementData& 
 
 void Placement::commit() {
     bool placementChanged = false;
-    assert(getPrevPlacement());
+    if (!getPrevPlacement()) {
+        assert(false);
+        return;
+    }
     prevZoomAdjustment = getPrevPlacement()->zoomAdjustment(placementZoom);
-    float increment = getPrevPlacement()->symbolFadeChange(commitTime);
+    const float increment = getPrevPlacement()->symbolFadeChange(commitTime);
 
     // add the opacities from the current placement, and copy their current
     // values from the previous placement
@@ -728,7 +731,7 @@ void Placement::commit() {
         }
     }
 
-    fadeStartTime = placementChanged ? commitTime : getPrevPlacement()->fadeStartTime;
+    fadeStartTime = placementChanged ? commitTime : (getPrevPlacement() ? getPrevPlacement()->fadeStartTime : TimePoint{});
 }
 
 void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformState& state, bool updateOpacities) const {
