@@ -12,3 +12,4 @@
 
 - [MapLibre Native for Android](./android/README.md)
     - [Quickstart](./android/getting-started-guide.md)
+    - [Location Component](./android/location-component-guide.md)
