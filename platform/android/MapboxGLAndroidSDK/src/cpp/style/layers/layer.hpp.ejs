@@ -48,7 +48,7 @@ public:
 
 }; // class <%- camelize(type) %>Layer
 
-class <%- camelize(type) %>JavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::<%- camelize(type) %>LayerFactory {
+class <%- camelize(type) %>JavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::<%- camelize(type) %>LayerFactory {
 public:
     ~<%- camelize(type) %>JavaLayerPeerFactory() override;
 
@@ -60,7 +60,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class <%- camelize(type) %>JavaLayerPeerFactory
+}; // class <%- camelize(type) %>JavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl
