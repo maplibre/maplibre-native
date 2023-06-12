@@ -1328,7 +1328,26 @@ class MainActivity : AppCompatActivity() {
 <li>Add a variable <code>locationComponent</code> to manage user location.</li>
 <li>At the end of the <code>onCreate()</code> method, call <code>checkPermissions(</code>) to ensure that the application can access the user's location.</li>
 </ul>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:top}}
+<pre><code class="language-kotlin">/**
+ * This activity shows a basic usage of the LocationComponent's pulsing circle. There's no
+ * customization of the pulsing circle's color, radius, speed, etc.
+ */
+class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallback {
+    private var lastLocation: Location? = null
+    private lateinit var mapView: MapView
+    private var permissionsManager: PermissionsManager? = null
+    private var locationComponent: LocationComponent? = null
+    private lateinit var maplibreMap: MapLibreMap
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_location_layer_basic_pulsing_circle)
+        mapView = findViewById(R.id.mapView)
+        if (savedInstanceState != null) {
+            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION)
+        }
+        mapView.onCreate(savedInstanceState)
+        checkPermissions()
+    }
 </code></pre>
 <ol start="3">
 <li>
@@ -1337,7 +1356,39 @@ class MainActivity : AppCompatActivity() {
 <p>If the permissions are granted, call <code>mapView.getMapAsync(this)</code> to register the activity as a listener for onMapReady event.</p>
 </li>
 </ol>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:permission}}
+<pre><code class="language-kotlin">    private fun checkPermissions() {
+        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+            mapView.getMapAsync(this)
+        } else {
+            permissionsManager = PermissionsManager(object : PermissionsListener {
+                override fun onExplanationNeeded(permissionsToExplain: List&lt;String&gt;) {
+                    Toast.makeText(
+                        this@BasicLocationPulsingCircleActivity,
+                        &quot;You need to accept location permissions.&quot;,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onPermissionResult(granted: Boolean) {
+                    if (granted) {
+                        mapView.getMapAsync(this@BasicLocationPulsingCircleActivity)
+                    } else {
+                        finish()
+                    }
+                }
+            })
+            permissionsManager!!.requestLocationPermissions(this)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array&lt;String&gt;,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 </code></pre>
 <ol start="4">
 <li>
@@ -1356,7 +1407,23 @@ class MainActivity : AppCompatActivity() {
 </ul>
 </li>
 </ol>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:onMapReady}}
+<pre><code class="language-kotlin">    @SuppressLint(&quot;MissingPermission&quot;)
+    override fun onMapReady(maplibreMap: MapLibreMap) {
+        this.maplibreMap = maplibreMap
+        maplibreMap.setStyle(Style.getPredefinedStyle(&quot;Streets&quot;)) { style: Style -&gt;
+            locationComponent = maplibreMap.locationComponent
+            val locationComponentOptions =
+                LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
+                    .pulseEnabled(true)
+                    .build()
+            val locationComponentActivationOptions =
+                buildLocationComponentActivationOptions(style, locationComponentOptions)
+            locationComponent!!.activateLocationComponent(locationComponentActivationOptions)
+            locationComponent!!.isLocationComponentEnabled = true
+            locationComponent!!.cameraMode = CameraMode.TRACKING
+            locationComponent!!.forceLocationUpdate(lastLocation)
+        }
+    }
 </code></pre>
 <ol start="5">
 <li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a> is used to hold the style, <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a> and other locating behaviors.
@@ -1367,7 +1434,22 @@ class MainActivity : AppCompatActivity() {
 </ul>
 </li>
 </ol>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt:LocationComponentActivationOptions}}
+<pre><code class="language-kotlin">    private fun buildLocationComponentActivationOptions(
+        style: Style,
+        locationComponentOptions: LocationComponentOptions
+    ): LocationComponentActivationOptions {
+        return LocationComponentActivationOptions
+            .builder(this, style)
+            .locationComponentOptions(locationComponentOptions)
+            .useDefaultLocationEngine(true)
+            .locationEngineRequest(
+                LocationEngineRequest.Builder(750)
+                    .setFastestInterval(750)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                    .build()
+            )
+            .build()
+    }
 </code></pre>
 <ol start="6">
 <li>For further customization, you can also utilize the <code>foregroundTintColor()</code> and <code>pulseColor()</code> methods on the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a> builder:</li>
