@@ -88,7 +88,7 @@ public class LightTest extends BaseTest {
 <% if (property.name == 'color') { -%>
       assertEquals("<%- camelize(property.name) %> should match", <%- defaultValueJava(property) %>, light.get<%- camelize(property.name) %>());
 <% } else { -%>
-      assertEquals("<%- camelize(property.name) %> should match", <%- defaultValueJava(property) %>, light.get<%- camelize(property.name) %>());
+      assertEquals("<%- camelize(property.name) %> should match", <%- defaultValueJava(property) %>, light.get<%- camelize(property.name) %>()<%- property.type === 'number' ? ', 0f' : '' %>);
 <% } -%>
     });
   }
