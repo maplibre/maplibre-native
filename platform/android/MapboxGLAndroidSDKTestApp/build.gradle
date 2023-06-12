@@ -9,12 +9,12 @@ android {
     compileSdkVersion androidVersions.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.mapbox.mapboxsdk.testapp"
+        applicationId "org.maplibre.testapp"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         versionCode 14
         versionName "6.0.1"
-        testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
+        testInstrumentationRunner "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
     }
 
@@ -50,7 +50,7 @@ android {
         viewBinding = true
     }
 
-    namespace 'com.mapbox.mapboxsdk.testapp'
+    namespace 'org.maplibre.android.testapp'
     testNamespace 'org.maplibre.testapp.test'
     lint {
         abortOnError false

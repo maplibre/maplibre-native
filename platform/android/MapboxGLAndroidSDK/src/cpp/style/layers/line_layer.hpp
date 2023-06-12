@@ -14,7 +14,7 @@ namespace android {
 class LineLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/LineLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/LineLayer"; };
 
     LineLayer(jni::JNIEnv&, jni::String&, jni::String&);
 

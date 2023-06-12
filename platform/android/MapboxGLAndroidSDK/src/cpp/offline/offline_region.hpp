@@ -15,7 +15,7 @@ public:
     class OfflineRegionObserver {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineRegion$OfflineRegionObserver";
         };
     };
@@ -23,7 +23,7 @@ public:
     class OfflineRegionStatusCallback {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineRegion$OfflineRegionStatusCallback";
         };
 
@@ -37,7 +37,7 @@ public:
     class OfflineRegionDeleteCallback {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineRegion$OfflineRegionDeleteCallback";
         };
 
@@ -49,7 +49,7 @@ public:
     class OfflineRegionInvalidateCallback {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineRegion$OfflineRegionInvalidateCallback";
         };
 
@@ -61,7 +61,7 @@ public:
     class OfflineRegionUpdateMetadataCallback {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineRegion$OfflineRegionUpdateMetadataCallback";
         };
 
@@ -72,7 +72,7 @@ public:
                              std::optional<mbgl::OfflineRegionMetadata>);
     };
 
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion"; };
+    static constexpr auto Name() { return "org/maplibre/android/offline/OfflineRegion"; };
 
     OfflineRegion(jni::JNIEnv&, jni::jlong, const jni::Object<FileSource>&);
 

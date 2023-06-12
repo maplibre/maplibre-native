@@ -139,8 +139,8 @@ jobs:
       - name: Build app for size test & output size 
         working-directory: ./
         run: | 
-          bazelisk build --compilation_mode=opt //platform/ios:size
-          cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size) ./size
+          bazel build --compilation_mode=opt //platform/ios:size --//:maplibre_platform=ios
+          cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios) ./size
 
       - name: Upload size test result
         uses: actions/upload-artifact@v3
