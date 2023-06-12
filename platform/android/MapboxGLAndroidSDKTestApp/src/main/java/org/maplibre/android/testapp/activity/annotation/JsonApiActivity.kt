@@ -8,25 +8,24 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.annotations.IconFactory
-import com.mapbox.mapboxsdk.annotations.MarkerOptions
-import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.geometry.LatLngBounds
-import com.mapbox.mapboxsdk.maps.MapView
-import com.mapbox.mapboxsdk.maps.MapboxMap
-import com.mapbox.mapboxsdk.testapp.R
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.maplibre.android.MapLibre
+import org.maplibre.android.annotations.IconFactory
+import org.maplibre.android.annotations.MarkerOptions
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.testapp.R
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
-
 
 /* ANCHOR: top */
 class JsonApiActivity : AppCompatActivity() {
@@ -35,13 +34,13 @@ class JsonApiActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
 
     // Declare a variable for MapboxMap
-    private lateinit var maplibreMap: MapboxMap
+    private lateinit var maplibreMap: MapLibreMap
     /* ANCHOR_END: top */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Init MapLibre
-        Mapbox.getInstance(this)
+        MapLibre.getInstance(this)
 
         // Init layout view
         setContentView(R.layout.activity_json_api)
@@ -94,7 +93,6 @@ class JsonApiActivity : AppCompatActivity() {
     }
     /* ANCHOR_END: getEarthquakes */
 
-
     /* ANCHOR: addMarkers */
     private fun addMarkersToMap(data: FeatureCollection) {
         val bounds = mutableListOf<LatLng>()
@@ -102,7 +100,7 @@ class JsonApiActivity : AppCompatActivity() {
         // Get bitmaps for marker icon
         val infoIconDrawable = ResourcesCompat.getDrawable(
             this.resources,
-            com.mapbox.mapboxsdk.R.drawable.maplibre_info_icon_default,
+            R.drawable.maplibre_info_icon_default,
             null
         )!!
         val bitmapBlue = infoIconDrawable.toBitmap()
