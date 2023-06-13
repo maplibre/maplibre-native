@@ -34,7 +34,11 @@ using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
 
 namespace gfx {
 class Context;
+class ShaderGroup;
 class ShaderRegistry;
+class UniformBuffer;
+using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
 
 class LayerRenderData {

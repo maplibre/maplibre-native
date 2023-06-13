@@ -288,7 +288,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                   std::vector<std::array<int16_t, 2>>& vertices,
                                   std::vector<std::array<int16_t, 2>>& attributes,
                                   std::vector<uint16_t>& indices,
-                                  std::vector<Segment<void>>& segments) {
+                                  std::vector<SegmentBase>& segments) {
             constexpr const uint16_t vertexLength = 4;
 
             // Create the vertex buffer for the specified tile mask.
@@ -339,7 +339,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
         std::vector<std::array<int16_t, 2>> vertices, attributes;
         std::vector<uint16_t> indices;
-        std::vector<Segment<void>> segments;
+        std::vector<SegmentBase> segments;
         buildRenderData(bucket.mask, vertices, attributes, indices, segments);
         builder->addVertices(vertices, 0, vertices.size());
         builder->setSegments(gfx::Triangles(), indices, segments);
@@ -368,9 +368,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             });
         builder->addVertices(vertices, 0, vertices.size());
 
-        builder->setSegments(gfx::Triangles(),
-                             bucket.indices.vector(),
-                             reinterpret_cast<const std::vector<Segment<void>>&>(bucket.segments));
+        builder->setSegments(gfx::Triangles(), bucket.indices.vector(), bucket.segments.data(), bucket.segments.size());
 
         // attributes
         {

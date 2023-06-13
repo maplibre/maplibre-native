@@ -11,8 +11,7 @@
 namespace mbgl {
 
 class Color;
-template <typename VertexType>
-class Segment;
+class SegmentBase;
 
 namespace gfx {
 
@@ -136,7 +135,8 @@ public:
                             std::size_t vertexOffset,
                             std::size_t vertexLength);
 
-    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<Segment<void>>&);
+    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<SegmentBase>&);
+    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
 
     /// Add lines based on existing vertices
     void addLines(const std::vector<uint16_t>& indexes,
@@ -155,7 +155,7 @@ protected:
     virtual UniqueDrawable createDrawable() const = 0;
 
     /// Create a segment wrapper
-    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, Segment<void>&&) = 0;
+    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
