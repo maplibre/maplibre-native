@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * The background color or pattern of the map.
  *
- * @see <a href="https://maplibre.org/maplibre-gl-style-spec/#layers-background">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-background">The online documentation</a>
  */
 @UiThread
 public class BackgroundLayer extends Layer {

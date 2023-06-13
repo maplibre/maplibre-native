@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * A filled polygon with an optional stroked border.
  *
- * @see <a href="https://maplibre.org/maplibre-gl-style-spec/#layers-fill">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-fill">The online documentation</a>
  */
 @UiThread
 public class FillLayer extends Layer {

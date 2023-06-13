@@ -15,7 +15,7 @@ import org.maplibre.android.style.layers.PropertyValue;
 /**
  * Constructs paint/layout properties for Layers
  *
- * @see <a href="https://maplibre.org/maplibre-gl-style-spec/#layers">Layer style documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers">Layer style documentation</a>
  */
 class LocationPropertyFactory {
 

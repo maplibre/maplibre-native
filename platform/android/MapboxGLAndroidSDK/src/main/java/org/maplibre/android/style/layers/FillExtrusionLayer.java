@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * An extruded (3D) polygon.
  *
- * @see <a href="https://maplibre.org/maplibre-gl-style-spec/#layers-fill-extrusion">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-fill-extrusion">The online documentation</a>
  */
 @UiThread
 public class FillExtrusionLayer extends Layer {
