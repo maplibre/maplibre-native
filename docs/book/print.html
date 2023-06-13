@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="android/index.html"><strong aria-hidden="true">2.</strong> MapLibre Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li><li class="chapter-item expanded "><a href="android/location-component-guide.html"><strong aria-hidden="true">2.2.</strong> Location Component</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="design/index.html"><strong aria-hidden="true">1.</strong> Design</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="design/ten-thousand-foot-view.html"><strong aria-hidden="true">1.1.</strong> Ten Thousand Foot View</a></li><li class="chapter-item expanded "><a href="design/coordinate-system.html"><strong aria-hidden="true">1.2.</strong> Coordinate System</a></li><li class="chapter-item expanded "><a href="design/expressions.html"><strong aria-hidden="true">1.3.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="design/archictural-problems-and-recommendations.html"><strong aria-hidden="true">1.4.</strong> Architectural Problems and Recommendations</a></li><li class="chapter-item expanded "><a href="design/android-map-rendering-data-flow.html"><strong aria-hidden="true">1.5.</strong> Android Map Rendering Data Flow</a></li><li class="chapter-item expanded "><a href="design/geometry-tile-worker.html"><strong aria-hidden="true">1.6.</strong> Geometry Tile Worker</a></li></ol></li><li class="chapter-item expanded "><a href="android/index.html"><strong aria-hidden="true">2.</strong> MapLibre Native for Android</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="android/getting-started-guide.html"><strong aria-hidden="true">2.1.</strong> Quickstart</a></li><li class="chapter-item expanded "><a href="android/annotation-guide.html"><strong aria-hidden="true">2.2.</strong> Annotation: Marker</a></li><li class="chapter-item expanded "><a href="android/location-component-guide.html"><strong aria-hidden="true">2.3.</strong> Location Component</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -1301,6 +1301,77 @@ class MainActivity : AppCompatActivity() {
 </ol>
 <div style="text-align: center;">
 <img src="https://user-images.githubusercontent.com/32692818/228113379-475e86f5-e3fa-4a36-8b4b-1fcba0f1eb3b.png" alt="Screenshot with the map in demotile style" width="50%" height="50%">
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="annotation-marker"><a class="header" href="#annotation-marker">Annotation: Marker</a></h1>
+<p>This guide will show you how to add Markers in the map.</p>
+<p><code>Annotation</code> is an overlay on top of a Map. In package
+<code>com.mapbox.mapboxsdk.annotations</code>, it has the following subclasses:</p>
+<ol>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker/index.html">Marker</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polyline/index.html">Polyline</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polygon/index.html">Polygon</a></li>
+</ol>
+<p>A Marker shows an icon image at a geographical location. By default, marker uses
+a <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapboxGLAndroidSDK/src/main/res/drawable-xxxhdpi/maplibre_marker_icon_default.png">provided image</a> as its icon.</p>
+<p><img src="https://raw.githubusercontent.com/maplibre/maplibre-native/main/test/fixtures/sprites/default_marker.png" alt="marker image" /></p>
+<p>Or, the icon can be customized using <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon-factory/index.html">IconFactory</a> to generate an
+<a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon/index.html">Icon</a> using a provided image.</p>
+<p>For more customization, please read the documentation about <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker-options/index.html">MarkerOptions</a>.</p>
+<p>In this showcase, we continue the code from the <a href="android/./getting-started-guide.html">Quickstart</a>,
+rename Activity into <code>JsonApiActivity</code>,
+and pull the GeoJSON data from a free and public API.
+Then add markers to the map with GeoJSON:</p>
+<ol>
+<li>
+<p>In your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>), add
+<code>okhttp</code> to simplify code for making HTTP requests.</p>
+<pre><code class="language-gradle">dependencies {
+    ...
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    ...
+}
+</code></pre>
+</li>
+<li>
+<p>Sync your Android project the with Gradle files.</p>
+</li>
+<li>
+<p>In <code>JsonApiActivity</code> we add a new variable for <code>MapboxMap</code>.
+It is used to add annotations to the map instance.</p>
+</li>
+</ol>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:top}}
+</code></pre>
+<ol start="4">
+<li>Call <code>mapview.getMapSync()</code> in order to get a <code>MapboxMap</code> object.
+After <code>mapboxMap</code> is assigned, call the <code>getEarthQuakeDataFromUSGS()</code> method
+to make a HTTP request and transform data into the map annotations.</li>
+</ol>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:mapAsync}}
+</code></pre>
+<ol start="5">
+<li>Define a function <code>getEarthQuakeDataFromUSGS()</code> to fetch GeoJSON data from a public API.
+If we successfully get the response, call <code>addMarkersToMap()</code> on the UI thread.</li>
+</ol>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes}}
+</code></pre>
+<ol start="6">
+<li>Now it is time to add markers into the map.
+<ul>
+<li>In the <code>addMarkersToMap()</code> method, we define two types of bitmap for the marker icon.</li>
+<li>For each feature in the GeoJSON, add a marker with a snippet about earthquake details.</li>
+<li>If the magnitude of an earthquake is bigger than 6.0, we use the red icon. Otherwise, we use the blue one.</li>
+<li>Finally, move the camera to the bounds of the newly added markers</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
+</code></pre>
+<ol start="7">
+<li>Here is the final result. For the full contents of <code>JsonApiActivity</code>, please visit source code of <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt">Test APP</a></li>
+</ol>
+<div style="align: center">
+  <img src="https://github.com/maplibre/maplibre-native/assets/19887090/00446249-9b19-4a48-8a46-00d4c5a2f981" alt="Screenshot with the map in demotile style">
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="locationcomponent"><a class="header" href="#locationcomponent">LocationComponent</a></h1>
 <p>This guide will demonstrate how to utilize the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a> to represent the user's current location.</p>
