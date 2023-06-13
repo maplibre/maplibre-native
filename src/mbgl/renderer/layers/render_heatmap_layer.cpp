@@ -119,7 +119,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
             checkRenderability(parameters, HeatmapProgram::activeBindingCount(allAttributeBindings));
 
             heatmapProgram->draw(parameters.context,
-                                 *parameters.renderPass,
+                                 *renderPass,
                                  gfx::Triangles(),
                                  gfx::DepthMode::disabled(),
                                  gfx::StencilMode::disabled(),
