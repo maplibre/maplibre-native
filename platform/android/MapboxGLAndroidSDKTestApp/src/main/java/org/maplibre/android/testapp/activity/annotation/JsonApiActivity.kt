@@ -1,4 +1,4 @@
-package com.mapbox.mapboxsdk.testapp.activity.annotation
+package org.maplibre.android.testapp.activity.annotation
 
 import android.graphics.Color
 import android.os.Bundle
@@ -100,7 +100,9 @@ class JsonApiActivity : AppCompatActivity() {
         // Get bitmaps for marker icon
         val infoIconDrawable = ResourcesCompat.getDrawable(
             this.resources,
-            R.drawable.maplibre_info_icon_default,
+            // Intentionally specify package name
+            // This makes copy from another project easier
+            org.maplibre.android.R.drawable.maplibre_info_icon_default,
             null
         )!!
         val bitmapBlue = infoIconDrawable.toBitmap()
