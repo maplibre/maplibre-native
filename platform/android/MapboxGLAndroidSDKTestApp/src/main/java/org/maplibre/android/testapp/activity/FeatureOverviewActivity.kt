@@ -33,7 +33,7 @@ import java.util.*
  *
  */
 class FeatureOverviewActivity : AppCompatActivity() {
-    private var recyclerView: RecyclerView? = null
+    private lateinit var recyclerView: RecyclerView
     private var sectionAdapter: FeatureSectionAdapter? = null
     private var features: List<Feature>? = null
 
@@ -42,17 +42,20 @@ class FeatureOverviewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feature_overview)
         recyclerView = findViewById<View>(R.id.recyclerView) as RecyclerView
-        recyclerView!!.layoutManager = LinearLayoutManager(this)
-        recyclerView!!.addOnItemTouchListener(SimpleOnItemTouchListener())
-        recyclerView!!.setHasFixedSize(true)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.addOnItemTouchListener(SimpleOnItemTouchListener())
+        recyclerView.setHasFixedSize(true)
+
         ItemClickSupport.addTo(recyclerView)
-            .setOnItemClickListener { recyclerView: RecyclerView?, position: Int, view: View? ->
-                if (!sectionAdapter!!.isSectionHeaderPosition(position)) {
-                    val itemPosition = sectionAdapter!!.getConvertedPosition(position)
-                    val feature = features!![itemPosition]
-                    startFeature(feature)
+            .setOnItemClickListener(object : ItemClickSupport.OnItemClickListener {
+                override fun onItemClicked(recyclerView: RecyclerView?, position: Int, view: View?) {
+                    if (sectionAdapter!!.isSectionHeaderPosition(position).not()) {
+                        val itemPosition = sectionAdapter!!.getConvertedPosition(position)
+                        val feature = features!![itemPosition]
+                        startFeature(feature)
+                    }
                 }
-            }
+            })
         if (savedInstanceState == null) {
             loadFeatures()
         } else {
@@ -164,7 +167,6 @@ class FeatureOverviewActivity : AppCompatActivity() {
             onFeaturesLoaded(features)
         }
     }
-
     companion object {
         private const val KEY_STATE_FEATURES = "featureList"
     }
