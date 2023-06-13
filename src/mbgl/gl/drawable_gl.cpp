@@ -47,7 +47,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
         context.setStencilMode(gfx::StencilMode::disabled());
     }
 
-    context.setColorMode(parameters.colorModeForRenderPass());
+    context.setColorMode(getColorMode());
     context.setCullFaceMode(gfx::CullFaceMode::disabled());
 
     bindUniformBuffers();

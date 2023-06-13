@@ -1,4 +1,5 @@
 #include <mbgl/gfx/attribute.hpp>
+#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
@@ -19,6 +20,7 @@ struct DrawableBuilder::Impl {
 
     Color currentColor = Color::white();
     std::vector<Color> colors;
+    gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
 };
 

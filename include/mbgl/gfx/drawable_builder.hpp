@@ -91,6 +91,9 @@ public:
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
 
+    const gfx::ColorMode& getColorMode() const;
+    void setColorMode(const gfx::ColorMode& value);
+    
     const gfx::CullFaceMode& getCullFaceMode() const;
     void setCullFaceMode(const gfx::CullFaceMode& value);
 

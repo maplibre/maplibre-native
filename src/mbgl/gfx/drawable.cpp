@@ -1,5 +1,6 @@
 #include <mbgl/gfx/drawable.hpp>
 
+#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/renderer/render_pass.hpp>
@@ -8,6 +9,7 @@ namespace mbgl {
 namespace gfx {
 
 struct Drawable::Impl {
+    gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
 };
 
@@ -18,6 +20,14 @@ Drawable::Drawable(std::string name_)
       impl(std::make_unique<Impl>()) {}
 
 Drawable::~Drawable() = default;
+
+const gfx::ColorMode& Drawable::getColorMode() const {
+    return impl->colorMode;
+}
+
+void Drawable::setColorMode(const gfx::ColorMode& value) {
+    impl->colorMode = value;
+}
 
 const gfx::CullFaceMode& Drawable::getCullFaceMode() const {
     return impl->cullFaceMode;

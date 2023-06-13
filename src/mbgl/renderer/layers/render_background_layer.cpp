@@ -303,6 +303,8 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setShader(curShader);
                 builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                            : gfx::ColorMode::unblended());
             }
 
             // Tile coordinates are fixed.

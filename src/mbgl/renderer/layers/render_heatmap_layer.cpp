@@ -80,7 +80,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
     if (!parameters.shaders.getLegacyGroup().populate(heatmapProgram)) return;
     if (!parameters.shaders.getLegacyGroup().populate(heatmapTextureProgram)) return;
 
-    if (parameters.pass == RenderPass::Translucent) {
+    if (parameters.pass == RenderPass::Pass3D) {
         const auto& viewportSize = parameters.staticData.backendSize;
         const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
 
@@ -133,7 +133,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
                                  getID());
         }
 
-    } /*else if (parameters.pass == RenderPass::Translucent) {
+    } else if (parameters.pass == RenderPass::Translucent) {
         const auto& size = parameters.staticData.backendSize;
 
         mat4 viewportMat;
@@ -177,7 +177,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
                 textures::color_ramp::Value{colorRampTexture->getResource(), gfx::TextureFilterType::Linear},
             },
             getID());
-    }*/
+    }
 }
 
 void RenderHeatmapLayer::updateColorRamp() {
@@ -351,6 +351,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         heatmapBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
         heatmapBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                         : gfx::DepthMaskType::ReadOnly);
+        heatmapBuilder->setColorMode(gfx::ColorMode::additive());
         heatmapBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
 
         heatmapBuilder->setRenderPass(renderPass);

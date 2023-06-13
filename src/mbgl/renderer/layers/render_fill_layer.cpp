@@ -470,6 +470,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                              : gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                                : gfx::ColorMode::unblended());
                     builder->setSubLayerIndex(0);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
@@ -480,6 +482,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setRenderPass(RenderPass::Translucent);
                     outlineBuilder = std::move(builder);
@@ -525,6 +528,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
                     commonInit(*builder);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
                     patternBuilder = std::move(builder);
@@ -535,6 +539,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
                     builder->setRenderPass(RenderPass::Translucent);
                     outlinePatternBuilder = std::move(builder);
