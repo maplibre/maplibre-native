@@ -17,7 +17,6 @@ struct alignas(16) LineUBO {
     float ratio;
     float device_pixel_ratio;
 };
-static_assert(sizeof(LineUBO) == 80);
 static_assert(sizeof(LineUBO) % 16 == 0);
 static constexpr std::string_view LineUBOName = "LineUBO";
 
@@ -28,12 +27,92 @@ struct alignas(16) LinePropertiesUBO {
     float gapwidth;
     float offset;
     float width;
+    
     float pad1;
     std::array<float,2> pad2;
 };
-static_assert(sizeof(LinePropertiesUBO) == 48);
 static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
 static constexpr std::string_view LinePropertiesUBOName = "LinePropertiesUBO";
+
+struct alignas(16) LineGradientUBO {
+    std::array<float, 4 * 4> matrix;
+    std::array<float, 2> units_to_pixels;
+    float ratio;
+    float device_pixel_ratio;
+};
+static_assert(sizeof(LineGradientUBO) % 16 == 0);
+[[maybe_unused]] static constexpr std::string_view LineGradientUBOName = "LineGradientUBO";
+
+struct alignas(16) LineGradientPropertiesUBO {
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    
+    float pad1;
+    std::array<float,2> pad2;
+};
+static_assert(sizeof(LineGradientPropertiesUBO) % 16 == 0);
+[[maybe_unused]] static constexpr std::string_view LineGradientPropertiesUBOName = "LineGradientPropertiesUBO";
+
+struct alignas(16) LinePatternUBO {
+    std::array<float, 4 * 4> matrix;
+    std::array<float, 4> scale;
+    std::array<float, 2> texsize;
+    std::array<float, 2> units_to_pixels;
+    float ratio;
+    float device_pixel_ratio;
+    float fade;
+    
+    float pad1;
+};
+static_assert(sizeof(LinePatternUBO) % 16 == 0);
+[[maybe_unused]] static constexpr std::string_view LinePatternUBOName = "LinePatternUBO";
+
+struct alignas(16) LinePatternPropertiesUBO {
+    std::array<float, 4> pattern_from;
+    std::array<float, 4> pattern_to;
+    float blur;
+    float opacity;
+    float offset;
+    float gapwidth;
+    float width;
+
+    float pad1;
+    std::array<float,2> pad2;
+};
+static_assert(sizeof(LinePatternPropertiesUBO) % 16 == 0);
+[[maybe_unused]] static constexpr std::string_view LinePatternPropertiesUBOName = "LinePatternPropertiesUBO";
+
+struct alignas(16) LineSDFUBO {
+    std::array<float, 4 * 4> matrix;
+    std::array<float, 2> units_to_pixels;
+    std::array<float, 2> patternscale_a;
+    std::array<float, 2> patternscale_b;
+    float ratio;
+    float device_pixel_ratio;
+    float tex_y_a;
+    float tex_y_b;
+    float sdfgamma;
+    float mix;
+};
+static_assert(sizeof(LineSDFUBO) % 16 == 0);
+[[maybe_unused]] static constexpr std::string_view LineSDFUBOName = "LineSDFUBO";
+
+struct alignas(16) LineSDFPropertiesUBO {
+    Color color;
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float floorwidth;
+    
+    std::array<float,2> pad1;
+};
+static_assert(sizeof(LineSDFPropertiesUBO) % 16 == 0);
+[[maybe_unused]] static constexpr std::string_view LineSDFPropertiesUBOName = "LineSDFPropertiesUBO";
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
