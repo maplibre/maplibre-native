@@ -49,7 +49,7 @@ public:
 };
 
 struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
-    DrawSegmentGL(gfx::DrawMode mode_, Segment<void>&& segment_, VertexArray&& vertexArray_)
+    DrawSegmentGL(gfx::DrawMode mode_, SegmentBase&& segment_, VertexArray&& vertexArray_)
         : gfx::Drawable::DrawSegment(mode_, std::move(segment_)),
           vertexArray(std::move(vertexArray_)) {}
 

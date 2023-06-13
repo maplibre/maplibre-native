@@ -4,11 +4,6 @@
 
 namespace mbgl {
 
-namespace gfx {
-class UniformBuffer;
-using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
-} // namespace gfx
-
 /**
     Circle layer specific tweaker
  */

@@ -58,7 +58,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
-        if (glSeg.getVertexArray().isValid()) {
+        if (mlSeg.indexLength > 0 && glSeg.getVertexArray().isValid()) {
             glContext.bindVertexArray = glSeg.getVertexArray().getID();
             glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
@@ -114,6 +114,7 @@ void DrawableGL::bindUniformBuffers() const {
                 using namespace std::string_literals;
                 Log::Error(Event::General,
                            "DrawableGL::bindUniformBuffers: UBO "s + element.first + " not found. skipping.");
+                assert(false);
                 continue;
             }
             element.second->bindBuffer(*uniformBuffer);
@@ -165,8 +166,14 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
             auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
             const auto& mlSeg = glSeg.getSegment();
 
+            if (mlSeg.indexLength == 0) {
+                continue;
+            }
+
             for (auto& binding : bindings) {
-                binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                if (binding) {
+                    binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                }
             }
 
             auto vertexArray = glContext.createVertexArray();

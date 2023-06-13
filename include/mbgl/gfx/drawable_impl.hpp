@@ -6,7 +6,7 @@ namespace mbgl {
 namespace gfx {
 
 struct Drawable::DrawSegment {
-    DrawSegment(gfx::DrawMode mode_, Segment<void>&& segment_)
+    DrawSegment(gfx::DrawMode mode_, SegmentBase&& segment_)
         : mode(mode_),
           segment(std::move(segment_)) {}
 
@@ -14,12 +14,12 @@ struct Drawable::DrawSegment {
 
     const gfx::DrawMode& getMode() const { return mode; }
 
-    Segment<void>& getSegment() { return segment; }
-    const Segment<void>& getSegment() const { return segment; }
+    SegmentBase& getSegment() { return segment; }
+    const SegmentBase& getSegment() const { return segment; }
 
 protected:
     gfx::DrawMode mode;
-    Segment<void> segment;
+    SegmentBase segment;
 };
 
 } // namespace gfx
