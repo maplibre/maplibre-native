@@ -19,14 +19,14 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-layout (std140) uniform LineDrawableUBO {
+layout (std140) uniform LineUBO {
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     lowp float u_device_pixel_ratio;
 };
 
-layout (std140) uniform LineEvaluatedPropsUBO {
+layout (std140) uniform LinePropertiesUBO {
     highp vec4 u_color;
     lowp float u_blur;
     lowp float u_opacity;
@@ -38,7 +38,7 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     highp float pad3;
 };
 
-layout (std140) uniform LineInterpolatedPropsUBO {
+layout (std140) uniform LineInterpolationUBO {
     lowp float u_color_t;
     lowp float u_blur_t;
     lowp float u_opacity_t;
@@ -157,14 +157,14 @@ mediump float width = u_width;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform LineDrawableUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform LineUBO {
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     lowp float u_device_pixel_ratio;
 };
 
-layout (std140) uniform LineEvaluatedPropsUBO {
+layout (std140) uniform LinePropertiesUBO {
     highp vec4 u_color;
     lowp float u_blur;
     lowp float u_opacity;
@@ -176,7 +176,7 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     highp float pad3;
 };
 
-layout (std140) uniform LineInterpolatedPropsUBO {
+layout (std140) uniform LineInterpolationUBO {
     lowp float u_color_t;
     lowp float u_blur_t;
     lowp float u_opacity_t;

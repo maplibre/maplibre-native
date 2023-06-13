@@ -11,16 +11,17 @@ namespace mbgl {
 
 using namespace style;
 
-struct alignas(16) LineDrawableUBO {
+struct alignas(16) LineUBO {
     std::array<float, 4 * 4> matrix;
     std::array<float, 2> units_to_pixels;
     float ratio;
     float device_pixel_ratio;
 };
-static_assert(sizeof(LineDrawableUBO) == 80);
-static_assert(sizeof(LineDrawableUBO) % 16 == 0);
+static_assert(sizeof(LineUBO) == 80);
+static_assert(sizeof(LineUBO) % 16 == 0);
+static constexpr std::string_view LineUBOName = "LineUBO";
 
-struct alignas(16) LineEvaluatedPropsUBO {
+struct alignas(16) LinePropertiesUBO {
     Color color;
     float blur;
     float opacity;
@@ -31,25 +32,28 @@ struct alignas(16) LineEvaluatedPropsUBO {
     float pad2;
     float pad3;
 };
-static_assert(sizeof(LineEvaluatedPropsUBO) == 48);
-static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
+static_assert(sizeof(LinePropertiesUBO) == 48);
+static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
+static constexpr std::string_view LinePropertiesUBOName = "LinePropertiesUBO";
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
                                const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
 
-    LineEvaluatedPropsUBO evaluatedPropsUBO;
-    evaluatedPropsUBO.color = evaluated.get<LineColor>().constantOr(Color(1, 0, 1, 1));
-    evaluatedPropsUBO.blur = evaluated.get<LineBlur>().constantOr(0);
-    evaluatedPropsUBO.opacity = evaluated.get<LineOpacity>().constantOr(0);
-    evaluatedPropsUBO.gapwidth = evaluated.get<LineGapWidth>().constantOr(0);
-    evaluatedPropsUBO.offset = evaluated.get<LineOffset>().constantOr(0);
-    evaluatedPropsUBO.width = evaluated.get<LineWidth>().constantOr(0);
-    evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
+    LinePropertiesUBO linePropertiesUBO {
+        /*color =*/ evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
+        /*blur =*/ evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
+        /*opacity =*/ evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
+        /*gapwidth =*/ evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
+        /*offset =*/ evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
+        /*width =*/ evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
+        0, 0, 0
+    };
+    evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&linePropertiesUBO, sizeof(linePropertiesUBO));
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace("LineEvaluatedPropsUBO", evaluatedPropsUniformBuffer);
+        drawable.mutableUniformBuffers().addOrReplace(LinePropertiesUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -63,13 +67,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto matrix = getTileMatrix(
             tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
 
-        LineDrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(matrix);
-        drawableUBO.ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
-        drawableUBO.units_to_pixels = {{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}};
-        drawableUBO.device_pixel_ratio = parameters.pixelRatio;
-        auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-        drawable.mutableUniformBuffers().addOrReplace("LineDrawableUBO", drawableUniformBuffer);
+        LineUBO lineUBO;
+        lineUBO.matrix = util::cast<float>(matrix);
+        lineUBO.ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
+        lineUBO.units_to_pixels = {{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}};
+        lineUBO.device_pixel_ratio = parameters.pixelRatio;
+        auto drawableUniformBuffer = parameters.context.createUniformBuffer(&lineUBO, sizeof(lineUBO));
+        drawable.mutableUniformBuffers().addOrReplace(LineUBOName, drawableUniformBuffer);
     });
 }
 
