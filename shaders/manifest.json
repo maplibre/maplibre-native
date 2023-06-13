@@ -38,19 +38,22 @@
         "name": "LineGradientShader",
         "header": "drawable_line_gradient",
         "glsl_vert": "drawable.line_gradient.vertex.glsl",
-        "glsl_frag": "drawable.line_gradient.fragment.glsl"
+        "glsl_frag": "drawable.line_gradient.fragment.glsl",
+        "uses_ubos": true
     },
     {
         "name": "LinePatternShader",
         "header": "drawable_line_pattern",
         "glsl_vert": "drawable.line_pattern.vertex.glsl",
-        "glsl_frag": "drawable.line_pattern.fragment.glsl"
+        "glsl_frag": "drawable.line_pattern.fragment.glsl",
+        "uses_ubos": true
     },
     {
         "name": "LineSDFShader",
         "header": "drawable_line_sdf",
         "glsl_vert": "drawable.line_sdf.vertex.glsl",
-        "glsl_frag": "drawable.line_sdf.fragment.glsl"
+        "glsl_frag": "drawable.line_sdf.fragment.glsl",
+        "uses_ubos": true
     },
     {
         "name": "LineShader",

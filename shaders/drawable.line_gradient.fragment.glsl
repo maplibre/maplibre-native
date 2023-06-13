@@ -1,4 +1,32 @@
-uniform lowp float u_device_pixel_ratio;
+layout (std140) uniform LineGradientUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+};
+
+layout (std140) uniform LineGradientPropertiesUBO {
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+
+    highp float pad1;
+    highp vec2 pad2;
+};
+
+layout (std140) uniform LineGradientInterpolationUBO {
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+
+    highp float pad3;
+    highp vec2 pad4;
+};
+
 uniform sampler2D u_image;
 
 in vec2 v_width2;

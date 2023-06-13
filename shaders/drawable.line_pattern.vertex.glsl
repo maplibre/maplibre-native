@@ -13,10 +13,42 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform vec2 u_units_to_pixels;
-uniform mediump float u_ratio;
-uniform lowp float u_device_pixel_ratio;
+layout (std140) uniform LinePatternUBO {
+    highp mat4 u_matrix;
+    mediump vec4 u_scale;
+    highp vec2 u_texsize;
+    highp vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+    highp float u_fade;
+
+    highp float pad1;
+};
+
+layout (std140) uniform LinePatternPropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
+    lowp float u_blur;
+    lowp float u_opacity;
+    lowp float u_offset;
+    mediump float u_gapwidth;
+    mediump float u_width;
+
+    highp float pad2;
+    highp vec2 pad3;
+};
+
+layout (std140) uniform LinePatternInterpolationUBO {
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_offset_t;
+    lowp float u_gapwidth_t;
+    lowp float u_width_t;
+    lowp float u_pattern_from_t;
+    lowp float u_pattern_to_t;
+
+    highp float pad4;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;

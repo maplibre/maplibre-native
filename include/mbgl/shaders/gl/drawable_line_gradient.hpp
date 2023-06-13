@@ -23,10 +23,34 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform mediump float u_ratio;
-uniform lowp float u_device_pixel_ratio;
-uniform vec2 u_units_to_pixels;
+layout (std140) uniform LineGradientUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+};
+
+layout (std140) uniform LineGradientPropertiesUBO {
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+
+    highp float pad1;
+    highp vec2 pad2;
+};
+
+layout (std140) uniform LineGradientInterpolationUBO {
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+
+    highp float pad3;
+    highp vec2 pad4;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -34,36 +58,21 @@ out float v_gamma_scale;
 out highp float v_lineprogress;
 
 #ifndef HAS_UNIFORM_u_blur
-uniform lowp float u_blur_t;
 layout (location = 2) in lowp vec2 a_blur;
 out lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
 layout (location = 3) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_gapwidth
-uniform lowp float u_gapwidth_t;
 layout (location = 4) in mediump vec2 a_gapwidth;
-#else
-uniform mediump float u_gapwidth;
 #endif
 #ifndef HAS_UNIFORM_u_offset
-uniform lowp float u_offset_t;
 layout (location = 5) in lowp vec2 a_offset;
-#else
-uniform lowp float u_offset;
 #endif
 #ifndef HAS_UNIFORM_u_width
-uniform lowp float u_width_t;
 layout (location = 6) in mediump vec2 a_width;
-#else
-uniform mediump float u_width;
 #endif
 
 void main() {
@@ -143,7 +152,35 @@ mediump float width = u_width;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(uniform lowp float u_device_pixel_ratio;
+    static constexpr const char* fragment = R"(layout (std140) uniform LineGradientUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+};
+
+layout (std140) uniform LineGradientPropertiesUBO {
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+
+    highp float pad1;
+    highp vec2 pad2;
+};
+
+layout (std140) uniform LineGradientInterpolationUBO {
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+
+    highp float pad3;
+    highp vec2 pad4;
+};
+
 uniform sampler2D u_image;
 
 in vec2 v_width2;
@@ -153,13 +190,9 @@ in highp float v_lineprogress;
 
 #ifndef HAS_UNIFORM_u_blur
 in lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 
 void main() {

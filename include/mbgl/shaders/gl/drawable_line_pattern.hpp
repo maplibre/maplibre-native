@@ -23,10 +23,42 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform vec2 u_units_to_pixels;
-uniform mediump float u_ratio;
-uniform lowp float u_device_pixel_ratio;
+layout (std140) uniform LinePatternUBO {
+    highp mat4 u_matrix;
+    mediump vec4 u_scale;
+    highp vec2 u_texsize;
+    highp vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+    highp float u_fade;
+
+    highp float pad1;
+};
+
+layout (std140) uniform LinePatternPropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
+    lowp float u_blur;
+    lowp float u_opacity;
+    lowp float u_offset;
+    mediump float u_gapwidth;
+    mediump float u_width;
+
+    highp float pad2;
+    highp vec2 pad3;
+};
+
+layout (std140) uniform LinePatternInterpolationUBO {
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_offset_t;
+    lowp float u_gapwidth_t;
+    lowp float u_width_t;
+    lowp float u_pattern_from_t;
+    lowp float u_pattern_to_t;
+
+    highp float pad4;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;
@@ -34,50 +66,29 @@ out float v_linesofar;
 out float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_blur
-uniform lowp float u_blur_t;
 layout (location = 2) in lowp vec2 a_blur;
 out lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
 layout (location = 3) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_offset
-uniform lowp float u_offset_t;
 layout (location = 4) in lowp vec2 a_offset;
-#else
-uniform lowp float u_offset;
 #endif
 #ifndef HAS_UNIFORM_u_gapwidth
-uniform lowp float u_gapwidth_t;
 layout (location = 5) in mediump vec2 a_gapwidth;
-#else
-uniform mediump float u_gapwidth;
 #endif
 #ifndef HAS_UNIFORM_u_width
-uniform lowp float u_width_t;
 layout (location = 6) in mediump vec2 a_width;
-#else
-uniform mediump float u_width;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-uniform lowp float u_pattern_from_t;
 layout (location = 7) in lowp vec4 a_pattern_from;
 out lowp vec4 pattern_from;
-#else
-uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-uniform lowp float u_pattern_to_t;
 layout (location = 8) in lowp vec4 a_pattern_to;
 out lowp vec4 pattern_to;
-#else
-uniform lowp vec4 u_pattern_to;
 #endif
 
 void main() {
@@ -167,10 +178,42 @@ mediump vec4 pattern_to = u_pattern_to;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(uniform lowp float u_device_pixel_ratio;
-uniform vec2 u_texsize;
-uniform float u_fade;
-uniform mediump vec4 u_scale;
+    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternUBO {
+    highp mat4 u_matrix;
+    mediump vec4 u_scale;
+    highp vec2 u_texsize;
+    highp vec2 u_units_to_pixels;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+    highp float u_fade;
+
+    highp float pad1;
+};
+
+layout (std140) uniform LinePatternPropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
+    lowp float u_blur;
+    lowp float u_opacity;
+    lowp float u_offset;
+    mediump float u_gapwidth;
+    mediump float u_width;
+
+    highp float pad2;
+    highp vec2 pad3;
+};
+
+layout (std140) uniform LinePatternInterpolationUBO {
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_offset_t;
+    lowp float u_gapwidth_t;
+    lowp float u_width_t;
+    lowp float u_pattern_from_t;
+    lowp float u_pattern_to_t;
+
+    highp float pad4;
+};
 
 uniform sampler2D u_image;
 
@@ -181,23 +224,15 @@ in float v_gamma_scale;
 
 #ifndef HAS_UNIFORM_u_pattern_from
 in lowp vec4 pattern_from;
-#else
-uniform lowp vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
 in lowp vec4 pattern_to;
-#else
-uniform lowp vec4 u_pattern_to;
 #endif
 #ifndef HAS_UNIFORM_u_blur
 in lowp float blur;
-#else
-uniform lowp float u_blur;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 
 void main() {

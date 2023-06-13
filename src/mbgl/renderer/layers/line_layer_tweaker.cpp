@@ -29,8 +29,7 @@ struct alignas(16) LinePropertiesUBO {
     float offset;
     float width;
     float pad1;
-    float pad2;
-    float pad3;
+    std::array<float,2> pad2;
 };
 static_assert(sizeof(LinePropertiesUBO) == 48);
 static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
@@ -48,7 +47,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         /*gapwidth =*/ evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
         /*offset =*/ evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
         /*width =*/ evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-        0, 0, 0
+        0, {0, 0}
     };
     evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&linePropertiesUBO, sizeof(linePropertiesUBO));
 

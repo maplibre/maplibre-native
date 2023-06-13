@@ -13,14 +13,42 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-uniform mat4 u_matrix;
-uniform mediump float u_ratio;
-uniform lowp float u_device_pixel_ratio;
-uniform vec2 u_patternscale_a;
-uniform float u_tex_y_a;
-uniform vec2 u_patternscale_b;
-uniform float u_tex_y_b;
-uniform vec2 u_units_to_pixels;
+layout (std140) uniform LineSDFUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_patternscale_a;
+    highp vec2 u_patternscale_b;
+    mediump float u_ratio;
+    lowp float u_device_pixel_ratio;
+    highp float u_tex_y_a;
+    highp float u_tex_y_b;
+    highp float u_sdfgamma;
+    highp float u_mix;
+};
+
+layout (std140) uniform LineSDFPropertiesUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+
+    highp vec2 pad1;
+};
+
+layout (std140) uniform LineSDFInterpolationUBO {
+    lowp float u_color_t;
+    lowp float u_blur_t;
+    lowp float u_opacity_t;
+    lowp float u_gapwidth_t;
+    lowp float u_offset_t;
+    lowp float u_width_t;
+    lowp float u_floorwidth_t;
+    
+    highp float pad2;
+};
 
 out vec2 v_normal;
 out vec2 v_width2;

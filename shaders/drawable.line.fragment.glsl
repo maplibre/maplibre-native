@@ -12,9 +12,9 @@ layout (std140) uniform LinePropertiesUBO {
     mediump float u_gapwidth;
     lowp float u_offset;
     mediump float u_width;
+
     highp float pad1;
-    highp float pad2;
-    highp float pad3;
+    highp vec2 pad2;
 };
 
 layout (std140) uniform LineInterpolationUBO {
@@ -24,7 +24,8 @@ layout (std140) uniform LineInterpolationUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
-    highp vec2 pad4;
+
+    highp vec2 pad3;
 };
 
 in vec2 v_width2;
