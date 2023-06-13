@@ -15,7 +15,7 @@ class RenderHeatmapLayer final : public RenderLayer {
 public:
     explicit RenderHeatmapLayer(Immutable<style::HeatmapLayer::Impl>);
     ~RenderHeatmapLayer() override;
-    
+
     void layerRemoved(UniqueChangeRequestVec&) override;
 
     /// Generate any changes needed by the layer
@@ -44,7 +44,7 @@ private:
 
     /// Remove all drawables for the tile from the layer group
     void removeTile(RenderPass, const OverscaledTileID&);
-    
+
     // Paint properties
     style::HeatmapPaintProperties::Unevaluated unevaluated;
     PremultipliedImage colorRamp;
@@ -55,7 +55,7 @@ private:
     // Programs
     std::shared_ptr<HeatmapProgram> heatmapProgram;
     std::shared_ptr<HeatmapTextureProgram> heatmapTextureProgram;
-    
+
     gfx::ShaderGroupPtr heatmapShaderGroup;
 };
 

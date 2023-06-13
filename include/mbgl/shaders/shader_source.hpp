@@ -19,7 +19,7 @@ enum class BuiltIn {
     HeatmapShader,
     HeatmapTextureShader,
     RasterShader,
-    
+
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,

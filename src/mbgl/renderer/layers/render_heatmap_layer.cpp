@@ -92,7 +92,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
 
         auto renderPass = parameters.encoder->createRenderPass("heatmap texture",
                                                                {*renderTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
-        
+
         for (const RenderTile& tile : *renderTiles) {
             const LayerRenderData* renderData = getRenderDataForPass(tile, parameters.pass);
             if (!renderData) {
@@ -328,8 +328,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         heatmapVertexAttrs.clear();
 
-        auto propertiesAsUniforms = heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight,
-                                                                                     HeatmapRadius>(
+        auto propertiesAsUniforms = heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
             paintPropertyBinders, evaluated);
 
         auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);

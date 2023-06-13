@@ -63,7 +63,8 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false);
+        const auto matrix = getTileMatrix(
+            tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false);
         const auto& size = parameters.staticData.backendSize;
         HeatmapDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
