@@ -96,6 +96,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillOutlineShader,
                   shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::HeatmapShader,
+                  shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::RasterShader>(shaders, programParameters);
 }
 
