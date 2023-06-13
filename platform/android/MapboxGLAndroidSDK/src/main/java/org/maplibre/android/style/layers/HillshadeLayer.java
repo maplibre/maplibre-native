@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * Client-side hillshading visualization based on DEM data. Currently, the implementation only supports Mapbox Terrain RGB and Mapzen Terrarium tiles.
  *
- * @see <a href="https://www.maplibre.com/maplibre-gl-style-spec/#layers-hillshade">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-gl-style-spec/#layers-hillshade">The online documentation</a>
  */
 @UiThread
 public class HillshadeLayer extends Layer {

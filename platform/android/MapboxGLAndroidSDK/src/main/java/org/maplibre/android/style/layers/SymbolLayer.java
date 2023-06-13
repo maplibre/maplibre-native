@@ -20,7 +20,7 @@ import org.maplibre.android.style.types.FormattedSection;
 /**
  * An icon or a text label.
  *
- * @see <a href="https://www.maplibre.com/maplibre-gl-style-spec/#layers-symbol">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-gl-style-spec/#layers-symbol">The online documentation</a>
  */
 @UiThread
 public class SymbolLayer extends Layer {

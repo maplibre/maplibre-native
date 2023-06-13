@@ -18,7 +18,7 @@ import org.maplibre.android.style.layers.TransitionOptions;
 /**
  * A stroked line.
  *
- * @see <a href="https://www.maplibre.com/maplibre-gl-style-spec/#layers-line">The online documentation</a>
+ * @see <a href="https://maplibre.org/maplibre-gl-style-spec/#layers-line">The online documentation</a>
  */
 @UiThread
 public class LineLayer extends Layer {
