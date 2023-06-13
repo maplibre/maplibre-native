@@ -58,14 +58,6 @@ final draft of the C++14 standard. More information in [DEVELOPING.md](../../DEV
 
 ## Opening the project
 
-Run
-
-```
-make style-code
-```
-
-To generate the needed generated sources.
-
 ### macOS
 
 * Environment
