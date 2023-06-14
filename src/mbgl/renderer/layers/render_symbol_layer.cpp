@@ -1,22 +1,27 @@
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
+
+#include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/layout/symbol_layout.hpp>
+#include <mbgl/programs/collision_box_program.hpp>
+#include <mbgl/programs/programs.hpp>
+#include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
+#include <mbgl/renderer/buckets/symbol_bucket.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/text/shaping.hpp>
-#include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/symbol_program.hpp>
-#include <mbgl/programs/collision_box_program.hpp>
-#include <mbgl/tile/tile.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/layout/symbol_layout.hpp>
+#include <mbgl/tile/tile.hpp>
 #include <mbgl/util/math.hpp>
 
 #include <cmath>
@@ -26,6 +31,8 @@ namespace mbgl {
 
 using namespace style;
 namespace {
+
+constexpr std::string_view SymbolShaderName = "SymbolShader";
 
 style::SymbolPropertyValues iconPropertyValues(const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_,
                                                const style::SymbolLayoutProperties::PossiblyEvaluated& layout_) {
@@ -623,6 +630,14 @@ style::TextPaintProperties::PossiblyEvaluated RenderSymbolLayer::textPaintProper
 
 void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
+    
+    renderTileIDs.clear();
+    renderTileIDs.reserve(renderTiles->size());
+    std::transform(renderTiles->begin(),
+                   renderTiles->end(),
+                   std::inserter(renderTileIDs, renderTileIDs.end()),
+                   [](const auto& tile) { return tile.get().getOverscaledTileID(); });
+
     addRenderPassesFromTiles();
 
     placementData.clear();
@@ -650,6 +665,54 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                     placementData.insert(sortPosition, std::move(layerData));
                 }
             }
+        }
+    }
+}
+
+void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
+                               gfx::Context& context,
+                               const TransformState& /*state*/,
+                               const RenderTree& /*renderTree*/,
+                               UniqueChangeRequestVec& /*changes*/) {
+    
+    if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
+        removeAllTiles();
+        return;
+    }
+    
+    // Set up a layer group
+    if (!tileLayerGroup) {
+        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+        if (!tileLayerGroup) {
+            return;
+        }
+        tileLayerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
+    }
+    
+    if (!symbolShaderGroup) {
+        symbolShaderGroup = shaders.getShaderGroup(std::string(SymbolShaderName));
+    }
+    if (!symbolShaderGroup) {
+        removeAllTiles();
+        return;
+    }
+
+    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+        // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
+        const auto tileID = drawable->getTileID();
+        if (drawable->getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
+            drawable.reset();
+            ++stats.tileDrawablesRemoved;
+        }
+    });
+
+    for (const RenderTile& tile : *renderTiles) {
+        const auto& tileID = tile.getOverscaledTileID();
+        
+        const LayerRenderData* renderData = getRenderDataForPass(tile, passes);
+        if (!renderData) {
+            removeTile(passes, tileID);
+            continue;
         }
     }
 }
