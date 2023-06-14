@@ -1,4 +1,14 @@
-layout (location = 0) in vec4 a_pos_offset;
+// Generated code, do not modify this file!
+#pragma once
+#include <mbgl/shaders/shader_source.hpp>
+
+namespace mbgl {
+namespace shaders {
+
+template <>
+struct ShaderSource<BuiltIn::SymbolSDFTextShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "SymbolSDFTextShader";
+    static constexpr const char* vertex = R"(layout (location = 0) in vec4 a_pos_offset;
 layout (location = 1) in vec4 a_data;
 layout (location = 2) in vec4 a_pixeloffset;
 layout (location = 3) in vec3 a_projected_pos;
@@ -30,18 +40,68 @@ uniform vec2 u_texsize;
 out vec2 v_data0;
 out vec3 v_data1;
 
-#pragma mapbox: define highp vec4 fill_color
-#pragma mapbox: define highp vec4 halo_color
-#pragma mapbox: define lowp float opacity
-#pragma mapbox: define lowp float halo_width
-#pragma mapbox: define lowp float halo_blur
+#ifndef HAS_UNIFORM_u_fill_color
+uniform lowp float u_fill_color_t;
+layout (location = 5) in highp vec4 a_fill_color;
+out highp vec4 fill_color;
+#else
+uniform highp vec4 u_fill_color;
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
+uniform lowp float u_halo_color_t;
+layout (location = 6) in highp vec4 a_halo_color;
+out highp vec4 halo_color;
+#else
+uniform highp vec4 u_halo_color;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+uniform lowp float u_opacity_t;
+layout (location = 7) in lowp vec2 a_opacity;
+out lowp float opacity;
+#else
+uniform lowp float u_opacity;
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
+uniform lowp float u_halo_width_t;
+layout (location = 8) in lowp vec2 a_halo_width;
+out lowp float halo_width;
+#else
+uniform lowp float u_halo_width;
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
+uniform lowp float u_halo_blur_t;
+layout (location = 9) in lowp vec2 a_halo_blur;
+out lowp float halo_blur;
+#else
+uniform lowp float u_halo_blur;
+#endif
 
 void main() {
-    #pragma mapbox: initialize highp vec4 fill_color
-    #pragma mapbox: initialize highp vec4 halo_color
-    #pragma mapbox: initialize lowp float opacity
-    #pragma mapbox: initialize lowp float halo_width
-    #pragma mapbox: initialize lowp float halo_blur
+    #ifndef HAS_UNIFORM_u_fill_color
+fill_color = unpack_mix_color(a_fill_color, u_fill_color_t);
+#else
+highp vec4 fill_color = u_fill_color;
+#endif
+    #ifndef HAS_UNIFORM_u_halo_color
+halo_color = unpack_mix_color(a_halo_color, u_halo_color_t);
+#else
+highp vec4 halo_color = u_halo_color;
+#endif
+    #ifndef HAS_UNIFORM_u_opacity
+opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
+#else
+lowp float opacity = u_opacity;
+#endif
+    #ifndef HAS_UNIFORM_u_halo_width
+halo_width = unpack_mix_vec2(a_halo_width, u_halo_width_t);
+#else
+lowp float halo_width = u_halo_width;
+#endif
+    #ifndef HAS_UNIFORM_u_halo_blur
+halo_blur = unpack_mix_vec2(a_halo_blur, u_halo_blur_t);
+#else
+lowp float halo_blur = u_halo_blur;
+#endif
 
     vec2 a_pos = a_pos_offset.xy;
     vec2 a_offset = a_pos_offset.zw;
@@ -111,3 +171,91 @@ void main() {
     v_data0 = a_tex / u_texsize;
     v_data1 = vec3(gamma_scale, size, interpolated_fade_opacity);
 }
+)";
+    static constexpr const char* fragment = R"(#define SDF_PX 8.0
+
+uniform bool u_is_halo;
+uniform sampler2D u_texture;
+uniform highp float u_gamma_scale;
+uniform lowp float u_device_pixel_ratio;
+uniform bool u_is_text;
+
+in vec2 v_data0;
+in vec3 v_data1;
+
+#ifndef HAS_UNIFORM_u_fill_color
+in highp vec4 fill_color;
+#else
+uniform highp vec4 u_fill_color;
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
+in highp vec4 halo_color;
+#else
+uniform highp vec4 u_halo_color;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+in lowp float opacity;
+#else
+uniform lowp float u_opacity;
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
+in lowp float halo_width;
+#else
+uniform lowp float u_halo_width;
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
+in lowp float halo_blur;
+#else
+uniform lowp float u_halo_blur;
+#endif
+
+void main() {
+    #ifdef HAS_UNIFORM_u_fill_color
+highp vec4 fill_color = u_fill_color;
+#endif
+    #ifdef HAS_UNIFORM_u_halo_color
+highp vec4 halo_color = u_halo_color;
+#endif
+    #ifdef HAS_UNIFORM_u_opacity
+lowp float opacity = u_opacity;
+#endif
+    #ifdef HAS_UNIFORM_u_halo_width
+lowp float halo_width = u_halo_width;
+#endif
+    #ifdef HAS_UNIFORM_u_halo_blur
+lowp float halo_blur = u_halo_blur;
+#endif
+
+    float EDGE_GAMMA = 0.105 / u_device_pixel_ratio;
+
+    vec2 tex = v_data0.xy;
+    float gamma_scale = v_data1.x;
+    float size = v_data1.y;
+    float fade_opacity = v_data1[2];
+
+    float fontScale = u_is_text ? size / 24.0 : size;
+
+    lowp vec4 color = fill_color;
+    highp float gamma = EDGE_GAMMA / (fontScale * u_gamma_scale);
+    lowp float buff = (256.0 - 64.0) / 256.0;
+    if (u_is_halo) {
+        color = halo_color;
+        gamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / (fontScale * u_gamma_scale);
+        buff = (6.0 - halo_width / fontScale) / SDF_PX;
+    }
+
+    lowp float dist = texture(u_texture, tex).a;
+    highp float gamma_scaled = gamma * gamma_scale;
+    highp float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
+
+    fragColor = color * (alpha * opacity * fade_opacity);
+
+#ifdef OVERDRAW_INSPECTOR
+    fragColor = vec4(1.0);
+#endif
+}
+)";
+};
+
+} // namespace shaders
+} // namespace mbgl
