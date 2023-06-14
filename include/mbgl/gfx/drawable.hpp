@@ -85,7 +85,7 @@ public:
 
     /// @brief Return the textures attached to this drawable
     /// @return Texture and sampler location pairs
-    // const Textures& getTextures() const { return textures; };
+    const Textures& getTextures() const { return textures; };
 
     /// @brief Get the texture at the given sampler location.
     const gfx::Texture2DPtr& getTexture(int32_t location) const;
