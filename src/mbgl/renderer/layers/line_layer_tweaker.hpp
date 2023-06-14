@@ -30,7 +30,7 @@ struct alignas(16) LinePatternTilePropertiesUBO {
     std::array<float, 4> pattern_from;
     std::array<float, 4> pattern_to;
 };
-static_assert(sizeof(LinePatternTilePropertiesUBO) %16 == 0);
+static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
 static constexpr std::string_view LinePatternTilePropertiesUBOName = "LinePatternTilePropertiesUBO";
 
 } // namespace mbgl

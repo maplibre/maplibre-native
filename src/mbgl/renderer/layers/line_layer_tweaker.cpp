@@ -30,9 +30,9 @@ struct alignas(16) LinePropertiesUBO {
     float gapwidth;
     float offset;
     float width;
-    
+
     float pad1;
-    std::array<float,2> pad2;
+    std::array<float, 2> pad2;
 };
 static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
 static constexpr std::string_view LinePropertiesUBOName = "LinePropertiesUBO";
@@ -52,9 +52,9 @@ struct alignas(16) LineGradientPropertiesUBO {
     float gapwidth;
     float offset;
     float width;
-    
+
     float pad1;
-    std::array<float,2> pad2;
+    std::array<float, 2> pad2;
 };
 static_assert(sizeof(LineGradientPropertiesUBO) % 16 == 0);
 [[maybe_unused]] static constexpr std::string_view LineGradientPropertiesUBOName = "LineGradientPropertiesUBO";
@@ -67,7 +67,7 @@ struct alignas(16) LinePatternUBO {
     float ratio;
     float device_pixel_ratio;
     float fade;
-    
+
     float pad1;
 };
 static_assert(sizeof(LinePatternUBO) % 16 == 0);
@@ -81,7 +81,7 @@ struct alignas(16) LinePatternPropertiesUBO {
     float width;
 
     float pad1;
-    std::array<float,2> pad2;
+    std::array<float, 2> pad2;
 };
 static_assert(sizeof(LinePatternPropertiesUBO) % 16 == 0);
 static constexpr std::string_view LinePatternPropertiesUBOName = "LinePatternPropertiesUBO";
@@ -109,8 +109,8 @@ struct alignas(16) LineSDFPropertiesUBO {
     float offset;
     float width;
     float floorwidth;
-    
-    std::array<float,2> pad1;
+
+    std::array<float, 2> pad1;
 };
 static_assert(sizeof(LineSDFPropertiesUBO) % 16 == 0);
 [[maybe_unused]] static constexpr std::string_view LineSDFPropertiesUBOName = "LineSDFPropertiesUBO";
@@ -121,15 +121,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
 
-    LinePropertiesUBO linePropertiesUBO {
-        /*color =*/ evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
-        /*blur =*/ evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-        /*opacity =*/ evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-        /*gapwidth =*/ evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-        /*offset =*/ evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-        /*width =*/ evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-        0, {0, 0}
-    };
+    LinePropertiesUBO linePropertiesUBO{
+        /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
+        /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
+        /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
+        /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
+        /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
+        /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
+        0,
+        {0, 0}};
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID()) return;
@@ -151,9 +151,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
             lineUBO.device_pixel_ratio = parameters.pixelRatio;
             auto drawableUniformBuffer = parameters.context.createUniformBuffer(&lineUBO, sizeof(lineUBO));
             drawable.mutableUniformBuffers().addOrReplace(LineUBOName, drawableUniformBuffer);
-            
+
             // properties UBO
-            drawable.mutableUniformBuffers().createOrUpdate(LinePropertiesUBOName, &linePropertiesUBO, sizeof(linePropertiesUBO), parameters.context);
+            drawable.mutableUniformBuffers().createOrUpdate(
+                LinePropertiesUBOName, &linePropertiesUBO, sizeof(linePropertiesUBO), parameters.context);
         }
         // gradient line
         else if (drawable.getShader()->getUniformBlocks().get(std::string(LineGradientUBOName))) {
@@ -166,37 +167,47 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
             Size textureSize{0, 0};
             if (const auto shader = drawable.getShader()) {
                 if (const auto index = shader->getSamplerLocation("u_image")) {
-                    if(auto itextureAttachment = std::find_if(drawable.getTextures().begin(), drawable.getTextures().end(), [&index](const auto& textureAttachment) -> bool { return (textureAttachment.texture) && (textureAttachment.location == static_cast<int32_t>(index.value())); });
-                       drawable.getTextures().end() != itextureAttachment) {
+                    if (auto itextureAttachment = std::find_if(drawable.getTextures().begin(),
+                                                               drawable.getTextures().end(),
+                                                               [&index](const auto& textureAttachment) -> bool {
+                                                                   return (textureAttachment.texture) &&
+                                                                          (textureAttachment.location ==
+                                                                           static_cast<int32_t>(index.value()));
+                                                               });
+                        drawable.getTextures().end() != itextureAttachment) {
                         textureSize = itextureAttachment->texture->getSize();
                     }
                 }
             }
-            LinePatternUBO linePatternUBO {
-                /*matrix =*/ util::cast<float>(matrix),
-                /*scale =*/ {parameters.pixelRatio,
-                    1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
-                    crossfade.fromScale,
-                    crossfade.toScale},
-                /*texsize =*/ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                /*units_to_pixels =*/ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                /*ratio =*/ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-                /*device_pixel_ratio =*/ parameters.pixelRatio,
-                /*fade =*/ crossfade.t,
-                0
-            };
-            drawable.mutableUniformBuffers().createOrUpdate(LinePatternUBOName, &linePatternUBO, sizeof(linePatternUBO), parameters.context);
+            LinePatternUBO linePatternUBO{
+                /*matrix =*/util::cast<float>(matrix),
+                /*scale =*/
+                {parameters.pixelRatio,
+                 1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
+                 crossfade.fromScale,
+                 crossfade.toScale},
+                /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                /*units_to_pixels =*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+                /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
+                /*device_pixel_ratio =*/parameters.pixelRatio,
+                /*fade =*/crossfade.t,
+                0};
+            drawable.mutableUniformBuffers().createOrUpdate(
+                LinePatternUBOName, &linePatternUBO, sizeof(linePatternUBO), parameters.context);
 
             // properties UBO
-            LinePatternPropertiesUBO linePatternPropertiesUBO {
-                /*blur =*/ evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-                /*opacity =*/ evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-                /*offset =*/ evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-                /*gapwidth =*/ evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-                /*width =*/ evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                0, {0, 0}
-            };
-            drawable.mutableUniformBuffers().createOrUpdate(LinePatternPropertiesUBOName, &linePatternPropertiesUBO, sizeof(linePatternPropertiesUBO), parameters.context);
+            LinePatternPropertiesUBO linePatternPropertiesUBO{
+                /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
+                /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
+                /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
+                /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
+                /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
+                0,
+                {0, 0}};
+            drawable.mutableUniformBuffers().createOrUpdate(LinePatternPropertiesUBOName,
+                                                            &linePatternPropertiesUBO,
+                                                            sizeof(linePatternPropertiesUBO),
+                                                            parameters.context);
         }
         // SDF line
         else if (drawable.getShader()->getUniformBlocks().get(std::string(LineSDFUBOName))) {
