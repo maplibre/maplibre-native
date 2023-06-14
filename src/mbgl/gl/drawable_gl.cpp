@@ -48,7 +48,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     }
 
     context.setColorMode(parameters.colorModeForRenderPass());
-    context.setCullFaceMode(gfx::CullFaceMode::disabled());
+    context.setCullFaceMode(getCullFaceMode());
 
     bindUniformBuffers();
     bindTextures();
