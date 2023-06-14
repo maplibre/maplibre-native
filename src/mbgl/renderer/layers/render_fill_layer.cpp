@@ -273,18 +273,6 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
-void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
-    }
-}
-
-void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
-}
-
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
@@ -293,9 +281,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->clearDrawables();
-        }
+        removeAllTiles();
         return;
     }
 
@@ -307,13 +293,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
     }
-
-    const auto removeAll = [&]() {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
-        }
-    };
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
@@ -328,7 +307,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         outlinePatternShaderGroup = shaders.getShaderGroup(std::string(FillOutlinePatternShaderName));
     }
     if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
-        removeAll();
+        removeAllTiles();
         return;
     }
 
@@ -342,7 +321,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
     std::unique_ptr<gfx::DrawableBuilder> patternBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
-    std::vector<gfx::DrawablePtr> newTiles;
     gfx::VertexAttributeArray fillVertexAttrs;
     gfx::VertexAttributeArray outlineVertexAttrs;
     gfx::VertexAttributeArray patternVertexAttrs;

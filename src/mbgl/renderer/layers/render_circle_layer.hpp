@@ -13,8 +13,6 @@ public:
     explicit RenderCircleLayer(Immutable<style::CircleLayer::Impl>);
     ~RenderCircleLayer() final = default;
 
-    void layerRemoved(UniqueChangeRequestVec&) override;
-
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -36,9 +34,6 @@ private:
                                 float,
                                 const mat4&,
                                 const FeatureState&) const override;
-
-    /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&);
 
     // Paint properties
     style::CirclePaintProperties::Unevaluated unevaluated;

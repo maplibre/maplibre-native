@@ -133,6 +133,10 @@ public:
                             std::size_t vertexOffset,
                             std::size_t vertexLength);
 
+    /// Provide raw data for vertices
+    /// Incompatible with adding primitives
+    void setRawVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType);
+    
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<SegmentBase>&);
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
 
@@ -149,6 +153,8 @@ public:
                       std::size_t baseIndex = 0);
 
 protected:
+    std::size_t curVertexCount() const;
+    
     /// Create an instance of the appropriate drawable type
     virtual UniqueDrawable createDrawable() const = 0;
 
