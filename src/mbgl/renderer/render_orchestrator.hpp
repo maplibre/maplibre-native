@@ -91,8 +91,7 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
     void clearData();
 
-    void update(const std::shared_ptr<UpdateParameters>&);
-
+#if MLN_DRAWABLE_RENDERER
     using DrawableMap = std::map<util::SimpleIdentity, gfx::DrawablePtr>;
     const DrawableMap& getDrawables() const { return drawables; }
 
@@ -117,6 +116,7 @@ public:
     void processChanges();
     /// @brief Indicate that the orchestrator needs to re-sort layer groups when processing changes
     void markLayerGroupOrderDirty();
+#endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
@@ -149,12 +149,14 @@ private:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
+#if MLN_DRAWABLE_RENDERER
     /// Move changes into the pending set, clearing the provided collection
     void addChanges(UniqueChangeRequestVec&);
 
     void onRemoveLayerGroup(LayerGroupBase&);
 
     void updateLayerGroupOrder();
+#endif
 
     RendererObserver* observer;
 
@@ -187,12 +189,14 @@ private:
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
 
+#if MLN_DRAWABLE_RENDERER
     DrawableMap drawables;
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
+#endif
 };
 
 } // namespace mbgl

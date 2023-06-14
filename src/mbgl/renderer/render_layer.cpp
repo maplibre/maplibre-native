@@ -112,6 +112,7 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     return nullptr;
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
     layerIndex = newLayerIndex;
 
@@ -139,5 +140,6 @@ void RenderLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& c
         changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
     }
 }
+#endif
 
 } // namespace mbgl

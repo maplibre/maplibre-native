@@ -74,9 +74,12 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     }
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+#if MLN_DRAWABLE_RENDERER
     if (tileLayerGroup) {
         tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
     }
+#endif
 }
 
 bool RenderFillLayer::hasTransition() const {
@@ -87,6 +90,7 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
 
@@ -254,6 +258,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
                                              const GeometryTileFeature& feature,
@@ -273,6 +278,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
     if (tileLayerGroup) {
@@ -580,5 +586,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
+#endif
 
 } // namespace mbgl

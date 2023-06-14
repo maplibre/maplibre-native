@@ -74,9 +74,12 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+#if MLN_DRAWABLE_RENDERER
     if (tileLayerGroup) {
         tileLayerGroup->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
     }
+#endif
 }
 
 bool RenderCircleLayer::hasTransition() const {
@@ -87,6 +90,7 @@ bool RenderCircleLayer::hasCrossfade() const {
     return false;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderCircleLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
 
@@ -166,6 +170,7 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
     vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
@@ -245,6 +250,7 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
     return false;
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderCircleLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
     if (tileLayerGroup) {
@@ -422,5 +428,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
+#endif
 
 } // namespace mbgl

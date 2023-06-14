@@ -123,6 +123,7 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                      data));
 }
 
+#if MLN_DRAWABLE_RENDERER
 static std::size_t padSize(std::size_t size, std::size_t padding) {
     return (padding - (size % padding)) % padding;
 }
@@ -210,6 +211,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
     return {};
 }
+#endif
 
 void UploadPass::pushDebugGroup(const char* name) {
     commandEncoder.pushDebugGroup(name);

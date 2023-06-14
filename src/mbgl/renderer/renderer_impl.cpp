@@ -4,31 +4,36 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_tweaker.hpp>
+#include <mbgl/gl/drawable_gl.hpp>
+#include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#endif
+
+#if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)
 // DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
 // Drawables will be on the left, vanilla rendering on the right
-// #define SPLIT_VIEW
-// If using SPLIT_VIEW, QUAD_SPLIT_VIEW will split each half, showing just the opaque
+// #define MLN_RENDERER_SPLIT_VIEW 1
+// If using SPLIT_VIEW, MLN_RENDERER_QUAD_SPLIT_VIEW will split each half, showing just the opaque
 // pass on top and then a composited opaque+translucent pass on the bottom
 // #define QUAD_SPLIT_VIEW
-#ifdef SPLIT_VIEW
+#if MLN_RENDERER_SPLIT_VIEW
 #include <mbgl/gl/context.hpp>
+#endif
 #endif
 
 namespace mbgl {
@@ -74,9 +79,11 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         // Initialize legacy shader programs
         staticData->programs.registerWith(*staticData->shaders);
 
+#if MLN_DRAWABLE_RENDERER
         // Initialize shaders for drawables
         const auto programParameters = ProgramParameters{pixelRatio, false};
         backend.initShaders(*staticData->shaders, programParameters);
+#endif
 
         // Notify post-shader registration
         observer->onRegisterShaders(*staticData->shaders);
@@ -100,6 +107,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
     const auto& layerRenderItems = renderTree.getLayerRenderItems();
 
+#if MLN_DRAWABLE_RENDERER
     // Run changes
     orchestrator.processChanges();
 
@@ -111,8 +119,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     });
 
     // Give the layers a chance to do setup
-    //    orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
-    //    });
+    // orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
+    // });
+#endif
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
@@ -130,8 +139,10 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
 
+#if MLN_DRAWABLE_RENDERER
         // Give the layers a chance to upload
         orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+#endif
     }
 
     // - 3D PASS
@@ -152,6 +163,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
         parameters.staticData.depthRenderbuffer->setShouldClear(true);
 
+#if MLN_LEGACY_RENDERER
         int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
         for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
             parameters.currentLayer = i;
@@ -161,6 +173,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 renderItem.render(parameters);
             }
         }
+#endif
     }
 
     // - CLEAR
@@ -179,7 +192,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     }
 
     // Actually render the layers
-
+#if MLN_DRAWABLE_RENDERER
     // Drawables
     const auto drawableOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
@@ -210,7 +223,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             }
         });
     };
+#endif
 
+#if MLN_LEGACY_RENDERER
     // Render everything top-to-bottom by using reverse iterators. Render opaque objects first.
     const auto renderLayerOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
@@ -246,63 +261,74 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             }
         }
     };
+#endif // MLN_LEGACY_RENDERER
 
-#ifdef SPLIT_VIEW
-    [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
-    [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
-    [[maybe_unused]] const auto halfW = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width *
-                                                                       0.5f);
-    [[maybe_unused]] const auto halfH = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().height *
-                                                                       0.5f);
-    platform::glEnable(GL_SCISSOR_TEST);
-#ifdef QUAD_SPLIT_VIEW
-    // Drawable LayerGroups on the left
-    // Opaque only on top
-    platform::glScissor(0, 0, halfW, H);
+#if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     drawableOpaquePass();
-
-    // Composite (Opaque+Translucent) on bottom
-    platform::glScissor(0, 0, halfW, halfH);
-    // Clipping masks were drawn only on the other side
-    parameters.clearTileClippingMasks();
     drawableTranslucentPass();
-
-    // RenderLayers on the right
-    // Opaque only on top
-    platform::glScissor(halfW, 0, halfW, H);
-    parameters.clearTileClippingMasks();
+#elif (MLN_LEGACY_RENDERER && !MLN_DRAWABLE_RENDERER)
     renderLayerOpaquePass();
-
-    // Composite (Opaque+Translucent) on bottom
-    platform::glScissor(halfW, 0, halfW, halfH);
-    parameters.clearTileClippingMasks();
     renderLayerTranslucentPass();
+#elif (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
+#   if MLN_RENDERER_SPLIT_VIEW
+        [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
+        [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
+        [[maybe_unused]] const auto halfW = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width *
+                                                                        0.5f);
+        [[maybe_unused]] const auto halfH = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().height *
+                                                                        0.5f);
+        platform::glEnable(GL_SCISSOR_TEST);
+#       if MLN_RENDERER_QUAD_SPLIT_VIEW
+            // Drawable LayerGroups on the left
+            // Opaque only on top
+            platform::glScissor(0, 0, halfW, H);
+            drawableOpaquePass();
+
+            // Composite (Opaque+Translucent) on bottom
+            platform::glScissor(0, 0, halfW, halfH);
+            // Clipping masks were drawn only on the other side
+            parameters.clearTileClippingMasks();
+            drawableTranslucentPass();
+
+            // RenderLayers on the right
+            // Opaque only on top
+            platform::glScissor(halfW, 0, halfW, H);
+            parameters.clearTileClippingMasks();
+            renderLayerOpaquePass();
+
+            // Composite (Opaque+Translucent) on bottom
+            platform::glScissor(halfW, 0, halfW, halfH);
+            parameters.clearTileClippingMasks();
+            renderLayerTranslucentPass();
+#       else
+            // Drawable LayerGroups on the left
+            platform::glScissor(0, 0, halfW, H);
+            parameters.clearTileClippingMasks();
+            drawableOpaquePass();
+            drawableTranslucentPass();
+
+            // RenderLayers on the right
+            platform::glScissor(halfW, 0, W, H);
+            parameters.clearTileClippingMasks();
+            renderLayerOpaquePass();
+            renderLayerTranslucentPass();
+#       endif
+        // Reset viewport
+        platform::glScissor(0, 0, W, H);
+        platform::glDisable(GL_SCISSOR_TEST);
+#   else // ifdef MLN_RENDERER_SPLIT_VIEW
+        // Do RenderLayers first, drawables last
+        renderLayerOpaquePass();
+        renderLayerTranslucentPass();
+
+        drawableOpaquePass();
+        drawableTranslucentPass();
+#   endif // MLN_RENDERER_SPLIT_VIEW
 #else
-    // Drawable LayerGroups on the left
-    platform::glScissor(0, 0, halfW, H);
-    parameters.clearTileClippingMasks();
-    drawableOpaquePass();
-    drawableTranslucentPass();
-
-    // RenderLayers on the right
-    platform::glScissor(halfW, 0, W, H);
-    parameters.clearTileClippingMasks();
-    renderLayerOpaquePass();
-    renderLayerTranslucentPass();
-#endif
-    // Reset viewport
-    platform::glScissor(0, 0, W, H);
-    platform::glDisable(GL_SCISSOR_TEST);
-#else // ifdef SPLIT_VIEW
-
-    // Do RenderLayers first, drawables last
-    renderLayerOpaquePass();
-    drawableOpaquePass();
-
-    renderLayerTranslucentPass();
-    drawableTranslucentPass();
+    static_assert(0, "Must define one of (MLN_DRAWABLE_RENDERER, MLN_LEGACY_RENDERER)");
 #endif
 
+#if MLN_LEGACY_RENDERER
     // - DEBUG PASS
     // --------------------------------------------------------------------------------
     // Renders debug overlays.
@@ -327,10 +353,13 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.context.visualizeDepthBuffer(parameters.depthRangeSize);
     }
 #endif
+#endif // MLN_LEGACY_RENDERER
 
+#if MLN_DRAWABLE_RENDERER
     //     Give the layers a chance to do cleanup
     orchestrator.observeLayerGroups(
         [&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+#endif
 
     // Ends the RenderPass
     parameters.renderPass.reset();
