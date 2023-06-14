@@ -35,7 +35,7 @@ using Texture2DPtr = std::shared_ptr<Texture2D>;
 class Drawable {
 public:
     /// @brief Map from sampler location to texture info
-    using Textures = std::unordered_map<int32_t,gfx::Texture2DPtr>;
+    using Textures = std::unordered_map<int32_t, gfx::Texture2DPtr>;
 
 protected:
     Drawable(std::string name);
@@ -85,7 +85,7 @@ public:
 
     /// @brief Return the textures attached to this drawable
     /// @return Texture and sampler location pairs
-    //const Textures& getTextures() const { return textures; };
+    // const Textures& getTextures() const { return textures; };
 
     /// @brief Get the texture at the given sampler location.
     const gfx::Texture2DPtr& getTexture(int32_t location) const;
