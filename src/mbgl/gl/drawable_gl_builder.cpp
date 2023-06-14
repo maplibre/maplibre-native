@@ -23,6 +23,7 @@ void DrawableGLBuilder::init() {
     auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
 
     drawableGL.setColorAttrName(colorAttrName);
+
     drawableGL.setVertexAttrName(vertexAttrName);
 
     if (impl->rawVerticesCount) {

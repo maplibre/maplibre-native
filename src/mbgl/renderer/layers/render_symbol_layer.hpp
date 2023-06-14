@@ -109,8 +109,11 @@ private:
     
     // Programs
     Programs programs;
-    
-    gfx::ShaderGroupPtr symbolShaderGroup;
+
+    gfx::ShaderGroupPtr symbolIconGroup;
+    gfx::ShaderGroupPtr symbolSDFIconGroup;
+    gfx::ShaderGroupPtr symbolSDFTextGroup;
+    gfx::ShaderGroupPtr symbolTextAndIconGroup;
 
     std::unordered_set<OverscaledTileID> renderTileIDs;
 };

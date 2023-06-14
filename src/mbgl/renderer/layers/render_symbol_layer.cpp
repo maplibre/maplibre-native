@@ -32,7 +32,10 @@ namespace mbgl {
 using namespace style;
 namespace {
 
-constexpr std::string_view SymbolShaderName = "SymbolShader";
+constexpr std::string_view SymbolIconShaderName = "SymbolIconShader";
+constexpr std::string_view SymbolSDFIconShaderName = "SymbolSDFTextShader";
+constexpr std::string_view SymbolSDFTextShaderName = "SymbolSDFIconShader";
+constexpr std::string_view SymbolTextAndIconShaderName = "SymbolTextAndIconShader";
 
 style::SymbolPropertyValues iconPropertyValues(const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_,
                                                const style::SymbolLayoutProperties::PossiblyEvaluated& layout_) {
@@ -58,8 +61,8 @@ style::SymbolPropertyValues textPropertyValues(const style::SymbolPaintPropertie
                                        evaluated_.get<style::TextColor>().constantOr(Color::black()).a > 0};
 }
 
-using SegmentWrapper = std::reference_wrapper<Segment<SymbolTextAttributes>>;
-using SegmentVectorWrapper = std::reference_wrapper<SegmentVector<SymbolTextAttributes>>;
+using SegmentWrapper = std::reference_wrapper<const Segment<SymbolTextAttributes>>;
+using SegmentVectorWrapper = std::reference_wrapper<const SegmentVector<SymbolTextAttributes>>;
 using SegmentsWrapper = variant<SegmentWrapper, SegmentVectorWrapper>;
 
 struct RenderableSegment {
@@ -397,7 +400,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         this->checkRenderability(parameters, programInstance.activeBindingCount(allAttributeBindings));
 
         segments.match(
-            [&](const std::reference_wrapper<Segment<SymbolTextAttributes>>& segment) {
+            [&](const SegmentWrapper& segment) {
                 programInstance.draw(parameters.context,
                                      *parameters.renderPass,
                                      gfx::Triangles(),
@@ -412,7 +415,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                                      textureBindings,
                                      this->getID() + "/" + suffix);
             },
-            [&](const std::reference_wrapper<SegmentVector<SymbolTextAttributes>>& segmentVector) {
+            [&](const SegmentVectorWrapper& segmentVector) {
                 programInstance.draw(parameters.context,
                                      *parameters.renderPass,
                                      gfx::Triangles(),
@@ -689,12 +692,17 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         tileLayerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
     }
     
-    if (!symbolShaderGroup) {
-        symbolShaderGroup = shaders.getShaderGroup(std::string(SymbolShaderName));
+    if (!symbolIconGroup) {
+        symbolIconGroup = shaders.getShaderGroup(std::string(SymbolIconShaderName));
     }
-    if (!symbolShaderGroup) {
-        removeAllTiles();
-        return;
+    if (!symbolSDFIconGroup) {
+        symbolSDFIconGroup = shaders.getShaderGroup(std::string(SymbolSDFIconShaderName));
+    }
+    if (!symbolSDFTextGroup) {
+        symbolSDFTextGroup = shaders.getShaderGroup(std::string(SymbolSDFTextShaderName));
+    }
+    if (!symbolTextAndIconGroup) {
+        symbolTextAndIconGroup = shaders.getShaderGroup(std::string(SymbolTextAndIconShaderName));
     }
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
@@ -706,13 +714,177 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
     });
 
+    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
+    std::multiset<RenderableSegment> renderableSegments;
+    std::unique_ptr<gfx::DrawableBuilder> builder;
+
+    const auto layerPrefix = getID() + "/";
+
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
         
-        const LayerRenderData* renderData = getRenderDataForPass(tile, passes);
-        if (!renderData) {
+        const auto* optRenderData = getRenderDataForPass(tile, passes);
+        if (!optRenderData || !optRenderData->bucket) {
             removeTile(passes, tileID);
             continue;
+        }
+
+        const auto& renderData = *optRenderData;
+        const auto& bucket = static_cast<const SymbolBucket&>(*renderData.bucket);
+        const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
+
+        assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
+        const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
+
+        // If we already have drawables for this tile, update them.
+        if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
+            tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                drawable.mutableUniformBuffers();//.createOrUpdate(..., &interpolateUBO, context);
+            });
+            continue;
+        }
+
+        using VertVec = std::vector<std::array<int16_t, 4>>;
+        const auto buildVertices = [&](const std::vector<SymbolLayoutVertex>& src, VertVec& dest) -> VertVec& {
+            if (dest.size() != src.size()) {
+                dest.resize(src.size());
+                std::transform(src.begin(), src.end(), dest.begin(), [](const auto& x) { return x.a1; });
+            }
+            return dest;
+        };
+        auto iconVertices = [&, verts = VertVec()]() mutable -> VertVec& {
+            return buildVertices(bucket.icon.vertices.vector(), verts);
+        };
+        auto textVertices = [&, verts = VertVec()]() mutable -> VertVec& {
+            return buildVertices(bucket.text.vertices.vector(), verts);
+        };
+
+        float serialKey = 1.0f;
+        auto addRenderables = [&, it = renderableSegments.begin()](const auto& segments, const SymbolType type) mutable {
+                for (auto& segment : segments) {
+                    const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
+                    it = renderableSegments.emplace_hint(it,
+                                                         std::ref(segment),
+                                                         tile,
+                                                         renderData,
+                                                         bucketPaintProperties,
+                                                         key,
+                                                         type);
+                }
+            };
+
+        addRenderables(bucket.icon.segments, SymbolType::IconRGBA);
+        addRenderables(bucket.sdfIcon.segments, SymbolType::IconSDF);
+        addRenderables(bucket.text.segments, SymbolType::Text);
+
+        const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
+                              evaluated.get<style::TextHaloWidth>().constantOr(1);
+        const auto textFill = evaluated.get<style::TextColor>().constantOr(Color::black()).a > 0.0f;
+
+        const auto iconHalo = evaluated.get<style::IconHaloColor>().constantOr(Color::black()).a > 0.0f &&
+                              evaluated.get<style::IconHaloWidth>().constantOr(1);
+        const auto iconFill = evaluated.get<style::IconColor>().constantOr(Color::black()).a > 0.0f;
+
+        const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
+                              [[maybe_unused]] const Segment<SymbolTextAttributes>& segment,
+                              [[maybe_unused]] const gfx::IndexVector<gfx::Triangles>& indices,
+                              [[maybe_unused]] const VertVec& vertices,
+                              const std::string_view suffix) {
+            if (!shaderGroup) {
+                return;
+            }
+
+            if (!builder) {
+                builder = context.createDrawableBuilder(layerPrefix + std::string(suffix));
+                builder->setSubLayerIndex(0);
+                builder->setNeedsStencil(false);
+                builder->setRenderPass(passes);
+                builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
+                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+            }
+
+            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(context, {}));
+            if (!shader) {
+                return;
+            }
+            builder->setShader(shader);
+
+            //builder->addVertices(verts, 0, verts.size());
+
+            //builder->setSegments(gfx::Triangles(), indices.vector(), &segment, 1);
+
+            builder->flush();
+
+            //drawable->setData(std::make_unique<gfx::SymbolDrawableData>(...));
+
+            for (auto& drawable : builder->clearDrawables()) {
+                drawable->setTileID(tileID);
+                //auto& uniforms = drawable->mutableUniformBuffers();
+                //uniforms.createOrUpdate(..., &interpUBO, context);
+                tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
+                ++stats.tileDrawablesAdded;
+            }
+        };
+
+        // No data-driven properties?
+//        gfx::VertexAttributeArray attrs;
+//        const auto uniformProps = attrs.readDataDrivenPaintProperties<attributes::pos_offset,
+//            attributes::data<uint16_t, 4>,
+//            attributes::pixeloffset>(binders, evaluated);
+//
+//        gfx::VertexAttributeArray dynamicAttrs;
+//        const auto dynamicUniformProps = dynamicAttrs.readDataDrivenPaintProperties<attributes::projected_pos>(binders, evaluated);
+//
+//        gfx::VertexAttributeArray opacityAttrs;
+//        const auto opacityUniformProps = opacityAttrs.readDataDrivenPaintProperties<attributes::fade_opacity>(binders, evaluated);
+//
+//        builder->setVertexAttributes(attrs);
+
+        for (auto& renderable : renderableSegments) {
+            const auto sdfIcons = (renderable.type == SymbolType::IconSDF);
+
+            if (renderable.type == SymbolType::Text) {
+                //const auto& binders = bucketPaintProperties.textBinders;
+                if (bucket.iconsInText) {
+//                    const ZoomEvaluatedSize partiallyEvaluatedTextSize = bucket.textSizeBinder->evaluateForZoom(
+//                        static_cast<float>(parameters.state.getZoom()));
+//                    const bool transformed = values.rotationAlignment == AlignmentType::Map || parameters.state.getPitch() != 0;
+//                    const Size& iconTexSize = tile.getIconAtlasTexture()->getSize();
+//                    const bool linear = parameters.state.isChanging() || transformed || !partiallyEvaluatedTextSize.isZoomConstant;
+//                    const auto filterType = linear ? gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
+//                    const gfx::TextureBinding iconTextureBinding = tile.getIconAtlasTextureBinding(filterType);
+                    if (textHalo) {
+                        draw(symbolTextAndIconGroup, renderable.segment, bucket.text.triangles, textVertices(), "halo");
+                    }
+
+                    if (textFill) {
+                        draw(symbolTextAndIconGroup, renderable.segment, bucket.text.triangles, textVertices(), "fill");
+                    }
+                } else {
+                    if (textHalo) {
+                        draw(symbolSDFTextGroup, renderable.segment, bucket.text.triangles, textVertices(), "halo");
+                    }
+
+                    if (textFill) {
+                        draw(symbolSDFTextGroup, renderable.segment, bucket.text.triangles, textVertices(), "fill");
+                    }
+                }
+            } else {
+                //const auto& binders = bucketPaintProperties.iconBinders;
+                if (sdfIcons) {
+                    if (iconHalo) {
+                        draw(symbolSDFIconGroup, renderable.segment, bucket.icon.triangles, iconVertices(), "halo");
+                    }
+
+                    if (iconFill) {
+                        draw(symbolSDFIconGroup, renderable.segment, bucket.icon.triangles, iconVertices(), "fill");
+                    }
+                } else {
+                    draw(symbolIconGroup, renderable.segment, bucket.icon.triangles, iconVertices(), "icon");
+                }
+            }
         }
     }
 }
