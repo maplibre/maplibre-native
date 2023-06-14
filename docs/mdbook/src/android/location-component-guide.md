@@ -96,5 +96,5 @@ val locationComponentOptions =
 [predefined styles]: https://github.com/maplibre/maplibre-native/tree/main/src/mbgl/util/tile_server_options.cpp
 [LocationComponentActivationOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html
 [LocationEngine]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.engine/-location-engine/index.html
-[Test APP]: https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt
+[Test APP]: https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt
 [camera modes]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.modes/-camera-mode/index.html
