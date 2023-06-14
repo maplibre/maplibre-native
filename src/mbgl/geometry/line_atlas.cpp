@@ -223,7 +223,7 @@ void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
 }
 
 gfx::TextureBinding DashPatternTexture::textureBinding() const {
-        // The texture needs to have been uploaded already.
+    // The texture needs to have been uploaded already.
 #if MLN_DRAWABLE_RENDERER
     assert(std::holds_alternative<gfx::Texture2DPtr>(texture));
     return {std::get<gfx::Texture2DPtr>(texture)->getResource(),

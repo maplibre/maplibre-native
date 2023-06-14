@@ -270,60 +270,60 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
 #elif (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
-#   if MLN_RENDERER_SPLIT_VIEW
-        [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
-        [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
-        [[maybe_unused]] const auto halfW = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width *
-                                                                        0.5f);
-        [[maybe_unused]] const auto halfH = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().height *
-                                                                        0.5f);
-        platform::glEnable(GL_SCISSOR_TEST);
-#       if MLN_RENDERER_QUAD_SPLIT_VIEW
-            // Drawable LayerGroups on the left
-            // Opaque only on top
-            platform::glScissor(0, 0, halfW, H);
-            drawableOpaquePass();
+#if MLN_RENDERER_SPLIT_VIEW
+    [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
+    [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
+    [[maybe_unused]] const auto halfW = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width *
+                                                                       0.5f);
+    [[maybe_unused]] const auto halfH = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().height *
+                                                                       0.5f);
+    platform::glEnable(GL_SCISSOR_TEST);
+#if MLN_RENDERER_QUAD_SPLIT_VIEW
+    // Drawable LayerGroups on the left
+    // Opaque only on top
+    platform::glScissor(0, 0, halfW, H);
+    drawableOpaquePass();
 
-            // Composite (Opaque+Translucent) on bottom
-            platform::glScissor(0, 0, halfW, halfH);
-            // Clipping masks were drawn only on the other side
-            parameters.clearTileClippingMasks();
-            drawableTranslucentPass();
+    // Composite (Opaque+Translucent) on bottom
+    platform::glScissor(0, 0, halfW, halfH);
+    // Clipping masks were drawn only on the other side
+    parameters.clearTileClippingMasks();
+    drawableTranslucentPass();
 
-            // RenderLayers on the right
-            // Opaque only on top
-            platform::glScissor(halfW, 0, halfW, H);
-            parameters.clearTileClippingMasks();
-            renderLayerOpaquePass();
+    // RenderLayers on the right
+    // Opaque only on top
+    platform::glScissor(halfW, 0, halfW, H);
+    parameters.clearTileClippingMasks();
+    renderLayerOpaquePass();
 
-            // Composite (Opaque+Translucent) on bottom
-            platform::glScissor(halfW, 0, halfW, halfH);
-            parameters.clearTileClippingMasks();
-            renderLayerTranslucentPass();
-#       else
-            // Drawable LayerGroups on the left
-            platform::glScissor(0, 0, halfW, H);
-            parameters.clearTileClippingMasks();
-            drawableOpaquePass();
-            drawableTranslucentPass();
+    // Composite (Opaque+Translucent) on bottom
+    platform::glScissor(halfW, 0, halfW, halfH);
+    parameters.clearTileClippingMasks();
+    renderLayerTranslucentPass();
+#else
+    // Drawable LayerGroups on the left
+    platform::glScissor(0, 0, halfW, H);
+    parameters.clearTileClippingMasks();
+    drawableOpaquePass();
+    drawableTranslucentPass();
 
-            // RenderLayers on the right
-            platform::glScissor(halfW, 0, W, H);
-            parameters.clearTileClippingMasks();
-            renderLayerOpaquePass();
-            renderLayerTranslucentPass();
-#       endif
-        // Reset viewport
-        platform::glScissor(0, 0, W, H);
-        platform::glDisable(GL_SCISSOR_TEST);
-#   else // ifdef MLN_RENDERER_SPLIT_VIEW
-        // Do RenderLayers first, drawables last
-        renderLayerOpaquePass();
-        renderLayerTranslucentPass();
+    // RenderLayers on the right
+    platform::glScissor(halfW, 0, W, H);
+    parameters.clearTileClippingMasks();
+    renderLayerOpaquePass();
+    renderLayerTranslucentPass();
+#endif
+    // Reset viewport
+    platform::glScissor(0, 0, W, H);
+    platform::glDisable(GL_SCISSOR_TEST);
+#else  // ifdef MLN_RENDERER_SPLIT_VIEW
+    // Do RenderLayers first, drawables last
+    renderLayerOpaquePass();
+    renderLayerTranslucentPass();
 
-        drawableOpaquePass();
-        drawableTranslucentPass();
-#   endif // MLN_RENDERER_SPLIT_VIEW
+    drawableOpaquePass();
+    drawableTranslucentPass();
+#endif // MLN_RENDERER_SPLIT_VIEW
 #else
     static_assert(0, "Must define one of (MLN_DRAWABLE_RENDERER, MLN_LEGACY_RENDERER)");
 #endif
