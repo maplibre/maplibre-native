@@ -45,7 +45,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("anchor");
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       assertNotNull(light);
       // Set and Get
       light.setAnchor(ANCHOR_MAP);
@@ -58,7 +58,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("positionTransitionOptions");
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       assertNotNull(light);
       // Set and Get
       TransitionOptions options = new TransitionOptions(300, 100);
@@ -72,7 +72,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("position");
-    invoke(maplibreMap,(uiController, mapboxMap) -> {
+    invoke(maplibreMap,(uiController, maplibreMap) -> {
       assertNotNull(light);
       // Set and Get
       Position position = new Position(1, 2, 3);
@@ -86,7 +86,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("colorTransitionOptions");
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       assertNotNull(light);
       // Set and Get
       TransitionOptions options = new TransitionOptions(300, 100);
@@ -100,7 +100,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("color");
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       assertNotNull(light);
       // Set and Get
       light.setColor("rgba(255,128,0,0.7)");
@@ -113,7 +113,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("intensityTransitionOptions");
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       assertNotNull(light);
       // Set and Get
       TransitionOptions options = new TransitionOptions(300, 100);
@@ -127,7 +127,7 @@ public class LightTest extends BaseTest {
     validateTestSetup();
     setupLight();
     Timber.i("intensity");
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       assertNotNull(light);
       // Set and Get
       light.setIntensity(0.3f);
