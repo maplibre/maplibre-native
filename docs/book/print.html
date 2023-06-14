@@ -1196,7 +1196,7 @@ brevity, this document does not speak of these classes.</p>
 <pre><code class="language-gradle">allprojects {
     repositories {
     ...
-    mavenCentral()                
+    mavenCentral()
     }
 }
 </code></pre>
@@ -1216,7 +1216,7 @@ brevity, this document does not speak of these classes.</p>
 <li>
 <p>Add a <code>MapView</code> to your layout XML file (usually <code>&lt;project&gt;/&lt;app-module&gt;/src/main/res/layout/activity_main.xml</code>).</p>
 <pre><code class="language-xml">...
-&lt;com.mapbox.mapboxsdk.maps.MapView
+&lt;org.maplibre.android.maps.MapView
     android:id=&quot;@+id/mapView&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;
@@ -1229,10 +1229,11 @@ brevity, this document does not speak of these classes.</p>
 <pre><code class="language-kotlin">import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
-import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.MapView
+import org.maplibre.android.Maplibre
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.testapp.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -1241,9 +1242,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Init MapLibre
-        Mapbox.getInstance(this)
+        MapLibre.getInstance(this)
 
         // Init layout view
         val inflater = LayoutInflater.from(this)
@@ -1305,7 +1306,7 @@ class MainActivity : AppCompatActivity() {
 <div style="break-before: page; page-break-before: always;"></div><h1 id="annotation-marker"><a class="header" href="#annotation-marker">Annotation: Marker</a></h1>
 <p>This guide will show you how to add Markers in the map.</p>
 <p><code>Annotation</code> is an overlay on top of a Map. In package
-<code>com.mapbox.mapboxsdk.annotations</code>, it has the following subclasses:</p>
+<code>org.maplibre.android.annotations</code>, it has the following subclasses:</p>
 <ol>
 <li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker/index.html">Marker</a></li>
 <li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polyline/index.html">Polyline</a></li>
@@ -1340,20 +1341,62 @@ Then add markers to the map with GeoJSON:</p>
 It is used to add annotations to the map instance.</p>
 </li>
 </ol>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:top}}
+<pre><code class="language-kotlin">class JsonApiActivity : AppCompatActivity() {
+
+    // Declare a variable for MapView
+    private lateinit var mapView: MapView
+
+    // Declare a variable for MapboxMap
+    private lateinit var maplibreMap: MapLibreMap
 </code></pre>
 <ol start="4">
 <li>Call <code>mapview.getMapSync()</code> in order to get a <code>MapboxMap</code> object.
 After <code>mapboxMap</code> is assigned, call the <code>getEarthQuakeDataFromUSGS()</code> method
 to make a HTTP request and transform data into the map annotations.</li>
 </ol>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:mapAsync}}
+<pre><code class="language-kotlin">        mapView.getMapAsync { map -&gt;
+            maplibreMap = map
+
+            maplibreMap.setStyle(&quot;https://demotiles.maplibre.org/style.json&quot;)
+
+            // Fetch data from USGS
+            getEarthQuakeDataFromUSGS()
+        }
 </code></pre>
 <ol start="5">
 <li>Define a function <code>getEarthQuakeDataFromUSGS()</code> to fetch GeoJSON data from a public API.
 If we successfully get the response, call <code>addMarkersToMap()</code> on the UI thread.</li>
 </ol>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes}}
+<pre><code class="language-kotlin">    // Get Earthquake data from usgs.gov, read API doc at:
+    // https://earthquake.usgs.gov/fdsnws/event/1/
+    private fun getEarthQuakeDataFromUSGS() {
+        val url = &quot;https://earthquake.usgs.gov/fdsnws/event/1/query&quot;.toHttpUrl().newBuilder()
+            .addQueryParameter(&quot;format&quot;, &quot;geojson&quot;)
+            .addQueryParameter(&quot;starttime&quot;, &quot;2022-01-01&quot;)
+            .addQueryParameter(&quot;endtime&quot;, &quot;2022-12-31&quot;)
+            .addQueryParameter(&quot;minmagnitude&quot;, &quot;5.8&quot;)
+            .addQueryParameter(&quot;latitude&quot;, &quot;24&quot;)
+            .addQueryParameter(&quot;longitude&quot;, &quot;121&quot;)
+            .addQueryParameter(&quot;maxradius&quot;, &quot;1.5&quot;)
+            .build()
+        val request: Request = Request.Builder().url(url).build()
+
+        OkHttpClient().newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Toast.makeText(this@JsonApiActivity, &quot;Fail to fetch data&quot;, Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val featureCollection = response.body?.string()
+                    ?.let(FeatureCollection::fromJson)
+                    ?: return
+                // If FeatureCollection in response is not null
+                // Then add markers to map
+                runOnUiThread { addMarkersToMap(featureCollection) }
+            }
+        })
+    }
 </code></pre>
 <ol start="6">
 <li>Now it is time to add markers into the map.
@@ -1365,10 +1408,61 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
 </ul>
 </li>
 </ol>
-<pre><code class="language-kotlin">{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
+<pre><code class="language-kotlin">    private fun addMarkersToMap(data: FeatureCollection) {
+        val bounds = mutableListOf&lt;LatLng&gt;()
+
+        // Get bitmaps for marker icon
+        val infoIconDrawable = ResourcesCompat.getDrawable(
+            this.resources,
+            // Intentionally specify package name
+            // This makes copy from another project easier
+            org.maplibre.android.R.drawable.maplibre_info_icon_default,
+            null
+        )!!
+        val bitmapBlue = infoIconDrawable.toBitmap()
+        val bitmapRed = infoIconDrawable
+            .mutate()
+            .apply { setTint(Color.RED) }
+            .toBitmap()
+
+        // Add symbol for each point feature
+        data.features()?.forEach { feature -&gt;
+            val geometry = feature.geometry()?.toJson() ?: return@forEach
+            val point = Point.fromJson(geometry) ?: return@forEach
+            val latLng = LatLng(point.latitude(), point.longitude())
+            bounds.add(latLng)
+
+            // Contents in InfoWindow of each marker
+            val title = feature.getStringProperty(&quot;title&quot;)
+            val epochTime = feature.getNumberProperty(&quot;time&quot;)
+            val dateString = SimpleDateFormat(&quot;yyyy/MM/dd HH:mm&quot;, Locale.TAIWAN).format(epochTime)
+
+            // If magnitude &gt; 6.0, show marker with red icon. If not, show blue icon instead
+            val mag = feature.getNumberProperty(&quot;mag&quot;)
+            val icon = IconFactory.getInstance(this)
+                .fromBitmap(if (mag.toFloat() &gt; 6.0) bitmapRed else bitmapBlue)
+
+            // Use MarkerOptions and addMarker() to add a new marker in map
+            val markerOptions = MarkerOptions()
+                .position(latLng)
+                .title(dateString)
+                .snippet(title)
+                .icon(icon)
+            maplibreMap.addMarker(markerOptions)
+        }
+
+        // Move camera to newly added annotations
+        maplibreMap.getCameraForLatLngBounds(LatLngBounds.fromLatLngs(bounds))?.let {
+            val newCameraPosition = CameraPosition.Builder()
+                .target(it.target)
+                .zoom(it.zoom - 0.5)
+                .build()
+            maplibreMap.cameraPosition = newCameraPosition
+        }
+    }
 </code></pre>
 <ol start="7">
-<li>Here is the final result. For the full contents of <code>JsonApiActivity</code>, please visit source code of <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/annotation/JsonApiActivity.kt">Test APP</a></li>
+<li>Here is the final result. For the full contents of <code>JsonApiActivity</code>, please visit source code of <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt">Test APP</a></li>
 </ol>
 <div style="align: center">
   <img src="https://github.com/maplibre/maplibre-native/assets/19887090/00446249-9b19-4a48-8a46-00d4c5a2f981" alt="Screenshot with the map in demotile style">
@@ -1534,14 +1628,14 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </code></pre>
 <ol start="7">
 <li>
-<p>Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a> <sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
+<p>Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a> <sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
 <p><img src="https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63" alt="result" /></p>
 </li>
 </ol>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p>A variety of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.modes/-camera-mode/index.html">camera modes</a> determine how the camera will track the user location.<br />
 They provide the right context to your users at the correct time.<br />
-<sup class="footnote-reference"><a href="#2">2</a></sup>: In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/com/mapbox/mapboxsdk/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
+<sup class="footnote-reference"><a href="#2">2</a></sup>: In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
 </div>
 
                     </main>

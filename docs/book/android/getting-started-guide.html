@@ -151,7 +151,7 @@
 <pre><code class="language-gradle">allprojects {
     repositories {
     ...
-    mavenCentral()                
+    mavenCentral()
     }
 }
 </code></pre>
@@ -171,7 +171,7 @@
 <li>
 <p>Add a <code>MapView</code> to your layout XML file (usually <code>&lt;project&gt;/&lt;app-module&gt;/src/main/res/layout/activity_main.xml</code>).</p>
 <pre><code class="language-xml">...
-&lt;com.mapbox.mapboxsdk.maps.MapView
+&lt;org.maplibre.android.maps.MapView
     android:id=&quot;@+id/mapView&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;
@@ -184,10 +184,11 @@
 <pre><code class="language-kotlin">import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
-import com.mapbox.mapboxsdk.Mapbox
-import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.mapboxsdk.maps.MapView
+import org.maplibre.android.Maplibre
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.testapp.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -196,9 +197,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Init MapLibre
-        Mapbox.getInstance(this)
+        MapLibre.getInstance(this)
 
         // Init layout view
         val inflater = LayoutInflater.from(this)
