@@ -34,18 +34,8 @@ using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class Drawable {
 public:
-    struct TextureAttachment {
-        /// @brief A Texture2D instance
-        std::shared_ptr<gfx::Texture2D> texture{nullptr};
-        /// @brief A sampler location to bind the texture to
-        int32_t location{0};
-
-        TextureAttachment() = delete;
-        TextureAttachment(std::shared_ptr<gfx::Texture2D> tex, int32_t loc)
-            : texture(std::move(tex)),
-              location(loc) {}
-    };
-    using Textures = std::vector<TextureAttachment>;
+    /// @brief Map from sampler location to texture info
+    using Textures = std::unordered_map<int32_t,gfx::Texture2DPtr>;
 
 protected:
     Drawable(std::string name);
@@ -95,22 +85,26 @@ public:
 
     /// @brief Return the textures attached to this drawable
     /// @return Texture and sampler location pairs
-    const Textures& getTextures() const { return textures; };
+    //const Textures& getTextures() const { return textures; };
+
+    /// @brief Get the texture at the given sampler location.
+    const gfx::Texture2DPtr& getTexture(int32_t location) const;
 
     /// @brief Set the collection of textures bound to this drawable
     /// @param textures_ A Textures collection to set
     void setTextures(const Textures& textures_) noexcept { textures = textures_; }
+    void setTextures(Textures&& textures_) noexcept { textures = std::move(textures_); }
 
     /// @brief Attach the given texture to this drawable at the given sampler location.
     /// @param texture Texture2D instance
     /// @param location A sampler location in the shader being used with this drawable.
-    void setTexture(std::shared_ptr<gfx::Texture2D> texture, int32_t location);
+    void setTexture(gfx::Texture2DPtr texture, int32_t location);
 
-    using TexSourceFunc = std::function<gfx::Texture2DPtr()>;
+    using TexSourceFunc = std::function<Textures()>;
 
-    /// @brief Provide a function to get the current texture
-    void setTextureSource(int32_t location, TexSourceFunc);
-    const TexSourceFunc& getTextureSource(int32_t location) const;
+    /// @brief Provide a function to get the current textures
+    void setTextureSource(TexSourceFunc value) { textureSource = std::move(value); }
+    const TexSourceFunc& getTextureSource() const { return textureSource; }
 
     /// @brief Provide all texture sources at once
     void setTextureSources(std::vector<TexSourceFunc>);
@@ -189,7 +183,7 @@ protected:
     std::unique_ptr<Impl> impl;
 
     Textures textures;
-    std::vector<TexSourceFunc> textureSources;
+    TexSourceFunc textureSource;
     std::vector<DrawableTweakerPtr> tweakers;
 };
 
