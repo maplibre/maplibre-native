@@ -2,6 +2,8 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 
+#include <string_view>
+
 namespace mbgl {
 
 namespace gfx {
@@ -21,9 +23,14 @@ public:
     ~LineLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
-
-protected:
-    gfx::UniformBufferPtr evaluatedPropsUniformBuffer = nullptr;
 };
+
+/// Evaluated properties that depend on the tile
+struct alignas(16) LinePatternTilePropertiesUBO {
+    std::array<float, 4> pattern_from;
+    std::array<float, 4> pattern_to;
+};
+static_assert(sizeof(LinePatternTilePropertiesUBO) %16 == 0);
+static constexpr std::string_view LinePatternTilePropertiesUBOName = "LinePatternTilePropertiesUBO";
 
 } // namespace mbgl

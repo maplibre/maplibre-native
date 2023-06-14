@@ -36,8 +36,6 @@ layout (std140) uniform LinePatternUBO {
 };
 
 layout (std140) uniform LinePatternPropertiesUBO {
-    lowp vec4 u_pattern_from;
-    lowp vec4 u_pattern_to;
     lowp float u_blur;
     lowp float u_opacity;
     lowp float u_offset;
@@ -46,6 +44,11 @@ layout (std140) uniform LinePatternPropertiesUBO {
 
     highp float pad2;
     highp vec2 pad3;
+};
+
+layout (std140) uniform LinePatternTilePropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
 };
 
 layout (std140) uniform LinePatternInterpolationUBO {
@@ -191,8 +194,6 @@ mediump vec4 pattern_to = u_pattern_to;
 };
 
 layout (std140) uniform LinePatternPropertiesUBO {
-    lowp vec4 u_pattern_from;
-    lowp vec4 u_pattern_to;
     lowp float u_blur;
     lowp float u_opacity;
     lowp float u_offset;
@@ -201,6 +202,11 @@ layout (std140) uniform LinePatternPropertiesUBO {
 
     highp float pad2;
     highp vec2 pad3;
+};
+
+layout (std140) uniform LinePatternTilePropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
 };
 
 layout (std140) uniform LinePatternInterpolationUBO {
