@@ -1967,9 +1967,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 
-    [self.styleNames addObject:@"Line Pattern"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/46b24e19-6503-4b2a-81a4-ea6d8431fc92/style.json?key=pdr3bbcne6eRBgLXQ1kg"]];
-
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
     if (apiKey.length)
