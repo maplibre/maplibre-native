@@ -71,13 +71,15 @@ struct RenderableSegment {
                       const LayerRenderData& renderData_,
                       const SymbolBucket::PaintProperties& bucketPaintProperties_,
                       float sortKey_,
-                      const SymbolType type_)
+                      const SymbolType type_,
+                      const uint8_t overscaledZ_ = 0)
         : segment(segment_),
           tile(tile_),
           renderData(renderData_),
           bucketPaintProperties(bucketPaintProperties_),
           sortKey(sortKey_),
-          type(type_) {}
+          type(type_),
+          overscaledZ(overscaledZ_) {}
 
     SegmentWrapper segment;
     const RenderTile& tile;
@@ -85,6 +87,7 @@ struct RenderableSegment {
     const SymbolBucket::PaintProperties& bucketPaintProperties;
     float sortKey;
     SymbolType type;
+    uint8_t overscaledZ;
 
     friend bool operator<(const RenderableSegment& lhs, const RenderableSegment& rhs) {
         // Sort renderable segments by a sort key.
@@ -722,7 +725,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
-        
+
         const auto* optRenderData = getRenderDataForPass(tile, passes);
         if (!optRenderData || !optRenderData->bucket) {
             removeTile(passes, tileID);
@@ -731,7 +734,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& renderData = *optRenderData;
         const auto& bucket = static_cast<const SymbolBucket&>(*renderData.bucket);
-        const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
 
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
@@ -744,39 +746,77 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        using VertVec = std::vector<std::array<int16_t, 4>>;
-        const auto buildVertices = [&](const std::vector<SymbolLayoutVertex>& src, VertVec& dest) -> VertVec& {
-            if (dest.size() != src.size()) {
-                dest.resize(src.size());
-                std::transform(src.begin(), src.end(), dest.begin(), [](const auto& x) { return x.a1; });
-            }
-            return dest;
-        };
-        auto iconVertices = [&, verts = VertVec()]() mutable -> VertVec& {
-            return buildVertices(bucket.icon.vertices.vector(), verts);
-        };
-        auto textVertices = [&, verts = VertVec()]() mutable -> VertVec& {
-            return buildVertices(bucket.text.vertices.vector(), verts);
-        };
-
         float serialKey = 1.0f;
         auto addRenderables = [&, it = renderableSegments.begin()](const auto& segments, const SymbolType type) mutable {
                 for (auto& segment : segments) {
                     const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
+                    if (type == SymbolType::Text) {
+                        assert(segment.vertexOffset + segment.vertexLength <= bucket.text.vertices.elements());
+                    } else {
+                        assert(segment.vertexLength + segment.vertexLength <= bucket.icon.vertices.elements());
+                    }
                     it = renderableSegments.emplace_hint(it,
                                                          std::ref(segment),
                                                          tile,
                                                          renderData,
                                                          bucketPaintProperties,
                                                          key,
-                                                         type);
+                                                         type,
+                                                         tileID.overscaledZ);
                 }
             };
 
         addRenderables(bucket.icon.segments, SymbolType::IconRGBA);
         addRenderables(bucket.sdfIcon.segments, SymbolType::IconSDF);
         addRenderables(bucket.text.segments, SymbolType::Text);
+    }
 
+        // No data-driven properties?
+//        gfx::VertexAttributeArray attrs;
+//        const auto uniformProps = attrs.readDataDrivenPaintProperties<attributes::pos_offset,
+//            attributes::data<uint16_t, 4>,
+//            attributes::pixeloffset>(binders, evaluated);
+//
+//        gfx::VertexAttributeArray dynamicAttrs;
+//        const auto dynamicUniformProps = dynamicAttrs.readDataDrivenPaintProperties<attributes::projected_pos>(binders, evaluated);
+//
+//        gfx::VertexAttributeArray opacityAttrs;
+//        const auto opacityUniformProps = opacityAttrs.readDataDrivenPaintProperties<attributes::fade_opacity>(binders, evaluated);
+//
+//        builder->setVertexAttributes(attrs);
+
+    using RawVertexVec = std::vector<std::uint8_t>;    // <int16_t, 4>
+    struct RawVertices {
+        RawVertexVec text, icon;
+    };
+    std::unordered_map<UnwrappedTileID, RawVertices> rawVertices;
+
+    for (auto& renderable : renderableSegments) {
+        const auto& tile = renderable.tile;
+        const auto tileID = tile.id.overscaleTo(renderable.overscaledZ);
+        const auto& bucket = static_cast<const SymbolBucket&>(*renderable.renderData.bucket);
+
+        const auto sdfIcons = (renderable.type == SymbolType::IconSDF);
+
+        const auto buildVertices = [&](const SymbolBucket::Buffer& buffer, RawVertexVec& dest) -> auto& {
+            const std::vector<SymbolLayoutVertex>& src = buffer.vertices.vector();
+            const auto vertSize = sizeof(SymbolLayoutVertex::a1);
+            if (dest.size() != vertSize * src.size()) {
+                dest.resize(vertSize * src.size());
+                for (std::size_t i = 0; i < src.size(); ++i) {
+                    std::memcpy(&dest[vertSize * i], &src[i].a1, vertSize);
+                }
+            }
+            return dest;
+        };
+        const auto iconVertices = [&]() -> auto& {
+            return buildVertices(bucket.icon, rawVertices[tile.id].icon);
+        };
+        auto textVertices = [&]() -> auto& {
+            return buildVertices(bucket.text, rawVertices[tile.id].text);
+        };
+
+        const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
         const auto textFill = evaluated.get<style::TextColor>().constantOr(Color::black()).a > 0.0f;
@@ -788,7 +828,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
                               [[maybe_unused]] const Segment<SymbolTextAttributes>& segment,
                               [[maybe_unused]] const gfx::IndexVector<gfx::Triangles>& indices,
-                              [[maybe_unused]] const VertVec& vertices,
+                              [[maybe_unused]] const RawVertexVec& vertices,
+                              std::size_t vertexCount,
                               const std::string_view suffix) {
             if (!shaderGroup) {
                 return;
@@ -811,9 +852,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
             builder->setShader(shader);
 
-            //builder->addVertices(verts, 0, verts.size());
-
-            //builder->setSegments(gfx::Triangles(), indices.vector(), &segment, 1);
+            auto raw = vertices;
+            builder->setRawVertices(std::move(raw), vertexCount, gfx::AttributeDataType::Short4);
+            builder->setSegments(gfx::Triangles(), indices.vector(), &segment, 1);
 
             builder->flush();
 
@@ -828,26 +869,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
         };
 
-        // No data-driven properties?
-//        gfx::VertexAttributeArray attrs;
-//        const auto uniformProps = attrs.readDataDrivenPaintProperties<attributes::pos_offset,
-//            attributes::data<uint16_t, 4>,
-//            attributes::pixeloffset>(binders, evaluated);
-//
-//        gfx::VertexAttributeArray dynamicAttrs;
-//        const auto dynamicUniformProps = dynamicAttrs.readDataDrivenPaintProperties<attributes::projected_pos>(binders, evaluated);
-//
-//        gfx::VertexAttributeArray opacityAttrs;
-//        const auto opacityUniformProps = opacityAttrs.readDataDrivenPaintProperties<attributes::fade_opacity>(binders, evaluated);
-//
-//        builder->setVertexAttributes(attrs);
-
-        for (auto& renderable : renderableSegments) {
-            const auto sdfIcons = (renderable.type == SymbolType::IconSDF);
-
-            if (renderable.type == SymbolType::Text) {
-                //const auto& binders = bucketPaintProperties.textBinders;
-                if (bucket.iconsInText) {
+        if (renderable.type == SymbolType::Text) {
+            //const auto& binders = bucketPaintProperties.textBinders;
+            const auto& vertices = textVertices();
+            const auto& vertexCount = bucket.text.vertices.elements();
+            const auto& indices = bucket.text.triangles;
+            if (bucket.iconsInText) {
 //                    const ZoomEvaluatedSize partiallyEvaluatedTextSize = bucket.textSizeBinder->evaluateForZoom(
 //                        static_cast<float>(parameters.state.getZoom()));
 //                    const bool transformed = values.rotationAlignment == AlignmentType::Map || parameters.state.getPitch() != 0;
@@ -855,35 +882,37 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 //                    const bool linear = parameters.state.isChanging() || transformed || !partiallyEvaluatedTextSize.isZoomConstant;
 //                    const auto filterType = linear ? gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
 //                    const gfx::TextureBinding iconTextureBinding = tile.getIconAtlasTextureBinding(filterType);
-                    if (textHalo) {
-                        draw(symbolTextAndIconGroup, renderable.segment, bucket.text.triangles, textVertices(), "halo");
-                    }
+                if (textHalo) {
+                    draw(symbolTextAndIconGroup, renderable.segment, indices, vertices, vertexCount, "halo");
+                }
 
-                    if (textFill) {
-                        draw(symbolTextAndIconGroup, renderable.segment, bucket.text.triangles, textVertices(), "fill");
-                    }
-                } else {
-                    if (textHalo) {
-                        draw(symbolSDFTextGroup, renderable.segment, bucket.text.triangles, textVertices(), "halo");
-                    }
-
-                    if (textFill) {
-                        draw(symbolSDFTextGroup, renderable.segment, bucket.text.triangles, textVertices(), "fill");
-                    }
+                if (textFill) {
+                    draw(symbolTextAndIconGroup, renderable.segment, indices, vertices, vertexCount, "fill");
                 }
             } else {
-                //const auto& binders = bucketPaintProperties.iconBinders;
-                if (sdfIcons) {
-                    if (iconHalo) {
-                        draw(symbolSDFIconGroup, renderable.segment, bucket.icon.triangles, iconVertices(), "halo");
-                    }
-
-                    if (iconFill) {
-                        draw(symbolSDFIconGroup, renderable.segment, bucket.icon.triangles, iconVertices(), "fill");
-                    }
-                } else {
-                    draw(symbolIconGroup, renderable.segment, bucket.icon.triangles, iconVertices(), "icon");
+                if (textHalo) {
+                    draw(symbolSDFTextGroup, renderable.segment, indices, vertices, vertexCount, "halo");
                 }
+
+                if (textFill) {
+                    draw(symbolSDFTextGroup, renderable.segment, indices, vertices, vertexCount, "fill");
+                }
+            }
+        } else {
+            //const auto& binders = bucketPaintProperties.iconBinders;
+            const auto& vertices = iconVertices();
+            const auto& vertexCount = bucket.icon.vertices.elements();
+            const auto& indices = bucket.icon.triangles;
+            if (sdfIcons) {
+                if (iconHalo) {
+                    draw(symbolSDFIconGroup, renderable.segment, indices, vertices, vertexCount, "halo");
+                }
+
+                if (iconFill) {
+                    draw(symbolSDFIconGroup, renderable.segment, indices, vertices, vertexCount, "fill");
+                }
+            } else {
+                draw(symbolIconGroup, renderable.segment, indices, vertices, vertexCount, "icon");
             }
         }
     }
