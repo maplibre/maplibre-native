@@ -554,7 +554,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     if (const auto samplerLocation = fillShader->getSamplerLocation("u_image")) {
-                        patternBuilder->setTextureSource(*samplerLocation, [=]() { return atlases->icon; });
+                        patternBuilder->setTextureSource([=]() {
+                            return gfx::Drawable::Textures{{*samplerLocation, atlases->icon}};
+                        });
                     }
                 }
 
@@ -571,7 +573,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     if (const auto samplerLocation = outlineShader->getSamplerLocation("u_image")) {
-                        outlinePatternBuilder->setTextureSource(*samplerLocation, [=]() { return atlases->icon; });
+                        outlinePatternBuilder->setTextureSource([=]() {
+                            return gfx::Drawable::Textures{{*samplerLocation, atlases->icon}};
+                        });
                     }
                 }
 
