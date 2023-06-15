@@ -62,6 +62,7 @@ bool RenderRasterLayer::hasCrossfade() const {
     return false;
 }
 
+#if MLN_LEGACY_RENDERER
 static float saturationFactor(float saturation) {
     if (saturation > 0) {
         return 1.f - 1.f / (1.001f - saturation);
@@ -86,6 +87,7 @@ static std::array<float, 3> spinWeights(float spin) {
         {(2 * c + 1) / 3, (-std::sqrt(3.0f) * s - c + 1) / 3, (std::sqrt(3.0f) * s - c + 1) / 3}};
     return spin_weights;
 }
+#endif
 
 void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTiles();
