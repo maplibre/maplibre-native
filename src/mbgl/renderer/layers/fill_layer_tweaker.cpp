@@ -97,17 +97,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
             if (const auto index = shader->getSamplerLocation("u_image")) {
-                const auto& textures = drawable.getTextures();
-                const auto src = drawable.getTextureSource(*index);
-                gfx::Texture2DPtr tex = src ? src() : nullptr;
-                if (!tex && textures.size() > *index) {
-                    tex = textures[*index].texture;
-                }
-                if (tex) {
+                if (const auto& tex = drawable.getTexture(*index)) {
                     textureSize = tex->getSize();
                 }
             }
         }
+
         const FillDrawableUBO drawableUBO = {
             /*.matrix=*/util::cast<float>(matrix),
             /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
