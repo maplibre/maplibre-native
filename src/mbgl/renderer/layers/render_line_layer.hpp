@@ -8,6 +8,9 @@
 #include <mbgl/layout/pattern_layout.hpp>
 #include <mbgl/gfx/texture.hpp>
 
+#include <optional>
+#include <memory>
+
 namespace mbgl {
 
 class LineProgram;
@@ -59,8 +62,10 @@ private:
     float getLineWidth(const GeometryTileFeature&, float, const FeatureState&) const;
     void updateColorRamp();
 
-    PremultipliedImage colorRamp;
+    std::shared_ptr<PremultipliedImage> colorRamp;
     std::optional<gfx::Texture> colorRampTexture;
+    
+    gfx::Texture2DPtr colorRampTexture2D;
 
     /// Remove all drawables for the tile from the layer group
     void removeTile(RenderPass, const OverscaledTileID&);
