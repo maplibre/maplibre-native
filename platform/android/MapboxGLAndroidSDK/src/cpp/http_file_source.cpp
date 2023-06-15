@@ -37,7 +37,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/http/NativeHttpRequest"; };
+    static constexpr auto Name() { return "org/maplibre/android/http/NativeHttpRequest"; };
 
     HTTPRequest(jni::JNIEnv&, const Resource&, FileSource::Callback);
     ~HTTPRequest();

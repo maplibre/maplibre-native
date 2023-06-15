@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-               BuildableName = "MapLibre GL.app"
+               BuildableName = "MapLibre Native.app"
                BlueprintName = "iosapp"
                ReferencedContainer = "container:ios.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "MapLibre GL.app"
+            BuildableName = "MapLibre Native.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
@@ -79,7 +79,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "MapLibre GL.app"
+            BuildableName = "MapLibre Native.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>
@@ -103,7 +103,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DA1DC9491CB6C1C2006E619F"
-            BuildableName = "MapLibre GL.app"
+            BuildableName = "MapLibre Native.app"
             BlueprintName = "iosapp"
             ReferencedContainer = "container:ios.xcodeproj">
          </BuildableReference>

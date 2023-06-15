@@ -2,7 +2,7 @@
   "Id": "maplibre-gl-native",
   "Name": "MapLibre Native",
   "QDocModule": "qtlocation",
-  "QtUsage": "Used in the MapLibre backend of Qt Location.",
+  "QtUsage": "Used in the MapLibre Native backend of Qt Location.",
 
   "Description": "MapLibre Native is a community led fork derived from mapbox-gl-native.",
   "Homepage": "https://github.com/maplibre/maplibre-native",

@@ -14,7 +14,7 @@ namespace android {
 class FillLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/FillLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/FillLayer"; };
 
     FillLayer(jni::JNIEnv&, jni::String&, jni::String&);
 

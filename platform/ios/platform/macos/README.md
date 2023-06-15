@@ -19,7 +19,7 @@ MapLibre Native for macOS is compatible with macOS 10.10.0 and above for Cocoa a
 
 * [Build the MapLibre Native for macOS from source](INSTALL.md)
 * [Contribute to MapLibre Native for macOS](CONTRIBUTING.md)
-* [Mapbox Style Specification](https://www.mapbox.com/mapbox-gl-style-spec/)
+* [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/)
 * [Mapbox Vector Tile Specification](https://www.mapbox.com/developers/vector-tiles/)
 
 The MapLibre Organization does not officially support the macOS to the same extent as iOS (see [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md)); however, bug reports and pull requests are certainly welcome.

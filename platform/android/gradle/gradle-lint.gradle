@@ -20,11 +20,3 @@ def isLocalBuild() {
     }
     return true
 }
-
-lint.dependsOn ciLint
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'lintVitalRelease') {
-        task.dependsOn ciLint
-    }
-}
