@@ -73,23 +73,23 @@ public:
         std::shared_ptr<CollisionBoxProgram> collisionBoxProgram;
         std::shared_ptr<CollisionCircleProgram> collisionCircleProgram;
     };
-    
+
 public:
     explicit RenderSymbolLayer(Immutable<style::SymbolLayer::Impl>);
     ~RenderSymbolLayer() override;
-    
+
     static style::IconPaintProperties::PossiblyEvaluated iconPaintProperties(
-                                                                             const style::SymbolPaintProperties::PossiblyEvaluated&);
+        const style::SymbolPaintProperties::PossiblyEvaluated&);
     static style::TextPaintProperties::PossiblyEvaluated textPaintProperties(
-                                                                             const style::SymbolPaintProperties::PossiblyEvaluated&);
-    
+        const style::SymbolPaintProperties::PossiblyEvaluated&);
+
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
-    
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -97,16 +97,16 @@ private:
     bool hasCrossfade() const override;
     void render(PaintParameters&) override;
     void prepare(const LayerPrepareParameters&) override;
-    
+
 private:
     // Paint properties
     style::SymbolPaintProperties::Unevaluated unevaluated;
-    
+
     float iconSize = 1.0f;
     float textSize = 16.0f;
-    
+
     bool hasFormatSectionOverrides = false;
-    
+
     // Programs
     Programs programs;
 

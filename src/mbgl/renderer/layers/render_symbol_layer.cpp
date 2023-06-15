@@ -637,7 +637,7 @@ style::TextPaintProperties::PossiblyEvaluated RenderSymbolLayer::textPaintProper
 
 void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
-    
+
     renderTileIDs.clear();
     renderTileIDs.reserve(renderTiles->size());
     std::transform(renderTiles->begin(),
@@ -681,12 +681,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                const TransformState& state,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& /*changes*/) {
-    
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllTiles();
         return;
     }
-    
+
     // Set up a layer group
     if (!tileLayerGroup) {
         tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
@@ -695,7 +694,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
     }
-    
+
     if (!symbolIconGroup) {
         symbolIconGroup = shaders.getShaderGroup(std::string(SymbolIconShaderName));
     }
@@ -722,6 +721,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     std::multiset<RenderableSegment> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
+    const auto currentZoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
 
     for (const RenderTile& tile : *renderTiles) {
@@ -742,51 +742,48 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
             tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
-                drawable.mutableUniformBuffers();//.createOrUpdate(..., &interpolateUBO, context);
+                drawable.mutableUniformBuffers(); //.createOrUpdate(..., &interpolateUBO, context);
             });
             continue;
         }
 
         float serialKey = 1.0f;
-        auto addRenderables = [&, it = renderableSegments.begin()](const auto& segments, const SymbolType type) mutable {
-                for (auto& segment : segments) {
-                    const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
-                    if (type == SymbolType::Text) {
-                        assert(segment.vertexOffset + segment.vertexLength <= bucket.text.vertices.elements());
-                    } else {
-                        assert(segment.vertexLength + segment.vertexLength <= bucket.icon.vertices.elements());
-                    }
-                    it = renderableSegments.emplace_hint(it,
-                                                         std::ref(segment),
-                                                         tile,
-                                                         renderData,
-                                                         bucketPaintProperties,
-                                                         key,
-                                                         type,
-                                                         tileID.overscaledZ);
+        auto addRenderables = [&, it = renderableSegments.begin()](const auto& segments,
+                                                                   const SymbolType type) mutable {
+            for (auto& segment : segments) {
+                const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
+                if (type == SymbolType::Text) {
+                    assert(segment.vertexOffset + segment.vertexLength <= bucket.text.vertices.elements());
+                } else {
+                    assert(segment.vertexLength + segment.vertexLength <= bucket.icon.vertices.elements());
                 }
-            };
+                it = renderableSegments.emplace_hint(
+                    it, std::ref(segment), tile, renderData, bucketPaintProperties, key, type, tileID.overscaledZ);
+            }
+        };
 
         addRenderables(bucket.icon.segments, SymbolType::IconRGBA);
         addRenderables(bucket.sdfIcon.segments, SymbolType::IconSDF);
         addRenderables(bucket.text.segments, SymbolType::Text);
     }
 
-        // No data-driven properties?
-//        gfx::VertexAttributeArray attrs;
-//        const auto uniformProps = attrs.readDataDrivenPaintProperties<attributes::pos_offset,
-//            attributes::data<uint16_t, 4>,
-//            attributes::pixeloffset>(binders, evaluated);
+    // No data-driven properties?
+    //        gfx::VertexAttributeArray attrs;
+    //        const auto uniformProps = attrs.readDataDrivenPaintProperties<attributes::pos_offset,
+    //            attributes::data<uint16_t, 4>,
+    //            attributes::pixeloffset>(binders, evaluated);
 
-//        gfx::VertexAttributeArray dynamicAttrs;
-//        const auto dynamicUniformProps = dynamicAttrs.readDataDrivenPaintProperties<attributes::projected_pos>(binders, evaluated);
-//
-//        gfx::VertexAttributeArray opacityAttrs;
-//        const auto opacityUniformProps = opacityAttrs.readDataDrivenPaintProperties<attributes::fade_opacity>(binders, evaluated);
-//
-//        builder->setVertexAttributes(attrs);
+    //        gfx::VertexAttributeArray dynamicAttrs;
+    //        const auto dynamicUniformProps =
+    //        dynamicAttrs.readDataDrivenPaintProperties<attributes::projected_pos>(binders, evaluated);
+    //
+    //        gfx::VertexAttributeArray opacityAttrs;
+    //        const auto opacityUniformProps =
+    //        opacityAttrs.readDataDrivenPaintProperties<attributes::fade_opacity>(binders, evaluated);
+    //
+    //        builder->setVertexAttributes(attrs);
 
-    using RawVertexVec = std::vector<std::uint8_t>;    // <int16_t, 4>
+    using RawVertexVec = std::vector<std::uint8_t>; // <int16_t, 4>
     struct RawVertices {
         RawVertexVec text, icon;
     };
@@ -807,77 +804,22 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& iconBinders = bucketPaintProperties.iconBinders;
 
         const auto& layout = *bucket.layout;
-        __unused const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
-        __unused const Size& iconTexSize = tile.hasIconAtlasTexture() ? tile.getIconAtlasTexture()->getSize() : Size{0,0};
-        __unused const Size& glyphTexSize = tile.hasGlyphAtlasTexture() ? tile.getGlyphAtlasTexture()->getSize() : Size{0,0};
-        __unused const bool variablePlacedIcon = bucket.hasVariablePlacement && layout.get<IconTextFit>() != IconTextFitType::None;
+        __unused const auto values = isText ? textPropertyValues(evaluated, layout)
+                                            : iconPropertyValues(evaluated, layout);
+        __unused const Size& iconTexSize = tile.hasIconAtlasTexture() ? tile.getIconAtlasTexture()->getSize()
+                                                                      : Size{0, 0};
+        __unused const Size& glyphTexSize = tile.hasGlyphAtlasTexture() ? tile.getGlyphAtlasTexture()->getSize()
+                                                                        : Size{0, 0};
+        __unused const bool variablePlacedIcon = bucket.hasVariablePlacement &&
+                                                 layout.get<IconTextFit>() != IconTextFitType::None;
         const bool iconAlongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
                                    layout.get<IconRotationAlignment>() == AlignmentType::Map;
         const bool textAlongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point &&
                                    layout.get<TextRotationAlignment>() == AlignmentType::Map;
         __unused const bool alongLine = isText ? textAlongLine : iconAlongLine;
 
-//        const ZoomEvaluatedSize u = evaluateForZoom(currentZoom);
-//        return UniformValues{uniforms::is_size_zoom_constant::Value(u.isZoomConstant),
-//                             uniforms::is_size_feature_constant::Value(u.isFeatureConstant),
-//                             uniforms::size_t::Value(u.sizeT),
-//                             uniforms::size::Value(u.size)};
-
-        struct PaintUniforms {
-            float gamma_scale;
-            float device_pixel_ratio;
-
-            vec2 texsize;
-            vec2 texsize_icon;
-
-            mat4 matrix;
-            mat4 label_plane_matrix;
-            mat4 coord_matrix;
-
-            bool is_size_zoom_constant;
-            bool is_size_feature_constant;
-
-            float camera_to_center_distance;
-            float pitch;
-            bool rotate_symbol;
-            float aspect_ratio;
-            float fade_change;
-
-            // paint properties
-            vec4 fill_color;
-            vec4 halo_color;
-            float opacity;
-            float halo_width;
-            float halo_blur;
-        };
-        
-        __unused struct TileUniforms {
-            float size_t;
-            float size;
-
-            bool is_text;
-            bool is_halo;
-            bool pitch_with_map;
-
-        } uniforms;
-        
-        struct SymbolInterpUBO {
-            float fill_color_t;
-            float halo_color_t;
-            float opacity_t;
-            float halo_width_t;
-            float halo_blur_t;
-        };
-
-        const auto zoom = static_cast<float>(state.getZoom());
-        __unused const SymbolInterpUBO interpolateUBO = {
-            /* .fill_color_t = */ std::get<0>((isText ? textBinders.get<TextColor>() : iconBinders.get<IconColor>())->interpolationFactor(zoom)),
-            /* .halo_color_t = */ std::get<0>((isText ? textBinders.get<TextHaloColor>() : iconBinders.get<IconHaloColor>())->interpolationFactor(zoom)),
-            /* .opacity_t = */    std::get<0>((isText ? textBinders.get<TextOpacity>() : iconBinders.get<IconOpacity>())->interpolationFactor(zoom)),
-            /* .halo_width_t = */ std::get<0>((isText ? textBinders.get<TextHaloWidth>() : iconBinders.get<IconHaloWidth>())->interpolationFactor(zoom)),
-            /* .halo_blur_t = */  std::get<0>((isText ? textBinders.get<TextHaloBlur>() : iconBinders.get<IconHaloBlur>())->interpolationFactor(zoom)),
-//            /* .padding = */ //{0},
-        };
+        const ZoomEvaluatedSize size = isText ? bucket.textSizeBinder->evaluateForZoom(currentZoom)
+                                              : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
 
         const auto buildVertices = [&](const SymbolBucket::Buffer& buffer, RawVertexVec& dest) -> auto& {
             const std::vector<SymbolLayoutVertex>& src = buffer.vertices.vector();
@@ -921,9 +863,18 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        const auto uniformProps = isText ?
-            attrs.readDataDrivenPaintProperties<TextOpacity, TextColor, TextHaloColor, TextHaloWidth, TextHaloBlur>(bucketPaintProperties.textBinders, evaluated) :
-            attrs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(bucketPaintProperties.iconBinders, evaluated);
+        const auto uniformProps = isText ? attrs.readDataDrivenPaintProperties<TextOpacity,
+                                                                               TextColor,
+                                                                               TextHaloColor,
+                                                                               TextHaloWidth,
+                                                                               TextHaloBlur>(
+                                               bucketPaintProperties.textBinders, evaluated)
+                                         : attrs.readDataDrivenPaintProperties<IconOpacity,
+                                                                               IconColor,
+                                                                               IconHaloColor,
+                                                                               IconHaloWidth,
+                                                                               IconHaloBlur>(
+                                               bucketPaintProperties.iconBinders, evaluated);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -932,6 +883,24 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto iconHalo = evaluated.get<style::IconHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::IconHaloWidth>().constantOr(1);
         const auto iconFill = evaluated.get<style::IconColor>().constantOr(Color::black()).a > 0.0f;
+
+        const SymbolDrawableInterpolateUBO interpolateUBO = {
+            /* .fill_color_t = */ std::get<0>((isText ? textBinders.get<TextColor>() : iconBinders.get<IconColor>())
+                                                  ->interpolationFactor(currentZoom)),
+            /* .halo_color_t = */
+            std::get<0>((isText ? textBinders.get<TextHaloColor>() : iconBinders.get<IconHaloColor>())
+                            ->interpolationFactor(currentZoom)),
+            /* .opacity_t = */
+            std::get<0>((isText ? textBinders.get<TextOpacity>() : iconBinders.get<IconOpacity>())
+                            ->interpolationFactor(currentZoom)),
+            /* .halo_width_t = */
+            std::get<0>((isText ? textBinders.get<TextHaloWidth>() : iconBinders.get<IconHaloWidth>())
+                            ->interpolationFactor(currentZoom)),
+            /* .halo_blur_t = */
+            std::get<0>((isText ? textBinders.get<TextHaloBlur>() : iconBinders.get<IconHaloBlur>())
+                            ->interpolationFactor(currentZoom)),
+            /* .padding = */ {0},
+        };
 
         const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
                               [[maybe_unused]] const Segment<SymbolTextAttributes>& segment,
@@ -956,7 +925,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setVertexAttrName("a_pos_offset");
             }
 
-            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(context, uniformProps));
+            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                shaderGroup->getOrCreateShader(context, uniformProps));
             if (!shader) {
                 return;
             }
@@ -968,12 +938,25 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             builder->flush();
 
-            //drawable->setData(std::make_unique<gfx::SymbolDrawableData>(...));
+            // drawable->setData(std::make_unique<gfx::SymbolDrawableData>(...));
+
+            const SymbolDrawableTilePropsUBO tileUBO = {
+                /* .is_text = */ isText,
+                /* .is_halo = */ isHalo,
+                /* .pitch_with_map = */ (values.pitchAlignment == style::AlignmentType::Map),
+                /* .is_size_zoom_constant = */ size.isZoomConstant,
+                /* .is_size_feature_constant = */ size.isFeatureConstant,
+                /* .size_t = */ size.sizeT,
+                /* .size = */ size.size,
+            };
 
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
-                //auto& uniforms = drawable->mutableUniformBuffers();
-                //uniforms.createOrUpdate(..., &interpUBO, context);
+
+                auto& uniforms = drawable->mutableUniformBuffers();
+                uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
+                uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.tileDrawablesAdded;
             }
@@ -984,44 +967,84 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             const auto& vertexCount = bucket.text.vertices.elements();
             const auto& indices = bucket.text.triangles;
             if (bucket.iconsInText) {
-//                    const ZoomEvaluatedSize partiallyEvaluatedTextSize = bucket.textSizeBinder->evaluateForZoom(
-//                        static_cast<float>(parameters.state.getZoom()));
-//                    const bool transformed = values.rotationAlignment == AlignmentType::Map || parameters.state.getPitch() != 0;
-//                    const Size& iconTexSize = tile.getIconAtlasTexture()->getSize();
-//                    const bool linear = parameters.state.isChanging() || transformed || !partiallyEvaluatedTextSize.isZoomConstant;
-//                    const auto filterType = linear ? gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
-//                    const gfx::TextureBinding iconTextureBinding = tile.getIconAtlasTextureBinding(filterType);
+                //                    const ZoomEvaluatedSize partiallyEvaluatedTextSize =
+                //                    bucket.textSizeBinder->evaluateForZoom(
+                //                        static_cast<float>(parameters.state.getZoom()));
+                //                    const bool transformed = values.rotationAlignment == AlignmentType::Map ||
+                //                    parameters.state.getPitch() != 0; const Size& iconTexSize =
+                //                    tile.getIconAtlasTexture()->getSize(); const bool linear =
+                //                    parameters.state.isChanging() || transformed ||
+                //                    !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
+                //                    gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest; const
+                //                    gfx::TextureBinding iconTextureBinding =
+                //                    tile.getIconAtlasTextureBinding(filterType);
                 if (textHalo) {
-                    draw(symbolTextAndIconGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */true, "halo");
+                    draw(symbolTextAndIconGroup,
+                         renderable.segment,
+                         indices,
+                         vertices,
+                         vertexCount,
+                         /* isHalo = */ true,
+                         "halo");
                 }
 
                 if (textFill) {
-                    draw(symbolTextAndIconGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */false, "fill");
+                    draw(symbolTextAndIconGroup,
+                         renderable.segment,
+                         indices,
+                         vertices,
+                         vertexCount,
+                         /* isHalo = */ false,
+                         "fill");
                 }
             } else {
                 if (textHalo) {
-                    draw(symbolSDFTextGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */true, "halo");
+                    draw(symbolSDFTextGroup,
+                         renderable.segment,
+                         indices,
+                         vertices,
+                         vertexCount,
+                         /* isHalo = */ true,
+                         "halo");
                 }
 
                 if (textFill) {
-                    draw(symbolSDFTextGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */false, "fill");
+                    draw(symbolSDFTextGroup,
+                         renderable.segment,
+                         indices,
+                         vertices,
+                         vertexCount,
+                         /* isHalo = */ false,
+                         "fill");
                 }
             }
         } else {
-            //const auto& binders = bucketPaintProperties.iconBinders;
+            // const auto& binders = bucketPaintProperties.iconBinders;
             const auto& vertices = buildVertices(buffer, rawVertices[tile.id].icon);
             const auto& vertexCount = bucket.icon.vertices.elements();
             const auto& indices = bucket.icon.triangles;
             if (sdfIcons) {
                 if (iconHalo) {
-                    draw(symbolSDFIconGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */true, "halo");
+                    draw(symbolSDFIconGroup,
+                         renderable.segment,
+                         indices,
+                         vertices,
+                         vertexCount,
+                         /* isHalo = */ true,
+                         "halo");
                 }
 
                 if (iconFill) {
-                    draw(symbolSDFIconGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */false, "fill");
+                    draw(symbolSDFIconGroup,
+                         renderable.segment,
+                         indices,
+                         vertices,
+                         vertexCount,
+                         /* isHalo = */ false,
+                         "fill");
                 }
             } else {
-                draw(symbolIconGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */false, "icon");
+                draw(symbolIconGroup, renderable.segment, indices, vertices, vertexCount, /* isHalo = */ false, "icon");
             }
         }
     }
