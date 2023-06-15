@@ -186,15 +186,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
             Size textureSize{0, 0};
             if (const auto shader = drawable.getShader()) {
                 if (const auto index = shader->getSamplerLocation("u_image")) {
-                    if (auto itextureAttachment = std::find_if(drawable.getTextures().begin(),
-                                                               drawable.getTextures().end(),
-                                                               [&index](const auto& textureAttachment) -> bool {
-                                                                   return (textureAttachment.texture) &&
-                                                                          (textureAttachment.location ==
-                                                                           static_cast<int32_t>(index.value()));
-                                                               });
-                        drawable.getTextures().end() != itextureAttachment) {
-                        textureSize = itextureAttachment->texture->getSize();
+                    if (const auto& texture = drawable.getTexture(index.value())) {
+                        textureSize = texture->getSize();
                     }
                 }
             }
