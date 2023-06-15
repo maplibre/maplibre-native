@@ -53,7 +53,8 @@ public:
     void setVertexAttrName(std::string);
 
     void setColorAttrName(std::string);
-    
+    void setVertexAttrName(std::string);
+
     /// Reset a single color attribute for all vertexes
     void resetColor(const Color&) override;
 
