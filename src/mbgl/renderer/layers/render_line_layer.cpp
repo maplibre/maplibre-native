@@ -305,17 +305,16 @@ void RenderLineLayer::updateColorRamp() {
     if (colorRampTexture) {
         colorRampTexture = std::nullopt;
     }
-    
+
     if (colorRampTexture2D) {
         colorRampTexture2D.reset();
-        
+
         // delete all gradient drawables
         if (tileLayerGroup) {
             stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
             tileLayerGroup->clearDrawables();
         }
     }
-        
 }
 
 float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
@@ -622,12 +621,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             // gradient line
             gfx::VertexAttributeArray vertexAttrs;
-            auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineBlur,
-                                                                                  LineOpacity,
-                                                                                  LineGapWidth,
-                                                                                  LineOffset,
-                                                                                  LineWidth>(paintPropertyBinders,
-                                                                                               evaluated);
+            auto propertiesAsUniforms =
+                vertexAttrs.readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
+                    paintPropertyBinders, evaluated);
             auto lineGradientShader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!lineGradientShader) continue;
 
@@ -661,28 +657,30 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             builder->setVertexAttributes(std::move(vertexAttrs));
 
             // texture
-            if (const auto samplerLocation = std::static_pointer_cast<gfx::ShaderProgramBase>(lineGradientShader)->getSamplerLocation("u_image")) {
+            if (const auto samplerLocation = std::static_pointer_cast<gfx::ShaderProgramBase>(lineGradientShader)
+                                                 ->getSamplerLocation("u_image")) {
                 if (!colorRampTexture2D && colorRamp->valid()) {
                     // create texture. to be reused for all the tiles of the layer
                     colorRampTexture2D = context.createTexture2D();
                     colorRampTexture2D->setImage(colorRamp);
-                    colorRampTexture2D->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                    colorRampTexture2D->setSamplerConfiguration(
+                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
                 }
-                
+
                 if (colorRampTexture2D) {
                     builder->setTexture(colorRampTexture2D, samplerLocation.value());
-                    
+
                     // segments
                     builder->setSegments(
-                                         gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
-                    
+                        gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+
                     // finish
                     builder->flush();
                     for (auto& drawable : builder->clearDrawables()) {
                         drawable->setTileID(tileID);
                         drawable->mutableUniformBuffers().createOrUpdate(
-                                                                         LineGradientInterpolationUBOName, &lineGradientInterpolationUBO, context);
-                        
+                            LineGradientInterpolationUBOName, &lineGradientInterpolationUBO, context);
+
                         tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                         ++stats.tileDrawablesAdded;
                     }

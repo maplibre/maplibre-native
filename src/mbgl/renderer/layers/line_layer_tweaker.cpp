@@ -138,7 +138,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
         0,
         {0, 0}};
-    
+
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID()) return;
 
@@ -152,12 +152,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         // simple line
         if (drawable.getShader()->getUniformBlocks().get(std::string(LineUBOName))) {
             // main UBO
-            LineUBO lineUBO {
+            LineUBO lineUBO{
                 /*matrix = */ util::cast<float>(matrix),
                 /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                 /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-                /*device_pixel_ratio = */ parameters.pixelRatio
-            };
+                /*device_pixel_ratio = */ parameters.pixelRatio};
             drawable.mutableUniformBuffers().createOrUpdate(LineUBOName, &lineUBO, sizeof(lineUBO), parameters.context);
 
             // properties UBO
@@ -167,17 +166,19 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         // gradient line
         else if (drawable.getShader()->getUniformBlocks().get(std::string(LineGradientUBOName))) {
             // main UBO
-            LineGradientUBO lineGradientUBO {
+            LineGradientUBO lineGradientUBO{
                 /*matrix = */ util::cast<float>(matrix),
                 /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                 /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-                /*device_pixel_ratio = */ parameters.pixelRatio
-            };
-            drawable.mutableUniformBuffers().createOrUpdate(LineGradientUBOName, &lineGradientUBO, sizeof(lineGradientUBO), parameters.context);
+                /*device_pixel_ratio = */ parameters.pixelRatio};
+            drawable.mutableUniformBuffers().createOrUpdate(
+                LineGradientUBOName, &lineGradientUBO, sizeof(lineGradientUBO), parameters.context);
 
             // properties UBO
-            drawable.mutableUniformBuffers().createOrUpdate(
-                LineGradientPropertiesUBOName, &lineGradientPropertiesUBO, sizeof(lineGradientPropertiesUBO), parameters.context);
+            drawable.mutableUniformBuffers().createOrUpdate(LineGradientPropertiesUBOName,
+                                                            &lineGradientPropertiesUBO,
+                                                            sizeof(lineGradientPropertiesUBO),
+                                                            parameters.context);
         }
         // pattern line
         else if (drawable.getShader()->getUniformBlocks().get(std::string(LinePatternUBOName))) {

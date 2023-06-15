@@ -64,7 +64,7 @@ private:
 
     std::shared_ptr<PremultipliedImage> colorRamp;
     std::optional<gfx::Texture> colorRampTexture;
-    
+
     gfx::Texture2DPtr colorRampTexture2D;
 
     /// Remove all drawables for the tile from the layer group
