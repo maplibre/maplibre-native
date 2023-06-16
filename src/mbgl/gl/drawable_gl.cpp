@@ -169,8 +169,14 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
         std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
-        auto bindings = uploadPass.buildAttributeBindings(impl->vertexCount, impl->vertexType, vertexAttributeIndex,
-                                                          impl->vertexData, defaults, overrides, usage, vertexBuffer);
+        auto bindings = uploadPass.buildAttributeBindings(impl->vertexCount,
+                                                          impl->vertexType,
+                                                          vertexAttributeIndex,
+                                                          impl->vertexData,
+                                                          defaults,
+                                                          overrides,
+                                                          usage,
+                                                          vertexBuffer);
 
         impl->attributeBuffer = std::move(vertexBuffer);
         impl->indexBuffer = std::move(indexBuffer);
