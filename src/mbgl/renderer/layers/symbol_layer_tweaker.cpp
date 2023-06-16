@@ -4,6 +4,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
+#include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/layout/symbol_projection.hpp>
 #include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -32,27 +33,24 @@ struct alignas(16) SymbolDrawableUBO {
 
     /* 216 */ float camera_to_center_distance;
     /* 220 */ float pitch;
-    /* 224 */ std::array<bool, 4> rotate_symbol_pad3;
+    /* 224 */ /*bool*/ int rotate_symbol;
     /* 228 */ float aspect_ratio;
     /* 232 */ std::array<float, 2> fade_change_pad;
     /* 240 */
 };
-static_assert(offsetof(SymbolDrawableUBO, texsize_icon) == 200);
 static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) SymbolDrawablePaintUBO {
     /*  0 */ std::array<float, 4> fill_color;
-    /*  0 */ std::array<float, 4> halo_color;
-    /*  0 */ float opacity;
-    /*  0 */ float halo_width;
-    /*  0 */ float halo_blur;
+    /* 16 */ std::array<float, 4> halo_color;
+    /* 32 */ float opacity;
+    /* 36 */ float halo_width;
+    /* 40 */ float halo_blur;
+    /* 44 */ float padding;
+    /* 48 */
 };
-
-static_assert(sizeof(SymbolDrawablePaintUBO) == 48);
-
-static constexpr std::string_view SymbolDrawableUBOName = "SymbolDrawableUBO";
-static constexpr std::string_view SymbolDrawablePropsUBOName = "SymbolDrawablePropsUBO";
+static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
@@ -79,6 +77,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.opacity=*/evaluated.get<TextOpacity>().constantOr(TextOpacity::defaultValue()),
             /*.halo_width=*/evaluated.get<TextHaloWidth>().constantOr(TextHaloWidth::defaultValue()),
             /*.halo_blur=*/evaluated.get<TextHaloBlur>().constantOr(TextHaloBlur::defaultValue()),
+            /*.padding=*/0,
         };
         textBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
@@ -91,6 +90,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.opacity=*/evaluated.get<IconOpacity>().constantOr(IconOpacity::defaultValue()),
             /*.halo_width=*/evaluated.get<IconHaloWidth>().constantOr(IconHaloWidth::defaultValue()),
             /*.halo_blur=*/evaluated.get<IconHaloBlur>().constantOr(IconHaloBlur::defaultValue()),
+            /*.padding=*/0,
         };
         iconBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
@@ -99,23 +99,18 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (!drawable.getTileID()) {
             return;
         }
+        if (!drawable.getData() || !*drawable.getData()) {
+            return;
+        }
+        const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         const auto translate = evaluated.get<style::TextTranslate>();
         const auto anchor = evaluated.get<style::TextTranslateAnchor>();
 
-        struct {
-            bool isText;
-            bool hasVariablePlacement;
-            AlignmentType pitchAlignment;
-            AlignmentType rotationAlignment;
-            SymbolPlacementType placement;
-            IconTextFitType textFit;
-        } drawableData;
-
-        drawable.mutableUniformBuffers().addOrReplace(SymbolDrawablePropsUBOName,
-                                                      drawableData.isText ? textBuffer : iconBuffer);
+        drawable.mutableUniformBuffers().addOrReplace(SymbolDrawablePaintUBOName,
+                                                      symbolData.isText ? textBuffer : iconBuffer);
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         const auto matrix = getTileMatrix(
@@ -124,19 +119,19 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());
 
         const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
-        const bool pitchWithMap = drawableData.pitchAlignment == style::AlignmentType::Map;
-        const bool rotateWithMap = drawableData.rotationAlignment == style::AlignmentType::Map;
+        const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
+        const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
 
-        const bool alongLine = drawableData.placement != SymbolPlacementType::Point &&
-                               drawableData.rotationAlignment == AlignmentType::Map;
+        const bool alongLine = symbolData.placement != SymbolPlacementType::Point &&
+                               symbolData.rotationAlignment == AlignmentType::Map;
 
         // Line label rotation happens in `updateLineLabels`/`reprojectLineLabels``
         // Pitched point labels are automatically rotated by the labelPlaneMatrix projection
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-        const bool hasVariablePlacement = drawableData.hasVariablePlacement &&
-                                          drawableData.textFit != IconTextFitType::None;
+        const bool hasVariablePlacement = symbolData.hasVariablePlacement &&
+                                          symbolData.textFit != IconTextFitType::None;
 
         mat4 labelPlaneMatrix;
         if (alongLine || hasVariablePlacement) {
@@ -151,7 +146,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
         const auto camDist = state.getCameraToCenterDistance();
-        const float gammaScale = (drawableData.pitchAlignment == AlignmentType::Map
+        const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
                                       : 1.0f);
 
@@ -183,7 +178,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
 
             /*.camera_to_center_distance=*/camDist,
             /*.pitch=*/static_cast<float>(state.getPitch()),
-            /*.rotate_symbol=*/{rotateInShader},
+            /*.rotate_symbol=*/rotateInShader,
             /*.aspect_ratio=*/state.getSize().aspectRatio(),
             /*.fade_change=*/{parameters.symbolFadeChange},
         };

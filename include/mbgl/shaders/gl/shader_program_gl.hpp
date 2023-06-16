@@ -24,6 +24,7 @@ public:
     static std::shared_ptr<ShaderProgramGL> create(Context&,
                                                    const ProgramParameters& programParameters,
                                                    const std::string& name,
+                                                   const std::string_view firstAttribName,
                                                    const std::string& vertexSource,
                                                    const std::string& fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);

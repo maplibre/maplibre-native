@@ -119,11 +119,10 @@ std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string& n
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
                                                          const ProgramParameters& programParameters,
                                                          const std::string& /*name*/,
+                                                         const std::string_view firstAttribName,
                                                          const std::string& vertexSource,
                                                          const std::string& fragmentSource,
                                                          const std::string& additionalDefines) noexcept(false) {
-    const auto firstAttrib = "a_pos";
-
     // throws on compile error
     auto vertProg = context.createShader(
         ShaderType::Vertex,
@@ -140,7 +139,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
          additionalDefines.c_str(),
          shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
          fragmentSource.c_str()});
-    auto program = context.createProgram(vertProg, fragProg, firstAttrib);
+    auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
 
     // GLES3.1
     // GLint numAttribs;

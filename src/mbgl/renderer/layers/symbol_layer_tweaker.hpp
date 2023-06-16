@@ -19,6 +19,8 @@ public:
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
+    static constexpr std::string_view SymbolDrawableUBOName = "SymbolDrawableUBO";
+    static constexpr std::string_view SymbolDrawablePaintUBOName = "SymbolDrawablePaintUBO";
     static constexpr std::string_view SymbolDrawableTilePropsUBOName = "SymbolDrawableTilePropsUBO";
     static constexpr std::string_view SymbolDrawableInterpolateUBOName = "SymbolDrawableInterpolateUBO";
 
@@ -29,16 +31,17 @@ private:
 
 /// Evaluated properties that depend on the tile
 struct alignas(16) SymbolDrawableTilePropsUBO {
-    /*  0 */ bool is_text;
-    /*  1 */ bool is_halo;
-    /*  2 */ bool pitch_with_map;
-    /*  3 */ bool is_size_zoom_constant;
-    /*  4 */ bool is_size_feature_constant;
-    /*  8 */ float size_t;
-    /* 12 */ float size;
-    /* 16 */
+    /*  0 */ /*bool*/ int is_text;
+    /*  4 */ /*bool*/ int is_halo;
+    /*  8 */ /*bool*/ int pitch_with_map;
+    /* 12 */ /*bool*/ int is_size_zoom_constant;
+    /* 16 */ /*bool*/ int is_size_feature_constant;
+    /* 20 */ float size_t;
+    /* 24 */ float size;
+    /* 28 */ float padding;
+    /* 32 */
 };
-static_assert(sizeof(SymbolDrawableTilePropsUBO) == 16);
+static_assert(sizeof(SymbolDrawableTilePropsUBO) == 2 * 16);
 
 /// Attribute interpolations
 struct alignas(16) SymbolDrawableInterpolateUBO {
@@ -47,7 +50,7 @@ struct alignas(16) SymbolDrawableInterpolateUBO {
     /*  8 */ float opacity_t;
     /* 12 */ float halo_width_t;
     /* 16 */ float halo_blur_t;
-    /* 20 */ std::array<float, 3> padding;
+    /* 20 */ float pad1, pad2, pad3;
     /* 32 */
 };
 static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32);

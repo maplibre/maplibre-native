@@ -21,60 +21,57 @@ layout (location = 4) in float a_fade_opacity;
 // For composite functions:
 // [ text-size(lowerZoomStop, feature),
 //   text-size(upperZoomStop, feature) ]
-uniform bool u_is_size_zoom_constant;
-uniform bool u_is_size_feature_constant;
-uniform highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
-uniform highp float u_size; // used when size is both zoom and feature constant
-uniform mat4 u_matrix;
-uniform mat4 u_label_plane_matrix;
-uniform mat4 u_coord_matrix;
-uniform bool u_is_text;
-uniform bool u_pitch_with_map;
-uniform highp float u_pitch;
-uniform bool u_rotate_symbol;
-uniform highp float u_aspect_ratio;
-uniform highp float u_camera_to_center_distance;
-uniform float u_fade_change;
-uniform vec2 u_texsize;
+
+layout (std140) uniform SymbolDrawableUBO {
+    highp mat4 u_matrix;
+    highp mat4 u_label_plane_matrix;
+    highp mat4 u_coord_matrix;
+
+    highp vec2 u_texsize;
+    highp vec2 u_texsize_icon;
+
+    highp float u_gamma_scale;
+    highp float u_device_pixel_ratio;
+
+    highp float u_camera_to_center_distance;
+    highp float u_pitch;
+    bool u_rotate_symbol;
+    highp float u_aspect_ratio;
+    highp float u_fade_change;
+    highp float u_pad2;
+};
+
+layout (std140) uniform SymbolDrawablePaintUBO {
+    highp vec4 u_fill_color;
+    highp vec4 u_halo_color;
+    highp float u_opacity;
+    highp float u_halo_width;
+    highp float u_halo_blur;
+    highp float u_padding;
+};
+
+layout (std140) uniform SymbolDrawableTilePropsUBO {
+    bool u_is_text;
+    bool u_is_halo;
+    bool u_pitch_with_map;
+    bool u_is_size_zoom_constant;
+    bool u_is_size_feature_constant;
+    highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
+    highp float u_size; // used when size is both zoom and feature constant
+    bool u_pad3;
+};
+
+layout (std140) uniform SymbolDrawableInterpolateUBO {
+    highp float u_fill_color_t;
+    highp float u_halo_color_t;
+    highp float u_opacity_t;
+    highp float u_halo_width_t;
+    highp float u_halo_blur_t;
+    highp float u_pad4,u_pad5,u_pad6;
+};
 
 out vec2 v_data0;
 out vec3 v_data1;
-
-#ifndef HAS_UNIFORM_u_fill_color
-uniform lowp float u_fill_color_t;
-layout (location = 5) in highp vec4 a_fill_color;
-out highp vec4 fill_color;
-#else
-uniform highp vec4 u_fill_color;
-#endif
-#ifndef HAS_UNIFORM_u_halo_color
-uniform lowp float u_halo_color_t;
-layout (location = 6) in highp vec4 a_halo_color;
-out highp vec4 halo_color;
-#else
-uniform highp vec4 u_halo_color;
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
-layout (location = 7) in lowp vec2 a_opacity;
-out lowp float opacity;
-#else
-uniform lowp float u_opacity;
-#endif
-#ifndef HAS_UNIFORM_u_halo_width
-uniform lowp float u_halo_width_t;
-layout (location = 8) in lowp vec2 a_halo_width;
-out lowp float halo_width;
-#else
-uniform lowp float u_halo_width;
-#endif
-#ifndef HAS_UNIFORM_u_halo_blur
-uniform lowp float u_halo_blur_t;
-layout (location = 9) in lowp vec2 a_halo_blur;
-out lowp float halo_blur;
-#else
-uniform lowp float u_halo_blur;
-#endif
 
 void main() {
     #ifndef HAS_UNIFORM_u_fill_color
@@ -174,40 +171,58 @@ lowp float halo_blur = u_halo_blur;
 )";
     static constexpr const char* fragment = R"(#define SDF_PX 8.0
 
-uniform bool u_is_halo;
+layout (std140) uniform SymbolDrawableUBO {
+    highp mat4 u_matrix;
+    highp mat4 u_label_plane_matrix;
+    highp mat4 u_coord_matrix;
+
+    highp vec2 u_texsize;
+    highp vec2 u_texsize_icon;
+
+    highp float u_gamma_scale;
+    highp float u_device_pixel_ratio;
+
+    highp float u_camera_to_center_distance;
+    highp float u_pitch;
+    bool u_rotate_symbol;
+    highp float u_aspect_ratio;
+    highp float u_fade_change;
+    highp float u_pad2;
+};
+
+layout (std140) uniform SymbolDrawablePaintUBO {
+    highp vec4 u_fill_color;
+    highp vec4 u_halo_color;
+    highp float u_opacity;
+    highp float u_halo_width;
+    highp float u_halo_blur;
+    highp float u_padding;
+};
+
+layout (std140) uniform SymbolDrawableTilePropsUBO {
+    bool u_is_text;
+    bool u_is_halo;
+    bool u_pitch_with_map;
+    bool u_is_size_zoom_constant;
+    bool u_is_size_feature_constant;
+    highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
+    highp float u_size; // used when size is both zoom and feature constant
+    bool u_pad3;
+};
+
+layout (std140) uniform SymbolDrawableInterpolateUBO {
+    highp float u_fill_color_t;
+    highp float u_halo_color_t;
+    highp float u_opacity_t;
+    highp float u_halo_width_t;
+    highp float u_halo_blur_t;
+    highp float u_pad4,u_pad5,u_pad6;
+};
+
 uniform sampler2D u_texture;
-uniform highp float u_gamma_scale;
-uniform lowp float u_device_pixel_ratio;
-uniform bool u_is_text;
 
 in vec2 v_data0;
 in vec3 v_data1;
-
-#ifndef HAS_UNIFORM_u_fill_color
-in highp vec4 fill_color;
-#else
-uniform highp vec4 u_fill_color;
-#endif
-#ifndef HAS_UNIFORM_u_halo_color
-in highp vec4 halo_color;
-#else
-uniform highp vec4 u_halo_color;
-#endif
-#ifndef HAS_UNIFORM_u_opacity
-in lowp float opacity;
-#else
-uniform lowp float u_opacity;
-#endif
-#ifndef HAS_UNIFORM_u_halo_width
-in lowp float halo_width;
-#else
-uniform lowp float u_halo_width;
-#endif
-#ifndef HAS_UNIFORM_u_halo_blur
-in lowp float halo_blur;
-#else
-uniform lowp float u_halo_blur;
-#endif
 
 void main() {
     #ifdef HAS_UNIFORM_u_fill_color

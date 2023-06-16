@@ -399,6 +399,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
