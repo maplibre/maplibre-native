@@ -37,14 +37,17 @@ class OfflineManagerTest : AppCenter() {
     @Before
     @After
     fun resetDatabase() {
+        val latch = CountDownLatch(1)
         OfflineManager.getInstance(context).resetDatabase(object : OfflineManager.FileSourceCallback {
             override fun onSuccess() {
+                latch.countDown()
             }
 
             override fun onError(message: String) {
                 throw IOException("Unable to reset database before / after tests.")
             }
         })
+        latch.await()
     }
 
     @Test(timeout = 30_000)
