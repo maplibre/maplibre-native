@@ -11,8 +11,7 @@
 namespace mbgl {
 
 class Color;
-template <typename VertexType>
-class Segment;
+class SegmentBase;
 
 namespace gfx {
 
@@ -114,10 +113,8 @@ public:
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
 
-    using TexSourceFunc = std::function<gfx::Texture2DPtr()>;
-
     /// @brief Provide a function to get the current texture
-    void setTextureSource(int32_t location, TexSourceFunc);
+    void setTextureSource(Drawable::TexSourceFunc value) { textureSource = std::move(value); }
 
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
@@ -136,7 +133,8 @@ public:
                             std::size_t vertexOffset,
                             std::size_t vertexLength);
 
-    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<Segment<void>>&);
+    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<SegmentBase>&);
+    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
 
     /// Add lines based on existing vertices
     void addLines(const std::vector<uint16_t>& indexes,
@@ -155,7 +153,7 @@ protected:
     virtual UniqueDrawable createDrawable() const = 0;
 
     /// Create a segment wrapper
-    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, Segment<void>&&) = 0;
+    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
@@ -177,7 +175,7 @@ protected:
     ColorAttrMode colorAttrMode = ColorAttrMode::PerVertex;
     VertexAttributeArray vertexAttrs;
     gfx::Drawable::Textures textures;
-    std::vector<TexSourceFunc> textureSources;
+    Drawable::TexSourceFunc textureSource;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

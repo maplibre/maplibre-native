@@ -48,7 +48,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     }
 
     context.setColorMode(parameters.colorModeForRenderPass());
-    context.setCullFaceMode(gfx::CullFaceMode::disabled());
+    context.setCullFaceMode(getCullFaceMode());
 
     bindUniformBuffers();
     bindTextures();
@@ -58,7 +58,7 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
-        if (glSeg.getVertexArray().isValid()) {
+        if (mlSeg.indexLength > 0 && glSeg.getVertexArray().isValid()) {
             glContext.bindVertexArray = glSeg.getVertexArray().getID();
             glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
@@ -111,6 +111,7 @@ void DrawableGL::bindUniformBuffers() const {
         for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
             if (!uniformBuffer) {
+                assert(false);
                 continue;
             }
             element.second->bindBuffer(*uniformBuffer);
@@ -162,8 +163,14 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
             auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
             const auto& mlSeg = glSeg.getSegment();
 
+            if (mlSeg.indexLength == 0) {
+                continue;
+            }
+
             for (auto& binding : bindings) {
-                binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                if (binding) {
+                    binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                }
             }
 
             auto vertexArray = glContext.createVertexArray();
@@ -176,14 +183,14 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         };
     }
 
-    for (std::size_t i = 0; i < textureSources.size(); ++i) {
-        if (const auto& source = textureSources[i]) {
-            setTexture(source(), static_cast<int32_t>(i));
+    if (const auto src = getTextureSource()) {
+        for (auto& pair : src()) {
+            setTexture(std::move(pair.second), pair.first);
         }
     }
 
     const bool texturesNeedUpload = std::any_of(
-        textures.begin(), textures.end(), [](const auto& tex) { return tex.texture->needsUpload(); });
+        textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
 
     if (texturesNeedUpload) {
         uploadTextures();
@@ -191,21 +198,28 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 }
 
 void DrawableGL::uploadTextures() const {
-    for (const auto& tex : textures) {
-        std::static_pointer_cast<gl::Texture2D>(tex.texture)->upload();
+    for (const auto& pair : textures) {
+        if (const auto& tex = pair.second) {
+            std::static_pointer_cast<gl::Texture2D>(tex)->upload();
+        }
     }
 }
 
 void DrawableGL::bindTextures() const {
     int32_t unit = 0;
-    for (const auto& tex : textures) {
-        std::static_pointer_cast<gl::Texture2D>(tex.texture)->bind(tex.location, unit++);
+    for (const auto& pair : textures) {
+        if (const auto& tex = pair.second) {
+            const auto& location = pair.first;
+            std::static_pointer_cast<gl::Texture2D>(tex)->bind(location, unit++);
+        }
     }
 }
 
 void DrawableGL::unbindTextures() const {
-    for (const auto& tex : textures) {
-        std::static_pointer_cast<gl::Texture2D>(tex.texture)->unbind();
+    for (const auto& pair : textures) {
+        if (const auto& tex = pair.second) {
+            std::static_pointer_cast<gl::Texture2D>(tex)->unbind();
+        }
     }
 }
 

@@ -59,13 +59,13 @@ MLN_EXPORT
 /**
  Returns default style as NSURL
  */
-+ (NSURL*) defaultStyleURL;
++ (nullable NSURL*) defaultStyleURL;
 
 /** Get predefined style by name
  
  @param withStyleName style name.
  */
-+ (MLNDefaultStyle*) predefinedStyle:(NSString*)withStyleName;
++ (nullable MLNDefaultStyle*) predefinedStyle:(NSString*)withStyleName;
 
 // MARK: Accessing Metadata About the Style
 
