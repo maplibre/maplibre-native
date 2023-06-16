@@ -46,6 +46,7 @@ public:
 
     // Binds the atlas texture to the GPU, and uploads data if it is out of date.
     gfx::TextureBinding textureBinding() const;
+    const std::shared_ptr<gfx::Texture2D>& getTexture() const;
 
     // Returns the size of the texture image.
     Size getSize() const;
