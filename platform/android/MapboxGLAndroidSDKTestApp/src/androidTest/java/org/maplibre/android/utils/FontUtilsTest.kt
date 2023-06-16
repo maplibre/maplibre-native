@@ -25,7 +25,7 @@ class FontUtilsTest {
 
     @Test
     fun testExtractedFontShouldBeNull() {
-        val actual = FontUtils.extractValidFont(null)
+        val actual = FontUtils.extractValidFont()
         Assert.assertNull(actual)
     }
 }

@@ -41,7 +41,7 @@ public class FontUtils {
    * @return the selected fon
    */
   public static String extractValidFont(String... fontNames) {
-    if (fontNames == null) {
+    if (fontNames.length == 0) {
       return null;
     }
 
