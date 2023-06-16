@@ -235,7 +235,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         // SDF line
         else if (drawable.getShader()->getUniformBlocks().get(std::string(LineSDFUBOName))) {
             if (const auto& data = drawable.getData()) {
-                const gfx::LineDrawableData& lineData = static_cast<const gfx::LineDrawableData&>(*data.value());
+                const gfx::LineDrawableData& lineData = static_cast<const gfx::LineDrawableData&>(*data);
                 const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
                     evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, lineData.linePatternCap);
 
