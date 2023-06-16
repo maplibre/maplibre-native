@@ -231,7 +231,6 @@ const std::shared_ptr<gfx::Texture2D>& DashPatternTexture::getTexture() const {
     return (std::holds_alternative<gfx::Texture2DPtr>(texture)) ? std::get<gfx::Texture2DPtr>(texture) : noTexture;
 }
 
-
 Size DashPatternTexture::getSize() const {
     if (std::holds_alternative<AlphaImage>(texture)) {
         return std::get<AlphaImage>(texture).size;

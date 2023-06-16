@@ -524,8 +524,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         std::optional<ImagePosition> patternPosB = tile.getPattern(linePatternValue.to.id());
         LinePatternTilePropertiesUBO linePatternTilePropertiesUBO{
             /*pattern_from =*/patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-            /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}
-        };
+            /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
 
         // update existing drawables
         tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
@@ -569,7 +568,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineOffset,
                                                                                   LineWidth,
                                                                                   LineFloorWidth>(paintPropertyBinders,
-                                                                                               evaluated);
+                                                                                                  evaluated);
             auto lineSDFShader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!lineSDFShader) continue;
 
@@ -610,7 +609,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // finish
             builder->flush();
-            
+
             const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
                                                                                           : LinePatternCap::Square;
             for (auto& drawable : builder->clearDrawables()) {
