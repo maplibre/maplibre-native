@@ -355,12 +355,6 @@ gfx::TexturePixelType Enum<gfx::TexturePixelType>::from(const platform::GLint va
             return gfx::TexturePixelType::RGBA;
         case GL_RED:
             return gfx::TexturePixelType::Alpha;
-        case GL_STENCIL_INDEX:
-            return gfx::TexturePixelType::Stencil;
-        case GL_DEPTH_COMPONENT:
-            return gfx::TexturePixelType::Depth;
-        case GL_LUMINANCE:
-            return gfx::TexturePixelType::Luminance;
     }
     return {};
 }
@@ -372,12 +366,6 @@ platform::GLenum Enum<gfx::TexturePixelType>::to(const gfx::TexturePixelType val
             return GL_RGBA;
         case gfx::TexturePixelType::Alpha:
             return GL_RED;
-        case gfx::TexturePixelType::Stencil:
-            return GL_STENCIL_INDEX;
-        case gfx::TexturePixelType::Depth:
-            return GL_DEPTH_COMPONENT;
-        case gfx::TexturePixelType::Luminance:
-            return GL_LUMINANCE;
     }
     return GL_INVALID_ENUM;
 }

@@ -142,9 +142,6 @@ enum class BufferUsageType : uint8_t {
 enum class TexturePixelType : uint8_t {
     RGBA,
     Alpha,
-    Stencil,
-    Depth,
-    Luminance,
 };
 
 enum class TextureChannelDataType : uint8_t {
