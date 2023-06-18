@@ -1,4 +1,4 @@
-# Design Proposal Template
+# Design Proposal for Android Annotations API
 
 ## Motivation
 
