@@ -34,7 +34,7 @@ For a beginner, the concept of `AnnotationManager`s is hard to grasp. The follow
 2. Create `SymbolOptions`
 3. Create `Symbol` using `SymbolOptions` on `SymbolManager`
 
-Here we can observe a negative leak of internal implementation details – that one manager equals one layer in style – onto the user-facing API.Much more straight-forward is the following:
+Here we can observe a negative leak of internal implementation details – that one manager equals one layer in style – onto the user-facing API. Much more straight-forward is the following:
 
 1. Create `Symbol`
 2. Add `Symbol` to map
@@ -72,7 +72,7 @@ Symbol(latLng).apply {
 
 ### Z layers
 
-Once we imagine that users need not interact with `*Manager` classes, and that the map object has an overview over all annotations that it contains, it becomes obvious that users might want to assign differnt annotations different Z layer heights, without manually adding the objects to different managers (which would be needed to mix objects of different types) →(G6 **ease**).
+Once we imagine that users need not interact with `*Manager` classes, and that the map object has an overview over all annotations that it contains, it becomes obvious that users might want to assign different annotations different Z layer heights, without manually adding the objects to different managers (which would be needed to mix objects of different types) →(G6 **ease**).
 
 They might also want to be able to set properties that are not data-driven on a per-item basis, even if this causes multiple layers to become necessary. The map object should automatically group the objects it receives into layers of compatible items and create appropriate `*Manager` objects for the user →(G4 **power**).
 
@@ -97,7 +97,7 @@ The proposed solution is to create a `ClusterGroup` or `CollisionGroup` that can
 
 ### `*Manager`
 
-What about the `*Manager` API? It is no longer a user-facing forefront and primarily for advanced users. Much of the functionality that had previously been set on a `*Manager` level should be moved to either the annotation objects directly (through automatic grouping into `*Manager` objects) or, in the case of `SymbolManager`, to `CollisionGroup`. It should also keep its functions that offer expert functionality like `create` with GeoJSON as a parameter →(G4 **power**). Advanced users have a better understanding of the underlying layer operations and the style spec. In this sense, they are mostly for internal use and are only exposed to facilitate special-need features.
+What about the `*Manager` API? It is no longer a user-facing forefront and primarily for advanced users. Much of the functionality that had previously been set on a `*Manager` level should be moved to either to the annotation objects directly (through automatic grouping into `*Manager` objects) or, in the case of `SymbolManager`, to `CollisionGroup`. It should also keep its functions that offer expert functionality like `create` with GeoJSON as a parameter →(G4 **power**). Advanced users have a better understanding of the underlying layer operations and the style spec. In this sense, they are mostly for internal use and are only exposed to facilitate special-need features.
 
 For this reason, we shall not revise its API at this time, and instead only Kotlinify its getters and setters.
 
@@ -105,7 +105,7 @@ For this reason, we shall not revise its API at this time, and instead only Kotl
 
 Object properties that have a default value should not be set to `null`, but to their default value instead →(G3 **Kotlin-first**). This makes it easier for users to find out what value is set by default →(G5 **learnability**).
 
-The `setUsedDataDrivenProperties` should check for variations to the default values instead of for `null`. The default values should be set as constants and be kept in sync with any changes to default values in the renderer.
+The `setUsedDataDrivenProperties` mechanism should check for variations to the default values instead of for `null`. The default values should be set as constants and be kept in sync with any changes to default values in the style specifications.
 
 `null` values should be used to signal to users that a property is not set and therefore not used (e.g. `halo` value unset = no halo; but `color` of a `Text` is never unset, instead it defaults to `Color.BLACK` per spec).
 
@@ -113,31 +113,29 @@ The `setUsedDataDrivenProperties` should check for variations to the default val
 
 The annotations API currently uses code generation to generate the annotation objects. This should no longer be done in the future for the following reasons.
 
-* Code generation incentivises non-specific, flat APIs where hiearchical objects or other specific constructs may make more sense.
-* In a similar way, it makes it harder to assign documentation to specific methods →(G5 **learnability**).
+* Code generation incentivises non-specific, flat APIs – even where hiearchical objects or other specific constructs make more sense.
+* In a similar way, it makes it harder to assign documentation to specific method →(G5 **learnability**). The current generated docs don't read like they were written with the Android implementation in mind, because they are copied from the spec.
 * When switching to Kotlin and when removing the `*Options` classes (G3 **Kotlin-first**), boilerplate code is reduced by a significant amount.
 
 Due to these reasons, it is simpler to reach our goals without code generation.
 
 ## API Modifications
 
-The following lists concrete class defintions that should be available to users. All properties are to be understood as settable and gettable by appropriate (G3 **Kotlin-first**) getters and setters. Non-nullable variables are either the default value that is currently in the code or (optional) constructor parameters. Nullable `val`s are optional constructor parameters with default value `null`.
+The following list shows concrete public properties or functions that should be available to users. All properties are to be understood as settable and gettable by appropriate (G3 **Kotlin-first**) getters and setters. Non-nullable variables are either the provided default value from the spec, or (optional) constructor parameters. Nullable `val`s are optional constructor parameters with default value `null`.
 
-(NDD) represents a property that is not data-driven, such that two items that do not match in all (NDD) properties must not be placed in the same layer (and are therefore not handled by the same manager).
+(NDD) represents a property that is not data-driven, such that two items that do not match in all (NDD) properties must not be handled by the same manager and can not be placed in the same layer.
 
-* `AnnotationManager`
-    * to be specified
-* `SymbolManager`, `FillManager`, `CircleManager`, `LineManager`
+* `AnnotationManager`, `SymbolManager`, `FillManager`, `CircleManager`, `LineManager`
     * Kotlinified using Kotlin getters and setters, but essentially unchanged
 * `Annotation`
     * `var zLayer: Int` (default `0`)
     * `var draggable: Boolean` (default `false`)
     * `var data: JsonElement?`
-    * `var clickListener: OnAnnotationClickListener`
-    * `var dragListener: OnAnnotationDragListener`
-    * `var longClickListener: OnAnnotationLongClickListener`
+    * `var clickListener: OnAnnotationClickListener?`
+    * `var dragListener: OnAnnotationDragListener?`
+    * `var longClickListener: OnAnnotationLongClickListener?`
 * `Symbol extends Annotation`
-    * `var position: LatLng` (non-optional)
+    * `var position: LatLng` (mandatory constructor parameter)
     * `var icon: Icon?`
     * `var text: Text?`
 * `Icon`
@@ -187,8 +185,6 @@ The following lists concrete class defintions that should be available to users.
     * `val pitchAlignment: Alignment?` (`null` represents `"auto"`) (NDD)
     * `val lineHeight: Float` (default `1.2f`) (NDD)
 * `enum Justify`: `AUTO`, `LEFT`, `CENTER`, `RIGHT` (inner class of `Text`)
-* `sealed class Anchor`
-* `enum SingleAnchor extends Anchor
 * `enum Transform`: `UPPERCASE`, `LOWERCASE` (inner class of `Text`)
 * `sealed class Offset` (inner class of `Text`)
 * `RadialOffset extends Offset` (inner class of `Text`)
@@ -270,6 +266,7 @@ The following lists concrete class defintions that should be available to users.
     * `add(manager: AnnotationManager, layerBelow: String)` (added above the layer specified by the parameter)
     * `remove(AnnotationManager...)`
     * `removeAllManagers()`
+    * analog methods for `ClusterGroup` and `CollisionGroup`: `add, remove, removeAllGroups`
 
 ## Migration Plan and Compatibility
 
