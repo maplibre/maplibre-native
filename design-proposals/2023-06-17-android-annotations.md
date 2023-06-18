@@ -47,6 +47,8 @@ A second advantage is that the user need not worry about multiple managers for d
 
 Note that the direction in which things are added is reversed: in this proposal, we add `Symbol` to map, and not map creates `Symbol`. If a user decides to use `SymbolManager` directly, they add the `SymbolManager` to the map instead of passing the map to the `SymbolManager` during instantiation. This is possible only because we are implementing the API as a part of `maplibre-native` (G1).
 
+This reversed approach allows us to rewrite similar calls to the ancient, Google Maps-style API that is currently part of `maplibre-native` to redirect them to the new implementation. This way, we can remove the legacy implementation and deduplicate the codebase.
+
 A dependency injection pattern should be used to add a reference to the map to the annotation, such that it can notify the map on updates of itself. No annotation can be added to multiple maps, otherwise an exception is thrown.
 
 ### State consistency and learnability
@@ -95,7 +97,9 @@ The proposed solution is to create a `ClusterGroup` or `CollisionGroup` that can
 
 ### `*Manager`
 
-What about the `*Manager` API? It is no longer a user-facing forefront and primarily for advanced users. It should also keep its functions that offer expert functionality like `create` with GeoJSON as a parameter. For this reason, we shall not revise its API at this time, and instead only Kotlinify its getters and setters.
+What about the `*Manager` API? It is no longer a user-facing forefront and primarily for advanced users. Much of the functionality that had previously been set on a `*Manager` level should be moved to either the annotation objects directly (through automatic grouping into `*Manager` objects) or, in the case of `SymbolManager`, to `CollisionGroup`. It should also keep its functions that offer expert functionality like `create` with GeoJSON as a parameter →(G4 **power**). Advanced users have a better understanding of the underlying layer operations and the style spec. In this sense, they are mostly for internal use and are only exposed to facilitate special-need features.
+
+For this reason, we shall not revise its API at this time, and instead only Kotlinify its getters and setters.
 
 ### Non-null by default
 
@@ -142,7 +146,7 @@ The following lists concrete class defintions that should be available to users.
     * `val opacity: Float` (default `1f`)
     * `val fitText: FitText` (default `FitText(false, false, Padding.ZERO)`) (NDD)
     * `val keepUpright: Boolean` (default `false`) (NDD)
-    * `val pitchAlignment: PitchAlignment` (default `AUTO`) (NDD)
+    * `val pitchAlignment: Alignment?` (`null` represents `"auto"`) (NDD)
 * `enum Anchor`: `LEFT`, `RIGHT`, `CENTER`, `TOP_LEFT`, `TOP_RIGHT`, `BOTTOM_LEFT`, `BOTTOM_RIGHT` (inner class of `Icon` and `Text`)
 * `FitText` (inner class of `Icon`)
     * `val width: Boolean`
@@ -154,7 +158,7 @@ The following lists concrete class defintions that should be available to users.
     * `val bottom: Float`
     * `val left: Float`
     * constant `ZERO = Padding(0, 0, 0, 0)`
-* `enum PitchAlignment`: `MAP`, `VIEWPORT`, `AUTO` (inner class of `Icon` and `Text`)
+* `enum Alignment`: `MAP`, `VIEWPORT`
 * `SdfIcon`
     * `val color: @ColorInt Int` (non-optional constructor parameter)
     * `val halo: Halo?`
@@ -177,7 +181,7 @@ The following lists concrete class defintions that should be available to users.
     * `val opacity: Float` (default `0f`)
     * `val color: @ColorInt Int` (default `Color.BLACK`)
     * `val halo: Halo?`
-    * `val pitchAlignment: PitchAlignment` (default `AUTO`) (NDD)
+    * `val pitchAlignment: Alignment?` (`null` represents `"auto"`) (NDD)
     * `val lineHeight: Float` (default `1.2f`) (NDD)
 * `enum Justify`: `AUTO`, `LEFT`, `CENTER`, `RIGHT` (inner class of `Text`)
 * `sealed class Anchor`
@@ -203,7 +207,7 @@ The following lists concrete class defintions that should be available to users.
     * `var dashArray: Float[]?` (throws if `.length % 2 != 0`) (NDD)
 * `enum Join` (inner class of `Line`): `BEVEL`, `ROUND`, `MITER`
 * `enum Cap` (inner class of `Line`): `BUTT`, `ROUND`, `SQUARE`
-* `Translate` (inner class of `Line` and `Fill`)
+* `Translate` (inner class of `Line`, `Circle` and `Fill`)
     * `val offset: PointF` (maps to `line-translate`)
     * `val anchor: Translate.Anchor`
 * `enum Anchor` (inner class of `Translate`): `MAP`, `VIEWPORT`
@@ -222,20 +226,46 @@ The following lists concrete class defintions that should be available to users.
     * `var blur: Float?` (throw if <= 0)
     * `var opacity: Float` (default `1f`)
     * `var stroke: Stroke?`
-* `Stroke` (inner class of Circle)
+    * `var translate: Translate?` (NDD)
+    * `var pitchScale: Alignment` (default `MAP`) (NDD)
+    * `var pitchAlignment: Alignment` (default `VIEWPORT`) (NDD)
+* `Stroke` (inner class of `Circle`)
     * `val width: Float` (throws if <= 0)
     * `val color: @ColorInt Int` (default `Color.BLACK`)
     * `val opacity: Float` (default `1f`)
-* `ClusterGroup`
-    * *under construction*
+* `enum PitchScale` (inner class of `Circle`): `MAP`, `VIEWPORT`
+* `ClusterGroup` (defaults match former `ClusterOptions`)
+    * `val symbols: List<Symbol> by Delegates.observable(mutableListOf(), onChange = { _, _, new -> … })`
+    * `val colorLevels: Map<Int, /* @ColorInt */ Int> by Delegates.observable(mutableMapOf(Pair(0, Color.BLUE)), onChange = {_, _, new -> … })
+`
+    * `var radius: Int` (default `50`)
+    * `var maxZoom: Int` (default `14`)
+    * `var textColor: Expression` (default `Expression.color(Color.WHITE)`)
+    * `var textSize: Expression` (default `Expression.literal(12)`)
+    * `var textField: Expression` (default `Expression.toNumber(Expression.get("point_count"))`)
+    * provides list-like functionality (`add`, `addAll`, `remove`, `removeAll`, `get`, `getAll`) to add new `Symbol`s
 * `CollisionGroup`
-    *`val variableAnchor: Anchor[]` (default empty array)
-    * *under construction* – to be added: more `var`s from `SymbolManager`
+    * `val symbols: List<Symbol> by Delegates.observable(mutableListOf(), onChange = { _, _, new -> … })`
+    * `var symbolSpacing: Float` (default `250f`)
+    * `var symbolAvoidEdges: Boolean` (default `false`)
+    * `var iconAllowOverlap: Boolean` (default `false`)
+    * `var iconIgnorePlacement: Boolean` (default `false`)
+    * `var iconOptional: Boolean` (default `false`)
+    * `var iconPadding: Float` (default `2f`)
+    * `var textPadding: Float` (default `2f`)
+    * `var textAllowOverlap: Boolean` (default `false`)
+    * `var textIgnorePlacement: Boolean` (default `false`)
+    * `var textOptional: Boolean` (default `false`)
+    * `var textVariableAnchor: Anchor[]?` (throws on empty array)
 
 ## Migration Plan and Compatibility
 
-<!-- If your change is incompatible with existing APIs, draft a migration plan to help users adapting to the new version once your change is completed. -->
+Users who do not wish to migrate can continue using the old Plugins Annotation API, which is to be deprecated.
+
+Long-term, we aim for a removal of duplicate API from `maplibre-native`, as it had been deprecated for a while and we are to offer a similarly user-friendly alternative. As a migration path, we can rewrite existing old code to map to new code. This also allows us to deduplicate the internal implementation.
+
+One remaining task is to consider supporting an `InfoWindow`-like feature with our new API. This should be the last piece missing for feature parity with the very old version.
 
 ## Rejected Alternatives
 
-<!-- Discuss what alternatives to your proposed change you considered and why you rejected them.-->
+* Moving the existing code to `maplibre-native` without further considerations leads to chaos, because it would leave users with the choice between two rather mediocre APIs – one being mediocre by design, the other because it is deprecated. Additionally, it would leave the codebase with two confusingly similar codebases. With this proposal, we can offer one new and clean API, and redirect calls to the old API to the new one.
