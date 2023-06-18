@@ -43,9 +43,11 @@ This proposal facilitates exactly the second, easier version →(G5 **learnabili
 
 Users should be able to set click, drag and long-click listeners directly on annotations and not only on managers. Any manager listeners that consume the event should have priority.
 
+A second advantage is that the user need not worry about multiple managers for different types of objects. For instance, when adding a polygon as well as a marker, they would need to handle a `SymbolManger` as well as a `FillManager`.
+
 Note that the direction in which things are added is reversed: in this proposal, we add `Symbol` to map, and not map creates `Symbol`. If a user decides to use `SymbolManager` directly, they add the `SymbolManager` to the map instead of passing the map to the `SymbolManager` during instantiation. This is possible only because we are implementing the API as a part of `maplibre-native` (G1).
 
-A second advantage is that the user need not worry about multiple managers for different types of objects. For instance, when adding a polygon as well as a marker, they would need to handle a `SymbolManger` as well as a `FillManager`.
+A dependency injection pattern should be used to add a reference to the map to the annotation, such that it can notify the map on updates of itself. No annotation can be added to multiple maps, otherwise an exception is thrown.
 
 ### State consistency and learnability
 
@@ -59,7 +61,7 @@ As stated above, we want to be able to instantiate annotation classes directly. 
 
 ```
 Symbol(latLng).apply {
-    icon = Icon(img)
+    icon = Icon(bitmap)
     text = "label"
 }.let { map.add(it) }
 ```
@@ -74,11 +76,34 @@ They might also want to be able to set properties that are not data-driven on a 
 
 If a user whishes to create a `*Manager` class themselves, they should be provided with the ability to insert their layer above or below a specific existing layer, or on top of a specific Z index. →(G4 **power**) All other annotations should be placed on top of all existing style layers.
 
+**Runtime considersations**:
+
+* The naive algorithm for grouping annotations runs in O(n²) with n as the total amount of annotations. However, through clever use of sorting algorithms, an implementation in O(n log n) is possible.
+* The current implementation runs in O(n) with n as the amount of items in a layer for each update.
+* In case a user needs this high efficiency (for displaying tens of thousands of markers), they should group their annotations in a manager themselves. Adding a manager on top should run in O(m) with m as the total amount of managers, then in O(n) with n as the amount of markers inside this manager's layer. So if only a constant amount of managers is used, the total is O(n).
+
+### Icons
+
+Users should not worry about manually adding icons to a layer's style →(G6 **ease**). For this reason, the API should take `Bitmap` objects (or, by extension, `Drawable`s that can be converted to `Bitmap`s) directly. Adding them to the style should happen automatically. Identical `Bitmap` objects should only be added once; the comparison is done using `Bitmap.sameAs` and an ID is generated automatically.
+
+
 ### `ClusterOptions` and symbol collisions
 
-This directly raises two more questions: how would users access the capabilities of `ClusterOptions`, and how can we set symbols to collide with each other (i.e. `setIconAllowOverlap(false)`)?
+Two more questions are to be raised: how would users access the capabilities of `ClusterOptions`, and how can we set symbols to collide with each other (i.e. `setIconAllowOverlap(false)`)?
 
 The proposed solution is to create a `ClusterGroup` or `CollisionGroup` that can be inserted to the at a specific Z index. It is forbidden to add two objects with conflicting, non-data-driven properties to the same `*Group`.
+
+### `*Manager`
+
+What about the `*Manager` API? It is no longer a user-facing forefront and primarily for advanced users. It should also keep its functions that offer expert functionality like `create` with GeoJSON as a parameter. For this reason, we shall not revise its API at this time, and instead only Kotlinify its getters and setters.
+
+### Non-null by default
+
+Object properties that have a default value should not be set to `null`, but to their default value instead →(G3 **Kotlin-first**). This makes it easier for users to find out what value is set by default →(G5 **learnability**).
+
+The `setUsedDataDrivenProperties` should check for variations to the default values instead of for `null`. The default values should be set as constants and be kept in sync with any changes to default values in the renderer.
+
+`null` values should be used to signal to users that a property is not set and therefore not used (e.g. `halo` value unset = no halo; but `color` of a `Text` is never unset, instead it defaults to `Color.BLACK` per spec).
 
 ### On code generation
 
@@ -92,71 +117,120 @@ Due to these reasons, it is simpler to reach our goals without code generation.
 
 ## API Modifications
 
-The following lists concrete class defintions that should be available to users. All properties are to be understood as settable and gettable by appropriate (G3 **Kotlin-first**) getters and setters. Non-nullable variables are either the default value that is currently in the code or constructor parameters. Nullable `val`s are optional constructor parameters with default value `null`.
+The following lists concrete class defintions that should be available to users. All properties are to be understood as settable and gettable by appropriate (G3 **Kotlin-first**) getters and setters. Non-nullable variables are either the default value that is currently in the code or (optional) constructor parameters. Nullable `val`s are optional constructor parameters with default value `null`.
 
 (NDD) represents a property that is not data-driven, such that two items that do not match in all (NDD) properties must not be placed in the same layer (and are therefore not handled by the same manager).
 
 * `AnnotationManager`
     * to be specified
+* `SymbolManager`, `FillManager`, `CircleManager`, `LineManager`
+    * Kotlinified using Kotlin getters and setters, but essentially unchanged
 * `Annotation`
-    * `var zLayer: Int`
-    * `var draggable: Boolean`
+    * `var zLayer: Int` (default `0`)
+    * `var draggable: Boolean` (default `false`)
     * `var data: JsonElement?`
 * `Symbol extends Annotation`
-    * `var latLng: LatLng`
+    * `var position: LatLng` (non-optional)
     * `var icon: Icon?`
     * `var text: Text?`
 * `Icon`
-    * `val image: Image`
-    * `val size: Float?`
-    * `val rotate: Float?`
-    * `val offset: PointF?`
-    * `val anchor: Anchor?`
-    * `val opacity: Float?`
-    * `val fitText: FitText?` (NDD)
-    * `val keepUpright: Boolean?` (NDD)
-    * `val pitchAlignment: PitchAlignment?` (NDD)
+    * `val image: Bitmap` (constructor alternatively takes and converts `Drawable`)
+    * `val size: Float` (default `1f`)
+    * `val rotate: Float` (default 0)
+    * `val offset: PointF` (default `PointF(0f, 0f)`)
+    * `val anchor: Anchor` (default `CENTER`)
+    * `val opacity: Float` (default `1f`)
+    * `val fitText: FitText` (default `FitText(false, false, Padding.ZERO)`) (NDD)
+    * `val keepUpright: Boolean` (default `false`) (NDD)
+    * `val pitchAlignment: PitchAlignment` (default `AUTO`) (NDD)
 * `enum Anchor`: `LEFT`, `RIGHT`, `CENTER`, `TOP_LEFT`, `TOP_RIGHT`, `BOTTOM_LEFT`, `BOTTOM_RIGHT` (inner class of `Icon` and `Text`)
 * `FitText` (inner class of `Icon`)
     * `val width: Boolean`
     * `val height: Boolean`
-    * `val padding: Padding?`
+    * `val padding: Padding` (default `Padding.ZERO`)
 * `Padding` (inner class of FitText)
     * `val top: Float`
     * `val right: Float`
     * `val bottom: Float`
     * `val left: Float`
+    * constant `ZERO = Padding(0, 0, 0, 0)`
 * `enum PitchAlignment`: `MAP`, `VIEWPORT`, `AUTO` (inner class of `Icon` and `Text`)
 * `SdfIcon`
-    * `val color: @ColorInt Int?`
+    * `val color: @ColorInt Int` (non-optional constructor parameter)
     * `val halo: Halo?`
 * `Image`: to be specified
 * `Halo`
-    * `val color: @ColorInt Int`
-    * `val width: @ColorInt Int?`
-    * `val blur: Float?`
+    * `val width: @ColorInt Int` (default `0` would represent no halo, so non-optional constructor parameter; throw if a number <= 0 is provided)
+    * `val color: @ColorInt Int` (non-optional constructor parameter)
+    * `val blur: Float?` (throw if <= 0)
 * `Text`
     * `val string: String`
-    * `val font: String[]?` TODO
-    * `val size: Float?`
-    * `val maxWidth: Float?`
-    * `val letterSpacing: Float?`
-    * `val justify: Justify?`
-    * `val radialOffset: Float?`
-    * `val anchor: Anchor?`
-    * `val rotate: Float?`
-    * `val transform: Transform?`
-    * `val offset: PointF?`
-    * `val opacity: Float?`
-    * `val color: @ColorInt Int?`
+    * `val font: String[]?` (throws if empty array is provided or if added to a map which does not have all the fonts in the font stack)
+    * `val size: Float` (default `16f`)
+    * `val maxWidth: Float` (default `10f`)
+    * `val letterSpacing: Float` (default `0f`)
+    * `val justify: Justify` (default `CENTER`)
+    * `val anchor: Anchor` (default `CENTER`)
+    * `val rotate: Float` (default `0f` in degrees)
+    * `val transform: Transform?` (`null` represents `NONE`)
+    * `val offset: Offset?`
+    * `val opacity: Float` (default `0f`)
+    * `val color: @ColorInt Int` (default `Color.BLACK`)
     * `val halo: Halo?`
-    * `val pitchAlignment: PitchAlignment?` (NDD)
-    * `val lineHeight: Float?` (NDD)
-    * `val variableAnchor: Anchor[]?` (NDD)
-    * `val maxAngle: Float?` (NDD)
-    * `val keepUpright: Boolean?` (NDD)
+    * `val pitchAlignment: PitchAlignment` (default `AUTO`) (NDD)
+    * `val lineHeight: Float` (default `1.2f`) (NDD)
 * `enum Justify`: `AUTO`, `LEFT`, `CENTER`, `RIGHT` (inner class of `Text`)
-* `enum Transform`: `NONE`, `UPPERCASE`, `LOWERCASE` (inner class of `Text`)
+* `sealed class Anchor`
+* `enum SingleAnchor extends Anchor
+* `enum Transform`: `UPPERCASE`, `LOWERCASE` (inner class of `Text`)
+* `sealed class Offset` (inner class of `Text`)
+* `RadialOffset extends Offset` (inner class of `Text`)
+    * `val offset: Float`
+* `AbsoluteOffset extends Offset` (inner class of `Text`)
+    * `val offset: PointF`
+* `Line`
+    * `var path: List<LatLng>`
+    * `var join: Join` (default `MITER`)
+    * `var opacity: Float` (default `1f`)
+    * `var color: @ColorInt Int` (default `Color.BLACK`)
+    * `var width: Float` (default `1f`)
+    * `var gap: Float?` (throws if <= 0)
+    * `var offset: Float` (default `0f`)
+    * `var blur: Float?` (throws if <= 0)
+    * `var pattern: Bitmap?`
+    * `var cap: Cap` (default `BUTT`) (NDD)
+    * `var translate: Translate?` (NDD)
+    * `var dashArray: Float[]?` (throws if `.length % 2 != 0`) (NDD)
+* `enum Join` (inner class of `Line`): `BEVEL`, `ROUND`, `MITER`
+* `enum Cap` (inner class of `Line`): `BUTT`, `ROUND`, `SQUARE`
+* `Translate` (inner class of `Line` and `Fill`)
+    * `val offset: PointF` (maps to `line-translate`)
+    * `val anchor: Translate.Anchor`
+* `enum Anchor` (inner class of `Translate`): `MAP`, `VIEWPORT`
+* `Fill`
+    * `var paths: List<List<LatLng>>`
+    * `var opacity: Float` (default `1f`)
+    * `var color: @ColorInt Int` (default `Color.BLACK`)
+    * `var outlineColor: @ColorInt Int?`
+    * `var pattern: Bitmap?` (note: if set, `outlineColor` is ignored)
+    * `var antialias: Boolean` (default `true`) (NDD)
+    * `var translate: Translate?` (NDD)
+* `Circle`
+    * `var center: LatLng`
+    * `var radius: Float` (default `5f`, in pixels)
+    * `var color: @ColorInt Int` (default `Color.BLACK`)
+    * `var blur: Float?` (throw if <= 0)
+    * `var opacity: Float` (default `1f`)
+    * `var stroke: Stroke?`
+* `Stroke` (inner class of Circle)
+    * `val width: Float` (throws if <= 0)
+    * `val color: @ColorInt Int` (default `Color.BLACK`)
+    * `val opacity: Float` (default `1f`)
+* `ClusterGroup`
+    * *under construction*
+* `CollisionGroup`
+    *`val variableAnchor: Anchor[]` (default empty array)
+    * *under construction* – to be added: more `var`s from `SymbolManager`
 
 ## Migration Plan and Compatibility
 
