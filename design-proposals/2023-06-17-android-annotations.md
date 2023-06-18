@@ -72,11 +72,11 @@ Symbol(latLng).apply {
 
 ### Z layers
 
-Once we imagine that users need not interact with `*Manager` classes, and that the map object has an overview over all annotations that it contains, it becomes obvious that users might want to assign differnt annotations different Z layer heights, without manually adding the objects to different managers (which would be needed to mix objects of different types). →(G6 **ease**)
+Once we imagine that users need not interact with `*Manager` classes, and that the map object has an overview over all annotations that it contains, it becomes obvious that users might want to assign differnt annotations different Z layer heights, without manually adding the objects to different managers (which would be needed to mix objects of different types) →(G6 **ease**).
 
-They might also want to be able to set properties that are not data-driven on a per-item basis, even if this causes multiple layers to become necessary. The map object should automatically group the objects it receives into layers of compatible items and create appropriate `*Manager` objects for the user. →(G4 **power**)
+They might also want to be able to set properties that are not data-driven on a per-item basis, even if this causes multiple layers to become necessary. The map object should automatically group the objects it receives into layers of compatible items and create appropriate `*Manager` objects for the user →(G4 **power**).
 
-If a user whishes to create a `*Manager` class themselves, they should be provided with the ability to insert their layer above or below a specific existing layer, or on top of a specific Z index. →(G4 **power**) All other annotations should be placed on top of all existing style layers.
+If a user whishes to create a `*Manager` class themselves, they should be provided with the ability to insert their layer above or below a specific existing layer, or on top of a specific Z index →(G4 **power**). All other annotations should be placed on top of all existing style layers.
 
 **Runtime considersations**:
 
