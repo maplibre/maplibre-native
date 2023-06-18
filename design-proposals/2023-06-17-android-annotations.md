@@ -64,7 +64,7 @@ As stated above, we want to be able to instantiate annotation classes directly. 
 ```
 Symbol(latLng).apply {
     icon = Icon(bitmap)
-    text = "label"
+    text = Text("label", color = Color.RED)
 }.let { map.add(it) }
 ```
 
@@ -133,6 +133,9 @@ The following lists concrete class defintions that should be available to users.
     * `var zLayer: Int` (default `0`)
     * `var draggable: Boolean` (default `false`)
     * `var data: JsonElement?`
+    * `var clickListener: OnAnnotationClickListener`
+    * `var dragListener: OnAnnotationDragListener`
+    * `var longClickListener: OnAnnotationLongClickListener`
 * `Symbol extends Annotation`
     * `var position: LatLng` (non-optional)
     * `var icon: Icon?`
@@ -192,7 +195,7 @@ The following lists concrete class defintions that should be available to users.
     * `val offset: Float`
 * `AbsoluteOffset extends Offset` (inner class of `Text`)
     * `val offset: PointF`
-* `Line`
+* `Line extends Annotation`
     * `var path: List<LatLng>`
     * `var join: Join` (default `MITER`)
     * `var opacity: Float` (default `1f`)
@@ -211,7 +214,7 @@ The following lists concrete class defintions that should be available to users.
     * `val offset: PointF` (maps to `line-translate`)
     * `val anchor: Translate.Anchor`
 * `enum Anchor` (inner class of `Translate`): `MAP`, `VIEWPORT`
-* `Fill`
+* `Fill extends Annotation`
     * `var paths: List<List<LatLng>>`
     * `var opacity: Float` (default `1f`)
     * `var color: @ColorInt Int` (default `Color.BLACK`)
@@ -219,7 +222,7 @@ The following lists concrete class defintions that should be available to users.
     * `var pattern: Bitmap?` (note: if set, `outlineColor` is ignored)
     * `var antialias: Boolean` (default `true`) (NDD)
     * `var translate: Translate?` (NDD)
-* `Circle`
+* `Circle extends Annotation`
     * `var center: LatLng`
     * `var radius: Float` (default `5f`, in pixels)
     * `var color: @ColorInt Int` (default `Color.BLACK`)
@@ -257,6 +260,16 @@ The following lists concrete class defintions that should be available to users.
     * `var textIgnorePlacement: Boolean` (default `false`)
     * `var textOptional: Boolean` (default `false`)
     * `var textVariableAnchor: Anchor[]?` (throws on empty array)
+* `MapLibreMap` (in addition to its other methods)
+    * `add(Annotation...)`
+    * `remove(Annotation...)`
+    * `removeAllAnnotations()`
+    * `add(AnnotationManager)` (added as highest z layer)
+    * `add(manager: AnnotationManager, zLayer: Int)` (added on top of this z layer)
+    * `add(manager: AnnotationManager, layerAbove: String)` (added below the layer specified by the parameter)
+    * `add(manager: AnnotationManager, layerBelow: String)` (added above the layer specified by the parameter)
+    * `remove(AnnotationManager...)`
+    * `removeAllManagers()`
 
 ## Migration Plan and Compatibility
 
