@@ -37,40 +37,19 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
 }
 
+static const gfx::Texture2DPtr noTexture;
+
+const gfx::Texture2DPtr& Drawable::getTexture(int32_t location) const {
+    const auto hit = textures.find(location);
+    return (hit != textures.end()) ? hit->second : noTexture;
+}
+
 void Drawable::setTexture(std::shared_ptr<gfx::Texture2D> texture, int32_t location) {
-    for (auto& tex : textures) {
-        if (tex.location == location) {
-            tex.texture = std::move(texture);
-            return;
-        }
-    }
-    textures.emplace_back(std::move(texture), location);
+    textures.insert(std::make_pair(location, gfx::Texture2DPtr{})).first->second = std::move(texture);
 }
 
 void Drawable::removeTexture(int32_t location) {
-    for (auto it = textures.begin(); it != textures.end(); ++it) {
-        if (it->location == location) {
-            textures.erase(it);
-            return;
-        }
-    }
-}
-
-/// @brief Provide a function to get the current texture
-void Drawable::setTextureSource(int32_t location, TexSourceFunc source) {
-    textureSources.resize(std::max(textureSources.size(), static_cast<size_t>(location + 1)));
-    textureSources[location] = std::move(source);
-}
-
-static const Drawable::TexSourceFunc noSource;
-
-const Drawable::TexSourceFunc& Drawable::getTextureSource(int32_t location) const {
-    return (static_cast<std::size_t>(location) < textureSources.size()) ? textureSources[location] : noSource;
-}
-
-/// @brief Provide all texture sources at once
-void Drawable::setTextureSources(std::vector<TexSourceFunc> sources) {
-    textureSources = std::move(sources);
+    textures.erase(location);
 }
 
 } // namespace gfx
