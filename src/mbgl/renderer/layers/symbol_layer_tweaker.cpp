@@ -103,15 +103,17 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (!drawable.getData() || !*drawable.getData()) {
             return;
         }
+
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
+        const auto isText = (symbolData.symbolType == SymbolType::Text);
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(SymbolDrawablePaintUBOName, isText ? textBuffer : iconBuffer);
+
         const auto translate = evaluated.get<style::TextTranslate>();
         const auto anchor = evaluated.get<style::TextTranslateAnchor>();
-
-        drawable.mutableUniformBuffers().addOrReplace(SymbolDrawablePaintUBOName,
-                                                      symbolData.isText ? textBuffer : iconBuffer);
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         const auto matrix = getTileMatrix(

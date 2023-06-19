@@ -698,6 +698,26 @@ static SymbolDrawableInterpolateUBO buildInterp(bool isText,
             0};
 }
 
+static SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
+                                               const style::SymbolType symbolType,
+                                               const style::AlignmentType pitchAlignment,
+                                               const bool isHalo,
+                                               const float currentZoom) {
+    const bool isText = (symbolType == SymbolType::Text);
+    const ZoomEvaluatedSize size = isText ? bucket.textSizeBinder->evaluateForZoom(currentZoom)
+                                          : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
+    return {
+        /* .is_text = */ isText,
+        /* .is_halo = */ isHalo,
+        /* .pitch_with_map = */ (pitchAlignment == style::AlignmentType::Map),
+        /* .is_size_zoom_constant = */ size.isZoomConstant,
+        /* .is_size_feature_constant = */ size.isFeatureConstant,
+        /* .size_t = */ size.sizeT,
+        /* .size = */ size.size,
+        /* .padding = */ 0,
+    };
+}
+
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
@@ -765,23 +785,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
             tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
                 if (drawable.getData() && *drawable.getData()) {
-                    const auto& drawData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
-                    const auto isText = drawData.isText;
-                    const SymbolDrawableInterpolateUBO interpolateUBO = buildInterp(
-                        isText, currentZoom, bucketPaintProperties);
+                    const auto& drawData = static_cast<const gfx::SymbolDrawableData&>(**drawable.getData());
+                    const auto isText = (drawData.symbolType == SymbolType::Text);
+                    const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
+                    const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
-                    const ZoomEvaluatedSize size = isText ? bucket.textSizeBinder->evaluateForZoom(currentZoom)
-                                                          : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
-                    const SymbolDrawableTilePropsUBO tileUBO = {
-                        /* .is_text = */ isText,
-                        /* .is_halo = */ drawData.isHalo,
-                        /* .pitch_with_map = */ (drawData.pitchAlignment == style::AlignmentType::Map),
-                        /* .is_size_zoom_constant = */ size.isZoomConstant,
-                        /* .is_size_feature_constant = */ size.isFeatureConstant,
-                        /* .size_t = */ size.sizeT,
-                        /* .size = */ size.size,
-                        /* .padding = */ 0,
-                    };
+                    const auto tileUBO = buildTileUBO(
+                        bucket, drawData.symbolType, drawData.pitchAlignment, drawData.isHalo, currentZoom);
+                    const auto interpolateUBO = buildInterp(isText, currentZoom, bucketPaintProperties);
 
                     auto& uniforms = drawable.mutableUniformBuffers();
                     uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
@@ -792,7 +803,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     // See `Placement::updateBucketDynamicVertices`
                     if (const auto newAttribs = drawable.getVertexAttributes().clone()) {
                         if (auto& attr = newAttribs->getOrAdd("a_projected_pos")) {
-                            const auto& buffer = isText ? bucket.text : bucket.icon;
                             const auto count = buffer.dynamicVertices.elements();
                             attr->reserve(count);
                             for (auto i = 0ULL; i < count; ++i) {
@@ -808,23 +818,23 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         float serialKey = 1.0f;
-        auto addRenderables = [&, it = renderableSegments.begin()](const auto& segments,
+        auto addRenderables = [&, it = renderableSegments.begin()](const SymbolBucket::Buffer& buffer,
                                                                    const SymbolType type) mutable {
-            for (auto& segment : segments) {
+            for (auto& segment : buffer.segments) {
                 const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
                 if (type == SymbolType::Text) {
-                    assert(segment.vertexOffset + segment.vertexLength <= bucket.text.vertices.elements());
+                    assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices.elements());
                 } else {
-                    assert(segment.vertexLength + segment.vertexLength <= bucket.icon.vertices.elements());
+                    assert(segment.vertexLength + segment.vertexLength <= buffer.vertices.elements());
                 }
                 it = renderableSegments.emplace_hint(
                     it, std::ref(segment), tile, renderData, bucketPaintProperties, key, type, tileID.overscaledZ);
             }
         };
 
-        addRenderables(bucket.icon.segments, SymbolType::IconRGBA);
-        addRenderables(bucket.sdfIcon.segments, SymbolType::IconSDF);
-        addRenderables(bucket.text.segments, SymbolType::Text);
+        addRenderables(bucket.icon, SymbolType::IconRGBA);
+        addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
+        addRenderables(bucket.text, SymbolType::Text);
     }
 
     using RawVertexVec = std::vector<std::uint8_t>; // <int16_t, 4>
@@ -840,7 +850,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tile = renderable.tile;
         const auto tileID = tile.id.overscaleTo(renderable.overscaledZ);
         const auto& bucket = static_cast<const SymbolBucket&>(*renderable.renderData.bucket);
-        const auto& buffer = isText ? bucket.text : bucket.icon;
+        const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
@@ -850,9 +860,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto iconTextFit = layout.get<IconTextFit>();
         const bool variablePlacedIcon = bucket.hasVariablePlacement && iconTextFit != IconTextFitType::None;
         const auto symbolPlacement = layout.get<SymbolPlacement>();
-
-        const ZoomEvaluatedSize size = isText ? bucket.textSizeBinder->evaluateForZoom(currentZoom)
-                                              : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
 
         const auto buildVertices = [&](const SymbolBucket::Buffer& buffer_, RawVertexVec& dest) -> auto& {
             const std::vector<SymbolLayoutVertex>& src = buffer_.vertices.vector();
@@ -866,29 +873,37 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             return dest;
         };
 
+        constexpr auto posOffsetAttribName = "a_pos_offset";
+        constexpr auto dataAttibName = "a_data";
+        constexpr auto pixOffsetAttribName = "a_pixeloffset";
+        constexpr auto projPosAttribName = "a_projected_pos";
+        constexpr auto fadeOpacityAttribName = "a_fade_opacity";
+        constexpr auto texUniformName = "u_texture";
+        constexpr auto iconTexUniformName = "u_texture_icon";
+
         gfx::VertexAttributeArray attrs;
-        if (auto& attr = attrs.getOrAdd("a_data")) {
+        if (auto& attr = attrs.getOrAdd(dataAttibName)) {
             const auto count = buffer.vertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
                 attr->set(i, util::cast<float>(buffer.vertices.at(i).a2));
             }
         }
-        if (auto& attr = attrs.getOrAdd("a_pixeloffset")) {
+        if (auto& attr = attrs.getOrAdd(pixOffsetAttribName)) {
             const auto count = buffer.vertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
                 attr->set(i, util::cast<float>(buffer.vertices.at(i).a3));
             }
         }
-        if (auto& attr = attrs.getOrAdd("a_projected_pos")) {
+        if (auto& attr = attrs.getOrAdd(projPosAttribName)) {
             const auto count = buffer.dynamicVertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
                 attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
             }
         }
-        if (auto& attr = attrs.getOrAdd("a_fade_opacity")) {
+        if (auto& attr = attrs.getOrAdd(fadeOpacityAttribName)) {
             const auto count = buffer.opacityVertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
@@ -939,27 +954,26 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                builder->setVertexAttrName("a_pos_offset");
+                builder->setVertexAttrName(posOffsetAttribName);
             }
 
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(std::move(attrs));
 
-            constexpr auto firstAttribName = "a_pos_offset";
             const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                shaderGroup->getOrCreateShader(context, uniformProps, firstAttribName));
+                shaderGroup->getOrCreateShader(context, uniformProps, posOffsetAttribName));
             if (!shader) {
                 return;
             }
             builder->setShader(shader);
 
             if (const auto& atlases = tile.getAtlasTextures()) {
-                if (const auto samplerLocation = shader->getSamplerLocation("u_texture")) {
+                if (const auto samplerLocation = shader->getSamplerLocation(texUniformName)) {
                     builder->setTextureSource([=]() {
                         return gfx::Drawable::Textures{{*samplerLocation, isText ? atlases->glyph : atlases->icon}};
                     });
                 }
-                if (const auto samplerLocation = shader->getSamplerLocation("u_texture_icon")) {
+                if (const auto samplerLocation = shader->getSamplerLocation(iconTexUniformName)) {
                     builder->setTextureSource([=]() {
                         return gfx::Drawable::Textures{{*samplerLocation, atlases->icon}};
                     });
@@ -972,24 +986,15 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             builder->flush();
 
-            const SymbolDrawableTilePropsUBO tileUBO = {
-                /*.is_text=*/isText,
-                /*.is_halo=*/isHalo,
-                /*.pitch_with_map=*/(values.pitchAlignment == style::AlignmentType::Map),
-                /*.is_size_zoom_constant=*/size.isZoomConstant,
-                /*.is_size_feature_constant=*/size.isFeatureConstant,
-                /*.size_t=*/size.sizeT,
-                /*.size=*/size.size,
-                /*.padding=*/0,
-            };
+            const auto tileUBO = buildTileUBO(bucket, renderable.type, values.pitchAlignment, isHalo, currentZoom);
 
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
 
                 drawable->setData(std::make_unique<gfx::SymbolDrawableData>(
-                    /*.isText=*/isText,
                     /*.isHalo=*/isHalo,
                     /*.hasVariablePlacement=*/variablePlacedIcon,
+                    /*.symbolType=*/renderable.type,
                     /*.pitchAlignment=*/values.pitchAlignment,
                     /*.rotationAlignment=*/values.rotationAlignment,
                     /*.placement=*/symbolPlacement,

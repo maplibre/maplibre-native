@@ -6,28 +6,31 @@
 #include <memory>
 
 namespace mbgl {
+namespace style {
+enum class SymbolType : uint8_t;
+} // namespace style
 namespace gfx {
 
 struct SymbolDrawableData : public DrawableData {
-    SymbolDrawableData(const bool isText_,
-                       const bool isHalo_,
+    SymbolDrawableData(const bool isHalo_,
                        const bool hasVariablePlacement_,
+                       const style::SymbolType symbolType_,
                        const style::AlignmentType pitchAlignment_,
                        const style::AlignmentType rotationAlignment_,
                        const style::SymbolPlacementType placement_,
                        const style::IconTextFitType textFit_)
-        : isText(isText_),
-          isHalo(isHalo_),
+        : isHalo(isHalo_),
           hasVariablePlacement(hasVariablePlacement_),
+          symbolType(symbolType_),
           pitchAlignment(pitchAlignment_),
           rotationAlignment(rotationAlignment_),
           placement(placement_),
           textFit(textFit_) {}
     ~SymbolDrawableData() = default;
 
-    const bool isText;
     const bool isHalo;
     const bool hasVariablePlacement;
+    const style::SymbolType symbolType;
     const style::AlignmentType pitchAlignment;
     const style::AlignmentType rotationAlignment;
     const style::SymbolPlacementType placement;
