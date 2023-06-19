@@ -35,7 +35,8 @@ struct alignas(16) SymbolDrawableUBO {
     /* 220 */ float pitch;
     /* 224 */ /*bool*/ int rotate_symbol;
     /* 228 */ float aspect_ratio;
-    /* 232 */ std::array<float, 2> fade_change_pad;
+    /* 232 */ float fade_change;
+    /* 236 */ float pad;
     /* 240 */
 };
 static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
@@ -70,10 +71,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     if (!textBuffer) {
         const SymbolDrawablePaintUBO paramsUBO = {
-            /*.fill_color=*/util::cast<float>(
-                evaluated.get<TextColor>().constantOr(TextColor::defaultValue()).toArray()),
+            /*.fill_color=*/gfx::Drawable::colorAttrRGBA(
+                evaluated.get<TextColor>().constantOr(TextColor::defaultValue())),
             /*.halo_color=*/
-            util::cast<float>(evaluated.get<TextHaloColor>().constantOr(TextHaloColor::defaultValue()).toArray()),
+            gfx::Drawable::colorAttrRGBA(evaluated.get<TextHaloColor>().constantOr(TextHaloColor::defaultValue())),
             /*.opacity=*/evaluated.get<TextOpacity>().constantOr(TextOpacity::defaultValue()),
             /*.halo_width=*/evaluated.get<TextHaloWidth>().constantOr(TextHaloWidth::defaultValue()),
             /*.halo_blur=*/evaluated.get<TextHaloBlur>().constantOr(TextHaloBlur::defaultValue()),
@@ -180,7 +181,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
             /*.aspect_ratio=*/state.getSize().aspectRatio(),
-            /*.fade_change=*/{parameters.symbolFadeChange},
+            /*.fade_change=*/parameters.symbolFadeChange,
+            /*.pad=*/0,
         };
 
         drawable.mutableUniformBuffers().createOrUpdate(SymbolDrawableUBOName, &drawableUBO, parameters.context);

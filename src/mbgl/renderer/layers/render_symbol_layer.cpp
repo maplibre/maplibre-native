@@ -765,11 +765,43 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
             tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
                 if (drawable.getData() && *drawable.getData()) {
-                    const auto isText = static_cast<gfx::SymbolDrawableData&>(**drawable.getData()).isText;
+                    const auto& drawData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
+                    const auto isText = drawData.isText;
                     const SymbolDrawableInterpolateUBO interpolateUBO = buildInterp(
                         isText, currentZoom, bucketPaintProperties);
-                    drawable.mutableUniformBuffers().createOrUpdate(
+
+                    const ZoomEvaluatedSize size = isText ? bucket.textSizeBinder->evaluateForZoom(currentZoom)
+                                                          : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
+                    const SymbolDrawableTilePropsUBO tileUBO = {
+                        /* .is_text = */ isText,
+                        /* .is_halo = */ drawData.isHalo,
+                        /* .pitch_with_map = */ (drawData.pitchAlignment == style::AlignmentType::Map),
+                        /* .is_size_zoom_constant = */ size.isZoomConstant,
+                        /* .is_size_feature_constant = */ size.isFeatureConstant,
+                        /* .size_t = */ size.sizeT,
+                        /* .size = */ size.size,
+                        /* .padding = */ 0,
+                    };
+
+                    auto& uniforms = drawable.mutableUniformBuffers();
+                    uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
+                    uniforms.createOrUpdate(
                         SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+
+                    // TODO: detect whether anything has actually changed
+                    // See `Placement::updateBucketDynamicVertices`
+                    if (const auto newAttribs = drawable.getVertexAttributes().clone()) {
+                        if (auto& attr = newAttribs->getOrAdd("a_projected_pos")) {
+                            const auto& buffer = isText ? bucket.text : bucket.icon;
+                            const auto count = buffer.dynamicVertices.elements();
+                            attr->reserve(count);
+                            for (auto i = 0ULL; i < count; ++i) {
+                                attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
+                            }
+                        }
+
+                        drawable.setVertexAttributes(std::move(*newAttribs));
+                    }
                 }
             });
             continue;
@@ -885,7 +917,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                               evaluated.get<style::IconHaloWidth>().constantOr(1);
         const auto iconFill = evaluated.get<style::IconColor>().constantOr(Color::black()).a > 0.0f;
 
-        const SymbolDrawableInterpolateUBO interpolateUBO = buildInterp(isText, currentZoom, bucketPaintProperties);
+        const auto interpolateUBO = buildInterp(isText, currentZoom, bucketPaintProperties);
 
         const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
                               [[maybe_unused]] const Segment<SymbolTextAttributes>& segment,
@@ -941,14 +973,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             builder->flush();
 
             const SymbolDrawableTilePropsUBO tileUBO = {
-                /* .is_text = */ isText,
-                /* .is_halo = */ isHalo,
-                /* .pitch_with_map = */ (values.pitchAlignment == style::AlignmentType::Map),
-                /* .is_size_zoom_constant = */ size.isZoomConstant,
-                /* .is_size_feature_constant = */ size.isFeatureConstant,
-                /* .size_t = */ size.sizeT,
-                /* .size = */ size.size,
-                /* .padding = */ 0,
+                /*.is_text=*/isText,
+                /*.is_halo=*/isHalo,
+                /*.pitch_with_map=*/(values.pitchAlignment == style::AlignmentType::Map),
+                /*.is_size_zoom_constant=*/size.isZoomConstant,
+                /*.is_size_feature_constant=*/size.isFeatureConstant,
+                /*.size_t=*/size.sizeT,
+                /*.size=*/size.size,
+                /*.padding=*/0,
             };
 
             for (auto& drawable : builder->clearDrawables()) {
@@ -956,11 +988,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 drawable->setData(std::make_unique<gfx::SymbolDrawableData>(
                     /*.isText=*/isText,
+                    /*.isHalo=*/isHalo,
                     /*.hasVariablePlacement=*/variablePlacedIcon,
-                    /*.AlignmentType pitchAlignment=*/values.pitchAlignment,
-                    /*.AlignmentType rotationAlignment=*/values.rotationAlignment,
-                    /*.SymbolPlacementType placement=*/symbolPlacement,
-                    /*.IconTextFitType textFit=*/iconTextFit));
+                    /*.pitchAlignment=*/values.pitchAlignment,
+                    /*.rotationAlignment=*/values.rotationAlignment,
+                    /*.placement=*/symbolPlacement,
+                    /*.textFit=*/iconTextFit));
 
                 auto& uniforms = drawable->mutableUniformBuffers();
                 uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
