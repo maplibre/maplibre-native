@@ -134,7 +134,7 @@ public:
 
     const gfx::CullFaceMode& getCullFaceMode() const;
     void setCullFaceMode(const gfx::CullFaceMode&);
-    
+
     const gfx::ColorMode& getColorMode() const;
     void setColorMode(const gfx::ColorMode&);
 
