@@ -108,7 +108,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                 : constOrDefault<IconHaloColor>(evaluated)),
             /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
             /*.halo_width=*/
-                isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
+            isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
             /*.halo_blur=*/isText ? constOrDefault<TextHaloBlur>(evaluated) : constOrDefault<IconHaloBlur>(evaluated),
             /*.padding=*/0,
         };
