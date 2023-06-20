@@ -25,8 +25,6 @@ public:
     static constexpr std::string_view SymbolDrawableInterpolateUBOName = "SymbolDrawableInterpolateUBO";
 
 private:
-    gfx::UniformBufferPtr textBuffer;
-    gfx::UniformBufferPtr iconBuffer;
 };
 
 /// Evaluated properties that depend on the tile

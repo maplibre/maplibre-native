@@ -53,12 +53,35 @@ struct alignas(16) SymbolDrawablePaintUBO {
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
+static Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
+    if (const auto shader = drawable.getShader()) {
+        if (const auto index = shader->getSamplerLocation(name)) {
+            if (const auto& tex = drawable.getTexture(*index)) {
+                return tex->getSize();
+            }
+        }
+    }
+    return {0,0};
+}
+
+static std::array<float,2> toArray(const Size& s) {
+    return util::cast<float>(std::array<uint32_t,2>{s.width, s.height});
+}
+
+constexpr auto texUniformName = "u_texture";
+constexpr auto texIconUniformName = "u_texture_icon";
+
+template <typename T, class... Is, class... Ts>
+static auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
+    return evaluated.template get<T>().constantOr(T::defaultValue());
+}
+
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
+    auto& context = parameters.context;
     const auto& state = parameters.state;
-    const auto& props = static_cast<const SymbolLayerProperties&>(*evaluatedProperties);
-    const auto& evaluated = props.evaluated;
+    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {
         return;
@@ -69,83 +92,41 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    if (!textBuffer) {
-        const SymbolDrawablePaintUBO paramsUBO = {
-            /*.fill_color=*/gfx::Drawable::colorAttrRGBA(
-                evaluated.get<TextColor>().constantOr(TextColor::defaultValue())),
-            /*.halo_color=*/
-            gfx::Drawable::colorAttrRGBA(evaluated.get<TextHaloColor>().constantOr(TextHaloColor::defaultValue())),
-            /*.opacity=*/evaluated.get<TextOpacity>().constantOr(TextOpacity::defaultValue()),
-            /*.halo_width=*/evaluated.get<TextHaloWidth>().constantOr(TextHaloWidth::defaultValue()),
-            /*.halo_blur=*/evaluated.get<TextHaloBlur>().constantOr(TextHaloBlur::defaultValue()),
-            /*.padding=*/0,
-        };
-        textBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
-    }
-    if (!iconBuffer) {
-        const SymbolDrawablePaintUBO paramsUBO = {
-            /*.fill_color=*/util::cast<float>(
-                evaluated.get<IconColor>().constantOr(IconColor::defaultValue()).toArray()),
-            /*.halo_color=*/
-            util::cast<float>(evaluated.get<IconHaloColor>().constantOr(IconHaloColor::defaultValue()).toArray()),
-            /*.opacity=*/evaluated.get<IconOpacity>().constantOr(IconOpacity::defaultValue()),
-            /*.halo_width=*/evaluated.get<IconHaloWidth>().constantOr(IconHaloWidth::defaultValue()),
-            /*.halo_blur=*/evaluated.get<IconHaloBlur>().constantOr(IconHaloBlur::defaultValue()),
-            /*.padding=*/0,
-        };
-        iconBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
-    }
-
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID()) {
-            return;
-        }
-        if (!drawable.getData() || !*drawable.getData()) {
+        if (!drawable.getTileID() || !drawable.getData() || !*drawable.getData()) {
             return;
         }
 
+        const auto tileID = drawable.getTileID()->toUnwrapped();
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
+        const SymbolDrawablePaintUBO paintUBO = {
+            /*.fill_color=*/gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated)),
+            /*.halo_color=*/gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextHaloColor>(evaluated) : constOrDefault<IconHaloColor>(evaluated)),
+            /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
+            /*.halo_width=*/isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
+            /*.halo_blur=*/isText ? constOrDefault<TextHaloBlur>(evaluated) : constOrDefault<IconHaloBlur>(evaluated),
+            /*.padding=*/0,
+        };
 
-        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        // from RenderTile::translatedMatrix
+        const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
+        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>() : evaluated.get<style::IconTranslateAnchor>();
+        constexpr bool inViewportPixelUnits = false;
+        const auto matrix = getTileMatrix(tileID, renderTree, state, translate, anchor, inViewportPixelUnits);
 
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(SymbolDrawablePaintUBOName, isText ? textBuffer : iconBuffer);
-
-        const auto translate = evaluated.get<style::TextTranslate>();
-        const auto anchor = evaluated.get<style::TextTranslateAnchor>();
-
-        constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translate, anchor, inViewportPixelUnits);
-
-        const auto currentZoom = static_cast<float>(parameters.state.getZoom());
-
+        // from symbol_program, makeValues
+        const auto currentZoom = static_cast<float>(state.getZoom());
         const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
         const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
-
         const bool alongLine = symbolData.placement != SymbolPlacementType::Point &&
                                symbolData.rotationAlignment == AlignmentType::Map;
-
-        // Line label rotation happens in `updateLineLabels`/`reprojectLineLabels``
-        // Pitched point labels are automatically rotated by the labelPlaneMatrix projection
-        // Unpitched point labels need to have their rotation applied after projection
-        const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
-
         const bool hasVariablePlacement = symbolData.hasVariablePlacement &&
                                           symbolData.textFit != IconTextFitType::None;
-
-        mat4 labelPlaneMatrix;
-        if (alongLine || hasVariablePlacement) {
-            // For labels that follow lines the first part of the projection is
-            // handled on the cpu. Pass an identity matrix because no transformation
-            // needs to be done in the vertex shader.
-            matrix::identity(labelPlaneMatrix);
-        } else {
-            labelPlaneMatrix = getLabelPlaneMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        }
-
+        const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement) ?
+            matrix::identity4() :
+            getLabelPlaneMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
         const auto camDist = state.getCameraToCenterDistance();
@@ -153,28 +134,18 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
                                       : 1.0f);
 
-        Size textureSize = {0, 0};
-        Size iconTtextureSize = {0, 0};
-        if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation("u_texture")) {
-                if (const auto& tex = drawable.getTexture(*index)) {
-                    textureSize = tex->getSize();
-                }
-            }
-            if (const auto index = shader->getSamplerLocation("u_texture_icon")) {
-                if (const auto& tex = drawable.getTexture(*index)) {
-                    iconTtextureSize = tex->getSize();
-                }
-            }
-        }
+        // Line label rotation happens in `updateLineLabels`/`reprojectLineLabels``
+        // Pitched point labels are automatically rotated by the labelPlaneMatrix projection
+        // Unpitched point labels need to have their rotation applied after projection
+        const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
         const SymbolDrawableUBO drawableUBO = {
             /*.matrix=*/util::cast<float>(matrix),
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
-            /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-            /*.texsize_icon=*/{static_cast<float>(iconTtextureSize.width), static_cast<float>(iconTtextureSize.height)},
+            /*.texsize=*/toArray(getTexSize(drawable, texUniformName)),
+            /*.texsize_icon=*/toArray(getTexSize(drawable, texIconUniformName)),
 
             /*.gamma_scale=*/gammaScale,
             /*.device_pixel_ratio=*/parameters.pixelRatio,
@@ -187,7 +158,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.pad=*/0,
         };
 
-        drawable.mutableUniformBuffers().createOrUpdate(SymbolDrawableUBOName, &drawableUBO, parameters.context);
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.createOrUpdate(SymbolDrawablePaintUBOName, &paintUBO, context);
+        uniforms.createOrUpdate(SymbolDrawableUBOName, &drawableUBO, context);
     });
 }
 

@@ -678,9 +678,9 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     }
 }
 
-static SymbolDrawableInterpolateUBO buildInterp(bool isText,
-                                                float currentZoom,
-                                                const SymbolBucket::PaintProperties& pp) {
+static SymbolDrawableInterpolateUBO buildInterpUBO(bool isText,
+                                                   float currentZoom,
+                                                   const SymbolBucket::PaintProperties& pp) {
     const auto& t = pp.textBinders;
     const auto& i = pp.iconBinders;
     return {/* .fill_color_t = */ std::get<0>(
@@ -716,6 +716,60 @@ static SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
         /* .size = */ size.size,
         /* .padding = */ 0,
     };
+}
+
+constexpr auto dataAttibName = "a_data";
+constexpr auto posOffsetAttribName = "a_pos_offset";
+constexpr auto pixOffsetAttribName = "a_pixeloffset";
+constexpr auto projPosAttribName = "a_projected_pos";
+constexpr auto fadeOpacityAttribName = "a_fade_opacity";
+constexpr auto texUniformName = "u_texture";
+constexpr auto iconTexUniformName = "u_texture_icon";
+
+static void updateTileDrawable(gfx::Drawable& drawable,
+                               gfx::Context& context,
+                               const SymbolBucket& bucket,
+                               const SymbolBucket::PaintProperties& paintProps,
+                               const TransformState& state) {
+    if (!drawable.getData() || !*drawable.getData()) {
+        return;
+    }
+    
+    const auto& drawData = static_cast<const gfx::SymbolDrawableData&>(**drawable.getData());
+    const auto isText = (drawData.symbolType == SymbolType::Text);
+    const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
+    const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
+    const auto currentZoom = static_cast<float>(state.getZoom());
+
+    const auto tileUBO = buildTileUBO(
+        bucket, drawData.symbolType, drawData.pitchAlignment, drawData.isHalo, currentZoom);
+    const auto interpolateUBO = buildInterpUBO(isText, currentZoom, paintProps);
+
+    auto& uniforms = drawable.mutableUniformBuffers();
+    uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
+    uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+
+    // TODO: detect whether anything has actually changed
+    // See `Placement::updateBucketDynamicVertices`
+    if (const auto newAttribs = drawable.getVertexAttributes().clone()) {
+        if (auto& attr = newAttribs->getOrAdd(projPosAttribName)) {
+            const auto count = buffer.dynamicVertices.elements();
+            attr->reserve(count);
+            for (auto i = 0ULL; i < count; ++i) {
+                attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
+            }
+        }
+
+        if (auto& attr = newAttribs->getOrAdd(fadeOpacityAttribName)) {
+            const auto count = buffer.opacityVertices.elements();
+            attr->reserve(count);
+            for (auto i = 0ULL; i < count; ++i) {
+                attr->set(i, buffer.opacityVertices.at(i).a1[0]);
+            }
+        }
+
+        drawable.setVertexAttributes(std::move(*newAttribs));
+    }
 }
 
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
@@ -784,35 +838,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
             tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
-                if (drawable.getData() && *drawable.getData()) {
-                    const auto& drawData = static_cast<const gfx::SymbolDrawableData&>(**drawable.getData());
-                    const auto isText = (drawData.symbolType == SymbolType::Text);
-                    const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
-                    const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
-
-                    const auto tileUBO = buildTileUBO(
-                        bucket, drawData.symbolType, drawData.pitchAlignment, drawData.isHalo, currentZoom);
-                    const auto interpolateUBO = buildInterp(isText, currentZoom, bucketPaintProperties);
-
-                    auto& uniforms = drawable.mutableUniformBuffers();
-                    uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
-                    uniforms.createOrUpdate(
-                        SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
-
-                    // TODO: detect whether anything has actually changed
-                    // See `Placement::updateBucketDynamicVertices`
-                    if (const auto newAttribs = drawable.getVertexAttributes().clone()) {
-                        if (auto& attr = newAttribs->getOrAdd("a_projected_pos")) {
-                            const auto count = buffer.dynamicVertices.elements();
-                            attr->reserve(count);
-                            for (auto i = 0ULL; i < count; ++i) {
-                                attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
-                            }
-                        }
-
-                        drawable.setVertexAttributes(std::move(*newAttribs));
-                    }
-                }
+                updateTileDrawable(drawable, context, bucket, bucketPaintProperties, state);
             });
             continue;
         }
@@ -822,11 +848,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                                                    const SymbolType type) mutable {
             for (auto& segment : buffer.segments) {
                 const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
-                if (type == SymbolType::Text) {
-                    assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices.elements());
-                } else {
-                    assert(segment.vertexLength + segment.vertexLength <= buffer.vertices.elements());
-                }
+                assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices.elements());
                 it = renderableSegments.emplace_hint(
                     it, std::ref(segment), tile, renderData, bucketPaintProperties, key, type, tileID.overscaledZ);
             }
@@ -872,14 +894,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
             return dest;
         };
-
-        constexpr auto posOffsetAttribName = "a_pos_offset";
-        constexpr auto dataAttibName = "a_data";
-        constexpr auto pixOffsetAttribName = "a_pixeloffset";
-        constexpr auto projPosAttribName = "a_projected_pos";
-        constexpr auto fadeOpacityAttribName = "a_fade_opacity";
-        constexpr auto texUniformName = "u_texture";
-        constexpr auto iconTexUniformName = "u_texture_icon";
 
         gfx::VertexAttributeArray attrs;
         if (auto& attr = attrs.getOrAdd(dataAttibName)) {
@@ -932,7 +946,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                               evaluated.get<style::IconHaloWidth>().constantOr(1);
         const auto iconFill = evaluated.get<style::IconColor>().constantOr(Color::black()).a > 0.0f;
 
-        const auto interpolateUBO = buildInterp(isText, currentZoom, bucketPaintProperties);
+        const auto interpolateUBO = buildInterpUBO(isText, currentZoom, bucketPaintProperties);
 
         const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
                               [[maybe_unused]] const Segment<SymbolTextAttributes>& segment,
@@ -1014,17 +1028,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             const auto& vertexCount = bucket.text.vertices.elements();
             const auto& indices = bucket.text.triangles;
             if (bucket.iconsInText) {
-                //                    const ZoomEvaluatedSize partiallyEvaluatedTextSize =
-                //                    bucket.textSizeBinder->evaluateForZoom(
-                //                        static_cast<float>(parameters.state.getZoom()));
-                //                    const bool transformed = values.rotationAlignment == AlignmentType::Map ||
-                //                    parameters.state.getPitch() != 0; const Size& iconTexSize =
-                //                    tile.getIconAtlasTexture()->getSize(); const bool linear =
-                //                    parameters.state.isChanging() || transformed ||
-                //                    !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
-                //                    gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest; const
-                //                    gfx::TextureBinding iconTextureBinding =
-                //                    tile.getIconAtlasTextureBinding(filterType);
                 if (textHalo) {
                     draw(symbolTextAndIconGroup,
                          renderable.segment,

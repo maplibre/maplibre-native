@@ -67,18 +67,6 @@ static gfx::AttributeDataType mapType(platform::GLenum attrType) {
     }
 }
 
-// No `AttributeDataType` for 4x4, so we have to account for it separately...
-static int mapCount(const platform::GLenum attrType) {
-    switch (attrType) {
-        case GL_FLOAT_MAT3:
-            return 3;
-        case GL_FLOAT_MAT4:
-            return 4;
-        default:
-            return 1;
-    }
-}
-
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
     : ShaderProgramBase(),
       glProgram(std::move(glProgram_)) {}
@@ -102,17 +90,16 @@ using namespace platform;
 static void addAttr(
     VertexAttributeArrayGL& attrs, const char* name, GLint index, GLsizei length, GLint count, GLenum glType) {
     const auto elementType = mapType(glType);
-    const auto elementCount = mapCount(glType); // number of `elementType`, hopefully temporary
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-        if (const auto& newAttr = attrs.add(name, index, elementType, elementCount, count)) {
+        if (const auto& newAttr = attrs.add(name, index, elementType, count)) {
             const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
             glAttr->setGLType(glType);
         }
     }
 }
 
-std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string& name) const {
-    GLint sampler_location = MBGL_CHECK_ERROR(glGetUniformLocation(glProgram, name.c_str()));
+std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string_view name) const {
+    GLint sampler_location = MBGL_CHECK_ERROR(glGetUniformLocation(glProgram, name.data()));
     return (sampler_location == -1) ? std::optional<uint32_t>{} : sampler_location;
 }
 
