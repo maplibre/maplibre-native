@@ -1025,8 +1025,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         if (isText) {
             const auto& vertices = buildVertices(buffer, rawVertices[tile.id].text);
-            const auto& vertexCount = bucket.text.vertices.elements();
-            const auto& indices = bucket.text.triangles;
+            const auto vertexCount = buffer.vertices.elements();
+            const auto& indices = buffer.triangles;
             if (bucket.iconsInText) {
                 if (textHalo) {
                     draw(symbolTextAndIconGroup,
@@ -1069,10 +1069,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
         } else { // icons
-            // const auto& binders = bucketPaintProperties.iconBinders;
             const auto& vertices = buildVertices(buffer, rawVertices[tile.id].icon);
-            const auto& vertexCount = bucket.icon.vertices.elements();
-            const auto& indices = bucket.icon.triangles;
+            const auto vertexCount = buffer.vertices.elements();
+            const auto& indices = buffer.triangles;
             if (sdfIcons) {
                 if (iconHalo) {
                     draw(symbolSDFIconGroup,
