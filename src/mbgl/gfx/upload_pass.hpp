@@ -68,6 +68,9 @@ public:
 
     virtual gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
+        const gfx::AttributeDataType vertexType,
+        const std::size_t vertexAttributeIndex,
+        const std::vector<std::uint8_t>& vertexData,
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,

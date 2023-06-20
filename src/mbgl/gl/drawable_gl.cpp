@@ -75,6 +75,12 @@ void DrawableGL::setIndexData(std::vector<std::uint16_t> indexes, std::vector<Un
     impl->segments = std::move(segments);
 }
 
+void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
+    impl->vertexData = std::move(data);
+    impl->vertexCount = count;
+    impl->vertexType = type;
+}
+
 const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
     return impl->vertexAttributes;
 }
@@ -98,8 +104,16 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
+void DrawableGL::setColorAttrName(std::string value) {
+    impl->colorAttrName = std::move(value);
+}
+
+void DrawableGL::setVertexAttrName(std::string value) {
+    impl->vertexAttrName = std::move(value);
+}
+
 void DrawableGL::resetColor(const Color& newColor) {
-    if (const auto& colorAttr = impl->vertexAttributes.get("a_color")) {
+    if (const auto& colorAttr = impl->vertexAttributes.get(impl->colorAttrName)) {
         colorAttr->clear();
         colorAttr->set(0, Drawable::colorAttrRGBA(newColor));
     }
@@ -150,10 +164,19 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
         const auto& overrides = impl->vertexAttributes;
-        const auto vertexCount = overrides.getMaxCount();
+
+        const auto& indexAttribute = defaults.get(impl->vertexAttrName);
+        const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
         std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
-        auto bindings = uploadPass.buildAttributeBindings(vertexCount, defaults, overrides, usage, vertexBuffer);
+        auto bindings = uploadPass.buildAttributeBindings(impl->vertexCount,
+                                                          impl->vertexType,
+                                                          vertexAttributeIndex,
+                                                          impl->vertexData,
+                                                          defaults,
+                                                          overrides,
+                                                          usage,
+                                                          vertexBuffer);
 
         impl->attributeBuffer = std::move(vertexBuffer);
         impl->indexBuffer = std::move(indexBuffer);

@@ -197,14 +197,6 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     }
 }
 
-void RenderBackgroundLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
-    }
-}
-
 static constexpr std::string_view BackgroundPlainShaderName = "BackgroundShader";
 static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatternShader";
 
@@ -215,19 +207,12 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
-    const auto removeAll = [&]() {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
-        }
-    };
-
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover(state, zoom);
 
     // renderTiles is always empty, we use tileCover instead
     if (tileCover.empty()) {
-        removeAll();
+        removeAllTiles();
         return;
     }
 
@@ -245,7 +230,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (drawPasses == RenderPass::None) {
-        removeAll();
+        removeAllTiles();
         return;
     }
 
@@ -266,7 +251,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& curShader = hasPattern ? patternShader : plainShader;
     if (!curShader) {
-        removeAll();
+        removeAllTiles();
         return;
     }
 
