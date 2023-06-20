@@ -772,25 +772,6 @@ void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
     changes.clear();
 }
 
-void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
-    if (drawable) {
-        const auto& id = drawable->getId();
-        if (!drawables.insert(std::make_pair(id, std::move(drawable))).second) {
-            Log::Warning(Event::General, "Duplicate drawable " + std::to_string(id) + " ignored");
-        }
-    }
-}
-
-void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) {
-    drawables.erase(drawableId);
-}
-
-const gfx::DrawablePtr noDrawable;
-const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdentity& id) {
-    const auto hit = drawables.find(id);
-    return (hit != drawables.end()) ? hit->second : noDrawable;
-}
-
 void RenderOrchestrator::onRemoveLayerGroup(LayerGroupBase&) {}
 
 void RenderOrchestrator::updateLayerGroupOrder() {

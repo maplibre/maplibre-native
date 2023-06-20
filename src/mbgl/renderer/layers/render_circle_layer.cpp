@@ -245,18 +245,6 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
     return false;
 }
 
-void RenderCircleLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
-    }
-}
-
-void RenderCircleLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
-}
-
 struct alignas(16) CircleInterpolateUBO {
     float color_t;
     float radius_t;
@@ -276,18 +264,11 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
                                [[maybe_unused]] const RenderTree& renderTree,
-                               UniqueChangeRequestVec& changes) {
+                               UniqueChangeRequestVec& /*changes*/) {
     std::unique_lock<std::mutex> guard(mutex);
 
-    const auto removeAll = [&]() {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
-        }
-    };
-
     if (!renderTiles || renderTiles->empty()) {
-        removeAll();
+        removeAllTiles();
         return;
     }
 
@@ -298,14 +279,13 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             return;
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
 
     if (!circleShaderGroup) {
         circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);
     }
     if (!circleShaderGroup) {
-        removeAll();
+        removeAllTiles();
         return;
     }
 

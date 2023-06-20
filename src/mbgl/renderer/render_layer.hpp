@@ -152,7 +152,7 @@ public:
     virtual void update(
         gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const RenderTree&, UniqueChangeRequestVec&) {}
 
-    virtual void layerRemoved(UniqueChangeRequestVec&) {}
+    virtual void layerRemoved(UniqueChangeRequestVec&);
 
     /// @brief Called by the RenderOrchestrator during RenderTree construction.
     /// This event is run when a layer is added or removed from the style.
@@ -174,6 +174,12 @@ protected:
     void addRenderPassesFromTiles();
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
+
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&);
+
+    /// Remove all the drawables for tiles
+    void removeAllTiles();
 
 protected:
     // Stores current set of tiles to be rendered for this layer.
