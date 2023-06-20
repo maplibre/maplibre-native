@@ -113,12 +113,6 @@ jobs:
           ccache --zero-stats
           ccache --max-size=2G
           ccache --show-stats
-      
-      - name: Install iOS packaging dependencies
-        run: |
-          ./platform/ios/scripts/install-packaging-dependencies.sh
-        env:
-          CILAUNCH: true
         
       - run: make iproj CI=1
 
