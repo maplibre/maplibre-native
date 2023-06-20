@@ -39,7 +39,8 @@ const UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 }
 
 void DrawableBuilder::flush() {
-    if (!impl->vertices.empty()) {
+    const auto vertexCount = curVertexCount();
+    if (vertexCount) {
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
         draw->setNeedsStencil(needsStencil);
@@ -57,11 +58,11 @@ void DrawableBuilder::flush() {
                 if (auto& drawAttr = drawAttrs->getOrAdd(iName)) {
                     if (iAttr.getCount() == 1) {
                         // Apply the value to all vertexes
-                        for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
+                        for (std::size_t i = 0; i < vertexCount; ++i) {
                             drawAttr->setVariant(i, iAttr.get(0));
                         }
-                    } else if (iAttr.getCount() == impl->vertices.elements()) {
-                        for (std::size_t i = 0; i < impl->vertices.elements(); ++i) {
+                    } else if (iAttr.getCount() == vertexCount) {
+                        for (std::size_t i = 0; i < vertexCount; ++i) {
                             drawAttr->setVariant(i, iAttr.get(i));
                         }
                     } else {
@@ -167,6 +168,12 @@ std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2
     return baseIndex;
 }
 
+void DrawableBuilder::setRawVertices(std::vector<uint8_t>&& data, std::size_t count, AttributeDataType type) {
+    impl->rawVertices = std::move(data);
+    impl->rawVerticesCount = count;
+    impl->rawVerticesType = type;
+}
+
 void DrawableBuilder::setSegments(gfx::DrawMode mode,
                                   std::vector<uint16_t> indexes,
                                   const std::vector<SegmentBase>& segments) {
@@ -186,10 +193,10 @@ void DrawableBuilder::setSegments(gfx::DrawMode mode,
         } else if (mode.type == DrawModeType::Lines) {
             assert(seg.indexLength % 2 == 0);
         }
-        assert(seg.vertexOffset + seg.vertexLength <= impl->vertices.elements());
+        assert(seg.vertexOffset + seg.vertexLength <= curVertexCount());
         assert(seg.indexOffset + seg.indexLength <= impl->indexes.size());
         for (decltype(seg.indexLength) j = 0; j < seg.indexLength; ++j) {
-            assert(impl->indexes[seg.indexOffset + j] < impl->vertices.elements());
+            assert(impl->indexes[seg.indexOffset + j] < curVertexCount());
         }
 #endif
 
@@ -251,6 +258,10 @@ void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
          ++i) {
         impl->indexes.emplace_back(static_cast<uint16_t>(*i + baseIndex));
     }
+}
+
+std::size_t DrawableBuilder::curVertexCount() const {
+    return impl->rawVerticesCount ? impl->rawVerticesCount : impl->vertices.elements();
 }
 
 } // namespace gfx

@@ -60,6 +60,14 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
     return std::nullopt;
 }
 
+void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    // Remove everything
+    if (tileLayerGroup) {
+        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
+        tileLayerGroup.reset();
+    }
+}
+
 void RenderLayer::markContextDestroyed() {
     // no-op
 }
@@ -110,6 +118,17 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
         return bool(RenderPass(renderData->layerProperties->renderPasses) & pass) ? renderData : nullptr;
     }
     return nullptr;
+}
+
+void RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
+}
+
+void RenderLayer::removeAllTiles() {
+    if (tileLayerGroup) {
+        stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
+        tileLayerGroup->clearDrawables();
+    }
 }
 
 void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {

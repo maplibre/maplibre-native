@@ -15,8 +15,6 @@ public:
     explicit RenderRasterLayer(Immutable<style::RasterLayer::Impl>);
     ~RenderRasterLayer() override;
 
-    void layerRemoved(UniqueChangeRequestVec&) override;
-
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -31,9 +29,6 @@ private:
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
     void render(PaintParameters&) override;
-
-    /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&);
 
     // Paint properties
     style::RasterPaintProperties::Unevaluated unevaluated;
