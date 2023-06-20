@@ -265,7 +265,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto indexes = RenderStaticData::quadTriangleIndices();
     const auto segs = RenderStaticData::tileTriangleSegments();
-    
+
     // Put the tile cover into a searchable form.
     // TODO: Likely better to sort and `std::binary_search` the vector.
     // If it's returned in a well-defined order, we might not even need to sort.

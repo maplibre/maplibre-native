@@ -21,7 +21,7 @@ static_assert(sizeof(BackgroundDrawableUBO) % 16 == 0);
 struct alignas(16) BackgroundLayerUBO {
     /*  0 */ Color color;
     /* 16 */ float opacity;
-    /* 20 */ float pad1,pad2,pad3;
+    /* 20 */ float pad1, pad2, pad3;
     /* 32 */
 };
 static_assert(sizeof(BackgroundLayerUBO) == 32);
@@ -87,8 +87,8 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
 
         // We assume that drawables don't change between pattern and non-pattern.
         const auto& shader = drawable.getShader();
-        assert(hasPattern == (shader ==
-                              context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
+        assert(hasPattern ==
+               (shader == context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = parameters.matrixForTile(tileID);
@@ -138,11 +138,11 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
             };
             uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
         } else {
-            const BackgroundLayerUBO layerUBO = {
-                /* .color = */ evaluated.get<BackgroundColor>(),
-                /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                /* .pad = */ 0,0,0
-            };
+            const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
+                                                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
+                                                 /* .pad = */ 0,
+                                                 0,
+                                                 0};
             uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
         }
     });
