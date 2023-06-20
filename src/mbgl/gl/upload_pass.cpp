@@ -135,6 +135,9 @@ static std::size_t pad(std::vector<T>& vector, std::size_t size, T value) {
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::size_t vertexCount,
+    const gfx::AttributeDataType vertexType,
+    const std::size_t vertexAttributeIndex,
+    const std::vector<std::uint8_t>& vertexData,
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
@@ -146,16 +149,35 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     constexpr std::uint8_t padding = 0;
 
     std::vector<std::uint8_t> allData;
-    allData.reserve(defaults.getTotalSize() * vertexCount);
+    allData.reserve(vertexData.size() + (defaults.getTotalSize() + align) * vertexCount);
+
+    uint32_t vertexStride = 0;
+    if (vertexAttributeIndex != static_cast<std::size_t>(-1)) {
+        // Fill in vertices
+        allData.insert(allData.end(), vertexData.begin(), vertexData.end());
+        bindings.resize(vertexAttributeIndex + 1);
+        vertexStride = static_cast<uint32_t>(vertexData.size() / vertexCount);
+        bindings[vertexAttributeIndex] = {
+            /*.attribute = */ {vertexType, 0},
+            /* vertexStride = */ vertexStride,
+            /* vertexBufferResource = */ nullptr, // buffer details established later
+            /* vertexOffset = */ 0,
+        };
+    }
 
     // For each attribute in the program, with the corresponding default and optional override...
-    uint32_t vertexStride = 0;
     const auto resolveAttr = [&](const std::string& name, const auto& defaultAttr, const auto& overrideAttr) -> void {
         const auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
         const auto& effectiveGL = static_cast<const gl::VertexAttributeGL&>(effectiveAttr);
         const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
         const auto stride = defaultAttr.getStride();
         const auto offset = static_cast<uint32_t>(allData.size());
+        const auto index = static_cast<std::size_t>(defaultGL.getIndex());
+
+        if (index == vertexAttributeIndex) {
+            // already handled
+            return;
+        }
 
         // Get the raw data for the values in the desired format
         const auto& rawData = effectiveGL.getRaw(defaultGL.getGLType());
@@ -178,7 +200,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
-        const auto index = static_cast<std::size_t>(defaultGL.getIndex());
         bindings.resize(std::max(bindings.size(), index + 1));
         bindings[index] = {
             /*.attribute = */ {defaultAttr.getDataType(), offset},
