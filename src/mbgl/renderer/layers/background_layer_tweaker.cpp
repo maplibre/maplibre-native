@@ -5,6 +5,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
@@ -20,7 +21,7 @@ static_assert(sizeof(BackgroundDrawableUBO) % 16 == 0);
 struct alignas(16) BackgroundLayerUBO {
     /*  0 */ Color color;
     /* 16 */ float opacity;
-    /* 20 */ std::array<float, 3> pad;
+    /* 20 */ float pad1,pad2,pad3;
     /* 32 */
 };
 static_assert(sizeof(BackgroundLayerUBO) == 32);
@@ -40,16 +41,17 @@ struct alignas(16) BackgroundPatternLayerUBO {
     /* 80 */ float scale_b;
     /* 84 */ float mix;
     /* 88 */ float opacity;
-    /* 92 */ std::array<float, 1> pad;
+    /* 92 */ float pad;
     /* 96 */
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
 
 #if !defined(NDEBUG)
-static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatternShader";
+static constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
-static constexpr std::string_view BackgroundDrawableUBOName = "BackgroundDrawableUBO";
-static constexpr std::string_view BackgroundLayerUBOName = "BackgroundLayerUBO";
+static constexpr auto BackgroundDrawableUBOName = "BackgroundDrawableUBO";
+static constexpr auto BackgroundLayerUBOName = "BackgroundLayerUBO";
+static constexpr auto texUniformName = "u_image";
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& state = parameters.state;
@@ -79,26 +81,34 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
     }
     layerGroup.setEnabled(true);
 
-    constexpr int32_t samplerLocation = 0;
+    int32_t samplerLocation = -1;
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
 
         // We assume that drawables don't change between pattern and non-pattern.
-        assert(hasPattern == (drawable.getShader() ==
+        const auto& shader = drawable.getShader();
+        assert(hasPattern == (shader ==
                               context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = parameters.matrixForTile(tileID);
 
-        BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
+        const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(BackgroundDrawableUBOName, &drawableUBO, context);
 
         if (hasPattern) {
-            // TODO: add when raster is merged
-            // if (samplerLocation < 0) curShader->getSamplerLocation("u_image");
-            drawable.setTexture(parameters.patternAtlas.texture(), samplerLocation);
+            if (samplerLocation < 0) {
+                if (const auto index = shader->getSamplerLocation(texUniformName)) {
+                    samplerLocation = *index;
+                }
+            }
+            if (0 <= samplerLocation) {
+                if (const auto& tex = parameters.patternAtlas.texture()) {
+                    drawable.setTexture(tex, samplerLocation);
+                }
+            }
 
             // from BackgroundPatternProgram::layoutUniformValues
             const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(
@@ -124,14 +134,14 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                 /* .scale_b = */ crossfade.toScale,
                 /* .mix = */ crossfade.t,
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                /* .pad = */ {0},
+                /* .pad = */ 0,
             };
             uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
         } else {
             const BackgroundLayerUBO layerUBO = {
                 /* .color = */ evaluated.get<BackgroundColor>(),
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                /* .pad = */ {0, 0, 0},
+                /* .pad = */ 0,0,0
             };
             uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
         }
