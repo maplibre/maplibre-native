@@ -65,6 +65,11 @@ layout (std140) uniform SymbolDrawableInterpolateUBO {
 out vec2 v_tex;
 out float v_fade_opacity;
 
+#ifndef HAS_UNIFORM_u_opacity
+layout (location = 5) in lowp vec2 a_opacity;
+out lowp float opacity;
+#endif
+
 void main() {
     #ifndef HAS_UNIFORM_u_opacity
 opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
@@ -154,6 +159,10 @@ layout (std140) uniform SymbolDrawableInterpolateUBO {
 
 in vec2 v_tex;
 in float v_fade_opacity;
+
+#ifndef HAS_UNIFORM_u_opacity
+in lowp float opacity;
+#endif
 
 void main() {
     #ifdef HAS_UNIFORM_u_opacity

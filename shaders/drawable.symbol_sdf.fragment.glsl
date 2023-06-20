@@ -53,6 +53,12 @@ uniform sampler2D u_texture;
 in vec2 v_data0;
 in vec3 v_data1;
 
+#pragma mapbox: define highp vec4 fill_color
+#pragma mapbox: define highp vec4 halo_color
+#pragma mapbox: define lowp float opacity
+#pragma mapbox: define lowp float halo_width
+#pragma mapbox: define lowp float halo_blur
+
 void main() {
     #pragma mapbox: initialize highp vec4 fill_color
     #pragma mapbox: initialize highp vec4 halo_color

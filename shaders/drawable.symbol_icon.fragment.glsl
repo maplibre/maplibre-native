@@ -21,6 +21,8 @@ layout (std140) uniform SymbolDrawableInterpolateUBO {
 in vec2 v_tex;
 in float v_fade_opacity;
 
+#pragma mapbox: define lowp float opacity
+
 void main() {
     #pragma mapbox: initialize lowp float opacity
 

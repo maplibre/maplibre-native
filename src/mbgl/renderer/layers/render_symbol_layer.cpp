@@ -734,7 +734,7 @@ static void updateTileDrawable(gfx::Drawable& drawable,
     if (!drawable.getData() || !*drawable.getData()) {
         return;
     }
-    
+
     const auto& drawData = static_cast<const gfx::SymbolDrawableData&>(**drawable.getData());
     const auto isText = (drawData.symbolType == SymbolType::Text);
     const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);

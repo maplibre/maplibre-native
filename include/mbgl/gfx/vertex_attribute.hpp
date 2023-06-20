@@ -267,9 +267,7 @@ protected:
         }
     }
 
-    virtual std::unique_ptr<VertexAttribute> create(int index,
-                                                    AttributeDataType dataType,
-                                                    std::size_t count) const {
+    virtual std::unique_ptr<VertexAttribute> create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);
     }
 

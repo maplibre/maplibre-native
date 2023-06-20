@@ -35,8 +35,10 @@ const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const std::str
     return (result != attrs.end()) ? result->second : nullref;
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(
-    std::string name, int index, AttributeDataType dataType, std::size_t count) {
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(std::string name,
+                                                                  int index,
+                                                                  AttributeDataType dataType,
+                                                                  std::size_t count) {
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = create(index, dataType, count);
@@ -46,14 +48,15 @@ const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(
     }
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(
-    std::string name, int index, AttributeDataType dataType, std::size_t count) {
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(std::string name,
+                                                                       int index,
+                                                                       AttributeDataType dataType,
+                                                                       std::size_t count) {
     const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
     if (auto& attr = result.first->second; result.second) {
         return attr = create(index, dataType, count);
     } else if ((dataType == AttributeDataType::Invalid || attr->getDataType() == dataType) &&
-               (index < 0 || attr->getIndex() == index) &&
-               (count == 0 || attr->getCount() == count)) {
+               (index < 0 || attr->getIndex() == index) && (count == 0 || attr->getCount() == count)) {
         return attr;
     }
     return nullref;

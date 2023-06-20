@@ -61,11 +61,11 @@ static Size getTexSize(const gfx::Drawable& drawable, const std::string_view nam
             }
         }
     }
-    return {0,0};
+    return {0, 0};
 }
 
-static std::array<float,2> toArray(const Size& s) {
-    return util::cast<float>(std::array<uint32_t,2>{s.width, s.height});
+static std::array<float, 2> toArray(const Size& s) {
+    return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
 constexpr auto texUniformName = "u_texture";
@@ -101,17 +101,22 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
         const SymbolDrawablePaintUBO paintUBO = {
-            /*.fill_color=*/gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated)),
-            /*.halo_color=*/gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextHaloColor>(evaluated) : constOrDefault<IconHaloColor>(evaluated)),
+            /*.fill_color=*/gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated)
+                                                                : constOrDefault<IconColor>(evaluated)),
+            /*.halo_color=*/
+            gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextHaloColor>(evaluated)
+                                                : constOrDefault<IconHaloColor>(evaluated)),
             /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
-            /*.halo_width=*/isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
+            /*.halo_width=*/
+                isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
             /*.halo_blur=*/isText ? constOrDefault<TextHaloBlur>(evaluated) : constOrDefault<IconHaloBlur>(evaluated),
             /*.padding=*/0,
         };
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
-        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>() : evaluated.get<style::IconTranslateAnchor>();
+        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
+                                   : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(tileID, renderTree, state, translate, anchor, inViewportPixelUnits);
 
@@ -124,9 +129,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                symbolData.rotationAlignment == AlignmentType::Map;
         const bool hasVariablePlacement = symbolData.hasVariablePlacement &&
                                           symbolData.textFit != IconTextFitType::None;
-        const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement) ?
-            matrix::identity4() :
-            getLabelPlaneMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement)
+                                          ? matrix::identity4()
+                                          : getLabelPlaneMatrix(
+                                                matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
         const auto camDist = state.getCameraToCenterDistance();

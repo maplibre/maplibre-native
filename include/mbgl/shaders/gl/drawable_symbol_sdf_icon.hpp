@@ -73,6 +73,27 @@ layout (std140) uniform SymbolDrawableInterpolateUBO {
 out vec2 v_data0;
 out vec3 v_data1;
 
+#ifndef HAS_UNIFORM_u_fill_color
+layout (location = 5) in highp vec4 a_fill_color;
+out highp vec4 fill_color;
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
+layout (location = 6) in highp vec4 a_halo_color;
+out highp vec4 halo_color;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+layout (location = 7) in lowp vec2 a_opacity;
+out lowp float opacity;
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
+layout (location = 8) in lowp vec2 a_halo_width;
+out lowp float halo_width;
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
+layout (location = 9) in lowp vec2 a_halo_blur;
+out lowp float halo_blur;
+#endif
+
 void main() {
     #ifndef HAS_UNIFORM_u_fill_color
 fill_color = unpack_mix_color(a_fill_color, u_fill_color_t);
@@ -223,6 +244,22 @@ uniform sampler2D u_texture;
 
 in vec2 v_data0;
 in vec3 v_data1;
+
+#ifndef HAS_UNIFORM_u_fill_color
+in highp vec4 fill_color;
+#endif
+#ifndef HAS_UNIFORM_u_halo_color
+in highp vec4 halo_color;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+in lowp float opacity;
+#endif
+#ifndef HAS_UNIFORM_u_halo_width
+in lowp float halo_width;
+#endif
+#ifndef HAS_UNIFORM_u_halo_blur
+in lowp float halo_blur;
+#endif
 
 void main() {
     #ifdef HAS_UNIFORM_u_fill_color
