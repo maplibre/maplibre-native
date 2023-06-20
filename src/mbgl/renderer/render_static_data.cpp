@@ -7,10 +7,10 @@ namespace mbgl {
 
 static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices() {
     gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> result;
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ 0,            0 }}}));
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ util::EXTENT, 0 }}}));
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ 0, util::EXTENT }}}));
-    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{ util::EXTENT, util::EXTENT }}}));
+    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, 0}}}));
+    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, 0}}}));
+    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, util::EXTENT}}}));
+    result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, util::EXTENT}}}));
     return result;
 }
 
@@ -33,24 +33,23 @@ static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices() {
 
 static gfx::VertexVector<RasterLayoutVertex> rasterVertices() {
     gfx::VertexVector<RasterLayoutVertex> result;
-    result.emplace_back(RasterProgram::layoutVertex({ 0, 0 }, { 0, 0 }));
-    result.emplace_back(RasterProgram::layoutVertex({ util::EXTENT, 0 }, { util::EXTENT, 0 }));
-    result.emplace_back(RasterProgram::layoutVertex({ 0, util::EXTENT }, { 0, util::EXTENT }));
-    result.emplace_back(RasterProgram::layoutVertex({ util::EXTENT, util::EXTENT }, { util::EXTENT, util::EXTENT }));
+    result.emplace_back(RasterProgram::layoutVertex({0, 0}, {0, 0}));
+    result.emplace_back(RasterProgram::layoutVertex({util::EXTENT, 0}, {util::EXTENT, 0}));
+    result.emplace_back(RasterProgram::layoutVertex({0, util::EXTENT}, {0, util::EXTENT}));
+    result.emplace_back(RasterProgram::layoutVertex({util::EXTENT, util::EXTENT}, {util::EXTENT, util::EXTENT}));
     return result;
 }
 
 static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices() {
     gfx::VertexVector<HeatmapTextureLayoutVertex> result;
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({ 0, 0 }));
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({ 1, 0 }));
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({ 0, 1 }));
-    result.emplace_back(HeatmapTextureProgram::layoutVertex({ 1, 1 }));
+    result.emplace_back(HeatmapTextureProgram::layoutVertex({0, 0}));
+    result.emplace_back(HeatmapTextureProgram::layoutVertex({1, 0}));
+    result.emplace_back(HeatmapTextureProgram::layoutVertex({0, 1}));
+    result.emplace_back(HeatmapTextureProgram::layoutVertex({1, 1}));
     return result;
 }
 
-RenderStaticData::RenderStaticData(float pixelRatio,
-    std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
+RenderStaticData::RenderStaticData(float pixelRatio, std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
     : programs(ProgramParameters{pixelRatio, false}),
       shaders(std::move(shaders_)),
       clippingMaskSegments(tileTriangleSegments())

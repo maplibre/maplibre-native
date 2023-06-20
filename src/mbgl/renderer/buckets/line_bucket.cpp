@@ -15,14 +15,13 @@ LineBucket::LineBucket(LineBucket::PossiblyEvaluatedLayoutProperties layout_,
                        const std::map<std::string, Immutable<LayerProperties>>& layerPaintProperties,
                        const float zoom_,
                        const uint32_t overscaling_)
-    : layout(std::move(layout_)), zoom(zoom_), overscaling(overscaling_) {
+    : layout(std::move(layout_)),
+      zoom(zoom_),
+      overscaling(overscaling_) {
     for (const auto& pair : layerPaintProperties) {
-        paintPropertyBinders.emplace(
-            std::piecewise_construct,
-            std::forward_as_tuple(pair.first),
-            std::forward_as_tuple(
-                getEvaluated<LineLayerProperties>(pair.second),
-                zoom));
+        paintPropertyBinders.emplace(std::piecewise_construct,
+                                     std::forward_as_tuple(pair.first),
+                                     std::forward_as_tuple(getEvaluated<LineLayerProperties>(pair.second), zoom));
     }
 }
 
@@ -40,7 +39,7 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
-        if (it != patternDependencies.end()){
+        if (it != patternDependencies.end()) {
             pair.second.populateVertexVectors(
                 feature, vertices.elements(), index, patternPositions, it->second, canonical);
         } else {
@@ -80,7 +79,9 @@ const auto MAX_LINE_DISTANCE = static_cast<float>(std::pow(2, LINE_DISTANCE_BUFF
 class LineBucket::Distances {
 public:
     Distances(double clipStart_, double clipEnd_, double total_)
-    : clipStart(clipStart_), clipEnd(clipEnd_), total(total_) {}
+        : clipStart(clipStart_),
+          clipEnd(clipEnd_),
+          total(total_) {}
 
     // Scale line distance from tile units to [0, 2^15).
     double scaleToMaxLineDistance(double tileDistance) const {
@@ -127,7 +128,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 
     std::optional<Distances> lineDistances;
 
-    const auto &props = feature.getProperties();
+    const auto& props = feature.getProperties();
     auto clip_start_it = props.find("mapbox_clip_start");
     auto clip_end_it = props.find("mapbox_clip_end");
     if (clip_start_it != props.end() && clip_end_it != props.end()) {
@@ -147,8 +148,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     const double sharpCornerOffset =
         overscaling == 0
             ? SHARP_CORNER_OFFSET * (util::EXTENT / util::tileSize_D)
-            : (overscaling <= 16.0 ? SHARP_CORNER_OFFSET * (util::EXTENT / (util::tileSize_D * overscaling))
-                                   : 0.0);
+            : (overscaling <= 16.0 ? SHARP_CORNER_OFFSET * (util::EXTENT / (util::tileSize_D * overscaling)) : 0.0);
 
     const GeometryCoordinate firstCoordinate = coordinates[first];
     const LineCapType beginCap = layout.get<LineCap>();
@@ -200,10 +200,10 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         currentCoordinate = coordinates[i];
 
         // Calculate the normal towards the next vertex in this line. In case
-        // there is no next vertex, pretend that the line is continuing straight,
-        // meaning that we are just using the previous normal.
+        // there is no next vertex, pretend that the line is continuing
+        // straight, meaning that we are just using the previous normal.
         nextNormal = nextCoordinate ? util::perp(util::unit(convertPoint<double>(*nextCoordinate - *currentCoordinate)))
-                                : prevNormal;
+                                    : prevNormal;
 
         // If we still don't have a previous normal, this is the beginning of a
         // non-closed line, so we're doing a straight "join".
@@ -213,10 +213,11 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 
         // Determine the normal of the join extrusion. It is the angle bisector
         // of the segments between the previous line and the next line.
-        // In the case of 180° angles, the prev and next normals cancel each other out:
-        // prevNormal + nextNormal = (0, 0), its magnitude is 0, so the unit vector would be
-        // undefined. In that case, we're keeping the joinNormal at (0, 0), so that the cosHalfAngle
-        // below will also become 0 and miterLength will become Infinity.
+        // In the case of 180° angles, the prev and next normals cancel each
+        // other out: prevNormal + nextNormal = (0, 0), its magnitude is 0, so
+        // the unit vector would be undefined. In that case, we're keeping the
+        // joinNormal at (0, 0), so that the cosHalfAngle below will also become
+        // 0 and miterLength will become Infinity.
         Point<double> joinNormal = *prevNormal + *nextNormal;
         if (joinNormal.x != 0 || joinNormal.y != 0) {
             joinNormal = util::unit(joinNormal);
@@ -238,8 +239,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 
         // Calculate the length of the miter (the ratio of the miter to the width)
         // as the inverse of cosine of the angle between next and join normals.
-        const double miterLength =
-            cosHalfAngle != 0 ? 1 / cosHalfAngle : std::numeric_limits<double>::infinity();
+        const double miterLength = cosHalfAngle != 0 ? 1 / cosHalfAngle : std::numeric_limits<double>::infinity();
 
         // Approximate angle from cosine.
         const double approxAngle = 2 * std::sqrt(2 - 2 * cosHalfAngle);
@@ -249,9 +249,13 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         if (isSharpCorner && i > first) {
             const auto prevSegmentLength = util::dist<double>(*currentCoordinate, *prevCoordinate);
             if (prevSegmentLength > 2.0 * sharpCornerOffset) {
-                GeometryCoordinate newPrevVertex = *currentCoordinate - convertPoint<int16_t>(util::round(convertPoint<double>(*currentCoordinate - *prevCoordinate) * (sharpCornerOffset / prevSegmentLength)));
+                GeometryCoordinate newPrevVertex = *currentCoordinate -
+                                                   convertPoint<int16_t>(util::round(
+                                                       convertPoint<double>(*currentCoordinate - *prevCoordinate) *
+                                                       (sharpCornerOffset / prevSegmentLength)));
                 distance += util::dist<double>(newPrevVertex, *prevCoordinate);
-                addCurrentVertex(newPrevVertex, distance, *prevNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    newPrevVertex, distance, *prevNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
                 prevCoordinate = newPrevVertex;
             }
         }
@@ -275,8 +279,9 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
             }
 
             if (currentJoin == LineJoinType::Bevel) {
-                // The maximum extrude length is 128 / 63 = 2 times the width of the line
-                // so if miterLength >= 2 we need to draw a different type of bevel here.
+                // The maximum extrude length is 128 / 63 = 2 times the width of
+                // the line so if miterLength >= 2 we need to draw a different
+                // type of bevel here.
                 if (miterLength > 2) {
                     currentJoin = LineJoinType::FlipBevel;
                 }
@@ -290,13 +295,12 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         }
 
         // Calculate how far along the line the currentVertex is
-        if (prevCoordinate)
-            distance += util::dist<double>(*currentCoordinate, *prevCoordinate);
+        if (prevCoordinate) distance += util::dist<double>(*currentCoordinate, *prevCoordinate);
 
         if (middleVertex && currentJoin == LineJoinType::Miter) {
             joinNormal = joinNormal * miterLength;
-            addCurrentVertex(*currentCoordinate, distance, joinNormal, 0, 0, false, startVertex,
-                             triangleStore, lineDistances);
+            addCurrentVertex(
+                *currentCoordinate, distance, joinNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
 
         } else if (middleVertex && currentJoin == LineJoinType::FlipBevel) {
             // miter is too big, flip the direction to make a beveled join
@@ -307,15 +311,22 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
             } else {
                 const double direction = prevNormal->x * nextNormal->y - prevNormal->y * nextNormal->x > 0 ? -1 : 1;
                 const double bevelLength = miterLength * util::mag(*prevNormal + *nextNormal) /
-                                          util::mag(*prevNormal - *nextNormal);
+                                           util::mag(*prevNormal - *nextNormal);
                 joinNormal = util::perp(joinNormal) * bevelLength * direction;
             }
 
-            addCurrentVertex(*currentCoordinate, distance, joinNormal, 0, 0, false, startVertex,
-                             triangleStore, lineDistances);
+            addCurrentVertex(
+                *currentCoordinate, distance, joinNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
 
-            addCurrentVertex(*currentCoordinate, distance, joinNormal * -1.0, 0, 0, false, startVertex,
-                             triangleStore, lineDistances);
+            addCurrentVertex(*currentCoordinate,
+                             distance,
+                             joinNormal * -1.0,
+                             0,
+                             0,
+                             false,
+                             startVertex,
+                             triangleStore,
+                             lineDistances);
         } else if (middleVertex && (currentJoin == LineJoinType::Bevel || currentJoin == LineJoinType::FakeRound)) {
             const bool lineTurnsLeft = (prevNormal->x * nextNormal->y - prevNormal->y * nextNormal->x) > 0;
             const auto offset = static_cast<float>(-std::sqrt(miterLength * miterLength - 1));
@@ -332,57 +343,80 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 
             // Close previous segement with bevel
             if (!startOfLine) {
-                addCurrentVertex(*currentCoordinate, distance, *prevNormal, offsetA, offsetB, false,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(*currentCoordinate,
+                                 distance,
+                                 *prevNormal,
+                                 offsetA,
+                                 offsetB,
+                                 false,
+                                 startVertex,
+                                 triangleStore,
+                                 lineDistances);
             }
 
             if (currentJoin == LineJoinType::FakeRound) {
-                // The join angle is sharp enough that a round join would be visible.
-                // Bevel joins fill the gap between segments with a single pie slice triangle.
-                // Create a round join by adding multiple pie slices. The join isn't actually round, but
-                // it looks like it is at the sizes we render lines at.
+                // The join angle is sharp enough that a round join would be
+                // visible. Bevel joins fill the gap between segments with a
+                // single pie slice triangle. Create a round join by adding
+                // multiple pie slices. The join isn't actually round, but it
+                // looks like it is at the sizes we render lines at.
 
-                // Pick the number of triangles for approximating round join by based on the angle between normals.
+                // Pick the number of triangles for approximating round join by
+                // based on the angle between normals.
                 const auto n = static_cast<unsigned>(::round((approxAngle * 180 / M_PI) / DEG_PER_TRIANGLE));
 
                 for (unsigned m = 1; m < n; ++m) {
                     double t = static_cast<double>(m) / n;
                     if (t != 0.5) {
-                        // approximate spherical interpolation https://observablehq.com/@mourner/approximating-geometric-slerp
+                        // approximate spherical interpolation
+                        // https://observablehq.com/@mourner/approximating-geometric-slerp
                         const double t2 = t - 0.5;
                         const double A = 1.0904 + cosAngle * (-3.2452 + cosAngle * (3.55645 - cosAngle * 1.43519));
                         const double B = 0.848013 + cosAngle * (-1.06021 + cosAngle * 0.215638);
                         t = t + t * t2 * (t - 1) * (A * t2 * t2 + B);
                     }
                     auto approxFractionalNormal = util::unit(*prevNormal * (1.0 - t) + *nextNormal * t);
-                    addPieSliceVertex(*currentCoordinate, distance, approxFractionalNormal, lineTurnsLeft, startVertex, triangleStore, lineDistances);
+                    addPieSliceVertex(*currentCoordinate,
+                                      distance,
+                                      approxFractionalNormal,
+                                      lineTurnsLeft,
+                                      startVertex,
+                                      triangleStore,
+                                      lineDistances);
                 }
             }
 
             // Start next segment
             if (nextCoordinate) {
-                addCurrentVertex(*currentCoordinate, distance, *nextNormal, -offsetA, -offsetB,
-                                 false, startVertex, triangleStore, lineDistances);
+                addCurrentVertex(*currentCoordinate,
+                                 distance,
+                                 *nextNormal,
+                                 -offsetA,
+                                 -offsetB,
+                                 false,
+                                 startVertex,
+                                 triangleStore,
+                                 lineDistances);
             }
 
         } else if (!middleVertex && currentCap == LineCapType::Butt) {
             if (!startOfLine) {
                 // Close previous segment with a butt
-                addCurrentVertex(*currentCoordinate, distance, *prevNormal, 0, 0, false,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    *currentCoordinate, distance, *prevNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
             }
 
             // Start next segment with a butt
             if (nextCoordinate) {
-                addCurrentVertex(*currentCoordinate, distance, *nextNormal, 0, 0, false,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    *currentCoordinate, distance, *nextNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
             }
 
         } else if (!middleVertex && currentCap == LineCapType::Square) {
             if (!startOfLine) {
                 // Close previous segment with a square cap
-                addCurrentVertex(*currentCoordinate, distance, *prevNormal, 1, 1, false,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    *currentCoordinate, distance, *prevNormal, 1, 1, false, startVertex, triangleStore, lineDistances);
 
                 // The segment is done. Unset vertices to disconnect segments.
                 e1 = e2 = -1;
@@ -390,19 +424,26 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 
             // Start next segment
             if (nextCoordinate) {
-                addCurrentVertex(*currentCoordinate, distance, *nextNormal, -1, -1, false,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(*currentCoordinate,
+                                 distance,
+                                 *nextNormal,
+                                 -1,
+                                 -1,
+                                 false,
+                                 startVertex,
+                                 triangleStore,
+                                 lineDistances);
             }
 
         } else if (middleVertex ? currentJoin == LineJoinType::Round : currentCap == LineCapType::Round) {
             if (!startOfLine) {
                 // Close previous segment with a butt
-                addCurrentVertex(*currentCoordinate, distance, *prevNormal, 0, 0, false,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    *currentCoordinate, distance, *prevNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
 
                 // Add round cap or linejoin at end of segment
-                addCurrentVertex(*currentCoordinate, distance, *prevNormal, 1, 1, true, startVertex,
-                                 triangleStore, lineDistances);
+                addCurrentVertex(
+                    *currentCoordinate, distance, *prevNormal, 1, 1, true, startVertex, triangleStore, lineDistances);
 
                 // The segment is done. Unset vertices to disconnect segments.
                 e1 = e2 = -1;
@@ -411,20 +452,24 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
             // Start next segment with a butt
             if (nextCoordinate) {
                 // Add round cap before first segment
-                addCurrentVertex(*currentCoordinate, distance, *nextNormal, -1, -1, true,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    *currentCoordinate, distance, *nextNormal, -1, -1, true, startVertex, triangleStore, lineDistances);
 
-                addCurrentVertex(*currentCoordinate, distance, *nextNormal, 0, 0, false,
-                                 startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    *currentCoordinate, distance, *nextNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
             }
         }
 
         if (isSharpCorner && i < len - 1) {
             const auto nextSegmentLength = util::dist<double>(*currentCoordinate, *nextCoordinate);
             if (nextSegmentLength > 2 * sharpCornerOffset) {
-                GeometryCoordinate newCurrentVertex = *currentCoordinate + convertPoint<int16_t>(util::round(convertPoint<double>(*nextCoordinate - *currentCoordinate) * (sharpCornerOffset / nextSegmentLength)));
+                GeometryCoordinate newCurrentVertex = *currentCoordinate +
+                                                      convertPoint<int16_t>(util::round(
+                                                          convertPoint<double>(*nextCoordinate - *currentCoordinate) *
+                                                          (sharpCornerOffset / nextSegmentLength)));
                 distance += util::dist<double>(newCurrentVertex, *currentCoordinate);
-                addCurrentVertex(newCurrentVertex, distance, *nextNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
+                addCurrentVertex(
+                    newCurrentVertex, distance, *nextNormal, 0, 0, false, startVertex, triangleStore, lineDistances);
                 currentCoordinate = newCurrentVertex;
             }
         }
@@ -452,7 +497,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
 }
 
 void LineBucket::addCurrentVertex(const GeometryCoordinate& currentCoordinate,
-                                  double &distance,
+                                  double& distance,
                                   const Point<double>& normal,
                                   double endLeft,
                                   double endRight,
@@ -463,9 +508,13 @@ void LineBucket::addCurrentVertex(const GeometryCoordinate& currentCoordinate,
     Point<double> extrude = normal;
     double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
 
-    if (endLeft)
-        extrude = extrude - (util::perp(normal) * endLeft);
-    vertices.emplace_back(LineProgram::layoutVertex(currentCoordinate, extrude, round, false, static_cast<int8_t>(endLeft), static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
+    if (endLeft) extrude = extrude - (util::perp(normal) * endLeft);
+    vertices.emplace_back(LineProgram::layoutVertex(currentCoordinate,
+                                                    extrude,
+                                                    round,
+                                                    false,
+                                                    static_cast<int8_t>(endLeft),
+                                                    static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
     e3 = vertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -474,9 +523,13 @@ void LineBucket::addCurrentVertex(const GeometryCoordinate& currentCoordinate,
     e2 = e3;
 
     extrude = normal * -1.0;
-    if (endRight)
-        extrude = extrude - (util::perp(normal) * endRight);
-    vertices.emplace_back(LineProgram::layoutVertex(currentCoordinate, extrude, round, true, static_cast<int8_t>(-endRight), static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
+    if (endRight) extrude = extrude - (util::perp(normal) * endRight);
+    vertices.emplace_back(LineProgram::layoutVertex(currentCoordinate,
+                                                    extrude,
+                                                    round,
+                                                    true,
+                                                    static_cast<int8_t>(-endRight),
+                                                    static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
     e3 = vertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -484,13 +537,14 @@ void LineBucket::addCurrentVertex(const GeometryCoordinate& currentCoordinate,
     e1 = e2;
     e2 = e3;
 
-    // There is a maximum "distance along the line" that we can store in the buffers.
-    // When we get close to the distance, reset it to zero and add the vertex again with
-    // a distance of zero. The max distance is determined by the number of bits we allocate
-    // to `linesofar`.
+    // There is a maximum "distance along the line" that we can store in the
+    // buffers. When we get close to the distance, reset it to zero and add the
+    // vertex again with a distance of zero. The max distance is determined by
+    // the number of bits we allocate to `linesofar`.
     if (distance > MAX_LINE_DISTANCE / 2.0f && !lineDistances) {
         distance = 0.0;
-        addCurrentVertex(currentCoordinate, distance, normal, endLeft, endRight, round, startVertex, triangleStore, lineDistances);
+        addCurrentVertex(
+            currentCoordinate, distance, normal, endLeft, endRight, round, startVertex, triangleStore, lineDistances);
     }
 }
 
@@ -506,7 +560,8 @@ void LineBucket::addPieSliceVertex(const GeometryCoordinate& currentVertex,
         distance = lineDistances->scaleToMaxLineDistance(distance);
     }
 
-    vertices.emplace_back(LineProgram::layoutVertex(currentVertex, flippedExtrude, false, lineTurnsLeft, 0, static_cast<int32_t>(distance * LINE_DISTANCE_SCALE)));
+    vertices.emplace_back(LineProgram::layoutVertex(
+        currentVertex, flippedExtrude, false, lineTurnsLeft, 0, static_cast<int32_t>(distance * LINE_DISTANCE_SCALE)));
     e3 = vertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -537,7 +592,9 @@ bool LineBucket::hasData() const {
 }
 
 template <class Property>
-static float get(const LinePaintProperties::PossiblyEvaluated& evaluated, const std::string& id, const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
+static float get(const LinePaintProperties::PossiblyEvaluated& evaluated,
+                 const std::string& id,
+                 const std::map<std::string, LineProgram::Binders>& paintPropertyBinders) {
     auto it = paintPropertyBinders.find(id);
     if (it == paintPropertyBinders.end() || !it->second.statistics<Property>().max()) {
         return evaluated.get<Property>().constantOr(Property::defaultValue());
@@ -559,7 +616,9 @@ float LineBucket::getQueryRadius(const RenderLayer& layer) const {
     return lineWidth / 2.0f + std::abs(offset) + util::length(translate[0], translate[1]);
 }
 
-void LineBucket::update(const FeatureStates& states, const GeometryTileLayer& layer, const std::string& layerID,
+void LineBucket::update(const FeatureStates& states,
+                        const GeometryTileLayer& layer,
+                        const std::string& layerID,
                         const ImagePositions& imagePositions) {
     auto it = paintPropertyBinders.find(layerID);
     if (it != paintPropertyBinders.end()) {

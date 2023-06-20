@@ -1,5 +1,5 @@
 # ``Mapbox``
 
 @Metadata {
-    @DisplayName("MapLibre GL Native")
+    @DisplayName("MapLibre Native")
 }

@@ -23,7 +23,10 @@ struct RenderableSegment {
                       const RenderTile& tile_,
                       const LayerRenderData* renderData_,
                       float sortKey_)
-        : segment(segment_), tile(tile_), renderData(renderData_), sortKey(sortKey_) {}
+        : segment(segment_),
+          tile(tile_),
+          renderData(renderData_),
+          sortKey(sortKey_) {}
 
     const Segment<CircleAttributes>& segment;
     const RenderTile& tile;
@@ -52,18 +55,18 @@ void RenderCircleLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<CircleLayerProperties>(
-        staticImmutableCast<CircleLayer::Impl>(baseImpl),
-        unevaluated.evaluate(parameters));
+    auto properties = makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(baseImpl),
+                                                         unevaluated.evaluate(parameters));
     const auto& evaluated = properties->evaluated;
 
     passes = ((evaluated.get<style::CircleRadius>().constantOr(1) > 0 ||
-               evaluated.get<style::CircleStrokeWidth>().constantOr(1) > 0)
-              && (evaluated.get<style::CircleColor>().constantOr(Color::black()).a > 0 ||
-                  evaluated.get<style::CircleStrokeColor>().constantOr(Color::black()).a > 0)
-              && (evaluated.get<style::CircleOpacity>().constantOr(1) > 0 ||
-                  evaluated.get<style::CircleStrokeOpacity>().constantOr(1) > 0))
-             ? RenderPass::Translucent : RenderPass::None;
+               evaluated.get<style::CircleStrokeWidth>().constantOr(1) > 0) &&
+              (evaluated.get<style::CircleColor>().constantOr(Color::black()).a > 0 ||
+               evaluated.get<style::CircleStrokeColor>().constantOr(Color::black()).a > 0) &&
+              (evaluated.get<style::CircleOpacity>().constantOr(1) > 0 ||
+               evaluated.get<style::CircleStrokeOpacity>().constantOr(1) > 0))
+                 ? RenderPass::Translucent
+                 : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 }
@@ -99,8 +102,10 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
                                                               parameters.state)),
                 uniforms::scale_with_map::Value(scaleWithMap),
                 uniforms::extrude_scale::Value(
-                    pitchWithMap ? std::array<float, 2>{{tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-                                                         tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()))}}
+                    pitchWithMap ? std::array<float, 2>{{tile.id.pixelsToTileUnits(
+                                                             1.0f, static_cast<float>(parameters.state.getZoom())),
+                                                         tile.id.pixelsToTileUnits(
+                                                             1.0f, static_cast<float>(parameters.state.getZoom()))}}
                                  : parameters.pixelsToGLUnits),
                 uniforms::device_pixel_ratio::Value(parameters.pixelRatio),
                 uniforms::camera_to_center_distance::Value(parameters.state.getCameraToCenterDistance()),
@@ -108,8 +113,8 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
             paintPropertyBinders,
             evaluated,
             static_cast<float>(parameters.state.getZoom()));
-        const auto& allAttributeBindings =
-            CircleProgram::computeAllAttributeBindings(*circleBucket.vertexBuffer, paintPropertyBinders, evaluated);
+        const auto& allAttributeBindings = CircleProgram::computeAllAttributeBindings(
+            *circleBucket.vertexBuffer, paintPropertyBinders, evaluated);
 
         checkRenderability(parameters, CircleProgram::activeBindingCount(allAttributeBindings));
 
@@ -154,15 +159,15 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
 }
 
 GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
-    vec4 pos = {{ static_cast<double>(p.x), static_cast<double>(p.y), 0, 1 }};
+    vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
     matrix::transformMat4(pos, pos, posMatrix);
-    return {
-        static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
-        static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)
-    };
+    return {static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
+            static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)};
 }
 
-GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometry, const mat4& posMatrix, const Size& size) {
+GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometry,
+                                         const mat4& posMatrix,
+                                         const Size& size) {
     GeometryCoordinates projectedGeometry;
     for (auto& p : queryGeometry) {
         projectedGeometry.push_back(projectPoint(p, posMatrix, size));
@@ -171,40 +176,49 @@ GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometr
 }
 
 bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
-                                               const GeometryTileFeature& feature, const float zoom,
-                                               const TransformState& transformState, const float pixelsToTileUnits,
-                                               const mat4& posMatrix, const FeatureState& featureState) const {
+                                               const GeometryTileFeature& feature,
+                                               const float zoom,
+                                               const TransformState& transformState,
+                                               const float pixelsToTileUnits,
+                                               const mat4& posMatrix,
+                                               const FeatureState& featureState) const {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
     // Translate query geometry
     const GeometryCoordinates& translatedQueryGeometry = FeatureIndex::translateQueryGeometry(
-            queryGeometry,
-            evaluated.get<style::CircleTranslate>(),
-            evaluated.get<style::CircleTranslateAnchor>(),
-            static_cast<float>(transformState.getBearing()),
-            pixelsToTileUnits).value_or(queryGeometry);
+                                                             queryGeometry,
+                                                             evaluated.get<style::CircleTranslate>(),
+                                                             evaluated.get<style::CircleTranslateAnchor>(),
+                                                             static_cast<float>(transformState.getBearing()),
+                                                             pixelsToTileUnits)
+                                                             .value_or(queryGeometry);
 
     // Evaluate functions
     auto radius = evaluated.evaluate<style::CircleRadius>(zoom, feature, featureState);
     auto stroke = evaluated.evaluate<style::CircleStrokeWidth>(zoom, feature, featureState);
     auto size = radius + stroke;
 
-    // For pitch-alignment: map, compare feature geometry to query geometry in the plane of the tile
-    // Otherwise, compare geometry in the plane of the viewport
-    // A circle with fixed scaling relative to the viewport gets larger in tile space as it moves into the distance
-    // A circle with fixed scaling relative to the map gets smaller in viewport space as it moves into the distance
+    // For pitch-alignment: map, compare feature geometry to query geometry in
+    // the plane of the tile Otherwise, compare geometry in the plane of the
+    // viewport A circle with fixed scaling relative to the viewport gets larger
+    // in tile space as it moves into the distance A circle with fixed scaling
+    // relative to the map gets smaller in viewport space as it moves into the
+    // distance
     bool alignWithMap = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature) == AlignmentType::Map;
-    const GeometryCoordinates& transformedQueryGeometry = alignWithMap ?
-        translatedQueryGeometry :
-        projectQueryGeometry(translatedQueryGeometry, posMatrix, transformState.getSize());
+    const GeometryCoordinates& transformedQueryGeometry = alignWithMap ? translatedQueryGeometry
+                                                                       : projectQueryGeometry(translatedQueryGeometry,
+                                                                                              posMatrix,
+                                                                                              transformState.getSize());
     auto transformedSize = alignWithMap ? size * pixelsToTileUnits : size;
 
     const auto& geometry = feature.getGeometries();
     for (auto& ring : geometry) {
         for (auto& point : ring) {
-            const GeometryCoordinate& transformedPoint = alignWithMap ? point : projectPoint(point, posMatrix, transformState.getSize());
+            const GeometryCoordinate& transformedPoint = alignWithMap
+                                                             ? point
+                                                             : projectPoint(point, posMatrix, transformState.getSize());
 
             float adjustedSize = transformedSize;
-            vec4 center = {{ static_cast<double>(point.x), static_cast<double>(point.y), 0, 1 }};
+            vec4 center = {{static_cast<double>(point.x), static_cast<double>(point.y), 0, 1}};
             matrix::transformMat4(center, center, posMatrix);
             auto pitchScale = evaluated.evaluate<style::CirclePitchScale>(zoom, feature);
             auto pitchAlignment = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature);
@@ -214,7 +228,8 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
                 adjustedSize *= static_cast<float>(transformState.getCameraToCenterDistance() / center[3]);
             }
 
-            if (util::polygonIntersectsBufferedPoint(transformedQueryGeometry, transformedPoint, adjustedSize)) return true;
+            if (util::polygonIntersectsBufferedPoint(transformedQueryGeometry, transformedPoint, adjustedSize))
+                return true;
         }
     }
 

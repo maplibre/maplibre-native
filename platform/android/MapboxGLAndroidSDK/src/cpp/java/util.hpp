@@ -13,10 +13,10 @@ class List : private mbgl::util::noncopyable {
 public:
     static constexpr auto Name() { return "java/util/List"; };
 
-    template<class T>
+    template <class T>
     static jni::Local<jni::Array<jni::Object<T>>> toArray(jni::JNIEnv& env, const jni::Object<List>& list) {
         static auto& javaClass = jni::Class<List>::Singleton(env);
-        static auto toArray = javaClass.GetMethod<jni::Array<jni::Object<>> ()>(env, "toArray");
+        static auto toArray = javaClass.GetMethod<jni::Array<jni::Object<>>()>(env, "toArray");
 
         return jni::Local<jni::Array<jni::Object<T>>>(env, list.Call(env, toArray).release());
     };
@@ -40,10 +40,10 @@ class Set : private mbgl::util::noncopyable {
 public:
     static constexpr auto Name() { return "java/util/Set"; };
 
-    template<class T>
+    template <class T>
     static jni::Local<jni::Array<jni::Object<T>>> toArray(jni::JNIEnv& env, const jni::Object<Set>& list) {
         static auto& javaClass = jni::Class<Set>::Singleton(env);
-        static auto toArray = javaClass.GetMethod<jni::Array<jni::Object<>> ()>(env, "toArray");
+        static auto toArray = javaClass.GetMethod<jni::Array<jni::Object<>>()>(env, "toArray");
 
         return jni::Local<jni::Array<jni::Object<T>>>(env, list.Call(env, toArray).release());
     };
@@ -60,14 +60,14 @@ public:
         template <class T>
         static jni::Local<jni::Object<T>> getKey(jni::JNIEnv& env, const jni::Object<Entry>& entry) {
             static auto& javaClass = jni::Class<Map::Entry>::Singleton(env);
-            static auto method = javaClass.GetMethod<jni::Object<> ()>(env, "getKey");
+            static auto method = javaClass.GetMethod<jni::Object<>()>(env, "getKey");
             return jni::Cast(env, jni::Class<T>::Singleton(env), entry.Call(env, method));
         }
 
         template <class T>
         static jni::Local<jni::Object<T>> getValue(jni::JNIEnv& env, const jni::Object<Entry>& entry) {
             static auto& javaClass = jni::Class<Map::Entry>::Singleton(env);
-            static auto method = javaClass.GetMethod<jni::Object<> ()>(env, "getValue");
+            static auto method = javaClass.GetMethod<jni::Object<>()>(env, "getValue");
             return jni::Cast(env, jni::Class<T>::Singleton(env), entry.Call(env, method));
         }
     };

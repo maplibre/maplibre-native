@@ -2,7 +2,7 @@ if(TARGET mbgl-vendor-csscolorparser)
     return()
 endif()
 
-if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+if(MLN_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
     add_library(mbgl-vendor-csscolorparser OBJECT)
 else()
     add_library(mbgl-vendor-csscolorparser STATIC)

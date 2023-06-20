@@ -10,7 +10,9 @@ TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
                                std::vector<SymbolInstance>& symbolInstances,
                                uint32_t bucketInstanceId_,
                                std::string bucketLeaderId_)
-    : coord(coord_), bucketInstanceId(bucketInstanceId_), bucketLeaderId(std::move(bucketLeaderId_)) {
+    : coord(coord_),
+      bucketInstanceId(bucketInstanceId_),
+      bucketLeaderId(std::move(bucketLeaderId_)) {
     for (SymbolInstance& symbolInstance : symbolInstances) {
         if (symbolInstance.crossTileID == SymbolInstance::invalidCrossTileID()) continue;
         indexedSymbolInstances[symbolInstance.key].emplace_back(symbolInstance.crossTileID,
@@ -23,17 +25,19 @@ Point<int64_t> TileLayerIndex::getScaledCoordinates(SymbolInstance& symbolInstan
     // Round anchor positions to roughly 4 pixel grid
     const double roundingFactor = 512.0 / util::EXTENT / 2.0;
     const double scale = roundingFactor / std::pow(2, childTileCoord.canonical.z - coord.canonical.z);
-    return {
-        static_cast<int64_t>(std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.anchor.point.x) * scale)),
-        static_cast<int64_t>(std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.anchor.point.y) * scale))
-    };
+    return {static_cast<int64_t>(
+                std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.anchor.point.x) * scale)),
+            static_cast<int64_t>(
+                std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.anchor.point.y) * scale))};
 }
 
 void TileLayerIndex::findMatches(SymbolBucket& bucket,
                                  const OverscaledTileID& newCoord,
                                  std::set<uint32_t>& zoomCrossTileIDs) const {
     auto& symbolInstances = bucket.symbolInstances;
-    float tolerance = coord.canonical.z < newCoord.canonical.z ? 1.0f : static_cast<float>(std::pow(2, coord.canonical.z - newCoord.canonical.z));
+    float tolerance = coord.canonical.z < newCoord.canonical.z
+                          ? 1.0f
+                          : static_cast<float>(std::pow(2, coord.canonical.z - newCoord.canonical.z));
 
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
@@ -52,14 +56,14 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
         auto scaledSymbolCoord = getScaledCoordinates(symbolInstance, newCoord);
 
         for (const IndexedSymbolInstance& thisTileSymbol : it->second) {
-            // Return any symbol with the same keys whose coordinates are within 1
-            // grid unit. (with a 4px grid, this covers a 12px by 12px area)
+            // Return any symbol with the same keys whose coordinates are within
+            // 1 grid unit. (with a 4px grid, this covers a 12px by 12px area)
             if (std::abs(thisTileSymbol.coord.x - scaledSymbolCoord.x) <= tolerance &&
                 std::abs(thisTileSymbol.coord.y - scaledSymbolCoord.y) <= tolerance &&
                 zoomCrossTileIDs.find(thisTileSymbol.crossTileID) == zoomCrossTileIDs.end()) {
-                // Once we've marked ourselves duplicate against this parent symbol,
-                // don't let any other symbols at the same zoom level duplicate against
-                // the same parent (see issue #10844)
+                // Once we've marked ourselves duplicate against this parent
+                // symbol, don't let any other symbols at the same zoom level
+                // duplicate against the same parent (see issue #10844)
                 zoomCrossTileIDs.insert(thisTileSymbol.crossTileID);
                 symbolInstance.crossTileID = thisTileSymbol.crossTileID;
                 break;
@@ -68,19 +72,20 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
     }
 }
 
-CrossTileSymbolLayerIndex::CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID_) : maxCrossTileID(maxCrossTileID_) {}
+CrossTileSymbolLayerIndex::CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID_)
+    : maxCrossTileID(maxCrossTileID_) {}
 
 /*
- * Sometimes when a user pans across the antimeridian the longitude value gets wrapped.
- * To prevent labels from flashing out and in we adjust the tileID values in the indexes
- * so that they match the new wrapped version of the map.
+ * Sometimes when a user pans across the antimeridian the longitude value gets
+ * wrapped. To prevent labels from flashing out and in we adjust the tileID
+ * values in the indexes so that they match the new wrapped version of the map.
  */
 void CrossTileSymbolLayerIndex::handleWrapJump(float newLng) {
     const auto wrapDelta = static_cast<int>(std::round((newLng - lng) / 360.0f));
     if (wrapDelta != 0) {
-        std::map<uint8_t, std::map<OverscaledTileID,TileLayerIndex>> newIndexes;
+        std::map<uint8_t, std::map<OverscaledTileID, TileLayerIndex>> newIndexes;
         for (auto& zoomIndex : indexes) {
-            std::map<OverscaledTileID,TileLayerIndex> newZoomIndex;
+            std::map<OverscaledTileID, TileLayerIndex> newZoomIndex;
             for (auto& index : zoomIndex.second) {
                 // change the tileID's wrap and move its index
                 index.second.coord = index.second.coord.unwrapTo(index.second.coord.wrap + wrapDelta);
@@ -121,9 +126,10 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
             return false;
         } else {
             // We're replacing this bucket with an updated version
-            // Remove the old bucket's "used crossTileIDs" now so that the new bucket can claim them.
-            // We have to keep the old index entries themselves until the end of 'addBucket' so
-            // that we can copy them with 'findMatches'.
+            // Remove the old bucket's "used crossTileIDs" now so that the new
+            // bucket can claim them. We have to keep the old index entries
+            // themselves until the end of 'addBucket' so that we can copy them
+            // with 'findMatches'.
             removeBucketCrossTileIDs(tileID.overscaledZ, previousIndex->second);
         }
     }
@@ -254,4 +260,3 @@ void CrossTileSymbolIndex::reset() {
 }
 
 } // namespace mbgl
-

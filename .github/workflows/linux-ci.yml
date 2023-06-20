@@ -1,0 +1,215 @@
+name: linux-ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "test/**"
+      - "render-test/**"
+      - "expression-test/**"
+      - "include/**"
+      - ".github/workflows/linux-ci.yml"
+      - "vendor/**"
+      - "CMakeLists.txt"
+      - metrics/linux-gcc8-release-style.json
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "test/**"
+      - "render-test/**"
+      - "expression-test/**"
+      - "include/**"
+      - ".github/workflows/linux-ci.yml"
+      - "vendor/**"
+      - "CMakeLists.txt"
+      - metrics/linux-gcc8-release-style.json
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: hendrikmuhs/ccache-action@v1.2
+
+      - name: Get latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.24.1
+          ninjaVersion: latest
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libuv1-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libglfw3-dev
+
+      - name: Build MapLibre Native Core
+        run: |
+          cmake --version
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+
+      - name: Archive mbgl-test-runner
+        uses: actions/upload-artifact@v3
+        with:
+          name: mbgl-test-runner
+          path: build/mbgl-test-runner
+          retention-days: 1
+
+      - name: Archive mbgl-render-test-runner
+        uses: actions/upload-artifact@v3
+        with:
+          name: mbgl-render-test-runner
+          path: build/mbgl-render-test-runner
+          retention-days: 1
+
+      - name: Archive mbgl-expression-test
+        uses: actions/upload-artifact@v3
+        with:
+          name: mbgl-expression-test
+          path: build/expression-test/mbgl-expression-test
+          retention-days: 1
+
+  test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libopengl0
+
+      - name: Download mbgl-test-runner
+        uses: actions/download-artifact@v3
+        with:
+          name: mbgl-test-runner
+
+      - run: chmod +x ./mbgl-test-runner
+
+      - name: Install npm packages and run test server in background
+        run: |
+          npm install
+          node test/storage/server.js &
+
+      - name: Run C++ tests
+        run: xvfb-run -a ./mbgl-test-runner
+
+  expression-test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download mbgl-expression-test
+        uses: actions/download-artifact@v3
+        with:
+          name: mbgl-expression-test
+
+      - run: chmod +x ./mbgl-expression-test
+
+      - name: Run expression test
+        run: ./mbgl-expression-test
+
+  render-test:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libopengl0
+
+      - uses: actions/checkout@v3
+
+      - name: Download mbgl-render-test-runner
+        uses: actions/download-artifact@v3
+        with:
+          name: mbgl-render-test-runner
+
+      - run: chmod +x ./mbgl-render-test-runner
+
+      - name: Run render test
+        continue-on-error: true
+        id: render_test
+        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          echo $PR_NUMBER > ./pr_number
+
+      - name: Upload render test result
+        uses: actions/upload-artifact@v3
+        with:
+          name: render-test-result
+          path: |
+            metrics/linux-gcc8-release-style.html
+            ./pr_number
+
+  coverage:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libuv1-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libglfw3-dev \
+            xserver-xorg-video-dummy \
+            xinit
+
+      - name: Cache Bazel
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
+
+      - name: Start server
+        run: |
+          npm install --ignore-scripts
+          node test/storage/server.js &
+
+      - name: Generate coverage report
+        run: |
+          bazel coverage --test_output=all --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core //render-test:render-test --//:maplibre_platform=linux --run_under=//platform/linux:startxwrapper
+          echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ${{ env.coverage_report }}
+          fail_ci_if_error: true
+          verbose: true

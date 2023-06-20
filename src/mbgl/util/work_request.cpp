@@ -6,7 +6,8 @@
 
 namespace mbgl {
 
-WorkRequest::WorkRequest(Task task_) : task(std::move(task_)) {
+WorkRequest::WorkRequest(Task task_)
+    : task(std::move(task_)) {
     assert(task);
 }
 

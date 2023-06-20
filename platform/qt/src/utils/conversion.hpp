@@ -16,14 +16,12 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-std::string convertColor(const QColor &color);
+std::string convertColor(const QColor& color);
 
 template <>
 class ConversionTraits<QVariant> {
 public:
-    static bool isUndefined(const QVariant& value) {
-        return value.isNull() || !value.isValid();
-    }
+    static bool isUndefined(const QVariant& value) { return value.isNull() || !value.isValid(); }
 
     static bool isArray(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -33,26 +31,21 @@ public:
 #endif
     }
 
-    static std::size_t arrayLength(const QVariant& value) {
-        return value.toList().size();
-    }
+    static std::size_t arrayLength(const QVariant& value) { return value.toList().size(); }
 
-    static QVariant arrayMember(const QVariant& value, std::size_t i) {
-        return value.toList()[static_cast<int>(i)];
-    }
+    static QVariant arrayMember(const QVariant& value, std::size_t i) { return value.toList()[static_cast<int>(i)]; }
 
     static bool isObject(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        return QMetaType::canConvert(value.metaType(), QMetaType(QMetaType::QVariantMap))
-            || value.typeId() == QMetaType::QByteArray
+        return QMetaType::canConvert(value.metaType(), QMetaType(QMetaType::QVariantMap)) ||
+               value.typeId() == QMetaType::QByteArray
 #else
-        return value.canConvert(QVariant::Map)
-            || value.type() == QVariant::ByteArray
+        return value.canConvert(QVariant::Map) || value.type() == QVariant::ByteArray
 #endif
-            || QString(value.typeName()) == QStringLiteral("QMapLibreGL::Feature")
-            || value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()
-            || value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>()
-            || value.userType() == qMetaTypeId<std::list<QMapLibreGL::Feature>>();
+               || QString(value.typeName()) == QStringLiteral("QMapLibreGL::Feature") ||
+               value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>() ||
+               value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>() ||
+               value.userType() == qMetaTypeId<std::list<QMapLibreGL::Feature>>();
     }
 
     static std::optional<QVariant> objectMember(const QVariant& value, const char* key) {
@@ -142,29 +135,29 @@ public:
     static std::optional<Value> toValue(const QVariant& value) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         if (value.typeId() == QMetaType::Bool) {
-            return { value.toBool() };
+            return {value.toBool()};
         } else if (value.typeId() == QMetaType::QString) {
-            return { value.toString().toStdString() };
+            return {value.toString().toStdString()};
         } else if (value.typeId() == QMetaType::QColor) {
-            return { convertColor(value.value<QColor>()) };
+            return {convertColor(value.value<QColor>())};
         } else if (value.typeId() == QMetaType::Int) {
-            return { int64_t(value.toInt()) };
+            return {int64_t(value.toInt())};
         } else if (QMetaType::canConvert(value.metaType(), QMetaType(QMetaType::Double))) {
-            return { value.toDouble() };
+            return {value.toDouble()};
         } else {
             return {};
         }
 #else
         if (value.type() == QVariant::Bool) {
-            return { value.toBool() };
+            return {value.toBool()};
         } else if (value.type() == QVariant::String) {
-            return { value.toString().toStdString() };
+            return {value.toString().toStdString()};
         } else if (value.type() == QVariant::Color) {
-            return { convertColor(value.value<QColor>()) };
+            return {convertColor(value.value<QColor>())};
         } else if (value.type() == QVariant::Int) {
-            return { int64_t(value.toInt()) };
+            return {int64_t(value.toInt())};
         } else if (value.canConvert(QVariant::Double)) {
-            return { value.toDouble() };
+            return {value.toDouble()};
         } else {
             return {};
         }
@@ -173,7 +166,7 @@ public:
 
     static std::optional<GeoJSON> toGeoJSON(const QVariant& value, Error& error) {
         if (value.typeName() == QStringLiteral("QMapLibreGL::Feature")) {
-            return GeoJSON { QMapLibreGL::GeoJSON::asFeature(value.value<QMapLibreGL::Feature>()) };
+            return GeoJSON{QMapLibreGL::GeoJSON::asFeature(value.value<QMapLibreGL::Feature>())};
         } else if (value.userType() == qMetaTypeId<QVector<QMapLibreGL::Feature>>()) {
             return featureCollectionToGeoJSON(value.value<QVector<QMapLibreGL::Feature>>());
         } else if (value.userType() == qMetaTypeId<QList<QMapLibreGL::Feature>>()) {
@@ -185,7 +178,7 @@ public:
 #else
         } else if (value.type() != QVariant::ByteArray) {
 #endif
-            error = { "JSON data must be in QByteArray" };
+            error = {"JSON data must be in QByteArray"};
             return {};
         }
 
@@ -194,25 +187,25 @@ public:
     }
 
 private:
-    template<typename T>
-    static GeoJSON featureCollectionToGeoJSON(const T &features) {
+    template <typename T>
+    static GeoJSON featureCollectionToGeoJSON(const T& features) {
         mapbox::feature::feature_collection<double> collection;
         collection.reserve(static_cast<std::size_t>(features.size()));
-        for (const auto &feature : features) {
+        for (const auto& feature : features) {
             collection.push_back(QMapLibreGL::GeoJSON::asFeature(feature));
         }
-        return GeoJSON { std::move(collection) };
+        return GeoJSON{std::move(collection)};
     }
 };
 
-template <class T, class...Args>
-std::optional<T> convert(const QVariant& value, Error& error, Args&&...args) {
+template <class T, class... Args>
+std::optional<T> convert(const QVariant& value, Error& error, Args&&... args) {
     return convert<T>(Convertible(value), error, std::forward<Args>(args)...);
 }
 
-inline std::string convertColor(const QColor &color) {
-    return QString::asprintf("rgba(%d,%d,%d,%lf)",
-        color.red(), color.green(), color.blue(), color.alphaF()).toStdString();
+inline std::string convertColor(const QColor& color) {
+    return QString::asprintf("rgba(%d,%d,%d,%lf)", color.red(), color.green(), color.blue(), color.alphaF())
+        .toStdString();
 }
 
 } // namespace conversion

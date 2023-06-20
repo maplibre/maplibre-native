@@ -19,13 +19,10 @@ public:
     int32_t get(int32_t x, int32_t y) const;
     const std::array<float, 4>& getUnpackVector() const;
 
-    const PremultipliedImage* getImage() const {
-        return &image;
-    }
+    const PremultipliedImage* getImage() const { return &image; }
 
     const int32_t dim;
     const int32_t stride;
-
 
 private:
     Tileset::DEMEncoding encoding;
@@ -38,7 +35,6 @@ private:
         assert(y < dim + 1);
         return (y + 1) * stride + (x + 1);
     }
-
 };
 
 } // namespace mbgl

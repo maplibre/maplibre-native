@@ -8,10 +8,10 @@ namespace gl {
 
 class OffscreenTextureResource final : public gl::RenderableResource {
 public:
-    OffscreenTextureResource(gl::Context& context_,
-                             const Size size_,
-                             const gfx::TextureChannelDataType type_)
-        : context(context_), size(size_), type(type_) {
+    OffscreenTextureResource(gl::Context& context_, const Size size_, const gfx::TextureChannelDataType type_)
+        : context(context_),
+          size(size_),
+          type(type_) {
         assert(!size.isEmpty());
     }
 
@@ -28,7 +28,7 @@ public:
 
         context.activeTextureUnit = 0;
         context.scissorTest = false;
-        context.viewport = { 0, 0, size };
+        context.viewport = {0, 0, size};
     }
 
     PremultipliedImage readStillImage() {
@@ -50,11 +50,8 @@ private:
     std::optional<gl::Framebuffer> framebuffer;
 };
 
-OffscreenTexture::OffscreenTexture(gl::Context& context,
-                                   const Size size_,
-                                   const gfx::TextureChannelDataType type)
-    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context, size_, type)) {
-}
+OffscreenTexture::OffscreenTexture(gl::Context& context, const Size size_, const gfx::TextureChannelDataType type)
+    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context, size_, type)) {}
 
 bool OffscreenTexture::isRenderable() {
     try {

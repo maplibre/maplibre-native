@@ -32,7 +32,7 @@
 #include "java_types.hpp"
 #include "map_renderer.hpp"
 #include "map_renderer_runnable.hpp"
-#include "mapbox.hpp"
+#include "maplibre.hpp"
 #include "native_map_view.hpp"
 #include "util/tile_server_options.hpp"
 #ifndef MBGL_MODULE_OFFLINE_DISABLE
@@ -62,7 +62,7 @@ namespace android {
 
 void RegisterNativeHTTPRequest(JNIEnv&);
 
-void registerNatives(JavaVM *vm) {
+void registerNatives(JavaVM* vm) {
     theJVM = vm;
 
     jni::JNIEnv& env = jni::GetEnv(*vm, jni::jni_version_1_6);
@@ -101,7 +101,7 @@ void registerNatives(JavaVM *vm) {
     gson::JsonObject::registerNative(env);
     gson::JsonPrimitive::registerNative(env);
 
-    //Annotation
+    // Annotation
     Marker::registerNative(env);
     Polygon::registerNative(env);
     Polyline::registerNative(env);
@@ -162,7 +162,7 @@ void registerNatives(JavaVM *vm) {
     Logger::registerNative(env);
 
     // AssetManager
-    Mapbox::registerNative(env);
+    MapLibre::registerNative(env);
 
     // Util
     DefaultStyle::registerNative(env);

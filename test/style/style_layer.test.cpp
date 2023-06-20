@@ -37,13 +37,13 @@ using namespace std::literals::string_literals;
 
 namespace {
 
-const auto color = Color { 1, 0, 0, 1 };
+const auto color = Color{1, 0, 0, 1};
 const auto opacity = 1.0f;
 const auto radius = 1.0f;
 const auto blur = 1.0f;
 const auto pattern = PropertyValue<expression::Image>{"foo"};
 const auto antialias = false;
-const auto translate = std::array<float, 2> {{ 0, 0 }};
+const auto translate = std::array<float, 2>{{0, 0}};
 const auto translateAnchor = TranslateAnchorType::Map;
 const auto lineCap = LineCapType::Round;
 const auto lineJoin = LineJoinType::Miter;
@@ -52,7 +52,7 @@ const auto roundLimit = 1.0f;
 const auto width = 1.0f;
 const auto gapWidth = 1.0f;
 const auto offset = 1.0f;
-const auto dashArray = std::vector<float> {};
+const auto dashArray = std::vector<float>{};
 const auto hueRotate = 1.0f;
 const auto brightness = 1.0f;
 const auto saturation = 1.0f;
@@ -225,7 +225,7 @@ TEST(Layer, Observer) {
 
     // Notifies observer on filter change.
     bool filterChanged = false;
-    observer.layerChanged = [&] (Layer& layer_) {
+    observer.layerChanged = [&](Layer& layer_) {
         EXPECT_EQ(layer.get(), &layer_);
         filterChanged = true;
     };
@@ -234,7 +234,7 @@ TEST(Layer, Observer) {
 
     // Notifies observer on visibility change.
     bool visibilityChanged = false;
-    observer.layerChanged = [&] (Layer& layer_) {
+    observer.layerChanged = [&](Layer& layer_) {
         EXPECT_EQ(layer.get(), &layer_);
         visibilityChanged = true;
     };
@@ -243,7 +243,7 @@ TEST(Layer, Observer) {
 
     // Notifies observer on paint property change.
     bool paintPropertyChanged = false;
-    observer.layerChanged = [&] (Layer& layer_) {
+    observer.layerChanged = [&](Layer& layer_) {
         EXPECT_EQ(layer.get(), &layer_);
         paintPropertyChanged = true;
     };
@@ -252,7 +252,7 @@ TEST(Layer, Observer) {
 
     // Notifies observer on layout property change.
     bool layoutPropertyChanged = false;
-    observer.layerChanged = [&] (Layer& layer_) {
+    observer.layerChanged = [&](Layer& layer_) {
         EXPECT_EQ(layer.get(), &layer_);
         layoutPropertyChanged = true;
     };
@@ -261,7 +261,7 @@ TEST(Layer, Observer) {
 
     // Does not notify observer on no-op visibility change.
     visibilityChanged = false;
-    observer.layerChanged = [&] (Layer& layer_) {
+    observer.layerChanged = [&](Layer& layer_) {
         EXPECT_EQ(layer.get(), &layer_);
         visibilityChanged = true;
     };
@@ -270,7 +270,7 @@ TEST(Layer, Observer) {
 
     // Does not notify observer on no-op paint property change.
     paintPropertyChanged = false;
-    observer.layerChanged = [&] (Layer& layer_) {
+    observer.layerChanged = [&](Layer& layer_) {
         EXPECT_EQ(layer.get(), &layer_);
         paintPropertyChanged = true;
     };
@@ -279,7 +279,7 @@ TEST(Layer, Observer) {
 
     // Does not notify observer on no-op layout property change.
     layoutPropertyChanged = false;
-    observer.layerChanged = [&] (Layer& layer_) {
+    observer.layerChanged = [&](Layer& layer_) {
         EXPECT_EQ(layer.get(), &layer_);
         layoutPropertyChanged = true;
     };
@@ -292,7 +292,7 @@ TEST(Layer, DuplicateLayer) {
 
     // Setup style
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style { fileSource, 1.0 };
+    Style::Impl style{fileSource, 1.0};
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
 
     // Add initial layer
@@ -319,7 +319,8 @@ TEST(Layer, IncompatibleLayer) {
     // Try to add duplicate
     try {
         style.addLayer(std::make_unique<RasterLayer>("raster", "unusedsource"));
-        FAIL() << "Should not have been allowed to add an incompatible layer to the source";
+        FAIL() << "Should not have been allowed to add an incompatible layer "
+                  "to the source";
     } catch (const std::runtime_error& e) {
         // Expected
         ASSERT_STREQ("Layer 'raster' is not compatible with source 'unusedsource'", e.what());
@@ -328,7 +329,7 @@ TEST(Layer, IncompatibleLayer) {
 
 namespace {
 
-template<template<typename> class PropertyValueType, typename LayoutType>
+template <template <typename> class PropertyValueType, typename LayoutType>
 void testHasOverrides(LayoutType& layout) {
     // Undefined
     layout.template get<TextField>() = PropertyValueType<Formatted>();
@@ -364,9 +365,10 @@ void testHasOverrides(LayoutType& layout) {
     secondParagraph.setTextSectionOptions(std::nullopt, std::nullopt, toColor(literal("blue")));
     std::vector<FormatExpressionSection> sections{{std::move(secondParagraph)}};
     auto formattedExpr2 = std::make_unique<FormatExpression>(std::move(sections));
-    std::unordered_map<std::string, std::shared_ptr<Expression>> branches{ { "1st", std::move(formattedExpr1) },
-                                                                           { "2nd", std::move(formattedExpr2) } };
-    auto match = std::make_unique<Match<std::string>>(type::Formatted, literal("input"), std::move(branches), format("otherwise"));
+    std::unordered_map<std::string, std::shared_ptr<Expression>> branches{{"1st", std::move(formattedExpr1)},
+                                                                          {"2nd", std::move(formattedExpr2)}};
+    auto match = std::make_unique<Match<std::string>>(
+        type::Formatted, literal("input"), std::move(branches), format("otherwise"));
     PropertyExpression<Formatted> nestedPropExpr(std::move(match));
     layout.template get<TextField>() = PropertyValueType<Formatted>(std::move(nestedPropExpr));
     EXPECT_TRUE(MockOverrides::hasOverrides(layout.template get<TextField>()));
@@ -375,7 +377,6 @@ void testHasOverrides(LayoutType& layout) {
 } // namespace
 
 TEST(Layer, SymbolLayerOverrides) {
-
     // Unevaluated / transitionable.
     {
         MockLayoutProperties::Unevaluated layout;

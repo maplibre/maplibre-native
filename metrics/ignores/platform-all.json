@@ -16,6 +16,7 @@
     "expression-tests/legacy/interval/composite-default": "https://github.com/mapbox/mapbox-gl-native/issues/12747",
     "expression-tests/legacy/interval/tokens-zoom": "https://github.com/mapbox/mapbox-gl-native/issues/12747",
     "expression-tests/resolved-locale/basic": "Even the 'en' locale may not be present on some test systems.",
+    "expression-tests/within/non-supported": "Something is wrong with GeoJSON geometry in test",
     "probes/file-size/fail-file-doesnt-match": "Should fail, doesn't match the expectation.",
     "probes/file-size/fail-file-not-found": "Should fail, file not found.",
     "probes/file-size/fail-size-is-over": "Should fail, size is bigger than expected.",

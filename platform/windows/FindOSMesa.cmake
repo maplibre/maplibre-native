@@ -16,10 +16,10 @@ else()
 endif()
 
 find_library(OSMesa_osmesa_LIBRARY     NAMES osmesa        PATHS ${OSMesa_DIR}/lib PATH_SUFFIXES ${_ARCH} NO_DEFAULT_PATH)
-find_library(OSMesa_libGLESv3_LIBRARY  NAMES libGLESv3     PATHS ${OSMesa_DIR}/lib PATH_SUFFIXES ${_ARCH} NO_DEFAULT_PATH)
+find_library(OSMesa_libGLESv2_LIBRARY  NAMES libGLESv2     PATHS ${OSMesa_DIR}/lib PATH_SUFFIXES ${_ARCH} NO_DEFAULT_PATH)
 
 find_file(OSMesa_osmesa_LIBRARY_DLL    NAMES osmesa.dll    PATHS ${OSMesa_DIR} PATH_SUFFIXES ${_ARCH} NO_DEFAULT_PATH)
-find_file(OSMesa_libGLESv3_LIBRARY_DLL NAMES libGLESv3.dll PATHS ${OSMesa_DIR} PATH_SUFFIXES ${_ARCH} NO_DEFAULT_PATH)
+find_file(OSMesa_libGLESv2_LIBRARY_DLL NAMES libGLESv2.dll PATHS ${OSMesa_DIR} PATH_SUFFIXES ${_ARCH} NO_DEFAULT_PATH)
 
 unset(_ARCH)
 
@@ -29,18 +29,18 @@ include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSMesa
                                   REQUIRED_VARS
                                   OSMesa_osmesa_LIBRARY
-                                  OSMesa_libGLESv3_LIBRARY
+                                  OSMesa_libGLESv2_LIBRARY
                                   OSMesa_INCLUDE_DIR)
 
 # Hide internal variables
-mark_as_advanced(OSMesa_INCLUDE_DIR OSMesa_osmesa_LIBRARY OSMesa_libGLESv3_LIBRARY)
+mark_as_advanced(OSMesa_INCLUDE_DIR OSMesa_osmesa_LIBRARY OSMesa_libGLESv2_LIBRARY)
 
 # Set standard variables
 if(OSMesa_FOUND)
     set(OSMesa_INCLUDE_DIRS "${OSMesa_INCLUDE_DIR}")
     set(OSMesa_LIBRARIES
         "${OSMesa_osmesa_LIBRARY}"
-        "${OSMesa_libGLESv3_LIBRARY}"
+        "${OSMesa_libGLESv2_LIBRARY}"
     )
 
     add_library(OSMesa::osmesa SHARED IMPORTED)
@@ -53,13 +53,13 @@ if(OSMesa_FOUND)
             IMPORTED_LOCATION             ${OSMesa_osmesa_LIBRARY_DLL}
     )
 
-    add_library(OSMesa::libGLESv3 SHARED IMPORTED)
+    add_library(OSMesa::libGLESv2 SHARED IMPORTED)
 
     set_target_properties(
-        OSMesa::libGLESv3
+        OSMesa::libGLESv2
         PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES ${OSMesa_INCLUDE_DIRS}
-            IMPORTED_IMPLIB               ${OSMesa_libGLESv3_LIBRARY}
-            IMPORTED_LOCATION             ${OSMesa_libGLESv3_LIBRARY_DLL}
+            IMPORTED_IMPLIB               ${OSMesa_libGLESv2_LIBRARY}
+            IMPORTED_LOCATION             ${OSMesa_libGLESv2_LIBRARY_DLL}
     )
 endif()

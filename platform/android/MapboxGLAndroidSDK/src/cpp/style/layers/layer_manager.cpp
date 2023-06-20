@@ -102,7 +102,7 @@ void LayerManagerAndroid::registerNative(jni::JNIEnv& env) {
     }
 
     Layer::registerNative(env);
-    for (const auto& factory: peerFactories) {
+    for (const auto& factory : peerFactories) {
         factory->registerNative(env);
     }
 }
@@ -129,7 +129,7 @@ void LayerManagerAndroid::registerCoreFactory(mbgl::LayerFactory* factory) {
 
 JavaLayerPeerFactory* LayerManagerAndroid::getPeerFactory(const mbgl::style::LayerTypeInfo* typeInfo) {
     assert(typeInfo);
-    for (const auto& factory: peerFactories) {
+    for (const auto& factory : peerFactories) {
         if (factory->getLayerFactory()->getTypeInfo() == typeInfo) {
             return factory.get();
         }
@@ -147,7 +147,7 @@ LayerFactory* LayerManagerAndroid::getFactory(const mbgl::style::LayerTypeInfo* 
         return peerFactory->getLayerFactory();
     }
 
-    for (const auto& factory: coreFactories) {
+    for (const auto& factory : coreFactories) {
         if (factory->getTypeInfo() == info) {
             return factory.get();
         }
@@ -168,7 +168,8 @@ LayerManager* LayerManager::get() noexcept {
     return android::LayerManagerAndroid::get();
 }
 
-#if defined(MBGL_LAYER_LINE_DISABLE_ALL) || defined(MBGL_LAYER_SYMBOL_DISABLE_ALL) || defined(MBGL_LAYER_FILL_DISABLE_ALL)
+#if defined(MBGL_LAYER_LINE_DISABLE_ALL) || defined(MBGL_LAYER_SYMBOL_DISABLE_ALL) || \
+    defined(MBGL_LAYER_FILL_DISABLE_ALL)
 const bool LayerManager::annotationsEnabled = false;
 #else
 const bool LayerManager::annotationsEnabled = true;

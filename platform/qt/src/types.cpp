@@ -4,9 +4,14 @@
 #include "mbgl/util/traits.hpp"
 
 // mbgl::FeatureType
-static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PointType) == mbgl::underlying_type(mbgl::FeatureType::Point), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Feature::LineStringType) == mbgl::underlying_type(mbgl::FeatureType::LineString), "error");
-static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PolygonType) == mbgl::underlying_type(mbgl::FeatureType::Polygon), "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PointType) == mbgl::underlying_type(mbgl::FeatureType::Point),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Feature::LineStringType) ==
+                  mbgl::underlying_type(mbgl::FeatureType::LineString),
+              "error");
+static_assert(mbgl::underlying_type(QMapLibreGL::Feature::PolygonType) ==
+                  mbgl::underlying_type(mbgl::FeatureType::Polygon),
+              "error");
 
 namespace QMapLibreGL {
 
@@ -72,11 +77,13 @@ namespace QMapLibreGL {
 /*!
     \enum QMapLibreGL::Feature::Type
 
-    This enum is used as basis for geometry disambiguation in QMapLibreGL::Feature.
+    This enum is used as basis for geometry disambiguation in
+   QMapLibreGL::Feature.
 
-    \value PointType      A point geometry type. Means a single or a collection of points.
-    \value LineStringType A line string geometry type. Means a single or a collection of line strings.
-    \value PolygonType    A polygon geometry type. Means a single or a collection of polygons.
+    \value PointType      A point geometry type. Means a single or a collection
+   of points. \value LineStringType A line string geometry type. Means a single
+   or a collection of line strings. \value PolygonType    A polygon geometry
+   type. Means a single or a collection of polygons.
 */
 
 /*!
@@ -113,7 +120,8 @@ namespace QMapLibreGL {
 
     Represents a line annotation object, along with its properties.
 
-    A line annotation comprises of its geometry and line properties such as opacity, width and color.
+    A line annotation comprises of its geometry and line properties such as
+   opacity, width and color.
 */
 
 /*!
@@ -123,14 +131,16 @@ namespace QMapLibreGL {
 
     Represents a fill annotation object, along with its properties.
 
-    A fill annotation comprises of its geometry and fill properties such as opacity, color and outline color.
+    A fill annotation comprises of its geometry and fill properties such as
+   opacity, color and outline color.
 */
 
 /*!
     \typedef QMapLibreGL::Annotation
 
     Alias for QVariant.
-    Container that encapsulates either a symbol, a line, a fill or a style sourced annotation.
+    Container that encapsulates either a symbol, a line, a fill or a style
+   sourced annotation.
 */
 
 /*!
@@ -165,8 +175,8 @@ namespace QMapLibreGL {
     \class QMapLibreGL::CustomLayerRenderParameters
     \inmodule MapLibre Maps SDK for Qt
 
-    QMapLibreGL::CustomLayerRenderParameters provides the data passed on each render
-    pass for a custom layer.
+    QMapLibreGL::CustomLayerRenderParameters provides the data passed on each
+   render pass for a custom layer.
 */
 
 } // namespace QMapLibreGL

@@ -34,8 +34,7 @@ class AndroidRendererBackend;
  */
 class MapRenderer : public Scheduler {
 public:
-
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/maps/renderer/MapRenderer"; };
+    static constexpr auto Name() { return "org/maplibre/android/maps/renderer/MapRenderer"; };
 
     static void registerNative(jni::JNIEnv&);
 
@@ -73,7 +72,7 @@ public:
     void requestRender();
 
     // Snapshot - requires a RunLoop on the calling thread
-    using SnapshotCallback = std::function<void (PremultipliedImage)>;
+    using SnapshotCallback = std::function<void(PremultipliedImage)>;
     void requestSnapshot(SnapshotCallback);
 
 protected:
@@ -128,7 +127,7 @@ private:
     std::mutex updateMutex;
 
     bool framebufferSizeChanged = false;
-    std::atomic<bool> destroyed {false};
+    std::atomic<bool> destroyed{false};
 
     std::unique_ptr<SnapshotCallback> snapshotCallback;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};

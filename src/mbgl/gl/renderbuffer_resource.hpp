@@ -9,8 +9,7 @@ namespace gl {
 class RenderbufferResource final : public gfx::RenderbufferResource {
 public:
     explicit RenderbufferResource(UniqueRenderbuffer renderbuffer_)
-        : renderbuffer(std::move(renderbuffer_)) {
-    }
+        : renderbuffer(std::move(renderbuffer_)) {}
 
     ~RenderbufferResource() noexcept override = default;
 

@@ -4,21 +4,19 @@
 
 namespace mbgl {
 
-VectorTileFeature::VectorTileFeature(const mapbox::vector_tile::layer& layer,
-                                     const protozero::data_view& view)
-    : feature(view, layer) {
-}
+VectorTileFeature::VectorTileFeature(const mapbox::vector_tile::layer& layer, const protozero::data_view& view)
+    : feature(view, layer) {}
 
 FeatureType VectorTileFeature::getType() const {
     switch (feature.getType()) {
-    case mapbox::vector_tile::GeomType::POINT:
-        return FeatureType::Point;
-    case mapbox::vector_tile::GeomType::LINESTRING:
-        return FeatureType::LineString;
-    case mapbox::vector_tile::GeomType::POLYGON:
-        return FeatureType::Polygon;
-    default:
-        return FeatureType::Unknown;
+        case mapbox::vector_tile::GeomType::POINT:
+            return FeatureType::Point;
+        case mapbox::vector_tile::GeomType::LINESTRING:
+            return FeatureType::LineString;
+        case mapbox::vector_tile::GeomType::POLYGON:
+            return FeatureType::Polygon;
+        default:
+            return FeatureType::Unknown;
     }
 }
 
@@ -44,8 +42,7 @@ const GeometryCollection& VectorTileFeature::getGeometries() const {
 
         try {
             lines = feature.getGeometries<GeometryCollection>(scale);
-        }
-        catch(const std::runtime_error& ex) {
+        } catch (const std::runtime_error& ex) {
             Log::Error(Event::ParseTile, "Could not get geometries: " + std::string(ex.what()));
             lines = GeometryCollection();
         }
@@ -57,10 +54,9 @@ const GeometryCollection& VectorTileFeature::getGeometries() const {
     return *lines;
 }
 
-VectorTileLayer::VectorTileLayer(std::shared_ptr<const std::string> data_,
-                                 const protozero::data_view& view)
-    : data(std::move(data_)), layer(view) {
-}
+VectorTileLayer::VectorTileLayer(std::shared_ptr<const std::string> data_, const protozero::data_view& view)
+    : data(std::move(data_)),
+      layer(view) {}
 
 std::size_t VectorTileLayer::featureCount() const {
     return layer.featureCount();
@@ -74,8 +70,8 @@ std::string VectorTileLayer::getName() const {
     return layer.getName();
 }
 
-VectorTileData::VectorTileData(std::shared_ptr<const std::string> data_) : data(std::move(data_)) {
-}
+VectorTileData::VectorTileData(std::shared_ptr<const std::string> data_)
+    : data(std::move(data_)) {}
 
 std::unique_ptr<GeometryTileData> VectorTileData::clone() const {
     return std::make_unique<VectorTileData>(data);
@@ -83,8 +79,9 @@ std::unique_ptr<GeometryTileData> VectorTileData::clone() const {
 
 std::unique_ptr<GeometryTileLayer> VectorTileData::getLayer(const std::string& name) const {
     if (!parsed) {
-        // We're parsing this lazily so that we can construct VectorTileData objects on the main
-        // thread without incurring the overhead of parsing immediately.
+        // We're parsing this lazily so that we can construct VectorTileData
+        // objects on the main thread without incurring the overhead of parsing
+        // immediately.
         layers = mapbox::vector_tile::buffer(*data).getLayers();
         parsed = true;
     }

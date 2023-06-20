@@ -15,8 +15,8 @@ TransformParameters::TransformParameters(const TransformState& state_)
     // Update the default matrices to the current viewport dimensions.
     state.getProjMatrix(projMatrix);
 
-    // Also compute a projection matrix that aligns with the current pixel grid, taking into account
-    // odd viewport sizes.
+    // Also compute a projection matrix that aligns with the current pixel grid,
+    // taking into account odd viewport sizes.
     state.getProjMatrix(alignedProjMatrix, 1, true);
 
     // Calculate a second projection matrix with the near plane moved further,
@@ -27,37 +27,36 @@ TransformParameters::TransformParameters(const TransformState& state_)
 }
 
 PaintParameters::PaintParameters(gfx::Context& context_,
-                    float pixelRatio_,
-                    gfx::RendererBackend& backend_,
-                    const EvaluatedLight& evaluatedLight_,
-                    MapMode mode_,
-                    MapDebugOptions debugOptions_,
-                    TimePoint timePoint_,
-                    const TransformParameters& transformParams_,
-                    RenderStaticData& staticData_,
-                    LineAtlas& lineAtlas_,
-                    PatternAtlas& patternAtlas_)
+                                 float pixelRatio_,
+                                 gfx::RendererBackend& backend_,
+                                 const EvaluatedLight& evaluatedLight_,
+                                 MapMode mode_,
+                                 MapDebugOptions debugOptions_,
+                                 TimePoint timePoint_,
+                                 const TransformParameters& transformParams_,
+                                 RenderStaticData& staticData_,
+                                 LineAtlas& lineAtlas_,
+                                 PatternAtlas& patternAtlas_)
     : context(context_),
-    backend(backend_),
-    encoder(context.createCommandEncoder()),
-    transformParams(transformParams_),
-    state(transformParams_.state),
-    evaluatedLight(evaluatedLight_),
-    staticData(staticData_),
-    lineAtlas(lineAtlas_),
-    patternAtlas(patternAtlas_),
-    mapMode(mode_),
-    debugOptions(debugOptions_),
-    timePoint(timePoint_),
-    pixelRatio(pixelRatio_),
+      backend(backend_),
+      encoder(context.createCommandEncoder()),
+      transformParams(transformParams_),
+      state(transformParams_.state),
+      evaluatedLight(evaluatedLight_),
+      staticData(staticData_),
+      lineAtlas(lineAtlas_),
+      patternAtlas(patternAtlas_),
+      mapMode(mode_),
+      debugOptions(debugOptions_),
+      timePoint(timePoint_),
+      pixelRatio(pixelRatio_),
 #ifndef NDEBUG
-    programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs),
+      programs((debugOptions & MapDebugOptions::Overdraw) ? staticData_.overdrawPrograms : staticData_.programs),
 #else
-    programs(staticData_.programs),
+      programs(staticData_.programs),
 #endif
-    shaders(*staticData_.shaders)
-{
-    pixelsToGLUnits = {{ 2.0f  / state.getSize().width, -2.0f / state.getSize().height }};
+      shaders(*staticData_.shaders) {
+    pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
 
     if (state.getViewportMode() == ViewportMode::FlippedY) {
         pixelsToGLUnits[1] *= -1;
@@ -78,13 +77,11 @@ gfx::DepthMode PaintParameters::depthModeForSublayer(uint8_t n, gfx::DepthMaskTy
         return gfx::DepthMode::disabled();
     }
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;
-    return gfx::DepthMode { gfx::DepthFunctionType::LessEqual, mask, { depth, depth } };
+    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask, {depth, depth}};
 }
 
 gfx::DepthMode PaintParameters::depthModeFor3D() const {
-    return gfx::DepthMode{ gfx::DepthFunctionType::LessEqual,
-                           gfx::DepthMaskType::ReadWrite,
-                           { 0.0, depthRangeSize } };
+    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
 }
 
 void PaintParameters::clearStencil() {
@@ -95,16 +92,18 @@ void PaintParameters::clearStencil() {
 namespace {
 
 // Detects a difference in keys of renderTiles and tileClippingMaskIDs
-bool tileIDsIdentical(const RenderTiles& renderTiles,
-                      const std::map<UnwrappedTileID, int32_t>& tileClippingMaskIDs) {
+bool tileIDsIdentical(const RenderTiles& renderTiles, const std::map<UnwrappedTileID, int32_t>& tileClippingMaskIDs) {
     assert(renderTiles);
-    assert(std::is_sorted(renderTiles->begin(), renderTiles->end(),
-                          [](const RenderTile& a, const RenderTile& b) { return a.id < b.id; }));
+    assert(std::is_sorted(renderTiles->begin(), renderTiles->end(), [](const RenderTile& a, const RenderTile& b) {
+        return a.id < b.id;
+    }));
     if (renderTiles->size() != tileClippingMaskIDs.size()) {
         return false;
     }
-    return std::equal(renderTiles->begin(), renderTiles->end(), tileClippingMaskIDs.begin(),
-                      [](const RenderTile& a, const auto& b) { return a.id == b.first; });
+    return std::equal(
+        renderTiles->begin(), renderTiles->end(), tileClippingMaskIDs.begin(), [](const RenderTile& a, const auto& b) {
+            return a.id == b.first;
+        });
 }
 
 } // namespace
@@ -126,8 +125,8 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     if (!program) {
         return;
     }
-    
-    const style::Properties<>::PossiblyEvaluated properties {};
+
+    const style::Properties<>::PossiblyEvaluated properties{};
     const ClippingMaskProgram::Binders paintAttributeData(properties, 0);
 
     for (const RenderTile& renderTile : *renderTiles) {
@@ -135,30 +134,30 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         tileClippingMaskIDs.emplace(renderTile.id, stencilID);
 
         program->draw(context,
-                     *renderPass,
-                     gfx::Triangles(),
-                     gfx::DepthMode::disabled(),
-                     gfx::StencilMode{gfx::StencilMode::Always{},
-                                      stencilID,
-                                      0b11111111,
-                                      gfx::StencilOpType::Keep,
-                                      gfx::StencilOpType::Keep,
-                                      gfx::StencilOpType::Replace},
-                     gfx::ColorMode::disabled(),
-                     gfx::CullFaceMode::disabled(),
-                     *staticData.quadTriangleIndexBuffer,
-                     staticData.clippingMaskSegments,
-                     ClippingMaskProgram::computeAllUniformValues(
-                         ClippingMaskProgram::LayoutUniformValues{
-                             uniforms::matrix::Value(matrixForTile(renderTile.id)),
-                         },
-                         paintAttributeData,
-                         properties,
-                         static_cast<float>(state.getZoom())),
-                     ClippingMaskProgram::computeAllAttributeBindings(
-                         *staticData.tileVertexBuffer, paintAttributeData, properties),
-                     ClippingMaskProgram::TextureBindings{},
-                     "clipping/" + util::toString(stencilID));
+                      *renderPass,
+                      gfx::Triangles(),
+                      gfx::DepthMode::disabled(),
+                      gfx::StencilMode{gfx::StencilMode::Always{},
+                                       stencilID,
+                                       0b11111111,
+                                       gfx::StencilOpType::Keep,
+                                       gfx::StencilOpType::Keep,
+                                       gfx::StencilOpType::Replace},
+                      gfx::ColorMode::disabled(),
+                      gfx::CullFaceMode::disabled(),
+                      *staticData.quadTriangleIndexBuffer,
+                      staticData.clippingMaskSegments,
+                      ClippingMaskProgram::computeAllUniformValues(
+                          ClippingMaskProgram::LayoutUniformValues{
+                              uniforms::matrix::Value(matrixForTile(renderTile.id)),
+                          },
+                          paintAttributeData,
+                          properties,
+                          static_cast<float>(state.getZoom())),
+                      ClippingMaskProgram::computeAllAttributeBindings(
+                          *staticData.tileVertexBuffer, paintAttributeData, properties),
+                      ClippingMaskProgram::TextureBindings{},
+                      "clipping/" + util::toString(stencilID));
     }
 }
 
@@ -166,12 +165,12 @@ gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& 
     auto it = tileClippingMaskIDs.find(tileID);
     assert(it != tileClippingMaskIDs.end());
     const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
-    return gfx::StencilMode{ gfx::StencilMode::Equal{ 0b11111111 },
-                             id,
-                             0b00000000,
-                             gfx::StencilOpType::Keep,
-                             gfx::StencilOpType::Keep,
-                             gfx::StencilOpType::Replace };
+    return gfx::StencilMode{gfx::StencilMode::Equal{0b11111111},
+                            id,
+                            0b00000000,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Replace};
 }
 
 gfx::StencilMode PaintParameters::stencilModeFor3D() {
@@ -179,30 +178,26 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
         clearStencil();
     }
 
-    // We're potentially destroying the stencil clipping mask in this pass. That means we'll have
-    // to recreate it for the next source if any.
+    // We're potentially destroying the stencil clipping mask in this pass. That
+    // means we'll have to recreate it for the next source if any.
     tileClippingMaskIDs.clear();
 
     const int32_t id = nextStencilID++;
-    return gfx::StencilMode{ gfx::StencilMode::NotEqual{ 0b11111111 },
-                             id,
-                             0b11111111,
-                             gfx::StencilOpType::Keep,
-                             gfx::StencilOpType::Keep,
-                             gfx::StencilOpType::Replace };
+    return gfx::StencilMode{gfx::StencilMode::NotEqual{0b11111111},
+                            id,
+                            0b11111111,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Keep,
+                            gfx::StencilOpType::Replace};
 }
 
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     if (debugOptions & MapDebugOptions::Overdraw) {
         const float overdraw = 1.0f / 8.0f;
-        return gfx::ColorMode {
-            gfx::ColorMode::Add {
-                gfx::ColorBlendFactorType::ConstantColor,
-                gfx::ColorBlendFactorType::One
-            },
-            Color { overdraw, overdraw, overdraw, 0.0f },
-            gfx::ColorMode::Mask { true, true, true, true }
-        };
+        return gfx::ColorMode{
+            gfx::ColorMode::Add{gfx::ColorBlendFactorType::ConstantColor, gfx::ColorBlendFactorType::One},
+            Color{overdraw, overdraw, overdraw, 0.0f},
+            gfx::ColorMode::Mask{true, true, true, true}};
     } else if (pass == RenderPass::Translucent) {
         return gfx::ColorMode::alphaBlended();
     } else {

@@ -27,7 +27,8 @@ struct FormattedSection {
           fontStack(std::move(fontStack_)),
           textColor(std::move(textColor_)) {}
 
-    explicit FormattedSection(Image image_) : image(std::move(image_)) {}
+    explicit FormattedSection(Image image_)
+        : image(std::move(image_)) {}
 
     std::string text;
     std::optional<Image> image;
@@ -43,13 +44,12 @@ public:
     Formatted(const char* plainU8String) {
         sections.emplace_back(std::string(plainU8String), std::nullopt, std::nullopt, std::nullopt);
     }
-    
+
     Formatted(std::vector<FormattedSection> sections_)
-        : sections(std::move(sections_))
-    {}
-    
-    bool operator==(const Formatted& ) const;
-    
+        : sections(std::move(sections_)) {}
+
+    bool operator==(const Formatted&) const;
+
     std::string toString() const;
     mbgl::Value toObject() const;
 
@@ -57,9 +57,9 @@ public:
 
     std::vector<FormattedSection> sections;
 };
-            
+
 } // namespace expression
-    
+
 namespace conversion {
 
 template <>
@@ -74,6 +74,6 @@ struct ValueFactory<expression::Formatted> {
 };
 
 } // namespace conversion
-    
+
 } // namespace style
 } // namespace mbgl

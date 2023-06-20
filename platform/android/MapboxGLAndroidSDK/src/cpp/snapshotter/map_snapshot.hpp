@@ -15,23 +15,22 @@ namespace android {
 
 class MapSnapshot {
 public:
-
     using PointForFn = mbgl::MapSnapshotter::PointForFn;
     using LatLngForFn = mbgl::MapSnapshotter::LatLngForFn;
 
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/snapshotter/MapSnapshot"; };
+    static constexpr auto Name() { return "org/maplibre/android/snapshotter/MapSnapshot"; };
 
     static void registerNative(jni::JNIEnv&);
 
     static jni::Local<jni::Object<MapSnapshot>> New(JNIEnv& env,
-                                        PremultipliedImage&& image,
-                                        float pixelRatio,
-                                        std::vector<std::string> attributions,
-                                        bool showLogo,
-                                        PointForFn pointForFn,
-                                        LatLngForFn latLngForFn);
+                                                    PremultipliedImage&& image,
+                                                    float pixelRatio,
+                                                    std::vector<std::string> attributions,
+                                                    bool showLogo,
+                                                    PointForFn pointForFn,
+                                                    LatLngForFn latLngForFn);
 
-    MapSnapshot(jni::JNIEnv&) {};
+    MapSnapshot(jni::JNIEnv&){};
     MapSnapshot(float pixelRatio, PointForFn, LatLngForFn);
     ~MapSnapshot();
 

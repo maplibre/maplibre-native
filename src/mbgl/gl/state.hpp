@@ -5,8 +5,8 @@
 namespace mbgl {
 namespace gl {
 
-// Wraps a piece of OpenGL state and remember its value to avoid redundant state calls.
-// Wrapped types need to implement to the Value class interface:
+// Wraps a piece of OpenGL state and remember its value to avoid redundant state
+// calls. Wrapped types need to implement to the Value class interface:
 //
 // class Value {
 //     using Type = ...;
@@ -17,8 +17,8 @@ namespace gl {
 template <typename T, typename... Args>
 class State {
 public:
-    State(Args&&... args) : params(std::forward_as_tuple(::std::forward<Args>(args)...)) {
-    }
+    State(Args&&... args)
+        : params(std::forward_as_tuple(::std::forward<Args>(args)...)) {}
 
     State& operator=(const typename T::Type& value) {
         if (*this != value) {
@@ -29,13 +29,9 @@ public:
         return *this;
     }
 
-    bool operator==(const typename T::Type& value) const {
-        return !(*this != value);
-    }
+    bool operator==(const typename T::Type& value) const { return !(*this != value); }
 
-    bool operator!=(const typename T::Type& value) const {
-        return dirty || currentValue != value;
-    }
+    bool operator!=(const typename T::Type& value) const { return dirty || currentValue != value; }
 
     void setCurrentValue(const typename T::Type& value) {
         dirty = false;
@@ -44,17 +40,11 @@ public:
 
     // Mark the state as dirty. This means that the next time we are assigning a value to this
     // piece of OpenGL state will always result in an actual OpenGL call.
-    void setDirty() {
-        dirty = true;
-    }
+    void setDirty() { dirty = true; }
 
-    typename T::Type getCurrentValue() const {
-        return currentValue;
-    }
+    typename T::Type getCurrentValue() const { return currentValue; }
 
-    bool isDirty() const {
-        return dirty;
-    }
+    bool isDirty() const { return dirty; }
 
 private:
     template <std::size_t... I>

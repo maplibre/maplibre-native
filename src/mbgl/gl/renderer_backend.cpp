@@ -9,14 +9,12 @@ namespace mbgl {
 namespace gl {
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
-    : gfx::RendererBackend(contextMode_) {
-}
+    : gfx::RendererBackend(contextMode_) {}
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
     auto result = std::make_unique<gl::Context>(*this);
     result->enableDebugging();
-    result->initializeExtensions(
-            std::bind(&RendererBackend::getExtensionFunctionPointer, this, std::placeholders::_1));
+    result->initializeExtensions(std::bind(&RendererBackend::getExtensionFunctionPointer, this, std::placeholders::_1));
     return result;
 }
 
@@ -32,7 +30,7 @@ void RendererBackend::assumeFramebufferBinding(const gl::FramebufferID fbo) {
 }
 
 void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {
-    getContext<gl::Context>().viewport.setCurrentValue({ x, y, size });
+    getContext<gl::Context>().viewport.setCurrentValue({x, y, size});
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 
@@ -53,7 +51,7 @@ void RendererBackend::setFramebufferBinding(const gl::FramebufferID fbo) {
 }
 
 void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {
-    getContext<gl::Context>().viewport = { x, y, size };
+    getContext<gl::Context>().viewport = {x, y, size};
     assert(gl::value::Viewport::Get() == getContext<gl::Context>().viewport.getCurrentValue());
 }
 

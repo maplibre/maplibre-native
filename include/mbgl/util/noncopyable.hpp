@@ -1,15 +1,14 @@
 #pragma once
 
-namespace mbgl { namespace util {
+namespace mbgl {
+namespace util {
 
-namespace non_copyable_
-{
+namespace non_copyable_ {
 
-class noncopyable
-{
+class noncopyable {
 public:
-    noncopyable( noncopyable const& ) = delete;
-    noncopyable& operator=(noncopyable const& ) = delete;
+    noncopyable(noncopyable const&) = delete;
+    noncopyable& operator=(noncopyable const&) = delete;
 
 protected:
     constexpr noncopyable() = default;

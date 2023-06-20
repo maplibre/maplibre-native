@@ -9,7 +9,8 @@ namespace style {
 class Rotation {
 public:
     Rotation() = default;
-    Rotation(double angle_) : angle(mbgl::util::wrap<double>(angle_, 0, period())) {}
+    Rotation(double angle_)
+        : angle(mbgl::util::wrap<double>(angle_, 0, period())) {}
     constexpr double period() const noexcept { return 360.0; }
     double getAngle() const noexcept { return angle; }
 

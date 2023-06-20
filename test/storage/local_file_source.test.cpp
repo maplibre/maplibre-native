@@ -21,11 +21,11 @@ namespace {
 std::string toAbsoluteURL(const std::string& fileName) {
     char buff[PATH_MAX + 1];
 #ifdef _MSC_VER
-    char* cwd = _getcwd( buff, PATH_MAX + 1 );
+    char* cwd = _getcwd(buff, PATH_MAX + 1);
 #else
-    char* cwd = getcwd( buff, PATH_MAX + 1 );
+    char* cwd = getcwd(buff, PATH_MAX + 1);
 #endif
-    std::string url = { "file://" + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName };
+    std::string url = {"file://" + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName};
     assert(url.size() <= PATH_MAX);
     return url;
 }
@@ -49,7 +49,7 @@ TEST(LocalFileSource, EmptyFile) {
 
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("empty") }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL("empty")}, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
         ASSERT_TRUE(res.data.get());
@@ -65,7 +65,7 @@ TEST(LocalFileSource, NonEmptyFile) {
 
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("nonempty") }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL("nonempty")}, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
         ASSERT_TRUE(res.data.get());
@@ -81,14 +81,15 @@ TEST(LocalFileSource, NonExistentFile) {
 
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("does_not_exist") }, [&](Response res) {
-        req.reset();
-        ASSERT_NE(nullptr, res.error);
-        EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
-        ASSERT_FALSE(res.data.get());
-        // Do not assert on platform-specific error message.
-        loop.stop();
-    });
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL("does_not_exist")},
+                                                   [&](Response res) {
+                                                       req.reset();
+                                                       ASSERT_NE(nullptr, res.error);
+                                                       EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
+                                                       ASSERT_FALSE(res.data.get());
+                                                       // Do not assert on platform-specific error message.
+                                                       loop.stop();
+                                                   });
 
     loop.run();
 }
@@ -98,7 +99,7 @@ TEST(LocalFileSource, InvalidURL) {
 
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "test://wrong-scheme" }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, "test://wrong-scheme"}, [&](Response res) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
@@ -115,7 +116,7 @@ TEST(LocalFileSource, ReadDirectory) {
 
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("directory") }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL("directory")}, [&](Response res) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
@@ -132,7 +133,7 @@ TEST(LocalFileSource, URLEncoding) {
 
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL("%6eonempty") }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL("%6eonempty")}, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
         ASSERT_TRUE(res.data.get());
@@ -155,11 +156,12 @@ TEST(LocalFileSource, URLLimit) {
 
     delete[] filename;
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, toAbsoluteURL(url) }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, toAbsoluteURL(url)}, [&](Response res) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
 #if defined(_MSC_VER) && !defined(__clang__)
-        // Microsoft Visual Studio defines PATH_MAX as 260, less than the limit to trigger an error with reason "Other"
+        // Microsoft Visual Studio defines PATH_MAX as 260, less than the
+        // limit to trigger an error with reason "Other"
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
 #else
         EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);

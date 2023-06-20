@@ -1,8 +1,8 @@
 module: MapLibre
 author: MapLibre Contributors
 author_url: https://maplibre.org/
-github_url: https://github.com/maplibre/maplibre-gl-native
-copyright: '[License](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/LICENSE.md)'
+github_url: https://github.com/maplibre/maplibre-native
+copyright: '[License](https://github.com/maplibre/maplibre-native/blob/main/platform/ios/LICENSE.md)'
 
 head: |
   <link rel='shortcut icon' href='https://maplibre.org/favicon.ico' type='image/x-icon' />

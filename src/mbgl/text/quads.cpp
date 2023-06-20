@@ -1,5 +1,6 @@
 #include <mbgl/geometry/anchor.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/math/minmax.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/text/quads.hpp>
@@ -108,29 +109,29 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
 
     std::optional<std::array<float, 4>> matrix{std::nullopt};
     if (iconRotate) {
-        const float angle = iconRotate * util::DEG2RAD_F;
+        const float angle = util::deg2radf(iconRotate);
         const float angle_sin = std::sin(angle);
         const float angle_cos = std::cos(angle);
         matrix = std::array<float, 4>{{angle_cos, -angle_sin, angle_sin, angle_cos}};
     }
 
     auto makeBox = [&](Cut left, Cut top, Cut right, Cut bottom) {
-        const float leftEm =
-            getEmOffset(left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
+        const float leftEm = getEmOffset(
+            left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
         const float leftPx = getPxOffset(left.fixed - fixedOffsetX, fixedContentWidth, left.stretch, stretchWidth);
 
-        const float topEm =
-            getEmOffset(top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
+        const float topEm = getEmOffset(
+            top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
         const float topPx = getPxOffset(top.fixed - fixedOffsetY, fixedContentHeight, top.stretch, stretchHeight);
 
-        const float rightEm =
-            getEmOffset(right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
+        const float rightEm = getEmOffset(
+            right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
         const float rightPx = getPxOffset(right.fixed - fixedOffsetX, fixedContentWidth, right.stretch, stretchWidth);
 
-        const float bottomEm =
-            getEmOffset(bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
-        const float bottomPx =
-            getPxOffset(bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight);
+        const float bottomEm = getEmOffset(
+            bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
+        const float bottomPx = getPxOffset(
+            bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight);
 
         Point<float> tl(leftEm, topEm);
         Point<float> tr(rightEm, topEm);
@@ -200,8 +201,9 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                           const style::SymbolPlacementType placement,
                           const ImageMap& imageMap,
                           bool allowVerticalPlacement) {
-    const float textRotate = layout.get<TextRotate>() * util::DEG2RAD_F;
-    const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map && placement != SymbolPlacementType::Point;
+    const float textRotate = util::deg2radf(layout.get<TextRotate>());
+    const bool alongLine = layout.get<TextRotationAlignment>() == AlignmentType::Map &&
+                           placement != SymbolPlacementType::Point;
 
     SymbolQuads quads;
 
@@ -236,8 +238,9 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 isSDF = image->second->sdf;
             }
 
-            const Point<float> glyphOffset =
-                alongLine ? Point<float>{positionedGlyph.x + halfAdvance, positionedGlyph.y} : Point<float>{0.0f, 0.0f};
+            const Point<float> glyphOffset = alongLine
+                                                 ? Point<float>{positionedGlyph.x + halfAdvance, positionedGlyph.y}
+                                                 : Point<float>{0.0f, 0.0f};
 
             Point<float> builtInOffset = alongLine ? Point<float>{0.0f, 0.0f}
                                                    : Point<float>{positionedGlyph.x + halfAdvance + textOffset[0],
@@ -245,15 +248,16 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
 
             Point<float> verticalizedLabelOffset = {0.0f, 0.0f};
             if (rotateVerticalGlyph) {
-                // Vertical POI labels, that are rotated 90deg CW and whose glyphs must preserve upright orientation
-                // need to be rotated 90deg CCW. After quad is rotated, it is translated to the original built-in
-                // offset.
+                // Vertical POI labels, that are rotated 90deg CW and whose
+                // glyphs must preserve upright orientation need to be rotated
+                // 90deg CCW. After quad is rotated, it is translated to the
+                // original built-in offset.
                 verticalizedLabelOffset = builtInOffset;
                 builtInOffset = {0.0f, 0.0f};
             }
 
-            const float x1 =
-                (positionedGlyph.metrics.left - rectBuffer) * positionedGlyph.scale - halfAdvance + builtInOffset.x;
+            const float x1 = (positionedGlyph.metrics.left - rectBuffer) * positionedGlyph.scale - halfAdvance +
+                             builtInOffset.x;
             const float y1 = (-positionedGlyph.metrics.top - rectBuffer) * positionedGlyph.scale + builtInOffset.y;
             const float x2 = x1 + rect.w * positionedGlyph.scale / pixelRatio;
             const float y2 = y1 + rect.h * positionedGlyph.scale / pixelRatio;
@@ -264,21 +268,24 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
             Point<float> br{x2, y2};
 
             if (rotateVerticalGlyph) {
-                // Vertical-supporting glyphs are laid out in 24x24 point boxes (1 square em)
-                // In horizontal orientation, the y values for glyphs are below the midline
-                // and we use a "yOffset" of -17 to pull them up to the middle.
-                // By rotating counter-clockwise around the point at the center of the left
-                // edge of a 24x24 layout box centered below the midline, we align the center
-                // of the glyphs with the horizontal midline, so the yOffset is no longer
-                // necessary, but we also pull the glyph to the left along the x axis.
-                // The y coordinate includes baseline yOffset, therefore, needs to be accounted
-                // for when glyph is rotated and translated.
+                // Vertical-supporting glyphs are laid out in 24x24 point boxes
+                // (1 square em) In horizontal orientation, the y values for
+                // glyphs are below the midline and we use a "yOffset" of -17 to
+                // pull them up to the middle. By rotating counter-clockwise
+                // around the point at the center of the left edge of a 24x24
+                // layout box centered below the midline, we align the center of
+                // the glyphs with the horizontal midline, so the yOffset is no
+                // longer necessary, but we also pull the glyph to the left
+                // along the x axis. The y coordinate includes baseline yOffset,
+                // therefore, needs to be accounted for when glyph is rotated
+                // and translated.
 
                 const Point<float> center{-halfAdvance, halfAdvance - Shaping::yOffset};
                 const float verticalRotation = static_cast<float>(-M_PI_2);
 
-                // xHalfWidhtOffsetcorrection is a difference between full-width and half-width
-                // advance, should be 0 for full-width glyphs and will pull up half-width glyphs.
+                // xHalfWidhtOffsetcorrection is a difference between full-width
+                // and half-width advance, should be 0 for full-width glyphs and
+                // will pull up half-width glyphs.
                 const float xHalfWidhtOffsetcorrection = util::ONE_EM / 2.f - halfAdvance;
                 const float yImageOffsetCorrection = positionedGlyph.imageID ? xHalfWidhtOffsetcorrection : 0.0f;
                 const Point<float> xOffsetCorrection{5.0f - Shaping::yOffset - xHalfWidhtOffsetcorrection,

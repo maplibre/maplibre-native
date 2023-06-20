@@ -16,8 +16,8 @@ mbgl::LatLngBounds LatLngBounds::getLatLngBounds(jni::JNIEnv& env, const jni::Ob
     static auto neLatField = javaClass.GetField<jni::jdouble>(env, "latitudeNorth");
     static auto neLonField = javaClass.GetField<jni::jdouble>(env, "longitudeEast");
 
-    mbgl::LatLng sw = { bounds.Get(env, swLatField), bounds.Get(env, swLonField) };
-    mbgl::LatLng ne = { bounds.Get(env, neLatField), bounds.Get(env, neLonField) };
+    mbgl::LatLng sw = {bounds.Get(env, swLatField), bounds.Get(env, swLonField)};
+    mbgl::LatLng ne = {bounds.Get(env, neLatField), bounds.Get(env, neLonField)};
 
     return mbgl::LatLngBounds::hull(sw, ne);
 }

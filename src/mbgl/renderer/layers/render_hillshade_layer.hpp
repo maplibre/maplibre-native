@@ -10,7 +10,7 @@ namespace mbgl {
 class HillshadeProgram;
 class HillshadePrepareProgram;
 
-class RenderHillshadeLayer: public RenderLayer {
+class RenderHillshadeLayer : public RenderLayer {
 public:
     explicit RenderHillshadeLayer(Immutable<style::HillshadeLayer::Impl>);
     ~RenderHillshadeLayer() override;

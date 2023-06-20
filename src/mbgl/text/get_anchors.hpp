@@ -18,12 +18,12 @@ Anchors getAnchors(const GeometryCoordinates& line,
                    float overscaling);
 
 std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
-                                 float maxAngle,
-                                 float textLeft,
-                                 float textRight,
-                                 float iconLeft,
-                                 float iconRight,
-                                 float glyphSize,
-                                 float boxScale);
+                                      float maxAngle,
+                                      float textLeft,
+                                      float textRight,
+                                      float iconLeft,
+                                      float iconRight,
+                                      float glyphSize,
+                                      float boxScale);
 
 } // namespace mbgl

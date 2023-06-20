@@ -11,8 +11,8 @@ namespace mbgl {
 namespace {
 
 size_t getDashPatternHash(const std::vector<float>& dasharray, const LinePatternCap patternCap) {
-    size_t key =
-        patternCap == LinePatternCap::Round ? std::numeric_limits<size_t>::min() : std::numeric_limits<size_t>::max();
+    size_t key = patternCap == LinePatternCap::Round ? std::numeric_limits<size_t>::min()
+                                                     : std::numeric_limits<size_t>::max();
     for (const float part : dasharray) {
         util::hash_combine<float>(key, part);
     }
@@ -180,19 +180,22 @@ DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
 
     // The OpenGL ES 2.0 spec, section 3.8.2 states:
     //
-    //     Calling a sampler from a fragment shader will return (R,G,B,A) = (0,0,0,1) if any of the
-    //     following conditions are true:
-    //     […]
-    //     - A two-dimensional sampler is called, the corresponding texture image is a
-    //       non-power-of-two image […], and either the texture wrap mode is not CLAMP_TO_EDGE, or
-    //       the minification filter is neither NEAREST nor LINEAR.
+    //     Calling a sampler from a fragment shader will return (R,G,B,A) =
+    //     (0,0,0,1) if any of the following conditions are true: […]
+    //     - A two-dimensional sampler is called, the corresponding texture
+    //     image is a
+    //       non-power-of-two image […], and either the texture wrap mode is not
+    //       CLAMP_TO_EDGE, or the minification filter is neither NEAREST nor
+    //       LINEAR.
     //     […]
     //
-    // This means that texture lookups won't work for NPOT textures unless they use GL_CLAMP_TO_EDGE.
-    // We're using GL_CLAMP_TO_EDGE for the vertical direction, but GL_REPEAT for the horizontal
-    // direction, which means that we need a power-of-two texture for our line dash patterns to work
-    // on OpenGL ES 2.0 conforming implementations. Fortunately, this just means changing the height
-    // from 15 to 16, and from 30 to 32, so we don't waste many pixels.
+    // This means that texture lookups won't work for NPOT textures unless they
+    // use GL_CLAMP_TO_EDGE. We're using GL_CLAMP_TO_EDGE for the vertical
+    // direction, but GL_REPEAT for the horizontal direction, which means that
+    // we need a power-of-two texture for our line dash patterns to work on
+    // OpenGL ES 2.0 conforming implementations. Fortunately, this just means
+    // changing the height from 15 to 16, and from 30 to 32, so we don't waste
+    // many pixels.
     const uint32_t textureHeight = 1 << util::ceil_log2(height);
     AlphaImage image({256, textureHeight});
 

@@ -14,7 +14,7 @@ namespace android {
 class SymbolLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/SymbolLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/SymbolLayer"; };
 
     SymbolLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
@@ -162,7 +162,7 @@ public:
 
 }; // class SymbolLayer
 
-class SymbolJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::SymbolLayerFactory {
+class SymbolJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::SymbolLayerFactory {
 public:
     ~SymbolJavaLayerPeerFactory() override;
 
@@ -174,7 +174,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class SymbolJavaLayerPeerFactory
+}; // class SymbolJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

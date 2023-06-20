@@ -5,6 +5,6 @@ cmake -S "$path" `
   -GNinja `
   -DCMAKE_BUILD_TYPE="Release" `
   -DCMAKE_INSTALL_PREFIX="$install" `
-  -DMBGL_WITH_QT=ON `
-  -DMBGL_QT_STATIC=ON `
-  -DMBGL_QT_LIBRARY_ONLY=ON
+  -DMLN_WITH_QT=ON `
+  -DMLN_QT_STATIC=ON `
+  -DMLN_QT_LIBRARY_ONLY=ON

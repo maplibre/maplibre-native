@@ -1,4 +1,4 @@
-@import Mapbox;
+#import "Mapbox.h"
 
 #import "MBXViewController.h"
 
@@ -1909,7 +1909,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 
-    /// Add Mapbox Styles if an `apiKey` exists
+    /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
     if (apiKey.length)
     {
@@ -2189,7 +2189,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style
 {
-    // Default Mapbox styles use {name_en} as their label language, which means
+    // Default MapLibre styles use {name_en} as their label language, which means
     // that a device with an English-language locale is already effectively
     // using locale-based country labels.
     _localizingLabels = [[self bestLanguageForUser] isEqualToString:@"en"];

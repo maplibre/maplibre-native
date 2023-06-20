@@ -1,6 +1,7 @@
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/map/camera.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/util/mat3.hpp>
 #include <mbgl/util/quaternion.hpp>
 
@@ -27,12 +28,12 @@ TEST(FreeCameraOptions, SetLocation) {
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.0, 0.4282409625, 0.000027532812465}}));
 
     options.setLocation(
-        {{util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(util::LATITUDE_MAX * util::DEG2RAD_D)});
+        {{util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(util::deg2rad(util::LATITUDE_MAX))});
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.5, 0.0, 0.5}}));
 
     options.setLocation(
-        {{-util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(-util::LATITUDE_MAX * util::DEG2RAD_D)});
+        {{-util::LATITUDE_MAX, 0.0}, util::EARTH_RADIUS_M * M_PI * std::cos(util::deg2rad(-util::LATITUDE_MAX))});
     ASSERT_TRUE(options.position);
     ASSERT_THAT(options.position.value(), Vec3NearEquals1E7(vec3{{0.5, 1.0, 0.5}}));
 }
@@ -240,8 +241,8 @@ TEST(FreeCameraOptions, SetPitchBearing) {
     ASSERT_THAT(up, Vec3NearEquals1E7(vec3{{0.0, 1.0, 0.0}}));
     ASSERT_THAT(forward, Vec3NearEquals1E7(vec3{{0.0, 0.0, -1.0}}));
 
-    const double cos60 = std::cos(60.0 * util::DEG2RAD_D);
-    const double sin60 = std::sin(60.0 * util::DEG2RAD_D);
+    const double cos60 = std::cos(util::deg2rad(60.0));
+    const double sin60 = std::sin(util::deg2rad(60.0));
 
     options.setPitchBearing(60.0, 0.0);
     ASSERT_TRUE(options.orientation);

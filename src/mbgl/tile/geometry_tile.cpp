@@ -36,17 +36,15 @@ LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Lay
         // Layer data might be outdated, see issue #12432.
         return nullptr;
     }
-    return &result;   
+    return &result;
 }
 
 class GeometryTileRenderData final : public TileRenderData {
 public:
-    GeometryTileRenderData(
-        std::shared_ptr<GeometryTile::LayoutResult> layoutResult_,
-        std::shared_ptr<TileAtlasTextures> atlasTextures_)
-        : TileRenderData(std::move(atlasTextures_))
-        , layoutResult(std::move(layoutResult_)) {
-    }
+    GeometryTileRenderData(std::shared_ptr<GeometryTile::LayoutResult> layoutResult_,
+                           std::shared_ptr<TileAtlasTextures> atlasTextures_)
+        : TileRenderData(std::move(atlasTextures_)),
+          layoutResult(std::move(layoutResult_)) {}
 
 private:
     // TileRenderData overrides.
@@ -76,7 +74,7 @@ std::optional<ImagePosition> GeometryTileRenderData::getPattern(const std::strin
 void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     if (!layoutResult) return;
 
-    auto uploadFn = [&] (Bucket& bucket) {
+    auto uploadFn = [&](Bucket& bucket) {
         if (bucket.needsUpload()) {
             bucket.upload(uploadPass);
         }
@@ -116,13 +114,12 @@ void GeometryTileRenderData::prepare(const SourcePrepareParameters& parameters) 
 
 Bucket* GeometryTileRenderData::getBucket(const Layer::Impl& layer) const {
     const LayerRenderData* data = getLayerRenderData(layer);
-    return data ? data->bucket.get() : nullptr; 
+    return data ? data->bucket.get() : nullptr;
 }
 
 const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::Layer::Impl& layerImpl) const {
     return layoutResult ? layoutResult->getLayerRenderData(layerImpl) : nullptr;
 }
-
 
 /*
    Correlation between GeometryTile and GeometryTileWorker is safeguarded by two
@@ -130,9 +127,9 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
 
    GeometryTile's 'correlationID' is used for ensuring the tile will be flagged
    as non-pending only when the placement coming from the last operation (as in
-   'setData', 'setLayers',  'setShowCollisionBoxes') occurs. This is important for
-   still mode rendering as we want to render only when all layout and placement
-   operations are completed.
+   'setData', 'setLayers',  'setShowCollisionBoxes') occurs. This is important
+   for still mode rendering as we want to render only when all layout and
+   placement operations are completed.
 
    GeometryTileWorker's 'imageCorrelationID' is used for checking whether an
    image request reply coming from `GeometryTile` is valid. Previous image
@@ -140,9 +137,7 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
    that could flag the tile as non-pending too early.
  */
 
-GeometryTile::GeometryTile(const OverscaledTileID& id_,
-                           std::string sourceID_,
-                           const TileParameters& parameters)
+GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters)
     : Tile(Kind::Geometry, id_),
       ImageRequestor(parameters.imageManager),
       sourceID(std::move(sourceID_)),
@@ -159,8 +154,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {
-}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
 GeometryTile::~GeometryTile() {
     glyphManager.removeRequestor(*this);
@@ -181,8 +175,8 @@ void GeometryTile::setError(std::exception_ptr err) {
 }
 
 void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
-    // Mark the tile as pending again if it was complete before to prevent signaling a complete
-    // state despite pending parse operations.
+    // Mark the tile as pending again if it was complete before to prevent
+    // signaling a complete state despite pending parse operations.
     pending = true;
 
     ++correlationID;
@@ -191,8 +185,8 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
 }
 
 void GeometryTile::reset() {
-    // Mark the tile as pending again if it was complete before to prevent signaling a complete
-    // state despite pending parse operations.
+    // Mark the tile as pending again if it was complete before to prevent
+    // signaling a complete state despite pending parse operations.
     pending = true;
 
     ++correlationID;
@@ -204,8 +198,8 @@ std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
 }
 
 void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers) {
-    // Mark the tile as pending again if it was complete before to prevent signaling a complete
-    // state despite pending parse operations.
+    // Mark the tile as pending again if it was complete before to prevent
+    // signaling a complete state despite pending parse operations.
     pending = true;
 
     std::vector<Immutable<LayerProperties>> impls;
@@ -217,8 +211,7 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
         assert(layerImpl.getTypeInfo()->source != LayerTypeInfo::Source::NotRequired);
         assert(layerImpl.source == sourceID);
         assert(layerImpl.visibility != VisibilityType::None);
-        if (id.overscaledZ < std::floor(layerImpl.minZoom) ||
-            id.overscaledZ >= std::ceil(layerImpl.maxZoom)) {
+        if (id.overscaledZ < std::floor(layerImpl.minZoom) || id.overscaledZ >= std::ceil(layerImpl.maxZoom)) {
             continue;
         }
 
@@ -247,9 +240,9 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
 
     layoutResult = std::move(result);
     if (!atlasTextures) {
-    	atlasTextures = std::make_shared<TileAtlasTextures>();
+        atlasTextures = std::make_shared<TileAtlasTextures>();
     }
-    
+
     observer->onTileChanged(*this);
 }
 
@@ -260,7 +253,7 @@ void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelat
     }
     observer->onTileError(*this, std::move(err));
 }
-    
+
 void GeometryTile::onGlyphsAvailable(GlyphMap glyphs) {
     worker.self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphs));
 }
@@ -271,8 +264,15 @@ void GeometryTile::getGlyphs(GlyphDependencies glyphDependencies) {
     }
 }
 
-void GeometryTile::onImagesAvailable(ImageMap images, ImageMap patterns, ImageVersionMap versionMap, uint64_t imageCorrelationID) {
-    worker.self().invoke(&GeometryTileWorker::onImagesAvailable, std::move(images), std::move(patterns), std::move(versionMap), imageCorrelationID);
+void GeometryTile::onImagesAvailable(ImageMap images,
+                                     ImageMap patterns,
+                                     ImageVersionMap versionMap,
+                                     uint64_t imageCorrelationID) {
+    worker.self().invoke(&GeometryTileWorker::onImagesAvailable,
+                         std::move(images),
+                         std::move(patterns),
+                         std::move(versionMap),
+                         imageCorrelationID);
 }
 
 void GeometryTile::getImages(ImageRequestPair pair) {
@@ -299,7 +299,7 @@ bool GeometryTile::layerPropertiesUpdated(const Immutable<style::LayerProperties
 
 const GeometryTileData* GeometryTile::getData() const {
     if (!layoutResult || !layoutResult->featureIndex) {
-       return nullptr; 
+        return nullptr;
     }
     return layoutResult->featureIndex->getData();
 }
@@ -320,9 +320,11 @@ float GeometryTile::getQueryPadding(const std::unordered_map<std::string, const 
 }
 
 void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>& result,
-                                         const GeometryCoordinates& queryGeometry, const TransformState& transformState,
+                                         const GeometryCoordinates& queryGeometry,
+                                         const TransformState& transformState,
                                          const std::unordered_map<std::string, const RenderLayer*>& layers,
-                                         const RenderedQueryOptions& options, const mat4& projMatrix,
+                                         const RenderedQueryOptions& options,
+                                         const mat4& projMatrix,
                                          const SourceFeatureState& featureState) {
     if (!getData()) return;
 
@@ -332,21 +334,25 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
     transformState.matrixFor(posMatrix, id.toUnwrapped());
     matrix::multiply(posMatrix, projMatrix, posMatrix);
 
-    layoutResult->featureIndex->query(result, queryGeometry, transformState, posMatrix,
+    layoutResult->featureIndex->query(result,
+                                      queryGeometry,
+                                      transformState,
+                                      posMatrix,
                                       util::tileSize_D * id.overscaleFactor(),
-                                      std::pow(2, transformState.getZoom() - id.overscaledZ), options, id.toUnwrapped(),
-                                      layers, queryPadding * transformState.maxPitchScaleFactor(), featureState);
+                                      std::pow(2, transformState.getZoom() - id.overscaledZ),
+                                      options,
+                                      id.toUnwrapped(),
+                                      layers,
+                                      queryPadding * transformState.maxPitchScaleFactor(),
+                                      featureState);
 }
 
-void GeometryTile::querySourceFeatures(
-    std::vector<Feature>& result,
-    const SourceQueryOptions& options) {
-
+void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {
     // Data not yet available, or tile is empty
     if (!getData()) {
         return;
     }
-    
+
     // No source layers, specified, nothing to do
     if (!options.sourceLayers) {
         Log::Warning(Event::General, "At least one sourceLayer required");
@@ -357,14 +363,15 @@ void GeometryTile::querySourceFeatures(
         // Go throught all sourceLayers, if any
         // to gather all the features
         auto layer = getData()->getLayer(sourceLayer);
-        
+
         if (layer) {
             auto featureCount = layer->featureCount();
             for (std::size_t i = 0; i < featureCount; i++) {
                 auto feature = layer->getFeature(i);
 
                 // Apply filter, if any
-                if (options.filter && !(*options.filter)(style::expression::EvaluationContext { static_cast<float>(this->id.overscaledZ), feature.get() })) {
+                if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
+                                          static_cast<float>(this->id.overscaledZ), feature.get()})) {
                     continue;
                 }
 

@@ -23,16 +23,10 @@ public:
           enablePlacementTransitions(enablePlacementTransitions_) {}
 
     TransitionOptions reverseMerge(const TransitionOptions& defaults) const {
-        return {
-            duration ? duration : defaults.duration,
-            delay ? delay : defaults.delay,
-            enablePlacementTransitions
-        };
+        return {duration ? duration : defaults.duration, delay ? delay : defaults.delay, enablePlacementTransitions};
     }
 
-    bool isDefined() const {
-        return duration || delay;
-    }
+    bool isDefined() const { return duration || delay; }
 
     mapbox::base::Value serialize() const {
         mapbox::base::ValueObject result;

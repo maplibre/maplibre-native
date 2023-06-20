@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-option(MBGL_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
-option(MBGL_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
-option(MBGL_WITH_COVERAGE "Enable code coverage collection" OFF)
-option(MBGL_WITH_QT "Build Mapbox GL Qt bindings" OFF)
-option(MBGL_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
-option(MBGL_WITH_RTTI "Compile with runtime type information" OFF)
-option(MBGL_WITH_OPENGL "Build with OpenGL renderer" ON)
-option(MBGL_WITH_EGL "Build with EGL renderer" OFF)
-option(MBGL_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
-option(MBGL_WITH_WERROR "Make all compilation warnings errors" ON)
+option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
+option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
+option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
+option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
+option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
+option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
+option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
+option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
+option(MLN_WITH_EGL "Build with EGL renderer" OFF)
+option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
+option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 
-if (MBGL_WITH_CLANG_TIDY)
+if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
     if(NOT CLANG_TIDY_COMMAND)
         message(FATAL_ERROR "ENABLE_CLANG_TIDY is ON but clang-tidy is not found!")
@@ -24,11 +25,11 @@ if (MBGL_WITH_CLANG_TIDY)
     set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option")
 endif()
 
-if (MBGL_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
-if(WIN32 AND NOT MBGL_WITH_QT)
+if(WIN32 AND NOT MLN_WITH_QT)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
@@ -57,35 +58,35 @@ set(UBSAN_BLACKLIST ${PROJECT_SOURCE_DIR}/scripts/ubsan.blacklist)
 target_compile_options(
     mbgl-compiler-options
     INTERFACE
-        $<$<BOOL:${MBGL_WITH_COVERAGE}>:--coverage>
-        $<$<BOOL:${MBGL_WITH_SANITIZER}>:-DSANITIZE>
-        $<$<BOOL:${MBGL_WITH_SANITIZER}>:-fno-omit-frame-pointer>
-        $<$<BOOL:${MBGL_WITH_SANITIZER}>:-fno-optimize-sibling-calls>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},address>:-fsanitize=address>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},thread>:-fsanitize=thread>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=implicit-conversion,
+        $<$<BOOL:${MLN_WITH_COVERAGE}>:--coverage>
+        $<$<BOOL:${MLN_WITH_SANITIZER}>:-DSANITIZE>
+        $<$<BOOL:${MLN_WITH_SANITIZER}>:-fno-omit-frame-pointer>
+        $<$<BOOL:${MLN_WITH_SANITIZER}>:-fno-optimize-sibling-calls>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},address>:-fsanitize=address>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},thread>:-fsanitize=thread>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=implicit-conversion,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=undefined,
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=undefined,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=unsigned-integer-overflow,
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=unsigned-integer-overflow,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=nullability,
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=nullability,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=float-divide-by-zero,
         -fsanitize-blacklist=${UBSAN_BLACKLIST}>
         $<$<PLATFORM_ID:iOS>:-fembed-bitcode>
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<OR:$<BOOL:${MBGL_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<OR:$<BOOL:${MLN_WITH_RTTI}>,$<CXX_COMPILER_ID:MSVC>>>>:-fno-rtti>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wall>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wshadow>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>>:-Wextra>
-        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${MBGL_WITH_WERROR}>>:-Werror>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<NOT:$<PLATFORM_ID:Windows>>,$<BOOL:${MLN_WITH_WERROR}>>:-Werror>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<PLATFORM_ID:Android>>:-Wno-error=tautological-constant-compare>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=maybe-uninitialized>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=return-type>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=unknown-pragmas>
-        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=deprecated-declarations>
-        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-parameter>
-        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MBGL_WITH_QT}>>>:-Wno-error=unused-property-ivar>
+        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=deprecated-declarations>
+        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=unused-parameter>
+        $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=unused-property-ivar>
         $<$<CXX_COMPILER_ID:MSVC>:/utf-8>
         $<$<CXX_COMPILER_ID:MSVC>:/WX>      # all warnings as errors
         $<$<CXX_COMPILER_ID:MSVC>:/EHsc>    # exceptions
@@ -99,10 +100,10 @@ target_compile_options(
 target_link_libraries(
     mbgl-compiler-options
     INTERFACE
-        $<$<BOOL:${MBGL_WITH_COVERAGE}>:--coverage>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},address>:-fsanitize=address>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},thread>:-fsanitize=thread>
-        $<$<STREQUAL:${MBGL_WITH_SANITIZER},undefined>:-fsanitize=undefined>
+        $<$<BOOL:${MLN_WITH_COVERAGE}>:--coverage>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},address>:-fsanitize=address>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},thread>:-fsanitize=thread>
+        $<$<STREQUAL:${MLN_WITH_SANITIZER},undefined>:-fsanitize=undefined>
 )
 
 cmake_policy(SET CMP0063 NEW)
@@ -123,7 +124,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-if(MBGL_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+if(MLN_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
     add_library(mbgl-core OBJECT)
 else()
     add_library(mbgl-core STATIC)
@@ -164,6 +165,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/map_projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/mode.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/projection_mode.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/math/angles.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/clamp.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/log2.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/minmax.hpp
@@ -228,6 +230,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/image.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/image_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/in.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/index_of.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/interpolator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/is_constant.hpp
@@ -628,6 +631,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/image.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/image_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/in.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/index_of.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/interpolate.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/is_constant.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/is_expression.cpp
@@ -869,7 +873,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/work_request.cpp
 )
 
-if(MBGL_WITH_OPENGL)
+if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
@@ -982,7 +986,7 @@ target_sources(
     ${SRC_FILES}
 )
 
-if (MBGL_WITH_CLANG_TIDY)
+if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
@@ -997,18 +1001,18 @@ if(EXISTS ${PROJECT_SOURCE_DIR}/.git/HEAD)
             --short=8
             HEAD
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-        OUTPUT_VARIABLE MBGL_VERSION_REV
+        OUTPUT_VARIABLE MLN_VERSION_REV
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 else()
-    set(MBGL_VERSION_REV 00000000)
+    set(MLN_VERSION_REV 00000000)
 endif()
 
 set_source_files_properties(
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/version.cpp
     PROPERTIES
     COMPILE_DEFINITIONS
-    MBGL_VERSION_REV="${MBGL_VERSION_REV}"
+    MBGL_VERSION_REV="${MLN_VERSION_REV}"
 )
 
 target_include_directories(
@@ -1058,7 +1062,6 @@ target_link_libraries(
         Mapbox::Base::Extras::rapidjson
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
-        Mapbox::Base::optional
         Mapbox::Base::variant
 )
 
@@ -1098,7 +1101,7 @@ set_target_properties(
     mbgl-core
     PROPERTIES
         INTERFACE_MAPBOX_NAME "Mapbox GL Native"
-        INTERFACE_MAPBOX_URL "https://github.com/maplibre/maplibre-gl-native"
+        INTERFACE_MAPBOX_URL "https://github.com/maplibre/maplibre-native"
         INTERFACE_MAPBOX_AUTHOR "Mapbox"
         INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
@@ -1109,13 +1112,13 @@ add_library(
     Mapbox::Map ALIAS mbgl-core
 )
 
-if(MBGL_WITH_CORE_ONLY)
+if(MLN_WITH_CORE_ONLY)
     return()
 endif()
 
 include(${PROJECT_SOURCE_DIR}/scripts/license.cmake)
 
-if(MBGL_WITH_QT)
+if(MLN_WITH_QT)
     include(${PROJECT_SOURCE_DIR}/platform/qt/qt.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     include(${PROJECT_SOURCE_DIR}/platform/android/android.cmake)

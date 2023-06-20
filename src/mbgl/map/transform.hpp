@@ -22,7 +22,9 @@ public:
               ConstrainMode = ConstrainMode::HeightOnly,
               ViewportMode = ViewportMode::Default);
 
-    Transform(const TransformState &state_) : observer(MapObserver::nullObserver()), state(state_) {}
+    Transform(const TransformState& state_)
+        : observer(MapObserver::nullObserver()),
+          state(state_) {}
 
     // Map view
     void resize(Size size);
@@ -126,7 +128,7 @@ private:
                          const Duration&);
 
     // We don't want to show horizon: limit max pitch based on edge insets.
-    double getMaxPitchForEdgeInsets(const EdgeInsets &insets) const;
+    double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;
 
     TimePoint transitionStart;
     Duration transitionDuration;

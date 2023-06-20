@@ -40,8 +40,8 @@ Before building, follow these steps to install prerequisites:
 ### Build the iOS Demo App
 
 ```
-git clone --recurse-submodules git@github.com:maplibre/maplibre-gl-native.git
-cd maplibre-gl-native/platform/ios 
+git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
+cd maplibre-native/platform/ios 
 make iproj
 ```
 
@@ -57,8 +57,8 @@ If you wish to deploy on attached hardware, you need to setup your Apple Develop
 
 1. Clone the git repository:
    ```bash
-   git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
-   cd maplibre-gl-native
+   git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
+   cd maplibre-native
    ```
    Note that you must check out the project's git submodules to build. If you did not include `--recurse-submodules` in the clone, you can later run `git submodule update --init`.
 1. Run `make iframework BUILDTYPE=Release`. The packaging script will produce a `build/ios/pkg/` folder containing:

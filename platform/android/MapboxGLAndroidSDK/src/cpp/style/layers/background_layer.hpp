@@ -14,7 +14,7 @@ namespace android {
 class BackgroundLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/BackgroundLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/BackgroundLayer"; };
 
     BackgroundLayer(jni::JNIEnv&, jni::String&);
 
@@ -40,7 +40,7 @@ public:
 
 }; // class BackgroundLayer
 
-class BackgroundJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::BackgroundLayerFactory {
+class BackgroundJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::BackgroundLayerFactory {
 public:
     ~BackgroundJavaLayerPeerFactory() override;
 
@@ -52,7 +52,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class BackgroundJavaLayerPeerFactory
+}; // class BackgroundJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

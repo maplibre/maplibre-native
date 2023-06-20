@@ -10,16 +10,17 @@
 #include <algorithm>
 #include <list>
 
-
 namespace mbgl {
 
 /*
-   FakeFileSource is similar to StubFileSource, but it follows a post hoc, "push" model rather than
-   a pre hoc, "pull" model. You pass it to code that makes requests, it records what requests are
-   made, then you can examine them, make assertions about them, and respond as desired.
+   FakeFileSource is similar to StubFileSource, but it follows a post hoc,
+   "push" model rather than a pre hoc, "pull" model. You pass it to code that
+   makes requests, it records what requests are made, then you can examine them,
+   make assertions about them, and respond as desired.
 
-   This is particularly useful if you want to simulate multiple responses, e.g. as part of a resource
-   revalidation flow. StubFileSource allows only a single response.
+   This is particularly useful if you want to simulate multiple responses, e.g.
+   as part of a resource revalidation flow. StubFileSource allows only a single
+   response.
 */
 class FakeFileSource : public FileSource {
 public:
@@ -35,17 +36,16 @@ public:
             : resource(std::move(resource_)),
               callback(std::move(callback_)),
               list(list_),
-              link((list.push_back(this), std::prev(list.end()))) {
-        }
+              link((list.push_back(this), std::prev(list.end()))) {}
 
-        ~FakeFileRequest() override {
-            list.erase(link);
-        }
+        ~FakeFileRequest() override { list.erase(link); }
     };
 
     FakeFileSource(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
-        : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()) {}
-    FakeFileSource() : FakeFileSource(ResourceOptions::Default(), ClientOptions()) {}
+        : resourceOptions(resourceOptions_.clone()),
+          clientOptions(clientOptions_.clone()) {}
+    FakeFileSource()
+        : FakeFileSource(ResourceOptions::Default(), ClientOptions()) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) override {
         return std::make_unique<FakeFileRequest>(resource, callback, requests);
@@ -54,7 +54,7 @@ public:
     bool canRequest(const Resource&) const override { return true; }
 
     bool respond(Resource::Kind kind, const Response& response) {
-        auto it = std::find_if(requests.begin(), requests.end(), [&] (FakeFileRequest* fakeRequest) {
+        auto it = std::find_if(requests.begin(), requests.end(), [&](FakeFileRequest* fakeRequest) {
             return fakeRequest->resource.kind == kind;
         });
 
@@ -71,19 +71,11 @@ public:
 
     std::list<FakeFileRequest*> requests;
 
-    void setResourceOptions(ResourceOptions options) override {
-        resourceOptions = options;
-    }
-    ResourceOptions getResourceOptions() override {
-        return resourceOptions.clone();
-    }
+    void setResourceOptions(ResourceOptions options) override { resourceOptions = options; }
+    ResourceOptions getResourceOptions() override { return resourceOptions.clone(); }
 
-    void setClientOptions(ClientOptions options) override {
-        clientOptions = options;
-    }
-    ClientOptions getClientOptions() override {
-        return clientOptions.clone();
-    }
+    void setClientOptions(ClientOptions options) override { clientOptions = options; }
+    ClientOptions getClientOptions() override { return clientOptions.clone(); }
 
 private:
     ResourceOptions resourceOptions;
@@ -92,7 +84,8 @@ private:
 
 class FakeOnlineFileSource : public FakeFileSource {
 public:
-    FakeOnlineFileSource() : FakeOnlineFileSource(ResourceOptions::Default(), ClientOptions()) {}
+    FakeOnlineFileSource()
+        : FakeOnlineFileSource(ResourceOptions::Default(), ClientOptions()) {}
     FakeOnlineFileSource(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : FakeFileSource(resourceOptions_, clientOptions_) {}
 
@@ -100,15 +93,14 @@ public:
         return FakeFileSource::request(resource, callback);
     }
 
-    bool respond(Resource::Kind kind, const Response& response) {
-        return FakeFileSource::respond(kind, response);
-    }
+    bool respond(Resource::Kind kind, const Response& response) { return FakeFileSource::respond(kind, response); }
 
     mapbox::base::Value getProperty(const std::string& property) const override {
         return onlineFs->getProperty(property);
     }
 
-    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                              ClientOptions());
 };
 
 } // namespace mbgl

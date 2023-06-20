@@ -13,7 +13,9 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Basic)) {
 
     Timer timer;
 
-    auto callback = [&loop] { loop.stop(); };
+    auto callback = [&loop] {
+        loop.stop();
+    };
 
     auto interval = mbgl::Milliseconds(300);
     auto expectedTotalTime = interval;
@@ -131,9 +133,10 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(DestroyShouldStop)) {
 }
 
 TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedDuringExpiration)) {
-    // The idea is to have original timer cancellation and expiration roughly at the same time.
-    // In this case some timer backens (e.g. asio::high_resolution_timer)
-    // may call the expiration callback with good status while the timer may not expect it.
+    // The idea is to have original timer cancellation and expiration roughly at
+    // the same time. In this case some timer backens (e.g.
+    // asio::high_resolution_timer) may call the expiration callback with good
+    // status while the timer may not expect it.
 
     RunLoop loop;
 
@@ -173,7 +176,9 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedAfterExpiration)) {
 
     bool callbackFired = false;
 
-    auto timerCallback = [&] { callbackFired = true; };
+    auto timerCallback = [&] {
+        callbackFired = true;
+    };
 
     auto first = mbgl::Clock::now();
 
@@ -204,7 +209,7 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StartOverrides)) {
 
     auto interval1 = mbgl::Milliseconds(50);
     auto interval2 = mbgl::Milliseconds(250);
-    auto expectedTotalTime = interval1  + interval2;
+    auto expectedTotalTime = interval1 + interval2;
 
     int count = 0;
 

@@ -1,8 +1,8 @@
 find_package(OpenGL REQUIRED)
 
 if(WIN32)
-    if(MBGL_WITH_OSMESA)
-        message(WARNING "mbgl-glfw does not work with -DMBGL_WITH_OSMESA=ON. If you want to build this target, don't use this option.")
+    if(MLN_WITH_OSMESA)
+        message(WARNING "mbgl-glfw does not work with -DMLN_WITH_OSMESA=ON. If you want to build this target, don't use this option.")
         return()
     endif()
 
@@ -29,7 +29,7 @@ set_property(
     PROPERTY COMPILE_DEFINITIONS MAPBOX_PUCK_ASSETS_PATH=\"${PROJECT_SOURCE_DIR}/platform/glfw/assets/\"
 )
 
-if(MBGL_WITH_OPENGL)
+if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-glfw
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_gl_backend.cpp
@@ -40,7 +40,7 @@ if(MBGL_WITH_OPENGL)
     )
 endif()
 
-if(MBGL_WITH_EGL)
+if(MLN_WITH_EGL)
     target_compile_definitions(
         mbgl-glfw
         PRIVATE MBGL_WITH_EGL=1
@@ -94,7 +94,7 @@ target_link_libraries(
         Mapbox::Base::cheap-ruler-cpp
 )
 
-if(NOT WIN32 AND MBGL_WITH_OPENGL)
+if(NOT WIN32 AND MLN_WITH_OPENGL)
     target_link_libraries(
         mbgl-glfw
         PRIVATE OpenGL::GL

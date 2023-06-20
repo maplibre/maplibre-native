@@ -17,10 +17,7 @@ class BasicComparison : public Expression {
 public:
     using CompareFunctionType = bool (*)(const Value&, const Value&);
 
-    BasicComparison(
-        std::string op,
-        std::unique_ptr<Expression> lhs,
-        std::unique_ptr<Expression> rhs);
+    BasicComparison(std::string op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     bool operator==(const Expression&) const override;
@@ -40,11 +37,10 @@ class CollatorComparison : public Expression {
 public:
     using CompareFunctionType = bool (*)(const std::string&, const std::string&, const Collator&);
 
-    CollatorComparison(
-        std::string op,
-        std::unique_ptr<Expression> lhs,
-        std::unique_ptr<Expression> rhs,
-        std::unique_ptr<Expression> collator);
+    CollatorComparison(std::string op,
+                       std::unique_ptr<Expression> lhs,
+                       std::unique_ptr<Expression> rhs,
+                       std::unique_ptr<Expression> collator);
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     bool operator==(const Expression&) const override;
@@ -60,8 +56,6 @@ private:
     std::unique_ptr<Expression> collator;
     bool needsRuntimeTypeCheck;
 };
-
-
 
 } // namespace expression
 } // namespace style

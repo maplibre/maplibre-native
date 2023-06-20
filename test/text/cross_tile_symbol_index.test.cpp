@@ -29,12 +29,30 @@ SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
                                                                  SymbolContent::IconSDF,
                                                                  false,
                                                                  false);
-    return SymbolInstance(anchor, std::move(sharedData), shaping, std::nullopt, std::nullopt, 0, 0, placementType, textOffset, 0, 0, iconOffset, subfeature, 0, 0, key, 0.0f, 0.0f, 0.0f, variableTextOffset, false);
+    return SymbolInstance(anchor,
+                          std::move(sharedData),
+                          shaping,
+                          std::nullopt,
+                          std::nullopt,
+                          0,
+                          0,
+                          placementType,
+                          textOffset,
+                          0,
+                          0,
+                          iconOffset,
+                          subfeature,
+                          0,
+                          0,
+                          key,
+                          0.0f,
+                          0.0f,
+                          0.0f,
+                          variableTextOffset,
+                          false);
 }
 
-
 TEST(CrossTileSymbolLayerIndex, addBucket) {
-
     uint32_t maxCrossTileID = 0;
     uint32_t maxBucketInstanceId = 0;
     CrossTileSymbolLayerIndex index(maxCrossTileID);
@@ -70,7 +88,6 @@ TEST(CrossTileSymbolLayerIndex, addBucket) {
     // Assigned new IDs
     ASSERT_EQ(mainBucket.symbolInstances.at(0).crossTileID, 1u);
     ASSERT_EQ(mainBucket.symbolInstances.at(1).crossTileID, 2u);
-
 
     OverscaledTileID childID(7, 0, 7, 16, 16);
     std::vector<SymbolInstance> childInstances;
@@ -160,11 +177,9 @@ TEST(CrossTileSymbolLayerIndex, addBucket) {
     ASSERT_EQ(grandchildBucket.symbolInstances.at(0).crossTileID, 1u);
     // Does not match the previous value for Windsor because that tile was removed
     ASSERT_EQ(grandchildBucket.symbolInstances.at(1).crossTileID, 5u);
-
 }
 
 TEST(CrossTileSymbolLayerIndex, resetIDs) {
-
     uint32_t maxCrossTileID = 0;
     uint32_t maxBucketInstanceId = 0;
     CrossTileSymbolLayerIndex index(maxCrossTileID);
@@ -293,9 +308,12 @@ TEST(CrossTileSymbolLayerIndex, noDuplicatesWithinZoomLevel) {
 
     // copies parent ids without duplicate ids in this tile
     index.addBucket(childID, mat4{}, childBucket);
-    ASSERT_EQ(childBucket.symbolInstances.at(0).crossTileID, 1u); // A' copies from A
-    ASSERT_EQ(childBucket.symbolInstances.at(1).crossTileID, 2u); // B' copies from B
-    ASSERT_EQ(childBucket.symbolInstances.at(2).crossTileID, 3u); // C' gets new ID
+    ASSERT_EQ(childBucket.symbolInstances.at(0).crossTileID,
+              1u); // A' copies from A
+    ASSERT_EQ(childBucket.symbolInstances.at(1).crossTileID,
+              2u); // B' copies from B
+    ASSERT_EQ(childBucket.symbolInstances.at(2).crossTileID,
+              3u); // C' gets new ID
 }
 
 TEST(CrossTileSymbolLayerIndex, bucketReplacement) {
@@ -358,9 +376,12 @@ TEST(CrossTileSymbolLayerIndex, bucketReplacement) {
 
     // copies parent ids without duplicate ids in this tile
     index.addBucket(tileID, mat4{}, secondBucket);
-    ASSERT_EQ(secondBucket.symbolInstances.at(0).crossTileID, 1u); // A' copies from A
-    ASSERT_EQ(secondBucket.symbolInstances.at(1).crossTileID, 2u); // B' copies from B
-    ASSERT_EQ(secondBucket.symbolInstances.at(2).crossTileID, 3u); // C' gets new ID
+    ASSERT_EQ(secondBucket.symbolInstances.at(0).crossTileID,
+              1u); // A' copies from A
+    ASSERT_EQ(secondBucket.symbolInstances.at(1).crossTileID,
+              2u); // B' copies from B
+    ASSERT_EQ(secondBucket.symbolInstances.at(2).crossTileID,
+              3u); // C' gets new ID
 }
 
 namespace {

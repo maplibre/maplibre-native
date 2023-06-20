@@ -55,7 +55,8 @@ void TaggedString::trim() {
         std::size_t trailingWhitespace = styledText.first.find_last_not_of(u" \t\n\v\f\r") + 1;
 
         styledText.first = styledText.first.substr(beginningWhitespace, trailingWhitespace - beginningWhitespace);
-        styledText.second = std::vector<uint8_t>(styledText.second.begin() + beginningWhitespace, styledText.second.begin() + trailingWhitespace);
+        styledText.second = std::vector<uint8_t>(styledText.second.begin() + beginningWhitespace,
+                                                 styledText.second.begin() + trailingWhitespace);
     }
 }
 
@@ -66,7 +67,7 @@ double TaggedString::getMaxScale() const {
     }
     return maxScale;
 }
-    
+
 void TaggedString::verticalizePunctuation() {
     // Relies on verticalization changing characters in place so that style indices don't need updating
     styledText.first = util::i18n::verticalizePunctuation(styledText.first);

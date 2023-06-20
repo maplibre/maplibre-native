@@ -1,4 +1,5 @@
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/math/clamp.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/tile/tile_id.hpp>
@@ -12,7 +13,7 @@ namespace mbgl {
 
 namespace {
 LatLng latLngFromMercator(Point<double> mercatorCoordinate, LatLng::WrapMode wrapMode = LatLng::WrapMode::Unwrapped) {
-    return {util::RAD2DEG_D * (2 * std::atan(std::exp(M_PI - mercatorCoordinate.y * util::M2PI)) - M_PI_2),
+    return {util::rad2deg(2 * std::atan(std::exp(M_PI - mercatorCoordinate.y * util::M2PI)) - M_PI_2),
             mercatorCoordinate.x * 360.0 - 180.0,
             wrapMode};
 }
@@ -21,7 +22,7 @@ constexpr double kEpsilon = 1e-9;
 double roundForAccuracy(double x) {
     double round_x = std::round(x);
     double diff = std::abs(round_x - x);
-    if (diff < kEpsilon && diff > 0 ){
+    if (diff < kEpsilon && diff > 0) {
         return round_x;
     } else {
         return x;
@@ -30,7 +31,9 @@ double roundForAccuracy(double x) {
 } // namespace
 
 TransformState::TransformState(ConstrainMode constrainMode_, ViewportMode viewportMode_)
-    : bounds(LatLngBounds()), constrainMode(constrainMode_), viewportMode(viewportMode_) {}
+    : bounds(LatLngBounds()),
+      constrainMode(constrainMode_),
+      viewportMode(viewportMode_) {}
 
 void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.x) {
@@ -125,8 +128,8 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     updateCameraState();
 
     mat4 worldToCamera = camera.getWorldToCamera(scale, viewportMode == ViewportMode::FlippedY);
-    mat4 cameraToClip =
-        camera.getCameraToClipPerspective(getFieldOfView(), static_cast<double>(size.width) / size.height, nearZ, farZ);
+    mat4 cameraToClip = camera.getCameraToClipPerspective(
+        getFieldOfView(), static_cast<double>(size.width) / size.height, nearZ, farZ);
 
     // Move the center of perspective to center of specified edgeInsets.
     // Values are in range [-1, 1] where the upper and lower range values
@@ -155,12 +158,14 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
         projMatrix[9] = ySkew * pixelsPerMeter;
     }
 
-    // Make a second projection matrix that is aligned to a pixel grid for rendering raster tiles.
-    // We're rounding the (floating point) x/y values to achieve to avoid rendering raster images to fractional
-    // coordinates. Additionally, we adjust by half a pixel in either direction in case that viewport dimension
-    // is an odd integer to preserve rendering to the pixel grid. We're rotating this shift based on the angle
-    // of the transformation so that 0°, 90°, 180°, and 270° rasters are crisp, and adjust the shift so that
-    // it is always <= 0.5 pixels.
+    // Make a second projection matrix that is aligned to a pixel grid for
+    // rendering raster tiles. We're rounding the (floating point) x/y values to
+    // achieve to avoid rendering raster images to fractional coordinates.
+    // Additionally, we adjust by half a pixel in either direction in case that
+    // viewport dimension is an odd integer to preserve rendering to the pixel
+    // grid. We're rotating this shift based on the angle of the transformation
+    // so that 0°, 90°, 180°, and 270° rasters are crisp, and adjust the shift
+    // so that it is always <= 0.5 pixels.
 
     if (aligned) {
         const double worldSize = Projection::worldSize(scale);
@@ -186,10 +191,11 @@ void TransformState::updateCameraState() const {
     const double worldSize = Projection::worldSize(scale);
     const double cameraToCenterDistance = getCameraToCenterDistance();
 
-    // x & y tracks the center of the map in pixels. However as rendering is done in pixel coordinates the rendering
-    // origo is actually in the middle of the map (0.5 * worldSize). x&y positions have to be negated because it defines
-    // position of the map, not the camera. Moving map 10 units left has the same effect as moving camera 10 units to
-    // the right.
+    // x & y tracks the center of the map in pixels. However as rendering is
+    // done in pixel coordinates the rendering origo is actually in the middle
+    // of the map (0.5 * worldSize). x&y positions have to be negated because it
+    // defines position of the map, not the camera. Moving map 10 units left has
+    // the same effect as moving camera 10 units to the right.
     const double dx = 0.5 * worldSize - x;
     const double dy = 0.5 * worldSize - y;
 
@@ -420,8 +426,8 @@ CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& 
         .withCenter(getLatLng())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
-        .withBearing(-bearing * util::RAD2DEG_D)
-        .withPitch(pitch * util::RAD2DEG_D);
+        .withBearing(util::rad2deg(-bearing))
+        .withPitch(util::rad2deg(pitch));
 }
 
 // MARK: - EdgeInsets
@@ -436,7 +442,7 @@ void TransformState::setEdgeInsets(const EdgeInsets& val) {
 // MARK: - Position
 
 LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
-    return {util::RAD2DEG_D * (2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
+    return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
 }
 
 double TransformState::pixel_x() const {
@@ -505,7 +511,9 @@ void TransformState::setMinPitch(const double pitch_) {
     if (pitch_ <= maxPitch) {
         minPitch = util::clamp(pitch_, util::PITCH_MIN, maxPitch);
     } else {
-        Log::Warning(Event::General, "Trying to set minimum pitch to larger than maximum pitch, no changes made.");
+        Log::Warning(Event::General,
+                     "Trying to set minimum pitch to larger than maximum pitch, no "
+                     "changes made.");
     }
 }
 
@@ -517,7 +525,9 @@ void TransformState::setMaxPitch(const double pitch_) {
     if (pitch_ >= minPitch) {
         maxPitch = util::clamp(pitch_, minPitch, util::PITCH_MAX);
     } else {
-        Log::Warning(Event::General, "Trying to set maximum pitch to smaller than minimum pitch, no changes made.");
+        Log::Warning(Event::General,
+                     "Trying to set maximum pitch to smaller than minimum pitch, no "
+                     "changes made.");
     }
 }
 
@@ -775,7 +785,7 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
     Cc = newWorldSize / util::M2PI;
 
     const double m = 1 - 1e-15;
-    const double f = util::clamp(std::sin(util::DEG2RAD_D * constrained.latitude()), -m, m);
+    const double f = util::clamp(std::sin(util::deg2rad(constrained.latitude())), -m, m);
 
     ScreenCoordinate point = {
         -constrained.longitude() * Bc,
@@ -811,10 +821,10 @@ float TransformState::maxPitchScaleFactor() const {
     if (size.isEmpty()) {
         return {};
     }
-    auto latLng = screenCoordinateToLatLng({ 0, static_cast<float>(getSize().height) });
+    auto latLng = screenCoordinateToLatLng({0, static_cast<float>(getSize().height)});
 
     Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
-    vec4 p = {{ pt.x, pt.y, 0, 1 }};
+    vec4 p = {{pt.x, pt.y, 0, 1}};
     vec4 topPoint;
     matrix::transformMat4(topPoint, p, getCoordMatrix());
     return static_cast<float>(topPoint[3]) / getCameraToCenterDistance();

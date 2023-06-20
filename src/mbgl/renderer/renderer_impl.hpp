@@ -23,7 +23,7 @@ public:
 
 private:
     friend class Renderer;
- 
+
     void setObserver(RendererObserver*);
 
     void render(const RenderTree&);

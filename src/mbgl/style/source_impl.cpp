@@ -6,18 +6,19 @@ namespace mbgl {
 namespace style {
 
 namespace {
-void WarnIfOverscaleFactorCapsPrefetchDelta(const std::optional<uint8_t>& overscale, const std::optional<uint8_t>& prefetch) {
+void WarnIfOverscaleFactorCapsPrefetchDelta(const std::optional<uint8_t>& overscale,
+                                            const std::optional<uint8_t>& prefetch) {
     const uint8_t prefetchDelta = std::max<uint8_t>(util::DEFAULT_PREFETCH_ZOOM_DELTA, prefetch.value_or(0u));
     if (overscale && *overscale < prefetchDelta) {
-        Log::Warning(Event::Style, "Parent tile overscale factor will cap prefetch delta to " + std::to_string(int(*overscale)));
+        Log::Warning(Event::Style,
+                     "Parent tile overscale factor will cap prefetch delta to " + std::to_string(int(*overscale)));
     }
 }
 } // namespace
 
 Source::Impl::Impl(SourceType type_, std::string id_)
     : type(type_),
-      id(std::move(id_)) {
-}
+      id(std::move(id_)) {}
 
 void Source::Impl::setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept {
     prefetchZoomDelta = std::move(delta);

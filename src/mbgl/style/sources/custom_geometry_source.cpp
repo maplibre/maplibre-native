@@ -35,8 +35,7 @@ bool CustomGeometrySource::supportsLayerType(const mbgl::style::LayerTypeInfo* i
     return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
 }
 
-void CustomGeometrySource::setTileData(const CanonicalTileID& tileID,
-                                     const GeoJSON& data) {
+void CustomGeometrySource::setTileData(const CanonicalTileID& tileID, const GeoJSON& data) {
     loader->self().invoke(&CustomTileLoader::setTileData, tileID, data);
 }
 

@@ -10,10 +10,7 @@ class TileParameters;
 
 class VectorTile : public GeometryTile {
 public:
-    VectorTile(const OverscaledTileID&,
-               std::string sourceID,
-               const TileParameters&,
-               const Tileset&);
+    VectorTile(const OverscaledTileID&, std::string sourceID, const TileParameters&, const Tileset&);
 
     void setNecessity(TileNecessity) final;
     void setUpdateParameters(const TileUpdateParameters&) final;

@@ -18,7 +18,7 @@ class LayerRenderData;
 class SourcePrepareParameters;
 
 class TileAtlasTextures {
-public:    
+public:
     std::optional<gfx::Texture> glyph;
     std::optional<gfx::Texture> icon;
 };
@@ -49,9 +49,7 @@ public:
 
 private:
     // TileRenderData overrides.
-    Bucket* getBucket(const style::Layer::Impl&) const override {
-        return bucket ? bucket.get() : nullptr;
-    }
+    Bucket* getBucket(const style::Layer::Impl&) const override { return bucket ? bucket.get() : nullptr; }
     void upload(gfx::UploadPass& uploadPass) override {
         if (bucket) bucket->upload(uploadPass);
     }

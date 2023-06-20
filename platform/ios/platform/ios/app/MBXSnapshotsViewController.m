@@ -1,4 +1,4 @@
-@import Mapbox;
+#import "Mapbox.h"
 
 #import "MBXSnapshotsViewController.h"
 

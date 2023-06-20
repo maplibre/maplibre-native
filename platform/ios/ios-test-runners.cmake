@@ -1,8 +1,8 @@
-if(MBGL_IOS_RENDER_TEST)
+if(MLN_IOS_RENDER_TEST)
     include(${PROJECT_SOURCE_DIR}/vendor/zip-archive.cmake)
     initialize_ios_target(mbgl-vendor-zip-archive)
 
-    if(MBGL_WITH_OPENGL)
+    if(MLN_WITH_OPENGL)
         message(STATUS "Setting up test data for iOS render test with OpenGL renderer")
         set(PREPARE_CMD "${PROJECT_SOURCE_DIR}/render-test/ios/setup_test_data.sh")
     endif()
@@ -87,7 +87,7 @@ if(MBGL_IOS_RENDER_TEST)
     set_target_properties(RenderTestAppTests PROPERTIES XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
 endif()
 
-if(MBGL_IOS_UNIT_TEST)
+if(MLN_IOS_UNIT_TEST)
     execute_process(COMMAND ditto ${PROJECT_SOURCE_DIR}/test/fixtures ${CMAKE_CURRENT_BINARY_DIR}/test-data/test/fixtures)
     execute_process(
         COMMAND
@@ -159,7 +159,7 @@ if(MBGL_IOS_UNIT_TEST)
     set_target_properties(UnitTestsAppTests PROPERTIES XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
 endif()
 
-if(MBGL_IOS_BENCHMARK)
+if(MLN_IOS_BENCHMARK)
     execute_process(COMMAND ditto ${PROJECT_SOURCE_DIR}/benchmark/fixtures ${CMAKE_CURRENT_BINARY_DIR}/benchmark-data/benchmark/fixtures)
     execute_process(
         COMMAND

@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::DebugProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::DebugProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 out vec2 v_uv;
 

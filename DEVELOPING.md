@@ -1,5 +1,16 @@
 # Developing
 
+
+## Pre-commit hooks
+
+Install [pre-commit](https://pre-commit.com/) and run
+
+```
+pre-commit install
+```
+
+to install the pre-commit hooks configured in `.pre-commit-config.yml`.
+
 ## Render Tests
 
 To check that the output of the rendering is correct, we compare actual rendered PNGs for simple styles with expected PNGs. The content of the tests is stored in the MapLibre GL JS submodule which means that GL JS and Native are in fact quasi pixel-identical in their rendering.
@@ -26,10 +37,16 @@ Run the following on linux to build the render test runner:
 git submodule update --init --recursive --depth 1
 
 sudo apt update
-sudo apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri libjpeg-turbo8 libicu66 libjpeg-dev
+sudo apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-dev libc++abi-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri libjpeg-turbo8 libicu-dev libjpeg-dev
 
 cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+```
+
+Also, if your system supports OpenGL ES 3+, you can now execute the GLFW demo with:
+
+```
+MLN_API_KEY=add_maptiler_api_key_here ./build/platform/glfw/mbgl-glfw
 ```
 
 
@@ -76,7 +93,8 @@ or any of the platform make files:
 * iOS developers can use [Xcode](https://developer.apple.com/support/debugging/).  See also [Advanced Debugging with Xcode and LLDB](https://developer.apple.com/videos/play/wwdc2018/412/).
 
 ## Static Analysis
-We use [`clang-tidy`](https://clang.llvm.org/extra/clang-tidy/) for static analysis and run it on CI for each pull request. If you want to run it locally use `-DMBGL_WITH_CLANG_TIDY=ON` CMake option and just run regular build. For the list of enabled checks please see:
+
+We use [`clang-tidy`](https://clang.llvm.org/extra/clang-tidy/) for static analysis and run it on CI for each pull request. If you want to run it locally use `-DMLN_WITH_CLANG_TIDY=ON` CMake option and just run regular build. For the list of enabled checks please see:
  [`.clang-tidy`](.clang-tidy) and [`test/.clang-tidy`](test/.clang-tidy)(for tests we are less strict and use different set of checks).
 
 ## Logging in C++
@@ -166,3 +184,6 @@ autoload -Uz compinit && compinit
 ### Kotlin and Java compatibility
 
 We are moving the Android SDK to Kotlin, which is backward compatible with Java, but if you need a Java version of the Android SDK there is a `before-kotlin-port` tag available.
+
+
+

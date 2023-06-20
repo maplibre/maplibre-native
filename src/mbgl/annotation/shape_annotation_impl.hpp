@@ -20,10 +20,10 @@ public:
     ShapeAnnotationImpl(AnnotationID);
     virtual ~ShapeAnnotationImpl() = default;
 
-    virtual void updateStyle(style::Style::Impl&) const = 0;
-    virtual const ShapeAnnotationGeometry& geometry() const = 0;
+    virtual void updateStyle(style::Style::Impl &) const = 0;
+    virtual const ShapeAnnotationGeometry &geometry() const = 0;
 
-    void updateTileData(const CanonicalTileID&, AnnotationTileData&);
+    void updateTileData(const CanonicalTileID &, AnnotationTileData &);
 
     const AnnotationID id;
     const std::string layerID;
@@ -31,12 +31,8 @@ public:
 };
 
 struct CloseShapeAnnotation {
-    ShapeAnnotationGeometry operator()(const mbgl::LineString<double> &geom) const {
-        return geom;
-    }
-    ShapeAnnotationGeometry operator()(const mbgl::MultiLineString<double> &geom) const {
-        return geom;
-    }
+    ShapeAnnotationGeometry operator()(const mbgl::LineString<double> &geom) const { return geom; }
+    ShapeAnnotationGeometry operator()(const mbgl::MultiLineString<double> &geom) const { return geom; }
     ShapeAnnotationGeometry operator()(const mbgl::Polygon<double> &geom) const {
         mbgl::Polygon<double> closed = geom;
         for (auto &ring : closed) {

@@ -11,7 +11,7 @@ namespace android {
 class CustomLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/CustomLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/CustomLayer"; };
 
     static void registerNative(jni::JNIEnv&);
 
@@ -23,7 +23,7 @@ public:
     jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv&);
 }; // class CustomLayer
 
-class CustomJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::CustomLayerFactory {
+class CustomJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::CustomLayerFactory {
 public:
     ~CustomJavaLayerPeerFactory() override;
 
@@ -35,7 +35,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class CustomJavaLayerPeerFactory
+}; // class CustomJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

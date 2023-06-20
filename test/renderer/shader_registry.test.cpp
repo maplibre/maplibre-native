@@ -28,81 +28,68 @@ using namespace mbgl;
 namespace {
 
 class MapInstance {
+public:
+    class ShaderAndStyleObserver : public MapObserver {
     public:
-        class ShaderAndStyleObserver : public MapObserver {
-            public:
-                public:
-                    void onDidFinishLoadingStyle() override {
-                        styleLoaded();
-                    }
-
-                    void onRegisterShaders(gfx::ShaderRegistry& registry) override {
-                        registerShaders(registry);
-                    };
-                
-                    std::function<void()> styleLoaded;
-                    std::function<void(gfx::ShaderRegistry&)> registerShaders;
-        };
-
-        MapInstance(float pixelRatio, MapObserver& observer) :
-            frontend(pixelRatio),
-            adapter(frontend, observer, std::make_shared<MainResourceLoader>(
-                ResourceOptions()
-                    .withCachePath(":memory:")
-                    .withAssetPath("test/fixtures/api/assets"),
-                ClientOptions()
-            ),
-                MapOptions()
-                    .withMapMode(MapMode::Static)
-                    .withSize(frontend.getSize())
-                    .withPixelRatio(pixelRatio))
-        {}
-
     public:
-        HeadlessFrontend frontend;
-        MapAdapter adapter;
+        void onDidFinishLoadingStyle() override { styleLoaded(); }
+
+        void onRegisterShaders(gfx::ShaderRegistry& registry) override { registerShaders(registry); };
+
+        std::function<void()> styleLoaded;
+        std::function<void(gfx::ShaderRegistry&)> registerShaders;
+    };
+
+    MapInstance(float pixelRatio, MapObserver& observer)
+        : frontend(pixelRatio),
+          adapter(frontend,
+                  observer,
+                  std::make_shared<MainResourceLoader>(
+                      ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"),
+                      ClientOptions()),
+                  MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
+
+public:
+    HeadlessFrontend frontend;
+    MapAdapter adapter;
 };
 
-template<uint32_t token_value>
+template <uint32_t token_value>
 class StubProgramBase : public gfx::Shader {
-    public:
-        static constexpr auto Token = token_value;
-        virtual uint32_t draw() { return token; }
+public:
+    static constexpr auto Token = token_value;
+    virtual uint32_t draw() { return token; }
 
-    protected:
-        uint32_t token{token_value};
+protected:
+    uint32_t token{token_value};
 };
 
 class StubProgram_1 final : public StubProgramBase<10> {
-    public:
-        static constexpr std::string_view Name{"StubProgram_1"};
-        const std::string_view typeName() const noexcept override {
-            return Name;
-        }
+public:
+    static constexpr std::string_view Name{"StubProgram_1"};
+    const std::string_view typeName() const noexcept override { return Name; }
 
-        void setToken(uint32_t tok) { token = tok; }
+    void setToken(uint32_t tok) { token = tok; }
 };
 
 class StubProgram_2 final : public StubProgramBase<20> {
-    public:
-        static constexpr std::string_view Name{"StubProgram_2"};
-        const std::string_view typeName() const noexcept override {
-            return Name;
-        }
+public:
+    static constexpr std::string_view Name{"StubProgram_2"};
+    const std::string_view typeName() const noexcept override { return Name; }
 };
 
 class StubShaderConsumer {
-    public:
-        template<typename T>
-        uint32_t useShader(gfx::ShaderRegistry& registry) {
-            auto program = registry.get<T>();
-            return program ? program->draw() : 0;
-        }
+public:
+    template <typename T>
+    uint32_t useShader(gfx::ShaderRegistry& registry) {
+        auto program = registry.get<T>();
+        return program ? program->draw() : 0;
+    }
 };
 
 } // namespace
 
-// Ensure we can register a gfx::Shader-based type with a registry object 
+// Ensure we can register a gfx::Shader-based type with a registry object
 TEST(ShaderRegistry, RegisterShader) {
     gfx::ShaderRegistry registry;
 
@@ -170,16 +157,13 @@ TEST(ShaderRegistry, MultiRegister) {
     gfx::ShaderRegistry registry;
 
     ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>()));
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(),
-        "SecondProgram"));
-    
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(), "SecondProgram"));
+
     // Default option, register as the type name
     ASSERT_NE(registry.get<StubProgram_1>(), nullptr);
     // Register with an explicit name
     ASSERT_NE(registry.get<StubProgram_1>("SecondProgram"), nullptr);
-    ASSERT_NE(
-        registry.get<StubProgram_1>(),
-        registry.get<StubProgram_1>("SecondProgram"));
+    ASSERT_NE(registry.get<StubProgram_1>(), registry.get<StubProgram_1>("SecondProgram"));
 }
 
 // Test fetching
@@ -187,9 +171,8 @@ TEST(ShaderRegistry, RegistryFetch) {
     gfx::ShaderRegistry registry;
 
     ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>()));
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(),
-        "SecondProgram"));
-    
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(), "SecondProgram"));
+
     std::shared_ptr<StubProgram_1> progA;
     std::shared_ptr<StubProgram_1> progB;
 
@@ -205,21 +188,19 @@ TEST(ShaderRegistry, NamedReplace) {
     gfx::ShaderRegistry registry;
 
     // Register
-    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(),
-        "CustomName"));
-    
+    ASSERT_TRUE(registry.registerShader(std::make_shared<StubProgram_1>(), "CustomName"));
+
     std::shared_ptr<StubProgram_1> progA;
     ASSERT_TRUE(registry.populate(progA, "CustomName"));
     ASSERT_NE(progA, nullptr);
 
     // Replace it with a new instance
-    ASSERT_TRUE(registry.replaceShader(std::make_shared<StubProgram_1>(),
-        "CustomName"));
-    
+    ASSERT_TRUE(registry.replaceShader(std::make_shared<StubProgram_1>(), "CustomName"));
+
     std::shared_ptr<StubProgram_1> progB;
     ASSERT_TRUE(registry.populate(progB, "CustomName"));
     ASSERT_NE(progB, nullptr);
-    
+
     // Should be different instances
     ASSERT_NE(progA, progB);
 }
@@ -232,9 +213,7 @@ TEST(ShaderRegistry, GLSLReplacement_NoOp) {
 
     // Just replace with a default instance
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
-        if (!registry.replaceShader(std::make_shared<FillProgram>(
-            ProgramParameters(1.0f, false))))
-        {
+        if (!registry.replaceShader(std::make_shared<FillProgram>(ProgramParameters(1.0f, false)))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };
@@ -251,8 +230,8 @@ TEST(ShaderRegistry, GLSLReplacement_NoOp) {
     test::checkImage("test/fixtures/shader_registry/glsl_replace_noop", img, 0.005, 0.1);
 }
 
-// Test replacing an actual program with a similar instance using a different fragment
-// shader
+// Test replacing an actual program with a similar instance using a different
+// fragment shader
 TEST(ShaderRegistry, GLSLReplacement1) {
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
@@ -261,19 +240,14 @@ TEST(ShaderRegistry, GLSLReplacement1) {
     // Replace with an instance that only renders blue
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
         if (!registry.replaceShader(std::make_shared<FillProgram>(
-            ProgramParameters(1.0f, false).withShaderSource(
-                ProgramParameters::ProgramSource(
-                    gfx::Backend::Type::OpenGL,
-                    "",
-                    R"(
+                ProgramParameters(1.0f, false)
+                    .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
+                                                                       "",
+                                                                       R"(
 void main() {
-    gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+    fragColor = vec4(0.0, 0.0, 1.0, 1.0);
 }
-                    )"
-                )
-            )
-        )))
-        {
+                    )"))))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };
@@ -290,8 +264,8 @@ void main() {
     test::checkImage("test/fixtures/shader_registry/glsl_replace_1", img, 0.005, 0.1);
 }
 
-// Test replacing an actual program with a similar instance using a different fragment
-// shader
+// Test replacing an actual program with a similar instance using a different
+// fragment shader
 TEST(ShaderRegistry, GLSLReplacement2) {
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
@@ -300,11 +274,10 @@ TEST(ShaderRegistry, GLSLReplacement2) {
     // Replace with an instance that adds some red and green
     observer.registerShaders = [&](gfx::ShaderRegistry& registry) {
         if (!registry.replaceShader(std::make_shared<FillProgram>(
-            ProgramParameters(1.0f, false).withShaderSource(
-                ProgramParameters::ProgramSource(
-                    gfx::Backend::Type::OpenGL,
-                    "",
-                    R"(
+                ProgramParameters(1.0f, false)
+                    .withShaderSource(ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL,
+                                                                       "",
+                                                                       R"(
 #ifndef HAS_UNIFORM_u_color
 varying highp vec4 color;
 #else
@@ -325,18 +298,14 @@ void main() {
     lowp float opacity = u_opacity;
 #endif
 
-    gl_FragColor = mix(color * opacity,
+    fragColor = mix(color * opacity,
         vec4(0.3, 0.5, 0.0, 1.0), 0.5);
 
 #ifdef OVERDRAW_INSPECTOR
-    gl_FragColor = vec4(1.0);
+    fragColor = vec4(1.0);
 #endif
 }
-                    )"
-                )
-            )
-        )))
-        {
+                    )"))))) {
             throw std::runtime_error("Failed to register shader!");
         }
     };

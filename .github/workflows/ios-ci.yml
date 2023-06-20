@@ -8,6 +8,7 @@ on:
     tags:
       - 'ios-*'
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"
@@ -28,6 +29,7 @@ on:
     branches:
       - main
     paths:
+      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"
@@ -138,6 +140,14 @@ jobs:
             platform/ios/build/ios/Payload/RenderTestApp.app/PlugIns/RenderTestAppTests.xctest
           retention-days: 1
 
+      - name: Save PR number
+        if: github.event_name == 'pull_request'
+        working-directory: ./
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          echo $PR_NUMBER > ./pr_number
+
       - name: Check debug symbols
         run: make darwin-check-public-symbols
 
@@ -149,6 +159,24 @@ jobs:
 
       - name: Running ios UI tests
         run: make ios-uitest
+
+      # size test
+
+      - name: Build app for size test & output size 
+        working-directory: ./
+        run: | 
+          bazel build --compilation_mode=opt //platform/ios:size --//:maplibre_platform=ios
+          cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios) ./size
+
+      - name: Upload size test result
+        uses: actions/upload-artifact@v3
+        with:
+          name: size-test-result
+          path: |
+            ./size
+            ./pr_number
+      
+      # ---
 
       - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
         run: make ios-sanitize

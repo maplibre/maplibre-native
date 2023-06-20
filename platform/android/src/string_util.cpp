@@ -6,7 +6,7 @@ namespace mbgl {
 namespace platform {
 
 std::string uppercase(const std::string& str) {
-    auto env{ android::AttachEnv() };
+    auto env{android::AttachEnv()};
     jni::Local<jni::String> value = jni::Make<jni::String>(*env, str.c_str());
     static auto toUpperCase = jni::Class<jni::StringTag>::Singleton(*env).GetMethod<jni::String()>(*env, "toUpperCase");
     auto result = value.Call(*env, toUpperCase);
@@ -14,7 +14,7 @@ std::string uppercase(const std::string& str) {
 }
 
 std::string lowercase(const std::string& str) {
-    auto env{ android::AttachEnv() };
+    auto env{android::AttachEnv()};
     jni::Local<jni::String> value = jni::Make<jni::String>(*env, str.c_str());
     static auto toLowerCase = jni::Class<jni::StringTag>::Singleton(*env).GetMethod<jni::String()>(*env, "toLowerCase");
     auto result = value.Call(*env, toLowerCase);

@@ -21,14 +21,12 @@ public:
 class Renderable {
 protected:
     Renderable(const Size size_, std::unique_ptr<RenderableResource> resource_)
-        : size(size_), resource(std::move(resource_)) {
-    }
+        : size(size_),
+          resource(std::move(resource_)) {}
     virtual ~Renderable() = default;
 
 public:
-    Size getSize() const {
-        return size;
-    }
+    Size getSize() const { return size; }
 
     template <typename T>
     T& getResource() const {

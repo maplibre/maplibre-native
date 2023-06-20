@@ -17,12 +17,30 @@ namespace mbgl {
     center point when both are set.
     */
 struct CameraOptions {
-    CameraOptions& withCenter(const std::optional<LatLng>& o) { center = o; return *this; }
-    CameraOptions& withPadding(const std::optional<EdgeInsets>& p) { padding = p; return *this; }
-    CameraOptions& withAnchor(const std::optional<ScreenCoordinate>& o) { anchor = o; return *this; }
-    CameraOptions& withZoom(const std::optional<double>& o) { zoom = o; return *this; }
-    CameraOptions& withBearing(const std::optional<double>& o) { bearing = o; return *this; }
-    CameraOptions& withPitch(const std::optional<double>& o) { pitch = o; return *this; }
+    CameraOptions& withCenter(const std::optional<LatLng>& o) {
+        center = o;
+        return *this;
+    }
+    CameraOptions& withPadding(const std::optional<EdgeInsets>& p) {
+        padding = p;
+        return *this;
+    }
+    CameraOptions& withAnchor(const std::optional<ScreenCoordinate>& o) {
+        anchor = o;
+        return *this;
+    }
+    CameraOptions& withZoom(const std::optional<double>& o) {
+        zoom = o;
+        return *this;
+    }
+    CameraOptions& withBearing(const std::optional<double>& o) {
+        bearing = o;
+        return *this;
+    }
+    CameraOptions& withPitch(const std::optional<double>& o) {
+        pitch = o;
+        return *this;
+    }
 
     /** Coordinate at the center of the map. */
     std::optional<LatLng> center;
@@ -48,12 +66,8 @@ struct CameraOptions {
 };
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
-    return a.center == b.center
-        && a.padding == b.padding
-        && a.anchor == b.anchor
-        && a.zoom == b.zoom
-        && a.bearing == b.bearing
-        && a.pitch == b.pitch;
+    return a.center == b.center && a.padding == b.padding && a.anchor == b.anchor && a.zoom == b.zoom &&
+           a.bearing == b.bearing && a.pitch == b.pitch;
 }
 
 constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
@@ -98,24 +112,26 @@ struct AnimationOptions {
         : duration(d) {}
 };
 
-/** Various options for accessing physical properties of the underlying camera entity.
-    A direct access to these properties allows more flexible and precise controlling of the camera
-    while also being fully compatible and interchangeable with CameraOptions. All fields are optional. */
+/** Various options for accessing physical properties of the underlying camera
+   entity. A direct access to these properties allows more flexible and precise
+   controlling of the camera while also being fully compatible and
+   interchangeable with CameraOptions. All fields are optional. */
 struct FreeCameraOptions {
     /** Position of the camera in slightly modified web mercator coordinates
-        - The size of 1 unit is the width of the projected world instead of the "mercator meter".
-          Coordinate [0, 0, 0] is the north-west corner and [1, 1, 0] is the south-east corner.
-        - Z coordinate is conformal and must respect minimum and maximum zoom values.
+        - The size of 1 unit is the width of the projected world instead of the
+       "mercator meter". Coordinate [0, 0, 0] is the north-west corner and [1,
+       1, 0] is the south-east corner.
+        - Z coordinate is conformal and must respect minimum and maximum zoom
+       values.
         - Zoom is automatically computed from the altitude (z)
     */
     std::optional<vec3> position = std::nullopt;
 
     /** Orientation of the camera represented as a unit quaternion [x, y, z, w].
-        The default pose of the camera is such that the forward vector is looking up the -Z axis and
-        the up vector is aligned with north orientation of the map:
-          forward: [0, 0, -1]
-          up:      [0, -1, 0]
-          right    [1, 0, 0]
+        The default pose of the camera is such that the forward vector is
+       looking up the -Z axis and the up vector is aligned with north
+       orientation of the map: forward: [0, 0, -1] up:      [0, -1, 0] right [1,
+       0, 0]
 
         Orientation can be set freely but certain constraints still apply
          - Orientation must be representable with only pitch and bearing.
@@ -125,17 +141,18 @@ struct FreeCameraOptions {
     /** Helper function for setting the mercator position as Lat&Lng and altitude in meters */
     void setLocation(const LatLngAltitude& location);
 
-    /** Helper function for converting mercator position into Lat&Lng and altitude in meters.
-        This function fails to return a value if `position` is invalid or is not set */
+    /** Helper function for converting mercator position into Lat&Lng and
+       altitude in meters. This function fails to return a value if `position`
+       is invalid or is not set */
     std::optional<LatLngAltitude> getLocation() const;
 
-    /** Helper function for setting orientation of the camera by defining a focus point
-        on the map. Up vector is required in certain scenarios where bearing can't be deduced
-        from the viewing direction */
+    /** Helper function for setting orientation of the camera by defining a
+       focus point on the map. Up vector is required in certain scenarios where
+       bearing can't be deduced from the viewing direction */
     void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt);
 
-    /** Helper function for setting the orientation of the camera as a pitch and a bearing.
-        Both values are in degrees */
+    /** Helper function for setting the orientation of the camera as a pitch and
+       a bearing. Both values are in degrees */
     void setPitchBearing(double pitch, double bearing);
 };
 

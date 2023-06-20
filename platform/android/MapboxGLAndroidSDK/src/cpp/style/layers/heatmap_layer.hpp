@@ -14,7 +14,7 @@ namespace android {
 class HeatmapLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/HeatmapLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/HeatmapLayer"; };
 
     HeatmapLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
@@ -44,7 +44,7 @@ public:
 
 }; // class HeatmapLayer
 
-class HeatmapJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::HeatmapLayerFactory {
+class HeatmapJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::HeatmapLayerFactory {
 public:
     ~HeatmapJavaLayerPeerFactory() override;
 
@@ -56,7 +56,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class HeatmapJavaLayerPeerFactory
+}; // class HeatmapJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

@@ -9,13 +9,13 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-template <class T, class...Args>
-std::optional<T> convertJSON(const std::string& json, Error& error, Args&&...args) {
+template <class T, class... Args>
+std::optional<T> convertJSON(const std::string& json, Error& error, Args&&... args) {
     JSDocument document;
     document.Parse<0>(json.c_str());
 
     if (document.HasParseError()) {
-        error = { formatJSONParseError(document) };
+        error = {formatJSONParseError(document)};
         return {};
     }
 

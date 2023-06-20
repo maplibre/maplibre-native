@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <functional>
+#include <stdexcept>
 
 #include <uv.h>
 
@@ -12,7 +13,9 @@ namespace util {
 
 class AsyncTask::Impl {
 public:
-    explicit Impl(std::function<void()> fn) : async(new uv_async_t), task(std::move(fn)) {
+    explicit Impl(std::function<void()> fn)
+        : async(new uv_async_t),
+          task(std::move(fn)) {
         auto* loop = reinterpret_cast<uv_loop_t*>(RunLoop::getLoopHandle());
         if (uv_async_init(loop, async, asyncCallback) != 0) {
             throw std::runtime_error("Failed to initialize async.");
@@ -23,9 +26,7 @@ public:
     }
 
     ~Impl() {
-        uv_close(handle(), [](uv_handle_t* h) {
-            delete reinterpret_cast<uv_async_t*>(h);
-        });
+        uv_close(handle(), [](uv_handle_t* h) { delete reinterpret_cast<uv_async_t*>(h); });
     }
 
     void maySend() {
@@ -36,13 +37,9 @@ public:
     }
 
 private:
-    static void asyncCallback(uv_async_t* handle) {
-        reinterpret_cast<Impl*>(handle->data)->task();
-    }
+    static void asyncCallback(uv_async_t* handle) { reinterpret_cast<Impl*>(handle->data)->task(); }
 
-    uv_handle_t* handle() {
-        return reinterpret_cast<uv_handle_t*>(async);
-    }
+    uv_handle_t* handle() { return reinterpret_cast<uv_handle_t*>(async); }
 
     uv_async_t* async;
 
@@ -50,8 +47,7 @@ private:
 };
 
 AsyncTask::AsyncTask(std::function<void()>&& fn)
-    : impl(std::make_unique<Impl>(std::move(fn))) {
-}
+    : impl(std::make_unique<Impl>(std::move(fn))) {}
 
 AsyncTask::~AsyncTask() = default;
 

@@ -96,8 +96,8 @@ add_library(mapbox-gl SHARED
             ${PROJECT_SOURCE_DIR}/java/util.hpp
             ${PROJECT_SOURCE_DIR}/java_types.cpp
             ${PROJECT_SOURCE_DIR}/java_types.hpp
-            ${PROJECT_SOURCE_DIR}/mapbox.cpp
-            ${PROJECT_SOURCE_DIR}/mapbox.hpp
+            ${PROJECT_SOURCE_DIR}/maplibre.cpp
+            ${PROJECT_SOURCE_DIR}/maplibre.hpp
             ${PROJECT_SOURCE_DIR}/map/camera_position.cpp
             ${PROJECT_SOURCE_DIR}/map/camera_position.hpp
             ${PROJECT_SOURCE_DIR}/map/image.cpp

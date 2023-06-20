@@ -23,14 +23,15 @@ using namespace mbgl;
 
 class VectorTileTest {
 public:
-    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>(ResourceOptions::Default(),
+                                                                              ClientOptions());
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};
-    AnnotationManager annotationManager { style };
+    AnnotationManager annotationManager{style};
     ImageManager imageManager;
     GlyphManager glyphManager;
-    Tileset tileset { { "https://example.com" }, { 0, 22 }, "none" };
+    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
 
     TileParameters tileParameters{1.0,
                                   MapDebugOptions(),
@@ -68,7 +69,7 @@ TEST(VectorTile, Issue8542) {
 
     // Query before data is set
     std::vector<Feature> result;
-    tile.querySourceFeatures(result, { { {"layer"} }, {} });
+    tile.querySourceFeatures(result, {{{"layer"}}, {}});
 }
 
 TEST(VectorTileData, ParseResults) {

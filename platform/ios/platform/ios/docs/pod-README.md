@@ -1,16 +1,16 @@
-# MapLibre GL Native for iOS
+# MapLibre Native for iOS
 
-MapLibre GL Native for iOS is an open-source framework for embedding interactive map views with scalable, customizable vector maps into Cocoa Touch applications on iOS 9.0 and above using Objective-C, Swift, or Interface Builder. It takes stylesheets that conform to the [MapLibre Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/), applies them to vector tiles that conform to the [Mapbox Vector Tile Specification](https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/), and renders them using OpenGL.
+MapLibre Native for iOS is an open-source framework for embedding interactive map views with scalable, customizable vector maps into Cocoa Touch applications on iOS 9.0 and above using Objective-C, Swift, or Interface Builder. It takes stylesheets that conform to the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/), applies them to vector tiles that conform to the [Mapbox Vector Tile Specification](https://docs.mapbox.com/data/tilesets/guides/vector-tiles-standards/), and renders them using OpenGL.
 
-For more information, check out the [MapLibre GL Native for iOS repository](https://github.com/maplibre/maplibre-gl-native) and the [full changelog](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/platform/ios/CHANGELOG.md) online.
+For more information, check out the [MapLibre Native for iOS repository](https://github.com/maplibre/maplibre-native) and the [full changelog](https://github.com/maplibre/maplibre-native/blob/main/platform/ios/platform/ios/CHANGELOG.md) online.
 
 [![](https://raw.githubusercontent.com/mapbox/mapbox-gl-native-ios/master/platform/ios/docs/img/screenshot.png)]()
 
 ## Installation
 
-MapLibre GL Native for iOS may be installed as either a dynamic framework or a static framework. (To reduce the download size, the static framework is omitted from some distributions; you may need to download the full package from the [release page](https://github.com/mapbox/mapbox-gl-native-ios/releases/).)
+MapLibre Native for iOS may be installed as either a dynamic framework or a static framework. (To reduce the download size, the static framework is omitted from some distributions; you may need to download the full package from the [release page](https://github.com/mapbox/mapbox-gl-native-ios/releases/).)
 
-Integrating MapLibre GL Native for iOS requires Xcode 8.0 or higher.
+Integrating MapLibre Native for iOS requires Xcode 8.0 or higher.
 
 {{DYNAMIC}}
 
@@ -94,4 +94,4 @@ class ViewController: UIViewController {
 
 Full API documentation is included in this package, within the `documentation` folder. 
 
-We welcome your [bug reports, feature requests, and contributions](https://github.com/maplibre/maplibre-gl-native/issues).
+We welcome your [bug reports, feature requests, and contributions](https://github.com/maplibre/maplibre-native/issues).

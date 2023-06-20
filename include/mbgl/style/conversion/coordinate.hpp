@@ -8,11 +8,11 @@
 namespace mbgl {
 namespace style {
 namespace conversion {
-            
-template<>
+
+template <>
 struct Converter<LatLng> {
 public:
-    std::optional<LatLng> operator() (const Convertible& value, Error& error) const;
+    std::optional<LatLng> operator()(const Convertible& value, Error& error) const;
 };
 
 } // namespace conversion

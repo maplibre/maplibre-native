@@ -9,11 +9,9 @@ namespace mbgl {
 
 template <char... Cs>
 struct string_literal {
-    static constexpr const char chars[] = { Cs..., 0 };
+    static constexpr const char chars[] = {Cs..., 0};
 
-    static constexpr const char* value() {
-        return chars;
-    }
+    static constexpr const char* value() { return chars; }
 };
 
 template <char... Cs>
@@ -35,23 +33,17 @@ struct concat_literals;
 
 template <>
 struct concat_literals<> {
-    static constexpr auto value() {
-        return "";
-    }
+    static constexpr auto value() { return ""; }
 };
 
 template <char... As, char... Bs, class... Rest>
 struct concat_literals<string_literal<As...>, string_literal<Bs...>, Rest...> {
-    static constexpr auto value() {
-        return concat_literals<string_literal<As..., Bs...>, Rest...>::value();
-    }
+    static constexpr auto value() { return concat_literals<string_literal<As..., Bs...>, Rest...>::value(); }
 };
 
 template <char... Cs>
 struct concat_literals<string_literal<Cs...>> {
-    static constexpr auto value() {
-        return string_literal<Cs...>::value();
-    }
+    static constexpr auto value() { return string_literal<Cs...>::value(); }
 };
 
 } // namespace detail

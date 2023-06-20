@@ -8,9 +8,9 @@ add_library(
 )
 
 include(CheckSymbolExists)
-check_symbol_exists("strerror_r" "string.h" MBGL_SQLITE3_HAVE_STRERROR_R)
+check_symbol_exists("strerror_r" "string.h" MLN_SQLITE3_HAVE_STRERROR_R)
 
-if(MBGL_SQLITE3_HAVE_STRERROR_R)
+if(MLN_SQLITE3_HAVE_STRERROR_R)
     target_compile_definitions(
         mbgl-vendor-sqlite
         PRIVATE HAVE_STRERROR_R

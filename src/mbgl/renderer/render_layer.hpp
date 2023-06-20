@@ -70,8 +70,8 @@ public:
     // Overloaded version for transitions to a new layer impl.
     void transition(const TransitionParameters&, Immutable<style::Layer::Impl> newImpl);
 
-    // Fully evaluate possibly-transitioning paint properties based on a zoom level.
-    // Updates the contained `evaluatedProperties` member.
+    // Fully evaluate possibly-transitioning paint properties based on a zoom
+    // level. Updates the contained `evaluatedProperties` member.
     virtual void evaluate(const PropertyEvaluationParameters&) = 0;
 
     // Returns true if any paint properties have active transitions.
@@ -102,8 +102,13 @@ public:
 
     // Check wether the given geometry intersects
     // with the feature
-    virtual bool queryIntersectsFeature(const GeometryCoordinates&, const GeometryTileFeature&, const float,
-                                        const TransformState&, const float, const mat4&, const FeatureState&) const {
+    virtual bool queryIntersectsFeature(const GeometryCoordinates&,
+                                        const GeometryTileFeature&,
+                                        const float,
+                                        const TransformState&,
+                                        const float,
+                                        const mat4&,
+                                        const FeatureState&) const {
         return false;
     };
 
@@ -124,8 +129,8 @@ public:
     virtual std::optional<Color> getSolidBackground() const;
 
 protected:
-    // Checks whether the current hardware can render this layer. If it can't, we'll show a warning
-    // in the console to inform the developer.
+    // Checks whether the current hardware can render this layer. If it can't,
+    // we'll show a warning in the console to inform the developer.
     void checkRenderability(const PaintParameters&, uint32_t activeBindingCount);
 
     void addRenderPassesFromTiles();
@@ -143,9 +148,9 @@ protected:
     LayerPlacementData placementData;
 
 private:
-    // Some layers may not render correctly on some hardware when the vertex attribute limit of
-    // that GPU is exceeded. More attributes are used when adding many data driven paint properties
-    // to a layer.
+    // Some layers may not render correctly on some hardware when the vertex
+    // attribute limit of that GPU is exceeded. More attributes are used when
+    // adding many data driven paint properties to a layer.
     bool hasRenderFailures = false;
 };
 

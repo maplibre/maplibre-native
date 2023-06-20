@@ -33,9 +33,7 @@ class GeoJSONVTData final : public GeoJSONData {
 
     Features getLeaves(const std::uint32_t, const std::uint32_t, const std::uint32_t) final { return {}; }
 
-    std::uint8_t getClusterExpansionZoom(std::uint32_t) final {
-        return 0;
-    }
+    std::uint8_t getClusterExpansionZoom(std::uint32_t) final { return 0; }
 
     std::shared_ptr<Scheduler> getScheduler() final { return scheduler; }
 
@@ -43,7 +41,8 @@ class GeoJSONVTData final : public GeoJSONData {
     GeoJSONVTData(const GeoJSON& geoJSON,
                   const mapbox::geojsonvt::Options& options,
                   std::shared_ptr<Scheduler> scheduler_)
-        : impl(std::make_shared<mapbox::geojsonvt::GeoJSONVT>(geoJSON, options)), scheduler(std::move(scheduler_)) {
+        : impl(std::make_shared<mapbox::geojsonvt::GeoJSONVT>(geoJSON, options)),
+          scheduler(std::move(scheduler_)) {
         assert(scheduler);
     }
 
@@ -131,10 +130,13 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
 }
 
 GeoJSONSource::Impl::Impl(std::string id_, Immutable<GeoJSONOptions> options_)
-    : Source::Impl(SourceType::GeoJSON, std::move(id_)), options(std::move(options_)) {}
+    : Source::Impl(SourceType::GeoJSON, std::move(id_)),
+      options(std::move(options_)) {}
 
 GeoJSONSource::Impl::Impl(const GeoJSONSource::Impl& other, std::shared_ptr<GeoJSONData> data_)
-    : Source::Impl(other), options(other.options), data(std::move(data_)) {}
+    : Source::Impl(other),
+      options(other.options),
+      data(std::move(data_)) {}
 
 GeoJSONSource::Impl::~Impl() = default;
 

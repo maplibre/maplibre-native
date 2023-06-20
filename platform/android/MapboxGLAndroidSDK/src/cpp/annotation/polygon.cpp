@@ -13,9 +13,7 @@ mbgl::FillAnnotation Polygon::toAnnotation(jni::JNIEnv& env, const jni::Object<P
     static auto fillColor = javaClass.GetField<int>(env, "fillColor");
     static auto strokeColor = javaClass.GetField<int>(env, "strokeColor");
 
-    mbgl::Polygon<double> geometry {
-        MultiPoint::toGeometry<mbgl::LinearRing<double>>(env, polygon.Get(env, points))
-    };
+    mbgl::Polygon<double> geometry{MultiPoint::toGeometry<mbgl::LinearRing<double>>(env, polygon.Get(env, points))};
 
     auto jHoleListsArray = java::util::List::toArray<java::util::List>(env, polygon.Get(env, holes));
 
@@ -24,7 +22,7 @@ mbgl::FillAnnotation Polygon::toAnnotation(jni::JNIEnv& env, const jni::Object<P
         geometry.push_back(MultiPoint::toGeometry<mbgl::LinearRing<double>>(env, jHoleListsArray.Get(env, i)));
     }
 
-    mbgl::FillAnnotation annotation { geometry };
+    mbgl::FillAnnotation annotation{geometry};
     annotation.opacity = polygon.Get(env, alpha);
     annotation.color = *conversion::convert<mbgl::Color>(env, polygon.Get(env, fillColor));
     annotation.outlineColor = *conversion::convert<mbgl::Color>(env, polygon.Get(env, strokeColor));

@@ -35,7 +35,7 @@ dependencies {
 }
 
 tasks.withType(DokkaTask.class) {
-    moduleName.set("MapLibre GL Native for Android")
+    moduleName.set("MapLibre Native for Android")
 
     dokkaSourceSets {
 
@@ -95,7 +95,7 @@ android {
             jniDebuggable true
         }
     }
-    namespace 'com.mapbox.mapboxsdk'
+    namespace 'org.maplibre.android'
     lint {
         checkAllWarnings true
         disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'

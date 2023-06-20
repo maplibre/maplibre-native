@@ -30,18 +30,14 @@ public:
     std::optional<gfx::Texture> dem;
     std::optional<gfx::Texture> texture;
 
-    TileMask mask{ { 0, 0, 0 } };
+    TileMask mask{{0, 0, 0}};
 
     const DEMData& getDEMData() const;
     DEMData& getDEMData();
 
-    bool isPrepared() const {
-        return prepared;
-    }
+    bool isPrepared() const { return prepared; }
 
-    void setPrepared (bool preparedState) {
-        prepared = preparedState;
-    }
+    void setPrepared(bool preparedState) { prepared = preparedState; }
 
     // Raster-DEM Tile Sources use the default buffers from Painter
     gfx::VertexVector<HillshadeLayoutVertex> vertices;
@@ -50,7 +46,8 @@ public:
 
     std::optional<gfx::VertexBuffer<HillshadeLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
-private: 
+
+private:
     DEMData demdata;
     bool prepared = false;
 };

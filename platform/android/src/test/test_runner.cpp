@@ -23,7 +23,7 @@ void runner() {
 
     mbgl::Log::Info(mbgl::Event::General, "Start TestRunner");
     int status = mbgl::runTests(argv.size(), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "TestRunner finished with status: '" + std::to_string(status) +  "'");
+    mbgl::Log::Info(mbgl::Event::General, "TestRunner finished with status: '" + std::to_string(status) + "'");
     running = false;
     success = (status == 0);
     ALooper_wake(looper);

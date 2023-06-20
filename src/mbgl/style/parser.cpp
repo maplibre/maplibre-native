@@ -40,14 +40,17 @@ StyleParseResult Parser::parse(const std::string& json) {
         const JSValue& versionValue = document["version"];
         const int version = versionValue.IsNumber() ? versionValue.GetInt() : 0;
         if (version != 8) {
-            Log::Warning(Event::ParseStyle, "current renderer implementation only supports style spec version 8; using an outdated style will cause rendering errors");
+            Log::Warning(Event::ParseStyle,
+                         "current renderer implementation only supports style spec "
+                         "version 8; using an outdated style "
+                         "will cause rendering errors");
         }
     }
 
     if (document.HasMember("name")) {
         const JSValue& value = document["name"];
         if (value.IsString()) {
-            name = { value.GetString(), value.GetStringLength() };
+            name = {value.GetString(), value.GetStringLength()};
         }
     }
 
@@ -102,14 +105,14 @@ StyleParseResult Parser::parse(const std::string& json) {
     if (document.HasMember("sprite")) {
         const JSValue& sprite = document["sprite"];
         if (sprite.IsString()) {
-            spriteURL = { sprite.GetString(), sprite.GetStringLength() };
+            spriteURL = {sprite.GetString(), sprite.GetStringLength()};
         }
     }
 
     if (document.HasMember("glyphs")) {
         const JSValue& glyphs = document["glyphs"];
         if (glyphs.IsString()) {
-            glyphURL = { glyphs.GetString(), glyphs.GetStringLength() };
+            glyphURL = {glyphs.GetString(), glyphs.GetStringLength()};
         }
     }
 
@@ -148,11 +151,11 @@ void Parser::parseSources(const JSValue& value) {
     }
 
     for (const auto& property : value.GetObject()) {
-        std::string id { property.name.GetString(), property.name.GetStringLength() };
+        std::string id{property.name.GetString(), property.name.GetStringLength()};
 
         conversion::Error error;
-        std::optional<std::unique_ptr<Source>> source =
-            conversion::convert<std::unique_ptr<Source>>(property.value, error, id);
+        std::optional<std::unique_ptr<Source>> source = conversion::convert<std::unique_ptr<Source>>(
+            property.value, error, id);
         if (!source) {
             Log::Warning(Event::ParseStyle, error.message);
             continue;
@@ -187,22 +190,20 @@ void Parser::parseLayers(const JSValue& value) {
             continue;
         }
 
-        const std::string layerID = { id.GetString(), id.GetStringLength() };
+        const std::string layerID = {id.GetString(), id.GetStringLength()};
         if (layersMap.find(layerID) != layersMap.end()) {
             Log::Warning(Event::ParseStyle, "duplicate layer id " + layerID);
             continue;
         }
 
-        layersMap.emplace(layerID, std::pair<const JSValue&, std::unique_ptr<Layer>> { layerValue, nullptr });
+        layersMap.emplace(layerID, std::pair<const JSValue&, std::unique_ptr<Layer>>{layerValue, nullptr});
         ids.push_back(layerID);
     }
 
     for (const auto& id : ids) {
         auto it = layersMap.find(id);
 
-        parseLayer(it->first,
-                   it->second.first,
-                   it->second.second);
+        parseLayer(it->first, it->second.first, it->second.second);
     }
 
     for (const auto& id : ids) {
@@ -230,11 +231,11 @@ void Parser::parseLayer(const std::string& id, const JSValue& value, std::unique
         // This layer is referencing another layer. Recursively parse that layer.
         const JSValue& refVal = value["ref"];
         if (!refVal.IsString()) {
-            Log::Warning(Event::ParseStyle, "layer ref of '" + id +  "' must be a string");
+            Log::Warning(Event::ParseStyle, "layer ref of '" + id + "' must be a string");
             return;
         }
 
-        const std::string ref { refVal.GetString(), refVal.GetStringLength() };
+        const std::string ref{refVal.GetString(), refVal.GetStringLength()};
         auto it = layersMap.find(ref);
         if (it == layersMap.end()) {
             Log::Warning(Event::ParseStyle, "layer '" + id + "' references unknown layer " + ref);
@@ -243,9 +244,7 @@ void Parser::parseLayer(const std::string& id, const JSValue& value, std::unique
 
         // Recursively parse the referenced layer.
         stack.push_front(id);
-        parseLayer(it->first,
-                   it->second.first,
-                   it->second.second);
+        parseLayer(it->first, it->second.first, it->second.second);
         stack.pop_front();
 
         Layer* reference = it->second.second.get();

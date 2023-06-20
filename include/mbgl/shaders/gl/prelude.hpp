@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(#ifdef GL_ES
 precision highp float;
 #else

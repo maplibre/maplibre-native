@@ -12,9 +12,7 @@ mbgl::LineAnnotation Polyline::toAnnotation(jni::JNIEnv& env, const jni::Object<
     static auto color = javaClass.GetField<int>(env, "color");
     static auto width = javaClass.GetField<float>(env, "width");
 
-    mbgl::LineAnnotation annotation {
-        MultiPoint::toGeometry<mbgl::LineString<double>>(env, polyline.Get(env, points))
-    };
+    mbgl::LineAnnotation annotation{MultiPoint::toGeometry<mbgl::LineString<double>>(env, polyline.Get(env, points))};
 
     annotation.opacity = polyline.Get(env, alpha);
     annotation.color = *conversion::convert<mbgl::Color>(env, polyline.Get(env, color));

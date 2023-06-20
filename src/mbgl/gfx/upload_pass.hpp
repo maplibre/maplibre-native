@@ -24,16 +24,13 @@ public:
     UploadPass(const UploadPass&) = delete;
     UploadPass& operator=(const UploadPass&) = delete;
 
-    DebugGroup<UploadPass> createDebugGroup(const char* name) {
-        return { *this, name };
-    }
+    DebugGroup<UploadPass> createDebugGroup(const char* name) { return {*this, name}; }
 
 public:
     template <class Vertex>
-    VertexBuffer<Vertex>
-    createVertexBuffer(VertexVector<Vertex>&& v,
-                       const BufferUsageType usage = BufferUsageType::StaticDraw) {
-        return { v.elements(), createVertexBufferResource(v.data(), v.bytes(), usage) };
+    VertexBuffer<Vertex> createVertexBuffer(VertexVector<Vertex>&& v,
+                                            const BufferUsageType usage = BufferUsageType::StaticDraw) {
+        return {v.elements(), createVertexBufferResource(v.data(), v.bytes(), usage)};
     }
 
     template <class Vertex>
@@ -45,7 +42,7 @@ public:
     template <class DrawMode>
     IndexBuffer createIndexBuffer(IndexVector<DrawMode>&& v,
                                   const BufferUsageType usage = BufferUsageType::StaticDraw) {
-        return { v.elements(), createIndexBufferResource(v.data(), v.bytes(), usage) };
+        return {v.elements(), createIndexBufferResource(v.data(), v.bytes(), usage)};
     }
 
     template <class DrawMode>
@@ -58,23 +55,19 @@ protected:
     virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,
                                                                              std::size_t size,
                                                                              BufferUsageType) = 0;
-    virtual void
-    updateVertexBufferResource(VertexBufferResource&, const void* data, std::size_t size) = 0;
+    virtual void updateVertexBufferResource(VertexBufferResource&, const void* data, std::size_t size) = 0;
 
     virtual std::unique_ptr<IndexBufferResource> createIndexBufferResource(const void* data,
                                                                            std::size_t size,
                                                                            BufferUsageType) = 0;
-    virtual void
-    updateIndexBufferResource(IndexBufferResource&, const void* data, std::size_t size) = 0;
+    virtual void updateIndexBufferResource(IndexBufferResource&, const void* data, std::size_t size) = 0;
 
 public:
     // Create a texture from an image with data.
     template <typename Image>
-    Texture createTexture(const Image& image,
-                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
+    Texture createTexture(const Image& image, TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
         auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
-        return { image.size,
-                 createTextureResource(image.size, image.data.get(), format, type) };
+        return {image.size, createTextureResource(image.size, image.data.get(), format, type)};
     }
 
     template <typename Image>
@@ -99,12 +92,19 @@ public:
     }
 
 protected:
-    virtual std::unique_ptr<TextureResource> createTextureResource(
-        Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
-    virtual void updateTextureResource(TextureResource&, Size, const void* data,
-        TexturePixelType, TextureChannelDataType) = 0;
-    virtual void updateTextureResourceSub(TextureResource&, uint16_t xOffset, uint16_t yOffset, Size, const void* data,
-        TexturePixelType, TextureChannelDataType) = 0;
+    virtual std::unique_ptr<TextureResource> createTextureResource(Size,
+                                                                   const void* data,
+                                                                   TexturePixelType,
+                                                                   TextureChannelDataType) = 0;
+    virtual void updateTextureResource(
+        TextureResource&, Size, const void* data, TexturePixelType, TextureChannelDataType) = 0;
+    virtual void updateTextureResourceSub(TextureResource&,
+                                          uint16_t xOffset,
+                                          uint16_t yOffset,
+                                          Size,
+                                          const void* data,
+                                          TexturePixelType,
+                                          TextureChannelDataType) = 0;
 };
 
 } // namespace gfx

@@ -16,9 +16,9 @@
 namespace mbgl {
 namespace util {
 
-IOException::IOException(int err, const std::string& msg)
-    : std::runtime_error(msg + ": " + std::strerror(errno)), code(err) {
-}
+IOException::IOException(int err, const std::string &msg)
+    : std::runtime_error(msg + ": " + std::strerror(errno)),
+      code(err) {}
 
 void write_file(const std::string &filename, const std::string &data) {
     FILE *fd = fopen(filename.c_str(), MBGL_FOPEN_MODE_WBE);
@@ -51,14 +51,14 @@ std::optional<std::string> readFile(const std::string &filename) {
     return {};
 }
 
-void deleteFile(const std::string& filename) {
+void deleteFile(const std::string &filename) {
     const int ret = std::remove(filename.c_str());
     if (ret != 0 && errno != ENOENT) {
         throw IOException(errno, "Could not delete file " + filename);
     }
 }
 
-void copyFile(const std::string& destination, const std::string& source) {
+void copyFile(const std::string &destination, const std::string &source) {
     std::ifstream src(source, std::ios::binary);
     if (!src.good()) {
         throw IOException(errno, "Cannot read file " + source);

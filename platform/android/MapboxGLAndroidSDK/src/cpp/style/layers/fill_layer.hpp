@@ -14,7 +14,7 @@ namespace android {
 class FillLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/FillLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/FillLayer"; };
 
     FillLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
@@ -54,7 +54,7 @@ public:
 
 }; // class FillLayer
 
-class FillJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::FillLayerFactory {
+class FillJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::FillLayerFactory {
 public:
     ~FillJavaLayerPeerFactory() override;
 
@@ -66,7 +66,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class FillJavaLayerPeerFactory
+}; // class FillJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

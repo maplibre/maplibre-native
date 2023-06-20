@@ -9,7 +9,8 @@ using namespace mbgl::style;
 using namespace mbgl::style::conversion;
 
 TEST(StyleConversion, PropertyValue) {
-    // PropertyValue<T> accepts a constant expression: https://github.com/mapbox/mapbox-gl-native/issues/11940
+    // PropertyValue<T> accepts a constant expression:
+    // https://github.com/mapbox/mapbox-gl-native/issues/11940
     Error error;
     JSDocument doc;
     doc.Parse<0>(R"(["literal", [1, 2]])");

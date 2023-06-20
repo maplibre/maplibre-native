@@ -1,14 +1,14 @@
 # Linux
 
-A simple executable and test suite for Linux based on [MapLibre GL Native](../../README.md).
+A simple executable and test suite for Linux based on [MapLibre Native](../../README.md).
 
 This guide focuses on Debian and Ubuntu distributions.
 
-The build process should give you a set of `.a` files that you can use to include MapLibre GL Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
+The build process should give you a set of `.a` files that you can use to include MapLibre Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
 
 ## Prerequisites
 
-The following dependencies are required to build MapLibre GL Native on Debian 11.
+The following dependencies are required to build MapLibre Native on Debian 11.
 
 ```bash
 apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri
@@ -34,8 +34,8 @@ apt install libjpeg-turbo8 libicu66
 First, clone the repository. This repository uses git submodules, which are also required to build the project.
 
 ```bash
-git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-gl-native.git
-cd maplibre-gl-native
+git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.git
+cd maplibre-native
 ```
 
 To create the build, run the following commands.
@@ -45,7 +45,7 @@ cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILE
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
 
-If all went well, there should now be a `maplibre-gl-native/build/bin/mbgl-render` binary that you can run to generate map tile images. To test that it is working properly, run the following command.
+If all went well, there should now be a `maplibre-native/build/bin/mbgl-render` binary that you can run to generate map tile images. To test that it is working properly, run the following command.
 
 ```bash
 ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
@@ -53,7 +53,7 @@ If all went well, there should now be a `maplibre-gl-native/build/bin/mbgl-rende
 
 > I get an error `Error: Failed to open X display.` when I run this command.
 
-If you're setting up MapLibre GL Native on a headless server (i.e. one without a display), you'll need to simulate an X server to do any rendering.
+If you're setting up MapLibre Native on a headless server (i.e. one without a display), you'll need to simulate an X server to do any rendering.
 
 ```bash
 xvfb-run -a ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
@@ -150,7 +150,7 @@ For the purposes of this exercise, you can use the `zurich_switzerland.mbtiles` 
 
 Note that this style is totally inadequate for any real use beyond testing your custom setup. Don't forget to replace the source URL `"mbtiles:///path/to/zurich_switzerland.mbtiles"` with the actual path to your mbtiles file.
 
-From your `maplibre-gl-native/` dir, run the following command.
+From your `maplibre-native/` dir, run the following command.
 
 ```bash
 ./build/bin/mbgl-render --style /path/to/style.json --output out.png

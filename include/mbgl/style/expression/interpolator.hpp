@@ -10,42 +10,36 @@ namespace expression {
 
 class ExponentialInterpolator {
 public:
-    ExponentialInterpolator(double base_) : base(base_) {}
+    ExponentialInterpolator(double base_)
+        : base(base_) {}
 
     double base;
-    
+
     double interpolationFactor(const Range<double>& inputLevels, const double input) const {
-        return util::interpolationFactor(static_cast<float>(base),
-                                         Range<float> {
-                                            static_cast<float>(inputLevels.min),
-                                            static_cast<float>(inputLevels.max)
-                                         },
-                                         static_cast<float>(input));
+        return util::interpolationFactor(
+            static_cast<float>(base),
+            Range<float>{static_cast<float>(inputLevels.min), static_cast<float>(inputLevels.max)},
+            static_cast<float>(input));
     }
-    
-    bool operator==(const ExponentialInterpolator& rhs) const {
-        return base == rhs.base;
-    }
+
+    bool operator==(const ExponentialInterpolator& rhs) const { return base == rhs.base; }
 };
 
 class CubicBezierInterpolator {
 public:
-    CubicBezierInterpolator(double x1_, double y1_, double x2_, double y2_) : ub(x1_, y1_, x2_, y2_) {}
-    
+    CubicBezierInterpolator(double x1_, double y1_, double x2_, double y2_)
+        : ub(x1_, y1_, x2_, y2_) {}
+
     double interpolationFactor(const Range<double>& inputLevels, const double input) const {
-        return ub.solve(util::interpolationFactor(1.0f,
-                                                  Range<float> {
-                                                      static_cast<float>(inputLevels.min),
-                                                      static_cast<float>(inputLevels.max)
-                                                  },
-                                                  static_cast<float>(input)),
+        return ub.solve(util::interpolationFactor(
+                            1.0f,
+                            Range<float>{static_cast<float>(inputLevels.min), static_cast<float>(inputLevels.max)},
+                            static_cast<float>(input)),
                         1e-6);
     }
-    
-    bool operator==(const CubicBezierInterpolator& rhs) const {
-        return ub == rhs.ub;
-    }
-    
+
+    bool operator==(const CubicBezierInterpolator& rhs) const { return ub == rhs.ub; }
+
     util::UnitBezier ub;
 };
 

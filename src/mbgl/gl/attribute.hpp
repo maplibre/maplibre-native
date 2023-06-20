@@ -23,8 +23,7 @@ class AttributeLocations;
 template <class... As>
 class AttributeLocations<TypeList<As...>> final {
 private:
-    using Locations =
-        IndexedTuple<TypeList<As...>, TypeList<ExpandToType<As, std::optional<AttributeLocation>>...>>;
+    using Locations = IndexedTuple<TypeList<As...>, TypeList<ExpandToType<As, std::optional<AttributeLocation>>...>>;
 
     Locations locations;
 
@@ -33,7 +32,7 @@ public:
 
     void queryLocations(const ProgramID& id) {
         locations = Locations{
-            queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())... };
+            queryLocation(id, concat_literals<&string_literal<'a', '_'>::value, &As::name>::value())...};
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
         [[maybe_unused]] auto first = locations.template get<TypeOfFirst>();
         assert(first && first.value() == 0);
@@ -42,23 +41,25 @@ public:
     static constexpr const char* getFirstAttribName() {
         // Static assert that attribute list starts with position: we bind it on location 0.
         using TypeOfFirst = typename std::tuple_element_t<0, std::tuple<As...>>;
-        static_assert(std::is_same<attributes::pos, TypeOfFirst>::value || std::is_same<attributes::pos_offset, TypeOfFirst>::value ||
-                      std::is_same<attributes::pos_normal, TypeOfFirst>::value, "Program must start with position related attribute.");
+        static_assert(std::is_same<attributes::pos, TypeOfFirst>::value ||
+                          std::is_same<attributes::pos_offset, TypeOfFirst>::value ||
+                          std::is_same<attributes::pos_normal, TypeOfFirst>::value,
+                      "Program must start with position related attribute.");
         return concat_literals<&string_literal<'a', '_'>::value, TypeOfFirst::name>::value();
     }
 
     NamedAttributeLocations getNamedLocations() const {
         NamedAttributeLocations result;
 
-        auto maybeAddLocation = [&] (const std::string& name, const std::optional<AttributeLocation>& location) {
+        auto maybeAddLocation = [&](const std::string& name, const std::optional<AttributeLocation>& location) {
             if (location) {
                 result.emplace_back(name, *location);
             }
         };
 
-        util::ignore({ (maybeAddLocation(concat_literals<&string_literal<'a', '_'>::value, &As::name>::value(),
-                                         locations.template get<As>()),
-                        0)... });
+        util::ignore({(maybeAddLocation(concat_literals<&string_literal<'a', '_'>::value, &As::name>::value(),
+                                        locations.template get<As>()),
+                       0)...});
 
         return result;
     }
@@ -67,14 +68,14 @@ public:
         AttributeBindingArray result;
         result.resize(sizeof...(As));
 
-        auto maybeAddBinding = [&] (const std::optional<AttributeLocation>& location,
-                                    const std::optional<gfx::AttributeBinding>& binding) {
+        auto maybeAddBinding = [&](const std::optional<AttributeLocation>& location,
+                                   const std::optional<gfx::AttributeBinding>& binding) {
             if (location) {
                 result.at(*location) = binding;
             }
         };
 
-        util::ignore({ (maybeAddBinding(locations.template get<As>(), bindings.template get<As>()), 0)... });
+        util::ignore({(maybeAddBinding(locations.template get<As>(), bindings.template get<As>()), 0)...});
 
         return result;
     }
@@ -95,18 +96,18 @@ public:
     static uint32_t compute(const gfx::AttributeBindings<TypeList<As...>>& bindings) {
         uint32_t value = 0;
         util::ignore(
-            { (bindings.template get<As>() ? (void)(value |= 1 << TypeIndex<As, As...>::value)
-                                           : (void)0,
-               0)... });
+            {(bindings.template get<As>() ? (void)(value |= 1 << TypeIndex<As, As...>::value) : (void)0, 0)...});
         return value;
     }
 
     static std::string defines(const gfx::AttributeBindings<TypeList<As...>>& bindings) {
         std::string result;
-        util::ignore({ (!bindings.template get<As>()
-                            ? (void)(result += concat_literals<&attributeDefinePrefix, &As::name, &string_literal<'\n'>::value>::value())
-                            : (void)0,
-                        0)... });
+        util::ignore(
+            {(!bindings.template get<As>()
+                  ? (void)(result +=
+                           concat_literals<&attributeDefinePrefix, &As::name, &string_literal<'\n'>::value>::value())
+                  : (void)0,
+              0)...});
         return result;
     }
 };

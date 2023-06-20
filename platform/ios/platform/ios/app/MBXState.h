@@ -1,4 +1,4 @@
-@import Mapbox;
+#import "Mapbox.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

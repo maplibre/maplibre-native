@@ -50,205 +50,208 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
     }
 }
 
-    const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend& frontend) {
-        if (!coreSource.peer.has_value()) {
-            coreSource.peer = createSourcePeer(env, coreSource, &frontend);
-        }
-        return coreSource.peer.get<std::unique_ptr<Source>>()->javaPeer;
+const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env,
+                                                     mbgl::style::Source& coreSource,
+                                                     AndroidRendererFrontend& frontend) {
+    if (!coreSource.peer.has_value()) {
+        coreSource.peer = createSourcePeer(env, coreSource, &frontend);
     }
+    return coreSource.peer.get<std::unique_ptr<Source>>()->javaPeer;
+}
 
-    const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env, mbgl::style::Source& coreSource) {
-        if (!coreSource.peer.has_value()) {
-            coreSource.peer = createSourcePeer(env, coreSource, nullptr);
-        }
-        return coreSource.peer.get<std::unique_ptr<Source>>()->javaPeer;
+const jni::Object<Source>& Source::peerForCoreSource(jni::JNIEnv& env, mbgl::style::Source& coreSource) {
+    if (!coreSource.peer.has_value()) {
+        coreSource.peer = createSourcePeer(env, coreSource, nullptr);
     }
+    return coreSource.peer.get<std::unique_ptr<Source>>()->javaPeer;
+}
 
-    Source::Source(jni::JNIEnv& env,
-                   mbgl::style::Source& coreSource,
-                   const jni::Object<Source>& obj,
-                   AndroidRendererFrontend* frontend)
-        : source(coreSource), javaPeer(jni::NewGlobal(env, obj)), rendererFrontend(frontend) {}
+Source::Source(jni::JNIEnv& env,
+               mbgl::style::Source& coreSource,
+               const jni::Object<Source>& obj,
+               AndroidRendererFrontend* frontend)
+    : source(coreSource),
+      javaPeer(jni::NewGlobal(env, obj)),
+      rendererFrontend(frontend) {}
 
-    Source::Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source> coreSource)
-        : ownedSource(std::move(coreSource))
-        , source(*ownedSource) {
+Source::Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source> coreSource)
+    : ownedSource(std::move(coreSource)),
+      source(*ownedSource) {}
+
+Source::~Source() {
+    if (ownedSource) {
+        ownedSource.reset();
+        ownedSource.release();
     }
-
-    Source::~Source() {
-        if (ownedSource) {
-            ownedSource.reset();
-            ownedSource.release();
-        }
-        // Before being added to a map, the Java peer owns this C++ peer and cleans
-        //  up after itself correctly through the jni native peer bindings.
-        // After being added to the map, the ownership is flipped and the C++ peer has a strong reference
-        //  to it's Java peer, preventing the Java peer from being GC'ed.
-        //  In this case, the core source initiates the destruction, which requires releasing the Java peer,
-        //  while also resetting it's nativePtr to 0 to prevent the subsequent GC of the Java peer from
-        //  re-entering this dtor.
-        if (ownedSource.get() == nullptr && javaPeer.get() != nullptr) {
-            // Manually clear the java peer
-            android::UniqueEnv env = android::AttachEnv();
-            static auto& javaClass = jni::Class<Source>::Singleton(*env);
-            static auto nativePtrField = javaClass.GetField<jlong>(*env, "nativePtr");
-            javaPeer.Set(*env, nativePtrField, (jlong) 0);
-            javaPeer.reset();
-        }
-    }
-
-    jni::Local<jni::String> Source::getId(jni::JNIEnv& env) {
-        return jni::Make<jni::String>(env, source.getID());
-    }
-
-    jni::Local<jni::String> Source::getAttribution(jni::JNIEnv& env) {
-        auto attribution = source.getAttribution();
-        return attribution ? jni::Make<jni::String>(env, attribution.value()) : jni::Make<jni::String>(env,"");
-    }
-
-    void Source::setPrefetchZoomDelta(jni::JNIEnv& env, jni::Integer& delta) {
-        if (!delta) {
-            source.setPrefetchZoomDelta(std::nullopt);
-        } else {
-            source.setPrefetchZoomDelta(jni::Unbox(env, delta));
-        }
-    }
-
-    jni::Local<jni::Integer> Source::getPrefetchZoomDelta(jni::JNIEnv& env) {
-        auto delta = source.getPrefetchZoomDelta();
-        if (delta.has_value()) {
-            return jni::Box(env, jni::jint(delta.value()));
-        }
-        return jni::Local<jni::Integer>(env, nullptr);
-    }
-
-    void Source::setMaxOverscaleFactorForParentTiles(jni::JNIEnv& env, jni::Integer& maxOverscaleFactor) {
-        if (!maxOverscaleFactor) {
-            source.setMaxOverscaleFactorForParentTiles(std::nullopt);
-        } else {
-            source.setMaxOverscaleFactorForParentTiles(jni::Unbox(env, maxOverscaleFactor));
-        }
-    }
-
-    jni::Local<jni::Integer> Source::getMaxOverscaleFactorForParentTiles(jni::JNIEnv& env) {
-        auto maxOverscaleFactor = source.getMaxOverscaleFactorForParentTiles();
-        if (maxOverscaleFactor) {
-            return jni::Box(env, jni::jint(*maxOverscaleFactor));
-        }
-        return jni::Local<jni::Integer>(env, nullptr);
-    }
-
-    void Source::addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style::Style& style) {
-        if (!ownedSource) {
-            throw std::runtime_error("Cannot add source twice");
-        }
-
-        // Add source to style and release ownership
-        style.addSource(std::move(ownedSource));
-
-        // Add peer to core source
-        source.peer = std::unique_ptr<Source>(this);
-
-        // Add strong reference to java source
-        javaPeer = jni::NewGlobal(env, obj);
-    }
-
-    void Source::addToMap(JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& map, AndroidRendererFrontend& frontend) {
-        // Check to see if we own the source first
-        if (!ownedSource) {
-            throw std::runtime_error("Cannot add source twice");
-        }
-
-        // Add source to map and release ownership
-        map.getStyle().addSource(std::move(ownedSource));
-
-        // Add peer to core source
-        source.peer = std::unique_ptr<Source>(this);
-
-        // Add strong reference to java source
-        javaPeer = jni::NewGlobal(env, obj);
-
-        rendererFrontend = &frontend;
-    }
-
-    bool Source::removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map& map) {
-        // Cannot remove if not attached yet
-        if (ownedSource) {
-            throw std::runtime_error("Cannot remove detached source");
-        }
-
-        // Remove the source from the map and take ownership
-        ownedSource = map.getStyle().removeSource(source.getID());
-
-        // The source may not be removed if any layers still reference it
-        return ownedSource != nullptr;
-    }
-
-    jni::Local<jni::Boolean> Source::isVolatile(jni::JNIEnv& env) {
-        return jni::Box(env, jni::jboolean(source.isVolatile()));
-    }
-
-    void Source::setVolatile(JNIEnv& env, jni::Boolean& value) {
-        source.setVolatile(jni::Unbox(env, value));
-    }
-
-    void Source::setMinimumTileUpdateInterval(JNIEnv& env, jni::Long& interval) {
-        source.setMinimumTileUpdateInterval(Milliseconds(jni::Unbox(env, interval)));
-    }
-
-    jni::Local<jni::Long> Source::getMinimumTileUpdateInterval(JNIEnv& env) {
-        return jni::Box(env, jni::jlong(source.getMinimumTileUpdateInterval().count() / 1000000));
-    }
-
-    void Source::releaseJavaPeer() {
-        // We can't release the peer if the source was not removed from the map
-        if (!ownedSource) {
-            return;
-        }
-
-        // Release the peer relationships. These will be re-established when the source is added to a map
-        assert(ownedSource->peer.has_value());
-        ownedSource->peer.get<std::unique_ptr<Source>>().release();
-        ownedSource->peer = mapbox::base::TypeWrapper();
-
-        // Release the strong reference to the java peer
-        assert(javaPeer);
+    // Before being added to a map, the Java peer owns this C++ peer and cleans
+    //  up after itself correctly through the jni native peer bindings.
+    // After being added to the map, the ownership is flipped and the C++ peer
+    // has a strong reference
+    //  to it's Java peer, preventing the Java peer from being GC'ed.
+    //  In this case, the core source initiates the destruction, which requires
+    //  releasing the Java peer, while also resetting it's nativePtr to 0 to
+    //  prevent the subsequent GC of the Java peer from re-entering this dtor.
+    if (ownedSource.get() == nullptr && javaPeer.get() != nullptr) {
+        // Manually clear the java peer
+        android::UniqueEnv env = android::AttachEnv();
+        static auto& javaClass = jni::Class<Source>::Singleton(*env);
+        static auto nativePtrField = javaClass.GetField<jlong>(*env, "nativePtr");
+        javaPeer.Set(*env, nativePtrField, (jlong)0);
         javaPeer.reset();
+    }
+}
 
-        rendererFrontend = nullptr;
+jni::Local<jni::String> Source::getId(jni::JNIEnv& env) {
+    return jni::Make<jni::String>(env, source.getID());
+}
+
+jni::Local<jni::String> Source::getAttribution(jni::JNIEnv& env) {
+    auto attribution = source.getAttribution();
+    return attribution ? jni::Make<jni::String>(env, attribution.value()) : jni::Make<jni::String>(env, "");
+}
+
+void Source::setPrefetchZoomDelta(jni::JNIEnv& env, jni::Integer& delta) {
+    if (!delta) {
+        source.setPrefetchZoomDelta(std::nullopt);
+    } else {
+        source.setPrefetchZoomDelta(jni::Unbox(env, delta));
+    }
+}
+
+jni::Local<jni::Integer> Source::getPrefetchZoomDelta(jni::JNIEnv& env) {
+    auto delta = source.getPrefetchZoomDelta();
+    if (delta.has_value()) {
+        return jni::Box(env, jni::jint(delta.value()));
+    }
+    return jni::Local<jni::Integer>(env, nullptr);
+}
+
+void Source::setMaxOverscaleFactorForParentTiles(jni::JNIEnv& env, jni::Integer& maxOverscaleFactor) {
+    if (!maxOverscaleFactor) {
+        source.setMaxOverscaleFactorForParentTiles(std::nullopt);
+    } else {
+        source.setMaxOverscaleFactorForParentTiles(jni::Unbox(env, maxOverscaleFactor));
+    }
+}
+
+jni::Local<jni::Integer> Source::getMaxOverscaleFactorForParentTiles(jni::JNIEnv& env) {
+    auto maxOverscaleFactor = source.getMaxOverscaleFactorForParentTiles();
+    if (maxOverscaleFactor) {
+        return jni::Box(env, jni::jint(*maxOverscaleFactor));
+    }
+    return jni::Local<jni::Integer>(env, nullptr);
+}
+
+void Source::addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style::Style& style) {
+    if (!ownedSource) {
+        throw std::runtime_error("Cannot add source twice");
     }
 
-    void Source::registerNative(jni::JNIEnv& env) {
-        // Lookup the class
-        static auto& javaClass = jni::Class<Source>::Singleton(env);
+    // Add source to style and release ownership
+    style.addSource(std::move(ownedSource));
 
-        #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
+    // Add peer to core source
+    source.peer = std::unique_ptr<Source>(this);
 
-        // Register the peer
-        jni::RegisterNativePeer<Source>(
-            env,
-            javaClass,
-            "nativePtr",
-            METHOD(&Source::getId, "nativeGetId"),
-            METHOD(&Source::getAttribution, "nativeGetAttribution"),
-            METHOD(&Source::setPrefetchZoomDelta, "nativeSetPrefetchZoomDelta"),
-            METHOD(&Source::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
-            METHOD(&Source::setMaxOverscaleFactorForParentTiles, "nativeSetMaxOverscaleFactorForParentTiles"),
-            METHOD(&Source::getMaxOverscaleFactorForParentTiles, "nativeGetMaxOverscaleFactorForParentTiles"),
-            METHOD(&Source::isVolatile, "nativeIsVolatile"),
-            METHOD(&Source::setVolatile, "nativeSetVolatile"),
-            METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
-            METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"));
+    // Add strong reference to java source
+    javaPeer = jni::NewGlobal(env, obj);
+}
 
-
-        // Register subclasses
-        GeoJSONSource::registerNative(env);
-        ImageSource::registerNative(env);
-        RasterSource::registerNative(env);
-        UnknownSource::registerNative(env);
-        VectorSource::registerNative(env);
-        CustomGeometrySource::registerNative(env);
-        RasterDEMSource::registerNative(env);
+void Source::addToMap(JNIEnv& env, const jni::Object<Source>& obj, mbgl::Map& map, AndroidRendererFrontend& frontend) {
+    // Check to see if we own the source first
+    if (!ownedSource) {
+        throw std::runtime_error("Cannot add source twice");
     }
+
+    // Add source to map and release ownership
+    map.getStyle().addSource(std::move(ownedSource));
+
+    // Add peer to core source
+    source.peer = std::unique_ptr<Source>(this);
+
+    // Add strong reference to java source
+    javaPeer = jni::NewGlobal(env, obj);
+
+    rendererFrontend = &frontend;
+}
+
+bool Source::removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map& map) {
+    // Cannot remove if not attached yet
+    if (ownedSource) {
+        throw std::runtime_error("Cannot remove detached source");
+    }
+
+    // Remove the source from the map and take ownership
+    ownedSource = map.getStyle().removeSource(source.getID());
+
+    // The source may not be removed if any layers still reference it
+    return ownedSource != nullptr;
+}
+
+jni::Local<jni::Boolean> Source::isVolatile(jni::JNIEnv& env) {
+    return jni::Box(env, jni::jboolean(source.isVolatile()));
+}
+
+void Source::setVolatile(JNIEnv& env, jni::Boolean& value) {
+    source.setVolatile(jni::Unbox(env, value));
+}
+
+void Source::setMinimumTileUpdateInterval(JNIEnv& env, jni::Long& interval) {
+    source.setMinimumTileUpdateInterval(Milliseconds(jni::Unbox(env, interval)));
+}
+
+jni::Local<jni::Long> Source::getMinimumTileUpdateInterval(JNIEnv& env) {
+    return jni::Box(env, jni::jlong(source.getMinimumTileUpdateInterval().count() / 1000000));
+}
+
+void Source::releaseJavaPeer() {
+    // We can't release the peer if the source was not removed from the map
+    if (!ownedSource) {
+        return;
+    }
+
+    // Release the peer relationships. These will be re-established when the source is added to a map
+    assert(ownedSource->peer.has_value());
+    ownedSource->peer.get<std::unique_ptr<Source>>().release();
+    ownedSource->peer = mapbox::base::TypeWrapper();
+
+    // Release the strong reference to the java peer
+    assert(javaPeer);
+    javaPeer.reset();
+
+    rendererFrontend = nullptr;
+}
+
+void Source::registerNative(jni::JNIEnv& env) {
+    // Lookup the class
+    static auto& javaClass = jni::Class<Source>::Singleton(env);
+
+#define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
+
+    // Register the peer
+    jni::RegisterNativePeer<Source>(
+        env,
+        javaClass,
+        "nativePtr",
+        METHOD(&Source::getId, "nativeGetId"),
+        METHOD(&Source::getAttribution, "nativeGetAttribution"),
+        METHOD(&Source::setPrefetchZoomDelta, "nativeSetPrefetchZoomDelta"),
+        METHOD(&Source::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
+        METHOD(&Source::setMaxOverscaleFactorForParentTiles, "nativeSetMaxOverscaleFactorForParentTiles"),
+        METHOD(&Source::getMaxOverscaleFactorForParentTiles, "nativeGetMaxOverscaleFactorForParentTiles"),
+        METHOD(&Source::isVolatile, "nativeIsVolatile"),
+        METHOD(&Source::setVolatile, "nativeSetVolatile"),
+        METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
+        METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"));
+
+    // Register subclasses
+    GeoJSONSource::registerNative(env);
+    ImageSource::registerNative(env);
+    RasterSource::registerNative(env);
+    UnknownSource::registerNative(env);
+    VectorSource::registerNative(env);
+    CustomGeometrySource::registerNative(env);
+    RasterDEMSource::registerNative(env);
+}
 } // namespace android
 } // namespace mbgl

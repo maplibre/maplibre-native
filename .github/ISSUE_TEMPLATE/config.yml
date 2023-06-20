@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: "🙏 Q&A - GitHub Discussions"
-    url: https://github.com/maplibre/maplibre-gl-native/discussions/categories/q-a
-    about: If you have a question about using MapLibre GL Native
+    url: https://github.com/maplibre/maplibre-native/discussions/categories/q-a
+    about: If you have a question about using MapLibre Native
   - name: "💬 Chat with us on Slack"
     url: https://slack.openstreetmap.us/
     about: "Join #maplibre-native on the Open Street Map Slack"

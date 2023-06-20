@@ -32,10 +32,8 @@ struct Input {
 
 struct Compiled {
     bool operator==(const Compiled& other) const {
-        bool typeEqual = success == other.success &&
-                         isFeatureConstant == other.isFeatureConstant &&
-                         isZoomConstant == other.isZoomConstant &&
-                         serializedType == other.serializedType &&
+        bool typeEqual = success == other.success && isFeatureConstant == other.isFeatureConstant &&
+                         isZoomConstant == other.isZoomConstant && serializedType == other.serializedType &&
                          errors == other.errors;
         return typeEqual;
     }
@@ -99,4 +97,3 @@ std::unique_ptr<style::expression::Expression> parseExpression(const JSValue&,
 std::unique_ptr<style::expression::Expression> parseExpression(const std::optional<Value>&,
                                                                std::optional<PropertySpec>&,
                                                                TestResult&);
-

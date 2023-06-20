@@ -8,6 +8,7 @@ on:
     tags:
       - 'qt-**'
     paths:
+      - CMakeLists.txt
       - ".github/actions/qt5-build/**"
       - ".github/actions/qt6-build/**"
       - ".github/workflows/qt-ci.yml"
@@ -29,6 +30,7 @@ on:
     branches:
       - main
     paths:
+      - CMakeLists.txt
       - ".github/actions/qt5-build/**"
       - ".github/actions/qt6-build/**"
       - ".github/workflows/qt-ci.yml"
@@ -180,7 +182,7 @@ jobs:
         with:
           key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
 
-      - name: Build maplibre-gl-native (macOS)
+      - name: Build maplibre-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
         run: |
           mkdir build && cd build
@@ -192,21 +194,20 @@ jobs:
             -DCMAKE_INSTALL_PREFIX="../install" \
             -DCMAKE_OSX_DEPLOYMENT_TARGET="${DEPLOYMENT_TARGET}" \
             -DCMAKE_OSX_ARCHITECTURES="${DEPLOYMENT_ARCH}" \
-            -DMBGL_WITH_QT=ON \
-            -DMBGL_QT_DEPLOYMENT=ON \
-            -DMBGL_QT_LIBRARY_ONLY=ON
+            -DMLN_WITH_QT=ON \
+            -DMLN_QT_DEPLOYMENT=ON
           ninja
           ninja install
 
-      - name: Build maplibre-gl-native (Linux, Qt5)
+      - name: Build maplibre-native (Linux, Qt5)
         if: runner.os == 'Linux' && matrix.qt_version == '5.15.2'
         uses: ./source/.github/actions/qt5-build
 
-      - name: Build maplibre-gl-native (Linux, Qt6)
+      - name: Build maplibre-native (Linux, Qt6)
         if: runner.os == 'Linux' && matrix.qt_version != '5.15.2'
         uses: ./source/.github/actions/qt6-build
 
-      - name: Build maplibre-gl-native (Windows)
+      - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
@@ -219,9 +220,8 @@ jobs:
             -DCMAKE_C_COMPILER_LAUNCHER="ccache.exe" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache.exe" \
             -DCMAKE_INSTALL_PREFIX="../install" \
-            -DMBGL_WITH_QT=ON \
-            -DMBGL_QT_DEPLOYMENT=ON \
-            -DMBGL_QT_LIBRARY_ONLY=ON
+            -DMLN_WITH_QT=ON \
+            -DMLN_QT_DEPLOYMENT=ON
           ninja.exe
           ninja.exe install
 
@@ -238,14 +238,14 @@ jobs:
           QT_VERSION: ${{ matrix.qt_version }}
         run: |
           pushd install
-          tar cjvf ../maplibre-gl-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2 *
+          tar cjvf ../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2 *
           popd
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
-          path: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}.tar.bz2
+          name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
+          path: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}.tar.bz2
 
   test-tarball:
     needs: build
@@ -275,7 +275,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
+          name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
 
       - name: Download Qt
         uses: jurplel/install-qt-action@v3
@@ -294,7 +294,7 @@ jobs:
       - name: Build test app
         run: |
           mkdir install && cd install
-          tar xf ../maplibre-gl-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2
+          tar xf ../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2
           cd ..
           export CMAKE_PREFIX_PATH=$PWD/install
           mkdir build && cd build
@@ -318,7 +318,7 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v3
       with:
-        name: maplibre-gl-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
+        name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
 
     - name: Name tarball
       env:
@@ -326,7 +326,7 @@ jobs:
         TAG_PLATFORM: ${{ matrix.name }}
         QT_VERSION: ${{ matrix.qt_version }}
       run: |
-        mv maplibre-gl-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2 QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2
+        mv maplibre-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2 QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2
 
     - name: Release
       uses: ncipollo/release-action@v1

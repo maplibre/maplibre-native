@@ -60,7 +60,7 @@ document.getElementById('toggle-sequence').addEventListener('click', function (e
 std::string createResultItem(const TestRunOutput& result, const std::string& status, bool shouldHide) {
     std::ostringstream html;
     html << "<div class=\"test " << status << (shouldHide ? " hide" : "") << "\">\n";
-    html << R"(<h2><span class="label">)"  << status << "</span> " << result.id << "</h2>\n";
+    html << R"(<h2><span class="label">)" << status << "</span> " << result.id << "</h2>\n";
 
     html << "<p><pre>"s << result.expression << "</pre></p>\n"s;
     if (result.passed) {
@@ -98,11 +98,11 @@ std::string createResultPage(const TestStats& stats, bool shuffle, uint32_t seed
 
         // Failed tests
         if (unsuccessful) {
-            resultsPage  << "<p><strong>Failed tests:</strong>";
+            resultsPage << "<p><strong>Failed tests:</strong>";
             for (const auto& failed : stats.failed) {
                 resultsPage << failed.id << " ";
             }
-            resultsPage  << "<p><strong>Errored tests:</strong>";
+            resultsPage << "<p><strong>Errored tests:</strong>";
             for (const auto& errored : stats.errored) {
                 resultsPage << errored.id << " ";
             }
@@ -127,9 +127,9 @@ std::string createResultPage(const TestStats& stats, bool shuffle, uint32_t seed
     // Script
     resultsPage << resultsScript;
 
-     // Tests
+    // Tests
     resultsPage << "<div class=\"tests\">\n";
-    const auto appendResult = [&] (const auto& results, const std::string& status, bool hide = false) {
+    const auto appendResult = [&](const auto& results, const std::string& status, bool hide = false) {
         for (const auto& result : results) {
             resultsPage << createResultItem(result, status, hide);
         }
@@ -153,16 +153,21 @@ void printStats(const TestStats& stats) {
         printf(ANSI_COLOR_GREEN "%zu passed (%.1lf%%)" ANSI_COLOR_RESET "\n", passedTests, 100.0 * passedTests / count);
     }
     if (std::size_t ignorePassedTests = stats.ignorePassed.size()) {
-        printf(ANSI_COLOR_YELLOW "%zu passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n", ignorePassedTests, 100.0 * ignorePassedTests / count);
+        printf(ANSI_COLOR_YELLOW "%zu passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
+               ignorePassedTests,
+               100.0 * ignorePassedTests / count);
     }
     if (std::size_t ignoreFailedTests = stats.ignoreFailed.size()) {
-        printf(ANSI_COLOR_LIGHT_GRAY "%zu ignored (%.1lf%%)" ANSI_COLOR_RESET "\n", ignoreFailedTests, 100.0 * ignoreFailedTests / count);
+        printf(ANSI_COLOR_LIGHT_GRAY "%zu ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
+               ignoreFailedTests,
+               100.0 * ignoreFailedTests / count);
     }
     if (std::size_t failedTests = stats.failed.size()) {
         printf(ANSI_COLOR_RED "%zu failed (%.1lf%%)" ANSI_COLOR_RESET "\n", failedTests, 100.0 * failedTests / count);
     }
     if (std::size_t erroredTests = stats.errored.size()) {
-        printf(ANSI_COLOR_RED "%zu errored (%.1lf%%)" ANSI_COLOR_RESET "\n", erroredTests, 100.0 * erroredTests / count);
+        printf(
+            ANSI_COLOR_RED "%zu errored (%.1lf%%)" ANSI_COLOR_RESET "\n", erroredTests, 100.0 * erroredTests / count);
     }
 }
 

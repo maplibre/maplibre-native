@@ -17,8 +17,8 @@ typedef NSString *MLNExpressionInterpolationMode NS_TYPED_ENUM;
  An `NSString` identifying the `linear` interpolation type in an `NSExpression`.
  
  This attribute corresponds to the `linear` value in the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate"><code>interpolate</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#interpolate"><code>interpolate</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionInterpolationModeLinear;
 
@@ -26,8 +26,8 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionI
  An `NSString` identifying the `expotential` interpolation type in an `NSExpression`.
  
  This attribute corresponds to the `exponential` value in the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate"><code>interpolate</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#interpolate"><code>interpolate</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionInterpolationModeExponential;
 
@@ -35,15 +35,15 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionI
  An `NSString` identifying the `cubic-bezier` interpolation type in an `NSExpression`.
  
  This attribute corresponds to the `cubic-bezier` value in the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-interpolate"><code>interpolate</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#interpolate"><code>interpolate</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier;
 
 /**
  Methods for creating expressions that use Mapbox-specific functionality and for
  converting to and from the JSON format defined in the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions">Mapbox Style Specification</a>.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/">MapLibre Style Spec</a>.
  */
 @interface NSExpression (MLNAdditions)
 
@@ -51,50 +51,50 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionI
 
 /**
  `NSExpression` variable that corresponds to the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-zoom"><code>zoom</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#zoom"><code>zoom</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 @property (class, nonatomic, readonly) NSExpression *zoomLevelVariableExpression;
 
 /**
  `NSExpression` variable that corresponds to the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-heatmap-density"><code>heatmap-density</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#heatmap-density"><code>heatmap-density</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 @property (class, nonatomic, readonly) NSExpression *heatmapDensityVariableExpression;
 
 /**
  `NSExpression` variable that corresponds to the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-line-progress"><code>line-progress</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#line-progress"><code>line-progress</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 @property (class, nonatomic, readonly) NSExpression *lineProgressVariableExpression;
 
 /**
  `NSExpression` variable that corresponds to the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#eexpressions-geometry-type"><code>geometry-type</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#geometry-type"><code>geometry-type</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 @property (class, nonatomic, readonly) NSExpression *geometryTypeVariableExpression;
 
 /**
  `NSExpression` variable that corresponds to the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-id"><code>id</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#id"><code>id</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 @property (class, nonatomic, readonly) NSExpression *featureIdentifierVariableExpression;
 
 /**
  `NSExpression` variable that corresponds to the
  <a href="https://docs.mapbox.com/mapbox-gl-js/style-spec/#accumulated"><code>id</code></a>
- expression operator in the Mapbox Style Specification.
+ expression operator in the MapLibre Style Spec.
  */
 @property (class, nonatomic, readonly) NSExpression *featureAccumulatedVariableExpression;
 
 /**
  `NSExpression` variable that corresponds to the
- <a href="https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions-properties"><code>properties</code></a>
- expression operator in the Mapbox Style Specification.
+ <a href="https://maplibre.org/maplibre-style-spec/expressions/#properties"><code>properties</code></a>
+ expression operator in the MapLibre Style Spec.
  */
 @property (class, nonatomic, readonly) NSExpression *featureAttributesVariableExpression;
 
@@ -186,7 +186,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionI
  from JSON data.
  
  The Foundation object is interpreted according to the
- [Mapbox Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions).
+ [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/expressions/).
  See the
  “[Information for Style Authors](../for-style-authors.html#setting-attribute-values)”
  guide for a correspondence of operators and types between the style
@@ -203,7 +203,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionI
  An equivalent Foundation object that can be serialized as JSON.
  
  The Foundation object conforms to the
- [Mapbox Style Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/#expressions).
+ [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/expressions/).
  See the
  “[Information for Style Authors](../for-style-authors.html#setting-attribute-values)”
  guide for a correspondence of operators and types between the style

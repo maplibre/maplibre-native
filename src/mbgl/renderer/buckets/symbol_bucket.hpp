@@ -54,8 +54,8 @@ public:
     size_t vertexStartIndex;
     // The crossTileID is only filled/used on the foreground for variable text anchors
     uint32_t crossTileID = 0u;
-    // The placedOrientation is only used when symbol layer's property is set to support
-    // placement for orientation variants.
+    // The placedOrientation is only used when symbol layer's property is set to
+    // support placement for orientation variants.
     std::optional<style::TextWritingModeType> placedOrientation;
     float angle = 0;
 
@@ -99,8 +99,9 @@ public:
     void sortFeatures(float angle);
     // Returns references to the `symbolInstances` items, sorted by viewport Y.
     SymbolInstanceReferences getSortedSymbols(float angle) const;
-    // Returns references to the `symbolInstances` items, which belong to the `sortKeyRange` range;
-    // returns references to all the symbols if |sortKeyRange| is `std::nullopt`.
+    // Returns references to the `symbolInstances` items, which belong to the
+    // `sortKeyRange` range; returns references to all the symbols if
+    // |sortKeyRange| is `std::nullopt`.
     SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = std::nullopt) const;
 
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
@@ -149,7 +150,7 @@ public:
 
     Buffer icon;
     Buffer sdfIcon;
-    
+
     struct CollisionBuffer {
         gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>> vertices;
         gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>> dynamicVertices;

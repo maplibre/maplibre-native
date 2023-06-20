@@ -1,6 +1,6 @@
-#include <memory>
-
 #include <mbgl/text/bidi.hpp>
+
+#include <memory>
 
 namespace mbgl {
 
@@ -11,12 +11,12 @@ class BiDiImpl {
 };
 
 std::u16string applyArabicShaping(const std::u16string& input) {
+    // Qt does not support raw Arabic shaping, so we just return the input
     return input;
 }
 
-BiDi::BiDi() : impl(std::make_unique<BiDiImpl>())
-{
-}
+BiDi::BiDi()
+    : impl(std::make_unique<BiDiImpl>()) {}
 
 BiDi::~BiDi() = default;
 

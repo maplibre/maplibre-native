@@ -33,8 +33,12 @@ public:
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
 public:
-    std::unique_ptr<gfx::TextureResource> createTextureResource(Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
-    void updateTextureResource(gfx::TextureResource&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
+    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
+                                                                const void* data,
+                                                                gfx::TexturePixelType,
+                                                                gfx::TextureChannelDataType) override;
+    void updateTextureResource(
+        gfx::TextureResource&, Size, const void* data, gfx::TexturePixelType, gfx::TextureChannelDataType) override;
     void updateTextureResourceSub(gfx::TextureResource&,
                                   uint16_t xOffset,
                                   uint16_t yOffset,

@@ -13,7 +13,9 @@ public:
     CircleLayout(const BucketParameters& parameters,
                  const std::vector<Immutable<style::LayerProperties>>& group,
                  std::unique_ptr<GeometryTileLayer> sourceLayer_)
-        : sourceLayer(std::move(sourceLayer_)), zoom(parameters.tileID.overscaledZ), mode(parameters.mode) {
+        : sourceLayer(std::move(sourceLayer_)),
+          zoom(parameters.tileID.overscaledZ),
+          mode(parameters.mode) {
         assert(!group.empty());
         auto leaderLayerProperties = staticImmutableCast<style::CircleLayerProperties>(group.front());
         const auto& unevaluatedLayout = leaderLayerProperties->layerImpl().layout;

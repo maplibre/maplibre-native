@@ -9,7 +9,9 @@ bool polygonContainsPoint(const GeometryCoordinates& ring, const GeometryCoordin
     for (auto i = ring.begin(), j = ring.end() - 1; i != ring.end(); j = i++) {
         auto& p1 = *i;
         auto& p2 = *j;
-        if (((p1.y > p.y) != (p2.y > p.y)) && (p.x < static_cast<float>(p2.x - p1.x) * static_cast<float>(p.y - p1.y) / static_cast<float>(p2.y - p1.y) + p1.x)) {
+        if (((p1.y > p.y) != (p2.y > p.y)) &&
+            (p.x < static_cast<float>(p2.x - p1.x) * static_cast<float>(p.y - p1.y) / static_cast<float>(p2.y - p1.y) +
+                       p1.x)) {
             c = !c;
         }
     }
@@ -47,9 +49,12 @@ bool isCounterClockwise(const GeometryCoordinate& a, const GeometryCoordinate& b
     return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
 }
 
-bool lineSegmentIntersectsLineSegment(const GeometryCoordinate& a0, const GeometryCoordinate& a1, const GeometryCoordinate& b0, const GeometryCoordinate& b1) {
+bool lineSegmentIntersectsLineSegment(const GeometryCoordinate& a0,
+                                      const GeometryCoordinate& a1,
+                                      const GeometryCoordinate& b0,
+                                      const GeometryCoordinate& b1) {
     return isCounterClockwise(a0, b0, b1) != isCounterClockwise(a1, b0, b1) &&
-        isCounterClockwise(a0, a1, b0) != isCounterClockwise(a0, a1, b1);
+           isCounterClockwise(a0, a1, b0) != isCounterClockwise(a0, a1, b1);
 }
 bool lineIntersectsLine(const GeometryCoordinates& lineA, const GeometryCoordinates& lineB) {
     if (lineA.empty() || lineB.empty()) return false;
@@ -88,7 +93,9 @@ bool polygonIntersectsBufferedPoint(const GeometryCoordinates& polygon, const Ge
     return false;
 }
 
-bool polygonIntersectsBufferedMultiPoint(const GeometryCoordinates& polygon, const GeometryCollection& rings, float radius) {
+bool polygonIntersectsBufferedMultiPoint(const GeometryCoordinates& polygon,
+                                         const GeometryCollection& rings,
+                                         float radius) {
     for (auto& ring : rings) {
         for (auto& point : ring) {
             if (polygonIntersectsBufferedPoint(polygon, point, radius)) return true;
@@ -97,7 +104,9 @@ bool polygonIntersectsBufferedMultiPoint(const GeometryCoordinates& polygon, con
     return false;
 }
 
-bool polygonIntersectsBufferedMultiLine(const GeometryCoordinates& polygon, const GeometryCollection& multiLine, float radius) {
+bool polygonIntersectsBufferedMultiLine(const GeometryCoordinates& polygon,
+                                        const GeometryCollection& multiLine,
+                                        float radius) {
     for (auto& line : multiLine) {
         if (polygon.size() >= 3) {
             for (auto& p : line) {

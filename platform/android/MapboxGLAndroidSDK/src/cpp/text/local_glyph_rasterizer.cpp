@@ -34,7 +34,7 @@ namespace mbgl {
 namespace android {
 
 LocalGlyphRasterizer::LocalGlyphRasterizer() {
-    UniqueEnv env { AttachEnv() };
+    UniqueEnv env{AttachEnv()};
 
     static auto& javaClass = jni::Class<LocalGlyphRasterizer>::Singleton(*env);
     static auto constructor = javaClass.GetConstructor(*env);
@@ -42,18 +42,21 @@ LocalGlyphRasterizer::LocalGlyphRasterizer() {
     javaObject = jni::NewGlobal(*env, javaClass.New(*env, constructor));
 }
 
-PremultipliedImage LocalGlyphRasterizer::drawGlyphBitmap(const std::string& fontFamily, const bool bold, const GlyphID glyphID) {
-    UniqueEnv env { AttachEnv() };
+PremultipliedImage LocalGlyphRasterizer::drawGlyphBitmap(const std::string& fontFamily,
+                                                         const bool bold,
+                                                         const GlyphID glyphID) {
+    UniqueEnv env{AttachEnv()};
 
     static auto& javaClass = jni::Class<LocalGlyphRasterizer>::Singleton(*env);
-    static auto drawGlyphBitmap = javaClass.GetMethod<jni::Object<Bitmap> (jni::String, jni::jboolean, jni::jchar)>(*env, "drawGlyphBitmap");
+    static auto drawGlyphBitmap = javaClass.GetMethod<jni::Object<Bitmap>(jni::String, jni::jboolean, jni::jchar)>(
+        *env, "drawGlyphBitmap");
 
     return Bitmap::GetImage(*env,
-        javaObject.Call(*env,
-            drawGlyphBitmap,
-            jni::Make<jni::String>(*env, fontFamily),
-            static_cast<jni::jboolean>(bold),
-            static_cast<jni::jchar>(glyphID)));
+                            javaObject.Call(*env,
+                                            drawGlyphBitmap,
+                                            jni::Make<jni::String>(*env, fontFamily),
+                                            static_cast<jni::jboolean>(bold),
+                                            static_cast<jni::jchar>(glyphID)));
 }
 
 void LocalGlyphRasterizer::registerNative(jni::JNIEnv& env) {
@@ -65,12 +68,9 @@ void LocalGlyphRasterizer::registerNative(jni::JNIEnv& env) {
 class LocalGlyphRasterizer::Impl {
 public:
     Impl(const std::optional<std::string> fontFamily_)
-        : fontFamily(fontFamily_)
-    {}
+        : fontFamily(fontFamily_) {}
 
-    bool isConfigured() const {
-        return bool(fontFamily);
-    }
+    bool isConfigured() const { return bool(fontFamily); }
 
     PremultipliedImage drawGlyphBitmap(const FontStack& fontStack, GlyphID glyphID) {
         bool bold = false;
@@ -92,11 +92,10 @@ private:
 LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fontFamily)
     : impl(std::make_unique<Impl>(fontFamily)) {}
 
-LocalGlyphRasterizer::~LocalGlyphRasterizer()
-{}
+LocalGlyphRasterizer::~LocalGlyphRasterizer() {}
 
 bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) {
-     return util::i18n::allowsFixedWidthGlyphGeneration(glyphID) && impl->isConfigured();
+    return util::i18n::allowsFixedWidthGlyphGeneration(glyphID) && impl->isConfigured();
 }
 
 Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID glyphID) {
@@ -120,9 +119,9 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     // Copy alpha values from RGBA bitmap into the AlphaImage output
     fixedMetrics.bitmap = AlphaImage(size);
     for (uint32_t i = 0; i < size.width * size.height; i++) {
-        fixedMetrics.bitmap.data[i] =
-            0xff - round(0.2126 * rgbaBitmap.data[4 * i] + 0.7152 * rgbaBitmap.data[4 * i + 1] +
-                         0.0722 * rgbaBitmap.data[4 * i + 2]);
+        fixedMetrics.bitmap.data[i] = 0xff -
+                                      round(0.2126 * rgbaBitmap.data[4 * i] + 0.7152 * rgbaBitmap.data[4 * i + 1] +
+                                            0.0722 * rgbaBitmap.data[4 * i + 2]);
     }
 
     return fixedMetrics;

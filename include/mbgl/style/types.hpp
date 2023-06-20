@@ -68,7 +68,7 @@ enum class SymbolPlacementType : uint8_t {
     Line,
     LineCenter
 };
-    
+
 enum class SymbolZOrderType : uint8_t {
     Auto,
     ViewportY,
@@ -120,7 +120,7 @@ enum class TextWritingModeType : uint8_t {
     Vertical
 };
 
-enum class LightAnchorType: bool {
+enum class LightAnchorType : bool {
     Map,
     Viewport
 };

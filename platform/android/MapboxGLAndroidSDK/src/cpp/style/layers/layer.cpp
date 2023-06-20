@@ -24,145 +24,145 @@
 namespace mbgl {
 namespace android {
 
-    /**
-     * Invoked when the construction is initiated from the jvm through a subclass
-     */
-    Layer::Layer(std::unique_ptr<mbgl::style::Layer> coreLayer)
-        : ownedLayer(std::move(coreLayer))
-        , layer(*ownedLayer) {
+/**
+ * Invoked when the construction is initiated from the jvm through a subclass
+ */
+Layer::Layer(std::unique_ptr<mbgl::style::Layer> coreLayer)
+    : ownedLayer(std::move(coreLayer)),
+      layer(*ownedLayer) {}
+
+/**
+ * Takes a non-owning reference. For lookup methods
+ */
+Layer::Layer(mbgl::style::Layer& coreLayer)
+    : layer(coreLayer) {}
+
+Layer::~Layer() {}
+
+void Layer::addToStyle(mbgl::style::Style& style, std::optional<std::string> before) {
+    // Check to see if we own the layer first
+    if (!ownedLayer) {
+        throw std::runtime_error("Cannot add layer twice");
     }
 
-    /**
-     * Takes a non-owning reference. For lookup methods
-     */
-    Layer::Layer(mbgl::style::Layer& coreLayer) : layer(coreLayer) {}
+    // Add layer to map
+    style.addLayer(releaseCoreLayer(), before);
+}
 
-    Layer::~Layer() {
+void Layer::setLayer(std::unique_ptr<mbgl::style::Layer> sourceLayer) {
+    this->ownedLayer = std::move(sourceLayer);
+}
+
+std::unique_ptr<mbgl::style::Layer> Layer::releaseCoreLayer() {
+    assert(ownedLayer != nullptr);
+    return std::move(ownedLayer);
+}
+
+jni::Local<jni::String> Layer::getId(jni::JNIEnv& env) {
+    return jni::Make<jni::String>(env, layer.getID());
+}
+
+style::Layer& Layer::get() {
+    return layer;
+}
+
+void Layer::setProperty(jni::JNIEnv& env, const jni::String& jname, const jni::Object<>& jvalue) {
+    // Convert and set property
+    std::optional<mbgl::style::conversion::Error> error = layer.setProperty(jni::Make<std::string>(env, jname),
+                                                                            Value(env, jvalue));
+    if (error) {
+        mbgl::Log::Error(mbgl::Event::JNI,
+                         "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
+        return;
+    }
+}
+
+void Layer::setFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
+    using namespace mbgl::style;
+    using namespace mbgl::style::conversion;
+
+    Error error;
+    std::optional<Filter> converted = convert<Filter>(Value(env, jfilter), error);
+    if (!converted) {
+        mbgl::Log::Error(mbgl::Event::JNI, "Error setting filter: " + error.message);
+        return;
     }
 
-    void Layer::addToStyle(mbgl::style::Style& style, std::optional<std::string> before) {
-        // Check to see if we own the layer first
-        if (!ownedLayer) {
-            throw std::runtime_error("Cannot add layer twice");
-        }
+    layer.setFilter(std::move(*converted));
+}
 
-        // Add layer to map
-        style.addLayer(releaseCoreLayer(), before);
+jni::Local<jni::Object<gson::JsonElement>> Layer::getFilter(jni::JNIEnv& env) {
+    using namespace mbgl::style;
+    using namespace mbgl::style::conversion;
+
+    Filter filter = layer.getFilter();
+    if (filter.expression) {
+        mbgl::Value expressionValue = (*filter.expression)->serialize();
+        return gson::JsonElement::New(env, expressionValue);
+    } else {
+        return jni::Local<jni::Object<gson::JsonElement>>(env, nullptr);
     }
+}
 
-    void Layer::setLayer(std::unique_ptr<mbgl::style::Layer> sourceLayer) {
-        this->ownedLayer = std::move(sourceLayer);
-    }
+void Layer::setSourceLayer(jni::JNIEnv& env, const jni::String& sourceLayer) {
+    layer.setSourceLayer(jni::Make<std::string>(env, sourceLayer));
+}
 
-    std::unique_ptr<mbgl::style::Layer> Layer::releaseCoreLayer() {
-        assert(ownedLayer != nullptr);
-        return std::move(ownedLayer);
-    }
+jni::Local<jni::String> Layer::getSourceLayer(jni::JNIEnv& env) {
+    return jni::Make<jni::String>(env, layer.getSourceLayer());
+}
 
-    jni::Local<jni::String> Layer::getId(jni::JNIEnv& env) {
-        return jni::Make<jni::String>(env, layer.getID());
-    }
+jni::Local<jni::String> Layer::getSourceId(jni::JNIEnv& env) {
+    return jni::Make<jni::String>(env, layer.getSourceID());
+}
 
-    style::Layer& Layer::get() {
-        return layer;
-    }
+jni::jfloat Layer::getMinZoom(jni::JNIEnv&) {
+    return layer.getMinZoom();
+}
 
-    void Layer::setProperty(jni::JNIEnv& env, const jni::String& jname, const jni::Object<>& jvalue) {
-        // Convert and set property
-        std::optional<mbgl::style::conversion::Error> error =
-            layer.setProperty(jni::Make<std::string>(env, jname), Value(env, jvalue));
-        if (error) {
-            mbgl::Log::Error(mbgl::Event::JNI, "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
-            return;
-        }
-    }
+jni::jfloat Layer::getMaxZoom(jni::JNIEnv&) {
+    return layer.getMaxZoom();
+}
 
-    void Layer::setFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
-        using namespace mbgl::style;
-        using namespace mbgl::style::conversion;
+void Layer::setMinZoom(jni::JNIEnv&, jni::jfloat zoom) {
+    layer.setMinZoom(zoom);
+}
 
-        Error error;
-        std::optional<Filter> converted = convert<Filter>(Value(env, jfilter), error);
-        if (!converted) {
-            mbgl::Log::Error(mbgl::Event::JNI, "Error setting filter: " + error.message);
-            return;
-        }
+void Layer::setMaxZoom(jni::JNIEnv&, jni::jfloat zoom) {
+    layer.setMaxZoom(zoom);
+}
 
-        layer.setFilter(std::move(*converted));
-    }
+jni::Local<jni::Object<>> Layer::getVisibility(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, layer.getVisibility()));
+}
 
-    jni::Local<jni::Object<gson::JsonElement>> Layer::getFilter(jni::JNIEnv& env) {
-        using namespace mbgl::style;
-        using namespace mbgl::style::conversion;
+void Layer::registerNative(jni::JNIEnv& env) {
+    // Lookup the class
+    static auto& javaClass = jni::Class<Layer>::Singleton(env);
 
-        Filter filter = layer.getFilter();
-        if (filter.expression) {
-            mbgl::Value expressionValue = (*filter.expression)->serialize();
-            return gson::JsonElement::New(env, expressionValue);
-        } else {
-            return jni::Local<jni::Object<gson::JsonElement>>(env, nullptr);
-        }
-    }
+#define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
-    void Layer::setSourceLayer(jni::JNIEnv& env, const jni::String& sourceLayer) {
-        layer.setSourceLayer(jni::Make<std::string>(env, sourceLayer));
-    }
-
-    jni::Local<jni::String> Layer::getSourceLayer(jni::JNIEnv& env) {
-        return jni::Make<jni::String>(env, layer.getSourceLayer());
-    }
-
-    jni::Local<jni::String> Layer::getSourceId(jni::JNIEnv& env) {
-        return jni::Make<jni::String>(env, layer.getSourceID());
-    }
-
-    jni::jfloat Layer::getMinZoom(jni::JNIEnv&){
-        return layer.getMinZoom();
-    }
-
-    jni::jfloat Layer::getMaxZoom(jni::JNIEnv&) {
-        return layer.getMaxZoom();
-    }
-
-    void Layer::setMinZoom(jni::JNIEnv&, jni::jfloat zoom) {
-        layer.setMinZoom(zoom);
-    }
-
-    void Layer::setMaxZoom(jni::JNIEnv&, jni::jfloat zoom) {
-        layer.setMaxZoom(zoom);
-    }
-
-    jni::Local<jni::Object<>> Layer::getVisibility(jni::JNIEnv& env) {
-        using namespace mbgl::android::conversion;
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, layer.getVisibility()));
-    }
-
-    void Layer::registerNative(jni::JNIEnv& env) {
-        // Lookup the class
-        static auto& javaClass = jni::Class<Layer>::Singleton(env);
-
-        #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
-
-        // Register the peer
-        jni::RegisterNativePeer<Layer>(
-            env,
-            javaClass,
-            "nativePtr",
-            METHOD(&Layer::getId, "nativeGetId"),
-            METHOD(&Layer::setProperty,
-                   "nativeSetLayoutProperty"), // TODO : Export only nativeSetProperty() when #15970 lands.
-            METHOD(&Layer::setProperty, "nativeSetPaintProperty"),
-            METHOD(&Layer::setFilter, "nativeSetFilter"),
-            METHOD(&Layer::getFilter, "nativeGetFilter"),
-            METHOD(&Layer::setSourceLayer, "nativeSetSourceLayer"),
-            METHOD(&Layer::getSourceLayer, "nativeGetSourceLayer"),
-            METHOD(&Layer::getSourceId, "nativeGetSourceId"),
-            METHOD(&Layer::getMinZoom, "nativeGetMinZoom"),
-            METHOD(&Layer::getMaxZoom, "nativeGetMaxZoom"),
-            METHOD(&Layer::setMinZoom, "nativeSetMinZoom"),
-            METHOD(&Layer::setMaxZoom, "nativeSetMaxZoom"),
-            METHOD(&Layer::getVisibility, "nativeGetVisibility"));
-    }
+    // Register the peer
+    jni::RegisterNativePeer<Layer>(
+        env,
+        javaClass,
+        "nativePtr",
+        METHOD(&Layer::getId, "nativeGetId"),
+        METHOD(&Layer::setProperty,
+               "nativeSetLayoutProperty"), // TODO : Export only nativeSetProperty() when #15970 lands.
+        METHOD(&Layer::setProperty, "nativeSetPaintProperty"),
+        METHOD(&Layer::setFilter, "nativeSetFilter"),
+        METHOD(&Layer::getFilter, "nativeGetFilter"),
+        METHOD(&Layer::setSourceLayer, "nativeSetSourceLayer"),
+        METHOD(&Layer::getSourceLayer, "nativeGetSourceLayer"),
+        METHOD(&Layer::getSourceId, "nativeGetSourceId"),
+        METHOD(&Layer::getMinZoom, "nativeGetMinZoom"),
+        METHOD(&Layer::getMaxZoom, "nativeGetMaxZoom"),
+        METHOD(&Layer::setMinZoom, "nativeSetMinZoom"),
+        METHOD(&Layer::setMaxZoom, "nativeSetMaxZoom"),
+        METHOD(&Layer::getVisibility, "nativeGetVisibility"));
+}
 
 } // namespace android
 } // namespace mbgl

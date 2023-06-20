@@ -3,9 +3,10 @@
 namespace mbgl {
 namespace util {
 
-DefaultStyle::DefaultStyle(std::string url_, std::string name_, int version_):
-    url(url_), name(name_), currentVersion(version_)
-    {}
+DefaultStyle::DefaultStyle(std::string url_, std::string name_, int version_)
+    : url(url_),
+      name(name_),
+      currentVersion(version_) {}
 
 const std::string& DefaultStyle::getUrl() const {
     return url;

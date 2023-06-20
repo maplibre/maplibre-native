@@ -1,9 +1,9 @@
 include(cmake/mason.cmake)
 
 # include once for every platform to get all dependency defines
-set(MBGL_PLATFORM "android")
+set(MLN_PLATFORM "android")
 include(cmake/mason-dependencies.cmake)
-set(MBGL_PLATFORM "ios")
+set(MLN_PLATFORM "ios")
 include(cmake/mason-dependencies.cmake)
 
 get_cmake_property(_VARS VARIABLES)

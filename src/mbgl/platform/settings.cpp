@@ -21,7 +21,8 @@ public:
     std::mutex mutex;
 };
 
-Settings::Settings() : impl(std::make_unique<Impl>()) {}
+Settings::Settings()
+    : impl(std::make_unique<Impl>()) {}
 
 Settings& Settings::getInstance() noexcept {
     static Settings instance;

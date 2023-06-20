@@ -3,9 +3,11 @@
 namespace mbgl {
 namespace android {
 
-jni::Local<jni::Object<TransitionOptions>> TransitionOptions::fromTransitionOptions(jni::JNIEnv& env, jlong duration, jlong delay, jboolean enablePlacementTransitions) {
+jni::Local<jni::Object<TransitionOptions>> TransitionOptions::fromTransitionOptions(
+    jni::JNIEnv& env, jlong duration, jlong delay, jboolean enablePlacementTransitions) {
     static auto& javaClass = jni::Class<TransitionOptions>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<TransitionOptions> (jlong, jlong, jboolean)>(env, "fromTransitionOptions");
+    static auto method = javaClass.GetStaticMethod<jni::Object<TransitionOptions>(jlong, jlong, jboolean)>(
+        env, "fromTransitionOptions");
     return javaClass.Call(env, method, duration, delay, enablePlacementTransitions);
 }
 
@@ -21,9 +23,10 @@ long TransitionOptions::getDelay(jni::JNIEnv& env, const jni::Object<TransitionO
     return transitionOptions.Get(env, field);
 }
 
-bool TransitionOptions::isEnablePlacementTransitions(jni::JNIEnv& env, const jni::Object<mbgl::android::TransitionOptions>& transitionOptions) {
+bool TransitionOptions::isEnablePlacementTransitions(
+    jni::JNIEnv& env, const jni::Object<mbgl::android::TransitionOptions>& transitionOptions) {
     static auto& javaClass = jni::Class<TransitionOptions>::Singleton(env);
-    static auto field = javaClass.GetField<jboolean >(env, "enablePlacementTransitions");
+    static auto field = javaClass.GetField<jboolean>(env, "enablePlacementTransitions");
     return transitionOptions.Get(env, field);
 }
 

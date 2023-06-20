@@ -42,7 +42,7 @@ It is useful to split our goals into three sections to articulate what this prop
 ### <a name="core">Core Functionality</a>
 
 1. Shader (program) code will be implemented in a modular fashion, such that replacement of any given shader can happen without impacting other shaders.
-2. Shader (program) code may no longer be compiled from the [webgl source](https://github.com/maplibre/maplibre-gl-js/tree/main/src/shaders), and should be organized within the maplibre-gl-native repo (as a compile time option).
+2. Shader (program) code may no longer be compiled from the [webgl source](https://github.com/maplibre/maplibre-gl-js/tree/main/src/shaders), and should be organized within the maplibre-native repo (as a compile time option).
 3. Layer rendering logic should be replaceable at the dev level.  All the necessary support should be exposed and a developer should be able to take over representation of any given layer.
 4. Developers should be able to associate specific styles with specific layer rendering.  The style sheet should be able to call out the type of representation it would like beyond the default.
 5. Developers should be able to add new visual representations fed by existing geometry types.  Such as data display driven by tile sets or animated markers.
@@ -53,7 +53,7 @@ It is useful to split our goals into three sections to articulate what this prop
 1. Developers should be able to continue using the OpenGL renderer with this refactor.
 2. The resulting binary from the modularized refactor should not increase more than 5% when compiled.
 3. The modularization refactor should be visually identical to the current implementation when using OpenGL. All existing render tests should pass, and developers that continue to use this library with an OpenGL renderer should not experience any visual degradation such as artifacts.
-4. After refactor, the startup time for applications built with this library should not increase. This will be measured by the startup time of [this](https://github.com/maplibre/maplibre-gl-native/blob/main/platform/ios/platform/ios/iosapp%20UITests/iosapp_UITests.swift) iOS test app.
+4. After refactor, the startup time for applications built with this library should not increase. This will be measured by the startup time of [this](https://github.com/maplibre/maplibre-native/blob/main/platform/ios/platform/ios/iosapp%20UITests/iosapp_UITests.swift) iOS test app.
 5. When implemented with a given style and set of tilesets, the compiled library should not decrease the rendering frame rate.
 6. This refactor will not introduce data loading or other bottlenecks that will negatively impact rendering performance.
 7. Developers currently using this library will not see any breaking API changes, and will be able to seamlessly upgrade versions.
@@ -75,7 +75,7 @@ The shaders need a representation visible outside the toolkit and we need to cha
 
 Individual shaders are represented by an object class with massive amounts of template logic and a minimum of in-line comments.  They’re opaque from the outside and only controllable through vector tile data and styles. 
 
-The [render_raster_layer](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/layers/render_raster_layer.cpp), as an example, asks for the instantiation of (eventually) RasterProgram.  Rather than having the source for the program, that then pokes into a compressed chunk of memory that contains the source, which is then uncompressed and fed into OpenGL for compilation.
+The [render_raster_layer](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/layers/render_raster_layer.cpp), as an example, asks for the instantiation of (eventually) RasterProgram.  Rather than having the source for the program, that then pokes into a compressed chunk of memory that contains the source, which is then uncompressed and fed into OpenGL for compilation.
 
 All of this makes sense in context, but is completely inaccessible outside the toolkit and rather incomprehensible when making changes.
 
@@ -134,9 +134,9 @@ Modern graphics pipelines use more than one pass to create a visual representati
 Without getting too deep into specifics, early rendering passes allow the developer to use the power of the rasterizer for their own data.  Later rendering passes are typically used to decorate the map with effects.
 
 #### The way it is now:
-The [low level rendering logic](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) in the toolkit seems to only support one explicit rendering pass.  
+The [low level rendering logic](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) in the toolkit seems to only support one explicit rendering pass.  
 
-However, there is the [RenderPass](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/gl/render_pass.hpp) so some notion of this exists in the toolkit, but it's not clear how complete that is.  It may depend on ordering to work things out, rather than the explicit command buffer filling and fences we would use in a more modern approach.
+However, there is the [RenderPass](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/gl/render_pass.hpp) so some notion of this exists in the toolkit, but it's not clear how complete that is.  It may depend on ordering to work things out, rather than the explicit command buffer filling and fences we would use in a more modern approach.
 
 In any case, we need this filled out more explicitly for the render targets.
 
@@ -205,7 +205,7 @@ In WhirlyGlobe we’ve always called out separate objects for drawing certain ki
 
 Which is to say that Drawable is a good concept which can encapsulate a lot of complexity.  So much so that it eventually encapsulates ALL the complexity, at least at that level of rendering.  It’s a good interface between the things that construct geometry and the things that render geometry.
 
-To keep the Drawable somewhat manageable, we added the concept of a Drawable Builder.  This is an object that you throw geometry at in a somewhat disordered way and it emits Drawables when you’re done.  MapLibre's [Buckets](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/bucket.hpp) are similar, but not quite the same.  Perhaps they'll be adaptable.  We'll see.
+To keep the Drawable somewhat manageable, we added the concept of a Drawable Builder.  This is an object that you throw geometry at in a somewhat disordered way and it emits Drawables when you’re done.  MapLibre's [Buckets](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/bucket.hpp) are similar, but not quite the same.  Perhaps they'll be adaptable.  We'll see.
 
 Drawables and Builders have a subclass for each supported rendering SDK.  One mistake we won’t bring over is using multiple inheritance for that.  You’re welcome.  
 
@@ -221,7 +221,7 @@ Builders will be used primarily by Layers to emit Drawables for rendering.
 
 This is a big topic because it gets to the very heart of the critical changes we want to make to the toolkit.  There are a couple of different categories that are revealing and we'll use some examples.
 
-Most commonly there are *render layers*.  These are individual classes that know how to render, for instance, the [fill layer](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/layers/render_fill_layer.cpp).  You'll see a bunch of these that start with "render" and end with "layer".
+Most commonly there are *render layers*.  These are individual classes that know how to render, for instance, the [fill layer](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/layers/render_fill_layer.cpp).  You'll see a bunch of these that start with "render" and end with "layer".
 
 What's going on here is that the toolkit has broken out a bunch of features from a tile, consolidated them together in a Bucket and then handed them off to a Layer to render.  Sure enough, if you look in the render_*_layer you can see it doing just that.
 
@@ -230,7 +230,7 @@ Now it's not redoing the work of consolidation each frame, but it is doing a lot
 - This is more specific logic than we'd want to see in a rendering loop.  Remember, this runs every frame.
 - If your data is not in tile form, it's going to be hard to render.
 
-That last one is really interesting and we can find an example in MapLibre Native itself.  Look to the [Render Location Indicator Layer](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/layers/render_location_indicator_layer.cpp).  Here's where this approach trips up... rolls down the hill... into a pile of broken glass.  You can feel the developers' pain in this module.
+That last one is really interesting and we can find an example in MapLibre Native itself.  Look to the [Render Location Indicator Layer](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/layers/render_location_indicator_layer.cpp).  Here's where this approach trips up... rolls down the hill... into a pile of broken glass.  You can feel the developers' pain in this module.
 
 If you're not familiar with real time rendering toolkits, I'll put it this way.  Managing the logic for a location puck that updates every time the user moves should not involve direct OpenGL calls.  It should be abstracted, at least a little.
 
@@ -319,7 +319,7 @@ Every real time rendering toolkit has a main rendering loop or something like it
 
 On iOS this runs on the main thread and on Android this runs on its own separate thread.  You might think the latter is better, but it has its own problems (gesture lag).  In any case, MapLibre Native handles both just fine.
 
-The toolkit's main rendering "loop" lives in [renderer_impl](https://github.com/maplibre/maplibre-gl-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) and it's worth a look.  It serves as a central point to begin examining the real time rendering.
+The toolkit's main rendering "loop" lives in [renderer_impl](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/renderer/renderer_impl.cpp) and it's worth a look.  It serves as a central point to begin examining the real time rendering.
 
 As you might suspect, the rendering loop logic and implementation are heavily influenced by OpenGL.
 

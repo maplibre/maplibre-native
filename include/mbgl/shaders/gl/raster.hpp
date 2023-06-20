@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::RasterProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::RasterProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_tl_parent;
 uniform float u_scale_parent;

@@ -14,7 +14,7 @@ namespace android {
 class CircleLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/CircleLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/CircleLayer"; };
 
     CircleLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
@@ -68,7 +68,7 @@ public:
 
 }; // class CircleLayer
 
-class CircleJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::CircleLayerFactory {
+class CircleJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::CircleLayerFactory {
 public:
     ~CircleJavaLayerPeerFactory() override;
 
@@ -80,7 +80,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class CircleJavaLayerPeerFactory
+}; // class CircleJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

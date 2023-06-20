@@ -9,8 +9,10 @@ using namespace style;
 
 FillAnnotationImpl::FillAnnotationImpl(AnnotationID id_, FillAnnotation annotation_)
     : ShapeAnnotationImpl(id_),
-      annotation(ShapeAnnotationGeometry::visit(annotation_.geometry, CloseShapeAnnotation{}), annotation_.opacity, annotation_.color, annotation_.outlineColor) {
-}
+      annotation(ShapeAnnotationGeometry::visit(annotation_.geometry, CloseShapeAnnotation{}),
+                 annotation_.opacity,
+                 annotation_.color,
+                 annotation_.outlineColor) {}
 
 void FillAnnotationImpl::updateStyle(Style::Impl& style) const {
     Layer* layer = style.getLayer(layerID);

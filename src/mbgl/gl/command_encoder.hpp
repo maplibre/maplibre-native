@@ -9,8 +9,8 @@ class Context;
 
 class CommandEncoder final : public gfx::CommandEncoder {
 public:
-    explicit CommandEncoder(gl::Context& context_) : context(context_) {
-    }
+    explicit CommandEncoder(gl::Context& context_)
+        : context(context_) {}
 
     ~CommandEncoder() override;
 

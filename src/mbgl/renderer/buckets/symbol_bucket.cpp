@@ -55,10 +55,8 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
         paintProperties.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(pair.first),
-            std::forward_as_tuple(PaintProperties {
-                { RenderSymbolLayer::iconPaintProperties(evaluated), zoom },
-                { RenderSymbolLayer::textPaintProperties(evaluated), zoom }
-            }));
+            std::forward_as_tuple(PaintProperties{{RenderSymbolLayer::iconPaintProperties(evaluated), zoom},
+                                                  {RenderSymbolLayer::textPaintProperties(evaluated), zoom}}));
     }
 }
 
@@ -67,7 +65,9 @@ SymbolBucket::~SymbolBucket() = default;
 void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
     if (hasTextData()) {
         if (!staticUploaded) {
-            text.indexBuffer = uploadPass.createIndexBuffer(std::move(text.triangles), sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
+            text.indexBuffer = uploadPass.createIndexBuffer(
+                std::move(text.triangles),
+                sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
             text.vertexBuffer = uploadPass.createVertexBuffer(std::move(text.vertices));
             for (auto& pair : paintProperties) {
                 pair.second.textBinders.upload(uploadPass);
@@ -78,14 +78,16 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
 
         if (!dynamicUploaded) {
             if (!text.dynamicVertexBuffer) {
-                text.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(text.dynamicVertices), gfx::BufferUsageType::StreamDraw);
+                text.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(text.dynamicVertices),
+                                                                         gfx::BufferUsageType::StreamDraw);
             } else {
                 uploadPass.updateVertexBuffer(*text.dynamicVertexBuffer, std::move(text.dynamicVertices));
             }
         }
         if (!placementChangesUploaded) {
             if (!text.opacityVertexBuffer) {
-                text.opacityVertexBuffer = uploadPass.createVertexBuffer(std::move(text.opacityVertices), gfx::BufferUsageType::StreamDraw);
+                text.opacityVertexBuffer = uploadPass.createVertexBuffer(std::move(text.opacityVertices),
+                                                                         gfx::BufferUsageType::StreamDraw);
             } else {
                 uploadPass.updateVertexBuffer(*text.opacityVertexBuffer, std::move(text.opacityVertices));
             }
@@ -94,7 +96,9 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
 
     auto updateIconBuffer = [&](Buffer& iconBuffer) {
         if (!staticUploaded) {
-            iconBuffer.indexBuffer = uploadPass.createIndexBuffer(std::move(iconBuffer.triangles), sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
+            iconBuffer.indexBuffer = uploadPass.createIndexBuffer(
+                std::move(iconBuffer.triangles),
+                sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
             iconBuffer.vertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.vertices));
             for (auto& pair : paintProperties) {
                 pair.second.iconBinders.upload(uploadPass);
@@ -104,14 +108,16 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
         }
         if (!dynamicUploaded) {
             if (!iconBuffer.dynamicVertexBuffer) {
-                iconBuffer.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.dynamicVertices), gfx::BufferUsageType::StreamDraw);
+                iconBuffer.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.dynamicVertices),
+                                                                               gfx::BufferUsageType::StreamDraw);
             } else {
                 uploadPass.updateVertexBuffer(*iconBuffer.dynamicVertexBuffer, std::move(iconBuffer.dynamicVertices));
             }
         }
         if (!placementChangesUploaded) {
             if (!iconBuffer.opacityVertexBuffer) {
-                iconBuffer.opacityVertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.opacityVertices), gfx::BufferUsageType::StreamDraw);
+                iconBuffer.opacityVertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.opacityVertices),
+                                                                               gfx::BufferUsageType::StreamDraw);
             } else {
                 uploadPass.updateVertexBuffer(*iconBuffer.opacityVertexBuffer, std::move(iconBuffer.opacityVertices));
             }
@@ -131,9 +137,11 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
         }
         if (!placementChangesUploaded) {
             if (!collisionBox.dynamicVertexBuffer) {
-                collisionBox.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(collisionBox.dynamicVertices), gfx::BufferUsageType::StreamDraw);
+                collisionBox.dynamicVertexBuffer = uploadPass.createVertexBuffer(
+                    std::move(collisionBox.dynamicVertices), gfx::BufferUsageType::StreamDraw);
             } else {
-                uploadPass.updateVertexBuffer(*collisionBox.dynamicVertexBuffer, std::move(collisionBox.dynamicVertices));
+                uploadPass.updateVertexBuffer(*collisionBox.dynamicVertexBuffer,
+                                              std::move(collisionBox.dynamicVertices));
             }
         }
     };
@@ -152,9 +160,11 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
         }
         if (!placementChangesUploaded) {
             if (!collisionCircle.dynamicVertexBuffer) {
-                collisionCircle.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(collisionCircle.dynamicVertices), gfx::BufferUsageType::StreamDraw);
+                collisionCircle.dynamicVertexBuffer = uploadPass.createVertexBuffer(
+                    std::move(collisionCircle.dynamicVertices), gfx::BufferUsageType::StreamDraw);
             } else {
-                uploadPass.updateVertexBuffer(*collisionCircle.dynamicVertexBuffer, std::move(collisionCircle.dynamicVertices));
+                uploadPass.updateVertexBuffer(*collisionCircle.dynamicVertexBuffer,
+                                              std::move(collisionCircle.dynamicVertices));
             }
         }
     };
@@ -209,8 +219,12 @@ bool SymbolBucket::hasTextCollisionCircleData() const {
 void addPlacedSymbol(gfx::IndexVector<gfx::Triangles>& triangles, const PlacedSymbol& placedSymbol) {
     auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
     for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
-        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0), static_cast<uint16_t>(vertexIndex + 1), static_cast<uint16_t>(vertexIndex + 2));
-        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 1), static_cast<uint16_t>(vertexIndex + 2), static_cast<uint16_t>(vertexIndex + 3));
+        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0),
+                               static_cast<uint16_t>(vertexIndex + 1),
+                               static_cast<uint16_t>(vertexIndex + 2));
+        triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 1),
+                               static_cast<uint16_t>(vertexIndex + 2),
+                               static_cast<uint16_t>(vertexIndex + 3));
     }
 }
 
@@ -226,8 +240,9 @@ void SymbolBucket::sortFeatures(const float angle) {
 
     sortedAngle = angle;
 
-    // The current approach to sorting doesn't sort across text and icon segments so don't try.
-    // Sorting within segments separately seemed not to be worth the complexity.
+    // The current approach to sorting doesn't sort across text and icon
+    // segments so don't try. Sorting within segments separately seemed not to
+    // be worth the complexity.
     if (text.segments.size() > 1 || (icon.segments.size() > 1 || sdfIcon.segments.size() > 1)) {
         return;
     }
@@ -242,9 +257,9 @@ void SymbolBucket::sortFeatures(const float angle) {
     auto symbolsSortOrder = std::make_unique<std::vector<size_t>>();
     symbolsSortOrder->reserve(symbolInstances.size());
 
-    // If the symbols are allowed to overlap sort them by their vertical screen position.
-    // The index array buffer is rewritten to reference the (unchanged) vertices in the
-    // sorted order.
+    // If the symbols are allowed to overlap sort them by their vertical screen
+    // position. The index array buffer is rewritten to reference the
+    // (unchanged) vertices in the sorted order.
     for (const SymbolInstance& symbolInstance : getSortedSymbols(angle)) {
         symbolsSortOrder->push_back(symbolInstance.dataFeatureIndex);
 
@@ -288,7 +303,7 @@ SymbolInstanceReferences SymbolBucket::getSortedSymbols(const float angle) const
         if (aRotated != bRotated) {
             return aRotated < bRotated;
         }
-        return a.dataFeatureIndex > b.dataFeatureIndex;  // aRotated == bRotated
+        return a.dataFeatureIndex > b.dataFeatureIndex; // aRotated == bRotated
     });
 
     return result;
@@ -305,7 +320,7 @@ SymbolInstanceReferences SymbolBucket::getSymbols(const std::optional<SortKeyRan
 
 bool SymbolBucket::hasFormatSectionOverrides() const {
     if (!hasFormatSectionOverrides_) {
-        hasFormatSectionOverrides_= SymbolLayerPaintPropertyOverrides::hasOverrides(layout->get<TextField>());
+        hasFormatSectionOverrides_ = SymbolLayerPaintPropertyOverrides::hasOverrides(layout->get<TextField>());
     }
     return *hasFormatSectionOverrides_;
 }

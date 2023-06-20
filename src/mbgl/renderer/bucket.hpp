@@ -41,20 +41,17 @@ public:
 
     virtual void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {}
 
-    // As long as this bucket has a Prepare render pass, this function is getting called. Typically,
-    // this only happens once when the bucket is being rendered for the first time.
+    // As long as this bucket has a Prepare render pass, this function is
+    // getting called. Typically, this only happens once when the bucket is
+    // being rendered for the first time.
     virtual void upload(gfx::UploadPass&) = 0;
 
     virtual bool hasData() const = 0;
 
-    virtual float getQueryRadius(const RenderLayer&) const {
-        return 0;
-    };
+    virtual float getQueryRadius(const RenderLayer&) const { return 0; };
 
-    bool needsUpload() const {
-        return hasData() && !uploaded;
-    }
-   
+    bool needsUpload() const { return hasData() && !uploaded; }
+
     // The following methods are implemented by buckets that require cross-tile indexing and placement.
 
     // Returns a pair, the first element of which is a bucket cross-tile id
@@ -70,7 +67,7 @@ public:
 
 protected:
     Bucket() = default;
-    std::atomic<bool> uploaded { false };
+    std::atomic<bool> uploaded{false};
 };
 
 } // namespace mbgl

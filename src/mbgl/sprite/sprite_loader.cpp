@@ -27,7 +27,9 @@ struct SpriteLoader::Data {
 };
 
 SpriteLoader::SpriteLoader(float pixelRatio_)
-    : pixelRatio(pixelRatio_), observer(&nullObserver), threadPool(Scheduler::GetBackground()) {}
+    : pixelRatio(pixelRatio_),
+      observer(&nullObserver),
+      threadPool(Scheduler::GetBackground()) {}
 
 SpriteLoader::~SpriteLoader() = default;
 

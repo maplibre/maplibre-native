@@ -6,12 +6,12 @@
     allprojects {
         repositories {
         ...
-        mavenCentral()                
+        mavenCentral()
         }
     }
     ```
 
-2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the latest MapLibre GL Native version (e.g.: `org.maplibre.gl:android-sdk:10.0.2`). Visit [https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk](https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk) to view the version history of MapLibre GL Native for android. 
+2. Add the library as a dependency into your module Gradle file (usually `<project>/<app-module>/build.gradle`). Replace `<version>` with the latest MapLibre Native version (e.g.: `org.maplibre.gl:android-sdk:10.0.2`). Visit [https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk](https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk) to view the version history of MapLibre Native for android. 
 
     ```gradle
     dependencies {
@@ -27,7 +27,7 @@
 
     ```xml
     ...
-    <com.mapbox.mapboxsdk.maps.MapView
+    <org.maplibre.android.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,10 +41,11 @@
     import androidx.appcompat.app.AppCompatActivity
     import android.os.Bundle
     import android.view.LayoutInflater
-    import com.mapbox.mapboxsdk.Mapbox
-    import com.mapbox.mapboxsdk.camera.CameraPosition
-    import com.mapbox.mapboxsdk.geometry.LatLng
-    import com.mapbox.mapboxsdk.maps.MapView
+    import org.maplibre.android.Maplibre
+    import org.maplibre.android.camera.CameraPosition
+    import org.maplibre.android.geometry.LatLng
+    import org.maplibre.android.maps.MapView
+    import org.maplibre.android.testapp.R
 
     class MainActivity : AppCompatActivity() {
 
@@ -53,9 +54,9 @@
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
-            
+
             // Init MapLibre
-            Mapbox.getInstance(this)
+            MapLibre.getInstance(this)
 
             // Init layout view
             val inflater = LayoutInflater.from(this)

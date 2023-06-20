@@ -11,7 +11,8 @@ const style::LayerTypeInfo* FillExtrusionLayerFactory::getTypeInfo() const noexc
     return style::FillExtrusionLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> FillExtrusionLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible& value) noexcept {
+std::unique_ptr<style::Layer> FillExtrusionLayerFactory::createLayer(
+    const std::string& id, const style::conversion::Convertible& value) noexcept {
     auto const source = getSource(value);
     if (!source) {
         return nullptr;
@@ -20,9 +21,10 @@ std::unique_ptr<style::Layer> FillExtrusionLayerFactory::createLayer(const std::
     return std::unique_ptr<style::Layer>(new style::FillExtrusionLayer(id, *source));
 }
 
-std::unique_ptr<Layout> FillExtrusionLayerFactory::createLayout(const LayoutParameters& parameters,
-                                                                std::unique_ptr<GeometryTileLayer> layer,
-                                                                const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
+std::unique_ptr<Layout> FillExtrusionLayerFactory::createLayout(
+    const LayoutParameters& parameters,
+    std::unique_ptr<GeometryTileLayer> layer,
+    const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
     using namespace style;
     using LayoutType = PatternLayout<FillExtrusionBucket, FillExtrusionLayerProperties, FillExtrusionPattern>;
     return std::make_unique<LayoutType>(parameters.bucketParameters, group, std::move(layer), parameters);

@@ -35,9 +35,7 @@ public:
         return static_cast<T&>(getContext());
     }
 
-    bool contextIsShared() const {
-        return contextMode == ContextMode::Shared;
-    }
+    bool contextIsShared() const { return contextMode == ContextMode::Shared; }
 
     /// Returns a reference to the default surface that should be rendered on.
     virtual Renderable& getDefaultRenderable() = 0;
@@ -45,13 +43,16 @@ public:
 protected:
     virtual std::unique_ptr<Context> createContext() = 0;
 
-    /// Called when the backend's GL context needs to be made active or inactive. These are called,
-    /// as a matched pair, exclusively through BackendScope, in two situations:
+    /// Called when the backend's GL context needs to be made active or
+    /// inactive. These are called, as a matched pair, exclusively through
+    /// BackendScope, in two situations:
     ///
     ///   1. When releasing GL resources during Renderer destruction
-    ///      (Including calling CustomLayerHost::deinitialize during RenderCustomLayer destruction)
+    ///      (Including calling CustomLayerHost::deinitialize during
+    ///      RenderCustomLayer destruction)
     ///   2. When renderering through Renderer::render()
-    ///      (Including calling CustomLayerHost::initialize for newly added custom layers and
+    ///      (Including calling CustomLayerHost::initialize for newly added
+    ///      custom layers and
     ///       CustomLayerHost::deinitialize on layer removal)
     virtual void activate() = 0;
     virtual void deactivate() = 0;

@@ -23,19 +23,17 @@ bool PropertyExpressionBase::isRuntimeConstant() const noexcept {
     return isRuntimeConstant_;
 }
 
-float PropertyExpressionBase::interpolationFactor(const Range<float>& inputLevels, const float inputValue) const noexcept {
+float PropertyExpressionBase::interpolationFactor(const Range<float>& inputLevels,
+                                                  const float inputValue) const noexcept {
     return zoomCurve.match(
         [](std::nullptr_t) {
             assert(false);
             return 0.0f;
         },
         [&](const expression::Interpolate* z) {
-            return z->interpolationFactor(Range<double> { inputLevels.min, inputLevels.max }, inputValue);
+            return z->interpolationFactor(Range<double>{inputLevels.min, inputLevels.max}, inputValue);
         },
-        [](const expression::Step*) {
-            return 0.0f;
-        }
-    );
+        [](const expression::Step*) { return 0.0f; });
 }
 
 Range<float> PropertyExpressionBase::getCoveringStops(const float lower, const float upper) const noexcept {

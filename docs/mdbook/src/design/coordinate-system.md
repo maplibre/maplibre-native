@@ -1,6 +1,6 @@
 # Coordinate System
 
-Before we jump into the coordinate system of MapLibre Native GL, let's
+Before we jump into the coordinate system of MapLibre Native, let's
 quickly review the concepts of translating a position on the face of
 Earth to a map tile. This is not a comprehensive refresher of coordinate
 reference systems or rendering basics. Rather this intends to guide the
@@ -14,30 +14,30 @@ geometries defined by WGS84 longitude, latitude pair coordinates to a
 map tile.
 
 Instead of translating a full geometry, in the following subsections, we
-will project a WGS 84 point to a map tile rendered in MapLibre GL
+will project a WGS 84 point to a map tile rendered in MapLibre
 Native.
 
 #### World vs Earth
 
 This document uses the word *Earth* when it refers to the planet in
 which we all live in and make map tiles for. This document uses the word
-*World* to denote the world MapLibre Native GL renders. The word *world*
+*World* to denote the world MapLibre Native renders. The word *world*
 in rendering terms mean the *world* to render. It could be a set of
 cones and boxes, a modeled city, anything composed of 3D objects.
-MapLibre GL Native renders map tiles in a range of zoom levels on a 3D
+MapLibre Native renders map tiles in a range of zoom levels on a 3D
 plane. Map tiles are already produced from a WGS84 ellipsoid. Therefore,
 when this document uses the word *World,* it means the 3D plane
 containing a set of map tiles to be rendered, not the *Earth*.
 
 #### Transformations
 
-MapLibre GL requires a series of coordinate transformations to render a
+MapLibre Native requires a series of coordinate transformations to render a
 geometry from map tile. This is where we refresh our rendering knowledge
 a bit. To render anything through a GPU:
 
 1.  Design and define model in the *Local Space*. We call anything that
     needs to be renderer a *model.* In the Local space, a model lives in
-    its own coordinate system. For MapLibre Native GL, in local space
+    its own coordinate system. For MapLibre Native, in local space
     each individual tile is modeled. This map tile is already populated
     by a map tile generation process. The longitude, latitude bound per
     tile is now translated to pixel bounds in this local space.
@@ -57,7 +57,7 @@ a bit. To render anything through a GPU:
 4.  Finally, the *World Space* is transformed to device screen by
     applying viewport transform matrix.
 
-Going forward, scoping our discussion only to MapLibre GL Native, we
+Going forward, scoping our discussion only to MapLibre Native, we
 will talk mostly about two categories of coordinate systems:
 
 1.  World Coordinates
@@ -98,7 +98,7 @@ Projections are used to translate WGS84 coordinates to a plane. To be
 specific, projections are used to translate a location on the ellipsoid
 to a two-dimensional square. EPSG:3857[^11] or projected
 *Pseudo-Mercator Coordinate System* is such a coordinate system.
-EPSG:3857 is used by MapLibre GL Native as a default coordinate system
+EPSG:3857 is used by MapLibre Native as a default coordinate system
 to display maps. This system takes WGS84 coordinates and projects them
 into sphere. This stretches out the landmass in the hemispheres but
 mathematically makes it simpler to project a location back to a 2D
@@ -177,9 +177,9 @@ components to integers, we get `(585/783/11)`. This marks an individual
 tile's X, Y, and Z.
 
 To reach our goal of translating a location to a coordinate inside a
-tile, we need to know what is the *extent* of the tile. MapLibre GL
+tile, we need to know what is the *extent* of the tile. MapLibre
 Native follows Mapbox Vector Tile (MVT) spec. Following said spec,
-MapLibre GL Native internally normalizes each tile to an *extent* of
+MapLibre Native internally normalizes each tile to an *extent* of
 8192. Tile extent describes the width and height of the tile in integer
 coordinates. This means a tile coordinate can have higher precision than
 a pixel. Because normally a tile has a height and width of 512 pixels.
@@ -214,14 +214,14 @@ rendering workflow is to translate object coordinates to world
 coordinates. This is important to understand if we are to render
 multiple objects in the world. If we treat all tiles in a zoom level
 being rendered in a single 3D horizontal plane, then the World Space has
-only one object. And in MapLibre GL, this plane has an origin of (0,0),
+only one object. And in MapLibre Native, this plane has an origin of (0,0),
 positioned on the top left.
 
 ## Device Coordinates
 
-World space for MapLibre GL Native contains a plane in 3D with all the
+World space for MapLibre Native contains a plane in 3D with all the
 tiles for any specific zoom level. Map tiles are hierarchical in nature.
-As in they have different zoom levels. MapLibre GL Native internally
+As in they have different zoom levels. MapLibre Native internally
 stores a tree object that mimics a tile pyramid. However, it does not
 create a hierarchy of 3D planes where each plane mimics one zoom level.
 It reuses the same 3D plane to re-render the tiles in the requested zoom
@@ -232,7 +232,7 @@ world space starts with *View Matrix*, as defined in the world space.
 The key part here is the *camera*. A *view matrix* is a matrix that
 scales, rotates, and translates[^14] the world space from the view of
 the camera. To add the perspective of the camera, we apply the
-*Projection Matrix*. In MapLibre GL Native, a camera initialization
+*Projection Matrix*. In MapLibre Native, a camera initialization
 requires map center, bearing, and pitch.
 
 *Initializing the map with a center (lon, lat) does not translate or
@@ -250,12 +250,12 @@ Once a tile is built, the GPU can quickly draw the same tile with different
 bearing, pan, pitch, and zoom parameters[^15].
 
 If we keep following Figure 2, we see we need to also add a projection
-matrix. And MapLibre GL Native uses a *perspective projection*.
+matrix. And MapLibre Native uses a *perspective projection*.
 Perspective projection matrix introduces the sense of depth perspective
 through the camera. As in objects further from the camera will look
 smaller and objects closer to the camera will look bigger. This
 perspective component is defined by parameter *w.* That is why the
-shaders that MapLibre Native GL at the time of writing uses 4
+shaders that MapLibre Native at the time of writing uses 4
 dimensional vectors over 3 dimensional vectors. The 4^th^ dimension is
 this parameter *w*. Therefore, theoretically a GL coordinate is of the
 form `(x, y, z, w)`.
@@ -271,7 +271,7 @@ pitch: 45 degrees
 tile: 585/783/11
 ```
 
-On top of this, MapLibre GL Native uses a field of view of 36.87 degrees
+On top of this, MapLibre Native uses a field of view of 36.87 degrees
 or 0.6435011087932844 radians. This is somewhat arbitrary. The altitude
 of the camera used to be defined as 1.5 screen heights above the ground.
 The ground is the 3D plane that paints the map tiles. The field of view
@@ -322,7 +322,7 @@ with perspective component *w*.
 ```
 
 Doing this will take us into *clip space.* Clip coordinates contain all
-the tile coordinates we wish to render in MapLibre GL Native but only in
+the tile coordinates we wish to render in MapLibre Native but only in
 a normalized coordinate space of `[-1.0, 1.0]`.
 
 All that is left now is to translate this to viewport coordinates.
@@ -351,7 +351,7 @@ _________________________
 
 [^11]: There are other coordinate systems such as EPSG:54001 that uses
     equirectangles over squares to project the WGS84 coordinates. This
-    document focuses on EPSG:3857 because MapLibre GL Native uses it by
+    document focuses on EPSG:3857 because MapLibre Native uses it by
     default.
 
 [^12]: This document scopes out the trigonometric proof of this
@@ -369,7 +369,7 @@ _________________________
     so order of operation matters.
 
 [^15]: The piece of code we run on GPU is called a shader. We will see
-    more how shaders influence MapLibre GL Native rendering later in the
+    more how shaders influence MapLibre Native rendering later in the
     document.
 
 [^16]: Matrix and examples produced from Chris Loers work hosted in:

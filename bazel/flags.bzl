@@ -8,16 +8,20 @@ WARNING_FLAGS = [
     "-Wall",
     "-Werror",
     "-Wextra",
-    "-Wno-c++11-narrowing",
-    "-Wno-gnu-anonymous-struct",
-    "-Wno-pointer-to-int-cast",
-    "-Wno-tautological-constant-compare",
     "-Wno-unused-parameter",
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
-    "-Wno-nested-anon-types",
-    "-Wno-newline-eof",
-]
+] + select({
+    "//:ios": [
+        "-Wno-newline-eof",
+        "-Wno-nested-anon-types",
+        "-Wno-c++11-narrowing",
+        "-Wno-pointer-to-int-cast",
+        "-Wno-tautological-constant-compare",
+        "-Wno-gnu-anonymous-struct",
+    ],
+    "//:linux": [],
+})
 
 """
 Compilation flags used for all .cpp and .mm targets.
@@ -25,11 +29,10 @@ Compilation flags used for all .cpp and .mm targets.
 
 CPP_FLAGS = WARNING_FLAGS + [
     "-fexceptions",
-    "-frtti",
+    "-fno-rtti",
     "-ftemplate-depth=1024",
     "-std=c++17",
 ]
-
 """
 Compilation flags related to the Maplibre codebase. Relevant for all .cpp .mm and .m code
  - src/*

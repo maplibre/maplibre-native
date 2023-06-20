@@ -25,5 +25,4 @@ TEST(ToHex, SIZE_T) {
 #elif INTPTR_MAX == INT64_MAX
     EXPECT_EQ("a715b247df38cc29", util::toHex((uint64_t)0xa715b247df38cc29));
 #endif
-
 }

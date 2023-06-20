@@ -7,7 +7,7 @@ export DEV_TEAM ?= ""
 # When only the dependencies in the package.json are installed
 # Node.js will error when running a script from the root scripts directory
 # Getting rid of the duplicate package.json file is an open issue
-# https://github.com/maplibre/maplibre-gl-native/issues/657
+# https://github.com/maplibre/maplibre-native/issues/657
 
 export NODE_PATH = ../../node_modules
 
@@ -200,13 +200,13 @@ ipackage%:
 	@echo make ipackage is deprecated — use make iframework.
 
 .PHONY: iframework
-iframework: $(IOS_PROJ_PATH)
+iframework: $(IOS_PROJ_PATH) style-code
 	FORMAT=$(FORMAT) BUILD_DEVICE=$(BUILD_DEVICE) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/package.sh
 
 #  make xcframework
 .PHONY: xcframework
-xcframework: $(IOS_PROJ_PATH)
+xcframework: $(IOS_PROJ_PATH) style-code
 	FORMAT=$(FORMAT) SYMBOLS=$(SYMBOLS) BUILD_DOCS=$(BUILD_DOCS) \
 	./platform/ios/scripts/xcpackage.sh
 
@@ -217,7 +217,7 @@ ideploy:
 #  make idocument
 #   open documentation/ 
 .PHONY: idocument
-idocument:
+idocument: style-code
 	OUTPUT=$(OUTPUT) ./platform/ios/scripts/document.sh
 
 .PHONY: darwin-check-public-symbols

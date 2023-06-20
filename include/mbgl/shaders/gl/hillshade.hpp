@@ -7,7 +7,8 @@
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::HillshadeProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::HillshadeProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 
 layout (location = 0) in vec2 a_pos;

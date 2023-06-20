@@ -2,26 +2,26 @@
 
 ## Documentation
 
-- For a high-level overview of MapLibre GL Native, check out the [MapLibre GL Native Markdown Book](https://maplibre.org/maplibre-gl-native/docs/book/).
+- For a high-level overview of MapLibre Native, check out the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/).
 - See [`DEVELOPING.md`](DEVELOPING.md) for getting started with development.
 
 ## Source code checkout
 
 ```bash
-git clone --recurse-submodules https://github.com/maplibre/maplibre-gl-native.git
+git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
 ```
 
 ## Building
 
-MapLibre GL Native shares a single C++ core library with all platforms. To build it, we utilize CMake.
+MapLibre Native shares a single C++ core library with all platforms. To build it, we utilize CMake.
 
 To build, run the following from the root directory
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMBGL_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMBGL_WITH_COVERAGE=ON
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
 ```
 
 `CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
-`MBGL_WITH_CORE_ONLY=ON` will build only the core libraries.
+`MLN_WITH_CORE_ONLY=ON` will build only the core libraries.
 Built artifacts should be available on `build` folder.
 
 
@@ -31,17 +31,17 @@ If you want to contribute code:
 
 1. Please familiarize yourself with the installation process of your chosen platform.
 
-1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-gl-native/pulls) and [issues](https://github.com/maplibre/maplibre-gl-native/issues) don’t already cover your contribution or question.
+1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-native/pulls) and [issues](https://github.com/maplibre/maplibre-native/issues) don’t already cover your contribution or question.
 
 1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
 
 4. Prefix your commit messages with the platform(s) your changes affect, e.g. `[ios]`.
 
-Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre GL Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/ios/platform/macos/DEVELOPING.md).
+Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/ios/platform/macos/DEVELOPING.md).
 
 ## Design Proposals
 
-If you would like to change MapLibre GL Native in a substantial way, we recommend that you write a Design Proposal. Examples for substantial changes could be if you would like to split the mono-repo or if you would like to introduce shaders written in Metal.
+If you would like to change MapLibre Native in a substantial way, we recommend that you write a Design Proposal. Examples for substantial changes could be if you would like to split the mono-repo or if you would like to introduce shaders written in Metal.
 
 The purpose of a Design Proposal is to collectively think through a problem before starting to implement a solution. Every implementation has advantages and disadvantages. We can discuss them in a Design Proposal, and once we reach an agreement, we follow the guidelines in the Design Proposal and work on the implementation.
 

@@ -39,7 +39,7 @@ public:
     std::shared_ptr<FileSource> fileSource;
 
     const uint8_t prefetchZoomDelta;
-    
+
     // For still image requests, render requested
     const bool stillImageRequest;
 
