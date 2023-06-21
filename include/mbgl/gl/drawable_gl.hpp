@@ -49,11 +49,7 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    void setColorAttrName(std::string);
     void setVertexAttrName(std::string);
-
-    /// Reset a single color attribute for all vertexes
-    void resetColor(const Color&) override;
 
     void upload(gfx::UploadPass&);
 

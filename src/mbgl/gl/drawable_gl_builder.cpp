@@ -22,7 +22,6 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableGLBuilder::createSegment(gfx
 void DrawableGLBuilder::init() {
     auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
 
-    drawableGL.setColorAttrName(colorAttrName);
     drawableGL.setVertexAttrName(vertexAttrName);
 
     if (impl->rawVerticesCount) {
@@ -36,33 +35,11 @@ void DrawableGLBuilder::init() {
         drawableGL.setVertices(std::move(raw), verts.size(), gfx::AttributeDataType::Short2);
     }
 
-    auto& attrs = drawableGL.mutableVertexAttributes();
-    if (colorAttrMode != ColorAttrMode::None && !colorAttrName.empty()) {
-        if (const auto& colorAttr = attrs.getOrAdd(colorAttrName)) {
-            // We should have either a single color or one per vertex.  Otherwise,
-            // the color mode was probably changed after vertexes were added.
-            if (impl->colors.size() > 1 && impl->colors.size() != impl->vertices.elements()) {
-                impl->colors.clear();
-            }
-
-            if (impl->colors.empty()) {
-                colorAttr->set(0, gfx::Drawable::colorAttrRGBA(getColor()));
-            } else {
-                std::size_t index = 0;
-                colorAttr->reserve(impl->colors.size());
-                for (const auto& color : impl->colors) {
-                    colorAttr->set(index++, gfx::Drawable::colorAttrRGBA(color));
-                }
-            }
-        }
-    }
-
     drawableGL.setIndexData(std::move(impl->indexes), std::move(impl->segments));
 
     impl->indexes.clear();
     impl->segments.clear();
     impl->vertices.clear();
-    impl->colors.clear();
 }
 
 } // namespace gl

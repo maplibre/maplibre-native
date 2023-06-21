@@ -139,9 +139,12 @@ public:
     /// @brief Get a shader from the group by its set of data driven properties as uniforms.
     /// if no shader is found, create and register the shader.
     /// @param propertiesAsUniforms Vector of data driven properties as uniforms.
-    /// @return A `gfx::Shader`
-    virtual const std::shared_ptr<gfx::Shader> getOrCreateShader(gfx::Context&, const std::vector<std::string>&) {
-        return nullptr;
+    /// @param firstAttribName Name of the first attribute
+    /// @return A `gfx::ShaderPtr`
+    virtual gfx::ShaderPtr getOrCreateShader(gfx::Context&,
+                                             [[maybe_unused]] const std::vector<std::string>& propertiesAsUniforms,
+                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
+        return {};
     }
 
 private:
