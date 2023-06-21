@@ -964,7 +964,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setSubLayerIndex(0);
                 builder->setNeedsStencil(false);
                 builder->setRenderPass(passes);
-                builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
