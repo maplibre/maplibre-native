@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string_view>
 #include <type_traits>
 
@@ -7,6 +8,7 @@ namespace mbgl {
 namespace gfx {
 
 class Shader;
+using ShaderPtr = std::shared_ptr<Shader>;
 
 // Assert that a type is a valid shader for downcasting.
 // A valid shader must:

@@ -149,9 +149,6 @@ public:
     virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
-    // Reset a single color attribute for all vertexes
-    virtual void resetColor(const Color&) = 0;
-
     /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
     /// RGBA.
     static gfx::VertexAttribute::float4 colorAttrRGBA(const Color& color) {
