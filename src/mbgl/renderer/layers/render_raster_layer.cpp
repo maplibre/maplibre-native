@@ -207,18 +207,6 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
     }
 }
 
-void RenderRasterLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
-    }
-}
-
-void RenderRasterLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
-}
-
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -396,7 +384,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
                 imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-                changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
             }
 
             auto builder = createBuilder();
@@ -432,7 +419,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             // Set up a tile layer group
             tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
             tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-            changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
         }
 
         auto builder = createBuilder();

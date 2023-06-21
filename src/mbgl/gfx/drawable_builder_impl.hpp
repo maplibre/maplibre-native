@@ -15,6 +15,9 @@ namespace gfx {
 struct DrawableBuilder::Impl {
     using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t, 2>>;
     gfx::VertexVector<VT> vertices;
+    std::vector<uint8_t> rawVertices;
+    std::size_t rawVerticesCount = 0;
+    AttributeDataType rawVerticesType = static_cast<AttributeDataType>(-1);
     std::vector<uint16_t> indexes;
     std::vector<std::unique_ptr<Drawable::DrawSegment>> segments;
 

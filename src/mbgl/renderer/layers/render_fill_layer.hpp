@@ -14,15 +14,11 @@ class FillProgram;
 class FillPatternProgram;
 class FillOutlineProgram;
 class FillOutlinePatternProgram;
-class TileLayerGroup;
-using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 
 class RenderFillLayer final : public RenderLayer {
 public:
     explicit RenderFillLayer(Immutable<style::FillLayer::Impl>);
     ~RenderFillLayer() override;
-
-    void layerRemoved(UniqueChangeRequestVec&) override;
 
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
@@ -45,9 +41,6 @@ private:
                                 float,
                                 const mat4&,
                                 const FeatureState&) const override;
-
-    /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&);
 
     // Paint properties
     style::FillPaintProperties::Unevaluated unevaluated;
