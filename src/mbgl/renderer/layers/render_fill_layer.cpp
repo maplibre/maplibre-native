@@ -346,7 +346,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
-        builder.setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
         builder.setNeedsStencil(true);
     };
@@ -412,8 +411,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         std::vector<std::array<int16_t, 2>> rawVerts;
         const auto buildVertices = [&]() {
-            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
-                verts = bucket.vertices.vector();
+            const auto& verts = bucket.vertices.vector();
             if (rawVerts.size() < verts.size()) {
                 rawVerts.resize(verts.size());
                 std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });

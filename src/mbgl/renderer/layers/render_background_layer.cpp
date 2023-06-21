@@ -255,6 +255,17 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    const auto tileVertices = RenderStaticData::tileVertices();
+    const auto vertexCount = tileVertices.elements();
+    constexpr auto vertSize = sizeof(decltype(tileVertices)::Vertex::a1);
+    std::vector<std::uint8_t> rawVertices(vertexCount * vertSize);
+    for (auto i = 0ULL; i < vertexCount; ++i) {
+        std::memcpy(&rawVertices[i * vertSize], &tileVertices.vector()[i].a1, vertSize);
+    }
+
+    const auto indexes = RenderStaticData::quadTriangleIndices();
+    const auto segs = RenderStaticData::tileTriangleSegments();
+
     // Put the tile cover into a searchable form.
     // TODO: Likely better to sort and `std::binary_search` the vector.
     // If it's returned in a well-defined order, we might not even need to sort.
@@ -262,44 +273,41 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
-    for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
-        tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
-            // Has this tile dropped out of the cover set?
-            const auto tileID = drawable->getTileID();
-            if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
-                drawable.reset();
-                ++stats.tileDrawablesRemoved;
-                return;
-            }
-        });
+    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+        // Has this tile dropped out of the cover set?
+        const auto tileID = drawable->getTileID();
+        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
+            drawable.reset();
+            ++stats.tileDrawablesRemoved;
+            return;
+        }
+    });
 
-        // For each tile in the cover set, add a tile drawable if one doesn't already exist.
-        for (const auto& tileID : tileCover) {
-            // If we already have drawables for this tile, skip.
-            // If a drawable needs to be updated, that's handled in the layer tweaker.
-            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-                continue;
-            }
+    // For each tile in the cover set, add a tile drawable if one doesn't already exist.
+    for (const auto& tileID : tileCover) {
+        // If we already have drawables for this tile, skip.
+        // If a drawable needs to be updated, that's handled in the layer tweaker.
+        if (tileLayerGroup->getDrawableCount(drawPasses, tileID) > 0) {
+            continue;
+        }
 
-            // We actually need to build things, so set up a builder if we haven't already
-            if (!builder) {
-                builder = context.createDrawableBuilder("background");
-                builder->setRenderPass(drawPasses);
-                builder->setShader(curShader);
-                builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
-                builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-            }
+        // We actually need to build things, so set up a builder if we haven't already
+        if (!builder) {
+            builder = context.createDrawableBuilder("background");
+            builder->setRenderPass(drawPasses);
+            builder->setShader(curShader);
+            builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+        }
 
-            // Tile coordinates are fixed.
-            builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
+        auto verticesCopy = rawVertices;
+        builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
+        builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
+        builder->flush();
 
-            builder->flush();
-
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setTileID(tileID);
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.tileDrawablesAdded;
-            }
+        for (auto& drawable : builder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            tileLayerGroup->addDrawable(drawPasses, tileID, std::move(drawable));
+            ++stats.tileDrawablesAdded;
         }
     }
 }

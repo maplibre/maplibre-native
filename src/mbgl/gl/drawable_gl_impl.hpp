@@ -47,12 +47,10 @@ public:
 
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;
-    gfx::ColorMode colorMode;
     gfx::CullFaceMode cullFaceMode;
     GLfloat pointSize = 0.0f;
 
     std::string vertexAttrName = "a_pos";
-    std::string colorAttrName = "a_color";
 };
 
 struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {

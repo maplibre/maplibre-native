@@ -243,7 +243,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
-        builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
         builder->setSubLayerIndex(0);
         builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                  : gfx::DepthMaskType::ReadOnly);

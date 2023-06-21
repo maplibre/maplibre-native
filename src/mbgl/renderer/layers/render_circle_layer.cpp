@@ -377,7 +377,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         circleBuilder = context.createDrawableBuilder("circle");
         circleBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(circleShader));
-        circleBuilder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
         circleBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                        : gfx::DepthMaskType::ReadOnly);
         circleBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());

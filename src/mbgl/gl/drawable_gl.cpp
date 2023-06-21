@@ -104,19 +104,8 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void DrawableGL::setColorAttrName(std::string value) {
-    impl->colorAttrName = std::move(value);
-}
-
 void DrawableGL::setVertexAttrName(std::string value) {
     impl->vertexAttrName = std::move(value);
-}
-
-void DrawableGL::resetColor(const Color& newColor) {
-    if (const auto& colorAttr = impl->vertexAttributes.get(impl->colorAttrName)) {
-        colorAttr->clear();
-        colorAttr->set(0, Drawable::colorAttrRGBA(newColor));
-    }
 }
 
 void DrawableGL::bindUniformBuffers() const {
