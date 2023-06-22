@@ -9,6 +9,7 @@
 #include <mbgl/gl/draw_scope_resource.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
+#include <mbgl/gl/render_target_gl.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
@@ -405,6 +406,16 @@ Framebuffer Context::createFramebuffer(const gfx::Texture& color,
     return {depth.getSize(), std::move(fbo)};
 }
 
+FramebufferID Context::createFramebuffer(const gfx::Texture2D& color) {
+    [[maybe_unused]] auto test = static_cast<const gl::Texture2D&>(color).getTextureID();
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, static_cast<const gl::Texture2D&>(color).getTextureID(), 0));
+    checkFramebuffer();
+    return std::move(fbo);
+}
+
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
                                                                        const gfx::TextureChannelDataType type) {
     return std::make_unique<gl::OffscreenTexture>(*this, size, type);
@@ -468,9 +479,9 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
-    std::vector<std::string> emptyAttributes(0);
+    std::vector<std::string> emptyProperties(0);
     return std::static_pointer_cast<gfx::ShaderProgramBase>(
-        shaders.getShaderGroup(name)->getOrCreateShader(*this, emptyAttributes));
+        shaders.getShaderGroup(name)->getOrCreateShader(*this, emptyProperties));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
@@ -483,6 +494,10 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialC
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<gl::Texture2D>(*this);
+}
+
+RenderTargetPtr Context::createRenderTarget() {
+    return std::make_shared<gl::RenderTargetGL>(*this);
 }
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {

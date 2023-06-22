@@ -4,7 +4,7 @@ layout (std140) uniform HeatmapEvaluatedPropsUBO {
     highp float u_weight;
     highp float u_radius;
     highp float u_intensity;
-    highp float u_opacity;
+    lowp float pad0_;
 };
 
 #pragma mapbox: define highp float weight

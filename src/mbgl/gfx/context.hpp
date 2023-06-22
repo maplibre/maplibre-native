@@ -19,8 +19,10 @@ class PaintParameters;
 class ProgramParameters;
 class TileLayerGroup;
 class LayerGroup;
+class RenderTarget;
 using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using LayerGroupPtr = std::shared_ptr<LayerGroup>;
+using RenderTargetPtr = std::shared_ptr<RenderTarget>;
 
 namespace gfx {
 
@@ -127,6 +129,9 @@ public:
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
+    
+    /// Create a render target
+    virtual RenderTargetPtr createRenderTarget() = 0;
 };
 
 } // namespace gfx

@@ -15,9 +15,8 @@ using namespace style;
 
 struct alignas(16) HeatmapDrawableUBO {
     std::array<float, 4 * 4> matrix;
-    std::array<float, 2> world;
     float extrude_scale;
-    float padding;
+    std::array<float, 3> padding;
 };
 static_assert(sizeof(HeatmapDrawableUBO) % 16 == 0);
 
@@ -25,7 +24,7 @@ struct alignas(16) HeatmapEvaluatedPropsUBO {
     float weight;
     float radius;
     float intensity;
-    float opacity;
+    float padding;
 };
 static_assert(sizeof(HeatmapEvaluatedPropsUBO) % 16 == 0);
 
@@ -51,7 +50,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
             /* .radius = */ evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
             /* .intensity = */ evaluated.get<HeatmapIntensity>(),
-            /* .opacity = */ evaluated.get<HeatmapOpacity>()};
+            /* .padding = */ 0};
         evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
                                                                              sizeof(evaluatedPropsUBO));
     }
@@ -65,12 +64,10 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = getTileMatrix(
             tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false);
-        const auto& size = parameters.staticData.backendSize;
         HeatmapDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
-            /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-            /* .padding = */ 0};
+            /* .padding = */ {0}};
 
         drawable.mutableUniformBuffers().createOrUpdate(HeatmapDrawableUBOName, &drawableUBO, parameters.context);
     });

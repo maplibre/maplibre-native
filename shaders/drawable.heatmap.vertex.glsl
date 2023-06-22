@@ -3,22 +3,22 @@ out vec2 v_extrude;
 
 layout (std140) uniform HeatmapDrawableUBO {
     highp mat4 u_matrix;
-    highp vec2 u_world;
     highp float u_extrude_scale;
-    lowp float pad0_;
+    lowp float pad1_;
+    lowp vec2 pad2_;
 };
 
 layout (std140) uniform HeatmapEvaluatedPropsUBO {
     highp float u_weight;
     highp float u_radius;
     highp float u_intensity;
-    highp float u_opacity;
+    lowp float pad0_;
 };
 
 layout (std140) uniform HeatmapInterpolateUBO {
     lowp float u_weight_t;
     lowp float u_radius_t;
-    lowp vec2 pad1_;
+    lowp vec2 pad3_;
 };
 
 #pragma mapbox: define highp float weight

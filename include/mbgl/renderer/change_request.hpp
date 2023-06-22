@@ -11,11 +11,13 @@ class ChangeRequest;
 class LayerGroupBase;
 class TileLayerGroup;
 class RenderOrchestrator;
+class RenderTarget;
 
 using ChangeRequestPtr = std::shared_ptr<ChangeRequest>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
 using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
+using RenderTargetPtr = std::shared_ptr<RenderTarget>;
 
 namespace gfx {
 class Drawable;
@@ -87,6 +89,32 @@ public:
 protected:
     std::shared_ptr<TileLayerGroup> tileLayerGroup;
     int32_t newLayerIndex;
+};
+
+/**
+    Add a new render target to the scene
+ */
+class AddRenderTargetRequest : public ChangeRequest {
+public:
+    AddRenderTargetRequest(RenderTargetPtr renderTarget_);
+
+    void execute(RenderOrchestrator &) override;
+
+protected:
+    RenderTargetPtr renderTarget;
+};
+
+/**
+    Remove a render target from the scene
+ */
+class RemoveRenderTargetRequest : public ChangeRequest {
+public:
+    RemoveRenderTargetRequest(const RenderTargetPtr& renderTarget_);
+
+    void execute(RenderOrchestrator &) override;
+
+protected:
+    const RenderTargetPtr& renderTarget;
 };
 
 } // namespace mbgl

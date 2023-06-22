@@ -17,6 +17,8 @@ public:
     ~RenderHeatmapLayer() override;
 
     void layerRemoved(UniqueChangeRequestVec&) override;
+    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) override;
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
 
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
@@ -47,7 +49,7 @@ private:
 
     // Paint properties
     style::HeatmapPaintProperties::Unevaluated unevaluated;
-    PremultipliedImage colorRamp;
+    std::shared_ptr<PremultipliedImage> colorRamp;
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
     std::optional<gfx::Texture> colorRampTexture;
     SegmentVector<HeatmapTextureAttributes> segments;
@@ -57,6 +59,9 @@ private:
     std::shared_ptr<HeatmapTextureProgram> heatmapTextureProgram;
 
     gfx::ShaderGroupPtr heatmapShaderGroup;
+    gfx::ShaderProgramBasePtr heatmapTextureShader;
+    RenderTargetPtr renderTarget;
+    LayerGroupPtr textureLayerGroup;
 };
 
 } // namespace mbgl

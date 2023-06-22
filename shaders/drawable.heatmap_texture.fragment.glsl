@@ -2,11 +2,11 @@ in vec2 v_pos;
 uniform sampler2D u_image;
 uniform sampler2D u_color_ramp;
 
-layout (std140) uniform HeatmapEvaluatedPropsUBO {
-    highp float u_weight;
-    highp float u_radius;
-    highp float u_intensity;
+layout (std140) uniform HeatmapTextureDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_world;
     highp float u_opacity;
+    lowp float pad0_;
 };
 
 void main() {
