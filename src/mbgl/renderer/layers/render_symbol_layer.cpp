@@ -285,7 +285,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
     } else {
         if (values.hasHalo) {
             drawGlyphs(*programs.symbolSDFTextProgram,
-                       SymbolSDFTextProgram::layoutUniformValues(/* isText = */true,
+                       SymbolSDFTextProgram::layoutUniformValues(/* isText = */ true,
                                                                  bucket.hasVariablePlacement,
                                                                  values,
                                                                  glyphTexSize,
@@ -302,7 +302,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
 
         if (values.hasFill) {
             drawGlyphs(*programs.symbolSDFTextProgram,
-                       SymbolSDFTextProgram::layoutUniformValues(/* isText = */true,
+                       SymbolSDFTextProgram::layoutUniformValues(/* isText = */ true,
                                                                  bucket.hasVariablePlacement,
                                                                  values,
                                                                  glyphTexSize,
@@ -685,7 +685,7 @@ static const auto& getProperty(const SymbolBucket::PaintProperties& paintProps, 
 
 template <typename TText, typename TIcon, std::size_t N>
 static auto getInterpFactor(const SymbolBucket::PaintProperties& paintProps, bool isText, float currentZoom) {
-    return std::get<N>(getProperty<TText,TIcon>(paintProps, isText)->interpolationFactor(currentZoom));
+    return std::get<N>(getProperty<TText, TIcon>(paintProps, isText)->interpolationFactor(currentZoom));
 }
 
 static SymbolDrawableInterpolateUBO buildInterpUBO(const SymbolBucket::PaintProperties& paint,
@@ -696,8 +696,9 @@ static SymbolDrawableInterpolateUBO buildInterpUBO(const SymbolBucket::PaintProp
             /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paint, t, z),
             /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paint, t, z),
             /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paint, t, z),
-            /* .padding = */ 0, 0, 0
-    };
+            /* .padding = */ 0,
+            0,
+            0};
 }
 
 static SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
@@ -1093,8 +1094,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                          "fill");
                 }
             } else {
-                draw(symbolIconGroup, renderable.segment, indices, vertices, vertexCount,
-                     /* isHalo = */ false, "icon");
+                draw(symbolIconGroup,
+                     renderable.segment,
+                     indices,
+                     vertices,
+                     vertexCount,
+                     /* isHalo = */ false,
+                     "icon");
             }
         }
     }
