@@ -981,16 +981,23 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
             builder->setShader(shader);
 
+            // TODO: texture filtering
+            //const bool linear = parameters.state.isChanging() || transformed || !partiallyEvaluatedTextSize.isZoomConstant;
+            //const auto filterType = linear ? gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
+
             if (const auto& atlases = tile.getAtlasTextures()) {
-                if (const auto samplerLocation = shader->getSamplerLocation(texUniformName)) {
-                    builder->setTextureSource([=]() {
-                        return gfx::Drawable::Textures{{*samplerLocation, isText ? atlases->glyph : atlases->icon}};
-                    });
-                }
-                if (const auto samplerLocation = shader->getSamplerLocation(iconTexUniformName)) {
-                    builder->setTextureSource([=]() {
-                        return gfx::Drawable::Textures{{*samplerLocation, atlases->icon}};
-                    });
+                if (const auto texSamplerLocation = shader->getSamplerLocation(texUniformName)) {
+                    if (const auto iconSamplerLocation = shader->getSamplerLocation(iconTexUniformName)) {
+                        assert(*texSamplerLocation != *iconSamplerLocation);
+                        builder->setTextureSource([=]() -> gfx::Drawable::Textures {
+                            return {{*texSamplerLocation, atlases->glyph},
+                                    {*iconSamplerLocation, atlases->icon}};
+                        });
+                    } else {
+                        builder->setTextureSource([=]() -> gfx::Drawable::Textures {
+                            return {{*texSamplerLocation, isText ? atlases->glyph : atlases->icon}};
+                        });
+                    }
                 }
             }
 
