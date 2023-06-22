@@ -242,7 +242,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Update render layers for changed layers.
     for (const auto& entry : layerDiff.changed) {
-        renderLayers.at(entry.first)->transition(transitionParameters, entry.second.after);
+        if (const auto& renderLayer = renderLayers.at(entry.first)) {
+            const auto& newLayer = entry.second.after;
+            renderLayer->layerChanged(transitionParameters, newLayer, changes);
+            renderLayer->transition(transitionParameters, newLayer);
+        }
     }
 
     if (layersAddedOrRemoved) {

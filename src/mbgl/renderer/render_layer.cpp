@@ -60,6 +60,13 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
     return std::nullopt;
 }
 
+void RenderLayer::layerChanged(const TransitionParameters&,
+                               const Immutable<style::Layer::Impl>&,
+                               UniqueChangeRequestVec& changes) {
+    // Treat a layer change the same as a remove
+    layerRemoved(changes);
+}
+
 void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
     if (tileLayerGroup) {

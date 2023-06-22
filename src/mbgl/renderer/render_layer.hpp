@@ -152,6 +152,12 @@ public:
     virtual void update(
         gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const RenderTree&, UniqueChangeRequestVec&) {}
 
+    /// Called when the style layer is replaced (same ID and type), and the render layer is reused.
+    virtual void layerChanged(const TransitionParameters&,
+                              const Immutable<style::Layer::Impl>& newLayer,
+                              UniqueChangeRequestVec&);
+
+    /// Called when the style layer is removed
     virtual void layerRemoved(UniqueChangeRequestVec&);
 
     /// @brief Called by the RenderOrchestrator during RenderTree construction.
