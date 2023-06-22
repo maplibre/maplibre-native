@@ -127,8 +127,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
         const bool alongLine = symbolData.placement != SymbolPlacementType::Point &&
                                symbolData.rotationAlignment == AlignmentType::Map;
-        const bool hasVariablePlacement = symbolData.hasVariablePlacement &&
-                                          symbolData.textFit != IconTextFitType::None;
+        const bool hasVariablePlacement = symbolData.bucketVariablePlacement &&
+                                          (isText || symbolData.textFit != IconTextFitType::None);
         const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement)
                                           ? matrix::identity4()
                                           : getLabelPlaneMatrix(

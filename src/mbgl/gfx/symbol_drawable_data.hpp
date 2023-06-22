@@ -13,14 +13,14 @@ namespace gfx {
 
 struct SymbolDrawableData : public DrawableData {
     SymbolDrawableData(const bool isHalo_,
-                       const bool hasVariablePlacement_,
+                       const bool bucketVariablePlacement_,
                        const style::SymbolType symbolType_,
                        const style::AlignmentType pitchAlignment_,
                        const style::AlignmentType rotationAlignment_,
                        const style::SymbolPlacementType placement_,
                        const style::IconTextFitType textFit_)
         : isHalo(isHalo_),
-          hasVariablePlacement(hasVariablePlacement_),
+          bucketVariablePlacement(bucketVariablePlacement_),
           symbolType(symbolType_),
           pitchAlignment(pitchAlignment_),
           rotationAlignment(rotationAlignment_),
@@ -29,7 +29,7 @@ struct SymbolDrawableData : public DrawableData {
     ~SymbolDrawableData() = default;
 
     const bool isHalo;
-    const bool hasVariablePlacement;
+    bool bucketVariablePlacement;
     const style::SymbolType symbolType;
     const style::AlignmentType pitchAlignment;
     const style::AlignmentType rotationAlignment;
