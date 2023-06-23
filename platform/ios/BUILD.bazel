@@ -115,7 +115,7 @@ info_plist(
 info_plist(
     name = "info_static_plist",
     out = "Info-static.plist",
-    base_info_plist = "platform/ios/framework/Info-static.plist"
+    base_info_plist = "platform/ios/framework/Info-static.plist",
 )
 
 apple_xcframework(
@@ -154,6 +154,7 @@ ios_framework(
 # sdk for the static target which includes the resources.
 objc_library(
     name = "sdk",
+    hdrs = _PUBLIC_HEADERS,
     data = ["resources"],
     sdk_dylibs = [
         "libz",
@@ -170,7 +171,6 @@ objc_library(
         "objc-sdk",
         "objcpp-sdk",
     ],
-    hdrs = _PUBLIC_HEADERS
 )
 
 # sdk for the dynamic target. Lacking the resources bundle since for dynamic
@@ -386,122 +386,129 @@ objc_library(
 objc_library(
     name = "iosapp",
     srcs = [
-        "platform/ios/app/MBXAppDelegate.m",
-        "platform/ios/app/MBXState.m",
-        "platform/ios/app/MBXCustomLocationViewController.m",
-        "platform/ios/app/MBXSnapshotsViewController.m",
-        "platform/ios/app/MBXFrameTimeGraphView.m",
-        "platform/ios/app/main.m",
-        "platform/ios/app/MBXCustomCalloutView.m",
-        "platform/ios/app/MBXViewController.m",
-        "platform/ios/app/MBXUserLocationAnnotationView.m",
-        "platform/ios/app/MBXAnnotationView.m",
-        "platform/ios/app/MBXOfflinePacksTableViewController.m",
-        "platform/ios/app/MBXEmbeddedMapViewController.m",
-        "platform/ios/app/MBXOrnamentsViewController.m",
-        "platform/ios/app/MBXStateManager.m",
-        "platform/darwin/app/LimeGreenStyleLayer.m",
         "platform/darwin/app/LimeGreenStyleLayer.h",
+        "platform/darwin/app/LimeGreenStyleLayer.m",
+        "platform/ios/app/MBXAnnotationView.m",
+        "platform/ios/app/MBXAppDelegate.m",
         "platform/ios/app/MBXCustomCalloutView.h",
+        "platform/ios/app/MBXCustomCalloutView.m",
+        "platform/ios/app/MBXCustomLocationViewController.m",
+        "platform/ios/app/MBXEmbeddedMapViewController.m",
+        "platform/ios/app/MBXFrameTimeGraphView.m",
+        "platform/ios/app/MBXOfflinePacksTableViewController.m",
+        "platform/ios/app/MBXOrnamentsViewController.m",
+        "platform/ios/app/MBXSnapshotsViewController.m",
+        "platform/ios/app/MBXState.m",
+        "platform/ios/app/MBXStateManager.m",
+        "platform/ios/app/MBXUserLocationAnnotationView.m",
+        "platform/ios/app/MBXViewController.m",
+        "platform/ios/app/main.m",
     ],
     hdrs = [
-        "platform/ios/app/MBXAppDelegate.h",
-        "platform/ios/app/MBXState.h",
-        "platform/ios/app/MBXCustomLocationViewController.h",
-        "platform/ios/app/MBXSnapshotsViewController.h",
-        "platform/ios/app/MBXFrameTimeGraphView.h",
-        "platform/ios/app/MBXViewController.h",
-        "platform/ios/app/MBXUserLocationAnnotationView.h",
         "platform/ios/app/MBXAnnotationView.h",
-        "platform/ios/app/MBXOfflinePacksTableViewController.h",
+        "platform/ios/app/MBXAppDelegate.h",
+        "platform/ios/app/MBXCustomLocationViewController.h",
         "platform/ios/app/MBXEmbeddedMapViewController.h",
+        "platform/ios/app/MBXFrameTimeGraphView.h",
+        "platform/ios/app/MBXOfflinePacksTableViewController.h",
         "platform/ios/app/MBXOrnamentsViewController.h",
+        "platform/ios/app/MBXSnapshotsViewController.h",
+        "platform/ios/app/MBXState.h",
         "platform/ios/app/MBXStateManager.h",
-        "platform/ios/app/MLNMapView_Experimental.h"
+        "platform/ios/app/MBXUserLocationAnnotationView.h",
+        "platform/ios/app/MBXViewController.h",
+        "platform/ios/app/MLNMapView_Experimental.h",
     ],
+    data = glob([
+        "platform/ios/app/Assets.xcassets/**",
+    ]),
     includes = [
         "platform/darwin/app",
+        "platform/darwin/src",
         "platform/ios/src",
-        "platform/darwin/src"
     ],
     sdk_frameworks = [
-        "GLKit" # needed for LimeGreenStyleLayer
+        "GLKit",  # needed for LimeGreenStyleLayer
     ],
     deps = [
-        "sdk-headers"
+        "sdk-headers",
     ],
 )
 
 _IOS_APPLICATION_RESOURCES = [
-        "platform/ios/app/numeric_filter_style.json",
-        "platform/ios/app/missing_icon.json",
-        "platform/ios/app/points.geojson",
-        "platform/ios/app/polyline.geojson",
-        "platform/ios/app/Settings.bundle",
-        "platform/ios/app/Main.storyboard",
-        "platform/ios/app/threestates.geojson",
-        "platform/ios/app/LaunchScreen.storyboard",
-        "platform/ios/app/simple_route.json",
-        "platform/ios/app/fill_filter_style.json",
-        "platform/ios/app/Assets.xcassets",
-        "platform/darwin/test/amsterdam.geojson"
-    ] + glob([
-        "platform/ios/app/*.lproj/**",
-    ])
+    "platform/ios/app/numeric_filter_style.json",
+    "platform/ios/app/missing_icon.json",
+    "platform/ios/app/points.geojson",
+    "platform/ios/app/polyline.geojson",
+    "platform/ios/app/Settings.bundle",
+    "platform/ios/app/Main.storyboard",
+    "platform/ios/app/threestates.geojson",
+    "platform/ios/app/LaunchScreen.storyboard",
+    "platform/ios/app/simple_route.json",
+    "platform/ios/app/fill_filter_style.json",
+    "platform/darwin/test/amsterdam.geojson",
+] + glob([
+    "platform/ios/app/*.lproj/**",
+])
 
 ios_application(
     name = "App",
     bundle_id = "com.maplibre.app",
-    families = ["iphone", "ipad"],
+    families = [
+        "iphone",
+        "ipad",
+    ],
     infoplists = ["platform/ios/app/Info.plist"],
     minimum_os_version = "12.0",
+    resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
-        "sdk",
         "iosapp",
+        "sdk",
     ],
-    resources = _IOS_APPLICATION_RESOURCES
 )
 
 ios_application(
-    name = "ProvisionedApp",
+    name = "AppDynamicLib",
     bundle_id = "com.maplibre.app",
-    families = ["iphone", "ipad"],
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    frameworks = [
+        "MapLibre.link",
+    ],
     infoplists = ["platform/ios/app/Info.plist"],
     minimum_os_version = "12.0",
+    resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
         "iosapp",
     ],
-    frameworks = [
-        "MapLibre.link"
-    ],
-    resources = _IOS_APPLICATION_RESOURCES,
-    provisioning_profile = "MapLibre.mobileprovision"
 )
 
 # Outputs a file with the size of MapLibre as a dynamic library in bytes
 genrule(
     name = "size",
     srcs = [
-        "ProvisionedApp"
+        "AppDynamicLib",
     ],
     outs = [
-        "size-out"
+        "size-out",
     ],
     cmd = """
-        unzip $(location ProvisionedApp)
-        stat -f%z ./Payload/ProvisionedApp.app/Frameworks/MapLibre.link.framework/MapLibre.link > $@
+        unzip $(location AppDynamicLib)
+        stat -f%z ./Payload/AppDynamicLib.app/Frameworks/MapLibre.link.framework/MapLibre.link > $@
     """,
 )
 
 xcodeproj(
     name = "xcodeproj",
+    minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
     top_level_targets = [
         top_level_target("App", target_environments = ["simulator"]),
         top_level_target("RenderTestApp", target_environments = ["device", "simulator"])
     ],
-    minimum_xcode_version = "14"
 )

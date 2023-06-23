@@ -14,7 +14,7 @@ namespace android {
 class HeatmapLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/HeatmapLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/HeatmapLayer"; };
 
     HeatmapLayer(jni::JNIEnv&, jni::String&, jni::String&);
 

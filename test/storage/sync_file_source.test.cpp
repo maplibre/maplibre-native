@@ -7,7 +7,10 @@
 #include <mbgl/test/map_adapter.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <stdexcept>
 #include <unordered_map>
+#include "mbgl/storage/resource_options.hpp"
+#include "mbgl/util/client_options.hpp"
 
 #include <gtest/gtest.h>
 
@@ -33,6 +36,14 @@ public:
     void add(std::string const& key, std::string const& data) {
         assets.emplace(key, std::make_shared<std::string>(data));
     };
+
+    virtual void setResourceOptions(ResourceOptions) override {}
+
+    virtual ResourceOptions getResourceOptions() override { return ResourceOptions{}; }
+
+    virtual void setClientOptions(ClientOptions) override {}
+
+    virtual ClientOptions getClientOptions() { return ClientOptions{}; }
 
 private:
     std::unordered_map<std::string, std::shared_ptr<std::string>> assets;

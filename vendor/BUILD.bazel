@@ -18,6 +18,7 @@ cc_library(
             "mapbox-base/extras/filesystem/include/ghc/*.hpp",
             "mapbox-base/extras/kdbush.hpp/include/*.hpp",
             "mapbox-base/extras/rapidjson/include/**/*.h",
+            "mapbox-base/extras/args/args.hxx",
             "mapbox-base/include/mapbox/**/*.hpp",
         ],
         allow_empty = False,
@@ -35,6 +36,7 @@ cc_library(
         "mapbox-base/deps/shelf-pack-cpp/include",
         "mapbox-base/deps/supercluster.hpp/include",
         "mapbox-base/deps/variant/include",
+        "mapbox-base/extras/args",
         "mapbox-base/extras/expected-lite/include",
         "mapbox-base/extras/filesystem/include",
         "mapbox-base/extras/kdbush.hpp/include",
@@ -193,4 +195,23 @@ cc_library(
     ],
     includes = ["icu/include"],
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "nunicode-gen",
+    hdrs = glob(["nunicode/src/libnu/gen/*.c"]),
+    include_prefix = "gen",
+    strip_include_prefix = "nunicode/src/libnu/gen",
+)
+
+cc_library(
+    name = "nunicode",
+    srcs = glob(["nunicode/src/libnu/*.c"]),
+    hdrs = glob(["nunicode/include/libnu/*.h"]),
+    include_prefix = "libnu",
+    strip_include_prefix = "nunicode/include/libnu",
+    visibility = ["//visibility:public"],
+    deps = [
+        "nunicode-gen",
+    ],
 )

@@ -1,5 +1,4 @@
 #include <mbgl/util/grid_index.hpp>
-#include <mbgl/util/grid_index.cpp>
 
 #include <mbgl/test/util.hpp>
 

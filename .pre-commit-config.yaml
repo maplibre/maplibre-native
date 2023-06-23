@@ -1,7 +1,14 @@
 repos:
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v16.0.3
+  rev: v16.0.6
   hooks:
   - id: clang-format
     files: '.*\.(hpp|cpp|h)'
     exclude: '(vendor/.*|platform/(ios|darwin)/.*|test/ios/.*|render-test/ios/.*|benchmark/ios/.*)'
+- repo: https://github.com/keith/pre-commit-buildifier
+  rev: 6.1.0.1
+  hooks:
+    - id: buildifier
+ci:
+  # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
+  skip: [buildifier]

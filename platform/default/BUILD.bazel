@@ -1,5 +1,30 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
+cc_library(
+    name = "default-collator",
+    srcs = [
+        "src/mbgl/i18n/collator.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    deps = [
+        "//:mbgl-core",
+        "//vendor:nunicode",
+    ],
+)
+
+cc_library(
+    name = "render-test-bin",
+    srcs = [
+        "src/mbgl/render-test/main.cpp",
+    ],
+    visibility = [
+        "//render-test:__pkg__",
+    ],
+    deps = [
+        "//render-test:render-test-lib",
+    ],
+)
+
 # From: platform/ios/core-files.json
 # Mostly platform/default
 cc_library(
@@ -29,7 +54,24 @@ cc_library(
         "src/mbgl/util/png_writer.cpp",
         "src/mbgl/util/thread_local.cpp",
         "src/mbgl/util/utf.cpp",
-    ],
+    ] + select({
+        "//:linux": [
+            "src/mbgl/i18n/number_format.cpp",
+            "src/mbgl/layermanager/layer_manager.cpp",
+            "src/mbgl/storage/http_file_source.cpp",
+            "src/mbgl/text/local_glyph_rasterizer.cpp",
+            "src/mbgl/util/async_task.cpp",
+            "src/mbgl/util/image.cpp",
+            "src/mbgl/util/jpeg_reader.cpp",
+            "src/mbgl/util/logging_stderr.cpp",
+            "src/mbgl/util/png_reader.cpp",
+            "src/mbgl/util/run_loop.cpp",
+            "src/mbgl/util/string_stdlib.cpp",
+            "src/mbgl/util/thread.cpp",
+            "src/mbgl/util/timer.cpp",
+        ],
+        "//:ios": [],
+    }),
     hdrs = [
         "include/mbgl/gfx/headless_backend.hpp",
         "include/mbgl/gfx/headless_frontend.hpp",
@@ -51,9 +93,16 @@ cc_library(
     visibility = [
         "//platform/darwin:__pkg__",
         "//platform/ios:__pkg__",
+        "//platform/linux:__pkg__",
     ],
     deps = [
         "//:mbgl-core",
-        "//platform/darwin:darwin-loop",
-    ],
+    ] + select({
+        "//:ios": [
+            "//platform/darwin:darwin-loop",
+        ],
+        "//:linux": [
+            "default-collator",
+        ],
+    }),
 )

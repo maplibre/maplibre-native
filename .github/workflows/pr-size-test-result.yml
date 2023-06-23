@@ -9,7 +9,6 @@ on:
 jobs:
   comment-on-pr:
     runs-on: ubuntu-22.04
-    if: github.event.workflow_run.event == 'pull_request'
     steps:
       # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
       # TODO: de-duplicate with re-usable action
@@ -40,17 +39,46 @@ jobs:
       - name: Show directory structure
         run: ls -R
 
-      # TODO: leave comment with total size
+      # Move ./size artifact to ./size_main and store as cache
+    
+      - run: mv size size_main
+        if: github.event.workflow_run.event != 'pull_request'
 
-      # - name: 'Leave comment on PR with test results'
-      #   uses: actions/github-script@v6
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     script: |
-      #       let fs = require('fs');
-      #       await github.rest.issues.createComment({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         issue_number:  Number(fs.readFileSync('./pr_number')),
-      #         body: `Test results at https://maplibre-native-test-artifacts.s3.eu-central-1.amazonaws.com/${context.runId}-linux-gcc8-release-style.html`
-      #       });
+      - name: Save size
+        if: github.event.workflow_run.event != 'pull_request'
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            size_main
+          key: ios-size
+
+      # Restore cache so we can output the difference
+
+      - name: Restore size
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            size_main
+          key: ios-size
+
+      - run: |
+          echo pr_number="$(cat ./pr_number)" >> "$GITHUB_ENV"
+          echo old_size="$(cat ./size_main)" >> "$GITHUB_ENV"
+          echo new_size="$(cat ./size)" >> "$GITHUB_ENV"
+          echo percentage_change=$(awk 'NR==FNR{a=$0;next}{printf "%+.2f%%\n", 100*($0-a)/a}' ./size ./size_main) >> "$GITHUB_ENV"
+        if: github.event.workflow_run.event == 'pull_request'
+
+      - name: 'Leave comment on PR with test results'
+        if: github.event.workflow_run.event == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: size-test-result
+          number: ${{ env.pr_number }}
+          message: |
+            ### Size test result
+
+            Old size: ${{ env.old_size }} bytes
+            New size: ${{ env.new_size }} bytes
+            Difference: **${{ env.percentage_change }}**
+

@@ -14,7 +14,7 @@ namespace android {
 class HillshadeLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/HillshadeLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/HillshadeLayer"; };
 
     HillshadeLayer(jni::JNIEnv&, jni::String&, jni::String&);
 

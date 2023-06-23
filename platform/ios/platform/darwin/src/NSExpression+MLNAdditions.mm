@@ -250,7 +250,7 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 
 /**
  A placeholder for a catch-all method that evaluates an arbitrary number of
- arguments as an expression according to the Mapbox Style Specification’s
+ arguments as an expression according to the MapLibre Style Spec’s
  expression language.
  */
 - (id)MLN_FUNCTION:(id)firstArgument, ... {

@@ -59,8 +59,7 @@ jobs:
       - name: 'Leave comment on PR with test results'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
+          header: render-test-result
           number: ${{ env.pr_number }}
-          hide_and_recreate: true
-          hide_classify: "OUTDATED"
           message: |
             Render test results at https://maplibre-native-test-artifacts.s3.eu-central-1.amazonaws.com/${{ github.run_id }}-linux-gcc8-release-style.html
