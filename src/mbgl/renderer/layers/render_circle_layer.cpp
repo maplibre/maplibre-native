@@ -23,6 +23,7 @@ using namespace style;
 
 namespace {
 
+#if MLN_LEGACY_RENDERER
 struct RenderableSegment {
     RenderableSegment(const Segment<CircleAttributes>& segment_,
                       const RenderTile& tile_,
@@ -43,6 +44,7 @@ struct RenderableSegment {
         return lhs.sortKey < rhs.sortKey;
     }
 };
+#endif
 
 inline const style::CircleLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == CircleLayer::Impl::staticTypeInfo());
