@@ -77,13 +77,15 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
+ncpu=$(sysctl -n hw.ncpu)
 bazel build //platform/ios:"$target" --apple_platform_type=ios \
    --apple_generate_dsym \
    --compilation_mode="$compilation_mode" \
    --features=dead_strip \
    --objc_enable_binary_stripping \
    --copt=-Wall --copt=-Wextra --copt=-Wpedantic \
-   --copt=-Werror
+   --copt=-Werror \
+   --jobs "$ncpu"
 
 popd
 
