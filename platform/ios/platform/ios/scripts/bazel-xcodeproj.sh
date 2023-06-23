@@ -27,8 +27,7 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
-ncpu=$(sysctl -n hw.ncpu)
 flavor="$2"
-bazel run //platform/ios:xcodeproj --jobs "$ncpu" --//:renderer="$flavor"
+bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=$flavor --//:maplibre_platform=ios"
 
 popd

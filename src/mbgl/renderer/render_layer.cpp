@@ -1,6 +1,4 @@
-#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -9,6 +7,10 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layer_group.hpp>
+#endif
 
 namespace mbgl {
 

@@ -3,12 +3,15 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/command_encoder.hpp>
-#include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture_resource.hpp>
-#include <mbgl/gl/texture2d.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mbgl/gl/texture2d.hpp>
+#endif
 
 #include <algorithm>
 
@@ -221,6 +224,7 @@ void UploadPass::popDebugGroup() {
     commandEncoder.popDebugGroup();
 }
 
+#if MLN_DRAWABLE_RENDERER
 gfx::Context& UploadPass::getContext() {
     return commandEncoder.context;
 }
@@ -228,6 +232,7 @@ gfx::Context& UploadPass::getContext() {
 const gfx::Context& UploadPass::getContext() const {
     return commandEncoder.context;
 }
+#endif
 
 } // namespace gl
 } // namespace mbgl

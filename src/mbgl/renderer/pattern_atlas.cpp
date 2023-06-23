@@ -1,7 +1,9 @@
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/context.hpp>
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/texture2d.hpp>
+#endif
 
 namespace mbgl {
 

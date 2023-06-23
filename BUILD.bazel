@@ -38,17 +38,19 @@ cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE + select({
         ":drawable_renderer": MLN_DRAWABLES_SOURCE,
+        ":split_renderer": MLN_DRAWABLES_SOURCE,
         "//conditions:default": []
     }) + MLN_OPENGL_SOURCE,
     hdrs = MLN_CORE_HEADERS + select({
         ":drawable_renderer": MLN_DRAWABLES_HEADERS,
+        ":split_renderer": MLN_DRAWABLES_HEADERS,
         "//conditions:default": []
     }) + MLN_OPENGL_HEADERS,
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
-        ":legacy_renderer": ["-DMLN_LEGACY_RENDERER=1", "-DMLN_DRAWABLE_RENDERER=0"],
-        ":drawable_renderer": ["-DMLN_LEGACY_RENDERER=0", "-DMLN_DRAWABLE_RENDERER=1"],
-        ":split_renderer": ["-DMLN_LEGACY_RENDERER=1", "-DMLN_DRAWABLE_RENDERER=1", "-DMLN_RENDERER_SPLIT_VIEW=1"],
+        ":legacy_renderer": ["MLN_LEGACY_RENDERER=1", "MLN_DRAWABLE_RENDERER=0"],
+        ":drawable_renderer": ["MLN_LEGACY_RENDERER=0", "MLN_DRAWABLE_RENDERER=1"],
+        ":split_renderer": ["MLN_LEGACY_RENDERER=1", "MLN_DRAWABLE_RENDERER=1", "MLN_RENDERER_SPLIT_VIEW=1"],
     }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
         "//conditions:default": []

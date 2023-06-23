@@ -26,8 +26,10 @@ private:
     void popDebugGroup() override;
 
 public:
+#if MLN_DRAWABLE_RENDERER
     gfx::Context& getContext() override;
     const gfx::Context& getContext() const override;
+#endif
 
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
