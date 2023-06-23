@@ -169,7 +169,9 @@ void RenderLayer::setLayerGroup(LayerGroupBasePtr layerGroup_, UniqueChangeReque
 }
 
 /// (Un-)Register the layer group with the orchestrator
-void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_, bool activate, UniqueChangeRequestVec& changes) {
+void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
+                                     bool activate,
+                                     UniqueChangeRequestVec& changes) {
     if (layerGroup_) {
         if (activate) {
             // The RenderTree has determined this layer should be included in the renderable set for a frame

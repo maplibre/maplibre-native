@@ -18,8 +18,7 @@ void RemoveLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
     orchestrator.removeLayerGroup(layerIndex);
 }
 
-UpdateLayerGroupIndexRequest::UpdateLayerGroupIndexRequest(LayerGroupBasePtr tileLayerGroup_,
-                                                           int32_t newLayerIndex_)
+UpdateLayerGroupIndexRequest::UpdateLayerGroupIndexRequest(LayerGroupBasePtr tileLayerGroup_, int32_t newLayerIndex_)
     : layerGroup(std::move(tileLayerGroup_)),
       newLayerIndex(newLayerIndex_) {}
 

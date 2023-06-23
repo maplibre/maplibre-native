@@ -694,17 +694,15 @@ auto getInterpFactor(const SymbolBucket::PaintProperties& paintProps, bool isTex
     return std::get<N>(getProperty<TText, TIcon>(paintProps, isText)->interpolationFactor(currentZoom));
 }
 
-SymbolDrawableInterpolateUBO buildInterpUBO(const SymbolBucket::PaintProperties& paint,
-                                            const bool t,
-                                            const float z) {
+SymbolDrawableInterpolateUBO buildInterpUBO(const SymbolBucket::PaintProperties& paint, const bool t, const float z) {
     return {/* .fill_color_t = */ getInterpFactor<TextColor, IconColor, 0>(paint, t, z),
-        /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paint, t, z),
-        /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paint, t, z),
-        /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paint, t, z),
-        /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paint, t, z),
-        /* .padding = */ 0,
-        0,
-        0};
+            /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paint, t, z),
+            /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paint, t, z),
+            /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paint, t, z),
+            /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paint, t, z),
+            /* .padding = */ 0,
+            0,
+            0};
 }
 
 SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
@@ -712,7 +710,7 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
                                         const float currentZoom) {
     const bool isText = (drawData.symbolType == SymbolType::Text);
     const ZoomEvaluatedSize size = isText ? bucket.textSizeBinder->evaluateForZoom(currentZoom)
-    : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
+                                          : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
     return {
         /* .is_text = */ isText,
         /* .is_halo = */ drawData.isHalo,
@@ -741,27 +739,27 @@ void updateTileDrawable(gfx::Drawable& drawable,
     if (!drawable.getData() || !*drawable.getData()) {
         return;
     }
-    
+
     auto& drawData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
     const auto isText = (drawData.symbolType == SymbolType::Text);
     const auto currentZoom = static_cast<float>(state.getZoom());
-    
+
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
-    
+
     const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
     const auto interpolateUBO = buildInterpUBO(paintProps, isText, currentZoom);
-    
+
     auto& uniforms = drawable.mutableUniformBuffers();
     uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
     uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
-    
+
     // TODO: detect whether anything has actually changed
     // See `Placement::updateBucketDynamicVertices`
     if (const auto newAttribs = drawable.getVertexAttributes().clone()) {
         const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
         const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
-        
+
         if (auto& attr = newAttribs->getOrAdd(projPosAttribName)) {
             const auto count = buffer.dynamicVertices.elements();
             attr->reserve(count);
@@ -769,7 +767,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
                 attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
             }
         }
-        
+
         if (auto& attr = newAttribs->getOrAdd(fadeOpacityAttribName)) {
             const auto count = buffer.opacityVertices.elements();
             attr->reserve(count);
@@ -777,7 +775,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
                 attr->set(i, buffer.opacityVertices.at(i).a1[0]);
             }
         }
-        
+
         drawable.setVertexAttributes(std::move(*newAttribs));
     }
 }
