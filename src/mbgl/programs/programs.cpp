@@ -70,8 +70,7 @@ void Programs::registerWith(gfx::ShaderRegistry& registry) {
                   ClippingMaskProgram>(registry, programParameters);
 #else
     /// The following types will be registered
-    registerTypes<DebugProgram,
-                  ClippingMaskProgram>(registry, programParameters);
+    registerTypes<DebugProgram, ClippingMaskProgram>(registry, programParameters);
 #endif
 }
 

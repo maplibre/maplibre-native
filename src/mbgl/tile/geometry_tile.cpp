@@ -116,9 +116,9 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
                                                  imagePatch.paddedRect.y + ImagePosition::padding);
 #else
             uploadPass.updateTextureSub(*atlasTextures->icon,
-                                                    imagePatch.image->image,
-                                                    imagePatch.paddedRect.x + ImagePosition::padding,
-                                                    imagePatch.paddedRect.y + ImagePosition::padding);
+                                        imagePatch.image->image,
+                                        imagePatch.paddedRect.x + ImagePosition::padding,
+                                        imagePatch.paddedRect.y + ImagePosition::padding);
 #endif
         }
         imagePatches.clear();
