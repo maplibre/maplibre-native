@@ -501,6 +501,7 @@ xcodeproj(
     tags = ["manual"],
     top_level_targets = [
         top_level_target("App", target_environments = ["simulator"]),
+        top_level_target("RenderTestApp", target_environments = ["device", "simulator"])
     ],
     minimum_xcode_version = "14"
 )

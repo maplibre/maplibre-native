@@ -1,0 +1,18 @@
+objc_library(
+  name = "render_test_ios_src",
+  srcs = [
+    "ios_test_runner.cpp",
+    "iosTestRunner.h",
+    "iosTestRunner.mm"
+  ],
+  deps = [
+    "//platform/ios/test/common:ios_test_runner_lib"
+  ],
+  visibility = [
+    "//platform/ios/test/common:__pkg__"
+  ]
+)
+
+exports_files([
+  "Info.plist"
+])
