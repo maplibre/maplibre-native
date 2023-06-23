@@ -27,8 +27,26 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
-flavor="$2" # Renderer build flavor: legacy, drawable, split
-teamid="$4" # Provisioning profile team ID, required for targeting physical devices
+flavor="legacy" # Renderer build flavor: legacy, drawable, split
+teamid="0000000000" # Provisioning profile team ID, required for targeting physical devices
+while [[ $# -gt 0 ]]; do
+   case $1 in
+   --flavor)
+      shift
+      flavor="$1"
+      shift
+      ;;
+   --teamid)
+      shift
+      teamid="$1"
+      shift
+      ;;
+   -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+   esac
+done
 
 # Generate the team ID for Xcode device provisioning
 if [ ! -d platform/ios/bazel/__generated__ ]; then
