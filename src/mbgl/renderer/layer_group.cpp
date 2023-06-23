@@ -19,11 +19,7 @@ LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::st
     : LayerGroupBase(layerIndex_, std::move(name_)),
       impl(std::make_unique<Impl>(initialCapacity)) {}
 
-LayerGroup::~LayerGroup() {}
-
-void LayerGroup::updateLayerIndex(int32_t newLayerIndex) {
-    layerIndex = newLayerIndex;
-}
+LayerGroup::~LayerGroup() = default;
 
 std::size_t LayerGroup::getDrawableCount() const {
     return impl->drawables.size();

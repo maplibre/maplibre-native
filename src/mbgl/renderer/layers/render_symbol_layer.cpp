@@ -48,7 +48,7 @@ style::SymbolPropertyValues iconPropertyValues(const style::SymbolPaintPropertie
                                        evaluated_.get<style::IconTranslate>(),
                                        evaluated_.get<style::IconTranslateAnchor>(),
                                        evaluated_.get<style::IconHaloColor>().constantOr(Color::black()).a > 0 &&
-                                           evaluated_.get<style::IconHaloWidth>().constantOr(1),
+                                           evaluated_.get<style::IconHaloWidth>().constantOr(1) != 0,
                                        evaluated_.get<style::IconColor>().constantOr(Color::black()).a > 0};
 }
 
@@ -60,7 +60,7 @@ style::SymbolPropertyValues textPropertyValues(const style::SymbolPaintPropertie
                                        evaluated_.get<style::TextTranslate>(),
                                        evaluated_.get<style::TextTranslateAnchor>(),
                                        evaluated_.get<style::TextHaloColor>().constantOr(Color::black()).a > 0 &&
-                                           evaluated_.get<style::TextHaloWidth>().constantOr(1),
+                                           evaluated_.get<style::TextHaloWidth>().constantOr(1) != 0,
                                        evaluated_.get<style::TextColor>().constantOr(Color::black()).a > 0};
 }
 
@@ -342,7 +342,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     auto properties = makeMutable<SymbolLayerProperties>(staticImmutableCast<SymbolLayer::Impl>(baseImpl),
                                                          unevaluated.evaluate(parameters));
     auto& evaluated = properties->evaluated;
-    auto& layout = impl_cast(baseImpl).layout;
+    const auto& layout = impl_cast(baseImpl).layout;
 
     if (hasFormatSectionOverrides) {
         SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated);
@@ -359,6 +359,10 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
+    }
 }
 
 bool RenderSymbolLayer::hasTransition() const {
@@ -678,35 +682,37 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     }
 }
 
+namespace {
+
 template <typename TText, typename TIcon>
-static const auto& getProperty(const SymbolBucket::PaintProperties& paintProps, bool isText) {
+const auto& getProperty(const SymbolBucket::PaintProperties& paintProps, bool isText) {
     return isText ? paintProps.textBinders.get<TText>() : paintProps.iconBinders.get<TIcon>();
 }
 
 template <typename TText, typename TIcon, std::size_t N>
-static auto getInterpFactor(const SymbolBucket::PaintProperties& paintProps, bool isText, float currentZoom) {
+auto getInterpFactor(const SymbolBucket::PaintProperties& paintProps, bool isText, float currentZoom) {
     return std::get<N>(getProperty<TText, TIcon>(paintProps, isText)->interpolationFactor(currentZoom));
 }
 
-static SymbolDrawableInterpolateUBO buildInterpUBO(const SymbolBucket::PaintProperties& paint,
-                                                   const bool t,
-                                                   const float z) {
+SymbolDrawableInterpolateUBO buildInterpUBO(const SymbolBucket::PaintProperties& paint,
+                                            const bool t,
+                                            const float z) {
     return {/* .fill_color_t = */ getInterpFactor<TextColor, IconColor, 0>(paint, t, z),
-            /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paint, t, z),
-            /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paint, t, z),
-            /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paint, t, z),
-            /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paint, t, z),
-            /* .padding = */ 0,
-            0,
-            0};
+        /* .halo_color_t = */ getInterpFactor<TextHaloColor, IconHaloColor, 0>(paint, t, z),
+        /* .opacity_t = */ getInterpFactor<TextOpacity, IconOpacity, 0>(paint, t, z),
+        /* .halo_width_t = */ getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paint, t, z),
+        /* .halo_blur_t = */ getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paint, t, z),
+        /* .padding = */ 0,
+        0,
+        0};
 }
 
-static SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
-                                               const gfx::SymbolDrawableData& drawData,
-                                               const float currentZoom) {
+SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
+                                        const gfx::SymbolDrawableData& drawData,
+                                        const float currentZoom) {
     const bool isText = (drawData.symbolType == SymbolType::Text);
     const ZoomEvaluatedSize size = isText ? bucket.textSizeBinder->evaluateForZoom(currentZoom)
-                                          : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
+    : bucket.iconSizeBinder->evaluateForZoom(currentZoom);
     return {
         /* .is_text = */ isText,
         /* .is_halo = */ drawData.isHalo,
@@ -727,35 +733,35 @@ constexpr auto fadeOpacityAttribName = "a_fade_opacity";
 constexpr auto texUniformName = "u_texture";
 constexpr auto iconTexUniformName = "u_texture_icon";
 
-static void updateTileDrawable(gfx::Drawable& drawable,
-                               gfx::Context& context,
-                               const SymbolBucket& bucket,
-                               const SymbolBucket::PaintProperties& paintProps,
-                               const TransformState& state) {
+void updateTileDrawable(gfx::Drawable& drawable,
+                        gfx::Context& context,
+                        const SymbolBucket& bucket,
+                        const SymbolBucket::PaintProperties& paintProps,
+                        const TransformState& state) {
     if (!drawable.getData() || !*drawable.getData()) {
         return;
     }
-
+    
     auto& drawData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
     const auto isText = (drawData.symbolType == SymbolType::Text);
     const auto currentZoom = static_cast<float>(state.getZoom());
-
+    
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
-
+    
     const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
     const auto interpolateUBO = buildInterpUBO(paintProps, isText, currentZoom);
-
+    
     auto& uniforms = drawable.mutableUniformBuffers();
     uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
     uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
-
+    
     // TODO: detect whether anything has actually changed
     // See `Placement::updateBucketDynamicVertices`
     if (const auto newAttribs = drawable.getVertexAttributes().clone()) {
         const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
         const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
-
+        
         if (auto& attr = newAttribs->getOrAdd(projPosAttribName)) {
             const auto count = buffer.dynamicVertices.elements();
             attr->reserve(count);
@@ -763,7 +769,7 @@ static void updateTileDrawable(gfx::Drawable& drawable,
                 attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
             }
         }
-
+        
         if (auto& attr = newAttribs->getOrAdd(fadeOpacityAttribName)) {
             const auto count = buffer.opacityVertices.elements();
             attr->reserve(count);
@@ -771,28 +777,29 @@ static void updateTileDrawable(gfx::Drawable& drawable,
                 attr->set(i, buffer.opacityVertices.at(i).a1[0]);
             }
         }
-
+        
         drawable.setVertexAttributes(std::move(*newAttribs));
     }
 }
+
+} // namespace
 
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
                                const RenderTree& /*renderTree*/,
-                               UniqueChangeRequestVec& /*changes*/) {
+                               UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
     // Set up a layer group
-    if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-        if (!tileLayerGroup) {
-            return;
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
     }
 
     if (!symbolIconGroup) {
@@ -808,12 +815,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         symbolTextAndIconGroup = shaders.getShaderGroup(std::string(SymbolTextAndIconShaderName));
     }
 
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto tileID = drawable->getTileID();
         if (drawable->getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
             drawable.reset();
-            ++stats.tileDrawablesRemoved;
+            ++stats.drawablesRemoved;
         }
     });
 
@@ -850,7 +858,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         float serialKey = 1.0f;
         auto addRenderables = [&, it = renderableSegments.begin()](const SymbolBucket::Buffer& buffer,
                                                                    const SymbolType type) mutable {
-            for (auto& segment : buffer.segments) {
+            for (const auto& segment : buffer.segments) {
                 const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
                 assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices.elements());
                 it = renderableSegments.emplace_hint(
@@ -897,28 +905,28 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         gfx::VertexAttributeArray attrs;
-        if (auto& attr = attrs.getOrAdd(dataAttibName)) {
+        if (const auto& attr = attrs.getOrAdd(dataAttibName)) {
             const auto count = buffer.vertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
                 attr->set(i, util::cast<float>(buffer.vertices.at(i).a2));
             }
         }
-        if (auto& attr = attrs.getOrAdd(pixOffsetAttribName)) {
+        if (const auto& attr = attrs.getOrAdd(pixOffsetAttribName)) {
             const auto count = buffer.vertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
                 attr->set(i, util::cast<float>(buffer.vertices.at(i).a3));
             }
         }
-        if (auto& attr = attrs.getOrAdd(projPosAttribName)) {
+        if (const auto& attr = attrs.getOrAdd(projPosAttribName)) {
             const auto count = buffer.dynamicVertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
                 attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
             }
         }
-        if (auto& attr = attrs.getOrAdd(fadeOpacityAttribName)) {
+        if (const auto& attr = attrs.getOrAdd(fadeOpacityAttribName)) {
             const auto count = buffer.opacityVertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
@@ -1027,7 +1035,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
 
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
-                ++stats.tileDrawablesAdded;
+                ++stats.drawablesAdded;
             }
         };
 

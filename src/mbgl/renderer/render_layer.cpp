@@ -4,6 +4,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/tile_layer_group.cpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/tile/tile.hpp>
@@ -63,15 +64,16 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
 void RenderLayer::layerChanged(const TransitionParameters&,
                                const Immutable<style::Layer::Impl>&,
                                UniqueChangeRequestVec& changes) {
-    // Treat a layer change the same as a remove
+    // Treat a layer change the same as a remove.
+    // It will be set up again when `update()` is called.
     layerRemoved(changes);
 }
 
 void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
+    if (layerGroup) {
+        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(layerGroup->getLayerIndex()));
+        layerGroup.reset();
     }
 }
 
@@ -128,13 +130,15 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
 }
 
 void RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
+    if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
+        stats.drawablesRemoved += tileGroup->removeDrawables(renderPass, tileID).size();
+    }
 }
 
-void RenderLayer::removeAllTiles() {
-    if (tileLayerGroup) {
-        stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-        tileLayerGroup->clearDrawables();
+void RenderLayer::removeAllDrawables() {
+    if (layerGroup) {
+        stats.drawablesRemoved += layerGroup->getDrawableCount();
+        layerGroup->clearDrawables();
     }
 }
 
@@ -142,27 +146,38 @@ void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVe
     layerIndex = newLayerIndex;
 
     // Submit a change request to update the layer index of our tile layer group
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(tileLayerGroup, newLayerIndex));
+    if (layerGroup) {
+        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(layerGroup, newLayerIndex));
     }
 }
 
 void RenderLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
-    if (!tileLayerGroup) {
-        return;
-    }
-    if (isRenderable == willRender) {
-        return;
-    }
+    isRenderable = willRender;
 
     // This layer is either being freshly included in the renderable set or excluded
-    isRenderable = willRender;
-    if (willRender) {
-        // The RenderTree has determined this layer should be included in the renderable set for a frame
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
-    } else {
-        // The RenderTree is informing us we should not render anything
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
+    activateLayerGroup(layerGroup, willRender, changes);
+}
+
+void RenderLayer::setLayerGroup(LayerGroupBasePtr layerGroup_, UniqueChangeRequestVec& changes) {
+    // Remove the active layer group, if any, before replacing it.
+    activateLayerGroup(layerGroup, false, changes);
+
+    layerGroup = std::move(layerGroup_);
+
+    // Add the new layer group, if we're currently renderable.
+    activateLayerGroup(layerGroup, isRenderable, changes);
+}
+
+/// (Un-)Register the layer group with the orchestrator
+void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_, bool activate, UniqueChangeRequestVec& changes) {
+    if (layerGroup_) {
+        if (activate) {
+            // The RenderTree has determined this layer should be included in the renderable set for a frame
+            changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_, /*canReplace=*/true));
+        } else {
+            // The RenderTree is informing us we should not render anything
+            changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(layerGroup_->getLayerIndex()));
+        }
     }
 }
 

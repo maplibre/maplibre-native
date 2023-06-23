@@ -22,6 +22,9 @@ public:
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 
+protected:
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;

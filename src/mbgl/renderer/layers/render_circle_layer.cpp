@@ -74,8 +74,8 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
-    if (tileLayerGroup) {
-        tileLayerGroup->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
     }
 }
 
@@ -264,28 +264,28 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
                                [[maybe_unused]] const RenderTree& renderTree,
-                               UniqueChangeRequestVec& /*changes*/) {
+                               UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
     // Set up a layer group
-    if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-        if (!tileLayerGroup) {
-            return;
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
     }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!circleShaderGroup) {
         circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);
     }
     if (!circleShaderGroup) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
@@ -309,7 +309,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
             // remove it
             drawable.reset();
-            ++stats.tileDrawablesRemoved;
+            ++stats.drawablesRemoved;
         }
     });
 
@@ -397,7 +397,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->mutableUniformBuffers().createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-            ++stats.tileDrawablesAdded;
+            ++stats.drawablesAdded;
         }
     }
 }
