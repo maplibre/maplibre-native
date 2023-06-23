@@ -62,6 +62,7 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
     return std::nullopt;
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
     if (tileLayerGroup) {
@@ -69,6 +70,7 @@ void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
         tileLayerGroup.reset();
     }
 }
+#endif
 
 void RenderLayer::markContextDestroyed() {
     // no-op

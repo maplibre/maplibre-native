@@ -27,7 +27,21 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
-flavor="$2"
+flavor="$2" # Renderer build flavor: legacy, drawable, split
+teamid="$4" # Provisioning profile team ID, required for targeting physical devices
+
+# Generate the team ID for Xcode device provisioning
+if [ ! -d platform/ios/bazel/__generated__ ]; then
+   mkdir platform/ios/bazel/__generated__
+fi
+
+cat > platform/ios/bazel/__generated__/provisioning_profile.bzl <<EOF
+APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
+EOF
+
+# Generate the Xcode project
+# Example invocation: ./bazel-xcodeproj.sh flavor split teamid 1234567890
+# Find your team ID inside a .mobileprovision file or in your keychain (Apple development: your@email -> Get Info -> Organizational Unit)
 bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=$flavor --//:maplibre_platform=ios"
 
 popd

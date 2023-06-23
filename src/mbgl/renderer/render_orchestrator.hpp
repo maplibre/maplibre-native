@@ -96,6 +96,7 @@ public:
 
     void update(const std::shared_ptr<UpdateParameters>&);
 
+#if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
@@ -185,6 +186,7 @@ private:
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
 
+#if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
