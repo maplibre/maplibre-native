@@ -38,6 +38,7 @@ public:
                                                                         gfx::BufferUsageType) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
+#if MLN_DRAWABLE_RENDERER
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
         const gfx::AttributeDataType vertexType,
@@ -47,6 +48,7 @@ public:
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
         /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) override;
+#endif
 
 public:
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,

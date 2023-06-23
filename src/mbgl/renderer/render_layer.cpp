@@ -120,6 +120,7 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     return nullptr;
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
@@ -158,5 +159,6 @@ void RenderLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& c
         changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
     }
 }
+#endif
 
 } // namespace mbgl

@@ -47,9 +47,11 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
+#if MLN_DRAWABLE_RENDERER
     if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
         tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
     }
+#endif
 }
 
 bool RenderRasterLayer::hasTransition() const {
@@ -92,6 +94,7 @@ void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     assert(renderTiles || imageData || !params.source->isEnabled());
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderRasterLayer::render(PaintParameters& parameters) {
     if (parameters.pass != RenderPass::Translucent || (!renderTiles && !imageData)) {
         return;
@@ -206,7 +209,9 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
+#if MLN_DRAWABLE_RENDERER
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -445,5 +450,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
+#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace mbgl

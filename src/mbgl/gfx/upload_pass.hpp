@@ -66,6 +66,7 @@ public:
         updateIndexBufferResource(buffer.getResource(), v.data(), v.bytes());
     }
 
+#if MLN_DRAWABLE_RENDERER
     virtual gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
         const gfx::AttributeDataType vertexType,
@@ -75,6 +76,7 @@ public:
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
         /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) = 0;
+#endif
 
 protected:
     virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,

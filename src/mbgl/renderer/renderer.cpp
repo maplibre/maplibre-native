@@ -33,6 +33,7 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();
 
+#if MLN_DRAWABLE_RENDERER
         const auto& renderTreeParameters = renderTree->getParameters();
         const auto& state = renderTreeParameters.transformParams.state;
 
@@ -41,6 +42,7 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
             auto& shaders = *impl->staticData->shaders;
             impl->orchestrator.updateLayers(shaders, context, state, updateParameters, *renderTree);
         }
+#endif
 
         impl->render(*renderTree);
     }

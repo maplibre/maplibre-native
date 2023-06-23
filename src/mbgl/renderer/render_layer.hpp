@@ -118,7 +118,7 @@ public:
     bool supportsZoom(float zoom) const;
 
     virtual void upload(gfx::UploadPass&) {}
-    virtual void render(PaintParameters&) = 0;
+    virtual void render(PaintParameters&) {};
 
     // Check wether the given geometry intersects
     // with the feature
@@ -148,6 +148,7 @@ public:
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;
 
+#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     virtual void update(
         gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const RenderTree&, UniqueChangeRequestVec&) {}
@@ -165,6 +166,7 @@ public:
     /// @param willRender Indicates if this layer should render or not
     /// @param changes The collection of current pending change requests
     virtual void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes);
+#endif
 
 protected:
     // Checks whether the current hardware can render this layer. If it can't,
@@ -175,11 +177,13 @@ protected:
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
+#if MLN_DRAWABLE_RENDERER
     /// Remove all drawables for the tile from the layer group
     void removeTile(RenderPass, const OverscaledTileID&);
 
     /// Remove all the drawables for tiles
     void removeAllTiles();
+#endif
 
 protected:
     // Stores current set of tiles to be rendered for this layer.
