@@ -1,6 +1,7 @@
 #pragma once
-
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
+#endif
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
@@ -21,8 +22,9 @@
 #include <vector>
 
 namespace mbgl {
-
+#if MLN_DRAWABLE_RENDERER
 class ChangeRequest;
+#endif
 class RendererObserver;
 class RenderSource;
 class UpdateParameters;
@@ -37,10 +39,11 @@ class CrossTileSymbolIndex;
 class RenderTree;
 
 namespace gfx {
-class Drawable;
 class ShaderRegistry;
-
+#if MLN_DRAWABLE_RENDERER
+class Drawable;
 using DrawablePtr = std::shared_ptr<Drawable>;
+#endif
 } // namespace gfx
 
 namespace style {

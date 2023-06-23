@@ -1,6 +1,8 @@
 #pragma once
 
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
+#endif
 
 #include <memory>
 

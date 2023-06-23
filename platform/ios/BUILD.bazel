@@ -509,8 +509,8 @@ xcodeproj(
     tags = ["manual"],
     top_level_targets = [
         top_level_target(
-            "App",
-            target_environments = ["simulator"],
+            ":App",
+            target_environments = ["device", "simulator"],
         ),
     ],
 )

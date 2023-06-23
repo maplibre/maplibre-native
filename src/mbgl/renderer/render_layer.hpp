@@ -1,7 +1,9 @@
 #pragma once
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/change_request.hpp>
+#endif
+#include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/style/layer_properties.hpp>
@@ -14,7 +16,6 @@
 
 namespace mbgl {
 class Bucket;
-class ChangeRequest;
 class DynamicFeatureIndex;
 class LineAtlas;
 class PropertyEvaluationParameters;
@@ -23,22 +24,28 @@ class PatternAtlas;
 class RenderTile;
 class RenderTree;
 class SymbolBucket;
-class TileLayerGroup;
 class TransformState;
 class TransitionParameters;
 class UploadParameters;
 
+#if MLN_DRAWABLE_RENDERER
+class ChangeRequest;
+class TileLayerGroup;
 using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
+#endif
 
 namespace gfx {
 class Context;
 class ShaderGroup;
 class ShaderRegistry;
-class UniformBuffer;
 using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
+
+#if MLN_DRAWABLE_RENDERER
+class UniformBuffer;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+#endif
 } // namespace gfx
 
 class LayerRenderData {
@@ -195,7 +202,9 @@ protected:
 
     LayerPlacementData placementData;
 
+#if MLN_DRAWABLE_RENDERER
     TileLayerGroupPtr tileLayerGroup;
+#endif
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};
     // Current renderable status as specified by the markLayerRenderable event

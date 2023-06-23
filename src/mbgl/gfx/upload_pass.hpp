@@ -7,9 +7,12 @@
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/image.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/texture2d.hpp>
+#endif
 
 #include <optional>
 #include <vector>
@@ -17,11 +20,14 @@
 namespace mbgl {
 namespace gfx {
 
+#if MLN_DRAWABLE_RENDERER
+class Conext;
 class Texture2D;
 class VertexAttributeArray;
 
 using AttributeBindingArray = std::vector<std::optional<gfx::AttributeBinding>>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
+#endif
 
 class UploadPass {
 protected:
@@ -38,8 +44,10 @@ public:
 
     DebugGroup<UploadPass> createDebugGroup(const char* name) { return {*this, name}; }
 
+#if MLN_DRAWABLE_RENDERER
     virtual Context& getContext() = 0;
     virtual const Context& getContext() const = 0;
+#endif
 
 public:
     template <class Vertex>
@@ -119,6 +127,7 @@ public:
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
 
+#if MLN_DRAWABLE_RENDERER
     template <typename Image>
     void updateTexture(Texture2D& texture,
                        const Image& image,
@@ -138,6 +147,7 @@ public:
         const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
+#endif
 
 public:
     virtual std::unique_ptr<TextureResource> createTextureResource(Size,

@@ -2,7 +2,9 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/change_request.hpp>
+#endif
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_layer.hpp>
@@ -222,7 +224,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
+#if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> changes;
+#endif
 
     // Remove render layers for removed layers.
     for (const auto& entry : layerDiff.removed) {
