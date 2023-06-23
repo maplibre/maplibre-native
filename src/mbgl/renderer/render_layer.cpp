@@ -69,12 +69,8 @@ void RenderLayer::layerChanged(const TransitionParameters&,
     layerRemoved(changes);
 }
 
-void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (layerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(layerGroup->getLayerIndex()));
-        layerGroup.reset();
-    }
+void RenderLayer::layerRemoved(UniqueChangeRequestVec&) {
+    removeAllDrawables();
 }
 
 void RenderLayer::markContextDestroyed() {

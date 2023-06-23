@@ -736,11 +736,11 @@ void updateTileDrawable(gfx::Drawable& drawable,
                         const SymbolBucket& bucket,
                         const SymbolBucket::PaintProperties& paintProps,
                         const TransformState& state) {
-    if (!drawable.getData() || !*drawable.getData()) {
+    if (!drawable.getData()) {
         return;
     }
 
-    auto& drawData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
+    auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
     const auto isText = (drawData.symbolType == SymbolType::Text);
     const auto currentZoom = static_cast<float>(state.getZoom());
 
@@ -819,6 +819,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto tileID = drawable->getTileID();
         if (drawable->getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
             drawable.reset();
+            tileBucketInstances.erase(*tileID);
             ++stats.drawablesRemoved;
         }
     });
@@ -847,10 +848,18 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
-            tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
-                updateTileDrawable(drawable, context, bucket, bucketPaintProperties, state);
-            });
-            continue;
+            const auto hit = tileBucketInstances.insert(std::make_pair(tileID, bucket.bucketInstanceId));
+            if (!hit.second && hit.first->second != bucket.bucketInstanceId) {
+                // The bucket has changed, reset the drawables for this tile.
+                tileLayerGroup->removeDrawables(passes, tileID);
+                hit.first->second = bucket.bucketInstanceId;
+            } else {
+                // Just update the drawables we already created
+                tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                    updateTileDrawable(drawable, context, bucket, bucketPaintProperties, state);
+                });
+                continue;
+            }
         }
 
         float serialKey = 1.0f;

@@ -93,12 +93,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID() || !drawable.getData() || !*drawable.getData()) {
+        if (!drawable.getTileID() || !drawable.getData()) {
             return;
         }
 
         const auto tileID = drawable.getTileID()->toUnwrapped();
-        const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(**drawable.getData());
+        const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
         const SymbolDrawablePaintUBO paintUBO = {
             /*.fill_color=*/gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated)
