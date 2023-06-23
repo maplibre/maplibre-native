@@ -104,6 +104,24 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+objc_library(
+    name = "zip-archive",
+    srcs = [
+        "zip-archive/SSZipArchive/SSZipArchive.h",
+        "zip-archive/SSZipArchive/SSZipArchive.m",
+        "zip-archive/SSZipArchive/SSZipCommon.h",
+    ] + glob([
+        "zip-archive/SSZipArchive/minizip/*.c",
+        "zip-archive/SSZipArchive/minizip/*.h",
+    ], allow_empty = False),
+    includes = ["zip-archive/SSZipArchive"],
+    deps = [
+        # "minizip"
+    ],
+    defines = ["ZLIB_COMPAT"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/boost-files.json
 cc_library(
     name = "boost",

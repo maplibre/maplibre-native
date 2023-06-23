@@ -1,3 +1,5 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
 objc_library(
   name = "render_test_ios_src",
   srcs = [
@@ -6,11 +8,16 @@ objc_library(
     "iosTestRunner.mm"
   ],
   deps = [
-    "//platform/ios/test/common:ios_test_runner_lib"
+    "//platform/ios/test/common:ios_test_runner_lib",
+    "//render-test:render-test-lib",
+    "//:mbgl-core",
+    "//vendor:zip-archive",
+    "//render-test:render-test-ios-srcs"
   ],
   visibility = [
     "//platform/ios/test/common:__pkg__"
-  ]
+  ],
+  copts = CPP_FLAGS + MAPLIBRE_FLAGS,
 )
 
 exports_files([
