@@ -116,7 +116,7 @@ private:
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
 
     std::unordered_set<OverscaledTileID> renderTileIDs;
-    std::unordered_map<OverscaledTileID,uint32_t> tileBucketInstances;
+    std::unordered_map<OverscaledTileID, uint32_t> tileBucketInstances;
 };
 
 } // namespace mbgl
