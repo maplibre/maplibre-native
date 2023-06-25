@@ -19,11 +19,7 @@ class SimpleMapActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { mapboxMap: MapboxMap ->
-                val styles = Style.getPredefinedStyles()
-                if (styles != null && styles.size > 0) {
-                    val styleUrl = styles[0].url
-                    mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
-                }
+                mapboxMap.setStyle(Style.Builder().fromUri("https://demotiles.maplibre.org/style.json"))
             }
         )
     }

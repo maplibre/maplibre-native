@@ -33,6 +33,8 @@ android {
 
     buildTypes {
         debug {
+            jniDebuggable true
+            debuggable true
             testCoverageEnabled true
             minifyEnabled false
             shrinkResources false
@@ -78,7 +80,7 @@ dependencies {
 
     implementation dependenciesList.okhttp3
 
-    implementation dependenciesList.leakCanary
+    debugImplementation dependenciesList.leakCanary
 
     androidTestImplementation dependenciesList.supportAnnotations
     androidTestImplementation dependenciesList.testRunner
