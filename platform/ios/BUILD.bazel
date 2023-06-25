@@ -508,7 +508,13 @@ xcodeproj(
     project_name = "MapLibre",
     tags = ["manual"],
     top_level_targets = [
-        top_level_target("App", target_environments = ["simulator"]),
-        top_level_target("RenderTestApp", target_environments = ["device", "simulator"])
+        top_level_target(
+            "App",
+            target_environments = ["simulator"],
+        ),
+        top_level_target(
+            "//render-test/ios:RenderTest",
+            target_environments = ["simulator"],
+        ),
     ],
 )

@@ -14,7 +14,6 @@ cc_library(
     ],
 )
 
-
 # TODO: refactor
 cc_library(
     name = "render-test-ios-srcs",
@@ -26,17 +25,17 @@ cc_library(
     ) + [
         "include/mbgl/render_test.hpp",
     ],
-    deps = [
-        "//expression-test:test_runner_common",
-        "//platform/ios:sdk"
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    includes = [
+        "include",
     ],
     visibility = [
         "//render-test/ios:__pkg__",
     ],
-    includes = [
-        "include",
+    deps = [
+        "//expression-test:test_runner_common",
+        "//platform/ios:sdk",
     ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
 )
 
 cc_test(

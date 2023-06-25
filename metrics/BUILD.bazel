@@ -1,18 +1,25 @@
 filegroup(
     name = "render-test-files",
-    srcs = glob([
-        "cache-style.db",
+    srcs = glob(
+        [
+            "integration/**",
+            "tests/**",
+            "linux-gcc8-release/**",
+            "expectations/platform-all/**",
+            "ignores/**",
+            "ios-render-test-runner/**",  # iOS only
+            "expectations/platform-ios/**",  # iOS only
+        ],
+        allow_empty = False,
+    ) + [
         "cache-metrics.db",
-        "integration/**",
-        "tests/**",
-        "linux-gcc8-release/**",
-        "expectations/platform-all/**",
-        "ignores/**",
-    ]) + [
+        "cache-style.db",
+        "ios-render-test-runner-style.json",  # iOS only
         "linux-gcc8-release-metrics.json",
         "linux-gcc8-release-style.json",
     ],
     visibility = [
-        "//render-test:__pkg__",
+        "//platform/ios/test/common:__pkg__",
+        "//render-test:__subpackages__",
     ],
 )

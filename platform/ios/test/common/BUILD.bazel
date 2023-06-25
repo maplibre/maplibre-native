@@ -1,40 +1,47 @@
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
 
 cc_library(
-  name = "ios_test_runner_lib",
-  srcs = [
-    "ios_test_runner.hpp"
-  ],
-  includes = [
-    "."
-  ],
-  visibility = [
-    "//render-test/ios:__pkg__"
-  ]
+    name = "ios_test_runner_lib",
+    srcs = [
+        "ios_test_runner.hpp",
+    ],
+    includes = [
+        ".",
+    ],
+    visibility = [
+        "//render-test/ios:__pkg__",
+    ],
 )
 
 objc_library(
-  name = "render_test_app_srcs",
-  srcs = [
-    "AppDelegate.h",
-    "AppDelegate.m",
-    "main.m"
-  ],
-  deps = [
-    "ios_test_runner_lib"
-  ]
+    name = "render_test_app_srcs",
+    srcs = [
+        "AppDelegate.h",
+        "AppDelegate.m",
+        "main.m",
+    ],
+    data = [
+        "LaunchScreen.storyboard",
+        "Main.storyboard",
+    ],
+    deps = [
+        "ios_test_runner_lib",
+    ],
 )
 
 ios_application(
-  name = "RenderTestApp",
-  bundle_id	= "org.maplibre.RenderTestApp",
-  minimum_os_version = "12.0",
-  families = ["iphone"],
-  infoplists = [
-    "//render-test/ios:Info.plist"
-  ],
-  deps = [
-    "//render-test/ios:render_test_ios_src",
-    "render_test_app_srcs"
-  ]
+    name = "RenderTestApp",
+    bundle_id = "org.maplibre.RenderTestApp",
+    families = ["iphone"],
+    infoplists = [
+        "//render-test/ios:Info.plist",
+    ],
+    minimum_os_version = "12.0",
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        "render_test_app_srcs",
+        "//render-test/ios:render_test_ios_src",
+    ],
 )
