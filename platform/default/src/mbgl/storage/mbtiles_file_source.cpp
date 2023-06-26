@@ -14,6 +14,7 @@
 #include <mbgl/util/url.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/compression.hpp>
+#include <mbgl/util/filesystem.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
 
@@ -283,7 +284,8 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
         return req;
     }
 
-    if (resource.url.find(":///") == std::string::npos) {
+    if (resource.url.find("://") == std::string::npos ||
+        !util::is_absolute_path(resource.url.substr(resource.url.find("://") + 3))) {
         Response response;
         response.noContent = true;
         response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
