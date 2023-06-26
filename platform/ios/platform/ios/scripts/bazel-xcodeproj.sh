@@ -29,6 +29,7 @@ echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
 flavor="legacy" # Renderer build flavor: legacy, drawable, split
 teamid="0000000000" # Provisioning profile team ID, required for targeting physical devices
+uuid="iOS Team Provisioning Profile: *"
 while [[ $# -gt 0 ]]; do
    case $1 in
    --flavor)
@@ -39,6 +40,11 @@ while [[ $# -gt 0 ]]; do
    --teamid)
       shift
       teamid="$1"
+      shift
+      ;;
+   --profile-uuid)
+      shift
+      uuid="$1"
       shift
       ;;
    -*|--*)
@@ -55,6 +61,7 @@ fi
 
 cat > platform/ios/bazel/__generated__/provisioning_profile.bzl <<EOF
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
+APPLE_MOBILE_PROVISIONING_PROFILE_UUID = "$uuid"
 EOF
 
 # Generate the Xcode project

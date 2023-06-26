@@ -14,6 +14,9 @@ flavor="legacy"
 # Provisioning team ID
 teamid="0000000000"
 
+# Provisioning profile name/UUID
+uuid="iOS Team Provisioning Profile: *"
+
 while [[ $# -gt 0 ]]; do
    case $1 in
    --static)
@@ -50,6 +53,11 @@ while [[ $# -gt 0 ]]; do
    --teamid)
       shift
       teamid="$1"
+      shift
+      ;;
+   --profile-uuid)
+      shift
+      uuid="$1"
       shift
       ;;
    -*|--*)
@@ -100,6 +108,7 @@ fi
 
 cat > platform/ios/bazel/__generated__/provisioning_profile.bzl <<EOF
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
+APPLE_MOBILE_PROVISIONING_PROFILE_UUID = "$uuid"
 EOF
 
 # Build
