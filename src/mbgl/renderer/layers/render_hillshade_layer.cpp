@@ -75,6 +75,7 @@ void RenderHillshadeLayer::prepare(const LayerPrepareParameters& params) {
     maxzoom = params.source->getMaxZoom();
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderHillshadeLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass != RenderPass::Translucent && parameters.pass != RenderPass::Pass3D) return;
@@ -218,5 +219,6 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 } // namespace mbgl

@@ -63,6 +63,7 @@ void RenderHeatmapLayer::upload(gfx::UploadPass& uploadPass) {
     }
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderHeatmapLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass == RenderPass::Opaque) {
@@ -171,6 +172,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
             getID());
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 void RenderHeatmapLayer::updateColorRamp() {
     auto colorValue = unevaluated.get<HeatmapColor>().getValue();

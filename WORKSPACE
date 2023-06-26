@@ -10,8 +10,8 @@ http_archive(
 
 http_archive(
     name = "rules_xcodeproj",
-    sha256 = "5baccdd6a2734a0adeb9cb6175691d0609f8bdbd7c5f516e828d0df744ee9f6c",
-    url = "https://github.com/MobileNativeFoundation/rules_xcodeproj/releases/download/1.9.1/release.tar.gz",
+    sha256 = "f836d2a516a911dc0ace44b1f51aa575613f149a934f4be1e7bd551a549672ff",
+    url = "https://github.com/MobileNativeFoundation/rules_xcodeproj/releases/download/1.7.1/release.tar.gz",
 )
 
 load(
@@ -51,9 +51,9 @@ xcodeproj_rules_dependencies()
 
 load(
     "@build_bazel_rules_apple//apple:apple.bzl",
-    "provisioning_profile_repository",
+    "provisioning_profile_repository"
 )
 
 provisioning_profile_repository(
-    name = "local_provisioning_profiles",
+    name = "local_provisioning_profiles"
 )

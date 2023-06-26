@@ -3,9 +3,10 @@ package org.maplibre.android.testapp.activity.maplayout
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.maps.*
-import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.utils.NavUtils
+import com.mapbox.mapboxsdk.maps.*
+import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.utils.ApiKeyUtils
+import com.mapbox.mapboxsdk.testapp.utils.NavUtils
 
 /**
  * Test activity showcasing a simple MapView without any MapboxMap interaction.
@@ -18,11 +19,16 @@ class SimpleMapActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
-            OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                val styles = Style.getPredefinedStyles()
-                if (styles != null && styles.size > 0) {
-                    val styleUrl = styles[0].url
-                    maplibreMap.setStyle(Style.Builder().fromUri(styleUrl))
+            OnMapReadyCallback { mapboxMap: MapboxMap ->
+                var key = ApiKeyUtils.getApiKey(applicationContext)
+                if (key == null || key == "YOUR_API_KEY_GOES_HERE") {
+                    mapboxMap.setStyle(Style.Builder().fromUri("https://demotiles.maplibre.org/style.json"))
+                } else {
+                    val styles = Style.getPredefinedStyles()
+                    if (styles != null && styles.size > 0) {
+                        val styleUrl = styles[0].url
+                        mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
+                    }
                 }
             }
         )

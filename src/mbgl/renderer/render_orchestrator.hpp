@@ -1,6 +1,7 @@
 #pragma once
-
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
+#endif
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
@@ -21,8 +22,9 @@
 #include <vector>
 
 namespace mbgl {
-
+#if MLN_DRAWABLE_RENDERER
 class ChangeRequest;
+#endif
 class RendererObserver;
 class RenderSource;
 class UpdateParameters;
@@ -37,10 +39,11 @@ class CrossTileSymbolIndex;
 class RenderTree;
 
 namespace gfx {
-class Drawable;
 class ShaderRegistry;
-
+#if MLN_DRAWABLE_RENDERER
+class Drawable;
 using DrawablePtr = std::shared_ptr<Drawable>;
+#endif
 } // namespace gfx
 
 namespace style {
@@ -95,6 +98,7 @@ public:
 
     void update(const std::shared_ptr<UpdateParameters>&);
 
+#if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
@@ -111,6 +115,7 @@ public:
     void processChanges();
     /// @brief Indicate that the orchestrator needs to re-sort layer groups when processing changes
     void markLayerGroupOrderDirty();
+#endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
@@ -143,12 +148,14 @@ private:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
+#if MLN_DRAWABLE_RENDERER
     /// Move changes into the pending set, clearing the provided collection
     void addChanges(UniqueChangeRequestVec&);
 
     void onRemoveLayerGroup(LayerGroupBase&);
 
     void updateLayerGroupOrder();
+#endif
 
     RendererObserver* observer;
 
@@ -181,11 +188,13 @@ private:
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
 
+#if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
+#endif
 };
 
 } // namespace mbgl
