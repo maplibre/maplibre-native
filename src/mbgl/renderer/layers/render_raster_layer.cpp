@@ -229,7 +229,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    const auto renderPass = RenderPass::Translucent;
+    auto renderPass = RenderPass::Translucent;
 
     if (!rasterShader) {
         rasterShader = context.getGenericShader(shaders, "RasterShader");
@@ -242,7 +242,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                               ? gfx::TextureFilterType::Nearest
                                               : gfx::TextureFilterType::Linear;
 
-    auto createBuilder = [&context, this]() -> std::unique_ptr<gfx::DrawableBuilder> {
+    auto createBuilder = [&context, &renderPass, this]() -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
