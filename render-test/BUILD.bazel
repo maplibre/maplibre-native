@@ -14,9 +14,8 @@ cc_library(
     ],
 )
 
-# TODO: refactor
 cc_library(
-    name = "render-test-ios-srcs",
+    name = "render-test-srcs",
     srcs = glob(
         [
             "*.cpp",
@@ -34,33 +33,23 @@ cc_library(
     ],
     deps = [
         "//expression-test:test_runner_common",
-        "//platform/ios:sdk",
-    ],
+    ] + select({
+        "//:ios": ["//platform/ios:sdk"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
     name = "render-test",
-    srcs = glob(
-        [
-            "*.cpp",
-            "*.hpp",
-        ],
-    ) + [
-        "include/mbgl/render_test.hpp",
-    ],
     args = [
         "--manifestPath",
         "metrics/linux-gcc8-release-style.json",
     ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     data = [
         "//metrics:render-test-files",
     ],
-    includes = [
-        "include",
-    ],
     deps = [
-        "//expression-test:test_runner_common",
+        "render-test-srcs",
         "//platform/default:render-test-bin",
         "//platform/linux:impl",
         "//vendor:mapbox-base",

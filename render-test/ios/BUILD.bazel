@@ -43,8 +43,8 @@ objc_library(
     deps = [
         "//:mbgl-core",
         "//platform/ios/test/common:ios_test_runner_lib",
-        "//render-test:render-test-ios-srcs",
         "//render-test:render-test-lib",
+        "//render-test:render-test-srcs",
         "//vendor:zip-archive",
     ],
 )
