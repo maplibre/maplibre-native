@@ -27,7 +27,10 @@ private:
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
     void upload(gfx::UploadPass&) override;
+
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -46,11 +49,13 @@ private:
     PremultipliedImage colorRamp;
     std::optional<gfx::Texture> colorRampTexture;
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<LineProgram> lineProgram;
     std::shared_ptr<LineGradientProgram> lineGradientProgram;
     std::shared_ptr<LineSDFProgram> lineSDFProgram;
     std::shared_ptr<LinePatternProgram> linePatternProgram;
+#endif
 };
 
 } // namespace mbgl

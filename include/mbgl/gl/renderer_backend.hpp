@@ -22,8 +22,10 @@ public:
     /// Called prior to rendering to update the internally assumed OpenGL state.
     virtual void updateAssumedState() = 0;
 
+#if MLN_DRAWABLE_RENDERER
     /// One-time shader initialization
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
+#endif
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
