@@ -35,7 +35,7 @@ cc_library(
         "//expression-test:test_runner_common",
     ] + select({
         "//:ios": ["//platform/ios:sdk"],
-        "//conditions:default": [],
+        "//:linux": ["//platform/linux:impl"],
     }),
 )
 
@@ -51,7 +51,6 @@ cc_test(
     deps = [
         "render-test-srcs",
         "//platform/default:render-test-bin",
-        "//platform/linux:impl",
         "//vendor:mapbox-base",
     ],
 )
