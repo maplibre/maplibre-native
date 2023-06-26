@@ -96,6 +96,7 @@ std::optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) 
     return renderData->getPattern(pattern);
 }
 
+#if MLN_DRAWABLE_RENDERER
 static const gfx::Texture2DPtr noTexture;
 
 bool RenderTile::hasGlyphAtlasTexture() const {
@@ -128,6 +129,28 @@ static const std::shared_ptr<TileAtlasTextures> noAtlas;
 const std::shared_ptr<TileAtlasTextures>& RenderTile::getAtlasTextures() const {
     return renderData ? renderData->getAtlasTextures() : noAtlas;
 }
+
+#else
+gfx::TextureBinding RenderTile::getGlyphAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData);
+    return {getGlyphAtlasTexture()->getResource(), filter};
+}
+
+gfx::TextureBinding RenderTile::getIconAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData);
+    return {getIconAtlasTexture()->getResource(), filter};
+}
+
+const gfx::Texture* RenderTile::getGlyphAtlasTexture() const {
+    assert(renderData);
+    return &renderData->getGlyphAtlasTexture();
+}
+
+const gfx::Texture* RenderTile::getIconAtlasTexture() const {
+    assert(renderData);
+    return &renderData->getIconAtlasTexture();
+}
+#endif
 
 void RenderTile::upload(gfx::UploadPass& uploadPass) const {
     assert(renderData);
