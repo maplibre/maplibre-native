@@ -815,12 +815,12 @@ void TestRunner::run(TestMetadata& metadata) {
                         return a.isIcon == isIcon && a.location.min == box.min && a.location.max == box.max;
                     });
 
-                    // TODO: remove usage of std::codecvt_utf8
-                    // https://github.com/maplibre/maplibre-native/issues/1269
-                    #pragma clang diagnostic push
-                    #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+// TODO: remove usage of std::codecvt_utf8
+// https://github.com/maplibre/maplibre-native/issues/1269
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                     static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cv;
-                    #pragma clang diagnostic pop
+#pragma clang diagnostic pop
 
                     if (it == symbols.end()) {
                         symbols.push_back({tileId, box, placed, isIcon});
