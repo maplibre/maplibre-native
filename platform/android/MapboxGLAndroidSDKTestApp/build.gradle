@@ -48,6 +48,19 @@ android {
         }
     }
 
+    flavorDimensions += "renderer"
+    productFlavors {
+        create("legacy") {
+            dimension = "renderer"
+        }
+        create("drawable") {
+            dimension = "renderer"
+        }
+        create("split") {
+            dimension = "renderer"
+        }
+    }
+
     buildFeatures {
         viewBinding = true
     }
