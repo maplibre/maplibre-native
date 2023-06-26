@@ -110,15 +110,15 @@ objc_library(
         "zip-archive/SSZipArchive/SSZipArchive.h",
         "zip-archive/SSZipArchive/SSZipArchive.m",
         "zip-archive/SSZipArchive/SSZipCommon.h",
-    ] + glob([
-        "zip-archive/SSZipArchive/minizip/*.c",
-        "zip-archive/SSZipArchive/minizip/*.h",
-    ], allow_empty = False),
-    includes = ["zip-archive/SSZipArchive"],
-    deps = [
-        # "minizip"
-    ],
+    ] + glob(
+        [
+            "zip-archive/SSZipArchive/minizip/*.c",
+            "zip-archive/SSZipArchive/minizip/*.h",
+        ],
+        allow_empty = False,
+    ),
     defines = ["ZLIB_COMPAT"],
+    includes = ["zip-archive/SSZipArchive"],
     visibility = ["//visibility:public"],
 )
 
