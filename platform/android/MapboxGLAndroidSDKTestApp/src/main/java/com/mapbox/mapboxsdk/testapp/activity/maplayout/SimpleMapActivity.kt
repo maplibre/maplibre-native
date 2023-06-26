@@ -5,6 +5,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.mapbox.mapboxsdk.maps.*
 import com.mapbox.mapboxsdk.testapp.R
+import com.mapbox.mapboxsdk.testapp.utils.ApiKeyUtils
 import com.mapbox.mapboxsdk.testapp.utils.NavUtils
 
 /**
@@ -19,7 +20,16 @@ class SimpleMapActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { mapboxMap: MapboxMap ->
-                mapboxMap.setStyle(Style.Builder().fromUri("https://demotiles.maplibre.org/style.json"))
+                var key = ApiKeyUtils.getApiKey(applicationContext)
+                if (key == null || key == "YOUR_API_KEY_GOES_HERE") {
+                    mapboxMap.setStyle(Style.Builder().fromUri("https://demotiles.maplibre.org/style.json"))
+                } else {
+                    val styles = Style.getPredefinedStyles()
+                    if (styles != null && styles.size > 0) {
+                        val styleUrl = styles[0].url
+                        mapboxMap.setStyle(Style.Builder().fromUri(styleUrl))
+                    }
+                }
             }
         )
     }
