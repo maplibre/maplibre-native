@@ -8,6 +8,15 @@ build_type="static"
 # "release" or "debug"
 release_type="release"
 
+# Renderer flavor
+flavor="legacy"
+
+# Provisioning team ID
+teamid="0000000000"
+
+# Provisioning profile name/UUID
+uuid="iOS Team Provisioning Profile: *"
+
 while [[ $# -gt 0 ]]; do
    case $1 in
    --static)
@@ -35,6 +44,21 @@ while [[ $# -gt 0 ]]; do
       echo "Usage: .bazel-package.sh --static|--dynamic --release|--debug"
       echo "Defaults to \"--static --release\""
       exit 1
+      ;;
+   --flavor)
+      shift
+      flavor="$1"
+      shift
+      ;;
+   --teamid)
+      shift
+      teamid="$1"
+      shift
+      ;;
+   --profile-uuid)
+      shift
+      uuid="$1"
+      shift
       ;;
    -*|--*)
       echo "Unknown option $1"
@@ -77,13 +101,28 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
+# Generate provisioning team ID
+if [ ! -d platform/ios/bazel/__generated__ ]; then
+   mkdir platform/ios/bazel/__generated__
+fi
+
+cat > platform/ios/bazel/__generated__/provisioning_profile.bzl <<EOF
+APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
+APPLE_MOBILE_PROVISIONING_PROFILE_UUID = "$uuid"
+EOF
+
+# Build
+ncpu=$(sysctl -n hw.ncpu)
 bazel build //platform/ios:"$target" --apple_platform_type=ios \
    --apple_generate_dsym \
    --compilation_mode="$compilation_mode" \
    --features=dead_strip \
    --objc_enable_binary_stripping \
    --copt=-Wall --copt=-Wextra --copt=-Wpedantic \
-   --copt=-Werror
+   --copt=-Werror \
+   --jobs "$ncpu" \
+   --//:renderer=$flavor \
+   --//:maplibre_platform=ios
 
 popd
 

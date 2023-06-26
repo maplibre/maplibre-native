@@ -65,6 +65,7 @@ bool RenderFillExtrusionLayer::is3D() const {
     return true;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass != RenderPass::Translucent) {
@@ -219,6 +220,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
         drawTiles(parameters.stencilModeFor3D(), parameters.colorModeForRenderPass(), "color");
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
                                                       const GeometryTileFeature& feature,

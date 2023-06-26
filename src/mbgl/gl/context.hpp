@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -15,6 +14,10 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/texture2d.hpp>
+#endif
 
 #include <array>
 #include <functional>
@@ -103,6 +106,7 @@ public:
 
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
 
+#if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::DrawableTweakerPtr createDrawableTweaker() override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
@@ -114,6 +118,7 @@ public:
     LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
     gfx::Texture2DPtr createTexture2D() override;
+#endif
 
 private:
     RendererBackend& backend;
