@@ -473,7 +473,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["platform/ios/app/Info.plist"],
+    infoplists = ["build/Info-app.plist"],
     minimum_os_version = "12.0",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
