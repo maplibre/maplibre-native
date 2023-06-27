@@ -6,13 +6,12 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "SymbolSDFIconProgram";
+struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "SymbolTextAndIconShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec4 a_pos_offset;
 layout (location = 1) in vec4 a_data;
-layout (location = 2) in vec4 a_pixeloffset;
-layout (location = 3) in vec3 a_projected_pos;
-layout (location = 4) in float a_fade_opacity;
+layout (location = 2) in vec3 a_projected_pos;
+layout (location = 3) in float a_fade_opacity;
 
 // contents of a_size vary based on the type of property value
 // used for {text,icon}-size.
@@ -21,59 +20,77 @@ layout (location = 4) in float a_fade_opacity;
 // For composite functions:
 // [ text-size(lowerZoomStop, feature),
 //   text-size(upperZoomStop, feature) ]
-uniform bool u_is_size_zoom_constant;
-uniform bool u_is_size_feature_constant;
-uniform highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
-uniform highp float u_size; // used when size is both zoom and feature constant
-uniform mat4 u_matrix;
-uniform mat4 u_label_plane_matrix;
-uniform mat4 u_coord_matrix;
-uniform bool u_is_text;
-uniform bool u_pitch_with_map;
-uniform highp float u_pitch;
-uniform bool u_rotate_symbol;
-uniform highp float u_aspect_ratio;
-uniform highp float u_camera_to_center_distance;
-uniform float u_fade_change;
-uniform vec2 u_texsize;
 
-out vec2 v_data0;
-out vec3 v_data1;
+layout (std140) uniform SymbolDrawableUBO {
+    highp mat4 u_matrix;
+    highp mat4 u_label_plane_matrix;
+    highp mat4 u_coord_matrix;
+
+    highp vec2 u_texsize;
+    highp vec2 u_texsize_icon;
+
+    highp float u_gamma_scale;
+    highp float u_device_pixel_ratio;
+
+    highp float u_camera_to_center_distance;
+    highp float u_pitch;
+    bool u_rotate_symbol;
+    highp float u_aspect_ratio;
+    highp float u_fade_change;
+    highp float u_pad2;
+};
+
+layout (std140) uniform SymbolDrawablePaintUBO {
+    highp vec4 u_fill_color;
+    highp vec4 u_halo_color;
+    highp float u_opacity;
+    highp float u_halo_width;
+    highp float u_halo_blur;
+    highp float u_padding;
+};
+
+layout (std140) uniform SymbolDrawableTilePropsUBO {
+    bool u_is_text;
+    bool u_is_halo;
+    bool u_pitch_with_map;
+    bool u_is_size_zoom_constant;
+    bool u_is_size_feature_constant;
+    highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
+    highp float u_size; // used when size is both zoom and feature constant
+    bool u_pad3;
+};
+
+layout (std140) uniform SymbolDrawableInterpolateUBO {
+    highp float u_fill_color_t;
+    highp float u_halo_color_t;
+    highp float u_opacity_t;
+    highp float u_halo_width_t;
+    highp float u_halo_blur_t;
+    highp float u_pad4,u_pad5,u_pad6;
+};
+
+out vec4 v_data0;
+out vec4 v_data1;
 
 #ifndef HAS_UNIFORM_u_fill_color
-uniform lowp float u_fill_color_t;
-layout (location = 5) in highp vec4 a_fill_color;
+layout (location = 4) in highp vec4 a_fill_color;
 out highp vec4 fill_color;
-#else
-uniform highp vec4 u_fill_color;
 #endif
 #ifndef HAS_UNIFORM_u_halo_color
-uniform lowp float u_halo_color_t;
-layout (location = 6) in highp vec4 a_halo_color;
+layout (location = 5) in highp vec4 a_halo_color;
 out highp vec4 halo_color;
-#else
-uniform highp vec4 u_halo_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-uniform lowp float u_opacity_t;
-layout (location = 7) in lowp vec2 a_opacity;
+layout (location = 6) in lowp vec2 a_opacity;
 out lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_halo_width
-uniform lowp float u_halo_width_t;
-layout (location = 8) in lowp vec2 a_halo_width;
+layout (location = 7) in lowp vec2 a_halo_width;
 out lowp float halo_width;
-#else
-uniform lowp float u_halo_width;
 #endif
 #ifndef HAS_UNIFORM_u_halo_blur
-uniform lowp float u_halo_blur_t;
-layout (location = 9) in lowp vec2 a_halo_blur;
+layout (location = 8) in lowp vec2 a_halo_blur;
 out lowp float halo_blur;
-#else
-uniform lowp float u_halo_blur;
 #endif
 
 void main() {
@@ -110,7 +127,7 @@ lowp float halo_blur = u_halo_blur;
     vec2 a_size = a_data.zw;
 
     float a_size_min = floor(a_size[0] * 0.5);
-    vec2 a_pxoffset = a_pixeloffset.xy;
+    float is_sdf = a_size[0] - 2.0 * a_size_min;
 
     highp float segment_angle = -a_projected_pos[2];
     float size;
@@ -141,7 +158,7 @@ lowp float halo_blur = u_halo_blur;
 
     size *= perspective_ratio;
 
-    float fontScale = u_is_text ? size / 24.0 : size;
+    float fontScale = size / 24.0;
 
     highp float symbol_rotation = 0.0;
     if (u_rotate_symbol) {
@@ -161,52 +178,91 @@ lowp float halo_blur = u_halo_blur;
     mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
     vec4 projected_pos = u_label_plane_matrix * vec4(a_projected_pos.xy, 0.0, 1.0);
-    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * fontScale + a_pxoffset), 0.0, 1.0);
+    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * fontScale), 0.0, 1.0);
     float gamma_scale = gl_Position.w;
 
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);
     float fade_change = fade_opacity[1] > 0.5 ? u_fade_change : -u_fade_change;
     float interpolated_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
 
-    v_data0 = a_tex / u_texsize;
-    v_data1 = vec3(gamma_scale, size, interpolated_fade_opacity);
+    v_data0.xy = a_tex / u_texsize;
+    v_data0.zw = a_tex / u_texsize_icon;
+    v_data1 = vec4(gamma_scale, size, interpolated_fade_opacity, is_sdf);
 }
 )";
     static constexpr const char* fragment = R"(#define SDF_PX 8.0
 
-uniform bool u_is_halo;
-uniform sampler2D u_texture;
-uniform highp float u_gamma_scale;
-uniform lowp float u_device_pixel_ratio;
-uniform bool u_is_text;
+#define SDF 1.0
+#define ICON 0.0
 
-in vec2 v_data0;
-in vec3 v_data1;
+layout (std140) uniform SymbolDrawableUBO {
+    highp mat4 u_matrix;
+    highp mat4 u_label_plane_matrix;
+    highp mat4 u_coord_matrix;
+
+    highp vec2 u_texsize;
+    highp vec2 u_texsize_icon;
+
+    highp float u_gamma_scale;
+    highp float u_device_pixel_ratio;
+
+    highp float u_camera_to_center_distance;
+    highp float u_pitch;
+    bool u_rotate_symbol;
+    highp float u_aspect_ratio;
+    highp float u_fade_change;
+    highp float u_pad2;
+};
+
+layout (std140) uniform SymbolDrawablePaintUBO {
+    highp vec4 u_fill_color;
+    highp vec4 u_halo_color;
+    highp float u_opacity;
+    highp float u_halo_width;
+    highp float u_halo_blur;
+    highp float u_padding;
+};
+
+layout (std140) uniform SymbolDrawableTilePropsUBO {
+    bool u_is_text;
+    bool u_is_halo;
+    bool u_pitch_with_map;
+    bool u_is_size_zoom_constant;
+    bool u_is_size_feature_constant;
+    highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
+    highp float u_size; // used when size is both zoom and feature constant
+    bool u_pad3;
+};
+
+layout (std140) uniform SymbolDrawableInterpolateUBO {
+    highp float u_fill_color_t;
+    highp float u_halo_color_t;
+    highp float u_opacity_t;
+    highp float u_halo_width_t;
+    highp float u_halo_blur_t;
+    highp float u_pad4,u_pad5,u_pad6;
+};
+
+uniform sampler2D u_texture;
+uniform sampler2D u_texture_icon;
+
+in vec4 v_data0;
+in vec4 v_data1;
 
 #ifndef HAS_UNIFORM_u_fill_color
 in highp vec4 fill_color;
-#else
-uniform highp vec4 u_fill_color;
 #endif
 #ifndef HAS_UNIFORM_u_halo_color
 in highp vec4 halo_color;
-#else
-uniform highp vec4 u_halo_color;
 #endif
 #ifndef HAS_UNIFORM_u_opacity
 in lowp float opacity;
-#else
-uniform lowp float u_opacity;
 #endif
 #ifndef HAS_UNIFORM_u_halo_width
 in lowp float halo_width;
-#else
-uniform lowp float u_halo_width;
 #endif
 #ifndef HAS_UNIFORM_u_halo_blur
 in lowp float halo_blur;
-#else
-uniform lowp float u_halo_blur;
 #endif
 
 void main() {
@@ -226,14 +282,27 @@ lowp float halo_width = u_halo_width;
 lowp float halo_blur = u_halo_blur;
 #endif
 
-    float EDGE_GAMMA = 0.105 / u_device_pixel_ratio;
-
-    vec2 tex = v_data0.xy;
-    float gamma_scale = v_data1.x;
-    float size = v_data1.y;
     float fade_opacity = v_data1[2];
 
-    float fontScale = u_is_text ? size / 24.0 : size;
+    if (v_data1.w == ICON) {
+        vec2 tex_icon = v_data0.zw;
+        lowp float alpha = opacity * fade_opacity;
+        fragColor = texture(u_texture_icon, tex_icon) * alpha;
+
+#ifdef OVERDRAW_INSPECTOR
+        fragColor = vec4(1.0);
+#endif
+        return;
+    }
+
+    vec2 tex = v_data0.xy;
+
+    float EDGE_GAMMA = 0.105 / u_device_pixel_ratio;
+
+    float gamma_scale = v_data1.x;
+    float size = v_data1.y;
+
+    float fontScale = size / 24.0;
 
     lowp vec4 color = fill_color;
     highp float gamma = EDGE_GAMMA / (fontScale * u_gamma_scale);

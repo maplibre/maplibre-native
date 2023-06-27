@@ -159,7 +159,7 @@ public:
                 static_cast<float>(components[3])};
     }
 
-    virtual const std::optional<UniqueDrawableData>& getData() const { return drawableData; }
+    virtual const UniqueDrawableData& getData() const { return drawableData; }
     virtual void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
 protected:
@@ -174,7 +174,7 @@ protected:
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
-    std::optional<UniqueDrawableData> drawableData{};
+    UniqueDrawableData drawableData{};
 
     struct Impl;
     std::unique_ptr<Impl> impl;

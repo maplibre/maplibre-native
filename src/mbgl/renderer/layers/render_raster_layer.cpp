@@ -51,8 +51,8 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
-        tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+    if (layerGroup && layerGroup->getLayerTweaker()) {
+        layerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
     }
 #endif
 }
@@ -214,9 +214,15 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
         }
     }
 }
+
 #endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
+void RenderRasterLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    RenderLayer::markLayerRenderable(willRender, changes);
+    activateLayerGroup(imageLayerGroup, willRender, changes);
+}
+
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -225,13 +231,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_lock<std::mutex> guard(mutex);
 
     if ((!renderTiles || renderTiles->empty()) && !imageData) {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
+        if (layerGroup) {
+            stats.drawablesRemoved += layerGroup->clearDrawables();
         }
         if (imageLayerGroup) {
-            //            stats.tileDrawablesRemoved += layerScene->getDrawableCount();
-            imageLayerGroup->clearDrawables();
+            stats.drawablesRemoved += imageLayerGroup->clearDrawables();
         }
         return;
     }
@@ -387,11 +391,12 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         RasterBucket& bucket = *imageData->bucket;
         if (!bucket.vertices.empty()) {
             if (imageLayerGroup) {
-                imageLayerGroup->clearDrawables();
+                stats.drawablesRemoved += imageLayerGroup->clearDrawables();
             } else {
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
                 imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+                activateLayerGroup(imageLayerGroup, isRenderable, changes);
             }
 
             auto builder = createBuilder();
@@ -400,16 +405,17 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
                 // finish
                 builder->flush();
+
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
                     imageLayerGroup->addDrawable(std::move(drawable));
-                    ++stats.tileDrawablesAdded;
+                    ++stats.drawablesAdded;
                 }
             }
         }
     } else if (renderTiles) {
-        if (tileLayerGroup) {
-            tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+        if (layerGroup) {
+            layerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
                 // Has this tile dropped out of the cover set?
                 if (const auto it = std::find_if(renderTiles->begin(),
                                                  renderTiles->end(),
@@ -420,14 +426,18 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                     it == renderTiles->end()) {
                     // remove it
                     drawable.reset();
-                    ++stats.tileDrawablesRemoved;
+                    ++stats.drawablesRemoved;
                 }
             });
         } else {
             // Set up a tile layer group
-            tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-            tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+            if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+                layerGroup_->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+                setLayerGroup(std::move(layerGroup_), changes);
+            }
         }
+
+        auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
         auto builder = createBuilder();
         for (const RenderTile& tile : *renderTiles) {
@@ -449,7 +459,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setTileID(tileID);
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.tileDrawablesAdded;
+                    ++stats.drawablesAdded;
                 }
             };
         }
