@@ -577,7 +577,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("lineSDF")};
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineSDFShader));
             builder->setRenderPass(renderPass);
-            builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
             builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                      : gfx::DepthMaskType::ReadOnly);
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -641,7 +640,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("linePattern")};
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(linePatternShader));
             builder->setRenderPass(renderPass);
-            builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
             builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                      : gfx::DepthMaskType::ReadOnly);
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -704,7 +702,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("lineGradient")};
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineGradientShader));
             builder->setRenderPass(renderPass);
-            builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
             builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                      : gfx::DepthMaskType::ReadOnly);
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -777,7 +774,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("line")};
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineShader));
             builder->setRenderPass(renderPass);
-            builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
             builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                      : gfx::DepthMaskType::ReadOnly);
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
