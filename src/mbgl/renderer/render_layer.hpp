@@ -17,6 +17,7 @@
 namespace mbgl {
 class Bucket;
 class DynamicFeatureIndex;
+class LayerGroupBase;
 class LineAtlas;
 class PropertyEvaluationParameters;
 class PaintParameters;
@@ -30,8 +31,7 @@ class UploadParameters;
 
 #if MLN_DRAWABLE_RENDERER
 class ChangeRequest;
-class TileLayerGroup;
-using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
+using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
 #endif
@@ -160,6 +160,12 @@ public:
     virtual void update(
         gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const RenderTree&, UniqueChangeRequestVec&) {}
 
+    /// Called when the style layer is replaced (same ID and type), and the render layer is reused.
+    virtual void layerChanged(const TransitionParameters&,
+                              const Immutable<style::Layer::Impl>& newLayer,
+                              UniqueChangeRequestVec&);
+
+    /// Called when the style layer is removed
     virtual void layerRemoved(UniqueChangeRequestVec&);
 
     /// @brief Called by the RenderOrchestrator during RenderTree construction.
@@ -185,11 +191,16 @@ protected:
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
 #if MLN_DRAWABLE_RENDERER
+    void setLayerGroup(LayerGroupBasePtr, UniqueChangeRequestVec&);
+
+    /// (Un-)Register the layer group with the orchestrator
+    void activateLayerGroup(const LayerGroupBasePtr&, bool activate, UniqueChangeRequestVec& changes);
+
     /// Remove all drawables for the tile from the layer group
     void removeTile(RenderPass, const OverscaledTileID&);
 
     /// Remove all the drawables for tiles
-    void removeAllTiles();
+    void removeAllDrawables();
 #endif
 
 protected:
@@ -203,10 +214,12 @@ protected:
     LayerPlacementData placementData;
 
 #if MLN_DRAWABLE_RENDERER
-    TileLayerGroupPtr tileLayerGroup;
+    // will need to be overriden to handle their activation.
+    LayerGroupBasePtr layerGroup;
 #endif
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};
+
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
@@ -214,8 +227,8 @@ protected:
 
     struct Stats {
         size_t propertyEvaluations = 0;
-        size_t tileDrawablesAdded = 0;
-        size_t tileDrawablesRemoved = 0;
+        size_t drawablesAdded = 0;
+        size_t drawablesRemoved = 0;
     } stats;
 
 private:

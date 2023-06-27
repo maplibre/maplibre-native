@@ -65,7 +65,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         if (!drawable.getTileID()) {
             // this is an image drawable
             if (const auto& data = drawable.getData()) {
-                const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data.value());
+                const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data);
 
                 matrix = imageData.matrix;
             } else {

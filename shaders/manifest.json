@@ -55,6 +55,34 @@
         "glsl_frag": "drawable.raster.fragment.glsl",
         "uses_ubos": true
     },
+    {
+        "name": "SymbolIconShader",
+        "header": "drawable_symbol_icon",
+        "glsl_vert": "drawable.symbol_icon.vertex.glsl",
+        "glsl_frag": "drawable.symbol_icon.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "SymbolSDFTextShader",
+        "header": "drawable_symbol_sdf_text",
+        "glsl_vert": "drawable.symbol_sdf.vertex.glsl",
+        "glsl_frag": "drawable.symbol_sdf.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "SymbolSDFIconShader",
+        "header": "drawable_symbol_sdf_icon",
+        "glsl_vert": "drawable.symbol_sdf.vertex.glsl",
+        "glsl_frag": "drawable.symbol_sdf.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "SymbolTextAndIconShader",
+        "header": "drawable_symbol_text_and_icon",
+        "glsl_vert": "drawable.symbol_text_and_icon.vertex.glsl",
+        "glsl_frag": "drawable.symbol_text_and_icon.fragment.glsl",
+        "uses_ubos": true
+    },
 
     {
         "name": "Prelude",

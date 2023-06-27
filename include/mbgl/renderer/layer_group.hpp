@@ -50,8 +50,12 @@ public:
 
     int32_t getLayerIndex() const { return layerIndex; }
 
+    void updateLayerIndex(int32_t value) { layerIndex = value; }
+
     virtual std::size_t getDrawableCount() const = 0;
     bool empty() const { return getDrawableCount() == 0; }
+
+    virtual std::size_t clearDrawables() = 0;
 
     /// Called before starting each frame
     virtual void preRender(RenderOrchestrator&, PaintParameters&) {}
@@ -90,8 +94,6 @@ public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~TileLayerGroup() override;
 
-    void updateLayerIndex(int32_t newLayerIndex);
-
     std::size_t getDrawableCount() const override;
     std::size_t getDrawableCount(mbgl::RenderPass, const OverscaledTileID&) const;
 
@@ -106,7 +108,7 @@ public:
     void observeDrawables(mbgl::RenderPass, const OverscaledTileID&, std::function<void(gfx::Drawable&)>&&);
     void observeDrawables(mbgl::RenderPass, const OverscaledTileID&, std::function<void(const gfx::Drawable&)>&&) const;
 
-    std::size_t clearDrawables();
+    std::size_t clearDrawables() override;
 
 protected:
     struct Impl;
@@ -121,8 +123,6 @@ public:
     LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~LayerGroup() override;
 
-    void updateLayerIndex(int32_t newLayerIndex);
-
     std::size_t getDrawableCount() const override;
     std::size_t getDrawableCount(mbgl::RenderPass) const;
 
@@ -133,7 +133,7 @@ public:
     void observeDrawables(std::function<void(const gfx::Drawable&)>) const override;
     void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) override;
 
-    std::size_t clearDrawables();
+    std::size_t clearDrawables() override;
 
 protected:
     struct Impl;
