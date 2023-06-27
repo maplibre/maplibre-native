@@ -26,6 +26,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
+- Fix "... has unresolved theme attributes" error in BitMapUtils ([#1274](https://github.com/maplibre/maplibre-native/issues/1274)).
+
 ### ⛵ Dependencies
 
 ## 10.1.0 - May 9, 2023
