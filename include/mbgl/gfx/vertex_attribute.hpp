@@ -38,16 +38,14 @@ public:
     using ElementType =
         std::variant<std::int32_t, ushort8, int2, int3, int4, float, float2, float3, float4, matf3, matf4>;
 
-    VertexAttribute(int index_, AttributeDataType dataType_, int size_, std::size_t count_, std::size_t stride_)
+    VertexAttribute(int index_, AttributeDataType dataType_, std::size_t count_, std::size_t stride_)
         : index(index_),
-          size(size_),
           stride((int)stride_),
           dataType(dataType_),
           items(count_) {}
     VertexAttribute(const VertexAttribute&) = default;
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
-          size(other.size),
           dataType(other.dataType),
           items(std::move(other.items)) {}
 
@@ -56,8 +54,6 @@ public:
 
     int getIndex() const { return index; }
     void setIndex(int value) { index = value; }
-
-    std::size_t getSize() const { return size; }
 
     std::size_t getStride() const { return stride; }
 
@@ -125,7 +121,6 @@ protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
     VertexAttribute& operator=(VertexAttribute&& other) {
         index = other.index;
-        size = other.size;
         dataType = other.dataType;
         items = std::move(other.items);
         return *this;
@@ -133,7 +128,6 @@ protected:
 
 protected:
     int index;
-    int size;
     int stride;
 
     /// indicates that a value has changed and any cached result should be discarded
@@ -175,17 +169,18 @@ public:
     const std::unique_ptr<VertexAttribute>& add(std::string name,
                                                 int index = -1,
                                                 AttributeDataType = AttributeDataType::Invalid,
-                                                int size = 1,
                                                 std::size_t count = 1);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
     /// The result is valid only until the next non-const method call on this class.
+    /// @param index index to match, or -1 for any
+    /// @param type type to match, or `Invalid` for any
+    /// @param count type to match, or 0 for any
     const std::unique_ptr<VertexAttribute>& getOrAdd(std::string name,
                                                      int index = -1,
-                                                     AttributeDataType = AttributeDataType::Invalid,
-                                                     int size = 1,
-                                                     std::size_t count = 1);
+                                                     AttributeDataType type = AttributeDataType::Invalid,
+                                                     std::size_t count = 0);
 
     // Set a value if the element is present
     template <typename T>
@@ -272,11 +267,8 @@ protected:
         }
     }
 
-    virtual std::unique_ptr<VertexAttribute> create(int index,
-                                                    AttributeDataType dataType,
-                                                    int size,
-                                                    std::size_t count) const {
-        return std::make_unique<VertexAttribute>(index, dataType, size, count, size * count);
+    virtual std::unique_ptr<VertexAttribute> create(int index, AttributeDataType dataType, std::size_t count) const {
+        return std::make_unique<VertexAttribute>(index, dataType, count, count);
     }
 
     virtual void copy(const VertexAttributeArray& other) {

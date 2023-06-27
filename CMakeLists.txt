@@ -11,6 +11,10 @@ option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
+option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" OFF)
+option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" ON)
+option(MLN_RENDERER_SPLIT_VIEW "Enable a split view if both renderers are enabled" ON)
+option(MLN_RENDERER_QUAD_SPLIT_VIEW "When using split view, split opaque and translucent passes as well" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -130,6 +134,75 @@ else()
     add_library(mbgl-core STATIC)
 endif()
 
+if(MLN_DRAWABLE_RENDERER)
+    list(APPEND INCLUDE_FILES
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
+        
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/texture2d.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/change_request.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_group.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program_mtl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
+
+        
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
+    )
+    list(APPEND SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
+        
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/change_request.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/tile_layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
+
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
+    )
+endif()
+
 list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor_ref.hpp
@@ -140,22 +213,13 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/scheduler.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_data.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_registry.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/texture2d.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
@@ -185,17 +249,11 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/platform/settings.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/platform/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/query.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_group.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_frontend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_state.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_group_gl.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program_mtl.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/database_file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/storage/file_source_manager.hpp
@@ -315,7 +373,6 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geo.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geojson.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geometry.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/ignore.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/image.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/immutable.hpp
@@ -330,7 +387,6 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/run_loop.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp
@@ -384,7 +440,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_scope.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
@@ -398,15 +453,12 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/upload_pass.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/background_layer_factory.cpp
@@ -614,9 +666,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/transition_parameters.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/update_parameters.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/upload_parameters.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/sprite/sprite_loader_observer.hpp
@@ -868,7 +917,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_header.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_timeout.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_timeout.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/i18n.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/i18n.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/interpolate.cpp
@@ -924,29 +972,27 @@ if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
+        PRIVATE
+            MBGL_RENDER_BACKEND_OPENGL=1
+            "MLN_RENDERER_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_SPLIT_VIEW}>"
+            "MLN_RENDERER_QUAD_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_QUAD_SPLIT_VIEW}>"
+        PUBLIC
+            "MLN_LEGACY_RENDERER=$<BOOL:${MLN_LEGACY_RENDERER}>"
+            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"    
     )
     list(APPEND 
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_tweaker.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/platform/gl_functions.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/change_request.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_source.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_group_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
@@ -1003,17 +1049,12 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/defines.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/draw_scope_resource.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/framebuffer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/index_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/index_buffer_resource.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/object.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/object.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.cpp
@@ -1028,26 +1069,21 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/types.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/upload_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/upload_pass.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/value.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/value.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/change_request.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer.cpp

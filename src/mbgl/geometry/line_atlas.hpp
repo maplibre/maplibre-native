@@ -1,14 +1,20 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
-#include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/image.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/texture2d.hpp>
+#include <variant>
+#else
+#include <mbgl/util/variant.hpp>
+#include <optional>
+#endif
 
 #include <map>
 #include <memory>
 #include <vector>
-#include <variant>
 
 namespace mbgl {
 
@@ -56,7 +62,12 @@ public:
 
 private:
     LinePatternPos from, to;
+
+#if MLN_DRAWABLE_RENDERER
     std::variant<AlphaImage, gfx::Texture2DPtr> texture;
+#else
+    variant<AlphaImage, gfx::Texture> texture;
+#endif
 };
 
 class LineAtlas {

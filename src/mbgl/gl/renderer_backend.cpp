@@ -4,8 +4,11 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/extension.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
-#include <mbgl/shaders/gl/shader_group_gl.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/shaders/gl/shader_group_gl.hpp>
+#endif
 
 #include <cassert>
 
@@ -66,6 +69,7 @@ void RendererBackend::setScissorTest(bool enabled) {
 
 RendererBackend::~RendererBackend() = default;
 
+#if MLN_DRAWABLE_RENDERER
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
 /// @param registry A shader registry instance
@@ -102,6 +106,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillPatternShader,
                   shaders::BuiltIn::RasterShader>(shaders, programParameters);
 }
+#endif
 
 } // namespace gl
 } // namespace mbgl

@@ -100,6 +100,7 @@ void RenderLineLayer::upload(gfx::UploadPass& uploadPass) {
     }
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderLineLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass == RenderPass::Opaque) {
@@ -219,6 +220,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 namespace {
 

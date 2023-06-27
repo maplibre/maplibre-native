@@ -6,6 +6,8 @@
 #include <mbgl/gl/drawable_gl_impl.hpp>
 #include <mbgl/util/convert.hpp>
 
+#include <cstring>
+
 namespace mbgl {
 namespace gl {
 
@@ -20,31 +22,17 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableGLBuilder::createSegment(gfx
 void DrawableGLBuilder::init() {
     auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
 
-    auto& attrs = drawableGL.mutableVertexAttributes();
-    if (const auto& posAttr = attrs.getOrAdd(vertexAttrName)) {
-        std::size_t index = 0;
-        for (const auto& vert : impl->vertices.vector()) {
-            posAttr->set(index++, gfx::VertexAttribute::int2{vert.a1[0], vert.a1[1]});
-        }
-    }
-    if (colorAttrMode != ColorAttrMode::None && !colorAttrName.empty()) {
-        if (const auto& colorAttr = attrs.getOrAdd(colorAttrName)) {
-            // We should have either a single color or one per vertex.  Otherwise,
-            // the color mode was probably changed after vertexes were added.
-            if (impl->colors.size() > 1 && impl->colors.size() != impl->vertices.elements()) {
-                impl->colors.clear();
-            }
+    drawableGL.setVertexAttrName(vertexAttrName);
 
-            if (impl->colors.empty()) {
-                colorAttr->set(0, gfx::Drawable::colorAttrRGBA(getColor()));
-            } else {
-                std::size_t index = 0;
-                colorAttr->reserve(impl->colors.size());
-                for (const auto& color : impl->colors) {
-                    colorAttr->set(index++, gfx::Drawable::colorAttrRGBA(color));
-                }
-            }
-        }
+    if (impl->rawVerticesCount) {
+        auto raw = impl->rawVertices;
+        drawableGL.setVertices(std::move(raw), impl->rawVerticesCount, impl->rawVerticesType);
+    } else {
+        const auto& verts = impl->vertices.vector();
+        constexpr auto vertSize = sizeof(std::remove_reference<decltype(verts)>::type::value_type);
+        std::vector<uint8_t> raw(verts.size() * vertSize);
+        std::memcpy(raw.data(), verts.data(), raw.size());
+        drawableGL.setVertices(std::move(raw), verts.size(), gfx::AttributeDataType::Short2);
     }
 
     drawableGL.setIndexData(std::move(impl->indexes), std::move(impl->segments));
@@ -52,7 +40,6 @@ void DrawableGLBuilder::init() {
     impl->indexes.clear();
     impl->segments.clear();
     impl->vertices.clear();
-    impl->colors.clear();
 }
 
 } // namespace gl

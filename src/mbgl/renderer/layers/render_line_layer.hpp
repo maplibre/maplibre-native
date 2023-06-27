@@ -46,7 +46,10 @@ private:
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
     void upload(gfx::UploadPass&) override;
+
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -70,6 +73,7 @@ private:
     /// Remove all drawables for the tile from the layer group
     void removeTile(RenderPass, const OverscaledTileID&);
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<LineProgram> lineProgram;
     std::shared_ptr<LineGradientProgram> lineGradientProgram;
@@ -80,6 +84,7 @@ private:
     gfx::ShaderGroupPtr lineGradientShaderGroup;
     gfx::ShaderGroupPtr lineSDFShaderGroup;
     gfx::ShaderGroupPtr linePatternShaderGroup;
+#endif
 };
 
 } // namespace mbgl

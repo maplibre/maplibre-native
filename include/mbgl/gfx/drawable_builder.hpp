@@ -10,7 +10,6 @@
 
 namespace mbgl {
 
-class Color;
 class SegmentBase;
 
 namespace gfx {
@@ -66,20 +65,6 @@ public:
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);
 
-    /// The color used for emitted vertexes
-    const Color& getColor() const;
-    void setColor(const Color& value);
-
-    /// Handling of color attributes
-    enum class ColorAttrMode {
-        None,
-        PerDrawable,
-        PerVertex
-    };
-    /// Set how the color value is used
-    /// This should not be changed while a build is in progress
-    void setColorAttrMode(ColorAttrMode mode) { colorAttrMode = mode; }
-
     /// Width for lines
     float getLineWidth() const { return lineWidth; }
     void setLineWidth(float value) { lineWidth = value; }
@@ -104,9 +89,8 @@ public:
     /// Set the name given to new drawables
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
-    /// The attribute names for automatic attributes (vertex/position and color, if color mode is not `None`)
+    /// The attribute names for vertex/position attributes
     void setVertexAttrName(std::string value) { vertexAttrName = std::move(value); }
-    void setColorAttrName(std::string value) { colorAttrName = std::move(value); }
 
     /// @brief Attach the given texture at the given sampler location.
     /// @param texture Texture2D instance
@@ -133,6 +117,10 @@ public:
                             std::size_t vertexOffset,
                             std::size_t vertexLength);
 
+    /// Provide raw data for vertices
+    /// Incompatible with adding primitives
+    void setRawVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType);
+
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<SegmentBase>&);
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
 
@@ -149,6 +137,8 @@ public:
                       std::size_t baseIndex = 0);
 
 protected:
+    std::size_t curVertexCount() const;
+
     /// Create an instance of the appropriate drawable type
     virtual UniqueDrawable createDrawable() const = 0;
 
@@ -162,7 +152,6 @@ protected:
     std::string name;
     std::string drawableName;
     std::string vertexAttrName;
-    std::string colorAttrName;
     mbgl::RenderPass renderPass;
     bool needsStencil = false;
     float lineWidth = 1.0f;
@@ -172,7 +161,6 @@ protected:
     gfx::ShaderProgramBasePtr shader;
     UniqueDrawable currentDrawable;
     std::vector<UniqueDrawable> drawables;
-    ColorAttrMode colorAttrMode = ColorAttrMode::PerVertex;
     VertexAttributeArray vertexAttrs;
     gfx::Drawable::Textures textures;
     Drawable::TexSourceFunc textureSource;

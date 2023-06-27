@@ -1,6 +1,5 @@
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
@@ -8,14 +7,11 @@
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
@@ -25,6 +21,13 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/std.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#endif
 
 namespace mbgl {
 
@@ -74,9 +77,12 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     }
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+#if MLN_DRAWABLE_RENDERER
     if (tileLayerGroup) {
         tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
     }
+#endif
 }
 
 bool RenderFillLayer::hasTransition() const {
@@ -87,6 +93,7 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
 
@@ -254,6 +261,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
                                              const GeometryTileFeature& feature,
@@ -273,18 +281,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
-void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
-    }
-}
-
-void RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
-}
-
+#if MLN_DRAWABLE_RENDERER
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
@@ -293,9 +290,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->clearDrawables();
-        }
+        removeAllTiles();
         return;
     }
 
@@ -307,13 +302,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
     }
-
-    const auto removeAll = [&]() {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
-        }
-    };
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
@@ -328,7 +316,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         outlinePatternShaderGroup = shaders.getShaderGroup(std::string(FillOutlinePatternShaderName));
     }
     if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
-        removeAll();
+        removeAllTiles();
         return;
     }
 
@@ -342,7 +330,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
     std::unique_ptr<gfx::DrawableBuilder> patternBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
-    std::vector<gfx::DrawablePtr> newTiles;
     gfx::VertexAttributeArray fillVertexAttrs;
     gfx::VertexAttributeArray outlineVertexAttrs;
     gfx::VertexAttributeArray patternVertexAttrs;
@@ -368,7 +355,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
-        builder.setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
         builder.setNeedsStencil(true);
     };
@@ -434,8 +420,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         std::vector<std::array<int16_t, 2>> rawVerts;
         const auto buildVertices = [&]() {
-            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
-                verts = bucket.vertices.vector();
+            const auto& verts = bucket.vertices.vector();
             if (rawVerts.size() < verts.size()) {
                 rawVerts.resize(verts.size());
                 std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
@@ -584,5 +569,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
+#endif
 
 } // namespace mbgl

@@ -5,7 +5,7 @@
 
 namespace mbgl {
 
-static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices() {
+gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> RenderStaticData::tileVertices() {
     gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> result;
     result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, 0}}}));
     result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, 0}}}));
@@ -14,7 +14,7 @@ static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices
     return result;
 }
 
-static gfx::IndexVector<gfx::Triangles> quadTriangleIndices() {
+gfx::IndexVector<gfx::Triangles> RenderStaticData::quadTriangleIndices() {
     gfx::IndexVector<gfx::Triangles> result;
     result.emplace_back(0, 1, 2);
     result.emplace_back(1, 2, 3);

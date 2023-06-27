@@ -38,6 +38,8 @@ public:
     struct DrawSegmentGL;
     void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments);
 
+    void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType);
+
     const gfx::VertexAttributeArray& getVertexAttributes() const override;
     void setVertexAttributes(const gfx::VertexAttributeArray& value) override;
     void setVertexAttributes(gfx::VertexAttributeArray&& value) override;
@@ -47,8 +49,7 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    /// Reset a single color attribute for all vertexes
-    void resetColor(const Color&) override;
+    void setVertexAttrName(std::string);
 
     void upload(gfx::UploadPass&);
 

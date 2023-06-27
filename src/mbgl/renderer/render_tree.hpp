@@ -1,6 +1,7 @@
 #pragma once
-
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
+#endif
 #include <mbgl/renderer/paint_parameters.hpp>
 
 #include <cassert>
