@@ -35,10 +35,12 @@ using namespace style;
 
 namespace {
 
+#if MLN_DRAWABLE_RENDERER
 constexpr std::string_view FillShaderName = "FillShader";
 constexpr std::string_view FillOutlineShaderName = "FillOutlineShader";
 constexpr std::string_view FillPatternShaderName = "FillPatternShader";
 constexpr std::string_view FillOutlinePatternShaderName = "FillOutlinePatternShader";
+#endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillLayer::Impl::staticTypeInfo());
