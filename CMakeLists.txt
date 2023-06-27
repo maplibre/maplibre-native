@@ -170,7 +170,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
-        
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
@@ -440,11 +441,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_scope.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/offscreen_texture.hpp
