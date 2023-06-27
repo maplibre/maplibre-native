@@ -55,7 +55,7 @@ public:
 #if MLN_DRAWABLE_RENDERER
     const std::shared_ptr<gfx::Texture2D>& getTexture() const;
 #endif
-    
+
     // Returns the size of the texture image.
     Size getSize() const;
 
