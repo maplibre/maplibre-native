@@ -392,6 +392,10 @@ public class MapboxGLSurfaceView extends SurfaceView implements SurfaceHolder.Ca
           mEglContext = null;
         } else {
           mEglConfig = view.eglConfigChooser.chooseConfig(mEgl, mEglDisplay);
+          if (mEglConfig == null) {
+            Log.e(TAG, "failed to select an EGL configuration");
+            return;
+          }
 
           /*
            * Create an EGL context. We want to do this as rarely as we can, because an

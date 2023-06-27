@@ -15,14 +15,14 @@ public:
     explicit RenderRasterLayer(Immutable<style::RasterLayer::Impl>);
     ~RenderRasterLayer() override;
 
-    void layerRemoved(UniqueChangeRequestVec&) override;
-
+#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
+#endif
 
 private:
     void transition(const TransitionParameters&) override;
@@ -30,20 +30,24 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
-    void render(PaintParameters&) override;
 
-    /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&);
+#if MLN_LEGACY_RENDERER
+    void render(PaintParameters&) override;
+#endif
 
     // Paint properties
     style::RasterPaintProperties::Unevaluated unevaluated;
     const ImageSourceRenderData* imageData = nullptr;
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<RasterProgram> rasterProgram;
+#endif
 
+#if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr rasterShader;
     LayerGroupPtr imageLayerGroup;
+#endif
 };
 
 } // namespace mbgl

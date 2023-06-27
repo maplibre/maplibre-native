@@ -21,7 +21,10 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
 
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
+
     void prepare(const LayerPrepareParameters&) override;
 
     // Paint properties
@@ -31,9 +34,11 @@ private:
     std::array<float, 2> getLatRange(const UnwrappedTileID& id);
     std::array<float, 2> getLight(const PaintParameters& parameters);
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<HillshadeProgram> hillshadeProgram;
     std::shared_ptr<HillshadePrepareProgram> hillshadePrepareProgram;
+#endif
 };
 
 } // namespace mbgl

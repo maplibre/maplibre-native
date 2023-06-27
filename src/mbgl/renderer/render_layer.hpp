@@ -1,7 +1,9 @@
 #pragma once
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/change_request.hpp>
+#endif
+#include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/style/layer_properties.hpp>
@@ -14,7 +16,6 @@
 
 namespace mbgl {
 class Bucket;
-class ChangeRequest;
 class DynamicFeatureIndex;
 class LineAtlas;
 class PropertyEvaluationParameters;
@@ -23,22 +24,28 @@ class PatternAtlas;
 class RenderTile;
 class RenderTree;
 class SymbolBucket;
-class TileLayerGroup;
 class TransformState;
 class TransitionParameters;
 class UploadParameters;
 
+#if MLN_DRAWABLE_RENDERER
+class ChangeRequest;
+class TileLayerGroup;
 using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using UniqueChangeRequest = std::unique_ptr<ChangeRequest>;
 using UniqueChangeRequestVec = std::vector<UniqueChangeRequest>;
+#endif
 
 namespace gfx {
 class Context;
 class ShaderGroup;
 class ShaderRegistry;
-class UniformBuffer;
 using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
+
+#if MLN_DRAWABLE_RENDERER
+class UniformBuffer;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+#endif
 } // namespace gfx
 
 class LayerRenderData {
@@ -118,7 +125,7 @@ public:
     bool supportsZoom(float zoom) const;
 
     virtual void upload(gfx::UploadPass&) {}
-    virtual void render(PaintParameters&) = 0;
+    virtual void render(PaintParameters&){};
 
     // Check wether the given geometry intersects
     // with the feature
@@ -148,11 +155,12 @@ public:
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;
 
+#if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     virtual void update(
         gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const RenderTree&, UniqueChangeRequestVec&) {}
 
-    virtual void layerRemoved(UniqueChangeRequestVec&) {}
+    virtual void layerRemoved(UniqueChangeRequestVec&);
 
     /// @brief Called by the RenderOrchestrator during RenderTree construction.
     /// This event is run when a layer is added or removed from the style.
@@ -165,6 +173,7 @@ public:
     /// @param willRender Indicates if this layer should render or not
     /// @param changes The collection of current pending change requests
     virtual void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes);
+#endif
 
 protected:
     // Checks whether the current hardware can render this layer. If it can't,
@@ -174,6 +183,14 @@ protected:
     void addRenderPassesFromTiles();
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
+
+#if MLN_DRAWABLE_RENDERER
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&);
+
+    /// Remove all the drawables for tiles
+    void removeAllTiles();
+#endif
 
 protected:
     // Stores current set of tiles to be rendered for this layer.
@@ -185,7 +202,9 @@ protected:
 
     LayerPlacementData placementData;
 
+#if MLN_DRAWABLE_RENDERER
     TileLayerGroupPtr tileLayerGroup;
+#endif
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};
     // Current renderable status as specified by the markLayerRenderable event

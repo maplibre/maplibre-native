@@ -44,7 +44,7 @@ afterEvaluate {
                 artifactId project.ext.mapLibreArtifactId
                 version this.version
                 
-                from components.release
+                from components.legacyRelease
 
                 artifact androidSourcesJar
                 artifact androidJavadocsJar                

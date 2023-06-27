@@ -2,7 +2,9 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/change_request.hpp>
+#endif
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_layer.hpp>
@@ -222,13 +224,17 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
+#if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> changes;
+#endif
 
     // Remove render layers for removed layers.
     for (const auto& entry : layerDiff.removed) {
         const auto hit = renderLayers.find(entry.first);
         if (hit != renderLayers.end()) {
+#if MLN_DRAWABLE_RENDERER
             hit->second->layerRemoved(changes);
+#endif
             renderLayers.erase(hit);
         }
     }
@@ -248,14 +254,16 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     if (layersAddedOrRemoved) {
         orderedLayers.clear();
         orderedLayers.reserve(layerImpls->size());
-        int32_t layerIndex = 0;
+        [[maybe_unused]] int32_t layerIndex = 0;
         for (const auto& layerImpl : *layerImpls) {
             RenderLayer* layer = renderLayers.at(layerImpl->id).get();
             assert(layer);
             orderedLayers.emplace_back(*layer);
 
+#if MLN_DRAWABLE_RENDERER
             // We're mutating the list of ordered layers and must notify them of their new assigned indices
             layer->layerIndexChanged(layerIndex++, changes);
+#endif
         }
     }
     assert(orderedLayers.size() == renderLayers.size());
@@ -338,7 +346,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                         }
                     }
                 }
-
                 continue;
             }
 
@@ -360,6 +367,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         filteredLayersForSource.clear();
     }
 
+#if MLN_DRAWABLE_RENDERER
     // Mark layers included in the renderable set as renderable
     // @TODO: Optimize this logic, combine with the above
     for (size_t i = 0; i < orderedLayers.size(); ++i) {
@@ -371,6 +379,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Add all change requests up to this point
     addChanges(changes);
+#endif
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
     if (!isMapModeContinuous && !renderTreeParameters->loaded) {
@@ -766,29 +775,11 @@ void RenderOrchestrator::clearData() {
     glyphManager->evict(fontStacks(*layerImpls));
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
     pendingChanges.insert(
         pendingChanges.end(), std::make_move_iterator(changes.begin()), std::make_move_iterator(changes.end()));
     changes.clear();
-}
-
-void RenderOrchestrator::addDrawable(gfx::DrawablePtr drawable) {
-    if (drawable) {
-        const auto& id = drawable->getId();
-        if (!drawables.insert(std::make_pair(id, std::move(drawable))).second) {
-            Log::Warning(Event::General, "Duplicate drawable " + std::to_string(id) + " ignored");
-        }
-    }
-}
-
-void RenderOrchestrator::removeDrawable(const util::SimpleIdentity& drawableId) {
-    drawables.erase(drawableId);
-}
-
-const gfx::DrawablePtr noDrawable;
-const gfx::DrawablePtr& RenderOrchestrator::getDrawable(const util::SimpleIdentity& id) {
-    const auto hit = drawables.find(id);
-    return (hit != drawables.end()) ? hit->second : noDrawable;
 }
 
 void RenderOrchestrator::onRemoveLayerGroup(LayerGroupBase&) {}
@@ -898,6 +889,7 @@ void RenderOrchestrator::processChanges() {
 void RenderOrchestrator::markLayerGroupOrderDirty() {
     layerGroupOrderDirty = true;
 }
+#endif // MLN_DRAWABLE_RENDERER
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        const GlyphRange& glyphRange,

@@ -1,7 +1,5 @@
 #include <mbgl/renderer/layers/render_raster_layer.hpp>
-#include <mbgl/renderer/layers/raster_layer_tweaker.hpp>
 #include <mbgl/renderer/buckets/raster_bucket.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -10,12 +8,17 @@
 #include <mbgl/programs/raster_program.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layers/raster_layer_tweaker.hpp>
 #include <mbgl/gfx/image_drawable_data.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#endif
 
 namespace mbgl {
 
@@ -47,9 +50,11 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
+#if MLN_DRAWABLE_RENDERER
     if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
         tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
     }
+#endif
 }
 
 bool RenderRasterLayer::hasTransition() const {
@@ -60,6 +65,7 @@ bool RenderRasterLayer::hasCrossfade() const {
     return false;
 }
 
+#if MLN_LEGACY_RENDERER
 static float saturationFactor(float saturation) {
     if (saturation > 0) {
         return 1.f - 1.f / (1.001f - saturation);
@@ -84,6 +90,7 @@ static std::array<float, 3> spinWeights(float spin) {
         {(2 * c + 1) / 3, (-std::sqrt(3.0f) * s - c + 1) / 3, (std::sqrt(3.0f) * s - c + 1) / 3}};
     return spin_weights;
 }
+#endif
 
 void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTiles();
@@ -92,6 +99,7 @@ void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     assert(renderTiles || imageData || !params.source->isEnabled());
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderRasterLayer::render(PaintParameters& parameters) {
     if (parameters.pass != RenderPass::Translucent || (!renderTiles && !imageData)) {
         return;
@@ -206,19 +214,9 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
-void RenderRasterLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
-    }
-}
-
-void RenderRasterLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
-}
-
+#if MLN_DRAWABLE_RENDERER
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -255,7 +253,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
-        builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::None);
         builder->setSubLayerIndex(0);
         builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                  : gfx::DepthMaskType::ReadOnly);
@@ -395,7 +392,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
                 imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-                changes.emplace_back(std::make_unique<AddLayerGroupRequest>(imageLayerGroup, /*canReplace=*/true));
             }
 
             auto builder = createBuilder();
@@ -431,7 +427,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             // Set up a tile layer group
             tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
             tileLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-            changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
         }
 
         auto builder = createBuilder();
@@ -460,5 +455,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
+#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace mbgl

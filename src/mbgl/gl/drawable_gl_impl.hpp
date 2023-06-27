@@ -34,6 +34,10 @@ public:
 
     std::vector<std::uint16_t> indexes;
 
+    std::vector<std::uint8_t> vertexData;
+    std::size_t vertexCount = 0;
+    gfx::AttributeDataType vertexType = static_cast<gfx::AttributeDataType>(-1);
+
     VertexAttributeArrayGL vertexAttributes;
 
     gfx::IndexBuffer indexBuffer = {0, nullptr};
@@ -43,9 +47,10 @@ public:
 
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;
-    gfx::ColorMode colorMode;
     gfx::CullFaceMode cullFaceMode;
     GLfloat pointSize = 0.0f;
+
+    std::string vertexAttrName = "a_pos";
 };
 
 struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {

@@ -11,8 +11,6 @@ class Size;
 
 namespace gfx {
 
-constexpr int32_t MaxActiveTextureUnits = 8;
-
 class Context;
 class UploadPass;
 class TextureResource;

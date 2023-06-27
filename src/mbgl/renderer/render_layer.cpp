@@ -1,6 +1,4 @@
-#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -9,6 +7,10 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layer_group.hpp>
+#endif
 
 namespace mbgl {
 
@@ -59,6 +61,16 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
 std::optional<Color> RenderLayer::getSolidBackground() const {
     return std::nullopt;
 }
+
+#if MLN_DRAWABLE_RENDERER
+void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    // Remove everything
+    if (tileLayerGroup) {
+        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
+        tileLayerGroup.reset();
+    }
+}
+#endif
 
 void RenderLayer::markContextDestroyed() {
     // no-op
@@ -112,6 +124,18 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     return nullptr;
 }
 
+#if MLN_DRAWABLE_RENDERER
+void RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
+}
+
+void RenderLayer::removeAllTiles() {
+    if (tileLayerGroup) {
+        stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
+        tileLayerGroup->clearDrawables();
+    }
+}
+
 void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
     layerIndex = newLayerIndex;
 
@@ -139,5 +163,6 @@ void RenderLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& c
         changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
     }
 }
+#endif
 
 } // namespace mbgl
