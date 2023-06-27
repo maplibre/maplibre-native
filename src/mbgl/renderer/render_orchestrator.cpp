@@ -250,7 +250,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (const auto& entry : layerDiff.changed) {
         if (const auto& renderLayer = renderLayers.at(entry.first)) {
             const auto& newLayer = entry.second.after;
-            
+
 #if MLN_DRAWABLE_RENDERER
             renderLayer->layerChanged(transitionParameters, newLayer, changes);
 #endif // MLN_DRAWABLE_RENDERER

@@ -375,7 +375,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     if (layerGroup) {
         layerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
     }
-#endif //MLN_DRAWABLE_RENDERER
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 bool RenderSymbolLayer::hasTransition() const {

@@ -99,7 +99,7 @@ private:
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-    
+
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
 #endif // MLN_LEGACY_RENDERER
