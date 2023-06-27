@@ -16,6 +16,8 @@ enum class BuiltIn {
     FillOutlineShader,
     FillPatternShader,
     FillOutlinePatternShader,
+    FillExtrusionShader,
+    FillExtrusionPatternShader,
     RasterShader,
     SymbolIconShader,
     SymbolSDFTextShader,

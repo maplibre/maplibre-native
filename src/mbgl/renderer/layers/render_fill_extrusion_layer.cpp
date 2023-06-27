@@ -18,11 +18,26 @@
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/fill_extrusion_drawable_data.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#endif // MLN_DRAWABLE_RENDERER
+
 namespace mbgl {
 
 using namespace style;
 
 namespace {
+
+#if MLN_DRAWABLE_RENDERER
+
+constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
+constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
+
+#endif // MLN_DRAWABLE_RENDERER
 
 inline const FillExtrusionLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillExtrusionLayer::Impl::staticTypeInfo());
@@ -51,6 +66,12 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+#if MLN_DRAWABLE_RENDERER
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(evaluatedProperties));
+    }
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 bool RenderFillExtrusionLayer::hasTransition() const {
@@ -240,5 +261,79 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
     return util::polygonIntersectsMultiPolygon(translatedQueryGeometry.value_or(queryGeometry),
                                                feature.getGeometries());
 }
+
+#if MLN_DRAWABLE_RENDERER
+
+void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
+                                      gfx::Context& context,
+                                      const TransformState& state,
+                                      const RenderTree& /*renderTree*/,
+                                      UniqueChangeRequestVec& changes) {
+    if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
+        removeAllDrawables();
+        return;
+    }
+
+    // Set up a layer group
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
+        }
+    }
+
+    if (!fillExtrusionGroup) {
+        fillExtrusionGroup = shaders.getShaderGroup(std::string(FillExtrusionShaderName));
+    }
+    if (!fillExtrusionPatternGroup) {
+        fillExtrusionPatternGroup = shaders.getShaderGroup(std::string(FillExtrusionPatternShaderName));
+    }
+
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+        // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
+//        const auto tileID = drawable->getTileID();
+//        if (drawable->getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
+//            drawable.reset();
+//            tileBucketInstances.erase(*tileID);
+//            ++stats.drawablesRemoved;
+//        }
+    });
+
+    const auto currentZoom = static_cast<float>(state.getZoom());
+    const auto layerPrefix = getID() + "/";
+
+    for (const RenderTile& tile : *renderTiles) {
+        const auto& tileID = tile.getOverscaledTileID();
+
+        const auto* optRenderData = getRenderDataForPass(tile, passes);
+        if (!optRenderData || !optRenderData->bucket) {
+            removeTile(passes, tileID);
+            continue;
+        }
+
+        const auto& renderData = *optRenderData;
+        const auto& bucket = static_cast<const FillExtrusionBucket&>(*renderData.bucket);
+
+
+        // If we already have drawables for this tile, update them.
+        if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
+            //const auto hit = tileBucketInstances.insert(std::make_pair(tileID, bucket.bucketInstanceId));
+            //if (!hit.second && hit.first->second != bucket.bucketInstanceId) {
+                // The bucket has changed, reset the drawables for this tile.
+            //    tileLayerGroup->removeDrawables(passes, tileID);
+            //    hit.first->second = bucket.bucketInstanceId;
+            //} else {
+                // Just update the drawables we already created
+                tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                });
+                continue;
+            //}
+        }
+
+    }
+}
+
+#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace mbgl
