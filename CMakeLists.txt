@@ -141,7 +141,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
-        
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
@@ -170,7 +169,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
-        
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
@@ -186,6 +186,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
@@ -449,7 +451,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
@@ -985,6 +986,10 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf_text.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
