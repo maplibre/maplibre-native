@@ -37,7 +37,6 @@
     NSString *xcTestBundleRoot = [[NSBundle bundleForClass:[self class]] resourcePath];
     NSString *testDataDir = [xcTestBundleRoot stringByAppendingString:@"/TestData.bundle"];
 
-    NSArray *bundleContents = [fileManager contentsOfDirectoryAtPath: xcTestBundleRoot error: &error];
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDir = [paths objectAtIndex: 0];
     

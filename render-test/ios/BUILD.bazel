@@ -1,5 +1,5 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_ui_test")
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
 
 apple_resource_bundle(
@@ -18,9 +18,6 @@ objc_library(
     srcs = [
         "tests/Tests.m",
     ],
-    data = [
-        "TestData",
-    ],
     deps = [
         "render_test_ios_src",
     ],
@@ -34,6 +31,9 @@ objc_library(
         "ios_test_runner.cpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = [
+        "TestData",
+    ],
     includes = [
         ".",
     ],
@@ -49,9 +49,10 @@ objc_library(
     ],
 )
 
-ios_ui_test(
+ios_unit_test(
     name = "RenderTest",
     minimum_os_version = "12.0",
+    provisioning_profile = "//platform/ios:xcode_profile",
     runner = "@build_bazel_rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
     test_host = "//platform/ios/test/common:RenderTestApp",
     visibility = [
