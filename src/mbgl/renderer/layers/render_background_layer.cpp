@@ -66,8 +66,8 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (tileLayerGroup) {
-        tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
     }
 #endif
 }
@@ -221,7 +221,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     // renderTiles is always empty, we use tileCover instead
     if (tileCover.empty()) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
@@ -239,17 +239,17 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (drawPasses == RenderPass::None) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
-    if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-        if (!tileLayerGroup) {
-            return;
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
     }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!hasPattern && !plainShader) {
         plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));
@@ -260,7 +260,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& curShader = hasPattern ? patternShader : plainShader;
     if (!curShader) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
@@ -287,7 +287,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         const auto tileID = drawable->getTileID();
         if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
             drawable.reset();
-            ++stats.tileDrawablesRemoved;
+            ++stats.drawablesRemoved;
             return;
         }
     });
@@ -316,7 +316,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);
             tileLayerGroup->addDrawable(drawPasses, tileID, std::move(drawable));
-            ++stats.tileDrawablesAdded;
+            ++stats.drawablesAdded;
         }
     }
 }
