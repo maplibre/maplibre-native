@@ -1,14 +1,11 @@
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/programs/line_program.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/line_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/render_line_layer.hpp>
-#include <mbgl/renderer/layers/line_layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -20,9 +17,15 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/convert.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/line_layer_tweaker.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#endif
 
 namespace mbgl {
 
@@ -63,9 +66,11 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
+#if MLN_DRAWABLE_RENDERER
     if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
         tileLayerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
     }
+#endif
 }
 
 bool RenderLineLayer::hasTransition() const {
@@ -309,6 +314,7 @@ void RenderLineLayer::updateColorRamp() {
         colorRampTexture = std::nullopt;
     }
 
+#if MLN_DRAWABLE_RENDERER
     if (colorRampTexture2D) {
         colorRampTexture2D.reset();
 
@@ -318,6 +324,7 @@ void RenderLineLayer::updateColorRamp() {
             tileLayerGroup->clearDrawables();
         }
     }
+#endif
 }
 
 float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
@@ -335,6 +342,7 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
     }
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderLineLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     // Remove everything
     if (tileLayerGroup) {
@@ -346,7 +354,9 @@ void RenderLineLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 void RenderLineLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
 }
+#endif
 
+#if MLN_DRAWABLE_RENDERER
 /// Property interpolation UBOs
 struct alignas(16) LineInterpolationUBO {
     float color_t;
@@ -816,5 +826,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 }
+#endif
 
 } // namespace mbgl
