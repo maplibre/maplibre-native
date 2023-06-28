@@ -457,8 +457,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             ++stats.drawablesRemoved;
         }
     });
-    
-    auto createLineBuilder = [&](const std::string& name, gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder>{
+
+    auto createLineBuilder = [&](const std::string& name,
+                                 gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
         builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
         builder->setRenderPass(renderPass);
@@ -466,21 +467,23 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                  : gfx::DepthMaskType::ReadOnly);
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrName("a_pos_normal");
-        
+
         return builder;
     };
-    
-    auto addVertices = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket){
+
+    auto addVertices = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
         std::vector<std::array<int16_t, 2>> vertices;
         vertices.resize(bucket.vertices.vector().size());
-        std::transform(bucket.vertices.vector().begin(),
-                       bucket.vertices.vector().end(),
-                       vertices.begin(),
-                       [](const auto& x) { return x.a1; });
+        std::transform(
+            bucket.vertices.vector().begin(), bucket.vertices.vector().end(), vertices.begin(), [](const auto& x) {
+                return x.a1;
+            });
         builder->addVertices(vertices, 0, vertices.size());
     };
-    
-    auto addAttributes = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket, gfx::VertexAttributeArray& vertexAttrs){
+
+    auto addAttributes = [&](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                             const LineBucket& bucket,
+                             gfx::VertexAttributeArray& vertexAttrs) {
         if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
             size_t index{0};
             for (const auto& vert : bucket.vertices.vector()) {
@@ -489,8 +492,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
         builder->setVertexAttributes(std::move(vertexAttrs));
     };
-    
-    auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket){
+
+    auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
         builder->setSegments(
             gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
     };
@@ -584,7 +587,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         });
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
-        
+
         if (!evaluated.get<LineDasharray>().from.empty()) {
             // dash array line (SDF)
             gfx::VertexAttributeArray vertexAttrs;
@@ -596,8 +599,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineWidth,
                                                                                   LineFloorWidth>(paintPropertyBinders,
                                                                                                   evaluated);
-            auto builder = createLineBuilder("lineSDF", lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
-            
+            auto builder = createLineBuilder("lineSDF",
+                                             lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+
             // vertices, attributes and segments
             addVertices(builder, bucket);
             addAttributes(builder, bucket, vertexAttrs);
@@ -627,7 +631,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineWidth,
                                                                                   LinePattern>(paintPropertyBinders,
                                                                                                evaluated);
-            auto builder = createLineBuilder("linePattern", linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+            auto builder = createLineBuilder("linePattern",
+                                             linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
             // vertices and attributes
             addVertices(builder, bucket);
@@ -662,8 +667,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             auto propertiesAsUniforms =
                 vertexAttrs.readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
                     paintPropertyBinders, evaluated);
-            
-            auto builder = createLineBuilder("lineGradient", lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+
+            auto builder = createLineBuilder("lineGradient",
+                                             lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
             // vertices and attributes
             addVertices(builder, bucket);
