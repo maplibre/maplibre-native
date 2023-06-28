@@ -457,6 +457,43 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             ++stats.drawablesRemoved;
         }
     });
+    
+    auto createLineBuilder = [&](const std::string& name, gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder>{
+        std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
+        builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+        builder->setRenderPass(renderPass);
+        builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                 : gfx::DepthMaskType::ReadOnly);
+        builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+        builder->setVertexAttrName("a_pos_normal");
+        
+        return builder;
+    };
+    
+    auto addVertices = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket){
+        std::vector<std::array<int16_t, 2>> vertices;
+        vertices.resize(bucket.vertices.vector().size());
+        std::transform(bucket.vertices.vector().begin(),
+                       bucket.vertices.vector().end(),
+                       vertices.begin(),
+                       [](const auto& x) { return x.a1; });
+        builder->addVertices(vertices, 0, vertices.size());
+    };
+    
+    auto addAttributes = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket, gfx::VertexAttributeArray& vertexAttrs){
+        if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
+            size_t index{0};
+            for (const auto& vert : bucket.vertices.vector()) {
+                attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
+            }
+        }
+        builder->setVertexAttributes(std::move(vertexAttrs));
+    };
+    
+    auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket){
+        builder->setSegments(
+            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+    };
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -548,10 +585,24 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         });
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
+        
+//        auto finish = [&context, &tileLayerGroup, renderPass, this](gfx::DrawableBuilder& builder,
+//                         const OverscaledTileID& tileID,
+//                         gfx::UniqueDrawableData data,
+//                         const std::string_view& uboName,
+//                         const void* uboData){
+//            for (auto& drawable : builder.clearDrawables()) {
+//                drawable->setTileID(tileID);
+//                drawable->setData(std::move(data));
+//                drawable->mutableUniformBuffers().createOrUpdate(
+//                    uboName, uboData, context);
+//                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+//                ++stats.drawablesAdded;
+//            }
+//        };
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
-            // dash array line
-
+            // dash array line (SDF)
             gfx::VertexAttributeArray vertexAttrs;
             auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
                                                                                   LineBlur,
@@ -561,46 +612,15 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineWidth,
                                                                                   LineFloorWidth>(paintPropertyBinders,
                                                                                                   evaluated);
-            auto lineSDFShader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
-            if (!lineSDFShader) continue;
-
-            std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("lineSDF")};
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineSDFShader));
-            builder->setRenderPass(renderPass);
-            builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                     : gfx::DepthMaskType::ReadOnly);
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setVertexAttrName("a_pos_normal");
-
-            // vertices
-            {
-                std::vector<std::array<int16_t, 2>> vertices;
-                vertices.resize(bucket.vertices.vector().size());
-                std::transform(bucket.vertices.vector().begin(),
-                               bucket.vertices.vector().end(),
-                               vertices.begin(),
-                               [](const auto& x) { return x.a1; });
-                builder->addVertices(vertices, 0, vertices.size());
-            }
-
-            // attributes
-            if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
-                size_t index{0};
-                for (const auto& vert : bucket.vertices.vector()) {
-                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
-                }
-            }
-            builder->setVertexAttributes(std::move(vertexAttrs));
-
-            // texture to be set in the tweaker
-
-            // segments
-            builder->setSegments(
-                gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+            auto builder = createLineBuilder("lineSDF", lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+            
+            // vertices, attributes and segments
+            addVertices(builder, bucket);
+            addAttributes(builder, bucket, vertexAttrs);
+            setSegments(builder, bucket);
 
             // finish
             builder->flush();
-
             const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
                                                                                           : LinePatternCap::Square;
             for (auto& drawable : builder->clearDrawables()) {
@@ -612,7 +632,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
-
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
             // pattern line
             gfx::VertexAttributeArray vertexAttrs;
@@ -624,46 +643,19 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineWidth,
                                                                                   LinePattern>(paintPropertyBinders,
                                                                                                evaluated);
-            auto linePatternShader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
-            if (!linePatternShader) continue;
+            auto builder = createLineBuilder("linePattern", linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
-            std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("linePattern")};
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(linePatternShader));
-            builder->setRenderPass(renderPass);
-            builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                     : gfx::DepthMaskType::ReadOnly);
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setVertexAttrName("a_pos_normal");
-
-            // vertices
-            {
-                std::vector<std::array<int16_t, 2>> vertices;
-                vertices.resize(bucket.vertices.vector().size());
-                std::transform(bucket.vertices.vector().begin(),
-                               bucket.vertices.vector().end(),
-                               vertices.begin(),
-                               [](const auto& x) { return x.a1; });
-                builder->addVertices(vertices, 0, vertices.size());
-            }
-
-            // attributes
-            if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
-                size_t index{0};
-                for (const auto& vert : bucket.vertices.vector()) {
-                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
-                }
-            }
-            builder->setVertexAttributes(std::move(vertexAttrs));
+            // vertices and attributes
+            addVertices(builder, bucket);
+            addAttributes(builder, bucket, vertexAttrs);
 
             // texture
             if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                if (const auto samplerLocation = std::static_pointer_cast<gfx::ShaderProgramBase>(linePatternShader)
-                                                     ->getSamplerLocation("u_image")) {
+                if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
                     builder->setTexture(atlases->icon, samplerLocation.value());
 
                     // segments
-                    builder->setSegments(
-                        gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+                    setSegments(builder, bucket);
 
                     // finish
                     builder->flush();
@@ -686,40 +678,15 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             auto propertiesAsUniforms =
                 vertexAttrs.readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
                     paintPropertyBinders, evaluated);
-            auto lineGradientShader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
-            if (!lineGradientShader) continue;
+            
+            auto builder = createLineBuilder("lineGradient", lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
-            std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("lineGradient")};
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineGradientShader));
-            builder->setRenderPass(renderPass);
-            builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                     : gfx::DepthMaskType::ReadOnly);
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setVertexAttrName("a_pos_normal");
-
-            // vertices
-            {
-                std::vector<std::array<int16_t, 2>> vertices;
-                vertices.resize(bucket.vertices.vector().size());
-                std::transform(bucket.vertices.vector().begin(),
-                               bucket.vertices.vector().end(),
-                               vertices.begin(),
-                               [](const auto& x) { return x.a1; });
-                builder->addVertices(vertices, 0, vertices.size());
-            }
-
-            // attributes
-            if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
-                size_t index{0};
-                for (const auto& vert : bucket.vertices.vector()) {
-                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
-                }
-            }
-            builder->setVertexAttributes(std::move(vertexAttrs));
+            // vertices and attributes
+            addVertices(builder, bucket);
+            addAttributes(builder, bucket, vertexAttrs);
 
             // texture
-            if (const auto samplerLocation = std::static_pointer_cast<gfx::ShaderProgramBase>(lineGradientShader)
-                                                 ->getSamplerLocation("u_image")) {
+            if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
                 if (!colorRampTexture2D && colorRamp->valid()) {
                     // create texture. to be reused for all the tiles of the layer
                     colorRampTexture2D = context.createTexture2D();
@@ -732,8 +699,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setTexture(colorRampTexture2D, samplerLocation.value());
 
                     // segments
-                    builder->setSegments(
-                        gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+                    setSegments(builder, bucket);
 
                     // finish
                     builder->flush();
@@ -758,40 +724,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineOffset,
                                                                                   LineWidth>(paintPropertyBinders,
                                                                                              evaluated);
-            auto lineShader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
-            if (!lineShader) continue;
+            auto builder = createLineBuilder("line", lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
-            std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("line")};
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(lineShader));
-            builder->setRenderPass(renderPass);
-            builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                     : gfx::DepthMaskType::ReadOnly);
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setVertexAttrName("a_pos_normal");
-
-            // vertices
-            {
-                std::vector<std::array<int16_t, 2>> vertices;
-                vertices.resize(bucket.vertices.vector().size());
-                std::transform(bucket.vertices.vector().begin(),
-                               bucket.vertices.vector().end(),
-                               vertices.begin(),
-                               [](const auto& x) { return x.a1; });
-                builder->addVertices(vertices, 0, vertices.size());
-            }
-
-            // attributes
-            if (auto& attr = vertexAttrs.getOrAdd("a_data")) {
-                size_t index{0};
-                for (const auto& vert : bucket.vertices.vector()) {
-                    attr->set(index++, gfx::VertexAttribute::int4{vert.a2[0], vert.a2[1], vert.a2[2], vert.a2[3]});
-                }
-            }
-            builder->setVertexAttributes(std::move(vertexAttrs));
-
-            // segments
-            builder->setSegments(
-                gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+            // vertices, attributes and segments
+            addVertices(builder, bucket);
+            addAttributes(builder, bucket, vertexAttrs);
+            setSegments(builder, bucket);
 
             // finish
             builder->flush();
