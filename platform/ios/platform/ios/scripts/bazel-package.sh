@@ -94,7 +94,7 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
 # Generate provisioning team ID
-cat > platform/ios/bazel/__generated__/provisioning_profile.bzl <<EOF
+cat > platform/ios/bazel/config.bzl <<EOF
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
 EOF
 
