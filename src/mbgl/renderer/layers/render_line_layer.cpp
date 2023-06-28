@@ -557,7 +557,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         // update existing drawables
         tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            // TODO: find a better way to check line type
             // simple line interpolation UBO
             if (drawable.getShader()->getUniformBlocks().get(std::string(LineInterpolationUBOName))) {
                 drawable.mutableUniformBuffers().createOrUpdate(
@@ -586,21 +585,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
         
-//        auto finish = [&context, &tileLayerGroup, renderPass, this](gfx::DrawableBuilder& builder,
-//                         const OverscaledTileID& tileID,
-//                         gfx::UniqueDrawableData data,
-//                         const std::string_view& uboName,
-//                         const void* uboData){
-//            for (auto& drawable : builder.clearDrawables()) {
-//                drawable->setTileID(tileID);
-//                drawable->setData(std::move(data));
-//                drawable->mutableUniformBuffers().createOrUpdate(
-//                    uboName, uboData, context);
-//                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-//                ++stats.drawablesAdded;
-//            }
-//        };
-
         if (!evaluated.get<LineDasharray>().from.empty()) {
             // dash array line (SDF)
             gfx::VertexAttributeArray vertexAttrs;
