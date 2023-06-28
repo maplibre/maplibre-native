@@ -54,7 +54,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
         std::set<UnwrappedTileID> tileIDs;
         observeDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getNeedsStencil() && drawable.getTileID() &&
+            if (drawable.getEnabled() && !drawable.getIs3D() &&
+                drawable.getEnableStencil() && drawable.getTileID() &&
                 drawable.hasRenderPass(parameters.pass)) {
                 tileIDs.emplace(drawable.getTileID()->toUnwrapped());
             }
@@ -126,23 +127,6 @@ void LayerGroupGL::upload(gfx::UploadPass& uploadPass) {
 void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
     if (!enabled) {
         return;
-    }
-
-    if (getDrawableCount()) {
-#if !defined(NDEBUG)
-        const auto label = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
-        const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
-#endif
-
-        // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
-        std::set<UnwrappedTileID> tileIDs;
-        observeDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getNeedsStencil() && drawable.getTileID() &&
-                drawable.hasRenderPass(parameters.pass)) {
-                tileIDs.emplace(drawable.getTileID()->toUnwrapped());
-            }
-        });
-        parameters.renderTileClippingMasks(tileIDs);
     }
 
     observeDrawables([&](gfx::Drawable& drawable) {

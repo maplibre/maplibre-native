@@ -17,10 +17,26 @@ out vec2 v_pos_a;
 out vec2 v_pos_b;
 out vec4 v_lighting;
 
+layout (std140) uniform FillXUBO {
+    highp float u_base;
+    highp float u_height;
+    highp vec4 u_color;
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+};
+
+layout (std140) uniform FillExtrusionInterpolateUBO {
+    highp float u_base_t;
+    highp float u_height_t;
+    highp float u_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+};
+
 #pragma mapbox: define lowp float base
 #pragma mapbox: define lowp float height
-#pragma mapbox: define lowp vec4 pattern_from
-#pragma mapbox: define lowp vec4 pattern_to
+#pragma mapbox: define mediump vec4 pattern_from
+#pragma mapbox: define mediump vec4 pattern_to
 
 void main() {
     #pragma mapbox: initialize lowp float base

@@ -27,6 +27,22 @@ out vec2 v_pos_a;
 out vec2 v_pos_b;
 out vec4 v_lighting;
 
+layout (std140) uniform FillXUBO {
+    highp float u_base;
+    highp float u_height;
+    highp vec4 u_color;
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+};
+
+layout (std140) uniform FillExtrusionInterpolateUBO {
+    highp float u_base_t;
+    highp float u_height_t;
+    highp float u_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+};
+
 #ifndef HAS_UNIFORM_u_base
 layout (location = 2) in lowp vec2 a_base;
 out lowp float base;
@@ -36,12 +52,12 @@ layout (location = 3) in lowp vec2 a_height;
 out lowp float height;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-layout (location = 4) in lowp vec4 a_pattern_from;
-out lowp vec4 pattern_from;
+layout (location = 4) in mediump vec4 a_pattern_from;
+out mediump vec4 pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-layout (location = 5) in lowp vec4 a_pattern_to;
-out lowp vec4 pattern_to;
+layout (location = 5) in mediump vec4 a_pattern_to;
+out mediump vec4 pattern_to;
 #endif
 
 void main() {
@@ -122,6 +138,22 @@ in vec2 v_pos_a;
 in vec2 v_pos_b;
 in vec4 v_lighting;
 
+layout (std140) uniform FillXUBO {
+    highp float u_base;
+    highp float u_height;
+    highp vec4 u_color;
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+};
+
+layout (std140) uniform FillExtrusionInterpolateUBO {
+    highp float u_base_t;
+    highp float u_height_t;
+    highp float u_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+};
+
 #ifndef HAS_UNIFORM_u_base
 in lowp float base;
 #endif
@@ -129,10 +161,10 @@ in lowp float base;
 in lowp float height;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-in lowp vec4 pattern_from;
+in mediump vec4 pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-in lowp vec4 pattern_to;
+in mediump vec4 pattern_to;
 #endif
 
 void main() {

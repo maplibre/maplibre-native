@@ -11,10 +11,12 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
@@ -36,6 +38,9 @@ namespace {
 
 constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
 constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
+
+constexpr auto posAttribName = "a_pos";
+constexpr auto normAttribName = "a_normal_ed";
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -149,7 +154,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     if (!renderData) {
                         continue;
                     }
-                    auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
+                    const auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
                     draw(*fillExtrusionProgram,
                          evaluated,
                          crossfade,
@@ -197,9 +202,11 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     if (!renderData) {
                         continue;
                     }
-                    auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
-                    std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
-                    std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
+                    const auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
+                    const std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
+                    const std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
+                    const auto numTiles = std::pow(2, tile.id.canonical.z);
+                    const auto heightFactor = static_cast<float>(-numTiles / util::tileSize_D / 8.0);
 
                     draw(*fillExtrusionPatternProgram,
                          evaluated,
@@ -216,7 +223,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                              tile.id,
                              parameters.state,
                              evaluated.get<FillExtrusionOpacity>(),
-                             static_cast<float>(-std::pow(2, tile.id.canonical.z) / util::tileSize_D / 8.0),
+                             heightFactor,
                              parameters.pixelRatio,
                              parameters.evaluatedLight,
                              evaluated.get<FillExtrusionVerticalGradient>()),
@@ -290,6 +297,16 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+
+    const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
+    const auto& crossfade = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).crossfade;
+
+    // If `FillExtrusionOpacity` is zero, no need to render anything
+    if (evaluatedProperties->renderPasses == mbgl::underlying_type(RenderPass::None)) {
+        removeAllDrawables();
+        return;
+    }
+
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
 //        const auto tileID = drawable->getTileID();
@@ -302,6 +319,19 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto currentZoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
+    const auto hasPattern = !unevaluated.get<FillExtrusionPattern>().isUndefined();
+    const auto opaque = evaluated.get<FillExtrusionOpacity>() >= 1;
+
+    std::unique_ptr<gfx::DrawableBuilder> depthBuilder;
+    std::unique_ptr<gfx::DrawableBuilder> colorBuilder;
+    gfx::VertexAttributeArray vertexAttrs;
+    std::vector<uint8_t> rawVertices;
+
+    const auto& shaderGroup = hasPattern ? fillExtrusionPatternGroup : fillExtrusionGroup;
+    if (!shaderGroup) {
+        removeAllDrawables();
+        return;
+    }
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -315,6 +345,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto& renderData = *optRenderData;
         const auto& bucket = static_cast<const FillExtrusionBucket&>(*renderData.bucket);
 
+        vertexAttrs.clear();
+
+        const auto vertexCount = bucket.vertices.elements();
+        constexpr auto vertexSize = sizeof(FillExtrusionLayoutVertex::a1);
 
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
@@ -331,6 +365,139 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             //}
         }
 
+        const auto& binders = bucket.paintPropertyBinders.at(getID());
+        if (hasPattern) {
+            const auto def = mbgl::Faded<expression::Image>{"", ""};
+            const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(def);
+            const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
+            const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
+            binders.setPatternParameters(patternPosA, patternPosB, crossfade);
+        }
+
+        //        class FillExtrusionPaintProperties : public Properties<
+        //            FillExtrusionBase,            // Data-driven
+        //            FillExtrusionColor,           // Data-driven
+        //            FillExtrusionHeight,          // Data-driven
+        //            FillExtrusionOpacity,         // Not
+        //            FillExtrusionPattern,         // Data-driven
+        //            FillExtrusionTranslate,       // Not
+        //            FillExtrusionTranslateAnchor, // Not
+        //            FillExtrusionVerticalGradient // Not
+        const auto uniformProps =
+            vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
+                                                      FillExtrusionColor,
+                                                      FillExtrusionHeight,
+                                                      FillExtrusionPattern>(
+                binders, evaluated);
+
+        const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                             shaderGroup->getOrCreateShader(context, uniformProps));
+        if (!shader) {
+            assert(false);
+            continue;
+        }
+
+        //        using FillExtrusionLayoutAttributes = TypeList<attributes::pos, attributes::normal_ed>;
+        //        using FillExtrusionUniforms = TypeList<uniforms::matrix,
+        //                                               uniforms::opacity,
+        //                                               uniforms::lightcolor,
+        //                                               uniforms::lightpos,
+        //                                               uniforms::lightintensity,
+        //                                               uniforms::vertical_gradient>;
+        //
+        //        using FillExtrusionPatternUniforms = TypeList<uniforms::matrix,
+        //                                                      uniforms::opacity,
+        //                                                      uniforms::scale,
+        //                                                      uniforms::texsize,
+        //                                                      uniforms::fade,
+        //                                                      uniforms::pixel_coord_upper,
+        //                                                      uniforms::pixel_coord_lower,
+        //                                                      uniforms::height_factor,
+        //                                                      uniforms::lightcolor,
+        //                                                      uniforms::lightpos,
+        //                                                      uniforms::lightintensity,
+        //                                                      uniforms::vertical_gradient>;
+
+        if (!depthBuilder) {
+            if (auto builder = context.createDrawableBuilder(layerPrefix + "depth")) {
+                builder->setShader(shader);
+                builder->setIs3D(true);
+                builder->setEnableStencil(false);
+                builder->setEnableColor(false);
+                builder->setRenderPass(passes);
+                builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                depthBuilder = std::move(builder);
+            }
+        }
+        if (!colorBuilder) {
+            if (auto builder = context.createDrawableBuilder(layerPrefix + "color")) {
+                builder->setShader(shader);
+                builder->setIs3D(true);
+                builder->setEnableStencil(true);
+                builder->setEnableColor(true);
+                builder->setRenderPass(passes);
+                builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                colorBuilder = std::move(builder);
+            }
+        }
+
+        if (hasPattern) {
+            if (const auto& atlases = tile.getAtlasTextures()) {
+                if (const auto texSamplerLocation = shader->getSamplerLocation("TODO")) {
+                    colorBuilder->setTextureSource([=]() -> gfx::Drawable::Textures {
+                        return {{*texSamplerLocation, atlases->icon}};
+                    });
+                }
+            }
+        }
+
+        if (const auto& attr = vertexAttrs.getOrAdd(normAttribName)) {
+            const auto count = bucket.vertices.elements();
+            attr->reserve(count);
+            for (auto i = 0ULL; i < count; ++i) {
+                attr->set(i, util::cast<float>(bucket.vertices.at(i).a2));  // int16_t x4
+            }
+        }
+
+        rawVertices.resize(vertexSize * vertexCount);
+        for (std::size_t i = 0; i < vertexCount; ++i) {
+            std::memcpy(&rawVertices[vertexSize * i], &bucket.vertices.at(i).a1, vertexSize);
+        }
+
+        auto vertexCopy = rawVertices;
+        depthBuilder->setRawVertices(std::move(vertexCopy), vertexCount, gfx::AttributeDataType::Short2);
+        colorBuilder->setRawVertices(std::move(rawVertices), vertexCount, gfx::AttributeDataType::Short2);
+
+        gfx::VertexAttributeArray attribCopy;
+        attribCopy.copy(vertexAttrs);
+        depthBuilder->setVertexAttributes(std::move(attribCopy));
+        colorBuilder->setVertexAttributes(std::move(vertexAttrs));
+
+        const auto finish = [&](gfx::DrawableBuilder& builder) {
+            builder.setSegments(gfx::Triangles(),
+                                bucket.triangles.vector(),
+                                bucket.triangleSegments.data(),
+                                bucket.triangleSegments.size());
+
+            builder.flush();
+
+            for (auto& drawable : builder.clearDrawables()) {
+                drawable->setTileID(tileID);
+                
+                //            const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
+                //            drawable->setData(std::move(drawData));
+                //
+                //            auto& uniforms = drawable->mutableUniformBuffers();
+                //            uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
+                //            uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+                
+                tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
+                ++stats.drawablesAdded;
+            }
+        };
+        
+        finish(*depthBuilder);
+        finish(*colorBuilder);
     }
 }
 

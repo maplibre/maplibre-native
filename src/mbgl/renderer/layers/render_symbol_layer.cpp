@@ -999,7 +999,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             if (!builder) {
                 builder = context.createDrawableBuilder(layerPrefix);
                 builder->setSubLayerIndex(0);
-                builder->setNeedsStencil(false);
+                builder->setEnableStencil(false);
                 builder->setRenderPass(passes);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);

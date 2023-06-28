@@ -19,13 +19,28 @@ layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
 out vec4 v_color;
 
+layout (std140) uniform FillXUBO {
+    highp float u_base;
+    highp float u_height;
+    highp vec4 u_color;
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+};
+
+layout (std140) uniform FillExtrusionInterpolateUBO {
+    highp float u_base_t;
+    highp float u_height_t;
+    highp float u_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+};
+
 #ifndef HAS_UNIFORM_u_base
 layout (location = 2) in highp vec2 a_base;
 #endif
 #ifndef HAS_UNIFORM_u_height
 layout (location = 3) in highp vec2 a_height;
 #endif
-
 #ifndef HAS_UNIFORM_u_color
 layout (location = 4) in highp vec4 a_color;
 #endif

@@ -358,7 +358,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder.setNeedsStencil(true);
+        builder.setEnableStencil(true);
     };
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {

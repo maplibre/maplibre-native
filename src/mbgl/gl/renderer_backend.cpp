@@ -100,6 +100,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillOutlineShader,
                   shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::FillExtrusionShader,
+                  shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFTextShader,
