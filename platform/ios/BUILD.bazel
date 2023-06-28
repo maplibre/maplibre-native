@@ -9,7 +9,7 @@ load(
     "xcodeproj",
 )
 load("bazel/macros.bzl", "info_plist")
-load("bazel/__generated__/provisioning_profile.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID", "APPLE_MOBILE_PROVISIONING_PROFILE_UUID")
+load("bazel/config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID")
 
 # This list of public headers is from what Mapbox vendors with their dynamic framework
 # If we forget one the build will fail, and if we add too many there will be a warning
@@ -507,7 +507,7 @@ genrule(
 
 local_provisioning_profile(
     name = "provisioning_profile",
-    profile_name = APPLE_MOBILE_PROVISIONING_PROFILE_UUID,
+    profile_name = "iOS Team Provisioning Profile: *",
     team_id = APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID,
 )
 
@@ -520,6 +520,7 @@ xcode_provisioning_profile(
 
 xcodeproj(
     name = "xcodeproj",
+    build_mode = "xcode",
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],

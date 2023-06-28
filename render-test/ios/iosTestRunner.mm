@@ -62,7 +62,6 @@
     }
 
     if (path) {
-
         std::string basePath = std::string([path UTF8String]);
         self.testStatus = self.runner->startTest(basePath) ? YES : NO;
         self.styleResultPath =  [path stringByAppendingPathComponent:@"/ios-render-test-runner-style.html"];
