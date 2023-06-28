@@ -31,8 +31,6 @@ public:
     ~RenderLineLayer() override;
 
 #if MLN_DRAWABLE_RENDERER
-    void layerRemoved(UniqueChangeRequestVec&) override;
-
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -72,8 +70,6 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::Texture2DPtr colorRampTexture2D;
-    /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&);
 #endif
 
 #if MLN_LEGACY_RENDERER

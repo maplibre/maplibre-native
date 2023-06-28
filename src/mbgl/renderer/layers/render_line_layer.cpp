@@ -67,8 +67,8 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (tileLayerGroup && tileLayerGroup->getLayerTweaker()) {
-        tileLayerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
+    if (layerGroup && layerGroup->getLayerTweaker()) {
+        layerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
     }
 #endif
 }
@@ -319,9 +319,9 @@ void RenderLineLayer::updateColorRamp() {
         colorRampTexture2D.reset();
 
         // delete all gradient drawables
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
+        if (layerGroup) {
+            stats.drawablesRemoved += layerGroup->getDrawableCount();
+            layerGroup->clearDrawables();
         }
     }
 #endif
@@ -341,20 +341,6 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
         return lineWidth;
     }
 }
-
-#if MLN_DRAWABLE_RENDERER
-void RenderLineLayer::layerRemoved(UniqueChangeRequestVec& changes) {
-    // Remove everything
-    if (tileLayerGroup) {
-        changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(tileLayerGroup->getLayerIndex()));
-        tileLayerGroup.reset();
-    }
-}
-
-void RenderLineLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    stats.tileDrawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
-}
-#endif
 
 #if MLN_DRAWABLE_RENDERER
 /// Property interpolation UBOs
@@ -428,27 +414,19 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
-    const auto removeAll = [&]() {
-        if (tileLayerGroup) {
-            stats.tileDrawablesRemoved += tileLayerGroup->getDrawableCount();
-            tileLayerGroup->clearDrawables();
-        }
-    };
-
     if (!renderTiles || renderTiles->empty()) {
-        removeAll();
+        removeAllDrawables();
         return;
     }
 
     // Set up a layer group
-    if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-        if (!tileLayerGroup) {
-            return;
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
-        changes.emplace_back(std::make_unique<AddLayerGroupRequest>(tileLayerGroup, /*canReplace=*/true));
     }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!lineShaderGroup) {
         lineShaderGroup = shaders.getShaderGroup("LineShader");
@@ -463,21 +441,23 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         lineSDFShaderGroup = shaders.getShaderGroup("LineSDFShader");
     }
 
+    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
+    std::transform(renderTiles->begin(),
+                   renderTiles->end(),
+                   std::inserter(newTileIDs, newTileIDs.begin()),
+                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
+
+    const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
+
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
-        // Has this tile dropped out of the cover set?
-        if (const auto it = std::find_if(renderTiles->begin(),
-                                         renderTiles->end(),
-                                         [&drawable](const auto& renderTile) {
-                                             return drawable->getTileID() == renderTile.get().getOverscaledTileID();
-                                         });
-            it == renderTiles->end()) {
-            // remove it
+        // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
+        const auto tileID = drawable->getTileID();
+        if (drawable->getRenderPass() != renderPass || (tileID && newTileIDs.find(*tileID) == newTileIDs.end())) {
             drawable.reset();
-            ++stats.tileDrawablesRemoved;
+            ++stats.drawablesRemoved;
         }
     });
 
-    const auto renderPass{RenderPass::Translucent};
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -630,7 +610,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     LineSDFInterpolationUBOName, &lineSDFInterpolationUBO, context);
 
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.tileDrawablesAdded;
+                ++stats.drawablesAdded;
             }
 
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
@@ -695,7 +675,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                             LinePatternTilePropertiesUBOName, &linePatternTilePropertiesUBO, context);
 
                         tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
+                        ++stats.drawablesAdded;
                     }
                 }
             }
@@ -763,7 +743,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                             LineGradientInterpolationUBOName, &lineGradientInterpolationUBO, context);
 
                         tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.tileDrawablesAdded;
+                        ++stats.drawablesAdded;
                     }
                 }
             }
@@ -821,7 +801,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     LineInterpolationUBOName, &lineInterpolationUBO, context);
 
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.tileDrawablesAdded;
+                ++stats.drawablesAdded;
             }
         }
     }
