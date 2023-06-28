@@ -14,7 +14,7 @@ namespace android {
 class SymbolLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/SymbolLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/SymbolLayer"; };
 
     SymbolLayer(jni::JNIEnv&, jni::String&, jni::String&);
 

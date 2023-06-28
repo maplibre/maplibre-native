@@ -135,6 +135,8 @@ jobs:
         run: make ios-uitest
 
       # size test
+      - name: Copy example config
+        run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Build app for size test & output size 
         working-directory: ./

@@ -11,7 +11,7 @@ namespace android {
 using SuperTag = jni::ObjectTag;
 class Formatted : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/types/Formatted"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/types/Formatted"; };
 
     static jni::Local<jni::Object<Formatted>> New(jni::JNIEnv &, const style::expression::Formatted &value);
 

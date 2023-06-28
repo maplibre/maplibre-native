@@ -19,7 +19,7 @@ public:
     class ListOfflineRegionsCallback {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineManager$ListOfflineRegionsCallback";
         }
 
@@ -36,7 +36,7 @@ public:
     class CreateOfflineRegionCallback {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineManager$CreateOfflineRegionCallback";
         }
 
@@ -53,7 +53,7 @@ public:
     class MergeOfflineRegionsCallback {
     public:
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineManager$MergeOfflineRegionsCallback";
         }
 
@@ -69,7 +69,7 @@ public:
 
     struct FileSourceCallback {
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/offline/"
+            return "org/maplibre/android/offline/"
                    "OfflineManager$FileSourceCallback";
         }
 
@@ -78,7 +78,7 @@ public:
         static void onError(jni::JNIEnv&, const jni::Object<OfflineManager::FileSourceCallback>&, const jni::String&);
     };
 
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineManager"; };
+    static constexpr auto Name() { return "org/maplibre/android/offline/OfflineManager"; };
 
     static void registerNative(jni::JNIEnv&);
 
