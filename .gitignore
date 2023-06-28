@@ -44,4 +44,3 @@ node_modules
 /bazel-*
 CMakeLists.txt.user
 CMakeFiles
-__generated__
