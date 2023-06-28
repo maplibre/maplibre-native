@@ -15,6 +15,10 @@
 #include <mbgl/shaders/gl/drawable_fill_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_raster.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_icon.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_sdf_icon.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_sdf_text.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
 #include <mbgl/shaders/gl/background_pattern.hpp>

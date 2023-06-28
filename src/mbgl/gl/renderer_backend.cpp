@@ -104,7 +104,11 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillPatternShader,
-                  shaders::BuiltIn::RasterShader>(shaders, programParameters);
+                  shaders::BuiltIn::RasterShader,
+                  shaders::BuiltIn::SymbolIconShader,
+                  shaders::BuiltIn::SymbolSDFTextShader,
+                  shaders::BuiltIn::SymbolSDFIconShader,
+                  shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
 }
 #endif
 
