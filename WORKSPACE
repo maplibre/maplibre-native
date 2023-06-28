@@ -48,3 +48,12 @@ load(
 )
 
 xcodeproj_rules_dependencies()
+
+load(
+    "@build_bazel_rules_apple//apple:apple.bzl",
+    "provisioning_profile_repository",
+)
+
+provisioning_profile_repository(
+    name = "local_provisioning_profiles",
+)
