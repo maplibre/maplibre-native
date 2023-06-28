@@ -403,21 +403,21 @@ global.supportsPropertyFunction = function (property) {
 // Template processing //
 
 // Java + JNI Light (Peer model)
-const lightJava = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/light/light.java.ejs', 'utf8'), {strict: true});
-const lightJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/light.junit.ejs', 'utf8'), {strict: true});
-writeIfModified(`MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/light/Light.java`, lightJava({properties: lightProperties}));
-writeIfModified(`MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/LightTest.java`, lightJavaUnitTests({properties: lightProperties}));
+const lightJava = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/light/light.java.ejs', 'utf8'), {strict: true});
+const lightJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestApp/src/androidTest/java/org/maplibre/android/testapp/style/light.junit.ejs', 'utf8'), {strict: true});
+writeIfModified(`MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/light/Light.java`, lightJava({properties: lightProperties}));
+writeIfModified(`MapboxGLAndroidSDKTestApp/src/androidTest/java/org/maplibre/android/testapp/style/LightTest.java`, lightJavaUnitTests({properties: lightProperties}));
 
 // Java
-const layerJava = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/layer.java.ejs', 'utf8'), {strict: true});
-const layerJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/layer.junit.ejs', 'utf8'), {strict: true});
+const layerJava = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/layers/layer.java.ejs', 'utf8'), {strict: true});
+const layerJavaUnitTests = ejs.compile(fs.readFileSync('MapboxGLAndroidSDKTestApp/src/androidTest/java/org/maplibre/android/testapp/style/layer.junit.ejs', 'utf8'), {strict: true});
 
 for (const layer of layers) {
-  var srcDir = 'MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/'
-  var testDir = 'MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/testapp/style/'
+  var srcDir = 'MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/layers/'
+  var testDir = 'MapboxGLAndroidSDKTestApp/src/androidTest/java/org/maplibre/android/testapp/style/'
   if (layer.type === 'location-indicator') {
-    srcDir = 'MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/'
-    testDir = 'MapboxGLAndroidSDKTestApp/src/androidTest/java/com/mapbox/mapboxsdk/location/'
+    srcDir = 'MapboxGLAndroidSDK/src/main/java/org/maplibre/android/location/'
+    testDir = 'MapboxGLAndroidSDKTestApp/src/androidTest/java/org/maplibre/android/location/'
   }
 
   writeIfModified(srcDir + `${camelize(layer.type)}Layer.java`, layerJava(layer));
@@ -436,23 +436,23 @@ for (const layer of layers) {
 }
 
 // Java PropertyFactory
-const propertyFactoryTemplate = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/property_factory.java.ejs', 'utf8'), {strict: true});
+const propertyFactoryTemplate = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/layers/property_factory.java.ejs', 'utf8'), {strict: true});
 
-var propertyFactorySrcDir = 'MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/PropertyFactory.java'
+var propertyFactorySrcDir = 'MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/layers/PropertyFactory.java'
 writeIfModified(
     propertyFactorySrcDir,
     propertyFactoryTemplate({layoutProperties: layoutProperties, paintProperties: paintProperties, locationIndicator: false})
 );
 
-var locationPropertyFactorySrcDir = 'MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/LocationPropertyFactory.java'
+var locationPropertyFactorySrcDir = 'MapboxGLAndroidSDK/src/main/java/org/maplibre/android/location/LocationPropertyFactory.java'
 writeIfModified(
     locationPropertyFactorySrcDir,
     propertyFactoryTemplate({layoutProperties: locationLayoutProperties, paintProperties: locationPaintProperties, locationIndicator: true})
 );
 
 // Java Property
-const enumPropertyJavaTemplate = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/property.java.ejs', 'utf8'), {strict: true});
+const enumPropertyJavaTemplate = ejs.compile(fs.readFileSync('MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/layers/property.java.ejs', 'utf8'), {strict: true});
 writeIfModified(
-    `MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/style/layers/Property.java`,
+    `MapboxGLAndroidSDK/src/main/java/org/maplibre/android/style/layers/Property.java`,
     enumPropertyJavaTemplate({properties: enumProperties})
 );

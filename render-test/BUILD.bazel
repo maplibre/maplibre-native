@@ -10,11 +10,12 @@ cc_library(
     ],
     visibility = [
         "//platform/default:__pkg__",
+        "//render-test/ios:__pkg__",
     ],
 )
 
-cc_test(
-    name = "render-test",
+cc_library(
+    name = "render-test-srcs",
     srcs = glob(
         [
             "*.cpp",
@@ -23,21 +24,33 @@ cc_test(
     ) + [
         "include/mbgl/render_test.hpp",
     ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    includes = [
+        "include",
+    ],
+    visibility = [
+        "//render-test/ios:__pkg__",
+    ],
+    deps = [
+        "//expression-test:test_runner_common",
+    ] + select({
+        "//:ios": ["//platform/ios:sdk"],
+        "//:linux": ["//platform/linux:impl"],
+    }),
+)
+
+cc_test(
+    name = "render-test",
     args = [
         "--manifestPath",
         "metrics/linux-gcc8-release-style.json",
     ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     data = [
         "//metrics:render-test-files",
     ],
-    includes = [
-        "include",
-    ],
     deps = [
-        "//expression-test:test_runner_common",
+        "render-test-srcs",
         "//platform/default:render-test-bin",
-        "//platform/linux:impl",
         "//vendor:mapbox-base",
     ],
 )

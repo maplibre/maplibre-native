@@ -13,7 +13,7 @@ class Bitmap;
 class ImageSource : public Source {
 public:
     using SuperTag = Source;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/sources/ImageSource"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/sources/ImageSource"; };
 
     static void registerNative(jni::JNIEnv&);
 

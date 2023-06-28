@@ -11,7 +11,7 @@ namespace android {
 
 class LatLng : private mbgl::util::noncopyable {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/geometry/LatLng"; };
+    static constexpr auto Name() { return "org/maplibre/android/geometry/LatLng"; };
 
     static jni::Local<jni::Object<LatLng>> New(jni::JNIEnv&, const mbgl::LatLng&);
 
