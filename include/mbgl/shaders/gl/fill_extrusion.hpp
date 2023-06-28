@@ -31,7 +31,6 @@ layout (location = 3) in highp vec2 a_height;
 #else
 uniform highp float u_height;
 #endif
-
 #ifndef HAS_UNIFORM_u_color
 uniform lowp float u_color_t;
 layout (location = 4) in highp vec4 a_color;

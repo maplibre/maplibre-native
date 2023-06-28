@@ -43,17 +43,17 @@ uniform lowp float u_height;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
-layout (location = 4) in lowp vec4 a_pattern_from;
-out lowp vec4 pattern_from;
+layout (location = 4) in mediump vec4 a_pattern_from;
+out mediump vec4 pattern_from;
 #else
-uniform lowp vec4 u_pattern_from;
+uniform mediump vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
-layout (location = 5) in lowp vec4 a_pattern_to;
-out lowp vec4 pattern_to;
+layout (location = 5) in mediump vec4 a_pattern_to;
+out mediump vec4 pattern_to;
 #else
-uniform lowp vec4 u_pattern_to;
+uniform mediump vec4 u_pattern_to;
 #endif
 
 void main() {
@@ -145,14 +145,14 @@ in lowp float height;
 uniform lowp float u_height;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-in lowp vec4 pattern_from;
+in mediump vec4 pattern_from;
 #else
-uniform lowp vec4 u_pattern_from;
+uniform mediump vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-in lowp vec4 pattern_to;
+in mediump vec4 pattern_to;
 #else
-uniform lowp vec4 u_pattern_to;
+uniform mediump vec4 u_pattern_to;
 #endif
 
 void main() {
