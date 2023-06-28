@@ -466,6 +466,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                  : gfx::DepthMaskType::ReadOnly);
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+        builder->setNeedsStencil(true);
         builder->setVertexAttrName("a_pos_normal");
 
         return builder;
