@@ -324,7 +324,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
     });
 
-    const auto currentZoom = static_cast<float>(state.getZoom());
+    const auto zoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
     const auto hasPattern = !unevaluated.get<FillExtrusionPattern>().isUndefined();
     const auto opaque = evaluated.get<FillExtrusionOpacity>() >= 1;
@@ -357,21 +357,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = bucket.vertices.elements();
         constexpr auto vertexSize = sizeof(FillExtrusionLayoutVertex::a1);
 
-        // If we already have drawables for this tile, update them.
-        if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
-            //const auto hit = tileBucketInstances.insert(std::make_pair(tileID, bucket.bucketInstanceId));
-            //if (!hit.second && hit.first->second != bucket.bucketInstanceId) {
-                // The bucket has changed, reset the drawables for this tile.
-            //    tileLayerGroup->removeDrawables(passes, tileID);
-            //    hit.first->second = bucket.bucketInstanceId;
-            //} else {
-                // Just update the drawables we already created
-                tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
-                });
-                continue;
-            //}
-        }
-
         const auto defPattern = mbgl::Faded<expression::Image>{"", ""};
         const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
         const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
@@ -382,30 +367,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             binders.setPatternParameters(patternPosA, patternPosB, crossfade);
         }
 
-        // class FillExtrusionPaintProperties : public Properties<
-        //   FillExtrusionBase,            // Data-driven
-        //   FillExtrusionColor,           // Data-driven
-        //   FillExtrusionHeight,          // Data-driven
-        //   FillExtrusionOpacity,         // Not
-        //   FillExtrusionPattern,         // Data-driven
-        //   FillExtrusionTranslate,       // Not
-        //   FillExtrusionTranslateAnchor, // Not
-        //   FillExtrusionVerticalGradient // Not
-        const auto uniformProps =
-            vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
-                                                      FillExtrusionColor,
-                                                      FillExtrusionHeight,
-                                                      FillExtrusionPattern>(
-                binders, evaluated);
-
-        const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                             shaderGroup->getOrCreateShader(context, uniformProps));
-        if (!shader) {
-            assert(false);
-            continue;
-        }
-
-        const auto zoom = static_cast<float>(state.getZoom());
         const FillExtrusionInterpolateUBO interpUBO = {
             /* .base_t = */ std::get<0>(binders.get<FillExtrusionBase>()->interpolationFactor(zoom)),
             /* .height_t = */ std::get<0>(binders.get<FillExtrusionHeight>()->interpolationFactor(zoom)),
@@ -420,7 +381,36 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
         };
 
-        if (!depthBuilder) {
+        // If we already have drawables for this tile, update them.
+        if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
+            // Just update the drawables we already created
+            tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                auto& uniforms = drawable.mutableUniformBuffers();
+                uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
+                uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
+            });
+            continue;
+        }
+
+        const auto uniformProps =
+            vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
+                                                      FillExtrusionColor,
+                                                      FillExtrusionHeight,
+                                                      FillExtrusionPattern>(
+                binders, evaluated);
+
+        const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                             shaderGroup->getOrCreateShader(context, uniformProps));
+        if (!shader) {
+            assert(false);
+            continue;
+        }
+
+        // The non-pattern path in `render()` only uses two-pass rendering if there's translucency.
+        // The pattern path always uses two passes.
+        const auto doDepthPass = (!opaque || hasPattern);
+
+        if (doDepthPass && !depthBuilder) {
             if (auto builder = context.createDrawableBuilder(layerPrefix + "depth")) {
                 builder->setShader(shader);
                 builder->setIs3D(true);
@@ -435,7 +425,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             if (auto builder = context.createDrawableBuilder(layerPrefix + "color")) {
                 builder->setShader(shader);
                 builder->setIs3D(true);
-                builder->setEnableStencil(true);
                 builder->setEnableColor(true);
                 builder->setRenderPass(passes);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
@@ -466,13 +455,18 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             std::memcpy(&rawVertices[vertexSize * i], &bucket.vertices.at(i).a1, vertexSize);
         }
 
-        auto vertexCopy = rawVertices;
-        depthBuilder->setRawVertices(std::move(vertexCopy), vertexCount, gfx::AttributeDataType::Short2);
+        colorBuilder->setEnableStencil(doDepthPass);
+        if (doDepthPass) {
+            auto vertexCopy = rawVertices;
+            depthBuilder->setRawVertices(std::move(vertexCopy), vertexCount, gfx::AttributeDataType::Short2);
+        }
         colorBuilder->setRawVertices(std::move(rawVertices), vertexCount, gfx::AttributeDataType::Short2);
 
-        gfx::VertexAttributeArray attribCopy;
-        attribCopy.copy(vertexAttrs);
-        depthBuilder->setVertexAttributes(std::move(attribCopy));
+        if (doDepthPass) {
+            gfx::VertexAttributeArray attribCopy;
+            attribCopy.copy(vertexAttrs);
+            depthBuilder->setVertexAttributes(std::move(attribCopy));
+        }
         colorBuilder->setVertexAttributes(std::move(vertexAttrs));
 
         const auto finish = [&](gfx::DrawableBuilder& builder) {
@@ -495,7 +489,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         };
         
-        finish(*depthBuilder);
+        if (doDepthPass) {
+            finish(*depthBuilder);
+        }
         finish(*colorBuilder);
     }
 }

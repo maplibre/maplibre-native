@@ -81,7 +81,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .base = */ constOrDefault<FillExtrusionBase>(evaluated),
             /* .height = */ constOrDefault<FillExtrusionHeight>(evaluated),
             /* .light_intensity = */ FillExtrusionProgram::lightIntensity(parameters.evaluatedLight),
-            /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>(),
+            /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
             /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
             /* .fade = */ crossfade.t,
             /* .pad = */ 0, 0, 0
