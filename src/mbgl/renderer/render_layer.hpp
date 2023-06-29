@@ -204,7 +204,7 @@ protected:
 
     /// Remove all the drawables for tiles
     void removeAllDrawables();
-    
+
     // Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
 #endif

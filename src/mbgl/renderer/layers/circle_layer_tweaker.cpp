@@ -101,8 +101,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state,
-                                          translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
 

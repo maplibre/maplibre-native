@@ -6,8 +6,7 @@
 #include <memory>
 
 namespace mbgl {
-namespace style {
-} // namespace style
+namespace style {} // namespace style
 namespace gfx {
 
 struct FillExtrusionDrawableData : public DrawableData {

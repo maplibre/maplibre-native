@@ -88,8 +88,9 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
             /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
             /* .fade = */ crossfade.t,
-            /* .pad = */ 0, 0, 0
-        };
+            /* .pad = */ 0,
+            0,
+            0};
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
 
@@ -106,14 +107,15 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = true;
-        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state,
-                                          translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);
         const auto nearestZoomScale = state.zoomScale(state.getIntegerZoom() - tileID.canonical.z);
         const auto tileSizeAtNearestZoom = std::floor(util::tileSize_D * nearestZoomScale);
-        const auto pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * zoomScale));
+        const auto pixelX = static_cast<int32_t>(tileSizeAtNearestZoom *
+                                                 (tileID.canonical.x + tileID.wrap * zoomScale));
         const auto pixelY = static_cast<int32_t>(tileSizeAtNearestZoom * tileID.canonical.y);
         const auto pixelRatio = parameters.pixelRatio;
         const auto numTiles = std::pow(2, tileID.canonical.z);
@@ -135,8 +137,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
             /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
             /* .height_factor = */ heightFactor,
-            /* .pad = */ 0
-        };
+            /* .pad = */ 0};
 
         drawable.mutableUniformBuffers().createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, parameters.context);
     });

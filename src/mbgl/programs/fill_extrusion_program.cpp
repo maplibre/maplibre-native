@@ -31,12 +31,11 @@ float FillExtrusionProgram::lightIntensity(const EvaluatedLight& light) {
     return light.get<LightIntensity>();
 }
 
-FillExtrusionProgram::LayoutUniformValues FillExtrusionProgram::layoutUniformValues(
-        const mat4& matrix,
-        const TransformState& state,
-        const float opacity,
-        const EvaluatedLight& light,
-        const float verticalGradient) {
+FillExtrusionProgram::LayoutUniformValues FillExtrusionProgram::layoutUniformValues(const mat4& matrix,
+                                                                                    const TransformState& state,
+                                                                                    const float opacity,
+                                                                                    const EvaluatedLight& light,
+                                                                                    const float verticalGradient) {
     return {uniforms::matrix::Value(matrix),
             uniforms::opacity::Value(opacity),
             uniforms::lightcolor::Value(FillExtrusionProgram::lightColor(light)),
@@ -57,10 +56,10 @@ FillExtrusionPatternProgram::LayoutUniformValues FillExtrusionPatternProgram::la
     const EvaluatedLight& light,
     const float verticalGradient) {
     const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
-    const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(util::tileSize_D *
-                                                         state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
-    const int32_t pixelX = static_cast<int32_t>(tileSizeAtNearestZoom *
-                                          (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
+    const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(
+        util::tileSize_D * state.zoomScale(state.getIntegerZoom() - tileID.canonical.z));
+    const int32_t pixelX = static_cast<int32_t>(
+        tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * state.zoomScale(tileID.canonical.z)));
     const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
 
     return {uniforms::matrix::Value(matrix),
