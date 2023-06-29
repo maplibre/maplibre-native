@@ -112,6 +112,9 @@ void DrawableGL::bindUniformBuffers() const {
         for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
             if (!uniformBuffer) {
+                using namespace std::string_literals;
+                Log::Error(Event::General,
+                           "DrawableGL::bindUniformBuffers: UBO "s + element.first + " not found. skipping.");
                 assert(false);
                 continue;
             }
