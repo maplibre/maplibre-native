@@ -4,12 +4,13 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
+#include <mbgl/programs/fill_extrusion_program.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/style/layers/fill_layer_properties.hpp>
+#include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
 
@@ -20,33 +21,47 @@ using namespace style;
 struct alignas(16) FillExtrusionDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4> scale;
-    /*  80 */ std::array<float, 2> world;
+    /*  80 */ std::array<float, 2> texsize;
     /*  88 */ std::array<float, 2> pixel_coord_upper;
     /*  96 */ std::array<float, 2> pixel_coord_lower;
-    /* 104 */ std::array<float, 2> texsize;
+    /* 104 */ float height_factor;
+    /* 108 */ float pad;
     /* 112 */
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 112);
+static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) FillExtrusionDrawablePropsUBO {
-    /*  0 */ Color color;
-    /* 16 */ Color outline_color;
-    /* 32 */ float opacity;
-    /* 36 */ std::array<float, 3> padding;
-    /* 48 */
+    /*  0 */ std::array<float, 4> color;
+    /* 16 */ std::array<float, 3> light_color;
+    /* 28 */ float pad1;
+    /* 32 */ std::array<float, 3> light_position;
+    /* 44 */ float base;
+    /* 48 */ float height;
+    /* 52 */ float light_intensity;
+    /* 56 */ float vertical_gradient;
+    /* 60 */ float opacity;
+    /* 64 */ float fade;
+    /* 68 */ float pad2, pad3, pad4;
+    /* 80 */
 };
-static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 48);
+static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 
 static constexpr std::string_view FillExtrusionDrawableUBOName = "FillExtrusionDrawableUBO";
 static constexpr std::string_view FillExtrusionDrawablePropsUBOName = "FillExtrusionDrawablePropsUBO";
 
+template <typename T, class... Is, class... Ts>
+static auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
+    return evaluated.template get<T>().constantOr(T::defaultValue());
+}
+
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                         const RenderTree& renderTree,
                                         const PaintParameters& parameters) {
-    const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
+    const auto& props = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
+    const auto& state = parameters.state;
 
     if (layerGroup.empty()) {
         return;
@@ -59,10 +74,17 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     if (!propsBuffer) {
         const FillExtrusionDrawablePropsUBO paramsUBO = {
-            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
-            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-            /* .padding = */ {0},
+            /* .color = */ gfx::Drawable::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
+            /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
+            /* .pad = */ 0,
+            /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
+            /* .base = */ constOrDefault<FillExtrusionBase>(evaluated),
+            /* .height = */ constOrDefault<FillExtrusionHeight>(evaluated),
+            /* .light_intensity = */ FillExtrusionProgram::lightIntensity(parameters.evaluatedLight),
+            /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>(),
+            /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
+            /* .fade = */ crossfade.t,
+            /* .pad = */ 0, 0, 0
         };
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
@@ -76,23 +98,22 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        const auto& translation = evaluated.get<FillTranslate>();
-        const auto anchor = evaluated.get<FillTranslateAnchor>();
+        const auto& translation = evaluated.get<FillExtrusionTranslate>();
+        const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
+        constexpr bool nearClipped = true;
+        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state,
+                                          translation, anchor, nearClipped, inViewportPixelUnits);
 
-        // from FillPatternProgram::layoutUniformValues
-        const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
-        const auto intZoom = parameters.state.getIntegerZoom();
-        const auto tileRatio = 1.0f / tileID.pixelsToTileUnits(1.0f, intZoom);
-        const int32_t tileSizeAtNearestZoom = static_cast<int32_t>(
-            util::tileSize_D * parameters.state.zoomScale(intZoom - tileID.canonical.z));
-        const int32_t pixelX = static_cast<int32_t>(
-            tileSizeAtNearestZoom *
-            (tileID.canonical.x + tileID.wrap * parameters.state.zoomScale(tileID.canonical.z)));
-        const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
+        const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
+        const auto zoomScale = state.zoomScale(tileID.canonical.z);
+        const auto nearestZoomScale = state.zoomScale(state.getIntegerZoom() - tileID.canonical.z);
+        const auto tileSizeAtNearestZoom = std::floor(util::tileSize_D * nearestZoomScale);
+        const auto pixelX = static_cast<int32_t>(tileSizeAtNearestZoom * (tileID.canonical.x + tileID.wrap * zoomScale));
+        const auto pixelY = static_cast<int32_t>(tileSizeAtNearestZoom * tileID.canonical.y);
         const auto pixelRatio = parameters.pixelRatio;
+        const auto numTiles = std::pow(2, tileID.canonical.z);
+        const auto heightFactor = static_cast<float>(-numTiles / util::tileSize_D / 8.0);
 
         Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
@@ -104,12 +125,13 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
 
         const FillExtrusionDrawableUBO drawableUBO = {
-            /*.matrix=*/util::cast<float>(matrix),
-            /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-            /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
-            /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-            /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-            /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .scale = */ {pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
+            /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+            /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+            /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+            /* .height_factor = */ heightFactor,
+            /* .pad = */ 0
         };
 
         drawable.mutableUniformBuffers().createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, parameters.context);

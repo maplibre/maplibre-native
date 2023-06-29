@@ -8,31 +8,43 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillExtrusionShader";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
-uniform vec3 u_lightcolor;
-uniform lowp vec3 u_lightpos;
-uniform lowp float u_lightintensity;
-uniform float u_vertical_gradient;
-uniform lowp float u_opacity;
-
-layout (location = 0) in vec2 a_pos;
+    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
 out vec4 v_color;
 
-layout (std140) uniform FillXUBO {
-    highp float u_base;
-    highp float u_height;
-    highp vec4 u_color;
+layout (std140) uniform FillExtrusionDrawableTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
 };
-
 layout (std140) uniform FillExtrusionInterpolateUBO {
     highp float u_base_t;
     highp float u_height_t;
     highp float u_color_t;
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
+    highp float u_pad_interp1, u_pad_interp2, u_pad_interp3;
+};
+layout (std140) uniform FillExtrusionDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec4 u_scale;
+    highp vec2 u_texsize;
+    highp vec2 u_pixel_coord_upper;
+    highp vec2 u_pixel_coord_lower;
+    highp float u_height_factor;
+    highp float u_pad_drawable;
+};
+layout (std140) uniform FillExtrusionDrawablePropsUBO {
+    highp vec4 u_color;
+    highp vec3 u_lightcolor;
+    highp float u_pad1;
+    highp vec3 u_lightpos;
+    highp float u_base;
+    highp float u_height;
+    highp float u_lightintensity;
+    highp float u_vertical_gradient;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_pad_props2, u_pad_props3, u_pad_props4;
 };
 
 #ifndef HAS_UNIFORM_u_base

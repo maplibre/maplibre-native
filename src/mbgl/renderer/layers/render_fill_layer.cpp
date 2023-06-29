@@ -396,9 +396,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
             /* .outline_color_t = */ std::get<0>(binders.get<FillOutlineColor>()->interpolationFactor(zoom)),
             /* .pattern_from_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-            /* .pattern_to_t = */ std::get<0>(binders.get<FillColor>()->interpolationFactor(zoom)),
+            /* .pattern_to_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
             /* .fade = */ crossfade.t,
-            /* .padding = */ {0},
+            /* .padding = */ 0, 0
         };
 
         // TODO: only update if properties re-evaluated?

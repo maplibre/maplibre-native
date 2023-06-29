@@ -33,7 +33,7 @@ struct alignas(16) FillDrawablePropsUBO {
     /*  0 */ Color color;
     /* 16 */ Color outline_color;
     /* 32 */ float opacity;
-    /* 36 */ std::array<float, 3> padding;
+    /* 36 */ float pad1, pad2, pad3;
     /* 48 */
 };
 static_assert(sizeof(FillDrawablePropsUBO) == 48);
@@ -59,10 +59,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     if (!propsBuffer) {
         const FillDrawablePropsUBO paramsUBO = {
-            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
-            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-            /* .padding = */ {0},
+//            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
+//            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+//            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+//            /* .padding = */ {0},
         };
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
@@ -79,8 +79,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& translation = evaluated.get<FillTranslate>();
         const auto anchor = evaluated.get<FillTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
+        constexpr bool nearClipped = false;
+        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state,
+                                          translation, anchor, nearClipped, inViewportPixelUnits);
 
         // from FillPatternProgram::layoutUniformValues
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();

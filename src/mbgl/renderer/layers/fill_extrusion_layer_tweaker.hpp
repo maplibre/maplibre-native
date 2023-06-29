@@ -32,19 +32,18 @@ struct alignas(16) FillExtrusionDrawableTilePropsUBO {
     /* 16 */ std::array<float, 4> pattern_to;
     /* 32 */
 };
-static_assert(sizeof(FillExtrusionDrawableTilePropsUBO) == 32);
+static_assert(sizeof(FillExtrusionDrawableTilePropsUBO) == 2 * 16);
 
 /// Attribute interpolations
 struct alignas(16) FillExtrusionInterpolateUBO {
-    /*  0 */ float color_t;
-    /*  4 */ float opacity_t;
-    /*  8 */ float outline_color_t;
+    /*  0 */ float base_t;
+    /*  4 */ float height_t;
+    /*  8 */ float color_t;
     /* 12 */ float pattern_from_t;
     /* 16 */ float pattern_to_t;
-    /* 20 */ float fade;
-    /* 24 */ std::array<float, 2> padding;
+    /* 20 */ float pad1, pad2, pad3;
     /* 32 */
 };
-static_assert(sizeof(FillExtrusionInterpolateUBO) == 32);
+static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16);
 
 } // namespace mbgl
