@@ -316,6 +316,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     if (parameters.staticData.has3D) {
         common3DPass();
         drawable3DPass();
+        parameters.clearStencil();
     }
     commonClearPass();
     drawableOpaquePass();
@@ -331,6 +332,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.clearStencil();
         common3DPass();
         renderLayer3DPass();
+        parameters.clearStencil();
     }
     commonClearPass();
     // Clipping masks were drawn only on the other side
@@ -346,6 +348,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     if (parameters.staticData.has3D) {
         common3DPass();
         drawable3DPass();
+        parameters.clearStencil();
     }
     commonClearPass();
     parameters.clearTileClippingMasks();
@@ -358,6 +361,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         parameters.clearStencil();
         common3DPass();
         renderLayer3DPass();
+        parameters.clearStencil();
     }
     commonClearPass();
     parameters.clearTileClippingMasks();
@@ -372,6 +376,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         common3DPass();
         renderLayer3DPass();
         drawable3DPass();
+        parameters.clearStencil();
     }
     commonClearPass();
     // Do RenderLayers first, drawables last

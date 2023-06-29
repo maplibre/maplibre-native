@@ -308,16 +308,15 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).crossfade;
 
-    // If `FillExtrusionOpacity` is zero, no need to render anything
-    if (evaluatedProperties->renderPasses == mbgl::underlying_type(RenderPass::None)) {
-        removeAllDrawables();
-        return;
-    }
+    // `passes` is set to (RenderPass::Translucent | RenderPass::Pass3D), but `render()`
+    // only runs on the translucent pass, so although our output is 3D, it does not render
+    // in the "3D pass".
+    constexpr auto drawPass = RenderPass::Translucent;
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
+        if (drawable->getRenderPass() != drawPass || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
             drawable.reset();
             ++stats.drawablesRemoved;
         }
@@ -344,7 +343,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
         if (!optRenderData || !optRenderData->bucket) {
-            removeTile(passes, tileID);
+            removeTile(drawPass, tileID);
             continue;
         }
 
@@ -381,9 +380,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         // If we already have drawables for this tile, update them.
-        if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
+        if (tileLayerGroup->getDrawableCount(drawPass, tileID) > 0) {
             // Just update the drawables we already created
-            tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+            tileLayerGroup->observeDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
                 auto& uniforms = drawable.mutableUniformBuffers();
                 uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
                 uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
@@ -415,7 +414,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setIs3D(true);
                 builder->setEnableStencil(false);
                 builder->setEnableColor(false);
-                builder->setRenderPass(passes);
+                builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
                 depthBuilder = std::move(builder);
             }
@@ -425,7 +424,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setShader(shader);
                 builder->setIs3D(true);
                 builder->setEnableColor(true);
-                builder->setRenderPass(passes);
+                builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
                 colorBuilder = std::move(builder);
             }
@@ -483,7 +482,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
                 uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
                 
-                tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
+                tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         };
