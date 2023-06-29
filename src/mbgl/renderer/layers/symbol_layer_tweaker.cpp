@@ -20,17 +20,19 @@ namespace mbgl {
 
 using namespace style;
 
+namespace {
+
 struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
     /* 128 */ std::array<float, 4 * 4> coord_matrix;
-
+    
     /* 192 */ std::array<float, 2> texsize;
     /* 200 */ std::array<float, 2> texsize_icon;
-
+    
     /* 208 */ float gamma_scale;
     /* 212 */ float device_pixel_ratio;
-
+    
     /* 216 */ float camera_to_center_distance;
     /* 220 */ float pitch;
     /* 224 */ /*bool*/ int rotate_symbol;
@@ -53,7 +55,7 @@ struct alignas(16) SymbolDrawablePaintUBO {
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
-static Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
+Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
     if (const auto shader = drawable.getShader()) {
         if (const auto index = shader->getSamplerLocation(name)) {
             if (const auto& tex = drawable.getTexture(*index)) {
@@ -64,7 +66,7 @@ static Size getTexSize(const gfx::Drawable& drawable, const std::string_view nam
     return {0, 0};
 }
 
-static std::array<float, 2> toArray(const Size& s) {
+std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
@@ -72,9 +74,11 @@ constexpr auto texUniformName = "u_texture";
 constexpr auto texIconUniformName = "u_texture_icon";
 
 template <typename T, class... Is, class... Ts>
-static auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
+auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
     return evaluated.template get<T>().constantOr(T::defaultValue());
 }
+
+} // namespace
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,

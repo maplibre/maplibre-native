@@ -18,6 +18,8 @@ namespace mbgl {
 
 using namespace style;
 
+namespace {
+
 struct alignas(16) FillExtrusionDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4> scale;
@@ -47,13 +49,15 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 
-static constexpr std::string_view FillExtrusionDrawableUBOName = "FillExtrusionDrawableUBO";
-static constexpr std::string_view FillExtrusionDrawablePropsUBOName = "FillExtrusionDrawablePropsUBO";
+constexpr std::string_view FillExtrusionDrawableUBOName = "FillExtrusionDrawableUBO";
+constexpr std::string_view FillExtrusionDrawablePropsUBOName = "FillExtrusionDrawablePropsUBO";
 
 template <typename T, class... Is, class... Ts>
-static auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
+auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
     return evaluated.template get<T>().constantOr(T::defaultValue());
 }
+
+} // namespace
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                         const RenderTree& renderTree,
