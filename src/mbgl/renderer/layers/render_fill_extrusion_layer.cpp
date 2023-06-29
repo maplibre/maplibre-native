@@ -39,7 +39,6 @@ namespace {
 constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
 constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
 
-constexpr auto posAttribName = "a_pos";
 constexpr auto normAttribName = "a_normal_ed";
 
 #endif // MLN_DRAWABLE_RENDERER
