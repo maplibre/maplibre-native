@@ -117,8 +117,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
         const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
                                    : evaluated.get<style::IconTranslateAnchor>();
+        constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, renderTree, state, translate, anchor, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, renderTree, state, translate,
+                                          anchor, nearClipped, inViewportPixelUnits);
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(state.getZoom());

@@ -169,6 +169,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_extrusion_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
@@ -186,6 +187,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_extrusion_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
@@ -1004,6 +1007,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_sdf.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_extrusion_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf_text.hpp

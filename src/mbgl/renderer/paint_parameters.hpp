@@ -96,14 +96,17 @@ public:
 public:
     void renderTileClippingMasks(const RenderTiles&);
     void renderTileClippingMasks(const std::set<UnwrappedTileID>&);
+
+    /// Clear any tile masks and the stencil buffer, if necessary
     void clearTileClippingMasks();
+
+    /// Clear the stencil buffer, even if there are no tile masks (for 3D)
+    void clearStencil();
 
     gfx::StencilMode stencilModeForClipping(const UnwrappedTileID&) const;
     gfx::StencilMode stencilModeFor3D();
 
 private:
-    void clearStencil();
-
     template <typename TIter>
     using GetTileIDFunc = std::function<const UnwrappedTileID&(const typename TIter::value_type&)>;
     template <typename TIter>

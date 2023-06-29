@@ -77,6 +77,20 @@
         "uses_ubos": true
     },
     {
+        "name": "FillExtrusionShader",
+        "header": "drawable_fill_extrusion",
+        "glsl_vert": "drawable.fill_extrusion.vertex.glsl",
+        "glsl_frag": "drawable.fill_extrusion.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillExtrusionPatternShader",
+        "header": "drawable_fill_extrusion_pattern",
+        "glsl_vert": "drawable.fill_extrusion_pattern.vertex.glsl",
+        "glsl_frag": "drawable.fill_extrusion_pattern.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "RasterShader",
         "header": "drawable_raster",
         "glsl_vert": "drawable.raster.vertex.glsl",

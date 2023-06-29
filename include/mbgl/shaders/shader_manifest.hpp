@@ -14,10 +14,12 @@
 #include <mbgl/shaders/gl/drawable_line.hpp>
 #include <mbgl/shaders/gl/drawable_fill_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline_pattern.hpp>
+#include <mbgl/shaders/gl/drawable_fill_extrusion.hpp>
+#include <mbgl/shaders/gl/drawable_fill_extrusion_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_raster.hpp>
 #include <mbgl/shaders/gl/drawable_symbol_icon.hpp>
-#include <mbgl/shaders/gl/drawable_symbol_sdf_icon.hpp>
 #include <mbgl/shaders/gl/drawable_symbol_sdf_text.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_sdf_icon.hpp>
 #include <mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>

@@ -34,12 +34,15 @@ void DrawableBuilder::flush() {
     const auto vertexCount = curVertexCount();
     if (vertexCount) {
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
+        draw->setEnabled(enabled);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
-        draw->setNeedsStencil(needsStencil);
+        draw->setEnableColor(enableColor);
+        draw->setEnableStencil(enableStencil);
         draw->setRenderPass(renderPass);
         draw->setDrawPriority(drawPriority);
         draw->setSubLayerIndex(subLayerIndex);
         draw->setDepthType(depthType);
+        draw->setIs3D(is3D);
         draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
         draw->setTextures(textures);

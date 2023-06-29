@@ -149,21 +149,40 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // -------------------------------------------------------------------------------------
     // Renders any 3D layers bottom-to-top to unique FBOs with texture
     // attachments, but share the same depth rbo between them.
-    if (parameters.staticData.has3D) {
-        parameters.staticData.backendSize = parameters.backend.getDefaultRenderable().getSize();
-
-        const auto debugGroup(parameters.encoder->createDebugGroup("3d"));
-        parameters.pass = RenderPass::Pass3D;
-
-        if (!parameters.staticData.depthRenderbuffer ||
-            parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
-            parameters.staticData.depthRenderbuffer =
+    const auto common3DPass = [&] {
+        if (parameters.staticData.has3D) {
+            parameters.staticData.backendSize = parameters.backend.getDefaultRenderable().getSize();
+            
+            const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
+            parameters.pass = RenderPass::Pass3D;
+            
+            if (!parameters.staticData.depthRenderbuffer ||
+                parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+                parameters.staticData.depthRenderbuffer =
                 parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-                    parameters.staticData.backendSize);
+                                                                                         parameters.staticData.backendSize);
+            }
+            parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
-        parameters.staticData.depthRenderbuffer->setShouldClear(true);
+    };
+
+#if MLN_DRAWABLE_RENDERER
+    const auto drawable3DPass = [&] {
+        const auto debugGroup(parameters.encoder->createDebugGroup("drawables-3d"));
+        assert(parameters.pass == RenderPass::Pass3D);
+        parameters.currentLayer = 0;
+
+        // draw layer groups, opaque pass
+        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+            layerGroup.render(orchestrator, parameters);
+            parameters.currentLayer++;
+        });
+    };
+#endif // MLN_DRAWABLE_RENDERER
 
 #if MLN_LEGACY_RENDERER
+    const auto renderLayer3DPass = [&] {
+        const auto debugGroup(parameters.encoder->createDebugGroup("3d"));
         int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
         for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
             parameters.currentLayer = i;
@@ -173,23 +192,25 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 renderItem.render(parameters);
             }
         }
-#endif
-    }
+    };
+#endif // MLN_LEGACY_RENDERER
 
-    // - CLEAR
-    // -------------------------------------------------------------------------------------
-    // Renders the backdrop of the OpenGL view. This also paints in areas where
-    // we don't have any tiles whatsoever.
-    {
-        std::optional<Color> color;
-        if (parameters.debugOptions & MapDebugOptions::Overdraw) {
-            color = Color::black();
-        } else if (!backend.contextIsShared()) {
-            color = renderTreeParameters.backgroundColor;
+    const auto commonClearPass = [&] {
+        // - CLEAR
+        // -------------------------------------------------------------------------------------
+        // Renders the backdrop of the OpenGL view. This also paints in areas where
+        // we don't have any tiles whatsoever.
+        {
+            std::optional<Color> color;
+            if (parameters.debugOptions & MapDebugOptions::Overdraw) {
+                color = Color::black();
+            } else if (!backend.contextIsShared()) {
+                color = renderTreeParameters.backgroundColor;
+            }
+            parameters.renderPass = parameters.encoder->createRenderPass(
+                                                                         "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
         }
-        parameters.renderPass = parameters.encoder->createRenderPass(
-            "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
-    }
+    };
 
     // Actually render the layers
 #if MLN_DRAWABLE_RENDERER
@@ -264,9 +285,19 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 #endif // MLN_LEGACY_RENDERER
 
 #if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
+    if (parameters.staticData.has3D) {
+        common3DPass();
+        drawable3DPass();
+    }
+    commonClearPass();
     drawableOpaquePass();
     drawableTranslucentPass();
 #elif (MLN_LEGACY_RENDERER && !MLN_DRAWABLE_RENDERER)
+    if (parameters.staticData.has3D) {
+        common3DPass();
+        renderLayer3DPass();
+    }
+    commonClearPass();
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
 #elif (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
@@ -282,41 +313,72 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Drawable LayerGroups on the left
     // Opaque only on top
     platform::glScissor(0, 0, halfW, H);
+    if (parameters.staticData.has3D) {
+        common3DPass();
+        drawable3DPass();
+        parameters.clearStencil();
+    }
+    commonClearPass();
     drawableOpaquePass();
 
     // Composite (Opaque+Translucent) on bottom
     platform::glScissor(0, 0, halfW, halfH);
-    // Clipping masks were drawn only on the other side
-    parameters.clearTileClippingMasks();
     drawableTranslucentPass();
 
     // RenderLayers on the right
     // Opaque only on top
     platform::glScissor(halfW, 0, halfW, H);
+    if (parameters.staticData.has3D) {
+        parameters.clearStencil();
+        common3DPass();
+        renderLayer3DPass();
+        parameters.clearStencil();
+    }
+    commonClearPass();
+    // Clipping masks were drawn only on the other side
     parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
 
     // Composite (Opaque+Translucent) on bottom
     platform::glScissor(halfW, 0, halfW, halfH);
-    parameters.clearTileClippingMasks();
     renderLayerTranslucentPass();
-#else
+#else // MLN_RENDERER_QUAD_SPLIT_VIEW
     // Drawable LayerGroups on the left
     platform::glScissor(0, 0, halfW, H);
+    if (parameters.staticData.has3D) {
+        common3DPass();
+        drawable3DPass();
+        parameters.clearStencil();
+    }
+    commonClearPass();
     parameters.clearTileClippingMasks();
     drawableOpaquePass();
     drawableTranslucentPass();
 
     // RenderLayers on the right
     platform::glScissor(halfW, 0, W, H);
+    if (parameters.staticData.has3D) {
+        parameters.clearStencil();
+        common3DPass();
+        renderLayer3DPass();
+        parameters.clearStencil();
+    }
+    commonClearPass();
     parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
-#endif
+#endif // MLN_RENDERER_QUAD_SPLIT_VIEW
     // Reset viewport
     platform::glScissor(0, 0, W, H);
     platform::glDisable(GL_SCISSOR_TEST);
-#else  // ifdef MLN_RENDERER_SPLIT_VIEW
+#else  // if MLN_RENDERER_SPLIT_VIEW
+    if (parameters.staticData.has3D) {
+        common3DPass();
+        renderLayer3DPass();
+        drawable3DPass();
+        parameters.clearStencil();
+    }
+    commonClearPass();
     // Do RenderLayers first, drawables last
     renderLayerOpaquePass();
     renderLayerTranslucentPass();

@@ -49,7 +49,7 @@ public:
     const util::SimpleIdentity& getId() const { return uniqueID; }
 
     /// Draw the drawable
-    virtual void draw(const PaintParameters&) const = 0;
+    virtual void draw(PaintParameters&) const = 0;
 
     /// Drawable name is used for debugging and troubleshooting
     const std::string& getName() const { return name; }
@@ -113,23 +113,33 @@ public:
     bool getEnabled() const { return enabled; }
     void setEnabled(bool value) { enabled = value; }
 
-    /// Whether to do stenciling (based on the Tile ID)
-    bool getNeedsStencil() const { return needsStencil; }
-    void setNeedsStencil(bool value) { needsStencil = value; }
+    /// Whether to render to the color target
+    bool getEnableColor() const { return enableColor; }
+    void setEnableColor(bool value) { enableColor = value; }
+
+    /// Whether to do stenciling (based on the Tile ID or 3D)
+    bool getEnableStencil() const { return enableStencil; }
+    void setEnableStencil(bool value) { enableStencil = value; }
 
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
-    /// Determines depth range within the layer
+    /// Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
-    const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
-    void setTileID(const OverscaledTileID& value) { tileID = value; }
-
+    /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
+
+    /// Uses 3D depth mode
+    bool getIs3D() const { return is3D; }
+    void setIs3D(bool value) { is3D = value; }
+
+    /// The ID of the tile that this drawable represents, if any
+    const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
+    void setTileID(const OverscaledTileID& value) { tileID = value; }
 
     const gfx::CullFaceMode& getCullFaceMode() const;
     void setCullFaceMode(const gfx::CullFaceMode&);
@@ -164,7 +174,9 @@ public:
 
 protected:
     bool enabled = true;
-    bool needsStencil = false;
+    bool enableColor = true;
+    bool enableStencil = false;
+    bool is3D = false;
     std::string name;
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;

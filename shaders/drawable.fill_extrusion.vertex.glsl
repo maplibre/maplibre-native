@@ -1,59 +1,50 @@
-// Generated code, do not modify this file!
-#pragma once
-#include <mbgl/shaders/shader_source.hpp>
-
-namespace mbgl {
-namespace shaders {
-
-template <>
-struct ShaderSource<BuiltIn::FillExtrusionProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "FillExtrusionProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
-uniform vec3 u_lightcolor;
-uniform lowp vec3 u_lightpos;
-uniform lowp float u_lightintensity;
-uniform float u_vertical_gradient;
-uniform lowp float u_opacity;
-
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
 out vec4 v_color;
 
-#ifndef HAS_UNIFORM_u_base
-uniform lowp float u_base_t;
-layout (location = 2) in highp vec2 a_base;
-#else
-uniform highp float u_base;
-#endif
-#ifndef HAS_UNIFORM_u_height
-uniform lowp float u_height_t;
-layout (location = 3) in highp vec2 a_height;
-#else
-uniform highp float u_height;
-#endif
-#ifndef HAS_UNIFORM_u_color
-uniform lowp float u_color_t;
-layout (location = 4) in highp vec4 a_color;
-#else
-uniform highp vec4 u_color;
-#endif
+layout (std140) uniform FillExtrusionDrawableTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+};
+layout (std140) uniform FillExtrusionInterpolateUBO {
+    highp float u_base_t;
+    highp float u_height_t;
+    highp float u_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+    highp float u_pad_interp1, u_pad_interp2, u_pad_interp3;
+};
+layout (std140) uniform FillExtrusionDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec4 u_scale;
+    highp vec2 u_texsize;
+    highp vec2 u_pixel_coord_upper;
+    highp vec2 u_pixel_coord_lower;
+    highp float u_height_factor;
+    highp float u_pad_drawable;
+};
+layout (std140) uniform FillExtrusionDrawablePropsUBO {
+    highp vec4 u_color;
+    highp vec3 u_lightcolor;
+    highp float u_pad1;
+    highp vec3 u_lightpos;
+    highp float u_base;
+    highp float u_height;
+    highp float u_lightintensity;
+    highp float u_vertical_gradient;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_pad_props2, u_pad_props3, u_pad_props4;
+};
+
+#pragma mapbox: define highp float base
+#pragma mapbox: define highp float height
+#pragma mapbox: define highp vec4 color
 
 void main() {
-    #ifndef HAS_UNIFORM_u_base
-highp float base = unpack_mix_vec2(a_base, u_base_t);
-#else
-highp float base = u_base;
-#endif
-    #ifndef HAS_UNIFORM_u_height
-highp float height = unpack_mix_vec2(a_height, u_height_t);
-#else
-highp float height = u_height;
-#endif
-    #ifndef HAS_UNIFORM_u_color
-highp vec4 color = unpack_mix_color(a_color, u_color_t);
-#else
-highp vec4 color = u_color;
-#endif
+    #pragma mapbox: initialize highp float base
+    #pragma mapbox: initialize highp float height
+    #pragma mapbox: initialize highp vec4 color
 
     vec3 normal = a_normal_ed.xyz;
 
@@ -99,18 +90,3 @@ highp vec4 color = u_color;
     v_color.b += clamp(color.b * directional * u_lightcolor.b, mix(0.0, 0.3, 1.0 - u_lightcolor.b), 1.0);
     v_color *= u_opacity;
 }
-)";
-    static constexpr const char* fragment = R"(in vec4 v_color;
-
-void main() {
-    fragColor = v_color;
-
-#ifdef OVERDRAW_INSPECTOR
-    fragColor = vec4(1.0);
-#endif
-}
-)";
-};
-
-} // namespace shaders
-} // namespace mbgl

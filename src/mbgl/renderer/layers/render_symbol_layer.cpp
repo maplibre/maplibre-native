@@ -662,12 +662,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
 
 #if MLN_DRAWABLE_RENDERER
-    renderTileIDs.clear();
-    renderTileIDs.reserve(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(renderTileIDs, renderTileIDs.end()),
-                   [](const auto& tile) { return tile.get().getOverscaledTileID(); });
+    updateRenderTileIDs();
 #endif // MLN_DRAWABLE_RENDERER
 
     addRenderPassesFromTiles();
@@ -999,7 +994,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             if (!builder) {
                 builder = context.createDrawableBuilder(layerPrefix);
                 builder->setSubLayerIndex(0);
-                builder->setNeedsStencil(false);
+                builder->setEnableStencil(false);
                 builder->setRenderPass(passes);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
