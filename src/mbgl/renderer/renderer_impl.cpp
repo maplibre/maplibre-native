@@ -328,6 +328,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Opaque only on top
     platform::glScissor(halfW, 0, halfW, H);
     if (parameters.staticData.has3D) {
+        parameters.clearStencil();
         common3DPass();
         renderLayer3DPass();
     }
@@ -354,6 +355,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // RenderLayers on the right
     platform::glScissor(halfW, 0, W, H);
     if (parameters.staticData.has3D) {
+        parameters.clearStencil();
         common3DPass();
         renderLayer3DPass();
     }
@@ -365,7 +367,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Reset viewport
     platform::glScissor(0, 0, W, H);
     platform::glDisable(GL_SCISSOR_TEST);
-#else  // ifdef MLN_RENDERER_SPLIT_VIEW
+#else  // if MLN_RENDERER_SPLIT_VIEW
     if (parameters.staticData.has3D) {
         common3DPass();
         renderLayer3DPass();
