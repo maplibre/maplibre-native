@@ -13,17 +13,21 @@
 
 namespace mbgl {
 
+#if MLN_LEGACY_RENDERER
 class LineProgram;
 class LineGradientProgram;
 class LineSDFProgram;
 class LinePatternProgram;
+#endif
 
+#if MLN_DRAWABLE_RENDERER
 namespace gfx {
 class ShaderGroup;
 class UniformBuffer;
 using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
+#endif
 
 class RenderLineLayer final : public RenderLayer {
 public:
