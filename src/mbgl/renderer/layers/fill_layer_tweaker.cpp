@@ -59,10 +59,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     if (!propsBuffer) {
         const FillDrawablePropsUBO paramsUBO = {
-//            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
-//            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-//            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-//            /* .padding = */ {0},
+            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
+            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+            /* .padding = */ 0, 0, 0
         };
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
