@@ -101,6 +101,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
+    MBXSettingsRuntimeStylingLineGradient,
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
@@ -430,6 +431,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Add Lime Green Triangle Layer",
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
+                @"Style Route line with gradient",
             ]];
             break;
         case MBXSettingsMiscellaneous:
@@ -646,6 +648,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     break;
                 case MBXSettingsRuntimeStylingCustomLatLonGrid:
                     [self addLatLonGrid];
+                    break;
+                case MBXSettingsRuntimeStylingLineGradient:
+                    [self styleLineGradient];
                     break;
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
@@ -1485,6 +1490,59 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 {
     _localizingLabels = !_localizingLabels;
     [self.mapView.style localizeLabelsIntoLocale:_localizingLabels ? [NSLocale localeWithLocaleIdentifier:@"mul"] : nil];
+}
+
+- (void)styleLineGradient
+{
+    CLLocationCoordinate2D coords[] = {
+        { 43.84455590478528, 10.504238605499268 },
+        { 43.84385562343126, 10.504125952720642 },
+        { 43.84388657526694, 10.503299832344055 },
+        { 43.84332557075269, 10.503235459327698 },
+        { 43.843441641085036, 10.502264499664307 },
+        { 43.84396395478592, 10.50242006778717 },
+        { 43.84406067904351, 10.501744151115416 },
+        { 43.84422317544319, 10.501792430877686 }
+    };
+    NSInteger count = sizeof(coords) / sizeof(coords[0]);
+
+    [self.mapView setCenterCoordinate:coords[0] zoomLevel:16 animated:YES];
+
+    MLNPolylineFeature *routeLine = [MLNPolylineFeature polylineWithCoordinates:coords count:count];
+
+    NSDictionary *sourceOptions = @{ MLNShapeSourceOptionLineDistanceMetrics: @YES };
+    
+    MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:sourceOptions];
+    [self.mapView.style addSource:routeSource];
+
+    MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
+    baseRouteLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor orangeColor]];
+    baseRouteLayer.lineWidth = [NSExpression expressionForConstantValue:@20];
+    baseRouteLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.95];
+    baseRouteLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
+    baseRouteLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    [self.mapView.style addLayer:baseRouteLayer];
+
+    MLNLineStyleLayer *routeLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-route-layer" source:routeSource];
+    routeLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
+    routeLayer.lineWidth = [NSExpression expressionForConstantValue:@15];
+    routeLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.8];
+    routeLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
+    routeLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    // Create stops dictionary
+    NSDictionary *stops = @{
+        @0: [UIColor blueColor],
+        @0.1: [UIColor colorWithRed:25 / 255.0 green:41 /255.0 blue:88 / 255.0 alpha:1.0],
+        @0.3: [UIColor cyanColor],
+        @0.5: [UIColor greenColor],
+        @0.7: [UIColor yellowColor],
+        @1: [UIColor redColor],
+    };
+    // Create an expression that will interpolate the color of the line
+    // (mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@))
+    NSExpression *lineGradientExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@)", stops];
+    routeLayer.lineGradient = lineGradientExpression;
+    [self.mapView.style addLayer:routeLayer];
 }
 
 - (void)styleRouteLine

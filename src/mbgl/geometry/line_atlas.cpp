@@ -241,6 +241,13 @@ gfx::TextureBinding DashPatternTexture::textureBinding() const {
 #endif
 }
 
+#if MLN_DRAWABLE_RENDERER
+static const gfx::Texture2DPtr noTexture;
+const std::shared_ptr<gfx::Texture2D>& DashPatternTexture::getTexture() const {
+    return (std::holds_alternative<gfx::Texture2DPtr>(texture)) ? std::get<gfx::Texture2DPtr>(texture) : noTexture;
+}
+#endif
+
 Size DashPatternTexture::getSize() const {
 #if MLN_DRAWABLE_RENDERER
     if (std::holds_alternative<AlphaImage>(texture)) {

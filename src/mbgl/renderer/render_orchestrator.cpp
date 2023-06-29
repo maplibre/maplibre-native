@@ -879,7 +879,6 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
         renderLayer.update(shaders, context, state, renderTree, changes);
     }
-
     addChanges(changes);
 }
 
