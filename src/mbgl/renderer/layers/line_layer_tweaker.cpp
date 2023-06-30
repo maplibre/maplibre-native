@@ -178,8 +178,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
             uniforms.createOrUpdate(LineUBOName, &lineUBO, sizeof(lineUBO), parameters.context);
 
             // properties UBO
-            uniforms.createOrUpdate(LinePropertiesUBOName, &linePropertiesUBO,
-                                    sizeof(linePropertiesUBO), parameters.context);
+            uniforms.createOrUpdate(
+                LinePropertiesUBOName, &linePropertiesUBO, sizeof(linePropertiesUBO), parameters.context);
         }
         // gradient line
         else if (shaderUniforms.get(std::string(LineGradientUBOName))) {
@@ -189,8 +189,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                 /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
                 /*device_pixel_ratio = */ parameters.pixelRatio};
-            uniforms.createOrUpdate(
-                LineGradientUBOName, &lineGradientUBO, sizeof(lineGradientUBO), parameters.context);
+            uniforms.createOrUpdate(LineGradientUBOName, &lineGradientUBO, sizeof(lineGradientUBO), parameters.context);
 
             // properties UBO
             uniforms.createOrUpdate(LineGradientPropertiesUBOName,
@@ -277,8 +276,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 uniforms.createOrUpdate(LineSDFUBOName, &lineSDFUBO, sizeof(lineSDFUBO), parameters.context);
 
                 // properties UBO
-                uniforms.createOrUpdate(LineSDFPropertiesUBOName, &lineSDFPropertiesUBO,
-                                        sizeof(lineSDFPropertiesUBO), parameters.context);
+                uniforms.createOrUpdate(
+                    LineSDFPropertiesUBOName, &lineSDFPropertiesUBO, sizeof(lineSDFPropertiesUBO), parameters.context);
             }
         }
     });

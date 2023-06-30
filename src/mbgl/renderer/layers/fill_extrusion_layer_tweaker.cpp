@@ -88,9 +88,9 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
         /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
         /* .fade = */ crossfade.t,
-            /* .pad = */ 0,
-            0,
-            0};
+        /* .pad = */ 0,
+        0,
+        0};
     if (!propsBuffer) {
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     } else {
