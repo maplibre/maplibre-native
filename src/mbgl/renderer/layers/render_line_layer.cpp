@@ -447,7 +447,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                    std::inserter(newTileIDs, newTileIDs.begin()),
                    [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
 
-    const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses & ~mbgl::underlying_type(RenderPass::Opaque));
+    const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses &
+                                                          ~mbgl::underlying_type(RenderPass::Opaque));
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.

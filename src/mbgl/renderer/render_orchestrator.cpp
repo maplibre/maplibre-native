@@ -381,7 +381,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (size_t i = 0; i < orderedLayers.size(); ++i) {
         RenderLayer& layer = orderedLayers[i];
         layer.markLayerRenderable(
-            layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(layer.getLayerIndex()))) != layerRenderItems.end(),
+            layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(layer.getLayerIndex()))) !=
+                layerRenderItems.end(),
             changes);
     }
 
