@@ -58,11 +58,10 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
 
 #if MLN_DRAWABLE_RENDERER
     if (renderTarget) {
-        renderTarget->getLayerGroup(0)->setLayerTweaker(
-            std::make_shared<HeatmapTextureLayerTweaker>(evaluatedProperties));
+        renderTarget->getLayerGroup(0)->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
     }
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(evaluatedProperties));
     }
 #endif
 }
@@ -285,12 +284,12 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // Set up tile layer group
-        auto layerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());
-        if (!layerGroup) {
+        auto tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());
+        if (!tileLayerGroup) {
             return;
         }
-        layerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
-        renderTarget->addLayerGroup(layerGroup, /*canReplace=*/true);
+        tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
+        renderTarget->addLayerGroup(tileLayerGroup, /*canReplace=*/true);
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get());
