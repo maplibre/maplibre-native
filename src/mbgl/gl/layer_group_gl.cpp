@@ -72,16 +72,6 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             return;
         }
 
-        // If this drawable can render either opaque or translucent...
-        if (drawable.hasAllRenderPasses(RenderPass::Opaque | RenderPass::Translucent)) {
-            // Render it only in the translucent pass if we're below the cutoff, and only in the opaque pass otherwise
-            //  (parameters.currentLayer >= parameters.opaquePassCutoff) ? RenderPass::Opaque : RenderPass::Translucent;
-            if ((parameters.currentLayer < parameters.opaquePassCutoff && parameters.pass != RenderPass::Translucent) ||
-                (parameters.currentLayer >= parameters.opaquePassCutoff && parameters.pass != RenderPass::Opaque)) {
-                return;
-            }
-        }
-
 #if !defined(NDEBUG)
         std::string label_tile;
         if (const auto& tileID = drawable.getTileID()) {
@@ -148,16 +138,6 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
     observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
-        }
-
-        // If this drawable can render either opaque or translucent...
-        if (drawable.hasAllRenderPasses(RenderPass::Opaque | RenderPass::Translucent)) {
-            // Render it only in the translucent pass if we're below the cutoff, and only in the opaque pass otherwise
-            //  (parameters.currentLayer >= parameters.opaquePassCutoff) ? RenderPass::Opaque : RenderPass::Translucent;
-            if ((parameters.currentLayer < parameters.opaquePassCutoff && parameters.pass != RenderPass::Translucent) ||
-                (parameters.currentLayer >= parameters.opaquePassCutoff && parameters.pass != RenderPass::Opaque)) {
-                return;
-            }
         }
 
 #if !defined(NDEBUG)
