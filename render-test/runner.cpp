@@ -689,7 +689,7 @@ TestRunner::Impl::Impl(const TestMetadata& metadata,
       fileSource(mbgl::FileSourceManager::get()->getFileSource(
           mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
       map(frontend,
-          *observer.get(),
+          *observer,
           mbgl::MapOptions()
               .withMapMode(metadata.mapMode)
               .withSize(metadata.size)
