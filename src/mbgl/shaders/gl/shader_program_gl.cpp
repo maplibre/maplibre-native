@@ -13,7 +13,9 @@
 namespace mbgl {
 namespace gl {
 
-static gfx::AttributeDataType mapType(platform::GLenum attrType) {
+namespace {
+
+gfx::AttributeDataType mapType(platform::GLenum attrType) {
     using T = gfx::AttributeDataType;
     switch (attrType) {
         case GL_FLOAT:
@@ -67,6 +69,20 @@ static gfx::AttributeDataType mapType(platform::GLenum attrType) {
     }
 }
 
+using namespace platform;
+
+void addAttr(VertexAttributeArrayGL& attrs, const char* name, GLint index, GLsizei length, GLint count, GLenum glType) {
+    const auto elementType = mapType(glType);
+    if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
+        if (const auto& newAttr = attrs.add(name, index, elementType, count)) {
+            const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
+            glAttr->setGLType(glType);
+        }
+    }
+}
+
+} // namespace
+
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
     : ShaderProgramBase(),
       glProgram(std::move(glProgram_)) {}
@@ -84,19 +100,6 @@ ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
       glProgram(std::move(other.glProgram)),
       uniformBlocks(std::move(other.uniformBlocks)),
       vertexAttributes(std::move(other.vertexAttributes)) {}
-
-using namespace platform;
-
-static void addAttr(
-    VertexAttributeArrayGL& attrs, const char* name, GLint index, GLsizei length, GLint count, GLenum glType) {
-    const auto elementType = mapType(glType);
-    if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-        if (const auto& newAttr = attrs.add(name, index, elementType, count)) {
-            const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
-            glAttr->setGLType(glType);
-        }
-    }
-}
 
 std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string_view name) const {
     GLint sampler_location = MBGL_CHECK_ERROR(glGetUniformLocation(glProgram, name.data()));
