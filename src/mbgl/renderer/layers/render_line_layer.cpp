@@ -447,7 +447,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                    std::inserter(newTileIDs, newTileIDs.begin()),
                    [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
 
-    const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
+    const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses & ~mbgl::underlying_type(RenderPass::Opaque));
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
@@ -463,8 +463,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
         builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
         builder->setRenderPass(renderPass);
-        builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                 : gfx::DepthMaskType::ReadOnly);
+        builder->setSubLayerIndex(0);
+        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setNeedsStencil(true);
         builder->setVertexAttrName("a_pos_normal");
