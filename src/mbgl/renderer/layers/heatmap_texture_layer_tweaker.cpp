@@ -44,7 +44,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
         HeatmapTextureDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(viewportMat),
             /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
-            /* .extrude_scale = */ evaluated.get<HeatmapOpacity>(),
+            /* .opacity = */ evaluated.get<HeatmapOpacity>(),
             /* .padding = */ 0};
 
         drawable.mutableUniformBuffers().createOrUpdate(HeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);

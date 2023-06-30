@@ -8,6 +8,7 @@ namespace mbgl {
 
 namespace gfx {
 class Texture2D;
+class UploadPass;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 } // namespace gfx
 
@@ -32,6 +33,7 @@ public:
     void observeLayerGroups(std::function<void(LayerGroupBase&)>);
     void observeLayerGroups(std::function<void(const LayerGroupBase&)>) const;
     
+    virtual void upload(gfx::UploadPass& uploadPass) = 0;
     virtual void render(RenderOrchestrator&, const RenderTree&, PaintParameters&) = 0;
 
 protected:

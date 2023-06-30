@@ -49,6 +49,7 @@ public:
     void setName(std::string value) { name = std::move(value); }
 
     int32_t getLayerIndex() const { return layerIndex; }
+    void updateLayerIndex(int32_t newLayerIndex) { layerIndex = newLayerIndex; }
 
     virtual std::size_t getDrawableCount() const = 0;
     bool empty() const { return getDrawableCount() == 0; }
@@ -90,8 +91,6 @@ public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~TileLayerGroup() override;
 
-    void updateLayerIndex(int32_t newLayerIndex);
-
     std::size_t getDrawableCount() const override;
     std::size_t getDrawableCount(mbgl::RenderPass, const OverscaledTileID&) const;
 
@@ -120,8 +119,6 @@ class LayerGroup : public LayerGroupBase {
 public:
     LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~LayerGroup() override;
-
-    void updateLayerIndex(int32_t newLayerIndex);
 
     std::size_t getDrawableCount() const override;
     std::size_t getDrawableCount(mbgl::RenderPass) const;

@@ -133,8 +133,11 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
         // Give the layers a chance to upload
         orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+        
+        // Give the render targets a chance to upload
+        orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
     }
-
+    
     // - 3D PASS
     // -------------------------------------------------------------------------------------
     // Renders any 3D layers bottom-to-top to unique FBOs with texture
@@ -163,7 +166,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
             }
         }
     }
-
+    
     // draw render targets
     orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) {
         renderTarget.render(orchestrator, renderTree, parameters);

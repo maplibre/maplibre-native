@@ -1,25 +1,26 @@
 #pragma once
 
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/gl/object.hpp>
 #include <mbgl/gl/types.hpp>
 
 namespace mbgl {
 namespace gl {
 
 class Context;
-class Framebuffer;
-using FramebufferPtr = std::shared_ptr<Framebuffer>;
+using UniqueFramebufferPtr = std::shared_ptr<UniqueFramebuffer>;
 
 class RenderTargetGL final : public RenderTarget {
 public:
     RenderTargetGL(Context& context);
     ~RenderTargetGL() override;
     
+    void upload(gfx::UploadPass& uploadPass) override;
     void render(RenderOrchestrator&, const RenderTree&, PaintParameters&) override;
 
 private:
-    Context& glContext;
-    FramebufferID id = 0;
+    [[maybe_unused]] Context& glContext;
+    UniqueFramebufferPtr framebuffer;
 };
 
 } // namespace gl

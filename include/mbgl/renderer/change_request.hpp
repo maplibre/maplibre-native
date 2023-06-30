@@ -81,13 +81,13 @@ protected:
 
 class UpdateLayerGroupIndexRequest : public ChangeRequest {
 public:
-    UpdateLayerGroupIndexRequest(std::shared_ptr<TileLayerGroup> tileLayerGroup_, int32_t newLayerIndex_);
+    UpdateLayerGroupIndexRequest(std::shared_ptr<LayerGroupBase> layerGroup_, int32_t newLayerIndex_);
     UpdateLayerGroupIndexRequest(const UpdateLayerGroupIndexRequest &) = delete;
 
     void execute(RenderOrchestrator &) override;
 
 protected:
-    std::shared_ptr<TileLayerGroup> tileLayerGroup;
+    std::shared_ptr<LayerGroupBase> layerGroup;
     int32_t newLayerIndex;
 };
 

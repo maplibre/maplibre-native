@@ -21,10 +21,6 @@ LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::st
 
 LayerGroup::~LayerGroup() {}
 
-void LayerGroup::updateLayerIndex(int32_t newLayerIndex) {
-    layerIndex = newLayerIndex;
-}
-
 std::size_t LayerGroup::getDrawableCount() const {
     return impl->drawables.size();
 }

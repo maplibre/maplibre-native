@@ -18,33 +18,39 @@ namespace gl {
 using namespace platform;
 
 RenderTargetGL::RenderTargetGL(Context& context)
-    : glContext(context) {}
-
-RenderTargetGL::~RenderTargetGL() {
-    if (id) {
-        MBGL_CHECK_ERROR(glDeleteFramebuffers(1, &id));
-        id = 0;
-    }
-}
-
-void RenderTargetGL::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
-    
-    const auto& viewportSize = parameters.staticData.backendSize;
-    const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
-    
-    if (!texture) {
+    : glContext(context) {
+        //const auto& viewportSize = parameters.staticData.backendSize;
+        //const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
+        const auto size = Size{500, 500};
+        
         texture = glContext.createTexture2D();
         texture->setSize(size);
         texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::HalfFloat);
         texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         texture->create();
     }
-    
-    if (!id) {
-        id = glContext.createFramebuffer(*texture);
+
+RenderTargetGL::~RenderTargetGL() {
+    if (framebuffer) {
+        MBGL_CHECK_ERROR(glDeleteFramebuffers(1, &framebuffer->get()));
+        framebuffer.reset();
+    }
+}
+
+void RenderTargetGL::upload(gfx::UploadPass& uploadPass) {
+    observeLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
+}
+
+void RenderTargetGL::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
+    if (!framebuffer) {
+        framebuffer = std::make_shared<UniqueFramebuffer>(glContext.createFramebuffer(*texture));
     }
     
-    glContext.bindFramebuffer = id;
+    glContext.bindFramebuffer = *framebuffer;
+    glContext.activeTextureUnit = 0;
+    glContext.scissorTest = false;
+    glContext.viewport = {0, 0, Size(500, 500)};
+    glContext.clear(Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {});
     
     // Run layer tweakers to update any dynamic elements
     observeLayerGroups([&](LayerGroupBase& layerGroup) {

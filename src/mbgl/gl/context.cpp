@@ -406,14 +406,13 @@ Framebuffer Context::createFramebuffer(const gfx::Texture& color,
     return {depth.getSize(), std::move(fbo)};
 }
 
-FramebufferID Context::createFramebuffer(const gfx::Texture2D& color) {
-    [[maybe_unused]] auto test = static_cast<const gl::Texture2D&>(color).getTextureID();
+UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
     MBGL_CHECK_ERROR(glFramebufferTexture2D(
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, static_cast<const gl::Texture2D&>(color).getTextureID(), 0));
     checkFramebuffer();
-    return std::move(fbo);
+    return fbo;
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,

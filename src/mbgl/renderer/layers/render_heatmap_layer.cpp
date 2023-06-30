@@ -237,9 +237,9 @@ void RenderHeatmapLayer::layerIndexChanged(int32_t newLayerIndex, [[maybe_unused
     layerIndex = newLayerIndex;
 
     // Submit a change request to update the layer index of our tile layer group
-    /*if (textureLayerGroup) {
+    if (textureLayerGroup) {
         changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(textureLayerGroup, newLayerIndex));
-    }*/
+    }
 }
 
 void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
@@ -253,7 +253,7 @@ void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeReques
     // This layer is either being freshly included in the renderable set or excluded
     isRenderable = willRender;
     if (willRender) {
-        // The RenderTree has determined this layer should be included in the renderable set for a frame
+        // The RenderTree has determined this render target should be included in the renderable set for a frame
         changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget));
     } else {
         // The RenderTree is informing us we should not render anything
@@ -316,7 +316,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     
     // Set up tile layer group
     if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+        tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }
@@ -448,6 +448,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         removeAll();
         return;
     }
+    
+    textureLayerGroup->clearDrawables();
     
     std::unique_ptr<gfx::DrawableBuilder> heatmapTextureBuilder;
     
