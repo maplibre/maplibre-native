@@ -72,16 +72,6 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             return;
         }
 
-        // If this drawable can render either opaque or translucent...
-        if (drawable.hasAllRenderPasses(RenderPass::Opaque | RenderPass::Translucent)) {
-            // Render it only in the translucent pass if we're below the cutoff, and only in the opaque pass otherwise
-            //  (parameters.currentLayer >= parameters.opaquePassCutoff) ? RenderPass::Opaque : RenderPass::Translucent;
-            if ((parameters.currentLayer < parameters.opaquePassCutoff && parameters.pass != RenderPass::Translucent) ||
-                (parameters.currentLayer >= parameters.opaquePassCutoff && parameters.pass != RenderPass::Opaque)) {
-                return;
-            }
-        }
-
 #if !defined(NDEBUG)
         std::string label_tile;
         if (const auto& tileID = drawable.getTileID()) {
@@ -128,45 +118,13 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
         return;
     }
 
-    if (getDrawableCount()) {
-#if !defined(NDEBUG)
-        const auto label = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
-        const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
-#endif
-
-        // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
-        std::set<UnwrappedTileID> tileIDs;
-        observeDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getNeedsStencil() && drawable.getTileID() &&
-                drawable.hasRenderPass(parameters.pass)) {
-                tileIDs.emplace(drawable.getTileID()->toUnwrapped());
-            }
-        });
-        parameters.renderTileClippingMasks(tileIDs);
-    }
-
     observeDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
 
-        // If this drawable can render either opaque or translucent...
-        if (drawable.hasAllRenderPasses(RenderPass::Opaque | RenderPass::Translucent)) {
-            // Render it only in the translucent pass if we're below the cutoff, and only in the opaque pass otherwise
-            //  (parameters.currentLayer >= parameters.opaquePassCutoff) ? RenderPass::Opaque : RenderPass::Translucent;
-            if ((parameters.currentLayer < parameters.opaquePassCutoff && parameters.pass != RenderPass::Translucent) ||
-                (parameters.currentLayer >= parameters.opaquePassCutoff && parameters.pass != RenderPass::Opaque)) {
-                return;
-            }
-        }
-
 #if !defined(NDEBUG)
-        std::string label;
-        if (const auto& tileID = drawable.getTileID()) {
-            label = drawable.getName() + "/" + util::toString(*tileID);
-        }
-        const auto labelPtr = (label.empty() ? drawable.getName() : label).c_str();
-        const auto debugGroup = parameters.encoder->createDebugGroup(labelPtr);
+        const auto debugGroup = parameters.encoder->createDebugGroup(drawable.getName().c_str());
 #endif
 
         drawable.draw(parameters);
