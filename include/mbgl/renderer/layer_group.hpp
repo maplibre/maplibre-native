@@ -49,7 +49,6 @@ public:
     void setName(std::string value) { name = std::move(value); }
 
     int32_t getLayerIndex() const { return layerIndex; }
-    void updateLayerIndex(int32_t newLayerIndex) { layerIndex = newLayerIndex; }
 
     void updateLayerIndex(int32_t value) { layerIndex = value; }
 

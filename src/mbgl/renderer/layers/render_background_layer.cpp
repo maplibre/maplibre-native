@@ -306,7 +306,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
             builder->setRenderPass(drawPasses);
             builder->setShader(curShader);
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-            builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+            builder->setColorMode(drawPasses == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                         : gfx::ColorMode::unblended());
         }
 
