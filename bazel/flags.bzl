@@ -11,6 +11,7 @@ WARNING_FLAGS = [
     "-Wno-unused-parameter",
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
+    "-Wno-unknown-pragmas",
 ] + select({
     "//:ios": [
         "-Wno-newline-eof",

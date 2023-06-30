@@ -130,7 +130,7 @@ android {
             debuggable true
         }
     }
-    namespace 'com.mapbox.mapboxsdk'
+    namespace 'org.maplibre.android'
     lint {
         checkAllWarnings true
         disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'

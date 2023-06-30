@@ -1,7 +1,7 @@
 #include "file_source.hpp"
 
 #include "attach_env.hpp"
-#include "mapbox.hpp"
+#include "maplibre.hpp"
 
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/actor/scheduler.hpp>
@@ -33,8 +33,8 @@ FileSource::FileSource(jni::JNIEnv& _env,
         [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
             auto env{android::AttachEnv()};
             std::unique_ptr<mbgl::FileSource> assetFileSource;
-            if (android::Mapbox::hasInstance(*env)) {
-                auto assetManager = android::Mapbox::getAssetManager(*env);
+            if (android::MapLibre::hasInstance(*env)) {
+                auto assetManager = android::MapLibre::getAssetManager(*env);
                 assetFileSource = std::make_unique<AssetManagerFileSource>(
                     *env, assetManager, resourceOptions.clone(), clientOptions.clone());
             }

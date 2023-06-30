@@ -50,6 +50,7 @@ cc_library(
         "src/mbgl/storage/sqlite3.cpp",
         "src/mbgl/text/bidi.cpp",
         "src/mbgl/util/compression.cpp",
+        "src/mbgl/util/filesystem.cpp",
         "src/mbgl/util/monotonic_timer.cpp",
         "src/mbgl/util/png_writer.cpp",
         "src/mbgl/util/thread_local.cpp",

@@ -8,9 +8,7 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::SymbolSDFIconProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "SymbolSDFIconProgram";
-    static constexpr const char* vertex = R"(const float PI = 3.141592653589793;
-
-layout (location = 0) in vec4 a_pos_offset;
+    static constexpr const char* vertex = R"(layout (location = 0) in vec4 a_pos_offset;
 layout (location = 1) in vec4 a_data;
 layout (location = 2) in vec4 a_pixeloffset;
 layout (location = 3) in vec3 a_projected_pos;

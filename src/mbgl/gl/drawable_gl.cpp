@@ -53,18 +53,16 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     bindUniformBuffers();
     bindTextures();
 
-    auto& glContext = static_cast<gl::Context&>(parameters.context);
-
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
         if (mlSeg.indexLength > 0 && glSeg.getVertexArray().isValid()) {
-            glContext.bindVertexArray = glSeg.getVertexArray().getID();
-            glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
+            context.bindVertexArray = glSeg.getVertexArray().getID();
+            context.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
     }
 
-    glContext.bindVertexArray = value::BindVertexArray::Default;
+    context.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
     unbindUniformBuffers();
@@ -114,6 +112,9 @@ void DrawableGL::bindUniformBuffers() const {
         for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
             if (!uniformBuffer) {
+                using namespace std::string_literals;
+                Log::Error(Event::General,
+                           "DrawableGL::bindUniformBuffers: UBO "s + element.first + " not found. skipping.");
                 assert(false);
                 continue;
             }

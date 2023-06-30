@@ -14,7 +14,7 @@ namespace android {
 class CircleLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/CircleLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/CircleLayer"; };
 
     CircleLayer(jni::JNIEnv&, jni::String&, jni::String&);
 

@@ -35,10 +35,12 @@ using namespace style;
 
 namespace {
 
+#if MLN_DRAWABLE_RENDERER
 constexpr std::string_view FillShaderName = "FillShader";
 constexpr std::string_view FillOutlineShaderName = "FillOutlineShader";
 constexpr std::string_view FillPatternShaderName = "FillPatternShader";
 constexpr std::string_view FillOutlinePatternShaderName = "FillOutlinePatternShader";
+#endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillLayer::Impl::staticTypeInfo());
@@ -79,8 +81,8 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (tileLayerGroup) {
-        tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
     }
 #endif
 }
@@ -290,18 +292,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
     // Set up a layer group
-    if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-        if (!tileLayerGroup) {
-            return;
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
     }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
@@ -316,7 +318,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         outlinePatternShaderGroup = shaders.getShaderGroup(std::string(FillOutlinePatternShaderName));
     }
     if (!fillShaderGroup || !outlineShaderGroup || !patternShaderGroup || !outlinePatternShaderGroup) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
@@ -350,7 +352,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpUBO, context);
             uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileUBO, context);
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-            ++stats.tileDrawablesAdded;
+            ++stats.drawablesAdded;
         }
     };
 
@@ -364,7 +366,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto tileID = drawable->getTileID();
         if (drawable->getRenderPass() != renderPass || (tileID && newTileIDs.find(*tileID) == newTileIDs.end())) {
             drawable.reset();
-            ++stats.tileDrawablesRemoved;
+            ++stats.drawablesRemoved;
         }
     });
 

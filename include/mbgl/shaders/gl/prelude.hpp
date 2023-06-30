@@ -26,6 +26,8 @@ precision highp float;
 
 #endif
 
+const float PI = 3.141592653589793;
+
 // Unpack a pair of values that have been packed into a single float.
 // The packed values are assumed to be 8-bit unsigned integers, and are
 // packed like so:

@@ -34,7 +34,7 @@ class AndroidRendererBackend;
  */
 class MapRenderer : public Scheduler {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/maps/renderer/MapRenderer"; };
+    static constexpr auto Name() { return "org/maplibre/android/maps/renderer/MapRenderer"; };
 
     static void registerNative(jni::JNIEnv&);
 
