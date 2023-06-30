@@ -157,7 +157,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
@@ -168,7 +167,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_extrusion_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
@@ -202,7 +200,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
