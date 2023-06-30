@@ -185,7 +185,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     orchestrator.observeRenderTargets(
         [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
 #endif
-    
+
     // - CLEAR
     // -------------------------------------------------------------------------------------
     // Renders the backdrop of the OpenGL view. This also paints in areas where

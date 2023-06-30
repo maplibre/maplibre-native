@@ -120,7 +120,7 @@ public:
     gfx::Texture2DPtr createTexture2D() override;
 
     RenderTargetPtr createRenderTarget() override;
-    
+
     UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
 #endif
 

@@ -454,7 +454,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     if (segments.empty()) {
         segments = RenderStaticData::heatmapTextureSegments();
     }
-    
+
     heatmapTextureBuilder->setSegments(
         gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
 
