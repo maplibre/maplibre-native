@@ -21,7 +21,10 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     bool is3D() const override;
+
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -34,9 +37,11 @@ private:
     // Paint properties
     style::FillExtrusionPaintProperties::Unevaluated unevaluated;
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<FillExtrusionProgram> fillExtrusionProgram;
     std::shared_ptr<FillExtrusionPatternProgram> fillExtrusionPatternProgram;
+#endif
 
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
 };

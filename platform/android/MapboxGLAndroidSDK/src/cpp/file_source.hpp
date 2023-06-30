@@ -24,11 +24,11 @@ namespace android {
  */
 class FileSource {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/storage/FileSource"; };
+    static constexpr auto Name() { return "org/maplibre/android/storage/FileSource"; };
 
     struct ResourceTransformCallback {
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/storage/"
+            return "org/maplibre/android/storage/"
                    "FileSource$ResourceTransformCallback";
         }
 
@@ -40,7 +40,7 @@ public:
 
     struct ResourcesCachePathChangeCallback {
         static constexpr auto Name() {
-            return "com/mapbox/mapboxsdk/storage/"
+            return "org/maplibre/android/storage/"
                    "FileSource$ResourcesCachePathChangeCallback";
         }
 

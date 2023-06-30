@@ -42,6 +42,9 @@ public:
     static SegmentVector<RasterAttributes> rasterSegments();
     static SegmentVector<HeatmapTextureAttributes> heatmapTextureSegments();
 
+    static gfx::IndexVector<gfx::Triangles> quadTriangleIndices();
+    static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices();
+
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;
     bool uploaded = false;

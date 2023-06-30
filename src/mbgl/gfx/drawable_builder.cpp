@@ -11,18 +11,10 @@ namespace gfx {
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
       vertexAttrName("a_pos"),
-      colorAttrName("a_color"),
       renderPass(RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
 DrawableBuilder::~DrawableBuilder() = default;
-
-const Color& DrawableBuilder::getColor() const {
-    return impl->currentColor;
-}
-void DrawableBuilder::setColor(const Color& value) {
-    impl->currentColor = value;
-}
 
 const gfx::ColorMode& DrawableBuilder::getColorMode() const {
     return impl->colorMode;
@@ -122,9 +114,6 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
     impl->vertices.emplace_back(Impl::VT({{{x1, y1}}}));
     impl->vertices.emplace_back(Impl::VT({{{x2, y2}}}));
     impl->indexes.insert(impl->indexes.end(), {n, static_cast<uint16_t>(n + 1), static_cast<uint16_t>(n + 2)});
-    if (colorAttrMode == ColorAttrMode::PerVertex) {
-        impl->colors.insert(impl->colors.end(), 3, impl->currentColor);
-    }
 
     if (impl->segments.empty()) {
         impl->segments.emplace_back(createSegment(gfx::Triangles(), {0, 0}));
@@ -138,9 +127,6 @@ void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
     impl->indexes.insert(impl->indexes.end(), {static_cast<uint16_t>(n - 2), static_cast<uint16_t>(n - 1), n});
-    if (colorAttrMode == ColorAttrMode::PerVertex) {
-        impl->colors.emplace_back(impl->currentColor);
-    }
 
     assert(!impl->segments.empty());
     auto& segment = impl->segments.back();
@@ -168,11 +154,6 @@ std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2
     std::for_each(std::next(vertices.begin(), vertexOffset),
                   std::next(vertices.begin(), vertexOffset + vertexLength),
                   [&](const std::array<int16_t, 2>& x) { impl->vertices.emplace_back(Impl::VT({{x}})); });
-    if (colorAttrMode == ColorAttrMode::PerVertex) {
-        for (size_t i = 0; i < vertexLength; ++i) {
-            impl->colors.emplace_back(impl->currentColor);
-        }
-    }
     return baseIndex;
 }
 

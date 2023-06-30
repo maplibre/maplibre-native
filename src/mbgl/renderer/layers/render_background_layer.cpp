@@ -1,25 +1,28 @@
 #include <mbgl/renderer/layers/render_background_layer.hpp>
-#include <mbgl/renderer/layers/background_layer_tweaker.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layers/background_layer_tweaker.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/renderer/change_request.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#endif
 
 #include <unordered_set>
 
@@ -61,9 +64,12 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     properties->renderPasses = mbgl::underlying_type(passes);
 
     evaluatedProperties = std::move(properties);
-    if (tileLayerGroup) {
-        tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
+
+#if MLN_DRAWABLE_RENDERER
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
     }
+#endif
 }
 
 bool RenderBackgroundLayer::hasTransition() const {
@@ -74,6 +80,7 @@ bool RenderBackgroundLayer::hasCrossfade() const {
     return getCrossfade<BackgroundLayerProperties>(evaluatedProperties).t != 1;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderBackgroundLayer::render(PaintParameters& parameters) {
     // Note that for bottommost layers without a pattern, the background color
     // is drawn with glClear rather than this method.
@@ -167,6 +174,7 @@ void RenderBackgroundLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 std::optional<Color> RenderBackgroundLayer::getSolidBackground() const {
     const auto& evaluated = getEvaluated<BackgroundLayerProperties>(evaluatedProperties);
@@ -197,6 +205,7 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
     }
 }
 
+#if MLN_DRAWABLE_RENDERER
 static constexpr std::string_view BackgroundPlainShaderName = "BackgroundShader";
 static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatternShader";
 
@@ -212,7 +221,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     // renderTiles is always empty, we use tileCover instead
     if (tileCover.empty()) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
@@ -230,17 +239,17 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (drawPasses == RenderPass::None) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
 
-    if (!tileLayerGroup) {
-        tileLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-        if (!tileLayerGroup) {
-            return;
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
     }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!hasPattern && !plainShader) {
         plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));
@@ -251,9 +260,20 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& curShader = hasPattern ? patternShader : plainShader;
     if (!curShader) {
-        removeAllTiles();
+        removeAllDrawables();
         return;
     }
+
+    const auto tileVertices = RenderStaticData::tileVertices();
+    const auto vertexCount = tileVertices.elements();
+    constexpr auto vertSize = sizeof(decltype(tileVertices)::Vertex::a1);
+    std::vector<std::uint8_t> rawVertices(vertexCount * vertSize);
+    for (auto i = 0ULL; i < vertexCount; ++i) {
+        std::memcpy(&rawVertices[i * vertSize], &tileVertices.vector()[i].a1, vertSize);
+    }
+
+    const auto indexes = RenderStaticData::quadTriangleIndices();
+    const auto segs = RenderStaticData::tileTriangleSegments();
 
     // Put the tile cover into a searchable form.
     // TODO: Likely better to sort and `std::binary_search` the vector.
@@ -262,48 +282,46 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
-    for (const auto renderPass : {RenderPass::Opaque, RenderPass::Translucent}) {
-        tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
-            // Has this tile dropped out of the cover set?
-            const auto tileID = drawable->getTileID();
-            if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
-                drawable.reset();
-                ++stats.tileDrawablesRemoved;
-                return;
-            }
-        });
+    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+        // Has this tile dropped out of the cover set?
+        const auto tileID = drawable->getTileID();
+        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
+            drawable.reset();
+            ++stats.drawablesRemoved;
+            return;
+        }
+    });
 
-        // For each tile in the cover set, add a tile drawable if one doesn't already exist.
-        for (const auto& tileID : tileCover) {
-            // If we already have drawables for this tile, skip.
-            // If a drawable needs to be updated, that's handled in the layer tweaker.
-            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-                continue;
-            }
+    // For each tile in the cover set, add a tile drawable if one doesn't already exist.
+    for (const auto& tileID : tileCover) {
+        // If we already have drawables for this tile, skip.
+        // If a drawable needs to be updated, that's handled in the layer tweaker.
+        if (tileLayerGroup->getDrawableCount(drawPasses, tileID) > 0) {
+            continue;
+        }
 
-            // We actually need to build things, so set up a builder if we haven't already
-            if (!builder) {
-                builder = context.createDrawableBuilder("background");
-                builder->setRenderPass(drawPasses);
-                builder->setShader(curShader);
-                builder->setColorAttrMode(gfx::DrawableBuilder::ColorAttrMode::PerDrawable);
-                builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
-                                                                            : gfx::ColorMode::unblended());
-            }
+        // We actually need to build things, so set up a builder if we haven't already
+        if (!builder) {
+            builder = context.createDrawableBuilder("background");
+            builder->setRenderPass(drawPasses);
+            builder->setShader(curShader);
+            builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+            builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                        : gfx::ColorMode::unblended());
+        }
 
-            // Tile coordinates are fixed.
-            builder->addQuad(0, 0, util::EXTENT, util::EXTENT);
+        auto verticesCopy = rawVertices;
+        builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
+        builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
+        builder->flush();
 
-            builder->flush();
-
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setTileID(tileID);
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.tileDrawablesAdded;
-            }
+        for (auto& drawable : builder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            tileLayerGroup->addDrawable(drawPasses, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
         }
     }
 }
+#endif
 
 } // namespace mbgl

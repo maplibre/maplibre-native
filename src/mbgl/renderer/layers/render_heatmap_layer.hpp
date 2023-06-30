@@ -33,7 +33,10 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     void upload(gfx::UploadPass&) override;
+
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -54,9 +57,11 @@ private:
     std::optional<gfx::Texture> colorRampTexture;
     SegmentVector<HeatmapTextureAttributes> segments;
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<HeatmapProgram> heatmapProgram;
     std::shared_ptr<HeatmapTextureProgram> heatmapTextureProgram;
+#endif
 
     gfx::ShaderGroupPtr heatmapShaderGroup;
     gfx::ShaderProgramBasePtr heatmapTextureShader;

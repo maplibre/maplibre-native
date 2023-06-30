@@ -51,8 +51,12 @@ public:
     int32_t getLayerIndex() const { return layerIndex; }
     void updateLayerIndex(int32_t newLayerIndex) { layerIndex = newLayerIndex; }
 
+    void updateLayerIndex(int32_t value) { layerIndex = value; }
+
     virtual std::size_t getDrawableCount() const = 0;
     bool empty() const { return getDrawableCount() == 0; }
+
+    virtual std::size_t clearDrawables() = 0;
 
     /// Called before starting each frame
     virtual void preRender(RenderOrchestrator&, PaintParameters&) {}
@@ -105,7 +109,7 @@ public:
     void observeDrawables(mbgl::RenderPass, const OverscaledTileID&, std::function<void(gfx::Drawable&)>&&);
     void observeDrawables(mbgl::RenderPass, const OverscaledTileID&, std::function<void(const gfx::Drawable&)>&&) const;
 
-    std::size_t clearDrawables();
+    std::size_t clearDrawables() override;
 
 protected:
     struct Impl;
@@ -130,7 +134,7 @@ public:
     void observeDrawables(std::function<void(const gfx::Drawable&)>) const override;
     void observeDrawables(std::function<void(gfx::UniqueDrawable&)>) override;
 
-    std::size_t clearDrawables();
+    std::size_t clearDrawables() override;
 
 protected:
     struct Impl;

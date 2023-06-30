@@ -6,7 +6,7 @@
     allprojects {
         repositories {
         ...
-        mavenCentral()                
+        mavenCentral()
         }
     }
     ```
@@ -27,7 +27,7 @@
 
     ```xml
     ...
-    <com.mapbox.mapboxsdk.maps.MapView
+    <org.maplibre.android.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,10 +41,11 @@
     import androidx.appcompat.app.AppCompatActivity
     import android.os.Bundle
     import android.view.LayoutInflater
-    import com.mapbox.mapboxsdk.Mapbox
-    import com.mapbox.mapboxsdk.camera.CameraPosition
-    import com.mapbox.mapboxsdk.geometry.LatLng
-    import com.mapbox.mapboxsdk.maps.MapView
+    import org.maplibre.android.Maplibre
+    import org.maplibre.android.camera.CameraPosition
+    import org.maplibre.android.geometry.LatLng
+    import org.maplibre.android.maps.MapView
+    import org.maplibre.android.testapp.R
 
     class MainActivity : AppCompatActivity() {
 
@@ -53,9 +54,9 @@
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
-            
+
             // Init MapLibre
-            Mapbox.getInstance(this)
+            MapLibre.getInstance(this)
 
             // Init layout view
             val inflater = LayoutInflater.from(this)

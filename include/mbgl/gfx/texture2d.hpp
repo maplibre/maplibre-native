@@ -11,8 +11,6 @@ class Size;
 
 namespace gfx {
 
-constexpr int32_t MaxActiveTextureUnits = 8;
-
 class Context;
 class UploadPass;
 class TextureResource;
@@ -107,7 +105,7 @@ public:
     /// @brief Get the underlying GL texture resource
     /// @note: Compat with legacy textures, to be refactored
     /// @return gfx::TextureResource
-    virtual gfx::TextureResource& getResource() = 0;
+    virtual gfx::TextureResource& getResource() const = 0;
 
     /// @brief Check whether the texture needs upload
     virtual bool needsUpload() const noexcept = 0;

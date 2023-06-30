@@ -11,12 +11,11 @@
 -dontnote com.google.gson.**
 
 # dontnote for keeps the entry point x but not the descriptor class y
--dontnote com.mapbox.mapboxsdk.maps.MapboxMap$OnFpsChangedListener
--dontnote com.mapbox.mapboxsdk.style.layers.PropertyValue
--dontnote com.mapbox.mapboxsdk.maps.MapboxMap
--dontnote com.mapbox.mapboxsdk.maps.MapboxMapOptions
--dontnote com.mapbox.mapboxsdk.log.LoggerDefinition
--dontnote com.mapbox.mapboxsdk.location.engine.LocationEnginePriority
+-dontnote org.maplibre.android.maps.MapLibreMap$OnFpsChangedListener
+-dontnote org.maplibre.android.style.layers.PropertyValue
+-dontnote org.maplibre.android.maps.MapLibreMap
+-dontnote org.maplibre.android.maps.MapLibreMapOptions
+-dontnote org.maplibre.android.log.LoggerDefinition
 
 # config for okhttp 3.11.0, https://github.com/square/okhttp/pull/3354
 -dontwarn javax.annotation.**
@@ -39,3 +38,12 @@
 # a large amount of users combine it with our SDK
 # we aren't able to provide a proguard config in that project (jar vs aar)
 -dontwarn com.sun.xml.internal.ws.spi.db.*
+
+# okhttp
+-dontwarn org.bouncycastle.jsse.BCSSLSocket
+-dontwarn org.bouncycastle.jsse.BCSSLParameters
+-dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
+-dontwarn org.conscrypt.*
+-dontwarn org.openjsse.javax.net.ssl.SSLParameters
+-dontwarn org.openjsse.javax.net.ssl.SSLSocket
+-dontwarn org.openjsse.net.ssl.OpenJSSE

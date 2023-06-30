@@ -153,9 +153,6 @@ public:
     virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
-    // Reset a single color attribute for all vertexes
-    virtual void resetColor(const Color&) = 0;
-
     /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
     /// RGBA.
     static gfx::VertexAttribute::float4 colorAttrRGBA(const Color& color) {
@@ -166,7 +163,7 @@ public:
                 static_cast<float>(components[3])};
     }
 
-    virtual const std::optional<UniqueDrawableData>& getData() const { return drawableData; }
+    virtual const UniqueDrawableData& getData() const { return drawableData; }
     virtual void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
 protected:
@@ -181,7 +178,7 @@ protected:
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
-    std::optional<UniqueDrawableData> drawableData{};
+    UniqueDrawableData drawableData{};
 
     struct Impl;
     std::unique_ptr<Impl> impl;

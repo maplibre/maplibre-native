@@ -53,18 +53,16 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
     bindUniformBuffers();
     bindTextures();
 
-    auto& glContext = static_cast<gl::Context&>(parameters.context);
-
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
         if (mlSeg.indexLength > 0 && glSeg.getVertexArray().isValid()) {
-            glContext.bindVertexArray = glSeg.getVertexArray().getID();
-            glContext.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
+            context.bindVertexArray = glSeg.getVertexArray().getID();
+            context.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
     }
 
-    glContext.bindVertexArray = value::BindVertexArray::Default;
+    context.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
     unbindUniformBuffers();
@@ -104,19 +102,8 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void DrawableGL::setColorAttrName(std::string value) {
-    impl->colorAttrName = std::move(value);
-}
-
 void DrawableGL::setVertexAttrName(std::string value) {
     impl->vertexAttrName = std::move(value);
-}
-
-void DrawableGL::resetColor(const Color& newColor) {
-    if (const auto& colorAttr = impl->vertexAttributes.get(impl->colorAttrName)) {
-        colorAttr->clear();
-        colorAttr->set(0, Drawable::colorAttrRGBA(newColor));
-    }
 }
 
 void DrawableGL::bindUniformBuffers() const {
@@ -125,6 +112,9 @@ void DrawableGL::bindUniformBuffers() const {
         for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
             if (!uniformBuffer) {
+                using namespace std::string_literals;
+                Log::Error(Event::General,
+                           "DrawableGL::bindUniformBuffers: UBO "s + element.first + " not found. skipping.");
                 assert(false);
                 continue;
             }

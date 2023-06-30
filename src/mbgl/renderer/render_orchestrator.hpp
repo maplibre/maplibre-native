@@ -1,6 +1,7 @@
 #pragma once
-
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
+#endif
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
@@ -13,6 +14,7 @@
 #include <mbgl/text/glyph_manager_observer.hpp>
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/text/placement.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 
 #include <map>
 #include <memory>
@@ -21,8 +23,9 @@
 #include <vector>
 
 namespace mbgl {
-
+#if MLN_DRAWABLE_RENDERER
 class ChangeRequest;
+#endif
 class RendererObserver;
 class RenderSource;
 class UpdateParameters;
@@ -37,10 +40,11 @@ class CrossTileSymbolIndex;
 class RenderTree;
 
 namespace gfx {
-class Drawable;
 class ShaderRegistry;
-
+#if MLN_DRAWABLE_RENDERER
+class Drawable;
 using DrawablePtr = std::shared_ptr<Drawable>;
+#endif
 } // namespace gfx
 
 namespace style {
@@ -93,6 +97,7 @@ public:
 
     void update(const std::shared_ptr<UpdateParameters>&);
 
+#if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
@@ -114,6 +119,7 @@ public:
     bool removeRenderTarget(const RenderTargetPtr&);
     void observeRenderTargets(std::function<void(RenderTarget&)> f);
     void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
+#endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
@@ -146,12 +152,14 @@ private:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
+#if MLN_DRAWABLE_RENDERER
     /// Move changes into the pending set, clearing the provided collection
     void addChanges(UniqueChangeRequestVec&);
 
     void onRemoveLayerGroup(LayerGroupBase&);
 
     void updateLayerGroupOrder();
+#endif
 
     RendererObserver* observer;
 
@@ -184,6 +192,7 @@ private:
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
 
+#if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
@@ -191,6 +200,7 @@ private:
     bool layerGroupOrderDirty = false;
     
     std::vector<RenderTargetPtr> renderTargets;
+#endif
 };
 
 } // namespace mbgl

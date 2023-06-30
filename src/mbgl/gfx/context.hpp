@@ -6,9 +6,12 @@
 #include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/uniform_buffer.hpp>
+#endif
 
 #include <memory>
 #include <string>
@@ -17,21 +20,26 @@ namespace mbgl {
 
 class PaintParameters;
 class ProgramParameters;
+
+#if MLN_DRAWABLE_RENDERER
 class TileLayerGroup;
 class LayerGroup;
 class RenderTarget;
 using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using LayerGroupPtr = std::shared_ptr<LayerGroup>;
 using RenderTargetPtr = std::shared_ptr<RenderTarget>;
+#endif
 
 namespace gfx {
 
+class OffscreenTexture;
+class ShaderRegistry;
+
+#if MLN_DRAWABLE_RENDERER
 class Drawable;
 class DrawableBuilder;
 class DrawableTweaker;
-class OffscreenTexture;
 class ShaderProgramBase;
-class ShaderRegistry;
 class Texture2D;
 
 using DrawablePtr = std::shared_ptr<Drawable>;
@@ -40,6 +48,7 @@ using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
+#endif
 
 class Context {
 protected:
@@ -106,6 +115,7 @@ public:
 
     virtual void clearStencilBuffer(int32_t) = 0;
 
+#if MLN_DRAWABLE_RENDERER
 public:
     /// Create a new drawable builder
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
@@ -132,6 +142,7 @@ public:
     
     /// Create a render target
     virtual RenderTargetPtr createRenderTarget() = 0;
+#endif
 };
 
 } // namespace gfx

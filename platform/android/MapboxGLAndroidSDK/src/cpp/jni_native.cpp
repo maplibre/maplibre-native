@@ -32,7 +32,7 @@
 #include "java_types.hpp"
 #include "map_renderer.hpp"
 #include "map_renderer_runnable.hpp"
-#include "mapbox.hpp"
+#include "maplibre.hpp"
 #include "native_map_view.hpp"
 #include "util/tile_server_options.hpp"
 #ifndef MBGL_MODULE_OFFLINE_DISABLE
@@ -162,7 +162,7 @@ void registerNatives(JavaVM* vm) {
     Logger::registerNative(env);
 
     // AssetManager
-    Mapbox::registerNative(env);
+    MapLibre::registerNative(env);
 
     // Util
     DefaultStyle::registerNative(env);

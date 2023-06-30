@@ -217,7 +217,7 @@ ideploy:
 #  make idocument
 #   open documentation/ 
 .PHONY: idocument
-idocument:
+idocument: style-code
 	OUTPUT=$(OUTPUT) ./platform/ios/scripts/document.sh
 
 .PHONY: darwin-check-public-symbols

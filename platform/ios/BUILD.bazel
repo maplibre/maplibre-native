@@ -1,13 +1,16 @@
-load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
+load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework", "local_provisioning_profile")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
+    "xcode_provisioning_profile",
     "xcodeproj",
+    "xcode_schemes",
 )
 load("bazel/macros.bzl", "info_plist")
+load("bazel/config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID")
 
 # This list of public headers is from what Mapbox vendors with their dynamic framework
 # If we forget one the build will fail, and if we add too many there will be a warning
@@ -296,6 +299,7 @@ objc_library(
         "OpenGLES",
         "QuartzCore",
     ],
+    defines = ["GLES_SILENCE_DEPRECATION=1"],
     deps = [
         "objc-headers",
         "//:mbgl-core",
@@ -385,6 +389,7 @@ objc_library(
 
 objc_library(
     name = "iosapp",
+    defines = ["GLES_SILENCE_DEPRECATION"],
     srcs = [
         "platform/darwin/app/LimeGreenStyleLayer.h",
         "platform/darwin/app/LimeGreenStyleLayer.m",
@@ -458,8 +463,9 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["platform/ios/app/Info.plist"],
+    infoplists = ["build/Info-app.plist"],
     minimum_os_version = "12.0",
+    provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
@@ -482,6 +488,7 @@ ios_application(
     minimum_os_version = "12.0",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
+    provisioning_profile = ":xcode_profile",
     deps = [
         "iosapp",
     ],
@@ -502,15 +509,44 @@ genrule(
     """,
 )
 
+local_provisioning_profile(
+    name = "provisioning_profile",
+    profile_name = "iOS Team Provisioning Profile: *",
+    team_id = APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID,
+)
+
+xcode_provisioning_profile(
+    name = "xcode_profile",
+    managed_by_xcode = True,
+    provisioning_profile = ":provisioning_profile",
+    visibility = ["//visibility:public"],
+)
+
 xcodeproj(
     name = "xcodeproj",
+    build_mode = "xcode",
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
+    default_xcode_configuration = "Debug",
+    xcode_configurations = {
+        "Debug": {"//command_line_option:compilation_mode": "dbg"},
+        "Release": {"//command_line_option:compilation_mode": "opt"}
+    },
     top_level_targets = [
         top_level_target(
             "App",
-            target_environments = ["simulator"],
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//render-test/ios:RenderTest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
         ),
     ],
 )
