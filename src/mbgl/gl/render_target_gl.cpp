@@ -19,16 +19,17 @@ using namespace platform;
 
 RenderTargetGL::RenderTargetGL(Context& context)
     : glContext(context) {
-        //const auto& viewportSize = parameters.staticData.backendSize;
-        //const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
-        const auto size = Size{500, 500};
-        
-        texture = glContext.createTexture2D();
-        texture->setSize(size);
-        texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::HalfFloat);
-        texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        texture->create();
-    }
+    // const auto& viewportSize = parameters.staticData.backendSize;
+    // const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
+    const auto size = Size{500, 500};
+
+    texture = glContext.createTexture2D();
+    texture->setSize(size);
+    texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::HalfFloat);
+    texture->setSamplerConfiguration(
+        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    texture->create();
+}
 
 RenderTargetGL::~RenderTargetGL() {
     if (framebuffer) {
@@ -41,24 +42,26 @@ void RenderTargetGL::upload(gfx::UploadPass& uploadPass) {
     observeLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
 
-void RenderTargetGL::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
+void RenderTargetGL::render(RenderOrchestrator& orchestrator,
+                            const RenderTree& renderTree,
+                            PaintParameters& parameters) {
     if (!framebuffer) {
         framebuffer = std::make_shared<UniqueFramebuffer>(glContext.createFramebuffer(*texture));
     }
-    
+
     glContext.bindFramebuffer = *framebuffer;
     glContext.activeTextureUnit = 0;
     glContext.scissorTest = false;
     glContext.viewport = {0, 0, Size(500, 500)};
     glContext.clear(Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {});
-    
+
     // Run layer tweakers to update any dynamic elements
     observeLayerGroups([&](LayerGroupBase& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
             layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
     });
-    
+
     // draw layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;
     parameters.currentLayer = 0;
@@ -68,7 +71,7 @@ void RenderTargetGL::render(RenderOrchestrator& orchestrator, const RenderTree& 
         layerGroup.render(orchestrator, parameters);
         parameters.currentLayer++;
     });
-    
+
     // draw layer groups, translucent pass
     parameters.pass = RenderPass::Translucent;
     parameters.currentLayer = static_cast<int32_t>(numLayerGroups()) - 1;

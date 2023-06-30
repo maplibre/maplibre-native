@@ -36,7 +36,7 @@ public:
     static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices();
     static gfx::VertexVector<RasterLayoutVertex> rasterVertices();
     static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices();
-    
+
     static SegmentVector<BackgroundAttributes> tileTriangleSegments();
     static SegmentVector<DebugAttributes> tileBorderSegments();
     static SegmentVector<RasterAttributes> rasterSegments();

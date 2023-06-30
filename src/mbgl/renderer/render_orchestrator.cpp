@@ -918,7 +918,6 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
     }
 }
 
-
 void RenderOrchestrator::observeRenderTargets(std::function<void(RenderTarget&)> f) {
     for (auto& renderTarget : renderTargets) {
         f(*renderTarget);

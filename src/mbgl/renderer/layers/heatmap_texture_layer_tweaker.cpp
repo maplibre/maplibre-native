@@ -47,7 +47,8 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .opacity = */ evaluated.get<HeatmapOpacity>(),
             /* .padding = */ 0};
 
-        drawable.mutableUniformBuffers().createOrUpdate(HeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);
+        drawable.mutableUniformBuffers().createOrUpdate(
+            HeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

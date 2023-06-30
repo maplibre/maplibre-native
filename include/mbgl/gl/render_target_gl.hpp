@@ -14,7 +14,7 @@ class RenderTargetGL final : public RenderTarget {
 public:
     RenderTargetGL(Context& context);
     ~RenderTargetGL() override;
-    
+
     void upload(gfx::UploadPass& uploadPass) override;
     void render(RenderOrchestrator&, const RenderTree&, PaintParameters&) override;
 

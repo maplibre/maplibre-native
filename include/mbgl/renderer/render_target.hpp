@@ -25,14 +25,14 @@ public:
 
     void setTexture(const gfx::Texture2DPtr& texture_) { texture = std::move(texture_); };
     const gfx::Texture2DPtr& getTexture() const { return texture; };
-    
+
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
     void observeLayerGroups(std::function<void(LayerGroupBase&)>);
     void observeLayerGroups(std::function<void(const LayerGroupBase&)>) const;
-    
+
     virtual void upload(gfx::UploadPass& uploadPass) = 0;
     virtual void render(RenderOrchestrator&, const RenderTree&, PaintParameters&) = 0;
 

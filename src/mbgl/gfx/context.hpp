@@ -139,7 +139,7 @@ public:
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
-    
+
     /// Create a render target
     virtual RenderTargetPtr createRenderTarget() = 0;
 #endif

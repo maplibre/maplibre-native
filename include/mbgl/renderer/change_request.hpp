@@ -109,12 +109,12 @@ protected:
  */
 class RemoveRenderTargetRequest : public ChangeRequest {
 public:
-    RemoveRenderTargetRequest(const RenderTargetPtr& renderTarget_);
+    RemoveRenderTargetRequest(const RenderTargetPtr &renderTarget_);
 
     void execute(RenderOrchestrator &) override;
 
 protected:
-    const RenderTargetPtr& renderTarget;
+    const RenderTargetPtr &renderTarget;
 };
 
 } // namespace mbgl

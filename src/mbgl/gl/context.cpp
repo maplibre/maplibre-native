@@ -412,8 +412,11 @@ Framebuffer Context::createFramebuffer(const gfx::Texture& color,
 UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(
-        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, static_cast<const gl::Texture2D&>(color).getTextureID(), 0));
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
     checkFramebuffer();
     return fbo;
 }

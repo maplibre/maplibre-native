@@ -114,7 +114,7 @@ public:
     void processChanges();
     /// @brief Indicate that the orchestrator needs to re-sort layer groups when processing changes
     void markLayerGroupOrderDirty();
-    
+
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
     void observeRenderTargets(std::function<void(RenderTarget&)> f);
@@ -198,7 +198,7 @@ private:
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
-    
+
     std::vector<RenderTargetPtr> renderTargets;
 #endif
 };
