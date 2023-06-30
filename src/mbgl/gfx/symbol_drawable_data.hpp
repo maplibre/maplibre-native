@@ -26,7 +26,7 @@ struct SymbolDrawableData : public DrawableData {
           rotationAlignment(rotationAlignment_),
           placement(placement_),
           textFit(textFit_) {}
-    ~SymbolDrawableData() = default;
+    ~SymbolDrawableData() override = default;
 
     const bool isHalo;
     bool bucketVariablePlacement;
