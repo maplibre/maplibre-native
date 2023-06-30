@@ -895,13 +895,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         addRenderables(bucket.text, SymbolType::Text);
     }
 
+    // We'll be processing renderables across tiles, potentially out-of-order, so keep
+    // track of some things by tile ID so we don't have to re-build them multiple times.
     using RawVertexVec = std::vector<std::uint8_t>; // <int16_t, 4>
-    struct RawVertices {
-        RawVertexVec text, icon;
+    struct TileInfo {
+        RawVertexVec textVertices, iconVertices;
+        gfx::DrawableTweakerPtr textTweaker, iconTweaker;
     };
-    std::unordered_map<UnwrappedTileID, RawVertices> rawVertices;
-
-    gfx::DrawableTweakerPtr textTweaker, iconTweaker;
+    std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
 
     for (auto& renderable : renderableSegments) {
         const auto isText = (renderable.type == SymbolType::Text);
@@ -917,6 +918,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& layout = *bucket.layout;
         const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+
+        const auto& atlases = tile.getAtlasTextures();
+        if (!atlases) {
+            assert(false);
+            continue;
+        }
+
+        auto& tileInfo = tileCache[tile.id];
 
         const auto buildVertices = [&](const SymbolBucket::Buffer& buffer_, RawVertexVec& dest) -> auto& {
             const std::vector<SymbolLayoutVertex>& src = buffer_.vertices.vector();
@@ -998,21 +1007,20 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
 
-            if (const auto& atlases = tile.getAtlasTextures()) {
-                if (isText && !textTweaker) {
-                    textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                        atlases,
-                        iconTexUniformName,
-                        texUniformName,
-                        isText);
-                }
-                if (!isText && !iconTweaker) {
-                    iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                        atlases,
-                        iconTexUniformName,
-                        texUniformName,
-                        isText);
-                }
+            // We can use the same tweakers for all the segments in a tile
+            if (isText && !tileInfo.textTweaker) {
+                tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                    atlases,
+                    iconTexUniformName,
+                    texUniformName,
+                    isText);
+            }
+            if (!isText && !tileInfo.iconTweaker) {
+                tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                    atlases,
+                    iconTexUniformName,
+                    texUniformName,
+                    isText);
             }
 
             if (!builder) {
@@ -1027,7 +1035,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             builder->clearTweakers();
-            builder->addTweaker(isText ? textTweaker : iconTweaker);
+            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
 
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(std::move(attrs));
@@ -1075,7 +1083,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         if (isText) {
-            const auto& vertices = buildVertices(buffer, rawVertices[tile.id].text);
+            const auto& vertices = buildVertices(buffer, tileInfo.textVertices);
             const auto vertexCount = buffer.vertices.elements();
             const auto& indices = buffer.triangles;
             if (bucket.iconsInText) {
@@ -1120,7 +1128,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
         } else { // icons
-            const auto& vertices = buildVertices(buffer, rawVertices[tile.id].icon);
+            const auto& vertices = buildVertices(buffer, tileInfo.iconVertices);
             const auto vertexCount = buffer.vertices.elements();
             const auto& indices = buffer.triangles;
             if (sdfIcons) {
