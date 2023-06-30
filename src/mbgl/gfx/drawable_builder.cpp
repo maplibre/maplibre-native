@@ -46,7 +46,7 @@ void DrawableBuilder::flush() {
         draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
         draw->setTextures(textures);
-        draw->setTextureSource(textureSource);
+        draw->setTweakers(tweakers);
 
         if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {

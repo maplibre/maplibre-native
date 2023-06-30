@@ -141,6 +141,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_atlases_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
@@ -152,7 +153,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program_mtl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
-
         
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
@@ -169,6 +169,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_extrusion_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            

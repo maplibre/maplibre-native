@@ -1,5 +1,6 @@
 #include <mbgl/gl/layer_group_gl.hpp>
 
+#include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
@@ -92,6 +93,10 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         const auto debugGroupTile = parameters.encoder->createDebugGroup(labelPtr);
 #endif
 
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
+        }
+
         drawable.draw(parameters);
     });
 }
@@ -152,6 +157,10 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
         const auto labelPtr = (label.empty() ? drawable.getName() : label).c_str();
         const auto debugGroup = parameters.encoder->createDebugGroup(labelPtr);
 #endif
+
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
+        }
 
         drawable.draw(parameters);
     });

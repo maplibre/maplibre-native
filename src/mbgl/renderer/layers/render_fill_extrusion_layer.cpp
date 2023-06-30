@@ -21,6 +21,7 @@
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/fill_extrusion_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -39,7 +40,9 @@ namespace {
 constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
 constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
 
-constexpr auto normAttribName = "a_normal_ed";
+constexpr auto NormAttribName = "a_normal_ed";
+
+constexpr auto IconTextureName = "u_image";
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -352,6 +355,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         vertexAttrs.clear();
 
+        gfx::DrawableTweakerPtr tweaker;
+        if (depthBuilder) {
+            depthBuilder->clearTweakers();
+        }
+        if (colorBuilder) {
+            colorBuilder->clearTweakers();
+        }
+        
         const auto vertexCount = bucket.vertices.elements();
         constexpr auto vertexSize = sizeof(FillExtrusionLayoutVertex::a1);
 
@@ -416,6 +427,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setEnableColor(false);
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                if (tweaker) {
+                    builder->addTweaker(tweaker);
+                }
                 depthBuilder = std::move(builder);
             }
         }
@@ -426,21 +440,30 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setEnableColor(true);
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                if (tweaker) {
+                    builder->addTweaker(tweaker);
+                }
                 colorBuilder = std::move(builder);
             }
         }
 
-        if (hasPattern) {
+        if (hasPattern && !tweaker) {
             if (const auto& atlases = tile.getAtlasTextures()) {
-                if (const auto texSamplerLocation = shader->getSamplerLocation("u_image")) {
-                    colorBuilder->setTextureSource([=]() -> gfx::Drawable::Textures {
-                        return {{*texSamplerLocation, atlases->icon}};
-                    });
+                tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                    atlases,
+                    std::string(),
+                    std::string(IconTextureName),
+                    /*isText=*/false);
+                if (depthBuilder) {
+                    depthBuilder->addTweaker(tweaker);
+                }
+                if (colorBuilder) {
+                    colorBuilder->addTweaker(tweaker);
                 }
             }
         }
 
-        if (const auto& attr = vertexAttrs.getOrAdd(normAttribName)) {
+        if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
             const auto count = bucket.vertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {

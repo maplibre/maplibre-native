@@ -463,10 +463,6 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::DrawableTweakerPtr Context::createDrawableTweaker() {
-    return std::make_shared<gl::DrawableGLTweaker>();
-}
-
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
     return std::make_shared<gl::UniformBufferGL>(data, size);
 }

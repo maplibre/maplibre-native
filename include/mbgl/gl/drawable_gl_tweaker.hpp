@@ -16,11 +16,7 @@ namespace gl {
 class DrawableGLTweaker : public gfx::DrawableTweaker {
 public:
     DrawableGLTweaker() = default;
-
-public:
     ~DrawableGLTweaker() override = default;
-
-    void execute(gfx::Drawable&, const PaintParameters&) override;
 };
 
 } // namespace gl

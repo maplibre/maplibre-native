@@ -192,12 +192,6 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         };
     }
 
-    if (const auto src = getTextureSource()) {
-        for (auto& pair : src()) {
-            setTexture(std::move(pair.second), pair.first);
-        }
-    }
-
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
 

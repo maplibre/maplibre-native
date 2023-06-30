@@ -100,15 +100,6 @@ public:
     /// @param location A sampler location in the shader being used with this drawable.
     void setTexture(gfx::Texture2DPtr texture, int32_t location);
 
-    using TexSourceFunc = std::function<Textures()>;
-
-    /// @brief Provide a function to get the current textures
-    void setTextureSource(TexSourceFunc value) { textureSource = std::move(value); }
-    const TexSourceFunc& getTextureSource() const { return textureSource; }
-
-    /// @brief Provide all texture sources at once
-    void setTextureSources(std::vector<TexSourceFunc>);
-
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
     void setEnabled(bool value) { enabled = value; }
@@ -154,6 +145,9 @@ public:
 
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
+    void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
+    void setTweakers(std::vector<DrawableTweakerPtr> value) { tweakers = std::move(value); }
+    void clearTweakers() { tweakers.clear(); }
 
     /// Get the uniform buffers attached to this drawable
     virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
@@ -192,7 +186,6 @@ protected:
     std::unique_ptr<Impl> impl;
 
     Textures textures;
-    TexSourceFunc textureSource;
     std::vector<DrawableTweakerPtr> tweakers;
 };
 

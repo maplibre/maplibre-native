@@ -23,6 +23,7 @@
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -900,6 +901,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     };
     std::unordered_map<UnwrappedTileID, RawVertices> rawVertices;
 
+    gfx::DrawableTweakerPtr textTweaker, iconTweaker;
+
     for (auto& renderable : renderableSegments) {
         const auto isText = (renderable.type == SymbolType::Text);
         const auto sdfIcons = (renderable.type == SymbolType::IconSDF);
@@ -980,6 +983,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto interpolateUBO = buildInterpUBO(bucketPaintProperties, isText, currentZoom);
 
+        if (builder) {
+            builder->clearTweakers();
+        }
+
         const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
                               const Segment<SymbolTextAttributes>& segment,
                               const gfx::IndexVector<gfx::Triangles>& indices,
@@ -989,6 +996,23 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                               const std::string_view suffix) {
             if (!shaderGroup) {
                 return;
+            }
+
+            if (const auto& atlases = tile.getAtlasTextures()) {
+                if (isText && !textTweaker) {
+                    textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                        atlases,
+                        iconTexUniformName,
+                        texUniformName,
+                        isText);
+                }
+                if (!isText && !iconTweaker) {
+                    iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                        atlases,
+                        iconTexUniformName,
+                        texUniformName,
+                        isText);
+                }
             }
 
             if (!builder) {
@@ -1001,6 +1025,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setVertexAttrName(posOffsetAttribName);
             }
+
+            builder->clearTweakers();
+            builder->addTweaker(isText ? textTweaker : iconTweaker);
 
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(std::move(attrs));
@@ -1016,21 +1043,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // const bool linear = parameters.state.isChanging() || transformed ||
             // !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
             // gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
-
-            if (const auto& atlases = tile.getAtlasTextures()) {
-                if (const auto texSamplerLocation = shader->getSamplerLocation(texUniformName)) {
-                    if (const auto iconSamplerLocation = shader->getSamplerLocation(iconTexUniformName)) {
-                        assert(*texSamplerLocation != *iconSamplerLocation);
-                        builder->setTextureSource([=]() -> gfx::Drawable::Textures {
-                            return {{*texSamplerLocation, atlases->glyph}, {*iconSamplerLocation, atlases->icon}};
-                        });
-                    } else {
-                        builder->setTextureSource([=]() -> gfx::Drawable::Textures {
-                            return {{*texSamplerLocation, isText ? atlases->glyph : atlases->icon}};
-                        });
-                    }
-                }
-            }
 
             auto raw = vertices;
             builder->setRawVertices(std::move(raw), vertexCount, gfx::AttributeDataType::Short4);
