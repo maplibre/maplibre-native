@@ -58,7 +58,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    CirclePaintParamsUBO paintParamsUBO = {
+    const CirclePaintParamsUBO paintParamsUBO = {
         /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
         /* .device_pixel_ratio = */ parameters.pixelRatio,
         /* .padding = */ {0}};
@@ -72,7 +72,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
 
     if (!evaluatedPropsUniformBuffer) {
-        CircleEvaluatedPropsUBO evaluatedPropsUBO = {
+        const CircleEvaluatedPropsUBO evaluatedPropsUBO = {
             /* .color = */ evaluated.get<CircleColor>().constantOr(CircleColor::defaultValue()),
             /* .stroke_color = */ evaluated.get<CircleStrokeColor>().constantOr(CircleStrokeColor::defaultValue()),
             /* .radius = */ evaluated.get<CircleRadius>().constantOr(CircleRadius::defaultValue()),

@@ -76,26 +76,30 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    if (!propsBuffer) {
-        const FillExtrusionDrawablePropsUBO paramsUBO = {
-            /* .color = */ gfx::Drawable::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
-            /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
-            /* .pad = */ 0,
-            /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
-            /* .base = */ constOrDefault<FillExtrusionBase>(evaluated),
-            /* .height = */ constOrDefault<FillExtrusionHeight>(evaluated),
-            /* .light_intensity = */ FillExtrusionProgram::lightIntensity(parameters.evaluatedLight),
-            /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
-            /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
-            /* .fade = */ crossfade.t,
+    // UBO depends on more than just evaluated properties, so we need to update every time.
+    const FillExtrusionDrawablePropsUBO paramsUBO = {
+        /* .color = */ gfx::Drawable::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
+        /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
+        /* .pad = */ 0,
+        /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
+        /* .base = */ constOrDefault<FillExtrusionBase>(evaluated),
+        /* .height = */ constOrDefault<FillExtrusionHeight>(evaluated),
+        /* .light_intensity = */ FillExtrusionProgram::lightIntensity(parameters.evaluatedLight),
+        /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
+        /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
+        /* .fade = */ crossfade.t,
             /* .pad = */ 0,
             0,
             0};
+    if (!propsBuffer) {
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+    } else {
+        propsBuffer->update(&paramsUBO, sizeof(paramsUBO));
     }
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace(FillExtrusionDrawablePropsUBOName, propsBuffer);
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(FillExtrusionDrawablePropsUBOName, propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -139,7 +143,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        drawable.mutableUniformBuffers().createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

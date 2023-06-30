@@ -40,8 +40,8 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         auto spinWeights = [](float spin) -> std::array<float, 4> {
             spin = util::deg2radf(spin);
-            float s = std::sin(spin);
-            float c = std::cos(spin);
+            const float s = std::sin(spin);
+            const float c = std::cos(spin);
             std::array<float, 4> spin_weights = {
                 {(2 * c + 1) / 3, (-std::sqrt(3.0f) * s - c + 1) / 3, (std::sqrt(3.0f) * s - c + 1) / 3, 0}};
             return spin_weights;
@@ -78,21 +78,21 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             matrix = parameters.matrixForTile(tileID, !parameters.state.isChanging());
         }
 
-        RasterDrawableUBO drawableUBO{/*.matrix = */ util::cast<float>(matrix),
-                                      /*.spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),
-                                      /*.tl_parent = */ {{0.0f, 0.0f}},
-                                      /*.scale_parent = */ 1.0f,
-                                      /*.buffer_scale = */ 1.0f,
-                                      /*.fade_t = */ 1.0f,
-                                      /*.opacity = */ evaluated.get<RasterOpacity>(),
-                                      /*.brightness_low = */ evaluated.get<RasterBrightnessMin>(),
-                                      /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
-                                      /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
-                                      /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
-                                      0,
-                                      0};
-        auto drawableUniformBuffer = parameters.context.createUniformBuffer(&drawableUBO, sizeof(drawableUBO));
-        drawable.mutableUniformBuffers().addOrReplace("RasterDrawableUBO", drawableUniformBuffer);
+        const RasterDrawableUBO drawableUBO{/*.matrix = */ util::cast<float>(matrix),
+                                            /*.spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),
+                                            /*.tl_parent = */ {{0.0f, 0.0f}},
+                                            /*.scale_parent = */ 1.0f,
+                                            /*.buffer_scale = */ 1.0f,
+                                            /*.fade_t = */ 1.0f,
+                                            /*.opacity = */ evaluated.get<RasterOpacity>(),
+                                            /*.brightness_low = */ evaluated.get<RasterBrightnessMin>(),
+                                            /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
+                                            /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
+                                            /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
+                                            0,
+                                            0};
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.createOrUpdate("RasterDrawableUBO", &drawableUBO, sizeof(drawableUBO), parameters.context);
     });
 }
 
