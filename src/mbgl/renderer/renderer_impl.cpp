@@ -12,7 +12,6 @@
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
@@ -22,6 +21,7 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #endif
 
@@ -180,10 +180,12 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 #endif
     }
 
+#if MLN_DRAWABLE_RENDERER
     // draw render targets
     orchestrator.observeRenderTargets(
         [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
-
+#endif
+    
     // - CLEAR
     // -------------------------------------------------------------------------------------
     // Renders the backdrop of the OpenGL view. This also paints in areas where

@@ -409,18 +409,6 @@ Framebuffer Context::createFramebuffer(const gfx::Texture& color,
     return {depth.getSize(), std::move(fbo)};
 }
 
-UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
-    auto fbo = createFramebuffer();
-    bindFramebuffer = fbo;
-    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
-                                            GL_COLOR_ATTACHMENT0,
-                                            GL_TEXTURE_2D,
-                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
-                                            0));
-    checkFramebuffer();
-    return fbo;
-}
-
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
                                                                        const gfx::TextureChannelDataType type) {
     return std::make_unique<gl::OffscreenTexture>(*this, size, type);
@@ -501,11 +489,23 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialC
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<gl::Texture2D>(*this);
 }
-#endif
 
 RenderTargetPtr Context::createRenderTarget() {
     return std::make_shared<gl::RenderTargetGL>(*this);
 }
+
+UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    checkFramebuffer();
+    return fbo;
+}
+#endif
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     GLbitfield mask = 0;

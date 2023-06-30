@@ -16,14 +16,16 @@ public:
     explicit RenderHeatmapLayer(Immutable<style::HeatmapLayer::Impl>);
     ~RenderHeatmapLayer() override;
 
+#if MLN_DRAWABLE_RENDERER
     void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
-
+    
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
+#endif
 
 private:
     void transition(const TransitionParameters&) override;
@@ -45,11 +47,13 @@ private:
                                 const FeatureState&) const override;
     void updateColorRamp();
 
+#if MLN_DRAWABLE_RENDERER
     /// Remove all drawables for the tile from the layer group
     void removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
     void removeAllDrawables() override;
+#endif
 
     // Paint properties
     style::HeatmapPaintProperties::Unevaluated unevaluated;
@@ -64,9 +68,11 @@ private:
     std::shared_ptr<HeatmapTextureProgram> heatmapTextureProgram;
 #endif
 
+#if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr heatmapShaderGroup;
     gfx::ShaderProgramBasePtr heatmapTextureShader;
     RenderTargetPtr renderTarget;
+#endif
 };
 
 } // namespace mbgl

@@ -1,25 +1,28 @@
 #include <mbgl/renderer/layers/render_heatmap_layer.hpp>
-#include <mbgl/renderer/layers/heatmap_layer_tweaker.hpp>
-#include <mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp>
 #include <mbgl/renderer/buckets/heatmap_bucket.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/intersection_tests.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layers/heatmap_layer_tweaker.hpp>
+#include <mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/render_target.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/shader_group.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
+#endif
 
 namespace mbgl {
 
@@ -226,6 +229,7 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
     return false;
 }
 
+#if MLN_DRAWABLE_RENDERER
 void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
 
@@ -447,6 +451,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     buildTextureVertices();
     heatmapTextureBuilder->addVertices(textureRawVerts, 0, textureRawVerts.size());
 
+    if (segments.empty()) {
+        segments = RenderStaticData::heatmapTextureSegments();
+    }
+    
     heatmapTextureBuilder->setSegments(
         gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
 
@@ -470,4 +478,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         ++stats.drawablesAdded;
     }
 }
+#endif // MLN_DRAWABLE_RENDERER
+
 } // namespace mbgl

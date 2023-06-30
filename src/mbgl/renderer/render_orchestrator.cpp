@@ -896,7 +896,6 @@ void RenderOrchestrator::processChanges() {
 void RenderOrchestrator::markLayerGroupOrderDirty() {
     layerGroupOrderDirty = true;
 }
-#endif // MLN_DRAWABLE_RENDERER
 
 bool RenderOrchestrator::addRenderTarget(RenderTargetPtr renderTarget) {
     auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
@@ -929,6 +928,7 @@ void RenderOrchestrator::observeRenderTargets(std::function<void(const RenderTar
         f(*renderTarget);
     }
 }
+#endif // MLN_DRAWABLE_RENDERER
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        const GlyphRange& glyphRange,
