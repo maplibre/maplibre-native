@@ -285,14 +285,14 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a render target
     if (!renderTarget) {
-        //const auto& viewportSize = parameters.staticData.backendSize;
-        const auto size = Size(500, 500); //Size{viewportSize.width / 4, viewportSize.height / 4};
+        // const auto& viewportSize = parameters.staticData.backendSize;
+        const auto size = Size(500, 500); // Size{viewportSize.width / 4, viewportSize.height / 4};
         renderTarget = context.createRenderTarget(size, gfx::TextureChannelDataType::HalfFloat);
         if (!renderTarget) {
             return;
         }
         activateRenderTarget(renderTarget, isRenderable, changes);
-        
+
         // Set up tile layer group
         auto tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
