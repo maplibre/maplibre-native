@@ -83,12 +83,10 @@ void UploadPass::updateTextureResource(gfx::TextureResource& resource,
                                        const Size size,
                                        const void* data,
                                        gfx::TexturePixelType format,
-                                       gfx::TextureChannelDataType type)
-{
+                                       gfx::TextureChannelDataType type) {
     auto const glFormat = Enum<gfx::TexturePixelType>::to(format);
     auto glInternalFormat = glFormat;
-    if (glFormat == GL_RED)
-        glInternalFormat = GL_R8;
+    if (glFormat == GL_RED) glInternalFormat = GL_R8;
 
     // Always use texture unit 0 for manipulating it.
     commandEncoder.context.activeTextureUnit = 0;

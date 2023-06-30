@@ -220,8 +220,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(const Size 
 
     auto const glFormat = Enum<gfx::TexturePixelType>::to(format);
     auto glInternalFormat = Enum<gfx::TexturePixelType>::sizedFor(format, type);
-    if (glFormat == GL_RED)
-        glInternalFormat = GL_R8;
+    if (glFormat == GL_RED) glInternalFormat = GL_R8;
 
     // Creates an empty texture with the specified size and format.
     MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,

@@ -2,8 +2,7 @@
 
 #include <QApplication>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     QApplication app(argc, argv);
 
     QSurfaceFormat fmt;
@@ -18,10 +17,9 @@ int main(int argc, char **argv)
     fmt.setDepthBufferSize(16);
 
     // Set proper OGL version now (needed for "cocoa" or "xcb"), but have troubles with "wayland" devices.
-    if (app.platformName() != QString("wayland"))
-    {
-      fmt.setProfile(QSurfaceFormat::CoreProfile);
-      fmt.setVersion(3, 3);
+    if (app.platformName() != QString("wayland")) {
+        fmt.setProfile(QSurfaceFormat::CoreProfile);
+        fmt.setVersion(3, 3);
     }
 
     QSurfaceFormat::setDefaultFormat(fmt);
