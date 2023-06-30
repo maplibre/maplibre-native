@@ -1003,7 +1003,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setRenderPass(passes);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+                builder->setColorMode(passes == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                        : gfx::ColorMode::unblended());
                 builder->setVertexAttrName(posOffsetAttribName);
             }
 
