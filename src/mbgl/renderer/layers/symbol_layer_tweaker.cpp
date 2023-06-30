@@ -20,6 +20,8 @@ namespace mbgl {
 
 using namespace style;
 
+namespace {
+
 struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
@@ -53,8 +55,8 @@ struct alignas(16) SymbolDrawablePaintUBO {
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
-static Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
-    if (const auto shader = drawable.getShader()) {
+Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
+    if (const auto& shader = drawable.getShader()) {
         if (const auto index = shader->getSamplerLocation(name)) {
             if (const auto& tex = drawable.getTexture(*index)) {
                 return tex->getSize();
@@ -64,7 +66,7 @@ static Size getTexSize(const gfx::Drawable& drawable, const std::string_view nam
     return {0, 0};
 }
 
-static std::array<float, 2> toArray(const Size& s) {
+std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
@@ -72,9 +74,11 @@ constexpr auto texUniformName = "u_texture";
 constexpr auto texIconUniformName = "u_texture_icon";
 
 template <typename T, class... Is, class... Ts>
-static auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
+auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
     return evaluated.template get<T>().constantOr(T::defaultValue());
 }
+
+} // namespace
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
