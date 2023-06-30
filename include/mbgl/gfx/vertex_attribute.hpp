@@ -145,8 +145,7 @@ public:
 
     VertexAttributeArray(int initCapacity = 10);
     VertexAttributeArray(VertexAttributeArray&&);
-    // Would need to use the virtual assignment operator
-    VertexAttributeArray(const VertexAttributeArray&);
+    VertexAttributeArray(const VertexAttributeArray&) = delete; // Would need to use the virtual assignment operator
     virtual ~VertexAttributeArray() = default;
 
     /// Number of elements
