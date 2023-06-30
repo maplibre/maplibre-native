@@ -490,8 +490,8 @@ gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<gl::Texture2D>(*this);
 }
 
-RenderTargetPtr Context::createRenderTarget() {
-    return std::make_shared<gl::RenderTargetGL>(*this);
+RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
+    return std::make_shared<gl::RenderTargetGL>(*this, size, type);
 }
 
 UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {

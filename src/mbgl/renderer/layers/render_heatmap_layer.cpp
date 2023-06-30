@@ -230,18 +230,21 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
 }
 
 #if MLN_DRAWABLE_RENDERER
-void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
-    RenderLayer::markLayerRenderable(willRender, changes);
-
-    if (renderTarget) {
-        if (willRender) {
+void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
+    if (renderTarget_) {
+        if (activate) {
             // The RenderTree has determined this render target should be included in the renderable set for a frame
-            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget));
+            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
         } else {
             // The RenderTree is informing us we should not render anything
-            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget));
+            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
         }
     }
+}
+
+void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    RenderLayer::markLayerRenderable(willRender, changes);
+    activateRenderTarget(renderTarget, willRender, changes);
 }
 
 void RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
@@ -282,11 +285,14 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a render target
     if (!renderTarget) {
-        renderTarget = context.createRenderTarget();
+        //const auto& viewportSize = parameters.staticData.backendSize;
+        const auto size = Size(500, 500); //Size{viewportSize.width / 4, viewportSize.height / 4};
+        renderTarget = context.createRenderTarget(size, gfx::TextureChannelDataType::HalfFloat);
         if (!renderTarget) {
             return;
         }
-
+        activateRenderTarget(renderTarget, isRenderable, changes);
+        
         // Set up tile layer group
         auto tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {

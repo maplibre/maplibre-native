@@ -28,7 +28,7 @@
 #if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)
 // DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
 // Drawables will be on the left, vanilla rendering on the right
-#define MLN_RENDERER_SPLIT_VIEW 1
+// #define MLN_RENDERER_SPLIT_VIEW 1
 // If using SPLIT_VIEW, MLN_RENDERER_QUAD_SPLIT_VIEW will split each half, showing just the opaque
 // pass on top and then a composited opaque+translucent pass on the bottom
 // #define QUAD_SPLIT_VIEW

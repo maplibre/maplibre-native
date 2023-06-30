@@ -17,18 +17,13 @@ namespace gl {
 
 using namespace platform;
 
-RenderTargetGL::RenderTargetGL(Context& context)
+RenderTargetGL::RenderTargetGL(Context& context, const Size size, const gfx::TextureChannelDataType type)
     : glContext(context) {
-    // const auto& viewportSize = parameters.staticData.backendSize;
-    // const auto size = Size{viewportSize.width / 4, viewportSize.height / 4};
-    const auto size = Size{500, 500};
-
     texture = glContext.createTexture2D();
     texture->setSize(size);
-    texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::HalfFloat);
+    texture->setFormat(gfx::TexturePixelType::RGBA, type);
     texture->setSamplerConfiguration(
         {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-    texture->create();
 }
 
 RenderTargetGL::~RenderTargetGL() {
@@ -46,13 +41,14 @@ void RenderTargetGL::render(RenderOrchestrator& orchestrator,
                             const RenderTree& renderTree,
                             PaintParameters& parameters) {
     if (!framebuffer) {
+        texture->create();
         framebuffer = std::make_shared<UniqueFramebuffer>(glContext.createFramebuffer(*texture));
     }
 
     glContext.bindFramebuffer = *framebuffer;
     glContext.activeTextureUnit = 0;
     glContext.scissorTest = false;
-    glContext.viewport = {0, 0, Size(500, 500)};
+    glContext.viewport = {0, 0, texture->getSize()};
     glContext.clear(Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {});
 
     // Run layer tweakers to update any dynamic elements

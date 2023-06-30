@@ -141,7 +141,7 @@ public:
     virtual Texture2DPtr createTexture2D() = 0;
 
     /// Create a render target
-    virtual RenderTargetPtr createRenderTarget() = 0;
+    virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
 #endif
 };
 

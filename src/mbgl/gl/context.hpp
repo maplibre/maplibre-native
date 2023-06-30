@@ -119,7 +119,7 @@ public:
 
     gfx::Texture2DPtr createTexture2D() override;
 
-    RenderTargetPtr createRenderTarget() override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
     UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
 #endif
