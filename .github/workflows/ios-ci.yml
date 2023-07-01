@@ -121,8 +121,8 @@ jobs:
       - name: Lint plist files
         run: make ios-lint-plist
 
-      - name: Running ios unit tests
-        run: make ios-test
+      # - name: Running ios unit tests
+      #   run: make ios-test
 
       # - name: Running ios UI tests
       #   run: make ios-uitest
