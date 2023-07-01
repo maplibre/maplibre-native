@@ -56,7 +56,7 @@ struct alignas(16) SymbolDrawablePaintUBO {
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
 Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
-    if (const auto shader = drawable.getShader()) {
+    if (const auto& shader = drawable.getShader()) {
         if (const auto index = shader->getSamplerLocation(name)) {
             if (const auto& tex = drawable.getTexture(*index)) {
                 return tex->getSize();
