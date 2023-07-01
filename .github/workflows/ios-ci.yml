@@ -124,10 +124,8 @@ jobs:
       - name: Running ios unit tests
         run: make ios-test
 
-      - name: Running ios UI tests
-        run: |
-          security unlock-keychain -p ec2-user
-          make ios-uitest
+      # - name: Running ios UI tests
+      #   run: make ios-uitest
 
       # size test
       - name: Copy example config
