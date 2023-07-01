@@ -67,13 +67,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Install macos dependencies
-        run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
-
       - name: Cache node modules
         uses: actions/cache@v3
         env:
