@@ -884,7 +884,6 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/gfx/drawable_builder.cpp",
     "src/mbgl/gfx/drawable_builder_impl.hpp",
     "src/mbgl/gfx/drawable_tweaker.cpp",
-    "src/mbgl/gfx/fill_extrusion_drawable_data.hpp",
     "src/mbgl/gfx/image_drawable_data.hpp",
     "src/mbgl/gfx/line_drawable_data.hpp",
     "src/mbgl/gfx/symbol_drawable_data.hpp",

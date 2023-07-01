@@ -169,7 +169,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_tweaker.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_extrusion_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
