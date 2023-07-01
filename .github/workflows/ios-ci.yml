@@ -127,6 +127,8 @@ jobs:
       # - name: Running ios UI tests
       #   run: make ios-uitest
 
+      - run: make style-code
+
       # size test
       - name: Copy example config
         run: cp bazel/example_config.bzl bazel/config.bzl
