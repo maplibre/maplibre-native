@@ -448,7 +448,7 @@ _IOS_APPLICATION_RESOURCES = [
     "platform/ios/app/LaunchScreen.storyboard",
     "platform/ios/app/simple_route.json",
     "platform/ios/app/fill_filter_style.json",
-    "//platform/darwin/test:amsterdam.geojson",
+    "//platform/ios/platform/darwin/test:amsterdam.geojson",
 ] + glob([
     "platform/ios/app/*.lproj/**",
 ])
@@ -539,6 +539,6 @@ xcodeproj(
                 "device",
             ],
         ),
-        "//platform/ios/platform/ios/test:ios_test"
+        "//platform/ios/platform/ios/test:ios_test",
     ],
 )
