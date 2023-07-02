@@ -1,0 +1,12 @@
+objc_library(
+  name = "test_utility",
+  srcs = [
+    "MLNTestUtility.h"
+  ],
+  includes = ["."],
+  visibility = [
+    "//platform/ios/platform/ios/test:__pkg__"
+  ]
+)
+
+exports_files(["amsterdam.geojson"])
