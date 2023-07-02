@@ -27,6 +27,8 @@ ios_unit_test(
     ],
     deps = [
         "ios_tests_src",
+        # "//platform/ios/platform/darwin/test:shared_tests_objc_srcs",
+        # "//platform/ios/platform/darwin/test:shared_tests_objcpp_srcs"
     ],
 )
 

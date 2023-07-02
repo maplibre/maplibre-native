@@ -1,5 +1,5 @@
 #import <XCTest/XCTest.h>
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 
 #import "NSPredicate+MLNPrivateAdditions.h"
 #import "MLNValueEvaluator.h"

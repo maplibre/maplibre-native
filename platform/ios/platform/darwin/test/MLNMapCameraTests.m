@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 #import <CoreLocation/CoreLocation.h>
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 #import <MapKit/MapKit.h>
 
 @interface MLNMapCameraTests : XCTestCase

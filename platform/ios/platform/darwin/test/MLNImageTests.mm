@@ -1,5 +1,5 @@
 #import <XCTest/XCTest.h>
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 
 #if TARGET_OS_IPHONE
     #import "UIImage+MLNAdditions.h"
