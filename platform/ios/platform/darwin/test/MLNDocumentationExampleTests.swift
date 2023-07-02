@@ -516,12 +516,12 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
                     0.0
                 ],
                 "type" : "Point"
-            ],
+            ] as [String : Any],
             "properties" : [
                 "cluster" : true,
                 "cluster_id" : 123,
                 "point_count" : 4567,
-            ]
+            ] as [String : Any]
         ]
         
         let clusterShapeData = try! JSONSerialization.data(withJSONObject: geoJSON, options: [])
@@ -591,12 +591,12 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
                     0.0
                 ],
                 "type" : "Point"
-            ],
+            ] as [String : Any],
             "properties" : [
                 "cluster" : true,
                 "cluster_id" : 123,
                 "point_count" : 4567,
-            ]
+            ] as [String : Any]
         ]
 
         let clusterShapeData = try! JSONSerialization.data(withJSONObject: geoJSON, options: [])
