@@ -1,6 +1,4 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -9,6 +7,7 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::LinePatternProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "LinePatternProgram";
     static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but

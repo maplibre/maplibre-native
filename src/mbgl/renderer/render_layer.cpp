@@ -1,12 +1,18 @@
 #include <mbgl/renderer/render_layer.hpp>
+
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/layer.hpp>
+#include <mbgl/style/layer_properties.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layer_group.hpp>
+#endif
 
 namespace mbgl {
 
@@ -28,6 +34,10 @@ bool RenderLayer::needsPlacement() const {
 
 const std::string& RenderLayer::getID() const {
     return baseImpl->id;
+}
+
+int32_t RenderLayer::getLayerIndex() const noexcept {
+    return layerIndex;
 }
 
 bool RenderLayer::hasRenderPass(RenderPass pass) const {
@@ -53,6 +63,20 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
 std::optional<Color> RenderLayer::getSolidBackground() const {
     return std::nullopt;
 }
+
+#if MLN_DRAWABLE_RENDERER
+void RenderLayer::layerChanged(const TransitionParameters&,
+                               const Immutable<style::Layer::Impl>&,
+                               UniqueChangeRequestVec& changes) {
+    // Treat a layer change the same as a remove.
+    // It will be set up again when `update()` is called.
+    layerRemoved(changes);
+}
+
+void RenderLayer::layerRemoved(UniqueChangeRequestVec&) {
+    removeAllDrawables();
+}
+#endif
 
 void RenderLayer::markContextDestroyed() {
     // no-op
@@ -105,5 +129,61 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     }
     return nullptr;
 }
+
+#if MLN_DRAWABLE_RENDERER
+void RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
+        stats.drawablesRemoved += tileGroup->removeDrawables(renderPass, tileID).size();
+    }
+}
+
+void RenderLayer::removeAllDrawables() {
+    if (layerGroup) {
+        stats.drawablesRemoved += layerGroup->getDrawableCount();
+        layerGroup->clearDrawables();
+    }
+}
+
+void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
+    layerIndex = newLayerIndex;
+
+    // Submit a change request to update the layer index of our tile layer group
+    if (layerGroup) {
+        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(layerGroup, newLayerIndex));
+    }
+}
+
+void RenderLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    isRenderable = willRender;
+
+    // This layer is either being freshly included in the renderable set or excluded
+    activateLayerGroup(layerGroup, willRender, changes);
+}
+
+void RenderLayer::setLayerGroup(LayerGroupBasePtr layerGroup_, UniqueChangeRequestVec& changes) {
+    // Remove the active layer group, if any, before replacing it.
+    activateLayerGroup(layerGroup, false, changes);
+
+    layerGroup = std::move(layerGroup_);
+
+    // Add the new layer group, if we're currently renderable.
+    activateLayerGroup(layerGroup, isRenderable, changes);
+}
+
+/// (Un-)Register the layer group with the orchestrator
+void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
+                                     bool activate,
+                                     UniqueChangeRequestVec& changes) {
+    if (layerGroup_) {
+        if (activate) {
+            // The RenderTree has determined this layer should be included in the renderable set for a frame
+            changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_, /*canReplace=*/true));
+        } else {
+            // The RenderTree is informing us we should not render anything
+            changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(layerGroup_->getLayerIndex()));
+        }
+    }
+}
+#endif
 
 } // namespace mbgl

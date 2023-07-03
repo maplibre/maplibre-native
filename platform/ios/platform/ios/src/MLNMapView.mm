@@ -1131,7 +1131,7 @@ public:
 - (CGSize)sizeForOrnament:(UIView *)view
               constraints:(NSMutableArray *)constraints {
     // avoid regenerating size constraints
-    CGSize size;
+    CGSize size = view.bounds.size;
     if(constraints && constraints.count > 0) {
         for (NSLayoutConstraint * constraint in constraints) {
             if([constraint.identifier isEqualToString:@"width"]) {
@@ -1142,10 +1142,7 @@ public:
             }
         }
     }
-    else {
-        size = view.bounds.size;
-    }
-    
+
     return size;
 }
 

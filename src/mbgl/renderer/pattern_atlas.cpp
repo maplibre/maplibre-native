@@ -1,6 +1,9 @@
 #include <mbgl/renderer/pattern_atlas.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/context.hpp>
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/texture2d.hpp>
+#endif
 
 namespace mbgl {
 
@@ -86,20 +89,41 @@ Size PatternAtlas::getPixelSize() const {
     return {static_cast<uint32_t>(shelfPack.width()), static_cast<uint32_t>(shelfPack.height())};
 }
 
-void PatternAtlas::upload(gfx::UploadPass& uploadPass) {
+void PatternAtlas::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
+#if MLN_DRAWABLE_RENDERER
+    if (!atlasTexture2D) {
+        atlasTexture2D = uploadPass.getContext().createTexture2D();
+        atlasTexture2D->upload(atlasImage);
+    } else if (dirty) {
+        atlasTexture2D->upload(atlasImage);
+    }
+#else
     if (!atlasTexture) {
         atlasTexture = uploadPass.createTexture(atlasImage);
     } else if (dirty) {
         uploadPass.updateTexture(*atlasTexture, atlasImage);
     }
-
+#endif
     dirty = false;
 }
 
+// @note: Deprecated
 gfx::TextureBinding PatternAtlas::textureBinding() const {
+#if MLN_DRAWABLE_RENDERER
+    assert(atlasTexture2D);
+    assert(!dirty);
+    return {atlasTexture2D->getResource(), gfx::TextureFilterType::Linear};
+#else
     assert(atlasTexture);
     assert(!dirty);
     return {atlasTexture->getResource(), gfx::TextureFilterType::Linear};
+#endif
 }
+
+#if MLN_DRAWABLE_RENDERER
+const std::shared_ptr<gfx::Texture2D>& PatternAtlas::texture() const {
+    return atlasTexture2D;
+}
+#endif
 
 } // namespace mbgl

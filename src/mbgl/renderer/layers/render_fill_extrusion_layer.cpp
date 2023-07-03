@@ -65,14 +65,15 @@ bool RenderFillExtrusionLayer::is3D() const {
     return true;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass != RenderPass::Translucent) {
         return;
     }
 
-    if (!parameters.shaders.populate(fillExtrusionProgram)) return;
-    if (!parameters.shaders.populate(fillExtrusionPatternProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillExtrusionProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(fillExtrusionPatternProgram)) return;
 
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).crossfade;
@@ -189,7 +190,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                              tile.translatedClipMatrix(evaluated.get<FillExtrusionTranslate>(),
                                                        evaluated.get<FillExtrusionTranslateAnchor>(),
                                                        parameters.state),
-                             tile.getIconAtlasTexture().size,
+                             tile.getIconAtlasTexture()->getSize(),
                              crossfade,
                              tile.id,
                              parameters.state,
@@ -201,8 +202,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                          patternPosA,
                          patternPosB,
                          FillExtrusionPatternProgram::TextureBindings{
-                             textures::image::Value{tile.getIconAtlasTexture().getResource(),
-                                                    gfx::TextureFilterType::Linear},
+                             textures::image::Value{tile.getIconAtlasTextureBinding(gfx::TextureFilterType::Linear)},
                          },
                          name);
                 }
@@ -220,6 +220,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
         drawTiles(parameters.stencilModeFor3D(), parameters.colorModeForRenderPass(), "color");
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
                                                       const GeometryTileFeature& feature,

@@ -22,11 +22,12 @@ RenderTile::RenderTile(UnwrappedTileID id_, Tile& tile_)
 
 RenderTile::~RenderTile() = default;
 
-mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
+mat4 RenderTile::translateVtxMatrix(const UnwrappedTileID& id,
+                                    const mat4& tileMatrix,
                                     const std::array<float, 2>& translation,
                                     TranslateAnchorType anchor,
                                     const TransformState& state,
-                                    const bool inViewportPixelUnits) const {
+                                    const bool inViewportPixelUnits) {
     if (translation[0] == 0 && translation[1] == 0) {
         return tileMatrix;
     }
@@ -51,6 +52,14 @@ mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
     }
 
     return vtxMatrix;
+}
+
+mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
+                                    const std::array<float, 2>& translation,
+                                    TranslateAnchorType anchor,
+                                    const TransformState& state,
+                                    const bool inViewportPixelUnits) const {
+    return translateVtxMatrix(id, tileMatrix, translation, anchor, state, inViewportPixelUnits);
 }
 
 mat4 RenderTile::translatedMatrix(const std::array<float, 2>& translation,
@@ -87,15 +96,61 @@ std::optional<ImagePosition> RenderTile::getPattern(const std::string& pattern) 
     return renderData->getPattern(pattern);
 }
 
-const gfx::Texture& RenderTile::getGlyphAtlasTexture() const {
-    assert(renderData);
-    return renderData->getGlyphAtlasTexture();
+#if MLN_DRAWABLE_RENDERER
+static const gfx::Texture2DPtr noTexture;
+
+bool RenderTile::hasGlyphAtlasTexture() const {
+    return renderData && renderData->getGlyphAtlasTexture();
 }
 
-const gfx::Texture& RenderTile::getIconAtlasTexture() const {
-    assert(renderData);
-    return renderData->getIconAtlasTexture();
+const gfx::Texture2DPtr& RenderTile::getGlyphAtlasTexture() const {
+    return renderData ? renderData->getGlyphAtlasTexture() : noTexture;
 }
+
+gfx::TextureBinding RenderTile::getGlyphAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData && renderData->getGlyphAtlasTexture());
+    return {getGlyphAtlasTexture()->getResource(), filter};
+}
+
+bool RenderTile::hasIconAtlasTexture() const {
+    return renderData && renderData->getIconAtlasTexture();
+}
+
+const gfx::Texture2DPtr& RenderTile::getIconAtlasTexture() const {
+    return renderData ? renderData->getIconAtlasTexture() : noTexture;
+}
+
+gfx::TextureBinding RenderTile::getIconAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData && renderData->getIconAtlasTexture());
+    return {getIconAtlasTexture()->getResource(), filter};
+}
+
+static const std::shared_ptr<TileAtlasTextures> noAtlas;
+const std::shared_ptr<TileAtlasTextures>& RenderTile::getAtlasTextures() const {
+    return renderData ? renderData->getAtlasTextures() : noAtlas;
+}
+
+#else
+gfx::TextureBinding RenderTile::getGlyphAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData);
+    return {getGlyphAtlasTexture()->getResource(), filter};
+}
+
+gfx::TextureBinding RenderTile::getIconAtlasTextureBinding(gfx::TextureFilterType filter) const {
+    assert(renderData);
+    return {getIconAtlasTexture()->getResource(), filter};
+}
+
+const gfx::Texture* RenderTile::getGlyphAtlasTexture() const {
+    assert(renderData);
+    return &renderData->getGlyphAtlasTexture();
+}
+
+const gfx::Texture* RenderTile::getIconAtlasTexture() const {
+    assert(renderData);
+    return &renderData->getIconAtlasTexture();
+}
+#endif
 
 void RenderTile::upload(gfx::UploadPass& uploadPass) const {
     assert(renderData);
@@ -139,7 +194,7 @@ void RenderTile::finishRender(PaintParameters& parameters) const {
     static const style::Properties<>::PossiblyEvaluated properties{};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
-    auto program = parameters.shaders.get<DebugProgram>();
+    auto program = parameters.shaders.getLegacyGroup().get<DebugProgram>();
     if (!program) {
         return;
     }

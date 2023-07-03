@@ -8,9 +8,17 @@
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/intersection_tests.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layers/circle_layer_tweaker.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#endif
 
 namespace mbgl {
 
@@ -18,6 +26,7 @@ using namespace style;
 
 namespace {
 
+#if MLN_LEGACY_RENDERER
 struct RenderableSegment {
     RenderableSegment(const Segment<CircleAttributes>& segment_,
                       const RenderTile& tile_,
@@ -38,6 +47,7 @@ struct RenderableSegment {
         return lhs.sortKey < rhs.sortKey;
     }
 };
+#endif
 
 inline const style::CircleLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == CircleLayer::Impl::staticTypeInfo());
@@ -69,6 +79,12 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+
+#if MLN_DRAWABLE_RENDERER
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
+    }
+#endif
 }
 
 bool RenderCircleLayer::hasTransition() const {
@@ -79,13 +95,15 @@ bool RenderCircleLayer::hasCrossfade() const {
     return false;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderCircleLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
+
     if (parameters.pass == RenderPass::Opaque) {
         return;
     }
 
-    if (!parameters.shaders.populate(circleProgram)) return;
+    if (!parameters.shaders.getLegacyGroup().populate(circleProgram)) return;
 
     const auto drawTile = [&](const RenderTile& tile, const LayerRenderData* data, const auto& segments) {
         auto& circleBucket = static_cast<CircleBucket&>(*data->bucket);
@@ -157,6 +175,7 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
         }
     }
 }
+#endif // MLN_LEGACY_RENDERER
 
 GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
     vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
@@ -235,5 +254,165 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 
     return false;
 }
+
+#if MLN_DRAWABLE_RENDERER
+struct alignas(16) CircleInterpolateUBO {
+    float color_t;
+    float radius_t;
+    float blur_t;
+    float opacity_t;
+    float stroke_color_t;
+    float stroke_width_t;
+    float stroke_opacity_t;
+    float padding;
+};
+static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
+
+static const std::string CircleShaderGroupName = "CircleShader";
+static constexpr std::string_view CircleInterpolateUBOName = "CircleInterpolateUBO";
+
+void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
+                               gfx::Context& context,
+                               const TransformState& state,
+                               [[maybe_unused]] const RenderTree& renderTree,
+                               UniqueChangeRequestVec& changes) {
+    std::unique_lock<std::mutex> guard(mutex);
+
+    if (!renderTiles || renderTiles->empty()) {
+        removeAllDrawables();
+        return;
+    }
+
+    // Set up a layer group
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
+        }
+    }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+
+    if (!circleShaderGroup) {
+        circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);
+    }
+    if (!circleShaderGroup) {
+        removeAllDrawables();
+        return;
+    }
+
+    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
+    std::transform(renderTiles->begin(),
+                   renderTiles->end(),
+                   std::inserter(newTileIDs, newTileIDs.begin()),
+                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
+
+    std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
+    std::vector<gfx::DrawablePtr> newTiles;
+    gfx::VertexAttributeArray circleVertexAttrs;
+    auto renderPass = RenderPass::Translucent;
+
+    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+        return;
+    }
+
+    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+        const auto tileID = drawable->getTileID();
+        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
+            // remove it
+            drawable.reset();
+            ++stats.drawablesRemoved;
+        }
+    });
+
+    const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
+
+    for (const RenderTile& tile : *renderTiles) {
+        const auto& tileID = tile.getOverscaledTileID();
+
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData) {
+            removeTile(renderPass, tileID);
+            continue;
+        }
+
+        auto& bucket = static_cast<CircleBucket&>(*renderData->bucket);
+        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+
+        float zoom = static_cast<float>(state.getZoom());
+        const CircleInterpolateUBO interpolateUBO = {
+            /* .color_t = */ std::get<0>(paintPropertyBinders.get<CircleColor>()->interpolationFactor(zoom)),
+            /* .radius_t = */ std::get<0>(paintPropertyBinders.get<CircleRadius>()->interpolationFactor(zoom)),
+            /* .blur_t = */ std::get<0>(paintPropertyBinders.get<CircleBlur>()->interpolationFactor(zoom)),
+            /* .opacity_t = */ std::get<0>(paintPropertyBinders.get<CircleOpacity>()->interpolationFactor(zoom)),
+            /* .stroke_color_t = */
+            std::get<0>(paintPropertyBinders.get<CircleStrokeColor>()->interpolationFactor(zoom)),
+            /* .stroke_width_t = */
+            std::get<0>(paintPropertyBinders.get<CircleStrokeWidth>()->interpolationFactor(zoom)),
+            /* .stroke_opacity_t = */
+            std::get<0>(paintPropertyBinders.get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
+            /* .padding = */ 0};
+
+        tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            drawable.mutableUniformBuffers().createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
+        });
+
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            continue;
+        }
+
+        circleVertexAttrs.clear();
+
+        auto propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
+                                                                                    CircleRadius,
+                                                                                    CircleBlur,
+                                                                                    CircleOpacity,
+                                                                                    CircleStrokeColor,
+                                                                                    CircleStrokeWidth,
+                                                                                    CircleStrokeOpacity>(
+            paintPropertyBinders, evaluated);
+
+        auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        if (!circleShader) {
+            continue;
+        }
+
+        std::vector<std::array<int16_t, 2>> rawVerts;
+        const auto buildVertices = [&]() {
+            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
+                verts = bucket.vertices.vector();
+            if (rawVerts.size() < verts.size()) {
+                rawVerts.resize(verts.size());
+                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+            }
+        };
+
+        circleBuilder = context.createDrawableBuilder("circle");
+        circleBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(circleShader));
+        circleBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                       : gfx::DepthMaskType::ReadOnly);
+        circleBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+        circleBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+
+        circleBuilder->setRenderPass(renderPass);
+        circleBuilder->setVertexAttributes(circleVertexAttrs);
+
+        buildVertices();
+        circleBuilder->addVertices(rawVerts, 0, rawVerts.size());
+
+        circleBuilder->setSegments(
+            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+
+        circleBuilder->flush();
+
+        for (auto& drawable : circleBuilder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            drawable->mutableUniformBuffers().createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
+
+            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+        }
+    }
+}
+#endif
 
 } // namespace mbgl

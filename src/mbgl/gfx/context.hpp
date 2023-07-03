@@ -9,13 +9,46 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/uniform_buffer.hpp>
+#endif
+
+#include <memory>
+#include <string>
+
 namespace mbgl {
 
+class PaintParameters;
 class ProgramParameters;
+
+#if MLN_DRAWABLE_RENDERER
+class TileLayerGroup;
+class LayerGroup;
+class RenderTarget;
+using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
+using LayerGroupPtr = std::shared_ptr<LayerGroup>;
+using RenderTargetPtr = std::shared_ptr<RenderTarget>;
+#endif
 
 namespace gfx {
 
 class OffscreenTexture;
+class ShaderRegistry;
+
+#if MLN_DRAWABLE_RENDERER
+class Drawable;
+class DrawableBuilder;
+class DrawableTweaker;
+class ShaderProgramBase;
+class Texture2D;
+
+using DrawablePtr = std::shared_ptr<Drawable>;
+using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
+using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
+#endif
 
 class Context {
 protected:
@@ -81,6 +114,35 @@ public:
 #endif
 
     virtual void clearStencilBuffer(int32_t) = 0;
+
+#if MLN_DRAWABLE_RENDERER
+public:
+    /// Create a new drawable builder
+    virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
+
+    /// Create a new drawable tweaker
+    virtual DrawableTweakerPtr createDrawableTweaker() = 0;
+
+    /// Create a new uniform buffer
+    virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) = 0;
+
+    /// Get the generic shader with the specified name
+    virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
+
+    /// Create a tile layer group implementation
+    virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
+                                                   std::size_t initialCapacity,
+                                                   std::string name) = 0;
+
+    /// Create a layer group implementation
+    virtual LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) = 0;
+
+    /// Create a texture
+    virtual Texture2DPtr createTexture2D() = 0;
+
+    /// Create a render target
+    virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
+#endif
 };
 
 } // namespace gfx

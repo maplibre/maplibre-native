@@ -7,6 +7,7 @@ load(
     "top_level_target",
     "xcode_provisioning_profile",
     "xcodeproj",
+    "xcode_schemes",
 )
 load("bazel/macros.bzl", "info_plist")
 load("bazel/config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID")
@@ -298,6 +299,7 @@ objc_library(
         "OpenGLES",
         "QuartzCore",
     ],
+    defines = ["GLES_SILENCE_DEPRECATION=1"],
     deps = [
         "objc-headers",
         "//:mbgl-core",
@@ -387,6 +389,7 @@ objc_library(
 
 objc_library(
     name = "iosapp",
+    defines = ["GLES_SILENCE_DEPRECATION"],
     srcs = [
         "platform/darwin/app/LimeGreenStyleLayer.h",
         "platform/darwin/app/LimeGreenStyleLayer.m",
@@ -460,7 +463,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["platform/ios/app/Info.plist"],
+    infoplists = ["build/Info-app.plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
@@ -485,6 +488,7 @@ ios_application(
     minimum_os_version = "12.0",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
+    provisioning_profile = ":xcode_profile",
     deps = [
         "iosapp",
     ],
@@ -524,6 +528,11 @@ xcodeproj(
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
+    default_xcode_configuration = "Debug",
+    xcode_configurations = {
+        "Debug": {"//command_line_option:compilation_mode": "dbg"},
+        "Release": {"//command_line_option:compilation_mode": "opt"}
+    },
     top_level_targets = [
         top_level_target(
             "App",

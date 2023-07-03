@@ -1,6 +1,4 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/gfx/backend.hpp>
 
@@ -11,6 +9,25 @@ namespace shaders {
 /// source code for the desired program and graphics back-end.
 enum class BuiltIn {
     None,
+    BackgroundShader,
+    BackgroundPatternShader,
+    CircleShader,
+    FillShader,
+    FillOutlineShader,
+    LineGradientShader,
+    LinePatternShader,
+    LineSDFShader,
+    LineShader,
+    FillPatternShader,
+    FillOutlinePatternShader,
+    HeatmapShader,
+    HeatmapTextureShader,
+    RasterShader,
+    SymbolIconShader,
+    SymbolSDFTextShader,
+    SymbolSDFIconShader,
+    SymbolTextAndIconShader,
+
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,
@@ -51,6 +68,7 @@ struct ShaderSource;
 /// @brief A specialization of the ShaderSource template for no shader code.
 template <>
 struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "";
     static constexpr const char* vertex = "";
     static constexpr const char* fragment = "";
 };
