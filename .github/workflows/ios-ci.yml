@@ -178,4 +178,4 @@ jobs:
           name: ios-render-test
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
-            ${{ env.render_test_artifacts_dir }}/RenderTestApp.zip
+            ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
