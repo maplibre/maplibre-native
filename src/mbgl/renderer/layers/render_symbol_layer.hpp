@@ -7,7 +7,7 @@
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 
 #if MLN_DRAWABLE_RENDERER
-#include <unordered_set>
+#include <unordered_map>
 #endif // MLN_DRAWABLE_RENDERER
 
 namespace mbgl {
@@ -126,7 +126,6 @@ private:
     gfx::ShaderGroupPtr symbolSDFTextGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
 
-    std::unordered_set<OverscaledTileID> renderTileIDs;
     std::unordered_map<OverscaledTileID, uint32_t> tileBucketInstances;
 #endif // MLN_DRAWABLE_RENDERER
 };

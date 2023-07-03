@@ -255,6 +255,14 @@ public:
         return propertiesAsUniforms;
     }
 
+    virtual void copy(const VertexAttributeArray& other) {
+        for (const auto& kv : other.attrs) {
+            if (kv.second) {
+                attrs.insert(std::make_pair(kv.first, copy(*kv.second)));
+            }
+        }
+    }
+
 protected:
     const std::unique_ptr<VertexAttribute>& add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
         const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
@@ -268,14 +276,6 @@ protected:
 
     virtual std::unique_ptr<VertexAttribute> create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);
-    }
-
-    virtual void copy(const VertexAttributeArray& other) {
-        for (const auto& kv : other.attrs) {
-            if (kv.second) {
-                attrs.insert(std::make_pair(kv.first, copy(*kv.second)));
-            }
-        }
     }
 
     virtual std::unique_ptr<VertexAttribute> copy(const gfx::VertexAttribute& attr) const {
