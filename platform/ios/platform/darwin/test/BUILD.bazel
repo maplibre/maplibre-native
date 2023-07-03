@@ -25,6 +25,12 @@ objc_library(
         allow_empty = False,
     ),
     copts = MAPLIBRE_FLAGS + WARNING_FLAGS,
+    data = glob(
+        [
+            "Media.xcassets/**",
+        ],
+        allow_empty = False,
+    ),
     sdk_frameworks = [
         "MapKit",
     ],
@@ -45,6 +51,9 @@ objc_library(
             "*.mm",
         ],
         allow_empty = False,
+        exclude = [
+            "MLNOfflineStorageTests.mm",
+        ],
     ),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS + ["-Wno-deprecated-declarations"],
     visibility = [
