@@ -1,8 +1,9 @@
 #pragma once
 
-#include <string>
-#include <memory>
+#include <functional>
 #include <map>
+#include <memory>
+#include <string>
 
 namespace mbgl {
 

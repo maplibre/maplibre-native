@@ -1,14 +1,17 @@
 #pragma once
-#if MLN_DRAWABLE_RENDERER
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/renderer/change_request.hpp>
-#endif
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/mat4.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable.hpp>
+#include <mbgl/renderer/change_request.hpp>
+
+#include <unordered_set>
+#endif // MLN_DRAWABLE_RENDERER
 
 #include <list>
 #include <memory>
@@ -201,7 +204,10 @@ protected:
 
     /// Remove all the drawables for tiles
     virtual void removeAllDrawables();
-#endif
+
+    // Update `renderTileIDs` from `renderTiles`
+    void updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
 
 protected:
     // Stores current set of tiles to be rendered for this layer.
@@ -216,6 +222,9 @@ protected:
 #if MLN_DRAWABLE_RENDERER
     // will need to be overriden to handle their activation.
     LayerGroupBasePtr layerGroup;
+
+    // The set of Tile IDs in `renderTiles`
+    std::unordered_set<OverscaledTileID> renderTileIDs;
 #endif
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};
