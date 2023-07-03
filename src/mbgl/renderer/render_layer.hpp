@@ -200,14 +200,13 @@ protected:
     void activateLayerGroup(const LayerGroupBasePtr&, bool activate, UniqueChangeRequestVec& changes);
 
     /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&);
+    virtual void removeTile(RenderPass, const OverscaledTileID&);
 
     /// Remove all the drawables for tiles
-    void removeAllDrawables();
-
+    virtual void removeAllDrawables();
+    
     // Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
-#endif
 
 protected:
     // Stores current set of tiles to be rendered for this layer.

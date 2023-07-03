@@ -19,8 +19,8 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
-#include <mbgl/gl/drawable_gl_tweaker.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
+#include <mbgl/gl/render_target_gl.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/texture2d.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
@@ -463,18 +463,14 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::DrawableTweakerPtr Context::createDrawableTweaker() {
-    return std::make_shared<gl::DrawableGLTweaker>();
-}
-
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
     return std::make_shared<gl::UniformBufferGL>(data, size);
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
-    std::vector<std::string> emptyAttributes(0);
+    std::vector<std::string> emptyProperties(0);
     return std::static_pointer_cast<gfx::ShaderProgramBase>(
-        shaders.getShaderGroup(name)->getOrCreateShader(*this, emptyAttributes));
+        shaders.getShaderGroup(name)->getOrCreateShader(*this, emptyProperties));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
@@ -487,6 +483,22 @@ LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialC
 
 gfx::Texture2DPtr Context::createTexture2D() {
     return std::make_shared<gl::Texture2D>(*this);
+}
+
+RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
+    return std::make_shared<gl::RenderTargetGL>(*this, size, type);
+}
+
+UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    checkFramebuffer();
+    return fbo;
 }
 #endif
 

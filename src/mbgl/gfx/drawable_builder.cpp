@@ -16,6 +16,13 @@ DrawableBuilder::DrawableBuilder(std::string name_)
 
 DrawableBuilder::~DrawableBuilder() = default;
 
+const gfx::ColorMode& DrawableBuilder::getColorMode() const {
+    return impl->colorMode;
+}
+void DrawableBuilder::setColorMode(const gfx::ColorMode& value) {
+    impl->colorMode = value;
+}
+
 const gfx::CullFaceMode& DrawableBuilder::getCullFaceMode() const {
     return impl->cullFaceMode;
 }
@@ -43,10 +50,11 @@ void DrawableBuilder::flush() {
         draw->setSubLayerIndex(subLayerIndex);
         draw->setDepthType(depthType);
         draw->setIs3D(is3D);
+        draw->setColorMode(impl->colorMode);
         draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
         draw->setTextures(textures);
-        draw->setTextureSource(textureSource);
+        draw->setTweakers(tweakers);
 
         if (auto drawAttrs = getVertexAttributes().clone()) {
             vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {

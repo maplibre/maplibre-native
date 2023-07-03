@@ -108,7 +108,6 @@ public:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::DrawableTweakerPtr createDrawableTweaker() override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
@@ -118,6 +117,10 @@ public:
     LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
     gfx::Texture2DPtr createTexture2D() override;
+
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+
+    UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
 #endif
 
 private:

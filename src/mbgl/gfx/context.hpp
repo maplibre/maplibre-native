@@ -24,8 +24,10 @@ class ProgramParameters;
 #if MLN_DRAWABLE_RENDERER
 class TileLayerGroup;
 class LayerGroup;
+class RenderTarget;
 using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using LayerGroupPtr = std::shared_ptr<LayerGroup>;
+using RenderTargetPtr = std::shared_ptr<RenderTarget>;
 #endif
 
 namespace gfx {
@@ -36,13 +38,11 @@ class ShaderRegistry;
 #if MLN_DRAWABLE_RENDERER
 class Drawable;
 class DrawableBuilder;
-class DrawableTweaker;
 class ShaderProgramBase;
 class Texture2D;
 
 using DrawablePtr = std::shared_ptr<Drawable>;
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
-using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
@@ -118,9 +118,6 @@ public:
     /// Create a new drawable builder
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
 
-    /// Create a new drawable tweaker
-    virtual DrawableTweakerPtr createDrawableTweaker() = 0;
-
     /// Create a new uniform buffer
     virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) = 0;
 
@@ -137,6 +134,9 @@ public:
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
+
+    /// Create a render target
+    virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
 #endif
 };
 

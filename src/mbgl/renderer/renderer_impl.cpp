@@ -21,6 +21,7 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #endif
 
@@ -142,6 +143,9 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 #if MLN_DRAWABLE_RENDERER
         // Give the layers a chance to upload
         orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+
+        // Give the render targets a chance to upload
+        orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
 #endif
     }
 
@@ -194,6 +198,14 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         }
     };
 #endif // MLN_LEGACY_RENDERER
+
+#if MLN_DRAWABLE_RENDERER
+    const auto drawableTargetsPass = [&] {
+        // draw render targets
+        orchestrator.observeRenderTargets(
+              [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
+    };
+#endif
 
     const auto commonClearPass = [&] {
         // - CLEAR
@@ -289,6 +301,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         common3DPass();
         drawable3DPass();
     }
+    drawableTargetsPass();
     commonClearPass();
     drawableOpaquePass();
     drawableTranslucentPass();
@@ -318,6 +331,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         drawable3DPass();
         parameters.clearStencil();
     }
+    drawableTargetsPass();
     commonClearPass();
     drawableOpaquePass();
 
@@ -350,6 +364,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         drawable3DPass();
         parameters.clearStencil();
     }
+    drawableTargetsPass();
     commonClearPass();
     parameters.clearTileClippingMasks();
     drawableOpaquePass();

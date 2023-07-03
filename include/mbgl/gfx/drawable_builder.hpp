@@ -89,6 +89,9 @@ public:
     bool getEnableStencil() const { return enableStencil; }
     void setEnableStencil(bool value) { enableStencil = value; }
 
+    const gfx::ColorMode& getColorMode() const;
+    void setColorMode(const gfx::ColorMode& value);
+
     const gfx::CullFaceMode& getCullFaceMode() const;
     void setCullFaceMode(const gfx::CullFaceMode& value);
 
@@ -110,8 +113,8 @@ public:
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
 
-    /// @brief Provide a function to get the current texture
-    void setTextureSource(Drawable::TexSourceFunc value) { textureSource = std::move(value); }
+    void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
+    void clearTweakers() { tweakers.clear(); }
 
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
@@ -179,7 +182,7 @@ protected:
     std::vector<UniqueDrawable> drawables;
     VertexAttributeArray vertexAttrs;
     gfx::Drawable::Textures textures;
-    Drawable::TexSourceFunc textureSource;
+    std::vector<DrawableTweakerPtr> tweakers;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

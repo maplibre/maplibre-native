@@ -93,7 +93,7 @@ void Texture2D::createStorage(const void* data) noexcept {
     context.pixelStoreUnpack = {1};
     MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
                                   0,
-                                  Enum<gfx::TexturePixelType>::to(pixelFormat),
+                                  Enum<gfx::TexturePixelType>::sizedFor(pixelFormat, channelType),
                                   size.width,
                                   size.height,
                                   0,
@@ -105,8 +105,12 @@ void Texture2D::createStorage(const void* data) noexcept {
 }
 
 void Texture2D::create() noexcept {
-    createObject();
-    createStorage();
+    if (!textureResource) {
+        createObject();
+    }
+    if (storageDirty) {
+        createStorage();
+    }
 }
 
 platform::GLuint Texture2D::getTextureID() const noexcept {

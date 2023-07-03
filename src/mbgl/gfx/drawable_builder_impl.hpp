@@ -1,4 +1,5 @@
 #include <mbgl/gfx/attribute.hpp>
+#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/index_vector.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
@@ -21,6 +22,7 @@ struct DrawableBuilder::Impl {
     std::vector<std::unique_ptr<Drawable::DrawSegment>> segments;
 
     AttributeDataType rawVerticesType = static_cast<AttributeDataType>(-1);
+    gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
 };
 

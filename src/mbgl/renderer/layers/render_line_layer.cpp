@@ -466,6 +466,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         builder->setRenderPass(renderPass);
         builder->setSubLayerIndex(0);
         builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+        builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                    : gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setEnableStencil(true);
         builder->setVertexAttrName("a_pos_normal");

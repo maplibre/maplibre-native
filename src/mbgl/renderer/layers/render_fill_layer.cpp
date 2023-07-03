@@ -23,6 +23,7 @@
 #include <mbgl/util/std.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -36,10 +37,12 @@ using namespace style;
 namespace {
 
 #if MLN_DRAWABLE_RENDERER
-constexpr std::string_view FillShaderName = "FillShader";
-constexpr std::string_view FillOutlineShaderName = "FillOutlineShader";
-constexpr std::string_view FillPatternShaderName = "FillPatternShader";
-constexpr std::string_view FillOutlinePatternShaderName = "FillOutlinePatternShader";
+constexpr auto FillShaderName = "FillShader";
+constexpr auto FillOutlineShaderName = "FillOutlineShader";
+constexpr auto FillPatternShaderName = "FillPatternShader";
+constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
+
+constexpr auto IconTextureName = "u_image";
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
@@ -432,6 +435,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         fillVertexAttrs.clear();
         outlineVertexAttrs.clear();
 
+        gfx::DrawableTweakerPtr tweaker;
+        if (fillBuilder) {
+            fillBuilder->clearTweakers();
+        }
+        if (outlineBuilder) {
+            outlineBuilder->clearTweakers();
+        }
+
         // `Fill*Program` all use `style::FillPaintProperties`
         const auto fillUniformProps =
             fillVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
@@ -457,6 +468,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                              : gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                                : gfx::ColorMode::unblended());
                     builder->setSubLayerIndex(0);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
@@ -467,6 +480,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setRenderPass(RenderPass::Translucent);
                     outlineBuilder = std::move(builder);
@@ -512,8 +526,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
                     commonInit(*builder);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
+                    if (tweaker) {
+                        builder->addTweaker(tweaker);
+                    }
                     patternBuilder = std::move(builder);
                 }
             }
@@ -522,9 +540,29 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
                     builder->setRenderPass(RenderPass::Translucent);
+                    if (tweaker) {
+                        builder->addTweaker(tweaker);
+                    }
                     outlinePatternBuilder = std::move(builder);
+                }
+            }
+
+            if ((patternBuilder || outlineBuilder) && !tweaker) {
+                if (const auto& atlases = tile.getAtlasTextures()) {
+                    tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                        atlases,
+                        /*glyphName=*/std::string(),
+                        std::string(IconTextureName),
+                        /*isText=*/false);
+                    if (patternBuilder) {
+                        patternBuilder->addTweaker(tweaker);
+                    }
+                    if (outlineBuilder) {
+                        outlineBuilder->addTweaker(tweaker);
+                    }
                 }
             }
 
@@ -539,14 +577,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                             bucket.triangleSegments.data(),
                                             bucket.triangleSegments.size());
 
-                if (const auto& atlases = tile.getAtlasTextures()) {
-                    if (const auto samplerLocation = fillShader->getSamplerLocation("u_image")) {
-                        patternBuilder->setTextureSource([=]() {
-                            return gfx::Drawable::Textures{{*samplerLocation, atlases->icon}};
-                        });
-                    }
-                }
-
                 finish(*patternBuilder, tileID, interpolateUBO, tileProps);
             }
             if (outlinePatternBuilder) {
@@ -557,14 +587,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 outlinePatternBuilder->setSegments(
                     gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
-
-                if (const auto& atlases = tile.getAtlasTextures()) {
-                    if (const auto samplerLocation = outlineShader->getSamplerLocation("u_image")) {
-                        outlinePatternBuilder->setTextureSource([=]() {
-                            return gfx::Drawable::Textures{{*samplerLocation, atlases->icon}};
-                        });
-                    }
-                }
 
                 finish(*outlinePatternBuilder, tileID, interpolateUBO, tileProps);
             }

@@ -42,8 +42,9 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     // force disable depth test for debugging
     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    context.setColorMode(makeColorMode(parameters));
     context.setStencilMode(makeStencilMode(parameters));
+
+    context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
 
     bindUniformBuffers();
@@ -190,12 +191,6 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
             glSeg.setVertexArray(std::move(vertexArray));
         };
-    }
-
-    if (const auto src = getTextureSource()) {
-        for (auto& pair : src()) {
-            setTexture(std::move(pair.second), pair.first);
-        }
     }
 
     const bool texturesNeedUpload = std::any_of(

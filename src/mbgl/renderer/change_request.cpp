@@ -29,4 +29,18 @@ void UpdateLayerGroupIndexRequest::execute(RenderOrchestrator &orchestrator) {
     orchestrator.markLayerGroupOrderDirty();
 }
 
+AddRenderTargetRequest::AddRenderTargetRequest(RenderTargetPtr renderTarget_)
+    : renderTarget(std::move(renderTarget_)) {}
+
+void AddRenderTargetRequest::execute(RenderOrchestrator &orchestrator) {
+    orchestrator.addRenderTarget(std::move(renderTarget));
+}
+
+RemoveRenderTargetRequest::RemoveRenderTargetRequest(const RenderTargetPtr &renderTarget_)
+    : renderTarget(renderTarget_) {}
+
+void RemoveRenderTargetRequest::execute(RenderOrchestrator &orchestrator) {
+    orchestrator.removeRenderTarget(renderTarget);
+}
+
 } // namespace mbgl

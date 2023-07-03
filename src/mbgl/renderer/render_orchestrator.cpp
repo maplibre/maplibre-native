@@ -34,12 +34,12 @@ namespace mbgl {
 
 using namespace style;
 
-static RendererObserver& nullObserver() {
+namespace {
+
+RendererObserver& nullObserver() {
     static RendererObserver observer;
     return observer;
 }
-
-namespace {
 
 class LayerRenderItem final : public RenderItem {
 public:
@@ -378,8 +378,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 #if MLN_DRAWABLE_RENDERER
     // Mark layers included in the renderable set as renderable
     // @TODO: Optimize this logic, combine with the above
-    for (size_t i = 0; i < orderedLayers.size(); ++i) {
-        RenderLayer& layer = orderedLayers[i];
+    for (auto orderedLayer : orderedLayers) {
+        RenderLayer& layer = orderedLayer;
         layer.markLayerRenderable(
             layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(layer.getLayerIndex()))) !=
                 layerRenderItems.end(),
@@ -896,6 +896,38 @@ void RenderOrchestrator::processChanges() {
 
 void RenderOrchestrator::markLayerGroupOrderDirty() {
     layerGroupOrderDirty = true;
+}
+
+bool RenderOrchestrator::addRenderTarget(RenderTargetPtr renderTarget) {
+    auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
+    if (it == renderTargets.end()) {
+        renderTargets.emplace_back(renderTarget);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget) {
+    auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
+    if (it != renderTargets.end()) {
+        renderTargets.erase(it);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void RenderOrchestrator::observeRenderTargets(std::function<void(RenderTarget&)> f) {
+    for (auto& renderTarget : renderTargets) {
+        f(*renderTarget);
+    }
+}
+
+void RenderOrchestrator::observeRenderTargets(std::function<void(const RenderTarget&)> f) const {
+    for (const auto& renderTarget : renderTargets) {
+        f(*renderTarget);
+    }
 }
 #endif // MLN_DRAWABLE_RENDERER
 
