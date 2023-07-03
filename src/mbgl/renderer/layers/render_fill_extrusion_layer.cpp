@@ -438,6 +438,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setShader(shader);
                 builder->setIs3D(true);
                 builder->setEnableColor(true);
+                builder->setColorMode(gfx::ColorMode::alphaBlended());
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
                 if (tweaker) {
