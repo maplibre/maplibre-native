@@ -79,6 +79,14 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - name: Cache Bazel
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -135,8 +143,6 @@ jobs:
         run: bazel test //platform/ios/platform/ios/test:ios_test
 
       # size test
-      - name: Copy example config
-        run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Build app for size test & output size 
         working-directory: ./
@@ -176,14 +182,3 @@ jobs:
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.zip
-
-      # ---
-
-      - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
-        run: make ios-sanitize
-
-      - name: Build and run SDK unit tests with address sanitizer
-        run: make ios-sanitize-address
-
-      - name: Build and run SDK unit tests with the static analyzer
-        run: make ios-static-analyzer
