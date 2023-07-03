@@ -76,4 +76,7 @@ swift_library(
     ],
 )
 
-exports_files(["amsterdam.geojson"])
+exports_files([
+    "amsterdam.geojson",
+    "MLNSDKTestHelpers.swift",
+])
