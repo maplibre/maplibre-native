@@ -283,10 +283,11 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    const auto& viewportSize = state.getSize();
+    const auto size = Size{viewportSize.width / 2, viewportSize.height / 2};
+    
     // Set up a render target
     if (!renderTarget) {
-        // const auto& viewportSize = parameters.staticData.backendSize;
-        const auto size = Size(500, 500); // Size{viewportSize.width / 4, viewportSize.height / 4};
         renderTarget = context.createRenderTarget(size, gfx::TextureChannelDataType::HalfFloat);
         if (!renderTarget) {
             return;
@@ -300,6 +301,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
         renderTarget->addLayerGroup(tileLayerGroup, /*canReplace=*/true);
+    }
+    
+    if (renderTarget->getTexture()->getSize() != size) {
+        renderTarget->getTexture()->setSize(size);
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get());

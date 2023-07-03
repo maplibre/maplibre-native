@@ -105,8 +105,12 @@ void Texture2D::createStorage(const void* data) noexcept {
 }
 
 void Texture2D::create() noexcept {
-    createObject();
-    createStorage();
+    if (!textureResource) {
+        createObject();
+    }
+    if (storageDirty) {
+        createStorage();
+    }
 }
 
 platform::GLuint Texture2D::getTextureID() const noexcept {

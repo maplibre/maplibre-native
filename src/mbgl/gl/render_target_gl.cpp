@@ -40,8 +40,8 @@ void RenderTargetGL::upload(gfx::UploadPass& uploadPass) {
 void RenderTargetGL::render(RenderOrchestrator& orchestrator,
                             const RenderTree& renderTree,
                             PaintParameters& parameters) {
+    texture->create();
     if (!framebuffer) {
-        texture->create();
         framebuffer = std::make_shared<UniqueFramebuffer>(glContext.createFramebuffer(*texture));
     }
 
