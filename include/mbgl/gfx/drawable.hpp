@@ -22,6 +22,7 @@ enum class RenderPass : uint8_t;
 
 namespace gfx {
 
+class ColorMode;
 class CullFaceMode;
 enum class DepthMaskType : bool;
 class DrawableTweaker;
@@ -133,6 +134,9 @@ public:
 
     const gfx::CullFaceMode& getCullFaceMode() const;
     void setCullFaceMode(const gfx::CullFaceMode&);
+
+    const gfx::ColorMode& getColorMode() const;
+    void setColorMode(const gfx::ColorMode&);
 
     /// Get the number of vertexes
     std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }

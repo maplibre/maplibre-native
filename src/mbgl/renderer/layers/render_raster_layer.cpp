@@ -260,6 +260,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSubLayerIndex(0);
         builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                  : gfx::DepthMaskType::ReadOnly);
+        builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrName("a_pos");
 
