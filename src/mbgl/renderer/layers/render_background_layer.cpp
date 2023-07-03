@@ -306,6 +306,8 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
             builder->setRenderPass(drawPasses);
             builder->setShader(curShader);
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+            builder->setColorMode(drawPasses == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                        : gfx::ColorMode::unblended());
         }
 
         auto verticesCopy = rawVertices;

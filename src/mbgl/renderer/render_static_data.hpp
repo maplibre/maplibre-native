@@ -31,13 +31,16 @@ public:
     std::optional<gfx::IndexBuffer> quadTriangleIndexBuffer;
     std::optional<gfx::IndexBuffer> tileBorderIndexBuffer;
 
+    static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices();
+    static gfx::IndexVector<gfx::Triangles> quadTriangleIndices();
+    static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices();
+    static gfx::VertexVector<RasterLayoutVertex> rasterVertices();
+    static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices();
+
     static SegmentVector<BackgroundAttributes> tileTriangleSegments();
     static SegmentVector<DebugAttributes> tileBorderSegments();
     static SegmentVector<RasterAttributes> rasterSegments();
     static SegmentVector<HeatmapTextureAttributes> heatmapTextureSegments();
-
-    static gfx::IndexVector<gfx::Triangles> quadTriangleIndices();
-    static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices();
 
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;

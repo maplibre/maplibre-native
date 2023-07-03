@@ -114,6 +114,11 @@ public:
     void processChanges();
     /// @brief Indicate that the orchestrator needs to re-sort layer groups when processing changes
     void markLayerGroupOrderDirty();
+
+    bool addRenderTarget(RenderTargetPtr);
+    bool removeRenderTarget(const RenderTargetPtr&);
+    void observeRenderTargets(std::function<void(RenderTarget&)> f);
+    void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
 #endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
@@ -193,6 +198,8 @@ private:
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
+
+    std::vector<RenderTargetPtr> renderTargets;
 #endif
 };
 
