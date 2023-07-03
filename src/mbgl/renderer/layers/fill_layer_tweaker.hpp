@@ -42,7 +42,7 @@ struct alignas(16) FillInterpolateUBO {
     /* 12 */ float pattern_from_t;
     /* 16 */ float pattern_to_t;
     /* 20 */ float fade;
-    /* 24 */ std::array<float, 2> padding;
+    /* 24 */ float pad1, pad2;
     /* 32 */
 };
 static_assert(sizeof(FillInterpolateUBO) == 32);

@@ -156,9 +156,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto& translation = evaluated.get<LineTranslate>();
         const auto anchor = evaluated.get<LineTranslateAnchor>();
+        constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translation, anchor, inViewportPixelUnits);
+            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
 
         // simple line
         if (drawable.getShader()->getUniformBlocks().get(std::string(LineUBOName))) {

@@ -26,13 +26,13 @@ struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
     /* 128 */ std::array<float, 4 * 4> coord_matrix;
-
+    
     /* 192 */ std::array<float, 2> texsize;
     /* 200 */ std::array<float, 2> texsize_icon;
-
+    
     /* 208 */ float gamma_scale;
     /* 212 */ float device_pixel_ratio;
-
+    
     /* 216 */ float camera_to_center_distance;
     /* 220 */ float pitch;
     /* 224 */ /*bool*/ int rotate_symbol;
@@ -121,8 +121,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
         const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
                                    : evaluated.get<style::IconTranslateAnchor>();
+        constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, renderTree, state, translate, anchor, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, renderTree, state, translate,
+                                          anchor, nearClipped, inViewportPixelUnits);
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(state.getZoom());

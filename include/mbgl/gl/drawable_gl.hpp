@@ -33,7 +33,7 @@ public:
     DrawableGL(std::string name);
     ~DrawableGL() override;
 
-    void draw(const PaintParameters&) const override;
+    void draw(PaintParameters&) const override;
 
     struct DrawSegmentGL;
     void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments);
@@ -61,6 +61,9 @@ protected:
     DrawableGL(std::unique_ptr<Impl>);
 
 private:
+    gfx::ColorMode makeColorMode(PaintParameters&) const;
+    gfx::StencilMode makeStencilMode(PaintParameters&) const;
+
     void uploadTextures() const;
 
     void bindUniformBuffers() const;

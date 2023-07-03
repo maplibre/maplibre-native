@@ -62,8 +62,10 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        constexpr bool nearClipped = false;
+        constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false);
+            tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits);
         HeatmapDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),

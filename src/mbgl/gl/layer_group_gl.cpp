@@ -1,5 +1,6 @@
 #include <mbgl/gl/layer_group_gl.hpp>
 
+#include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
@@ -54,7 +55,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
         std::set<UnwrappedTileID> tileIDs;
         observeDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getNeedsStencil() && drawable.getTileID() &&
+            if (drawable.getEnabled() && !drawable.getIs3D() &&
+                drawable.getEnableStencil() && drawable.getTileID() &&
                 drawable.hasRenderPass(parameters.pass)) {
                 tileIDs.emplace(drawable.getTileID()->toUnwrapped());
             }
@@ -80,6 +82,10 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         const auto labelPtr = (label_tile.empty() ? drawable.getName() : label_tile).c_str();
         const auto debugGroupTile = parameters.encoder->createDebugGroup(labelPtr);
 #endif
+
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
+        }
 
         drawable.draw(parameters);
     });
@@ -126,6 +132,10 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
 #if !defined(NDEBUG)
         const auto debugGroup = parameters.encoder->createDebugGroup(drawable.getName().c_str());
 #endif
+
+        for (const auto& tweaker : drawable.getTweakers()) {
+            tweaker->execute(drawable, parameters);
+        }
 
         drawable.draw(parameters);
     });
