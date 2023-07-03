@@ -1,4 +1,8 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
+load(
+    "@build_bazel_rules_swift//swift:swift.bzl",
+    "swift_library",
+)
 
 objc_library(
     name = "test_utility",
@@ -43,6 +47,27 @@ objc_library(
         allow_empty = False,
     ),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS + ["-Wno-deprecated-declarations"],
+    visibility = [
+        "//platform/ios/platform/ios/test:__pkg__",
+    ],
+    deps = [
+        "//platform/ios:sdk",
+    ],
+)
+
+swift_library(
+    name = "shared_tests_swift_srcs",
+    testonly = True,
+    srcs = glob(
+        [
+            "*.swift",
+        ],
+        allow_empty = False,
+    ),
+    data = [
+        "amsterdam.geojson",
+        "one-liner.json",
+    ],
     visibility = [
         "//platform/ios/platform/ios/test:__pkg__",
     ],
