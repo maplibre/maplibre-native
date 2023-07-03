@@ -21,7 +21,7 @@ gfx::IndexVector<gfx::Triangles> RenderStaticData::quadTriangleIndices() {
     return result;
 }
 
-static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices() {
+gfx::IndexVector<gfx::LineStrip> RenderStaticData::tileLineStripIndices() {
     gfx::IndexVector<gfx::LineStrip> result;
     result.emplace_back(0);
     result.emplace_back(1);
@@ -31,7 +31,7 @@ static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices() {
     return result;
 }
 
-static gfx::VertexVector<RasterLayoutVertex> rasterVertices() {
+gfx::VertexVector<RasterLayoutVertex> RenderStaticData::rasterVertices() {
     gfx::VertexVector<RasterLayoutVertex> result;
     result.emplace_back(RasterProgram::layoutVertex({0, 0}, {0, 0}));
     result.emplace_back(RasterProgram::layoutVertex({util::EXTENT, 0}, {util::EXTENT, 0}));
@@ -40,7 +40,7 @@ static gfx::VertexVector<RasterLayoutVertex> rasterVertices() {
     return result;
 }
 
-static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices() {
+gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVertices() {
     gfx::VertexVector<HeatmapTextureLayoutVertex> result;
     result.emplace_back(HeatmapTextureProgram::layoutVertex({0, 0}));
     result.emplace_back(HeatmapTextureProgram::layoutVertex({1, 0}));
