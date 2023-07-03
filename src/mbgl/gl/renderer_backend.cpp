@@ -104,6 +104,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::FillOutlinePatternShader,
                   shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::FillExtrusionShader,
+                  shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::RasterShader,

@@ -108,7 +108,6 @@ public:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::DrawableTweakerPtr createDrawableTweaker() override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;

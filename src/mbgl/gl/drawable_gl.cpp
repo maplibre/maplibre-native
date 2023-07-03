@@ -21,7 +21,7 @@ DrawableGL::~DrawableGL() {
     impl->attributeBuffer.reset();
 }
 
-void DrawableGL::draw(const PaintParameters& parameters) const {
+void DrawableGL::draw(PaintParameters& parameters) const {
     auto& context = static_cast<gl::Context&>(parameters.context);
 
     if (shader) {
@@ -36,16 +36,13 @@ void DrawableGL::draw(const PaintParameters& parameters) const {
         return;
     }
 
-    context.setDepthMode(parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+    context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
+                                   : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
 
     // force disable depth test for debugging
     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    if (needsStencil && tileID) {
-        context.setStencilMode(parameters.stencilModeForClipping(tileID->toUnwrapped()));
-    } else {
-        context.setStencilMode(gfx::StencilMode::disabled());
-    }
+    context.setStencilMode(makeStencilMode(parameters));
 
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
@@ -196,18 +193,28 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         };
     }
 
-    if (const auto src = getTextureSource()) {
-        for (auto& pair : src()) {
-            setTexture(std::move(pair.second), pair.first);
-        }
-    }
-
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
 
     if (texturesNeedUpload) {
         uploadTextures();
     }
+}
+
+gfx::ColorMode DrawableGL::makeColorMode(PaintParameters& parameters) const {
+    return enableColor ? parameters.colorModeForRenderPass() : gfx::ColorMode::disabled();
+}
+
+gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const {
+    if (enableStencil) {
+        if (is3D) {
+            return parameters.stencilModeFor3D();
+        } else if (tileID) {
+            return parameters.stencilModeForClipping(tileID->toUnwrapped());
+        }
+        assert(false);
+    }
+    return gfx::StencilMode::disabled();
 }
 
 void DrawableGL::uploadTextures() const {
