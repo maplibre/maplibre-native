@@ -68,7 +68,7 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
             text.indexBuffer = uploadPass.createIndexBuffer(
                 std::move(text.triangles),
                 sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
-            text.vertexBuffer = uploadPass.createVertexBuffer(std::move(text.vertices));
+            text.vertexBuffer = uploadPass.createVertexBuffer(text.vertices);
             for (auto& pair : paintProperties) {
                 pair.second.textBinders.upload(uploadPass);
             }
@@ -99,7 +99,7 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
             iconBuffer.indexBuffer = uploadPass.createIndexBuffer(
                 std::move(iconBuffer.triangles),
                 sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
-            iconBuffer.vertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.vertices));
+            iconBuffer.vertexBuffer = uploadPass.createVertexBuffer(iconBuffer.vertices);
             for (auto& pair : paintProperties) {
                 pair.second.iconBinders.upload(uploadPass);
             }

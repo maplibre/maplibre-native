@@ -13,6 +13,7 @@
 #include <mbgl/text/glyph_range.hpp>
 #include <mbgl/text/placement.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace mbgl {
@@ -133,9 +134,19 @@ public:
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
     struct Buffer {
-        gfx::VertexVector<SymbolLayoutVertex> vertices;
-        gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>> dynamicVertices;
-        gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>> opacityVertices;
+        using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
+        using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
+        using OpacityVertexVector = gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>>;
+
+        std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+        VertexVector& vertices = *sharedVertices;
+
+        std::shared_ptr<DynamicVertexVector> sharedDynamicVertices = std::make_shared<DynamicVertexVector>();
+        DynamicVertexVector& dynamicVertices = *sharedDynamicVertices;
+
+        std::shared_ptr<OpacityVertexVector> sharedOpacityVertices = std::make_shared<OpacityVertexVector>();
+        OpacityVertexVector& opacityVertices = *sharedOpacityVertices;
+
         gfx::IndexVector<gfx::Triangles> triangles;
         SegmentVector<SymbolTextAttributes> segments;
         std::vector<PlacedSymbol> placedSymbols;

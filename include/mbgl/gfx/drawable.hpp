@@ -139,9 +139,6 @@ public:
     const gfx::ColorMode& getColorMode() const;
     void setColorMode(const gfx::ColorMode&);
 
-    /// Get the number of vertexes
-    std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
-
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;

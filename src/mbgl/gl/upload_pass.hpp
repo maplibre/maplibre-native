@@ -49,7 +49,7 @@ public:
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
-        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) override;
+        /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
 #endif
 
 public:

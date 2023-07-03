@@ -1,13 +1,18 @@
 #pragma once
 
+#include <mbgl/gfx/types.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
 namespace mbgl {
+namespace gfx {
+class VertexBufferResource;
+} // namespace gfx
 namespace gl {
 
 class VertexAttributeArrayGL;
+class UploadPass;
 
 class VertexAttributeGL final : public gfx::VertexAttribute {
     // Can only be created by VertexAttributeArrayGL
@@ -34,7 +39,9 @@ public:
 
     std::size_t getStride() const;
 
-    const std::vector<std::uint8_t>& getRaw(platform::GLenum) const;
+    static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
+
+    static const std::unique_ptr<gfx::VertexBufferResource>& getSharedRawBuffer(UploadPass&, gfx::VertexAttribute&, gfx::BufferUsageType);
 
 private:
     static int getSize(platform::GLenum glType);
@@ -42,8 +49,13 @@ private:
     static bool get(const gfx::VertexAttribute::ElementType&, platform::GLenum glType, uint8_t* buffer);
 
 private:
+    struct RawDataGL : public RawData {
+        ~RawDataGL() override = default;
+        platform::GLenum rawType = 0;
+        std::unique_ptr<gfx::VertexBufferResource> buffer;
+    };
+
     platform::GLenum glType = 0;
-    mutable platform::GLenum rawType = 0;
     bool normalized = false;
 };
 

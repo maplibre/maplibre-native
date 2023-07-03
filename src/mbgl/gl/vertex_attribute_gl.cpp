@@ -1,6 +1,8 @@
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 
+#include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/gl/defines.hpp>
+#include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 
@@ -146,29 +148,63 @@ std::size_t VertexAttributeGL::getStride() const {
     return getStride(getGLType());
 }
 
-const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(platform::GLenum type) const {
-    if (dirty || rawType != type) {
-        const auto count = getCount();
-        // const auto size_ = getSize(type);
+namespace {
+const std::vector<std::uint8_t> noData;
+}
+const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr, platform::GLenum type) {
+    const auto count = attr.getCount();
+    if (count && !attr.getRawData()) {
+        attr.setRawData(std::make_unique<RawDataGL>());
+    }
+    auto* rawData = static_cast<RawDataGL*>(attr.getRawData().get());
+    if (!rawData) {
+        return noData;
+    }
+    if (attr.isDirty() || rawData->rawType != type) {
         const auto stride_ = getStride(type);
 
-        rawData.resize(stride_ * count);
-        std::fill(rawData.begin(), rawData.end(), 0);
+        rawData->data.resize(stride_ * count);
+        std::fill(rawData->data.begin(), rawData->data.end(), 0);
 
-        if (!rawData.empty()) {
-            std::uint8_t* outPtr = rawData.data();
+        if (!rawData->data.empty()) {
+            std::uint8_t* outPtr = rawData->data.data();
             for (std::size_t i = 0; i < count; ++i) {
-                if (!get(items[i], type, outPtr)) {
-                    // throw?
+                if (!get(attr.get(i), type, outPtr)) {
+                    // missing type conversion
+                    assert(false);
                 }
                 outPtr += stride_;
             }
         }
 
-        dirty = false;
-        rawType = type;
+        rawData->rawType = type;
+        attr.setDirty(false);
     }
-    return rawData;
+    return rawData->data;
+}
+
+namespace {
+const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
+}
+const std::unique_ptr<gfx::VertexBufferResource>& VertexAttributeGL::getSharedRawBuffer(gl::UploadPass& uploadPass,
+                                                                                        gfx::VertexAttribute& attr,
+                                                                                        const gfx::BufferUsageType usage) {
+    if (const auto& sharedRawData = attr.getSharedRawData()) {
+        // Create the GL-specific raw data cache, if necessary
+        if (!attr.getRawData()) {
+            attr.setRawData(std::make_unique<RawDataGL>());
+        }
+        if (auto* rawData = static_cast<RawDataGL*>(attr.getRawData().get())) {
+            // Create the GL buffer from the raw data
+            if (!rawData->buffer) {
+                const auto* rawBuf = sharedRawData->getRawData();
+                const auto rawBufSize = sharedRawData->getRawCount() * sharedRawData->getRawSize();
+                rawData->buffer = uploadPass.createVertexBufferResource(rawBuf, rawBufSize, usage);
+            }
+            return rawData->buffer;
+        }
+    }
+    return noBuffer;
 }
 
 } // namespace gl

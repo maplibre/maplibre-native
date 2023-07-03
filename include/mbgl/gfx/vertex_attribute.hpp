@@ -21,6 +21,7 @@ using mat4 = std::array<double, 4 * 4>;
 namespace gfx {
 
 class ShaderProgramBase;
+class VertexVectorBase;
 
 class VertexAttribute {
 public:
@@ -43,11 +44,27 @@ public:
           stride((int)stride_),
           dataType(dataType_),
           items(count_) {}
-    VertexAttribute(const VertexAttribute&) = default;
+    VertexAttribute(const VertexAttribute& other)
+        : index(other.index),
+          dataType(other.dataType),
+          items(other.items),
+          sharedRawData(other.sharedRawData),
+          sharedType(other.sharedType),
+          sharedOffset(other.sharedOffset),
+          sharedVertexOffset(other.sharedVertexOffset),
+          sharedStride(other.sharedStride)
+    {}
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
           dataType(other.dataType),
-          items(std::move(other.items)) {}
+          items(std::move(other.items)),
+          sharedRawData(std::move(other.sharedRawData)),
+          sharedType(other.sharedType),
+          sharedOffset(other.sharedOffset),
+          sharedVertexOffset(other.sharedVertexOffset),
+          sharedStride(other.sharedStride),
+          rawData(std::move(other.rawData))
+    {}
 
 public:
     virtual ~VertexAttribute() = default;
@@ -57,7 +74,7 @@ public:
 
     std::size_t getStride() const { return stride; }
 
-    std::size_t getCount() const { return items.size(); }
+    std::size_t getCount() const;
     AttributeDataType getDataType() const { return dataType; }
 
     const ElementType& get(std::size_t i) const { return items[i]; }
@@ -99,9 +116,8 @@ public:
     }
 
     bool isDirty() const { return dirty; }
-    void setDirty() {
-        dirty = true;
-        rawData.clear();
+    void setDirty(bool value = true) {
+        dirty = value;
     }
 
     template <std::size_t I = 0, typename... Tp>
@@ -116,6 +132,26 @@ public:
             set<I + 1, Tp...>(i, tuple, tupleIndex - 1);
         }
     }
+
+    const std::shared_ptr<VertexVectorBase>& getSharedRawData() const { return sharedRawData; }
+    AttributeDataType getSharedType() const { return sharedType; }
+    int getSharedOffset() const { return sharedOffset; }
+    int getSharedVertexOffset() const { return sharedVertexOffset; }
+    int getSharedStride() const { return sharedStride; }
+    void setSharedRawData(std::shared_ptr<VertexVectorBase> data, int offset, int vertexOffset, int stride, AttributeDataType type) {
+        sharedRawData = std::move(data);
+        sharedType = type;
+        sharedOffset = offset;
+        sharedVertexOffset = vertexOffset;
+        sharedStride = stride;
+    }
+    
+    struct RawData {
+        virtual ~RawData() = default;
+        std::vector<std::uint8_t> data;
+    };
+    const std::unique_ptr<RawData>& getRawData() const { return rawData; }
+    void setRawData(std::unique_ptr<RawData>&& value) { rawData = std::move(value); }
 
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
@@ -135,7 +171,14 @@ protected:
 
     AttributeDataType dataType;
     std::vector<ElementType> items;
-    mutable std::vector<std::uint8_t> rawData;
+
+    std::shared_ptr<VertexVectorBase> sharedRawData;
+    AttributeDataType sharedType = AttributeDataType::Invalid;
+    int sharedOffset = 0;
+    int sharedVertexOffset = 0;
+    int sharedStride = 0;
+
+    std::unique_ptr<RawData> rawData;
 };
 
 /// Stores a collection of vertex attributes by name
@@ -215,7 +258,7 @@ public:
     }
 
     using ResolveDelegate =
-        std::function<void(const std::string&, const VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
+        std::function<void(const std::string&, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
