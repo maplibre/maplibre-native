@@ -207,7 +207,6 @@ protected:
     
     // Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
-#endif
 
 protected:
     // Stores current set of tiles to be rendered for this layer.

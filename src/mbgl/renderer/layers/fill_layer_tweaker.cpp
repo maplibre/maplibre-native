@@ -62,8 +62,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
             /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
             /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-            /* .padding = */ 0, 0, 0
-        };
+            /* .padding = */ 0,
+            0,
+            0};
         propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
 
@@ -80,8 +81,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto anchor = evaluated.get<FillTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(tileID, renderTree, parameters.state,
-                                          translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
 
         // from FillPatternProgram::layoutUniformValues
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();

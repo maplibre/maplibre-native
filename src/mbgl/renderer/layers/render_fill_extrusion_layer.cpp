@@ -382,8 +382,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             /* .color_t = */ std::get<0>(binders.get<FillExtrusionColor>()->interpolationFactor(zoom)),
             /* .pattern_from_t = */ std::get<0>(binders.get<FillExtrusionPattern>()->interpolationFactor(zoom)),
             /* .pattern_to_t = */ std::get<0>(binders.get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            /* .pad = */ 0, 0, 0
-        };
+            /* .pad = */ 0,
+            0,
+            0};
 
         const FillExtrusionDrawableTilePropsUBO tilePropsUBO = {
             /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
@@ -395,21 +396,21 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             // Just update the drawables we already created
             tileLayerGroup->observeDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
                 auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
-                uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
             });
             continue;
         }
 
-        const auto uniformProps =
-            vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
-                                                      FillExtrusionColor,
-                                                      FillExtrusionHeight,
-                                                      FillExtrusionPattern>(
-                binders, evaluated);
+        const auto uniformProps = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
+                                                                            FillExtrusionColor,
+                                                                            FillExtrusionHeight,
+                                                                            FillExtrusionPattern>(binders, evaluated);
 
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                             shaderGroup->getOrCreateShader(context, uniformProps));
+            shaderGroup->getOrCreateShader(context, uniformProps));
         if (!shader) {
             assert(false);
             continue;
@@ -467,7 +468,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             const auto count = bucket.vertices.elements();
             attr->reserve(count);
             for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, util::cast<float>(bucket.vertices.at(i).a2));  // int16_t x4
+                attr->set(i, util::cast<float>(bucket.vertices.at(i).a2)); // int16_t x4
             }
         }
 
@@ -500,16 +501,18 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
-                
+
                 auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
-                uniforms.createOrUpdate(FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
-                
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
+
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         };
-        
+
         if (doDepthPass) {
             finish(*depthBuilder);
         }

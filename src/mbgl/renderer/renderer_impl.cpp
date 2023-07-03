@@ -156,15 +156,15 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto common3DPass = [&] {
         if (parameters.staticData.has3D) {
             parameters.staticData.backendSize = parameters.backend.getDefaultRenderable().getSize();
-            
+
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
-            
+
             if (!parameters.staticData.depthRenderbuffer ||
                 parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
                 parameters.staticData.depthRenderbuffer =
-                parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-                                                                                         parameters.staticData.backendSize);
+                    parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+                        parameters.staticData.backendSize);
             }
             parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
@@ -220,7 +220,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                 color = renderTreeParameters.backgroundColor;
             }
             parameters.renderPass = parameters.encoder->createRenderPass(
-                                                                         "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
+                "main buffer", {parameters.backend.getDefaultRenderable(), color, 1.0f, 0});
         }
     };
 
@@ -356,7 +356,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // Composite (Opaque+Translucent) on bottom
     platform::glScissor(halfW, 0, halfW, halfH);
     renderLayerTranslucentPass();
-#else // MLN_RENDERER_QUAD_SPLIT_VIEW
+#else  // MLN_RENDERER_QUAD_SPLIT_VIEW
     // Drawable LayerGroups on the left
     platform::glScissor(0, 0, halfW, H);
     if (parameters.staticData.has3D) {

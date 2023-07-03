@@ -20,7 +20,7 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  bool inViewportPixelUnits) {
     // from RenderTile::prepare
     mat4 tileMatrix;
-    state.matrixFor(/*out*/tileMatrix, tileID);
+    state.matrixFor(/*out*/ tileMatrix, tileID);
 
     // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
     const auto& params = renderTree.getParameters().transformParams;
