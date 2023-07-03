@@ -23,6 +23,7 @@
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -662,12 +663,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
 
 #if MLN_DRAWABLE_RENDERER
-    renderTileIDs.clear();
-    renderTileIDs.reserve(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(renderTileIDs, renderTileIDs.end()),
-                   [](const auto& tile) { return tile.get().getOverscaledTileID(); });
+    updateRenderTileIDs();
 #endif // MLN_DRAWABLE_RENDERER
 
     addRenderPassesFromTiles();
@@ -899,11 +895,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         addRenderables(bucket.text, SymbolType::Text);
     }
 
+    // We'll be processing renderables across tiles, potentially out-of-order, so keep
+    // track of some things by tile ID so we don't have to re-build them multiple times.
     using RawVertexVec = std::vector<std::uint8_t>; // <int16_t, 4>
-    struct RawVertices {
-        RawVertexVec text, icon;
+    struct TileInfo {
+        RawVertexVec textVertices, iconVertices;
+        gfx::DrawableTweakerPtr textTweaker, iconTweaker;
     };
-    std::unordered_map<UnwrappedTileID, RawVertices> rawVertices;
+    std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
 
     for (auto& renderable : renderableSegments) {
         const auto isText = (renderable.type == SymbolType::Text);
@@ -919,6 +918,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& layout = *bucket.layout;
         const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+
+        const auto& atlases = tile.getAtlasTextures();
+        if (!atlases) {
+            assert(false);
+            continue;
+        }
+
+        auto& tileInfo = tileCache[tile.id];
 
         const auto buildVertices = [&](const SymbolBucket::Buffer& buffer_, RawVertexVec& dest) -> auto& {
             const std::vector<SymbolLayoutVertex>& src = buffer_.vertices.vector();
@@ -985,6 +992,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto interpolateUBO = buildInterpUBO(bucketPaintProperties, isText, currentZoom);
 
+        if (builder) {
+            builder->clearTweakers();
+        }
+
         const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
                               const Segment<SymbolTextAttributes>& segment,
                               const gfx::IndexVector<gfx::Triangles>& indices,
@@ -996,10 +1007,26 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
 
+            // We can use the same tweakers for all the segments in a tile
+            if (isText && !tileInfo.textTweaker) {
+                tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                    atlases,
+                    iconTexUniformName,
+                    texUniformName,
+                    isText);
+            }
+            if (!isText && !tileInfo.iconTweaker) {
+                tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                    atlases,
+                    iconTexUniformName,
+                    texUniformName,
+                    isText);
+            }
+
             if (!builder) {
                 builder = context.createDrawableBuilder(layerPrefix);
                 builder->setSubLayerIndex(0);
-                builder->setNeedsStencil(false);
+                builder->setEnableStencil(false);
                 builder->setRenderPass(passes);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
@@ -1007,6 +1034,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                                                         : gfx::ColorMode::unblended());
                 builder->setVertexAttrName(posOffsetAttribName);
             }
+
+            builder->clearTweakers();
+            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
 
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(std::move(attrs));
@@ -1022,21 +1052,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // const bool linear = parameters.state.isChanging() || transformed ||
             // !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
             // gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
-
-            if (const auto& atlases = tile.getAtlasTextures()) {
-                if (const auto texSamplerLocation = shader->getSamplerLocation(texUniformName)) {
-                    if (const auto iconSamplerLocation = shader->getSamplerLocation(iconTexUniformName)) {
-                        assert(*texSamplerLocation != *iconSamplerLocation);
-                        builder->setTextureSource([=]() -> gfx::Drawable::Textures {
-                            return {{*texSamplerLocation, atlases->glyph}, {*iconSamplerLocation, atlases->icon}};
-                        });
-                    } else {
-                        builder->setTextureSource([=]() -> gfx::Drawable::Textures {
-                            return {{*texSamplerLocation, isText ? atlases->glyph : atlases->icon}};
-                        });
-                    }
-                }
-            }
 
             auto raw = vertices;
             builder->setRawVertices(std::move(raw), vertexCount, gfx::AttributeDataType::Short4);
@@ -1069,7 +1084,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         if (isText) {
-            const auto& vertices = buildVertices(buffer, rawVertices[tile.id].text);
+            const auto& vertices = buildVertices(buffer, tileInfo.textVertices);
             const auto vertexCount = buffer.vertices.elements();
             const auto& indices = buffer.triangles;
             if (bucket.iconsInText) {
@@ -1114,7 +1129,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
         } else { // icons
-            const auto& vertices = buildVertices(buffer, rawVertices[tile.id].icon);
+            const auto& vertices = buildVertices(buffer, tileInfo.iconVertices);
             const auto vertexCount = buffer.vertices.elements();
             const auto& indices = buffer.triangles;
             if (sdfIcons) {

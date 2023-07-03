@@ -50,6 +50,10 @@ public:
     /// Get the ID of the drawable we're currently working on, if any
     util::SimpleIdentity getDrawableId();
 
+    /// Whether the drawble should be drawn
+    bool getEnabled() const { return enabled; }
+    void setEnabled(bool value) { enabled = value; }
+
     /// The pass on which we'll be rendered
     mbgl::RenderPass getRenderPass() const { return renderPass; }
     void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
@@ -58,9 +62,17 @@ public:
     DrawPriority getDrawPriority() const;
     void setDrawPriority(DrawPriority);
 
-    /// The layer index assigned to generated drawables
+    /// Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
+
+    /// Depth writability for 2D drawables
+    DepthMaskType getDepthType() const { return depthType; }
+    void setDepthType(DepthMaskType value) { depthType = value; }
+
+    /// Uses 3D depth mode
+    bool getIs3D() const { return is3D; }
+    void setIs3D(bool value) { is3D = value; }
 
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);
@@ -69,12 +81,13 @@ public:
     float getLineWidth() const { return lineWidth; }
     void setLineWidth(float value) { lineWidth = value; }
 
-    /// Whether to do stenciling (based on the Tile ID)
-    bool getNeedsStencil() const { return needsStencil; }
-    void setNeedsStencil(bool value) { needsStencil = value; }
+    /// Whether to render to the color target
+    bool getEnableColor() const { return enableColor; }
+    void setEnableColor(bool value) { enableColor = value; }
 
-    DepthMaskType getDepthType() const { return depthType; }
-    void setDepthType(DepthMaskType value) { depthType = value; }
+    /// Whether to do stenciling (based on the Tile ID or 3D)
+    bool getEnableStencil() const { return enableStencil; }
+    void setEnableStencil(bool value) { enableStencil = value; }
 
     const gfx::ColorMode& getColorMode() const;
     void setColorMode(const gfx::ColorMode& value);
@@ -100,8 +113,8 @@ public:
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
 
-    /// @brief Provide a function to get the current texture
-    void setTextureSource(Drawable::TexSourceFunc value) { textureSource = std::move(value); }
+    void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
+    void clearTweakers() { tweakers.clear(); }
 
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
@@ -156,7 +169,10 @@ protected:
     std::string drawableName;
     std::string vertexAttrName;
     mbgl::RenderPass renderPass;
-    bool needsStencil = false;
+    bool enabled = true;
+    bool enableColor = true;
+    bool enableStencil = false;
+    bool is3D = false;
     float lineWidth = 1.0f;
     DrawPriority drawPriority = 0;
     int32_t subLayerIndex = 0;
@@ -166,7 +182,7 @@ protected:
     std::vector<UniqueDrawable> drawables;
     VertexAttributeArray vertexAttrs;
     gfx::Drawable::Textures textures;
-    Drawable::TexSourceFunc textureSource;
+    std::vector<DrawableTweakerPtr> tweakers;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

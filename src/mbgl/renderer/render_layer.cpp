@@ -144,6 +144,18 @@ void RenderLayer::removeAllDrawables() {
     }
 }
 
+void RenderLayer::updateRenderTileIDs() {
+    renderTileIDs.clear();
+    if (renderTiles) {
+        const auto inserter = std::inserter(renderTileIDs, renderTileIDs.end());
+        const auto getID = [](const auto& tile) {
+            return tile.get().getOverscaledTileID();
+        };
+        renderTileIDs.reserve(renderTiles->size());
+        std::transform(renderTiles->begin(), renderTiles->end(), inserter, getID);
+    }
+}
+
 void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
     layerIndex = newLayerIndex;
 

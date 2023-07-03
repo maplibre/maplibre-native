@@ -20,6 +20,7 @@ protected:
 public:
     virtual ~DrawableTweaker() = default;
 
+    /// Called just before rendering
     virtual void execute(Drawable&, const PaintParameters&) = 0;
 };
 
