@@ -1,5 +1,5 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
-load("@build_bazel_rules_apple//apple:ios.bzl", "ios_build_test", "ios_unit_test")
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
 load(
     "@build_bazel_rules_swift//swift:swift.bzl",
     "swift_library",
@@ -55,6 +55,7 @@ swift_library(
 ios_unit_test(
     name = "ios_test",
     minimum_os_version = "12.0",
+    runner = "@build_bazel_rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
     visibility = [
         "@rules_xcodeproj//xcodeproj:generated",
     ],
@@ -65,13 +66,5 @@ ios_unit_test(
         "//platform/ios/platform/darwin/test:shared_tests_objc_srcs",
         "//platform/ios/platform/darwin/test:shared_tests_objcpp_srcs",
         "//platform/ios/platform/darwin/test:shared_tests_swift_srcs",
-    ],
-)
-
-ios_build_test(
-    name = "my_build_test",
-    minimum_os_version = "12.0",
-    targets = [
-        "ios_tests",
     ],
 )
