@@ -19,9 +19,7 @@ void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, const PaintParamet
             }
         }
     }
-
 }
 
 } // namespace gfx
 } // namespace mbgl
-

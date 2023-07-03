@@ -1010,17 +1010,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // We can use the same tweakers for all the segments in a tile
             if (isText && !tileInfo.textTweaker) {
                 tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                    atlases,
-                    iconTexUniformName,
-                    texUniformName,
-                    isText);
+                    atlases, iconTexUniformName, texUniformName, isText);
             }
             if (!isText && !tileInfo.iconTweaker) {
                 tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                    atlases,
-                    iconTexUniformName,
-                    texUniformName,
-                    isText);
+                    atlases, iconTexUniformName, texUniformName, isText);
             }
 
             if (!builder) {

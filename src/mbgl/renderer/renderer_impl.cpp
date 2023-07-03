@@ -203,7 +203,7 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto drawableTargetsPass = [&] {
         // draw render targets
         orchestrator.observeRenderTargets(
-              [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
+            [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
     };
 #endif
 

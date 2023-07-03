@@ -19,18 +19,15 @@ class Drawable;
  */
 class DrawableAtlasesTweaker : public gfx::DrawableTweaker {
 public:
-    DrawableAtlasesTweaker(TileAtlasTexturesPtr atlases_,
-                           std::string iconName_,
-                           std::string glyphName_,
-                           bool isText_) :
-        atlases(std::move(atlases_)),
-        iconName(std::move(iconName_)),
-        glyphName(std::move(glyphName_)),
-        isText(isText_) { }
+    DrawableAtlasesTweaker(TileAtlasTexturesPtr atlases_, std::string iconName_, std::string glyphName_, bool isText_)
+        : atlases(std::move(atlases_)),
+          iconName(std::move(iconName_)),
+          glyphName(std::move(glyphName_)),
+          isText(isText_) {}
     ~DrawableAtlasesTweaker() override = default;
-    
+
     void execute(Drawable&, const PaintParameters&) override;
-    
+
 protected:
     TileAtlasTexturesPtr atlases;
     std::string iconName;

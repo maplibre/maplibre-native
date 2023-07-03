@@ -204,11 +204,11 @@ protected:
 
     /// Remove all the drawables for tiles
     virtual void removeAllDrawables();
-    
+
     // Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
 #endif // MLN_DRAWABLE_RENDERER
-    
+
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;

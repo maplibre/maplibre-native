@@ -361,7 +361,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         if (colorBuilder) {
             colorBuilder->clearTweakers();
         }
-        
+
         const auto vertexCount = bucket.vertices.elements();
         constexpr auto vertexSize = sizeof(FillExtrusionLayoutVertex::a1);
 
@@ -449,11 +449,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         if (hasPattern && !tweaker) {
             if (const auto& atlases = tile.getAtlasTextures()) {
-                tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                    atlases,
-                    std::string(),
-                    std::string(IconTextureName),
-                    /*isText=*/false);
+                tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                        std::string(),
+                                                                        std::string(IconTextureName),
+                                                                        /*isText=*/false);
                 if (depthBuilder) {
                     depthBuilder->addTweaker(tweaker);
                 }
