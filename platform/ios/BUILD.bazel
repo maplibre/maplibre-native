@@ -541,5 +541,6 @@ xcodeproj(
             ],
         ),
         "//platform/ios/platform/ios/test:ios_test",
+        "//platform/ios/platform/ios/iosapp-UITests:uitest",
     ],
 )
