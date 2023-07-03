@@ -23,7 +23,6 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gfx/fill_extrusion_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
