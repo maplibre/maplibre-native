@@ -55,7 +55,6 @@ swift_library(
 ios_unit_test(
     name = "ios_test",
     minimum_os_version = "12.0",
-    test_filter = "!MLNMapViewContentInsetTests",
     visibility = [
         "@rules_xcodeproj//xcodeproj:generated",
     ],
