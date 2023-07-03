@@ -323,14 +323,16 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
                                                                        0.5f);
     platform::glEnable(GL_SCISSOR_TEST);
 #if MLN_RENDERER_QUAD_SPLIT_VIEW
-    // Drawable LayerGroups on the left
-    // Opaque only on top
-    platform::glScissor(0, 0, halfW, H);
     if (parameters.staticData.has3D) {
         common3DPass();
         drawable3DPass();
+        renderLayer3DPass();
         parameters.clearStencil();
     }
+
+    // Drawable LayerGroups on the left
+    // Opaque only on top
+    platform::glScissor(0, 0, halfW, H);
     drawableTargetsPass();
     commonClearPass();
     drawableOpaquePass();
@@ -342,12 +344,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     // RenderLayers on the right
     // Opaque only on top
     platform::glScissor(halfW, 0, halfW, H);
-    if (parameters.staticData.has3D) {
-        parameters.clearStencil();
-        common3DPass();
-        renderLayer3DPass();
-        parameters.clearStencil();
-    }
     commonClearPass();
     // Clipping masks were drawn only on the other side
     parameters.clearTileClippingMasks();
@@ -357,13 +353,15 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     platform::glScissor(halfW, 0, halfW, halfH);
     renderLayerTranslucentPass();
 #else  // MLN_RENDERER_QUAD_SPLIT_VIEW
-    // Drawable LayerGroups on the left
-    platform::glScissor(0, 0, halfW, H);
     if (parameters.staticData.has3D) {
         common3DPass();
         drawable3DPass();
+        renderLayer3DPass();
         parameters.clearStencil();
     }
+
+    // Drawable LayerGroups on the left
+    platform::glScissor(0, 0, halfW, H);
     drawableTargetsPass();
     commonClearPass();
     parameters.clearTileClippingMasks();
@@ -372,12 +370,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
 
     // RenderLayers on the right
     platform::glScissor(halfW, 0, W, H);
-    if (parameters.staticData.has3D) {
-        parameters.clearStencil();
-        common3DPass();
-        renderLayer3DPass();
-        parameters.clearStencil();
-    }
     commonClearPass();
     parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
