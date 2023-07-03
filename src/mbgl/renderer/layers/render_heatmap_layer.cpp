@@ -285,7 +285,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& viewportSize = state.getSize();
     const auto size = Size{viewportSize.width / 2, viewportSize.height / 2};
-    
+
     // Set up a render target
     if (!renderTarget) {
         renderTarget = context.createRenderTarget(size, gfx::TextureChannelDataType::HalfFloat);
@@ -302,7 +302,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
         renderTarget->addLayerGroup(tileLayerGroup, /*canReplace=*/true);
     }
-    
+
     if (renderTarget->getTexture()->getSize() != size) {
         renderTarget->getTexture()->setSize(size);
     }
