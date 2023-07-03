@@ -897,6 +897,38 @@ void RenderOrchestrator::processChanges() {
 void RenderOrchestrator::markLayerGroupOrderDirty() {
     layerGroupOrderDirty = true;
 }
+
+bool RenderOrchestrator::addRenderTarget(RenderTargetPtr renderTarget) {
+    auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
+    if (it == renderTargets.end()) {
+        renderTargets.emplace_back(renderTarget);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget) {
+    auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
+    if (it != renderTargets.end()) {
+        renderTargets.erase(it);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void RenderOrchestrator::observeRenderTargets(std::function<void(RenderTarget&)> f) {
+    for (auto& renderTarget : renderTargets) {
+        f(*renderTarget);
+    }
+}
+
+void RenderOrchestrator::observeRenderTargets(std::function<void(const RenderTarget&)> f) const {
+    for (const auto& renderTarget : renderTargets) {
+        f(*renderTarget);
+    }
+}
 #endif // MLN_DRAWABLE_RENDERER
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {

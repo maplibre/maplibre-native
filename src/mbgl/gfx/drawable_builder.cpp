@@ -16,6 +16,13 @@ DrawableBuilder::DrawableBuilder(std::string name_)
 
 DrawableBuilder::~DrawableBuilder() = default;
 
+const gfx::ColorMode& DrawableBuilder::getColorMode() const {
+    return impl->colorMode;
+}
+void DrawableBuilder::setColorMode(const gfx::ColorMode& value) {
+    impl->colorMode = value;
+}
+
 const gfx::CullFaceMode& DrawableBuilder::getCullFaceMode() const {
     return impl->cullFaceMode;
 }
@@ -40,6 +47,7 @@ void DrawableBuilder::flush() {
         draw->setDrawPriority(drawPriority);
         draw->setSubLayerIndex(subLayerIndex);
         draw->setDepthType(depthType);
+        draw->setColorMode(impl->colorMode);
         draw->setCullFaceMode(impl->cullFaceMode);
         draw->setShader(shader);
         draw->setTextures(textures);
