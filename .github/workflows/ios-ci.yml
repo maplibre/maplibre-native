@@ -176,6 +176,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ios-render-test
+          retention-days: 3
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
