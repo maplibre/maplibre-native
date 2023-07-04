@@ -423,6 +423,15 @@ void Context::reset() {
     performCleanup();
 }
 
+void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
+    // Reset GL state to a known state so the CustomLayer always has a clean slate.
+    bindVertexArray = 0;
+    setDepthMode(depthMode);
+    setStencilMode(gfx::StencilMode::disabled());
+    setColorMode(colorMode);
+    setCullFaceMode(gfx::CullFaceMode::disabled());
+}
+
 void Context::setDirtyState() {
     // Note: does not set viewport/scissorTest/bindFramebuffer to dirty
     // since they are handled separately in the view object.

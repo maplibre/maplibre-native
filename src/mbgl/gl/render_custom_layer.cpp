@@ -11,6 +11,12 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#endif
+
 namespace mbgl {
 
 using namespace style;
@@ -58,6 +64,7 @@ void RenderCustomLayer::markContextDestroyed() {
 
 void RenderCustomLayer::prepare(const LayerPrepareParameters&) {}
 
+#if MLN_LEGACY_RENDERER
 void RenderCustomLayer::render(PaintParameters& paintParameters) {
     if (host != impl(baseImpl).host) {
         // If the context changed, deinitialize the previous one before initializing the new one.
@@ -100,5 +107,55 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
     glContext.setDirtyState();
 }
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+void RenderCustomLayer::update(gfx::ShaderRegistry& shaders,
+                             gfx::Context& context,
+                             const TransformState& state,
+                             [[maybe_unused]] const RenderTree& renderTree,
+                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
+    std::unique_lock<std::mutex> guard(mutex);
+    
+    // create layer group
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
+            setLayerGroup(std::move(layerGroup_), changes);
+        }
+    }
+    
+    auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
+    
+    // check if host changed and update
+    bool hostChanged = (host != impl(baseImpl).host);
+    if (hostChanged) {
+        // If the context changed, deinitialize the previous one before initializing the new one.
+        if (host && !contextDestroyed) {
+            MBGL_CHECK_ERROR(host->deinitialize());
+        }
+        host = impl(baseImpl).host;
+        MBGL_CHECK_ERROR(host->initialize());
+    }
+    
+    // create drawable
+    if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
+
+        localLayerGroup->clearDrawables();
+
+        // create tweaker
+        auto tweaker = std::make_shared<gfx::DrawableCustomLayerHostTweaker>(host);
+
+        // create empty drawable using a builder
+        std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(getID());
+        auto& drawable = builder->getCurrentDrawable(true);
+
+        // assign tweaker to drawable
+        drawable->addTweaker(tweaker);
+
+        // add drawable to layer group
+        localLayerGroup->addDrawable(std::move(drawable));
+    }
+}
+#endif
 
 } // namespace mbgl

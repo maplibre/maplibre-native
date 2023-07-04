@@ -100,7 +100,9 @@ public:
                abandonedFramebuffers.empty();
     }
 
-    void setDirtyState();
+    void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
+
+    void setDirtyState() override;
 
     extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 

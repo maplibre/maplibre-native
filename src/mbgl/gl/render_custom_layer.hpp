@@ -10,6 +10,15 @@ public:
     explicit RenderCustomLayer(Immutable<style::CustomLayer::Impl>);
     ~RenderCustomLayer() override;
 
+#if MLN_DRAWABLE_RENDERER
+    /// Generate any changes needed by the layer
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
+#endif
+    
 private:
     void transition(const TransitionParameters&) override {}
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -18,8 +27,10 @@ private:
     void markContextDestroyed() override;
     void prepare(const LayerPrepareParameters&) override;
 
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
-
+#endif
+    
     bool contextDestroyed = false;
     std::shared_ptr<style::CustomLayerHost> host;
 };
