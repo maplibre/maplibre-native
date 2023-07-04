@@ -49,7 +49,7 @@ jobs:
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: 3.24.1
+          cmakeVersion: 3.26.4
           ninjaVersion: latest
 
       - name: Install dependencies
