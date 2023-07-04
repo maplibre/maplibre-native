@@ -26,6 +26,7 @@ cc_library(
         "src/mbgl/test/*.hpp",
     ]),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    defines = ["CI_BUILD"],
     strip_include_prefix = "src",
     deps = [
         "testutils",
