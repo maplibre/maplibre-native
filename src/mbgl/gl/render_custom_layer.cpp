@@ -111,21 +111,21 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 
 #if MLN_DRAWABLE_RENDERER
 void RenderCustomLayer::update(gfx::ShaderRegistry& shaders,
-                             gfx::Context& context,
-                             const TransformState& state,
-                             [[maybe_unused]] const RenderTree& renderTree,
-                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                               gfx::Context& context,
+                               const TransformState& state,
+                               [[maybe_unused]] const RenderTree& renderTree,
+                               [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-    
+
     // create layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
-    
+
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
-    
+
     // check if host changed and update
     bool hostChanged = (host != impl(baseImpl).host);
     if (hostChanged) {
@@ -136,10 +136,9 @@ void RenderCustomLayer::update(gfx::ShaderRegistry& shaders,
         host = impl(baseImpl).host;
         MBGL_CHECK_ERROR(host->initialize());
     }
-    
+
     // create drawable
     if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
-
         localLayerGroup->clearDrawables();
 
         // create tweaker

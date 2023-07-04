@@ -19,8 +19,7 @@ class Drawable;
 class DrawableCustomLayerHostTweaker : public gfx::DrawableTweaker {
 public:
     DrawableCustomLayerHostTweaker(std::shared_ptr<style::CustomLayerHost> host_)
-        : host(host_)
-        {}
+        : host(host_) {}
     ~DrawableCustomLayerHostTweaker() override = default;
 
     void execute(Drawable&, const PaintParameters&) override;

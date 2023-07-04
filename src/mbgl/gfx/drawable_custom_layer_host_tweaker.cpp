@@ -16,8 +16,9 @@ void DrawableCustomLayerHostTweaker::execute(gfx::Drawable& drawable, const Pain
     // custom drawing
     auto& context = paintParameters.context;
     const TransformState& state = paintParameters.state;
-    context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly), paintParameters.colorModeForRenderPass());
-    
+    context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
+                       paintParameters.colorModeForRenderPass());
+
     style::CustomLayerRenderParameters parameters;
 
     parameters.width = state.getSize().width;
@@ -39,7 +40,7 @@ void DrawableCustomLayerHostTweaker::execute(gfx::Drawable& drawable, const Pain
     // changed the viewport or Framebuffer.
     // TODO: do this via the context
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
-    
+
     context.setDirtyState();
 }
 

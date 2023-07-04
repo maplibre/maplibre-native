@@ -18,7 +18,7 @@ public:
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif
-    
+
 private:
     void transition(const TransitionParameters&) override {}
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -30,7 +30,7 @@ private:
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
 #endif
-    
+
     bool contextDestroyed = false;
     std::shared_ptr<style::CustomLayerHost> host;
 };

@@ -137,10 +137,10 @@ public:
 
     /// Create a render target
     virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
-    
+
     /// Resets the context state to defaults
     virtual void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) = 0;
-    
+
     /// Sets dirty state
     virtual void setDirtyState() = 0;
 #endif
