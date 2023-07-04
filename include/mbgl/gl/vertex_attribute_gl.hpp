@@ -30,7 +30,6 @@ private:
 public:
     ~VertexAttributeGL() override = default;
 
-public:
     platform::GLenum getGLType() const { return glType; }
     void setGLType(platform::GLenum value);
 
@@ -41,20 +40,12 @@ public:
 
     static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
 
-    static const std::unique_ptr<gfx::VertexBufferResource>& getSharedRawBuffer(UploadPass&, gfx::VertexAttribute&, gfx::BufferUsageType);
-
 private:
     static int getSize(platform::GLenum glType);
     static int getStride(platform::GLenum glType);
     static bool get(const gfx::VertexAttribute::ElementType&, platform::GLenum glType, uint8_t* buffer);
 
 private:
-    struct RawDataGL : public RawData {
-        ~RawDataGL() override = default;
-        platform::GLenum rawType = 0;
-        std::unique_ptr<gfx::VertexBufferResource> buffer;
-    };
-
     platform::GLenum glType = 0;
     bool normalized = false;
 };

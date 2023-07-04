@@ -152,7 +152,7 @@ void DrawableBuilder::setRawVertices(std::vector<uint8_t>&& data, std::size_t co
 void DrawableBuilder::setSegments(gfx::DrawMode mode,
                                   std::vector<uint16_t> indexes,
                                   const std::vector<SegmentBase>& segments) {
-    setSegments(mode, indexes, segments.data(), segments.size());
+    setSegments(mode, std::move(indexes), segments.data(), segments.size());
 }
 
 void DrawableBuilder::setSegments(gfx::DrawMode mode,

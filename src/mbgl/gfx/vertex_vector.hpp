@@ -7,32 +7,49 @@
 namespace mbgl {
 namespace gfx {
 
-struct VertexVectorBase {
+struct VertexBufferBase {
+    virtual ~VertexBufferBase() = default;
+};
+
+class VertexVectorBase {
+public:
     virtual const void* getRawData() const = 0;
     virtual std::size_t getRawSize() const = 0;
     virtual std::size_t getRawCount() const = 0;
-#if !NDEBUG
-    bool locked = false;
-#endif
+
+    VertexBufferBase* getBuffer() const { return buffer.get(); }
+    void setBuffer(std::unique_ptr<VertexBufferBase>&& value) { buffer = std::move(value); }
+
+    bool getDirty() const { return dirty; }
+    void setDirty(bool value = true) { dirty = value; }
+
+    bool isReleased() const { return released; }
+
+protected:
+    std::unique_ptr<VertexBufferBase> buffer;
+    bool dirty = true;
+    bool released = false;
 };
+using VertexVectorBasePtr = std::shared_ptr<VertexVectorBase>;
 
 template <class V>
 class VertexVector : public VertexVectorBase {
 public:
     using Vertex = V;
+
     template <typename Arg>
     void emplace_back(Arg&& vertex) {
-        assert(!locked);
         v.emplace_back(std::forward<Arg>(vertex));
     }
 
     void extend(std::size_t n, const Vertex& val) {
-        assert(!locked);
         v.resize(v.size() + n, val);
+        dirty = true;
     }
 
     Vertex& at(std::size_t n) {
         assert(n < v.size());
+        dirty = true;
         return v.at(n);
     }
     const Vertex& at(std::size_t n) const {
@@ -47,8 +64,16 @@ public:
     bool empty() const { return v.empty(); }
 
     void clear() {
-        assert(!locked);
+        dirty = true;
         v.clear();
+    }
+
+    void release() {
+        // If we've already created a buffer, we don't need the raw data any more.
+        if (buffer) {
+            clear();
+        }
+        released = true;
     }
 
     const Vertex* data() const { return v.data(); }

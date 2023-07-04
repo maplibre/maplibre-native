@@ -1,4 +1,7 @@
 #include <mbgl/gl/upload_pass.hpp>
+
+#include <mbgl/gfx/vertex_buffer.hpp>
+#include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/defines.hpp>
@@ -126,6 +129,44 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                      data));
 }
 
+struct VertexBufferGL : public gfx::VertexBufferBase {
+    ~VertexBufferGL() override = default;
+
+    std::unique_ptr<gfx::VertexBufferResource> resource;
+};
+
+namespace {
+const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
+}
+const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec, const gfx::BufferUsageType usage) {
+    if (vec) {
+        const auto* rawBufPtr = vec->getRawData();
+        const auto rawBufSize = static_cast<int>(vec->getRawCount() * vec->getRawSize());
+        
+        // If we already have a buffer...
+        if (auto* rawData = static_cast<VertexBufferGL*>(vec->getBuffer()); rawData && rawData->resource) {
+            auto& resource = static_cast<gl::VertexBufferResource&>(*rawData->resource);
+            
+            // If it's changed, update it
+            if (rawBufSize <= resource.byteSize) {
+                if (vec->getDirty()) {
+                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                }
+                return rawData->resource;
+            }
+        }
+        // Otherwise, create a new one
+        if (rawBufSize > 0) {
+            auto buffer = std::make_unique<VertexBufferGL>();
+            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage);
+            vec->setBuffer(std::move(buffer));
+            return static_cast<VertexBufferGL*>(vec->getBuffer())->resource;
+        }
+    }
+    return noBuffer;
+}
+
+
 #if MLN_DRAWABLE_RENDERER
 static std::size_t padSize(std::size_t size, std::size_t padding) {
     return (padding - (size % padding)) % padding;
@@ -172,23 +213,20 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     // For each attribute in the program, with the corresponding default and optional override...
     const auto resolveAttr = [&](const std::string& name, auto& defaultAttr, auto& overrideAttr) -> void {
         auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
-        const auto& defaultGL = static_cast<const gl::VertexAttributeGL&>(defaultAttr);
+        const auto& defaultGL = static_cast<const VertexAttributeGL&>(defaultAttr);
         const auto stride = defaultAttr.getStride();
         const auto offset = static_cast<uint32_t>(allData.size());
         const auto index = static_cast<std::size_t>(defaultGL.getIndex());
 
         bindings.resize(std::max(bindings.size(), index + 1));
 
-        if (const auto shared = effectiveAttr.getSharedRawData()) {
-            const auto rawBufSize = shared->getRawCount() * shared->getRawSize();
-            if (const auto& buffer = gl::VertexAttributeGL::getSharedRawBuffer(*this, effectiveAttr, usage)) {
-                bindings[index] = {
-                    /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
-                    /* vertexStride = */ static_cast<uint32_t>(effectiveAttr.getSharedStride()),
-                    /* vertexBufferResource = */ buffer.get(),
-                    /* vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
-                };
-            }
+        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
+            bindings[index] = {
+                /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
+                /*.vertexStride = */ effectiveAttr.getSharedStride(),
+                /*.vertexBufferResource = */ buffer.get(),
+                /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
+            };
             return;
         }
 
@@ -198,9 +236,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
 
         // Get the raw data for the values in the desired format
-        const auto& rawData = gl::VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType());
+        const auto& rawData = VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType());
         if (rawData.empty()) {
-            gl::VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType());
+            VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType());
         }
 
         if (rawData.size() == stride * vertexCount) {

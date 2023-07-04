@@ -141,6 +141,8 @@ public:
 
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
+    virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
+
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
 

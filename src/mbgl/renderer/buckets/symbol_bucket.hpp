@@ -133,27 +133,38 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
-    struct Buffer {
-        using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
-        using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
-        using OpacityVertexVector = gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>>;
+    using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
+    using VertexBuffer = gfx::VertexBuffer<SymbolLayoutVertex>;
+    using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
+    using DynamicVertexBuffer = gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
+    using OpacityVertexVector = gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>>;
+    using OpacityVertexBuffer = gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>;
 
+    struct Buffer {
+        ~Buffer() {
+            sharedVertices->release();
+            sharedDynamicVertices->release();
+            sharedOpacityVertices->release();
+        }
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
-        VertexVector& vertices = *sharedVertices;
+        VertexVector& vertices() { return *sharedVertices; }
+        const VertexVector& vertices() const { return *sharedVertices; }
 
         std::shared_ptr<DynamicVertexVector> sharedDynamicVertices = std::make_shared<DynamicVertexVector>();
-        DynamicVertexVector& dynamicVertices = *sharedDynamicVertices;
+        DynamicVertexVector& dynamicVertices() { return *sharedDynamicVertices; }
+        const DynamicVertexVector& dynamicVertices() const { return *sharedDynamicVertices; }
 
         std::shared_ptr<OpacityVertexVector> sharedOpacityVertices = std::make_shared<OpacityVertexVector>();
-        OpacityVertexVector& opacityVertices = *sharedOpacityVertices;
+        OpacityVertexVector& opacityVertices() { return *sharedOpacityVertices; }
+        const OpacityVertexVector& opacityVertices() const { return *sharedOpacityVertices; }
 
         gfx::IndexVector<gfx::Triangles> triangles;
         SegmentVector<SymbolTextAttributes> segments;
         std::vector<PlacedSymbol> placedSymbols;
 
-        std::optional<gfx::VertexBuffer<SymbolLayoutVertex>> vertexBuffer;
-        std::optional<gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>> dynamicVertexBuffer;
-        std::optional<gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>> opacityVertexBuffer;
+        std::optional<VertexBuffer> vertexBuffer;
+        std::optional<DynamicVertexBuffer> dynamicVertexBuffer;
+        std::optional<OpacityVertexBuffer> opacityVertexBuffer;
         std::optional<gfx::IndexBuffer> indexBuffer;
     } text;
 

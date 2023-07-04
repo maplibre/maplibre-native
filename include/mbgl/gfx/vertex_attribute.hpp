@@ -62,8 +62,7 @@ public:
           sharedType(other.sharedType),
           sharedOffset(other.sharedOffset),
           sharedVertexOffset(other.sharedVertexOffset),
-          sharedStride(other.sharedStride),
-          rawData(std::move(other.rawData))
+          sharedStride(other.sharedStride)
     {}
 
 public:
@@ -116,9 +115,7 @@ public:
     }
 
     bool isDirty() const { return dirty; }
-    void setDirty(bool value = true) {
-        dirty = value;
-    }
+    void setDirty(bool value = true) { dirty = value; }
 
     template <std::size_t I = 0, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type set(std::size_t, std::tuple<Tp...>, std::size_t) {}
@@ -133,25 +130,22 @@ public:
         }
     }
 
+    std::vector<std::uint8_t>& getRawData() { return rawData; }
+    const std::vector<std::uint8_t>& getRawData() const { return rawData; }
+
     const std::shared_ptr<VertexVectorBase>& getSharedRawData() const { return sharedRawData; }
     AttributeDataType getSharedType() const { return sharedType; }
-    int getSharedOffset() const { return sharedOffset; }
-    int getSharedVertexOffset() const { return sharedVertexOffset; }
-    int getSharedStride() const { return sharedStride; }
-    void setSharedRawData(std::shared_ptr<VertexVectorBase> data, int offset, int vertexOffset, int stride, AttributeDataType type) {
+    uint32_t getSharedOffset() const { return sharedOffset; }
+    uint32_t getSharedVertexOffset() const { return sharedVertexOffset; }
+    uint32_t getSharedStride() const { return sharedStride; }
+    void setSharedRawData(std::shared_ptr<VertexVectorBase> data, uint32_t offset, uint32_t vertexOffset, uint32_t stride_, AttributeDataType type) {
         sharedRawData = std::move(data);
         sharedType = type;
         sharedOffset = offset;
         sharedVertexOffset = vertexOffset;
-        sharedStride = stride;
+        sharedStride = stride_;
     }
-    
-    struct RawData {
-        virtual ~RawData() = default;
-        std::vector<std::uint8_t> data;
-    };
-    const std::unique_ptr<RawData>& getRawData() const { return rawData; }
-    void setRawData(std::unique_ptr<RawData>&& value) { rawData = std::move(value); }
+    void resetSharedRawData() { sharedRawData.reset(); }
 
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
@@ -172,13 +166,14 @@ protected:
     AttributeDataType dataType;
     std::vector<ElementType> items;
 
+    // Cache of attribute data
+    mutable std::vector<std::uint8_t> rawData;
+
     std::shared_ptr<VertexVectorBase> sharedRawData;
     AttributeDataType sharedType = AttributeDataType::Invalid;
-    int sharedOffset = 0;
-    int sharedVertexOffset = 0;
-    int sharedStride = 0;
-
-    std::unique_ptr<RawData> rawData;
+    uint32_t sharedOffset = 0;
+    uint32_t sharedVertexOffset = 0;
+    uint32_t sharedStride = 0;
 };
 
 /// Stores a collection of vertex attributes by name

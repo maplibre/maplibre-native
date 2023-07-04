@@ -57,7 +57,7 @@ public:
     }
 
     template <class Vertex>
-    void updateVertexBuffer(VertexBuffer<Vertex>& buffer, VertexVector<Vertex>&& v) {
+    void updateVertexBuffer(VertexBuffer<Vertex>& buffer, const VertexVector<Vertex>& v) {
         assert(v.elements() == buffer.elements);
         updateVertexBufferResource(buffer.getResource(), v.data(), v.bytes());
     }
