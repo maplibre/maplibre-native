@@ -135,8 +135,6 @@ jobs:
         run: make ios-uitest
 
       # size test
-      - name: Copy example config
-        run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Build app for size test & output size 
         working-directory: ./
@@ -152,30 +150,6 @@ jobs:
             ./size
             ./pr_number
       
-      # render test
-
-      - name: Build RenderTest .ipa and .xctest for AWS Device Farm
-        run: |
-          bazel run //platform/ios:xcodeproj
-          build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
-          render_test_app_dir="$(dirname "$(find $DIR -name RenderTestApp.app)")"
-          cd "$render_test_app_dir"
-          mkdir Payload
-          mv RenderTestApp.app Payload
-          zip -r RenderTestApp.zip Payload
-          mv RenderTestApp.zip RenderTestApp.ipa
-          cd Payload/RenderTestApp.app/PlugIns
-          zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
-          echo render_test_artifacts_dir="$render_test_app_dir" >> $GITHUB_ENV
-      
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ios-render-test
-          path: |
-            ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
-            ${{ env.render_test_artifacts_dir }}/RenderTestApp.zip
-
       # ---
 
       - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
