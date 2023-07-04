@@ -275,7 +275,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
                                 const TransformState& state,
                                 [[maybe_unused]] const RenderTree& renderTree,
-                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                                UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -381,8 +381,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         std::vector<std::array<int16_t, 2>> rawVerts;
         const auto buildVertices = [&]() {
-            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
-                verts = bucket.vertices.vector();
+            const auto& verts = bucket.vertices.vector();
             if (rawVerts.size() < verts.size()) {
                 rawVerts.resize(verts.size());
                 std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
@@ -442,8 +441,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     std::vector<std::array<int16_t, 2>> textureRawVerts;
     const auto buildTextureVertices = [&]() {
-        const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex> verts =
-            RenderStaticData::heatmapTextureVertices().vector();
+        const auto verts = RenderStaticData::heatmapTextureVertices().vector();
         if (textureRawVerts.size() < verts.size()) {
             textureRawVerts.resize(verts.size());
             std::transform(verts.begin(), verts.end(), textureRawVerts.begin(), [](const auto& x) { return x.a1; });

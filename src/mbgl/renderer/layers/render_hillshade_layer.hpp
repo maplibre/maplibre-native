@@ -15,6 +15,17 @@ public:
     explicit RenderHillshadeLayer(Immutable<style::HillshadeLayer::Impl>);
     ~RenderHillshadeLayer() override;
 
+#if MLN_DRAWABLE_RENDERER
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
+
+    /// Generate any changes needed by the layer
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
+#endif
+    
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -27,6 +38,14 @@ private:
 
     void prepare(const LayerPrepareParameters&) override;
 
+#if MLN_DRAWABLE_RENDERER
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&) override;
+
+    /// Remove all the drawables for tiles
+    void removeAllDrawables() override;
+#endif
+    
     // Paint properties
     style::HillshadePaintProperties::Unevaluated unevaluated;
     uint8_t maxzoom = util::TERRAIN_RGB_MAXZOOM;
@@ -38,6 +57,12 @@ private:
     // Programs
     std::shared_ptr<HillshadeProgram> hillshadeProgram;
     std::shared_ptr<HillshadePrepareProgram> hillshadePrepareProgram;
+#endif
+    
+#if MLN_DRAWABLE_RENDERER
+    gfx::ShaderProgramBasePtr hillshadePrepareShader;
+    gfx::ShaderProgramBasePtr hillshadeShader;
+    std::unordered_map<OverscaledTileID, RenderTargetPtr> renderTargets;
 #endif
 };
 

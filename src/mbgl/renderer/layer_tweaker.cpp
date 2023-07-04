@@ -16,12 +16,14 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  const TransformState& state,
                                  const std::array<float, 2>& translation,
                                  style::TranslateAnchorType anchor,
-                                 bool inViewportPixelUnits) {
+                                 bool inViewportPixelUnits,
+                                 bool aligned) {
     // from RenderTile::prepare
     mat4 tileMatrix;
     state.matrixFor(tileMatrix, tileID);
 
-    const auto& projMatrix = renderTree.getParameters().transformParams.projMatrix;
+    const auto& transformParams = renderTree.getParameters().transformParams;
+    const auto& projMatrix = aligned ? transformParams.alignedProjMatrix : transformParams.projMatrix;
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);
 
     return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, state, inViewportPixelUnits);

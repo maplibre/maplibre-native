@@ -15,6 +15,18 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/util/geo.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layers/hillshade_layer_tweaker.hpp>
+#include <mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/render_target.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
+#include <mbgl/gfx/shader_group.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
+#endif
+
 namespace mbgl {
 
 using namespace style;
@@ -60,6 +72,14 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
                  : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
+#if MLN_DRAWABLE_RENDERER
+    /*if (renderTarget) {
+        renderTarget->getLayerGroup(0)->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
+    }*/
+    if (layerGroup) {
+        layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
+    }
+#endif
 }
 
 bool RenderHillshadeLayer::hasTransition() const {
@@ -220,5 +240,259 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
     }
 }
 #endif // MLN_LEGACY_RENDERER
+
+#if MLN_DRAWABLE_RENDERER
+void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
+    if (renderTarget_) {
+        if (activate) {
+            // The RenderTree has determined this render target should be included in the renderable set for a frame
+            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
+        } else {
+            // The RenderTree is informing us we should not render anything
+            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
+        }
+    }
+}
+
+void RenderHillshadeLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    RenderLayer::markLayerRenderable(willRender, changes);
+    for (auto pair : renderTargets) {
+        activateRenderTarget(pair.second, willRender, changes);
+    }
+}
+
+void RenderHillshadeLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    RenderLayer::removeTile(renderPass, tileID);
+}
+
+void RenderHillshadeLayer::removeAllDrawables() {
+    RenderLayer::removeAllDrawables();
+}
+
+static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
+static const std::string HillshadeShaderGroupName = "HillshadeShader";
+
+void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
+                                gfx::Context& context,
+                                const TransformState& state,
+                                [[maybe_unused]] const RenderTree& renderTree,
+                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
+    std::unique_lock<std::mutex> guard(mutex);
+
+    if (!renderTiles || renderTiles->empty()) {
+        removeAllDrawables();
+        for (auto pair : renderTargets) {
+            activateRenderTarget(pair.second, false, changes);
+        }
+        renderTargets.clear();
+        return;
+    }
+
+    // Set up a layer group
+    if (!layerGroup) {
+        auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+        if (!layerGroup_) {
+            return;
+        }
+        layerGroup_->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
+        setLayerGroup(std::move(layerGroup_), changes);
+    }
+
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+
+    if (!hillshadePrepareShader) {
+        hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);
+    }
+    if (!hillshadeShader) {
+        hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName);
+    }
+    if (!hillshadePrepareShader || !hillshadeShader) {
+        removeAllDrawables();
+        return;
+    }
+
+    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
+    std::transform(renderTiles->begin(),
+                   renderTiles->end(),
+                   std::inserter(newTileIDs, newTileIDs.begin()),
+                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
+
+    std::unique_ptr<gfx::DrawableBuilder> hillshadeBuilder;
+    std::unique_ptr<gfx::DrawableBuilder> hillshadePrepareBuilder;
+    std::vector<gfx::DrawablePtr> newTiles;
+    gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
+    gfx::VertexAttributeArray hillshadeVertexAttrs;
+    auto renderPass = RenderPass::Translucent;
+
+    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+        return;
+    }
+
+    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+        const auto tileID = drawable->getTileID();
+        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
+            // remove it
+            drawable.reset();
+            ++stats.drawablesRemoved;
+            
+            const auto result = renderTargets.find(*tileID);
+            if (result != renderTargets.end()) {
+                activateRenderTarget(result->second, false, changes);
+                renderTargets.erase(result);
+            }
+        }
+    });
+
+    for (const RenderTile& tile : *renderTiles) {
+        const auto& tileID = tile.getOverscaledTileID();
+        
+        auto* bucket_ = tile.getBucket(*baseImpl);
+        if (!bucket_) {
+            removeTile(renderPass, tileID);
+            continue;
+        }
+        auto& bucket = static_cast<HillshadeBucket&>(*bucket_);
+
+        if (!bucket.hasData()) {
+            continue;
+        }
+        
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            continue;
+        }
+
+        // Set up tile render target
+        const uint16_t tilesize = bucket.getDEMData().dim;
+        auto renderTarget = context.createRenderTarget({tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte);
+        if (!renderTarget) {
+            continue;
+        }
+        if (!renderTargets.insert(std::make_pair(tileID, renderTarget)).second) {
+            continue;
+        }
+        activateRenderTarget(renderTarget, true, changes);
+        
+        auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
+        if (!singleTileLayerGroup) {
+            return;
+        }
+        singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
+        renderTarget->addLayerGroup(singleTileLayerGroup, /*canReplace=*/true);
+        
+        hillshadePrepareVertexAttrs.clear();
+        
+        const auto staticDataVertices = RenderStaticData::rasterVertices();
+        const auto staticDataIndices = RenderStaticData::quadTriangleIndices();
+        const auto staticDataSegments = RenderStaticData::rasterSegments();
+        
+        if (auto& attr = hillshadePrepareVertexAttrs.getOrAdd("a_texture_pos")) {
+            std::size_t index{0};
+            for (auto& v : staticDataVertices.vector()) {
+                attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
+            }
+        }
+        
+        std::vector<std::array<int16_t, 2>> prepareRawVerts;
+        const auto buildPrepareVertices = [&]() {
+            const auto& verts = staticDataVertices.vector();
+            if (prepareRawVerts.size() < verts.size()) {
+                prepareRawVerts.resize(verts.size());
+                std::transform(verts.begin(), verts.end(), prepareRawVerts.begin(), [](const auto& x) { return x.a1; });
+            }
+        };
+
+        hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
+        hillshadePrepareBuilder->setShader(hillshadePrepareShader);
+        hillshadePrepareBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                                 : gfx::DepthMaskType::ReadOnly);
+        hillshadePrepareBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+        hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+
+        hillshadePrepareBuilder->setRenderPass(renderPass);
+        hillshadePrepareBuilder->setVertexAttributes(hillshadePrepareVertexAttrs);
+
+        buildPrepareVertices();
+        hillshadePrepareBuilder->addVertices(prepareRawVerts, 0, prepareRawVerts.size());
+
+        hillshadePrepareBuilder->setSegments(gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
+        
+        auto prepareImageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
+        if (prepareImageLocation.has_value()) {
+            std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+            texture->setImage(bucket.getDEMData().getImagePtr());
+            texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            hillshadePrepareBuilder->setTexture(texture, prepareImageLocation.value());
+        }
+        
+        hillshadePrepareBuilder->flush();
+
+        for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride, bucket.getDEMData().encoding));
+            singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+        }
+        
+        // Continue with tile
+        hillshadeVertexAttrs.clear();
+        
+        auto* vertices = &staticDataVertices;
+        auto* indices = &staticDataIndices;
+        auto* segments = &staticDataSegments;
+        
+        if (!bucket.vertices.empty() && !bucket.indices.empty()) {
+            vertices = &bucket.vertices;
+            indices = &bucket.indices;
+            if (!bucket.segments.empty()) {
+                segments = &bucket.segments;
+            }
+        }
+        
+        if (auto& attr = hillshadeVertexAttrs.getOrAdd("a_texture_pos")) {
+            std::size_t index{0};
+            for (auto& v : vertices->vector()) {
+                attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
+            }
+        }
+        
+        std::vector<std::array<int16_t, 2>> rawVerts;
+        const auto buildVertices = [&]() {
+            const auto& verts = vertices->vector();
+            if (rawVerts.size() < verts.size()) {
+                rawVerts.resize(verts.size());
+                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
+            }
+        };
+
+        hillshadeBuilder = context.createDrawableBuilder("hillshade");
+        hillshadeBuilder->setShader(hillshadeShader);
+        hillshadeBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                                                                          : gfx::DepthMaskType::ReadOnly);
+        hillshadeBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+        hillshadeBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+
+        hillshadeBuilder->setRenderPass(renderPass);
+        hillshadeBuilder->setVertexAttributes(hillshadeVertexAttrs);
+
+        buildVertices();
+        hillshadeBuilder->addVertices(rawVerts, 0, rawVerts.size());
+
+        hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
+        
+        auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
+        if (imageLocation.has_value()) {
+            hillshadeBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
+        }
+        
+        hillshadeBuilder->flush();
+
+        for (auto& drawable : hillshadeBuilder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+        }
+    }
+}
+#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace mbgl

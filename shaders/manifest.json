@@ -91,6 +91,20 @@
         "uses_ubos": true 
     },
     {
+        "name": "HillshadePrepareShader",
+        "header": "drawable_hillshade_prepare",
+        "glsl_vert": "drawable.hillshade_prepare.vertex.glsl",
+        "glsl_frag": "drawable.hillshade_prepare.fragment.glsl",
+        "uses_ubos": true 
+    },
+    {
+        "name": "HillshadeShader",
+        "header": "drawable_hillshade",
+        "glsl_vert": "drawable.hillshade.vertex.glsl",
+        "glsl_frag": "drawable.hillshade.fragment.glsl",
+        "uses_ubos": true 
+    },
+    {
         "name": "RasterShader",
         "header": "drawable_raster",
         "glsl_vert": "drawable.raster.vertex.glsl",

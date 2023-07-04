@@ -5,20 +5,19 @@
 namespace mbgl {
 
 /**
-    Heatmap layer specific tweaker
+    Hillshade prepare layer specific tweaker
  */
-class HeatmapLayerTweaker : public LayerTweaker {
+class HillshadePrepareLayerTweaker : public LayerTweaker {
 public:
-    HeatmapLayerTweaker(Immutable<style::LayerProperties> properties)
+    HillshadePrepareLayerTweaker(Immutable<style::LayerProperties> properties)
         : LayerTweaker(properties){};
 
 public:
-    ~HeatmapLayerTweaker() override = default;
+    ~HillshadePrepareLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
 protected:
-    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 };
 
 } // namespace mbgl

@@ -19,14 +19,15 @@ public:
     int32_t get(int32_t x, int32_t y) const;
     const std::array<float, 4>& getUnpackVector() const;
 
-    const PremultipliedImage* getImage() const { return &image; }
+    const PremultipliedImage* getImage() const { return &*image; }
+    const std::shared_ptr<PremultipliedImage>& getImagePtr() const { return image; }
 
     const int32_t dim;
     const int32_t stride;
-
+    const Tileset::DEMEncoding encoding;
+    
 private:
-    Tileset::DEMEncoding encoding;
-    PremultipliedImage image;
+    std::shared_ptr<PremultipliedImage> image;
 
     size_t idx(const int32_t x, const int32_t y) const {
         assert(x >= -1);
