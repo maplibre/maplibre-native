@@ -44,10 +44,11 @@ cc_library(
     hdrs = PREFIXED["MLN_GENERATED_STYLE_HEADERS"]
         + PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
     strip_include_prefix = "__generated__",
+    visibility = ["//visibility:private"],
     deps = [
         ":generate_style_code",
         ":generate_shaders",
-    ]
+    ],
 )
 
 # Generated source is inserted directly into the core target, no need to remove
