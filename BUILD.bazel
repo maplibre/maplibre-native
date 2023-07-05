@@ -40,7 +40,7 @@ config_setting(
 
 genrule(
     name = "generate_style_code",
-    cmd = "node ./$(location scripts/generate-style-code.js)",
+    cmd = "node $(execpath scripts/generate-style-code.js)",
     tools = ["scripts/generate-style-code.js"],
     outs = MLN_GENERATED_STYLE_HEADERS + MLN_GENERATED_STYLE_SOURCE,
 )
@@ -96,7 +96,7 @@ cc_library(
         "//:ios": [
             "//vendor:icu",
         ],
-        "//:linux": [],
+        "//conditions:default": [],
     }),
 )
 
@@ -132,6 +132,13 @@ config_setting(
     name = "ios",
     flag_values = {
         ":maplibre_platform": "ios",
+    },
+)
+
+config_setting(
+    name = "windows",
+    flag_values = {
+        ":maplibre_platform": "windows",
     },
 )
 

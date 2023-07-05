@@ -4,7 +4,7 @@ Applies to objective-c files that can't take the added CPP_FLAGS.
 Included in the CPP flags below.
 """
 
-WARNING_FLAGS = [
+GCC_CLANG_COMMON_FLAGS = [
     "-Wall",
     "-Werror",
     "-Wextra",
@@ -12,8 +12,15 @@ WARNING_FLAGS = [
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
     "-Wno-unknown-pragmas",
-] + select({
-    "//:ios": [
+]
+
+MSVC_FLAGS = [
+    "/Wall",
+    "/WX",
+]
+
+WARNING_FLAGS = select({
+    "//:ios": GCC_CLANG_COMMON_FLAGS + [
         "-Wno-newline-eof",
         "-Wno-nested-anon-types",
         "-Wno-c++11-narrowing",
@@ -21,19 +28,33 @@ WARNING_FLAGS = [
         "-Wno-tautological-constant-compare",
         "-Wno-gnu-anonymous-struct",
     ],
-    "//:linux": [],
+    "//:linux": GCC_CLANG_COMMON_FLAGS,
+    "//:windows": MSVC_FLAGS,
 })
 
 """
 Compilation flags used for all .cpp and .mm targets.
 """
 
-CPP_FLAGS = WARNING_FLAGS + [
+GCC_CLANG_CPP_FLAGS = GCC_CLANG_COMMON_FLAGS + [
     "-fexceptions",
     "-fno-rtti",
     "-ftemplate-depth=1024",
     "-std=c++17",
 ]
+
+MSVC_CPP_FLAGS = [
+    "/EHsc",
+    "/std:c++17",
+    "/GR-",
+]
+
+CPP_FLAGS = select({
+    "//:ios": GCC_CLANG_CPP_FLAGS,
+    "//:linux": GCC_CLANG_CPP_FLAGS,
+    "//:windows": MSVC_CPP_FLAGS,
+})
+
 """
 Compilation flags related to the Maplibre codebase. Relevant for all .cpp .mm and .m code
  - src/*
@@ -42,8 +63,14 @@ Compilation flags related to the Maplibre codebase. Relevant for all .cpp .mm an
 Not important for any vendors that are imported.
 """
 
-MAPLIBRE_FLAGS = [
-    "-DMBGL_USE_GLES2=1",
-    "-DMBGL_RENDER_BACKEND_OPENGL=1",
-    "-DGLES_SILENCE_DEPRECATION",
-]
+MAPLIBRE_FLAGS = select({
+    "//:windows": [
+        "/DMBGL_USE_GLES2=1",
+        "/DMBGL_RENDER_BACKEND_OPENGL=1"
+    ],
+    "//conditions:default": [
+        "-DMBGL_USE_GLES2=1",
+        "-DMBGL_RENDER_BACKEND_OPENGL=1",
+        "-DGLES_SILENCE_DEPRECATION",
+    ]
+})
