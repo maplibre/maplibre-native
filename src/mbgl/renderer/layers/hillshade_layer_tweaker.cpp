@@ -73,7 +73,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false, true);
+            tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, true);
         HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                             /* .latrange = */ getLatRange(tileID),
                                             /* .light = */ getLight(parameters, evaluated)};

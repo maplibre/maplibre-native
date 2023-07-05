@@ -62,7 +62,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                    /* .unpack = */ getUnpackVector(drawableData.encoding),
                                                    /* .dimension = */ {drawableData.stride, drawableData.stride},
                                                    /* .zoom = */ static_cast<float>(tileID.canonical.z),
-                                                   /* .maxzoom = */ util::TERRAIN_RGB_MAXZOOM};
+                                                   /* .maxzoom = */ drawableData.maxzoom};
 
         drawable.mutableUniformBuffers().createOrUpdate(
             HillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);

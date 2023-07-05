@@ -276,7 +276,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   const TransformState& state,
                                   [[maybe_unused]] const RenderTree& renderTree,
-                                  [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                                  UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -431,7 +431,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
             drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride,
-                                                                                  bucket.getDEMData().encoding));
+                                                                                  bucket.getDEMData().encoding,
+                                                                                  maxzoom));
             singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
