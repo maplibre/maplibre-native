@@ -239,7 +239,7 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
         }
 
         fs.writeFileSync(
-            glRoot + "/" + elem.header + ".hpp",
+            path.join(glRoot, elem.header + ".hpp"),
             `${generatedHeader}
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
