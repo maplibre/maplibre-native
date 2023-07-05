@@ -41,40 +41,35 @@ config_setting(
 )
 
 # Generate code required by the core
-# Generates code under the __generated__ prefix to avoid
-# conflicts with legacy build system
+# All generated code is placed in the prefix location __generated__
+# by our generator scripts and genrules
+PREFIXED = {
+    "MLN_GENERATED_STYLE_HEADERS": appendList(MLN_GENERATED_STYLE_HEADERS, "__generated__/"),
+    "MLN_GENERATED_STYLE_SOURCE": appendList(MLN_GENERATED_STYLE_SOURCE, "__generated__/"),
+    "MLN_GENERATED_SHADER_HEADERS": appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
+}
+
 genrule(
     name = "generate_style_code",
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
-    outs = appendList(
-        MLN_GENERATED_STYLE_HEADERS + MLN_GENERATED_STYLE_SOURCE,
-        "__generated__/"
-    ),
+    outs = PREFIXED["MLN_GENERATED_STYLE_HEADERS"] + PREFIXED["MLN_GENERATED_STYLE_SOURCE"],
 )
 
 genrule(
     name = "generate_shaders",
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
-    outs = appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
+    outs = PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
 )
 
-GENERATED_SOURCE = appendList(
-    MLN_GENERATED_STYLE_SOURCE,
-    "__generated__/"
-)
-
-# Header only target for generated code
-# Source files are included directly in the code TLU set
-# Headers indirected here so we can strip_include_prefix
+# This header only target strips the __generated__ prefix for the compiler
+# search paths, making the location of generated code transparent to the build
 cc_library(
     name = "mbgl-core-generated-artifacts",
     srcs = [],
-    hdrs = appendList(
-        MLN_GENERATED_STYLE_HEADERS + MLN_GENERATED_SHADER_HEADERS,
-        "__generated__/"
-    ),
+    hdrs = PREFIXED["MLN_GENERATED_STYLE_HEADERS"]
+        + PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
     strip_include_prefix = "__generated__",
     deps = [
         ":generate_style_code",
@@ -82,15 +77,12 @@ cc_library(
     ]
 )
 
-# This is defined by both
-# platform/default/filesource-files.json
-# and
-# src/core-files.json
-# because they have dependencies on each other
+# Generated source is inserted directly into the core target, no need to remove
+# the prefix from the path.
 cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE
-        + GENERATED_SOURCE
+        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"]
         + MLN_OPENGL_SOURCE
         + select({
             ":drawable_renderer": MLN_DRAWABLES_SOURCE,
