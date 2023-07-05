@@ -9,6 +9,7 @@ const colorParser = require('csscolorparser');
 
 require('./style-code');
 
+fs.mkdirSync(path.normalize("../__generated__"));
 const writeGenerated = (pathString, contents) => {
   const location = path.parse(
     path.relative(__dirname + "/../", path.normalize(pathString))
