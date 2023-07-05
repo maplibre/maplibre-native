@@ -30,7 +30,7 @@ filegroup(
 )
 
 genrule(
-    name = "generate_style_code",
+    name = "generated_style_code",
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
     srcs = ["style_data"],
@@ -45,7 +45,7 @@ filegroup(
 )
 
 genrule(
-    name = "generate_shaders",
+    name = "generated_shaders",
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
     srcs = ["shader_data"],
@@ -62,8 +62,8 @@ cc_library(
     strip_include_prefix = "__generated__/include",
     visibility = ["//visibility:public"],
     deps = [
-        ":generate_style_code",
-        ":generate_shaders",
+        ":generated_style_code",
+        ":generated_shaders",
     ],
 )
 
@@ -75,7 +75,7 @@ cc_library(
     strip_include_prefix = "__generated__/src",
     visibility = ["//visibility:private"],
     deps = [
-        ":generate_style_code",
+        ":generated_style_code",
     ],
 )
 
