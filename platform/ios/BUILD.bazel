@@ -394,7 +394,7 @@ _IOS_APPLICATION_RESOURCES = [
 
 ios_application(
     name = "App",
-    bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
+    bundle_id = "org.maplibre.app",
     families = [
         "iphone",
         "ipad",
@@ -454,6 +454,7 @@ xcodeproj(
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
+    bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin"},
     default_xcode_configuration = "Debug",
     xcode_configurations = {
         "Debug": {"//command_line_option:compilation_mode": "dbg"},
