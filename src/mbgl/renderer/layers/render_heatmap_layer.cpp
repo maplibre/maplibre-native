@@ -230,6 +230,7 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
 }
 
 #if MLN_DRAWABLE_RENDERER
+namespace {
 void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
     if (renderTarget_) {
         if (activate) {
@@ -241,6 +242,7 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
         }
     }
 }
+} // namespace
 
 void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
