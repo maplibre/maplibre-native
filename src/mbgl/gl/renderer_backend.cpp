@@ -92,8 +92,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         ...);
 }
 
-void RendererBackend::initShaders([[maybe_unused]] gfx::ShaderRegistry& shaders,
-                                  [[maybe_unused]] const ProgramParameters& programParameters) {
+void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
                   shaders::BuiltIn::CircleShader,
