@@ -233,9 +233,9 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
             ? pragmaMapConvertOnlyVertexArrays(vertexSource, pragmaMap, attribMap, "vertex")
             : pragmaMapConvert(vertexSource, pragmaMap, attribMap, "vertex");
 
-        const glRoot = path.normalize("include/mbgl/shaders/gl");
+        const glRoot = path.normalize("__generated__/include/mbgl/shaders/gl");
         if (!fs.existsSync(glRoot)) {
-            fs.mkdirSync(glRoot); // Ensure target directory is available
+            fs.mkdirSync(glRoot, {recursive: true}); // Ensure target directory is available
         }
 
         fs.writeFileSync(
@@ -263,7 +263,7 @@ struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
 );
 
 // Generate the manifest
-fs.writeFileSync(path.normalize("include/mbgl/shaders/shader_manifest.hpp"),
+fs.writeFileSync(path.normalize("__generated__/include/mbgl/shaders/shader_manifest.hpp"),
 `${generatedHeader}
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -274,7 +274,7 @@ ${generatedHeaders.join('\n')}
 `);
 
 // Generate shader_source.hpp
-fs.writeFileSync(path.normalize("include/mbgl/shaders/shader_source.hpp"),
+fs.writeFileSync(path.normalize("__generated__/include/mbgl/shaders/shader_source.hpp"),
 `${generatedHeader}
 #pragma once
 #include <mbgl/gfx/backend.hpp>
