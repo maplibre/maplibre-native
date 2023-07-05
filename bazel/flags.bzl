@@ -47,6 +47,7 @@ MSVC_CPP_FLAGS = [
     "/EHsc",
     "/std:c++17",
     "/GR-",
+    "/permissive-",
 ]
 
 CPP_FLAGS = select({
