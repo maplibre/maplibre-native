@@ -1,7 +1,8 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("//bazel:core.bzl",
-    "MLN_GENERATED_STYLE_HEADERS",
+    "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_GENERATED_SHADER_HEADERS",
     "MLN_CORE_SOURCE",
@@ -17,7 +18,8 @@ load("//bazel:macros.bzl", "appendList")
 # All generated code is placed in the prefix location __generated__
 # by our generator scripts and genrules
 PREFIXED = {
-    "MLN_GENERATED_STYLE_HEADERS": appendList(MLN_GENERATED_STYLE_HEADERS, "__generated__/"),
+    "MLN_PUBLIC_GENERATED_STYLE_HEADERS": appendList(MLN_PUBLIC_GENERATED_STYLE_HEADERS, "__generated__/"),
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS": appendList(MLN_PRIVATE_GENERATED_STYLE_HEADERS, "__generated__/"),
     "MLN_GENERATED_STYLE_SOURCE": appendList(MLN_GENERATED_STYLE_SOURCE, "__generated__/"),
     "MLN_GENERATED_SHADER_HEADERS": appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
 }
@@ -26,7 +28,9 @@ genrule(
     name = "generate_style_code",
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
-    outs = PREFIXED["MLN_GENERATED_STYLE_HEADERS"] + PREFIXED["MLN_GENERATED_STYLE_SOURCE"],
+    outs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
+        + PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"]
+        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"],
 )
 
 genrule(
@@ -39,15 +43,27 @@ genrule(
 # This header only target strips the __generated__ prefix for the compiler
 # search paths, making the location of generated code transparent to the build
 cc_library(
-    name = "mbgl-core-generated-artifacts",
+    name = "mbgl-core-generated-public-artifacts",
     srcs = [],
-    hdrs = PREFIXED["MLN_GENERATED_STYLE_HEADERS"]
+    hdrs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
         + PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
     strip_include_prefix = "__generated__/include",
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
     deps = [
         ":generate_style_code",
         ":generate_shaders",
+    ],
+)
+
+# ditto, but for private headers (under the src/ path)
+cc_library(
+    name = "mbgl-core-generated-private-artifacts",
+    srcs = [],
+    hdrs = PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"],
+    strip_include_prefix = "__generated__/src",
+    visibility = ["//visibility:private"],
+    deps = [
+        ":generate_style_code",
     ],
 )
 
@@ -98,7 +114,8 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":mbgl-core-generated-artifacts",
+        ":mbgl-core-generated-public-artifacts",
+        ":mbgl-core-generated-private-artifacts",
         "//vendor:boost",
         "//vendor:csscolorparser",
         "//vendor:earcut.hpp",

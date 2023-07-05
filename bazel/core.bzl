@@ -1,4 +1,5 @@
-MLN_GENERATED_STYLE_HEADERS = [
+MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
+    "include/mbgl/style/layers/circle_layer.hpp",
     "include/mbgl/style/layers/fill_layer.hpp",
     "include/mbgl/style/layers/line_layer.hpp",
     "include/mbgl/style/layers/symbol_layer.hpp",
@@ -11,35 +12,38 @@ MLN_GENERATED_STYLE_HEADERS = [
     "include/mbgl/style/light.hpp",
 ]
 
-MLN_GENERATED_STYLE_SOURCE = [
+MLN_PRIVATE_GENERATED_STYLE_HEADERS = [
     "src/mbgl/style/layers/fill_layer_properties.hpp",
+    "src/mbgl/style/layers/line_layer_properties.hpp",
+    "src/mbgl/style/layers/symbol_layer_properties.hpp",
+    "src/mbgl/style/layers/circle_layer_properties.hpp",
+    "src/mbgl/style/layers/heatmap_layer_properties.hpp",
+    "src/mbgl/style/layers/fill_extrusion_layer_properties.hpp",
+    "src/mbgl/style/layers/raster_layer_properties.hpp",
+    "src/mbgl/style/layers/hillshade_layer_properties.hpp",
+    "src/mbgl/style/layers/background_layer_properties.hpp",
+    "src/mbgl/style/layers/location_indicator_layer_properties.hpp",
+]
+
+MLN_GENERATED_STYLE_SOURCE = [
     "src/mbgl/style/layers/fill_layer_properties.cpp",
     "src/mbgl/style/layers/fill_layer.cpp",
-    "src/mbgl/style/layers/line_layer_properties.hpp",
     "src/mbgl/style/layers/line_layer_properties.cpp",
     "src/mbgl/style/layers/line_layer.cpp",
-    "src/mbgl/style/layers/symbol_layer_properties.hpp",
     "src/mbgl/style/layers/symbol_layer_properties.cpp",
     "src/mbgl/style/layers/symbol_layer.cpp",
-    "src/mbgl/style/layers/circle_layer_properties.hpp",
     "src/mbgl/style/layers/circle_layer_properties.cpp",
     "src/mbgl/style/layers/circle_layer.cpp",
-    "src/mbgl/style/layers/heatmap_layer_properties.hpp",
     "src/mbgl/style/layers/heatmap_layer_properties.cpp",
     "src/mbgl/style/layers/heatmap_layer.cpp",
-    "src/mbgl/style/layers/fill_extrusion_layer_properties.hpp",
     "src/mbgl/style/layers/fill_extrusion_layer_properties.cpp",
     "src/mbgl/style/layers/fill_extrusion_layer.cpp",
-    "src/mbgl/style/layers/raster_layer_properties.hpp",
     "src/mbgl/style/layers/raster_layer_properties.cpp",
     "src/mbgl/style/layers/raster_layer.cpp",
-    "src/mbgl/style/layers/hillshade_layer_properties.hpp",
     "src/mbgl/style/layers/hillshade_layer_properties.cpp",
     "src/mbgl/style/layers/hillshade_layer.cpp",
-    "src/mbgl/style/layers/background_layer_properties.hpp",
     "src/mbgl/style/layers/background_layer_properties.cpp",
     "src/mbgl/style/layers/background_layer.cpp",
-    "src/mbgl/style/layers/location_indicator_layer_properties.hpp",
     "src/mbgl/style/layers/location_indicator_layer_properties.cpp",
     "src/mbgl/style/layers/location_indicator_layer.cpp",
     "src/mbgl/style/light.cpp",
@@ -738,7 +742,6 @@ MLN_CORE_HEADERS = [
     "include/mbgl/style/image.hpp",
     "include/mbgl/style/layer.hpp",
     "include/mbgl/style/layer_properties.hpp",
-    "include/mbgl/style/layers/circle_layer.hpp",
     "include/mbgl/style/position.hpp",
     "include/mbgl/style/property_expression.hpp",
     "include/mbgl/style/property_value.hpp",
