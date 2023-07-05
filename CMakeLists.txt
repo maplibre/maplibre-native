@@ -173,11 +173,12 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_target.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_target_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/change_request.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/tile_layer_group.cpp
@@ -204,10 +205,13 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
-
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
@@ -465,6 +469,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
@@ -630,7 +635,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_source_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_static_data.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_static_data.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_target.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_tree.hpp
@@ -1074,7 +1078,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_target_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp

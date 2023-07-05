@@ -183,6 +183,8 @@ TEST(Thread, ThreadPoolMessaging) {
 }
 
 TEST(Thread, ReferenceCanOutliveThread) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuse-after-free" // See AspiringActor<>::object()
     auto thread = std::make_unique<Thread<TestWorker>>("Test");
     auto worker = thread->actor();
 
@@ -194,6 +196,7 @@ TEST(Thread, ReferenceCanOutliveThread) {
 
     using namespace std::literals;
     std::this_thread::sleep_for(10s);
+#pragma GCC diagnostic pop
 }
 
 TEST(Thread, DeletePausedThread) {
