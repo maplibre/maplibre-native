@@ -22,25 +22,34 @@ const args = (() => {
   return parser.parse_args();
 })();
 
-args.root = args.root ? args.root : "";
-const targetRoot = path.join(args.root, "__generated__");
-if (!fs.existsSync(targetRoot)) {
-    fs.mkdirSync();
-}
-
-const writeGenerated = (pathString, contents) => {
-  const location = path.parse(
-    path.relative(__dirname + "/../", path.normalize(pathString))
-  );
-
-  pathString = path.join(targetRoot, location.dir);
-  if (!fs.existsSync(pathString)) {
-    fs.mkdirSync(pathString, {recursive: true});
+let writeGenerated;
+if (args.root) {
+  const targetRoot = path.join(args.root, "__generated__");
+  if (args.root) {
+    if (!fs.existsSync(targetRoot)) {
+      fs.mkdirSync();
+    }
   }
 
-  writeIfModified(
-    path.join(pathString, location.name + location.ext), contents);
+  writeGenerated = (pathString, contents) => {
+    const location = path.parse(
+      path.relative(__dirname + "/../", path.normalize(pathString))
+    );
+
+    pathString = path.join(targetRoot, location.dir);
+    if (!fs.existsSync(pathString)) {
+      fs.mkdirSync(pathString, {recursive: true});
+    }
+
+    writeIfModified(
+      path.join(pathString, location.name + location.ext), contents);
+  }
+} else {
+  writeGenerated = (pathString, contents) => {
+    writeIfModified(pathString, contents);
+  };
 }
+
 
 function parseCSSColor(str) {
   const color = colorParser.parseCSSColor(str);
