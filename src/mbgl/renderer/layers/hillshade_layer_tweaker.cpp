@@ -35,7 +35,8 @@ std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
     return {{static_cast<float>(latlng0.latitude()), static_cast<float>(latlng1.latitude())}};
 }
 
-std::array<float, 2> getLight(const PaintParameters& parameters, const HillshadePaintProperties::PossiblyEvaluated& evaluated) {
+std::array<float, 2> getLight(const PaintParameters& parameters,
+                              const HillshadePaintProperties::PossiblyEvaluated& evaluated) {
     float azimuthal = util::deg2radf(evaluated.get<HillshadeIlluminationDirection>());
     if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport)
         azimuthal = azimuthal - static_cast<float>(parameters.state.getBearing());
@@ -57,10 +58,9 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     if (!evaluatedPropsUniformBuffer) {
-        HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {
-            /* .highlight = */ evaluated.get<HillshadeHighlightColor>(),
-            /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
-            /* .accent = */ evaluated.get<HillshadeAccentColor>()};
+        HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {/* .highlight = */ evaluated.get<HillshadeHighlightColor>(),
+                                                        /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
+                                                        /* .accent = */ evaluated.get<HillshadeAccentColor>()};
         evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
                                                                              sizeof(evaluatedPropsUBO));
     }
@@ -74,10 +74,9 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto matrix = getTileMatrix(
             tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false, true);
-        HillshadeDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .latrange = */ getLatRange(tileID),
-            /* .light = */ getLight(parameters, evaluated)};
+        HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
+                                            /* .latrange = */ getLatRange(tileID),
+                                            /* .light = */ getLight(parameters, evaluated)};
 
         drawable.mutableUniformBuffers().createOrUpdate(HillshadeDrawableUBOName, &drawableUBO, parameters.context);
     });

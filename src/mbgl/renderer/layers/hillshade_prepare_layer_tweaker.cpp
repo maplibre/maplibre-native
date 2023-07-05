@@ -53,19 +53,19 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto& drawableData = static_cast<const gfx::HillshadePrepareDrawableData&>(*drawable.getData());
-            
+
         mat4 matrix;
         matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
-        
-        HillshadePrepareDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .unpack = */ getUnpackVector(drawableData.encoding),
-            /* .dimension = */ {drawableData.stride, drawableData.stride},
-            /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ util::TERRAIN_RGB_MAXZOOM};
 
-        drawable.mutableUniformBuffers().createOrUpdate(HillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
+        HillshadePrepareDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
+                                                   /* .unpack = */ getUnpackVector(drawableData.encoding),
+                                                   /* .dimension = */ {drawableData.stride, drawableData.stride},
+                                                   /* .zoom = */ static_cast<float>(tileID.canonical.z),
+                                                   /* .maxzoom = */ util::TERRAIN_RGB_MAXZOOM};
+
+        drawable.mutableUniformBuffers().createOrUpdate(
+            HillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

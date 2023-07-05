@@ -25,7 +25,7 @@ public:
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif
-    
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -45,7 +45,7 @@ private:
     /// Remove all the drawables for tiles
     void removeAllDrawables() override;
 #endif
-    
+
     // Paint properties
     style::HillshadePaintProperties::Unevaluated unevaluated;
     uint8_t maxzoom = util::TERRAIN_RGB_MAXZOOM;
@@ -58,7 +58,7 @@ private:
     std::shared_ptr<HillshadeProgram> hillshadeProgram;
     std::shared_ptr<HillshadePrepareProgram> hillshadePrepareProgram;
 #endif
-    
+
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr hillshadePrepareShader;
     gfx::ShaderProgramBasePtr hillshadeShader;

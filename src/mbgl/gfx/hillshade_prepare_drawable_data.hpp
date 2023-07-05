@@ -12,7 +12,8 @@ namespace gfx {
 class HillshadePrepareDrawableData : public DrawableData {
 public:
     HillshadePrepareDrawableData(int32_t stride_, Tileset::DEMEncoding encoding_)
-        : stride(stride_), encoding(encoding_) {}
+        : stride(stride_),
+          encoding(encoding_) {}
 
     int32_t stride;
     Tileset::DEMEncoding encoding;

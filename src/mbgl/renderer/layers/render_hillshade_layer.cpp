@@ -273,10 +273,10 @@ static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShad
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
-                                gfx::Context& context,
-                                const TransformState& state,
-                                [[maybe_unused]] const RenderTree& renderTree,
-                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                                  gfx::Context& context,
+                                  const TransformState& state,
+                                  [[maybe_unused]] const RenderTree& renderTree,
+                                  [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -334,7 +334,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             // remove it
             drawable.reset();
             ++stats.drawablesRemoved;
-            
+
             const auto result = renderTargets.find(*tileID);
             if (result != renderTargets.end()) {
                 activateRenderTarget(result->second, false, changes);
@@ -345,7 +345,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
-        
+
         auto* bucket_ = tile.getBucket(*baseImpl);
         if (!bucket_) {
             removeTile(renderPass, tileID);
@@ -356,7 +356,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!bucket.hasData()) {
             continue;
         }
-        
+
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
             continue;
         }
@@ -371,27 +371,27 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
         activateRenderTarget(renderTarget, true, changes);
-        
+
         auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
         if (!singleTileLayerGroup) {
             return;
         }
         singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
         renderTarget->addLayerGroup(singleTileLayerGroup, /*canReplace=*/true);
-        
+
         hillshadePrepareVertexAttrs.clear();
-        
+
         const auto staticDataVertices = RenderStaticData::rasterVertices();
         const auto staticDataIndices = RenderStaticData::quadTriangleIndices();
         const auto staticDataSegments = RenderStaticData::rasterSegments();
-        
+
         if (auto& attr = hillshadePrepareVertexAttrs.getOrAdd("a_texture_pos")) {
             std::size_t index{0};
             for (auto& v : staticDataVertices.vector()) {
                 attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
             }
         }
-        
+
         std::vector<std::array<int16_t, 2>> prepareRawVerts;
         const auto buildPrepareVertices = [&]() {
             const auto& verts = staticDataVertices.vector();
@@ -414,32 +414,35 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         buildPrepareVertices();
         hillshadePrepareBuilder->addVertices(prepareRawVerts, 0, prepareRawVerts.size());
 
-        hillshadePrepareBuilder->setSegments(gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
-        
+        hillshadePrepareBuilder->setSegments(
+            gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
+
         auto prepareImageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
         if (prepareImageLocation.has_value()) {
             std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
             texture->setImage(bucket.getDEMData().getImagePtr());
-            texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            texture->setSamplerConfiguration(
+                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             hillshadePrepareBuilder->setTexture(texture, prepareImageLocation.value());
         }
-        
+
         hillshadePrepareBuilder->flush();
 
         for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride, bucket.getDEMData().encoding));
+            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride,
+                                                                                  bucket.getDEMData().encoding));
             singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
-        
+
         // Continue with tile
         hillshadeVertexAttrs.clear();
-        
+
         auto* vertices = &staticDataVertices;
         auto* indices = &staticDataIndices;
         auto* segments = &staticDataSegments;
-        
+
         if (!bucket.vertices.empty() && !bucket.indices.empty()) {
             vertices = &bucket.vertices;
             indices = &bucket.indices;
@@ -447,14 +450,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 segments = &bucket.segments;
             }
         }
-        
+
         if (auto& attr = hillshadeVertexAttrs.getOrAdd("a_texture_pos")) {
             std::size_t index{0};
             for (auto& v : vertices->vector()) {
                 attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
             }
         }
-        
+
         std::vector<std::array<int16_t, 2>> rawVerts;
         const auto buildVertices = [&]() {
             const auto& verts = vertices->vector();
@@ -478,12 +481,12 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadeBuilder->addVertices(rawVerts, 0, rawVerts.size());
 
         hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
-        
+
         auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
         if (imageLocation.has_value()) {
             hillshadeBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
         }
-        
+
         hillshadeBuilder->flush();
 
         for (auto& drawable : hillshadeBuilder->clearDrawables()) {
