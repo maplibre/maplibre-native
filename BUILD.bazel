@@ -43,7 +43,7 @@ cc_library(
     srcs = [],
     hdrs = PREFIXED["MLN_GENERATED_STYLE_HEADERS"]
         + PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
-    strip_include_prefix = "__generated__",
+    strip_include_prefix = "__generated__/include",
     visibility = ["//visibility:private"],
     deps = [
         ":generate_style_code",
