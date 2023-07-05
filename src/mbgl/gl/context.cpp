@@ -19,7 +19,6 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
-#include <mbgl/gl/drawable_gl_tweaker.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
 #include <mbgl/gl/render_target_gl.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
@@ -462,10 +461,6 @@ void Context::setDirtyState() {
 #if MLN_DRAWABLE_RENDERER
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
-}
-
-gfx::DrawableTweakerPtr Context::createDrawableTweaker() {
-    return std::make_shared<gl::DrawableGLTweaker>();
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {

@@ -469,7 +469,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                     : gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setNeedsStencil(true);
+        builder->setEnableStencil(true);
         builder->setVertexAttrName("a_pos_normal");
 
         return builder;

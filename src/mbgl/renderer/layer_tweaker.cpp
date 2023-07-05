@@ -16,14 +16,18 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  const TransformState& state,
                                  const std::array<float, 2>& translation,
                                  style::TranslateAnchorType anchor,
+                                 bool nearClipped,
                                  bool inViewportPixelUnits,
                                  bool aligned) {
     // from RenderTile::prepare
     mat4 tileMatrix;
-    state.matrixFor(tileMatrix, tileID);
+    state.matrixFor(/*out*/ tileMatrix, tileID);
+
 
     const auto& transformParams = renderTree.getParameters().transformParams;
-    const auto& projMatrix = aligned ? transformParams.alignedProjMatrix : transformParams.projMatrix;
+    // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
+    auto& projMatrix = nearClipped ? transformParams.nearClippedProjMatrix : transformParams.projMatrix;
+    projMatrix = aligned ? transformParams.alignedProjMatrix : projMatrix;
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);
 
     return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, state, inViewportPixelUnits);
