@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
+const { ArgumentParser } = require("argparse");
 const path = require('path');
 const fs = require('fs');
 const ejs = require('ejs');
@@ -9,14 +10,34 @@ const colorParser = require('csscolorparser');
 
 require('./style-code');
 
-fs.mkdirSync(path.normalize("../__generated__"));
+// Parse command line
+const args = (() => {
+  const parser = new ArgumentParser({
+      description: "MapLibre Shader Tools"
+  });
+  parser.add_argument("--root", "--r", {
+      help: "Directory root to place generated code",
+      required: false
+  });
+  return parser.parse_args();
+})();
+
+args.root = args.root ? args.root : "";
+const targetRoot = path.join(args.root, "__generated__");
+if (!fs.existsSync(targetRoot)) {
+    fs.mkdirSync();
+}
+
 const writeGenerated = (pathString, contents) => {
   const location = path.parse(
     path.relative(__dirname + "/../", path.normalize(pathString))
   );
 
-  pathString = path.join("__generated__", location.dir);
-  fs.mkdirSync(pathString, {recursive: true});
+  pathString = path.join(targetRoot, location.dir);
+  if (!fs.existsSync(pathString)) {
+    fs.mkdirSync(pathString, {recursive: true});
+  }
+
   writeIfModified(
     path.join(pathString, location.name + location.ext), contents);
 }

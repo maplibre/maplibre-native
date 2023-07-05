@@ -40,36 +40,41 @@ config_setting(
     }
 )
 
+# Generate code required by the core
+# Generates code under the __generated__ prefix to avoid
+# conflicts with legacy build system
 genrule(
     name = "generate_style_code",
-    cmd = "node $(execpath scripts/generate-style-code.js)",
+    cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
     outs = appendList(
         MLN_GENERATED_STYLE_HEADERS + MLN_GENERATED_STYLE_SOURCE,
-        "$(RULEDIR)/"
+        "__generated__/"
     ),
 )
 
 genrule(
     name = "generate_shaders",
-    cmd = "node $(execpath shaders/generate_shader_code.js)",
+    cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
-    outs = appendList(MLN_GENERATED_SHADER_HEADERS, "$(RULEDIR)/"),
+    outs = appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
 )
 
-# Contains all generated code for the core
 GENERATED_SOURCE = appendList(
     MLN_GENERATED_STYLE_SOURCE,
     "__generated__/"
 )
-GENERATED_HEADERS = appendList(
-    MLN_GENERATED_STYLE_HEADERS + MLN_GENERATED_SHADER_HEADERS,
-    "__generated__/"
-)
+
+# Header only target for generated code
+# Source files are included directly in the code TLU set
+# Headers indirected here so we can strip_include_prefix
 cc_library(
     name = "mbgl-core-generated-artifacts",
     srcs = [],
-    hdrs = GENERATED_HEADERS + GENERATED_SOURCE,
+    hdrs = appendList(
+        MLN_GENERATED_STYLE_HEADERS + MLN_GENERATED_SHADER_HEADERS,
+        "__generated__/"
+    ),
     strip_include_prefix = "__generated__",
     deps = [
         ":generate_style_code",
@@ -84,21 +89,36 @@ cc_library(
 # because they have dependencies on each other
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE + select({
-        ":drawable_renderer": MLN_DRAWABLES_SOURCE,
-        ":split_renderer": MLN_DRAWABLES_SOURCE,
-        "//conditions:default": []
-    }) + MLN_OPENGL_SOURCE,
-    hdrs = MLN_CORE_HEADERS + select({
-        ":drawable_renderer": MLN_DRAWABLES_HEADERS,
-        ":split_renderer": MLN_DRAWABLES_HEADERS,
-        "//conditions:default": []
-    }) + MLN_OPENGL_HEADERS,
+    srcs = MLN_CORE_SOURCE
+        + GENERATED_SOURCE
+        + MLN_OPENGL_SOURCE
+        + select({
+            ":drawable_renderer": MLN_DRAWABLES_SOURCE,
+            ":split_renderer": MLN_DRAWABLES_SOURCE,
+            "//conditions:default": []
+        }),
+    hdrs = MLN_CORE_HEADERS
+        + MLN_OPENGL_HEADERS
+        + select({
+            ":drawable_renderer": MLN_DRAWABLES_HEADERS,
+            ":split_renderer": MLN_DRAWABLES_HEADERS,
+            "//conditions:default": []
+        }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
-        ":legacy_renderer": ["MLN_LEGACY_RENDERER=1", "MLN_DRAWABLE_RENDERER=0"],
-        ":drawable_renderer": ["MLN_LEGACY_RENDERER=0", "MLN_DRAWABLE_RENDERER=1"],
-        ":split_renderer": ["MLN_LEGACY_RENDERER=1", "MLN_DRAWABLE_RENDERER=1", "MLN_RENDERER_SPLIT_VIEW=1"],
+        ":legacy_renderer": [
+            "MLN_LEGACY_RENDERER=1",
+            "MLN_DRAWABLE_RENDERER=0"
+        ],
+        ":drawable_renderer": [
+            "MLN_LEGACY_RENDERER=0",
+            "MLN_DRAWABLE_RENDERER=1"
+        ],
+        ":split_renderer": [
+            "MLN_LEGACY_RENDERER=1",
+            "MLN_DRAWABLE_RENDERER=1",
+            "MLN_RENDERER_SPLIT_VIEW=1"
+        ],
     }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
         "//conditions:default": []

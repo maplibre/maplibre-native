@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+console.log("Generating shaders...");
+
 const { ArgumentParser } = require("argparse");
 const path = require("node:path");
 const fs = require("node:fs")
@@ -200,6 +202,10 @@ const args = (() => {
     const parser = new ArgumentParser({
         description: "MapLibre Shader Tools"
     });
+    parser.add_argument("--root", "--r", {
+        help: "Directory root to place generated code",
+        required: true
+    });
     parser.add_argument("--compress", "--c", {
         help: "Compress shader text with zlib and output byte arrays instead of strings",
         required: false
@@ -217,6 +223,12 @@ const args = (() => {
 const shaderRoot = "shaders/";
 let generatedHeaders = [];
 let shaderNames = [];
+
+const targetRoot = path.join(args.root, "__generated__");
+if (!fs.existsSync(targetRoot)) {
+    fs.mkdirSync();
+}
+
 JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
     .filter(it => typeof it == "object")
     .forEach((elem) => {
@@ -233,7 +245,7 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
             ? pragmaMapConvertOnlyVertexArrays(vertexSource, pragmaMap, attribMap, "vertex")
             : pragmaMapConvert(vertexSource, pragmaMap, attribMap, "vertex");
 
-        const glRoot = path.normalize("__generated__/include/mbgl/shaders/gl");
+        const glRoot = path.join(args.root, "__generated__/include/mbgl/shaders/gl");
         if (!fs.existsSync(glRoot)) {
             fs.mkdirSync(glRoot, {recursive: true}); // Ensure target directory is available
         }
@@ -263,7 +275,7 @@ struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
 );
 
 // Generate the manifest
-fs.writeFileSync(path.normalize("__generated__/include/mbgl/shaders/shader_manifest.hpp"),
+fs.writeFileSync(path.join(args.root, "__generated__/include/mbgl/shaders/shader_manifest.hpp"),
 `${generatedHeader}
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
@@ -274,7 +286,7 @@ ${generatedHeaders.join('\n')}
 `);
 
 // Generate shader_source.hpp
-fs.writeFileSync(path.normalize("__generated__/include/mbgl/shaders/shader_source.hpp"),
+fs.writeFileSync(path.join(args.root, "__generated__/include/mbgl/shaders/shader_source.hpp"),
 `${generatedHeader}
 #pragma once
 #include <mbgl/gfx/backend.hpp>
@@ -308,3 +320,5 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
 } // namespace shaders
 } // namespace mbgl
 `);
+
+console.log("Shaders generated!");
