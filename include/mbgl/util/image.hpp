@@ -76,7 +76,7 @@ public:
     size_t stride() const { return channels * size.width; }
     size_t bytes() const { return stride() * size.height; }
 
-    void fill(uint8_t value) { 
+    void fill(uint8_t value) {
         if (valid()) {
             assert(bytes());
             std::fill(data.get(), data.get() + bytes(), value);
