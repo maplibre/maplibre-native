@@ -36,7 +36,7 @@ const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
 void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
                                            [[maybe_unused]] const RenderTree& renderTree,
                                            const PaintParameters& parameters) {
-    //const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
+    // const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {
         return;
@@ -58,11 +58,12 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
         matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
 
-        HillshadePrepareDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
-                                                   /* .unpack = */ getUnpackVector(drawableData.encoding),
-                                                   /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
-                                                   /* .zoom = */ static_cast<float>(tileID.canonical.z),
-                                                   /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
+        HillshadePrepareDrawableUBO drawableUBO = {
+            /* .matrix = */ util::cast<float>(matrix),
+            /* .unpack = */ getUnpackVector(drawableData.encoding),
+            /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
+            /* .zoom = */ static_cast<float>(tileID.canonical.z),
+            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         drawable.mutableUniformBuffers().createOrUpdate(
             HillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
