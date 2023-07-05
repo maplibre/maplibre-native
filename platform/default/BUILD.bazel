@@ -70,6 +70,7 @@ cc_library(
             "src/mbgl/util/string_stdlib.cpp",
             "src/mbgl/util/thread.cpp",
             "src/mbgl/util/timer.cpp",
+            "src/mbgl/util/webp_reader.cpp",
         ],
         "//:ios": [],
     }),

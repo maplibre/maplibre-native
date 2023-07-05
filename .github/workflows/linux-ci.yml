@@ -188,6 +188,7 @@ jobs:
             libpng-dev \
             libwebp-dev \
             libglfw3-dev \
+            libsqlite3-dev \
             xserver-xorg-video-dummy \
             xinit
 
