@@ -6,8 +6,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/context.hpp>
 
-// TODO: don't include
-#include <mbgl/gl/renderable_resource.hpp>
+#include <mbgl/gfx/renderable.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -33,13 +32,11 @@ void DrawableCustomLayerHostTweaker::execute(gfx::Drawable& drawable, const Pain
     state.getProjMatrix(projMatrix);
     parameters.projectionMatrix = projMatrix;
 
-    // TODO: check render errors independently of SDK
     host->render(parameters);
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
-    // TODO: do this via the context
-    paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
+    paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();
 
     context.setDirtyState();
 }
