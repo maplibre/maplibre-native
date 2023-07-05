@@ -814,7 +814,7 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/layermanager/location_indicator_layer_factory.cpp",
     "src/mbgl/platform/gl_functions.cpp",
     "src/mbgl/renderer/layers/render_location_indicator_layer.cpp",
-    "src/mbgl/renderer/layers/render_location_indicator_layer.hpp",\
+    "src/mbgl/renderer/layers/render_location_indicator_layer.hpp",
     "src/mbgl/style/layers/location_indicator_layer_impl.cpp",
     "src/mbgl/style/layers/location_indicator_layer_impl.hpp",
 ]
