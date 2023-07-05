@@ -258,7 +258,7 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
 
 void RenderHillshadeLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
-    for (auto pair : renderTargets) {
+    for (const auto& pair : renderTargets) {
         activateRenderTarget(pair.second, willRender, changes);
     }
 }
@@ -276,14 +276,14 @@ static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
-                                  const TransformState& state,
+                                  [[maybe_unused]] const TransformState& state,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
-        for (auto pair : renderTargets) {
+        for (const auto& pair : renderTargets) {
             activateRenderTarget(pair.second, false, changes);
         }
         renderTargets.clear();
@@ -379,7 +379,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             return;
         }
         singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
-        renderTarget->addLayerGroup(singleTileLayerGroup, /*canReplace=*/true);
+        renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
 
         hillshadePrepareVertexAttrs.clear();
 
