@@ -458,7 +458,7 @@ _IOS_APPLICATION_RESOURCES = [
 
 ios_application(
     name = "App",
-    bundle_id = "com.maplibre.app",
+    bundle_id = "org.maplibre.app",
     families = [
         "iphone",
         "ipad",
@@ -476,7 +476,7 @@ ios_application(
 
 ios_application(
     name = "AppDynamicLib",
-    bundle_id = "com.maplibre.app",
+    bundle_id = "org.maplibre.app",
     families = [
         "iphone",
         "ipad",
