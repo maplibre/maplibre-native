@@ -158,7 +158,7 @@ objc_library(
     name = "sdk",
     hdrs = _PUBLIC_HEADERS,
     data = ["resources"],
-    module_name = "Mapbox",
+    module_name = "MapLibre",
     sdk_dylibs = [
         "libz",
         "libsqlite3",
