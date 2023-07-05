@@ -10,8 +10,8 @@ load("//bazel:core.bzl",
     "MLN_OPENGL_HEADERS",
     "MLN_DRAWABLES_SOURCE",
     "MLN_DRAWABLES_HEADERS",
-    "appendList"
 )
+load("//bazel:macros.bzl", "appendList")
 
 string_flag(
     name = "renderer",

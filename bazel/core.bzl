@@ -89,12 +89,6 @@ MLN_GENERATED_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/symbol_text_and_icon.hpp",
 ]
 
-def appendList(items, prefix):
-    out = []
-    for item in items:
-        out.append(prefix + item)
-    return out
-
 MLN_CORE_SOURCE = [
     "src/mbgl/actor/mailbox.cpp",
     "src/mbgl/actor/scheduler.cpp",
