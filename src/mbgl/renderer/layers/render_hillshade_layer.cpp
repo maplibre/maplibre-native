@@ -430,9 +430,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride,
-                                                                                  bucket.getDEMData().encoding,
-                                                                                  maxzoom));
+            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(
+                bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom));
             singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
