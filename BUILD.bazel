@@ -24,19 +24,31 @@ PREFIXED = {
     "MLN_GENERATED_SHADER_HEADERS": appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
 }
 
+filegroup(
+    name = "style_data",
+    srcs = glob(["**/*.ejs"], allow_empty = False)
+)
+
 genrule(
     name = "generate_style_code",
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
+    srcs = ["style_data"],
     outs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
         + PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"]
         + PREFIXED["MLN_GENERATED_STYLE_SOURCE"],
+)
+
+filegroup(
+    name = "shader_data",
+    srcs = ["shaders/manifest.json"] + glob(["shaders/*.glsl"], allow_empty = False)
 )
 
 genrule(
     name = "generate_shaders",
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
+    srcs = ["shader_data"],
     outs = PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
 )
 
