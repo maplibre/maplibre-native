@@ -11,7 +11,7 @@ The build process should give you a set of `.a` files that you can use to includ
 The following dependencies are required to build MapLibre Native on Debian 11.
 
 ```bash
-apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libgl1-mesa-dev libgl1-mesa-dri
+apt install ccache cmake ninja-build pkg-config xvfb libcurl4-openssl-dev libglfw3-dev libuv1-dev g++-10 libc++-9-dev libc++abi-9-dev libpng-dev libwebp-dev libgl1-mesa-dev libgl1-mesa-dri
 ```
 
 There are two required packages that are not available in the standard Debian package repository: `libjpeg-turbo8` and `libicu66`. You can install them by downloading and installing the `.deb` packages.
