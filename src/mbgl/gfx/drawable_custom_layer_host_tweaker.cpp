@@ -11,7 +11,7 @@
 namespace mbgl {
 namespace gfx {
 
-void DrawableCustomLayerHostTweaker::execute(gfx::Drawable& drawable, const PaintParameters& paintParameters) {
+void DrawableCustomLayerHostTweaker::execute(gfx::Drawable& /*drawable*/, const PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
     const TransformState& state = paintParameters.state;

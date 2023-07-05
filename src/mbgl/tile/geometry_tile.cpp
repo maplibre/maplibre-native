@@ -2,8 +2,8 @@
 
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/gl/custom_layer.hpp>
-#include <mbgl/gl/render_custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
+#include <mbgl/renderer/layers/render_custom_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/image_atlas.hpp>

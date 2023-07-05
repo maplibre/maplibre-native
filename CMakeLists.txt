@@ -980,8 +980,8 @@ if(MLN_WITH_OPENGL)
     list(APPEND 
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
@@ -1046,10 +1046,10 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer_factory.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer_impl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/defines.hpp
@@ -1065,8 +1065,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/program.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_custom_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_custom_layer.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.hpp

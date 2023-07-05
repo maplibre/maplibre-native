@@ -1,8 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/drawable_tweaker.hpp>
-
-#include <mbgl/gl/custom_layer.hpp> // TODO: move to mbgl/gfx
+#include <mbgl/style/layers/custom_layer.hpp>
 
 #include <memory>
 #include <string>

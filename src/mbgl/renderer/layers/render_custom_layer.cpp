@@ -1,9 +1,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/custom_layer_impl.hpp>
-#include <mbgl/gl/render_custom_layer.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
+#include <mbgl/style/layers/custom_layer_impl.hpp>
+#include <mbgl/renderer/layers/render_custom_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/platform/gl_functions.hpp>
@@ -11,7 +9,13 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
+#if MLN_LEGACY_RENDERER
+#include <mbgl/gl/context.hpp>
+#include <mbgl/gl/renderable_resource.hpp>
+#endif
+
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
@@ -110,9 +114,9 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 #endif
 
 #if MLN_DRAWABLE_RENDERER
-void RenderCustomLayer::update(gfx::ShaderRegistry& shaders,
+void RenderCustomLayer::update(gfx::ShaderRegistry& /*shaders*/,
                                gfx::Context& context,
-                               const TransformState& state,
+                               const TransformState& /*state*/,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
