@@ -1,67 +1,55 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-load("//bazel:core.bzl", "MLN_CORE_SOURCE", "MLN_CORE_HEADERS", "MLN_OPENGL_SOURCE", "MLN_OPENGL_HEADERS", "MLN_DRAWABLES_SOURCE", "MLN_DRAWABLES_HEADERS")
-
-string_flag(
-    name = "renderer",
-    build_setting_default = "drawable",
-    values=["legacy", "drawable", "split"]
+load("//bazel:core.bzl",
+    "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
+    "MLN_GENERATED_STYLE_SOURCE",
+    "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_CORE_SOURCE",
+    "MLN_CORE_HEADERS",
+    "MLN_OPENGL_SOURCE",
+    "MLN_OPENGL_HEADERS",
+    "MLN_DRAWABLES_SOURCE",
+    "MLN_DRAWABLES_HEADERS",
 )
-
-config_setting(
-    name = "legacy_renderer",
-    flag_values = {
-        ":renderer": "legacy"
-    }
-)
-
-config_setting(
-    name = "drawable_renderer",
-        flag_values = {
-        ":renderer": "drawable"
-    }
-)
-
-config_setting(
-    name = "split_renderer",
-    flag_values = {
-        ":renderer": "split"
-    }
-)
+load("//bazel:macros.bzl", "appendList")
 
 # Generate code required by the core
+# All generated code is placed in the prefix location __generated__
+# by our generator scripts and genrules
+PREFIXED = {
+    "MLN_PUBLIC_GENERATED_STYLE_HEADERS": appendList(MLN_PUBLIC_GENERATED_STYLE_HEADERS, "__generated__/"),
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS": appendList(MLN_PRIVATE_GENERATED_STYLE_HEADERS, "__generated__/"),
+    "MLN_GENERATED_STYLE_SOURCE": appendList(MLN_GENERATED_STYLE_SOURCE, "__generated__/"),
+    "MLN_GENERATED_SHADER_HEADERS": appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
+}
+
 filegroup(
     name = "style_data",
-    srcs = glob(
-        ["**/*.ejs"],
-        allow_empty = False,
-    ),
+    srcs = glob(["**/*.ejs"], allow_empty = False)
 )
 
 genrule(
     name = "generated_style_code",
-    srcs = ["style_data"],
-    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_PRIVATE_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_STYLE_SOURCE,
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
+    srcs = ["style_data"],
+    outs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
+        + PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"]
+        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"],
 )
 
 filegroup(
     name = "shader_data",
-    srcs = ["shaders/manifest.json"] + glob(
-        ["shaders/*.glsl"],
-        allow_empty = False,
-    ),
+    srcs = ["shaders/manifest.json"] + glob(["shaders/*.glsl"], allow_empty = False)
 )
 
 genrule(
     name = "generated_shaders",
-    srcs = ["shader_data"],
-    outs = MLN_GENERATED_SHADER_HEADERS,
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
+    srcs = ["shader_data"],
+    outs = PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
 )
 
 # This header only target strips the __generated__ prefix for the compiler
@@ -69,12 +57,13 @@ genrule(
 cc_library(
     name = "mbgl-core-generated-public-artifacts",
     srcs = [],
-    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_SHADER_HEADERS,
+    hdrs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
+        + PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
+    strip_include_prefix = "__generated__/include",
     visibility = ["//visibility:public"],
     deps = [
-        ":generated_shaders",
         ":generated_style_code",
+        ":generated_shaders",
     ],
 )
 
@@ -82,7 +71,8 @@ cc_library(
 cc_library(
     name = "mbgl-core-generated-private-artifacts",
     srcs = [],
-    hdrs = MLN_PRIVATE_GENERATED_STYLE_HEADERS,
+    hdrs = PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"],
+    strip_include_prefix = "__generated__/src",
     visibility = ["//visibility:private"],
     deps = [
         ":generated_style_code",
@@ -93,21 +83,36 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE + select({
-        ":drawable_renderer": MLN_DRAWABLES_SOURCE,
-        ":split_renderer": MLN_DRAWABLES_SOURCE,
-        "//conditions:default": []
-    }) + MLN_OPENGL_SOURCE,
-    hdrs = MLN_CORE_HEADERS + select({
-        ":drawable_renderer": MLN_DRAWABLES_HEADERS,
-        ":split_renderer": MLN_DRAWABLES_HEADERS,
-        "//conditions:default": []
-    }) + MLN_OPENGL_HEADERS,
+    srcs = MLN_CORE_SOURCE
+        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"]
+        + MLN_OPENGL_SOURCE
+        + select({
+            ":drawable_renderer": MLN_DRAWABLES_SOURCE,
+            ":split_renderer": MLN_DRAWABLES_SOURCE,
+            "//conditions:default": []
+        }),
+    hdrs = MLN_CORE_HEADERS
+        + MLN_OPENGL_HEADERS
+        + select({
+            ":drawable_renderer": MLN_DRAWABLES_HEADERS,
+            ":split_renderer": MLN_DRAWABLES_HEADERS,
+            "//conditions:default": []
+        }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
-        ":legacy_renderer": ["MLN_LEGACY_RENDERER=1", "MLN_DRAWABLE_RENDERER=0"],
-        ":drawable_renderer": ["MLN_LEGACY_RENDERER=0", "MLN_DRAWABLE_RENDERER=1"],
-        ":split_renderer": ["MLN_LEGACY_RENDERER=1", "MLN_DRAWABLE_RENDERER=1", "MLN_RENDERER_SPLIT_VIEW=1"],
+        ":legacy_renderer": [
+            "MLN_LEGACY_RENDERER=1",
+            "MLN_DRAWABLE_RENDERER=0"
+        ],
+        ":drawable_renderer": [
+            "MLN_LEGACY_RENDERER=0",
+            "MLN_DRAWABLE_RENDERER=1"
+        ],
+        ":split_renderer": [
+            "MLN_LEGACY_RENDERER=1",
+            "MLN_DRAWABLE_RENDERER=1",
+            "MLN_RENDERER_SPLIT_VIEW=1"
+        ],
     }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
         "//conditions:default": []
@@ -121,8 +126,8 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":mbgl-core-generated-private-artifacts",
         ":mbgl-core-generated-public-artifacts",
+        ":mbgl-core-generated-private-artifacts",
         "//vendor:boost",
         "//vendor:csscolorparser",
         "//vendor:earcut.hpp",
@@ -182,6 +187,35 @@ config_setting(
     flag_values = {
         ":maplibre_platform": "windows",
     },
+)
+
+# Selects the rendering implementation to utilize in the core
+
+string_flag(
+    name = "renderer",
+    build_setting_default = "legacy",
+    values=["legacy", "drawable", "split"]
+)
+
+config_setting(
+    name = "legacy_renderer",
+    flag_values = {
+        ":renderer": "legacy"
+    }
+)
+
+config_setting(
+    name = "drawable_renderer",
+        flag_values = {
+        ":renderer": "drawable"
+    }
+)
+
+config_setting(
+    name = "split_renderer",
+    flag_values = {
+        ":renderer": "split"
+    }
 )
 
 exports_files(
