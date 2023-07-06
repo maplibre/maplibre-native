@@ -113,6 +113,9 @@ public:
 
     virtual void clearStencilBuffer(int32_t) = 0;
 
+    /// Sets dirty state
+    virtual void setDirtyState() = 0;
+
 #if MLN_DRAWABLE_RENDERER
 public:
     /// Create a new drawable builder
@@ -140,9 +143,6 @@ public:
 
     /// Resets the context state to defaults
     virtual void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) = 0;
-
-    /// Sets dirty state
-    virtual void setDirtyState() = 0;
 #endif
 };
 

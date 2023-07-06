@@ -423,6 +423,7 @@ void Context::reset() {
     performCleanup();
 }
 
+#if MLN_DRAWABLE_RENDERER
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
     bindVertexArray = 0;
@@ -431,6 +432,7 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
 }
+#endif
 
 void Context::setDirtyState() {
     // Note: does not set viewport/scissorTest/bindFramebuffer to dirty

@@ -4,12 +4,12 @@
 #include <mbgl/renderer/layers/render_custom_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/math/angles.hpp>
-#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #if MLN_LEGACY_RENDERER
+#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #endif
@@ -19,6 +19,9 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+
+// TODO: platform agnostic error checks
+#define MBGL_CHECK_ERROR(cmd) (cmd)
 #endif
 
 namespace mbgl {
@@ -114,9 +117,9 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 #endif
 
 #if MLN_DRAWABLE_RENDERER
-void RenderCustomLayer::update(gfx::ShaderRegistry& /*shaders*/,
+void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
-                               const TransformState& /*state*/,
+                               [[maybe_unused]] const TransformState& state,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -157,6 +160,7 @@ void RenderCustomLayer::update(gfx::ShaderRegistry& /*shaders*/,
 
         // add drawable to layer group
         localLayerGroup->addDrawable(std::move(drawable));
+        ++stats.drawablesAdded;
     }
 }
 #endif

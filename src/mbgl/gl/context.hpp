@@ -100,10 +100,6 @@ public:
                abandonedFramebuffers.empty();
     }
 
-    void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
-
-    void setDirtyState() override;
-
     extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
@@ -123,7 +119,11 @@ public:
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
     UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
+
+    void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 #endif
+
+    void setDirtyState() override;
 
 private:
     RendererBackend& backend;
