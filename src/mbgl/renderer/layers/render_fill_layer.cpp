@@ -58,6 +58,11 @@ RenderFillLayer::RenderFillLayer(Immutable<style::FillLayer::Impl> _impl)
 
 RenderFillLayer::~RenderFillLayer() = default;
 
+void RenderFillLayer::prepare(const LayerPrepareParameters& params) {
+    RenderLayer::prepare(params);
+    updateRenderTileIDs();
+}
+
 void RenderFillLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
@@ -325,12 +330,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-
     std::unique_ptr<gfx::DrawableBuilder> fillBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
     std::unique_ptr<gfx::DrawableBuilder> patternBuilder;
@@ -367,7 +366,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != renderPass || (tileID && newTileIDs.find(*tileID) == newTileIDs.end())) {
+        if (drawable->getRenderPass() != renderPass || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
             drawable.reset();
             ++stats.drawablesRemoved;
         }
