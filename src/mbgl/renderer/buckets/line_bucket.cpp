@@ -575,6 +575,7 @@ void LineBucket::addPieSliceVertex(const GeometryCoordinate& currentVertex,
 }
 
 void LineBucket::upload(gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
@@ -583,6 +584,7 @@ void LineBucket::upload(gfx::UploadPass& uploadPass) {
     for (auto& pair : paintPropertyBinders) {
         pair.second.upload(uploadPass);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
 }

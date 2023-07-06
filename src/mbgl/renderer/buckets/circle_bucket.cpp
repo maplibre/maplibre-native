@@ -24,6 +24,7 @@ CircleBucket::CircleBucket(const std::map<std::string, Immutable<LayerProperties
 CircleBucket::~CircleBucket() = default;
 
 void CircleBucket::upload(gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
@@ -32,6 +33,7 @@ void CircleBucket::upload(gfx::UploadPass& uploadPass) {
     for (auto& pair : paintPropertyBinders) {
         pair.second.upload(uploadPass);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
 }

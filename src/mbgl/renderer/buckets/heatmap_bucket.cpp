@@ -24,12 +24,14 @@ HeatmapBucket::HeatmapBucket(const BucketParameters& parameters,
 HeatmapBucket::~HeatmapBucket() = default;
 
 void HeatmapBucket::upload(gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
     indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
 
     for (auto& pair : paintPropertyBinders) {
         pair.second.upload(uploadPass);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
 }

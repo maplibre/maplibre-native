@@ -140,7 +140,7 @@ public:
     using OpacityVertexVector = gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>>;
     using OpacityVertexBuffer = gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>;
 
-    struct Buffer {
+    struct Buffer final {
         ~Buffer() {
             sharedVertices->release();
             sharedDynamicVertices->release();

@@ -13,6 +13,15 @@ struct VertexBufferBase {
 
 class VertexVectorBase {
 public:
+    VertexVectorBase() = default;
+    VertexVectorBase(const VertexVectorBase&) {}    // buffer is not copied
+    VertexVectorBase(VertexVectorBase&& other) :
+        buffer(std::move(other.buffer)),
+        dirty(other.dirty),
+        released(other.released)
+    {}
+    virtual ~VertexVectorBase() = default;
+
     virtual const void* getRawData() const = 0;
     virtual std::size_t getRawSize() const = 0;
     virtual std::size_t getRawCount() const = 0;
@@ -33,9 +42,14 @@ protected:
 using VertexVectorBasePtr = std::shared_ptr<VertexVectorBase>;
 
 template <class V>
-class VertexVector : public VertexVectorBase {
+class VertexVector final : public VertexVectorBase {
 public:
     using Vertex = V;
+
+    VertexVector() = default;
+    VertexVector(const VertexVector&) = default;
+    VertexVector(VertexVector&&) = default;
+    ~VertexVector() override = default;
 
     template <typename Arg>
     void emplace_back(Arg&& vertex) {

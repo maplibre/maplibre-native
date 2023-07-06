@@ -63,6 +63,7 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
 SymbolBucket::~SymbolBucket() = default;
 
 void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (hasTextData()) {
         if (!staticUploaded) {
             text.indexBuffer = uploadPass.createIndexBuffer(
@@ -175,6 +176,7 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
     if (hasTextCollisionCircleData()) {
         updateCollisionCircle(*textCollisionCircle);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
     staticUploaded = true;
