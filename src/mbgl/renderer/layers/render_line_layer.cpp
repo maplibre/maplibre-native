@@ -480,7 +480,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     auto addAttributes = [&](gfx::DrawableBuilder& builder,
                              const LineBucket& bucket,
-                             gfx::VertexAttributeArray& vertexAttrs) {
+                             gfx::VertexAttributeArray&& vertexAttrs) {
 
         const auto vertexCount = bucket.vertices.elements();
         builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
@@ -606,7 +606,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                              lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
             // vertices, attributes and segments
-            addAttributes(*builder, bucket, vertexAttrs);
+            addAttributes(*builder, bucket, std::move(vertexAttrs));
             setSegments(builder, bucket);
 
             // finish
@@ -637,7 +637,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                              linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
             // vertices and attributes
-            addAttributes(*builder, bucket, vertexAttrs);
+            addAttributes(*builder, bucket, std::move(vertexAttrs));
 
             // texture
             if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
@@ -673,7 +673,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                              lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
             // vertices and attributes
-            addAttributes(*builder, bucket, vertexAttrs);
+            addAttributes(*builder, bucket, std::move(vertexAttrs));
 
             // texture
             if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
@@ -717,7 +717,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             auto builder = createLineBuilder("line", lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
             // vertices, attributes and segments
-            addAttributes(*builder, bucket, vertexAttrs);
+            addAttributes(*builder, bucket, std::move(vertexAttrs));
             setSegments(builder, bucket);
 
             // finish
