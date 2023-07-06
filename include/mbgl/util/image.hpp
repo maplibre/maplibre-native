@@ -77,7 +77,7 @@ public:
     size_t bytes() const { return stride() * size.height; }
 
     void fill(uint8_t value) {
-        if (valid() && bytes()) {
+        if (valid()) {
             assert(bytes());
             std::fill(data.get(), data.get() + bytes(), value);
         }
