@@ -52,7 +52,9 @@ FillExtrusionBucket::FillExtrusionBucket(
     }
 }
 
-FillExtrusionBucket::~FillExtrusionBucket() = default;
+FillExtrusionBucket::~FillExtrusionBucket() {
+    sharedVertices->release();
+}
 
 void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      const GeometryCollection& geometry,

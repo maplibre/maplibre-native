@@ -61,7 +61,9 @@ RenderFillLayer::~RenderFillLayer() = default;
 
 void RenderFillLayer::prepare(const LayerPrepareParameters& params) {
     RenderLayer::prepare(params);
+#if MLN_DRAWABLE_RENDERER
     updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 void RenderFillLayer::transition(const TransitionParameters& parameters) {

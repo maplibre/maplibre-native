@@ -62,7 +62,9 @@ RenderCircleLayer::RenderCircleLayer(Immutable<style::CircleLayer::Impl> _impl)
 
 void RenderCircleLayer::prepare(const LayerPrepareParameters& parameters) {
     RenderLayer::prepare(parameters);
+#if MLN_DRAWABLE_RENDERER
     updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 void RenderCircleLayer::transition(const TransitionParameters& parameters) {

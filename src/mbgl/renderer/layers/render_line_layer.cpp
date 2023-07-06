@@ -105,7 +105,9 @@ void RenderLineLayer::prepare(const LayerPrepareParameters& params) {
             evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
     }
     
+#if MLN_DRAWABLE_RENDERER
     updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 void RenderLineLayer::upload(gfx::UploadPass& uploadPass) {
