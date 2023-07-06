@@ -258,7 +258,7 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
 
 void RenderHillshadeLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
-    
+
     auto renderPass = RenderPass::Translucent;
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
     for (const auto& pair : renderTargets) {
