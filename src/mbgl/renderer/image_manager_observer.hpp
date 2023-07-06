@@ -1,6 +1,9 @@
 #pragma once
 
 #include <mbgl/renderer/renderer_observer.hpp>
+#include <functional>
+#include <string>
+#include <vector>
 
 namespace mbgl {
 

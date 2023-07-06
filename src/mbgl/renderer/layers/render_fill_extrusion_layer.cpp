@@ -331,8 +331,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> depthBuilder;
     std::unique_ptr<gfx::DrawableBuilder> colorBuilder;
-    gfx::VertexAttributeArray vertexAttrs;
-    std::vector<uint8_t> rawVertices;
 
     const auto& shaderGroup = hasPattern ? fillExtrusionPatternGroup : fillExtrusionGroup;
     if (!shaderGroup) {
@@ -352,7 +350,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto& renderData = *optRenderData;
         const auto& bucket = static_cast<const FillExtrusionBucket&>(*renderData.bucket);
 
-        vertexAttrs.clear();
+        gfx::VertexAttributeArray vertexAttrs;
 
         gfx::DrawableTweakerPtr tweaker;
         if (depthBuilder) {
@@ -471,7 +469,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        rawVertices.resize(vertexSize * vertexCount);
+        std::vector<uint8_t> rawVertices(vertexSize * vertexCount);
         for (std::size_t i = 0; i < vertexCount; ++i) {
             std::memcpy(&rawVertices[vertexSize * i], &bucket.vertices.at(i).a1, vertexSize);
         }
