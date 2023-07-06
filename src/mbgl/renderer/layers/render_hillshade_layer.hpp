@@ -17,6 +17,8 @@ public:
 
 #if MLN_DRAWABLE_RENDERER
     void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
+    
+    void layerRemoved(UniqueChangeRequestVec&) override;
 
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
@@ -39,11 +41,11 @@ private:
     void prepare(const LayerPrepareParameters&) override;
 
 #if MLN_DRAWABLE_RENDERER
-    /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&) override;
+    /// Remove render target for the tile
+    void removeRenderTarget(const OverscaledTileID&, UniqueChangeRequestVec&);
 
-    /// Remove all the drawables for tiles
-    void removeAllDrawables() override;
+    /// Remove all the render targets
+    void removeAllRenderTargets(UniqueChangeRequestVec&);
 #endif
 
     // Paint properties

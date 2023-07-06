@@ -258,17 +258,33 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
 
 void RenderHillshadeLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
+    
+    auto renderPass = RenderPass::Translucent;
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
     for (const auto& pair : renderTargets) {
-        activateRenderTarget(pair.second, willRender, changes);
+        auto drawableCount = tileLayerGroup->getDrawableCount(renderPass, pair.first);
+        activateRenderTarget(pair.second, willRender && !drawableCount, changes);
     }
 }
 
-void RenderHillshadeLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    RenderLayer::removeTile(renderPass, tileID);
+void RenderHillshadeLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    removeAllDrawables();
+    removeAllRenderTargets(changes);
 }
 
-void RenderHillshadeLayer::removeAllDrawables() {
-    RenderLayer::removeAllDrawables();
+void RenderHillshadeLayer::removeRenderTarget(const OverscaledTileID& tileID, UniqueChangeRequestVec& changes) {
+    const auto result = renderTargets.find(tileID);
+    if (result != renderTargets.end()) {
+        activateRenderTarget(result->second, false, changes);
+        renderTargets.erase(result);
+    }
+}
+
+void RenderHillshadeLayer::removeAllRenderTargets(UniqueChangeRequestVec& changes) {
+    for (const auto& pair : renderTargets) {
+        activateRenderTarget(pair.second, false, changes);
+    }
+    renderTargets.clear();
 }
 
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
@@ -283,10 +299,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
-        for (const auto& pair : renderTargets) {
-            activateRenderTarget(pair.second, false, changes);
-        }
-        renderTargets.clear();
+        removeAllRenderTargets(changes);
         return;
     }
 
@@ -310,6 +323,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
     if (!hillshadePrepareShader || !hillshadeShader) {
         removeAllDrawables();
+        removeAllRenderTargets(changes);
         return;
     }
 
@@ -336,12 +350,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             // remove it
             drawable.reset();
             ++stats.drawablesRemoved;
-
-            const auto result = renderTargets.find(*tileID);
-            if (result != renderTargets.end()) {
-                activateRenderTarget(result->second, false, changes);
-                renderTargets.erase(result);
-            }
+            removeRenderTarget(*tileID, changes);
         }
     });
 
@@ -351,6 +360,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         auto* bucket_ = tile.getBucket(*baseImpl);
         if (!bucket_) {
             removeTile(renderPass, tileID);
+            removeRenderTarget(tileID, changes);
             continue;
         }
         auto& bucket = static_cast<HillshadeBucket&>(*bucket_);
