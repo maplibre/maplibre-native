@@ -334,10 +334,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
     std::unique_ptr<gfx::DrawableBuilder> patternBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
-    gfx::VertexAttributeArray fillVertexAttrs;
-    gfx::VertexAttributeArray outlineVertexAttrs;
-    gfx::VertexAttributeArray patternVertexAttrs;
-    gfx::VertexAttributeArray patternOutlineVertexAttrs;
 
     const auto layerPrefix = getID() + "/";
     const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
@@ -431,9 +427,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
         };
 
-        fillVertexAttrs.clear();
-        outlineVertexAttrs.clear();
-
         gfx::DrawableTweakerPtr tweaker;
         if (fillBuilder) {
             fillBuilder->clearTweakers();
@@ -443,11 +436,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // `Fill*Program` all use `style::FillPaintProperties`
-        const auto fillUniformProps =
-            fillVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
-                binders, evaluated);
-        const auto outlineUniformProps =
-            outlineVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+        gfx::VertexAttributeArray vertexAttrs;
+        const auto uniformProps =
+            vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
                 binders, evaluated);
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
@@ -456,10 +447,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             const auto doOutline = evaluated.get<FillAntialias>();
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                fillShaderGroup->getOrCreateShader(context, fillUniformProps));
+                fillShaderGroup->getOrCreateShader(context, uniformProps));
             const auto outlineShader = doOutline
                                            ? std::static_pointer_cast<gfx::ShaderProgramBase>(
-                                                 outlineShaderGroup->getOrCreateShader(context, outlineUniformProps))
+                                                 outlineShaderGroup->getOrCreateShader(context, uniformProps))
                                            : nullptr;
 
             if (!fillBuilder && fillShader) {
@@ -489,7 +480,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (fillBuilder) {
                 buildVertices();
                 fillBuilder->setShader(fillShader);
-                fillBuilder->setVertexAttributes(fillVertexAttrs);
+                if (outlineBuilder) {
+                    fillBuilder->setVertexAttributes(vertexAttrs);
+                } else {
+                    fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+                }
                 fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 fillBuilder->setSegments(gfx::Triangles(),
                                          bucket.triangles.vector(),
@@ -500,7 +495,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (outlineBuilder) {
                 buildVertices();
                 outlineBuilder->setShader(outlineShader);
-                outlineBuilder->setVertexAttributes(outlineVertexAttrs);
+                outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
@@ -515,10 +510,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             const auto doOutline = evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined();
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                patternShaderGroup->getOrCreateShader(context, fillUniformProps));
+                patternShaderGroup->getOrCreateShader(context, uniformProps));
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
                                                        outlinePatternShaderGroup->getOrCreateShader(
-                                                           context, outlineUniformProps))
+                                                           context, uniformProps))
                                                  : nullptr;
 
             if (!patternBuilder) {
@@ -568,7 +563,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 buildVertices();
                 patternBuilder->setShader(fillShader);
                 patternBuilder->setRenderPass(renderPass);
-                patternBuilder->setVertexAttributes(fillVertexAttrs);
+                if (outlinePatternBuilder) {
+                    patternBuilder->setVertexAttributes(vertexAttrs);
+                } else {
+                    patternBuilder->setVertexAttributes(std::move(vertexAttrs));
+                }
                 patternBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.triangles.vector(),
@@ -581,7 +580,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 buildVertices();
                 outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
-                outlinePatternBuilder->setVertexAttributes(outlineVertexAttrs);
+                outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlinePatternBuilder->addVertices(rawVerts, 0, rawVerts.size());
                 outlinePatternBuilder->setSegments(
                     gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
