@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <exception>
+#include <functional>
+#include <string>
 
 namespace mbgl {
 
