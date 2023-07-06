@@ -5,6 +5,7 @@
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/expression/image.hpp>
+#include <mbgl/style/properties.hpp>
 #include <mbgl/style/layer_properties.hpp>
 
 namespace mbgl {

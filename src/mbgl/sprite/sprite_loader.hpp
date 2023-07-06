@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/style/image.hpp>
+#include <mapbox/std/weak.hpp>
 
 #include <string>
 #include <map>

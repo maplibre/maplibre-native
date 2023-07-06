@@ -300,7 +300,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             return;
         }
         tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
-        renderTarget->addLayerGroup(tileLayerGroup, /*canReplace=*/true);
+        renderTarget->addLayerGroup(tileLayerGroup, /*replace=*/true);
     }
 
     if (renderTarget->getTexture()->getSize() != size) {
