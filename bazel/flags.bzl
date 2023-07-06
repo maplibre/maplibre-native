@@ -12,6 +12,7 @@ GCC_CLANG_COMMON_FLAGS = [
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
     "-Wno-unknown-pragmas",
+    "-Wno-unknown-warning-option",
 ]
 
 MSVC_FLAGS = [
@@ -56,31 +57,31 @@ MSVC_FLAGS = [
     "/wd4373", # virtual function overrides 'x', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
 ]
 
-WARNING_FLAGS = select({
-    "//:ios": GCC_CLANG_COMMON_FLAGS + [
+WARNING_FLAGS = {
+    "ios": [
         "-Wno-newline-eof",
         "-Wno-nested-anon-types",
         "-Wno-c++11-narrowing",
         "-Wno-pointer-to-int-cast",
         "-Wno-tautological-constant-compare",
         "-Wno-gnu-anonymous-struct",
-    ],
-    "//:linux": GCC_CLANG_COMMON_FLAGS,
-    "//:windows": MSVC_FLAGS,
-})
+    ] + GCC_CLANG_COMMON_FLAGS,
+    "linux": GCC_CLANG_COMMON_FLAGS,
+    "windows": MSVC_FLAGS,
+}
 
 """
 Compilation flags used for all .cpp and .mm targets.
 """
 
-GCC_CLANG_CPP_FLAGS = GCC_CLANG_COMMON_FLAGS + [
+GCC_CLANG_CPP_FLAGS = [
     "-fexceptions",
     "-fno-rtti",
     "-ftemplate-depth=1024",
     "-std=c++17",
 ]
 
-MSVC_CPP_FLAGS = MSVC_FLAGS + [
+MSVC_CPP_FLAGS = [
     "/EHsc",
     "/std:c++17",
     "/GR-",
@@ -89,9 +90,9 @@ MSVC_CPP_FLAGS = MSVC_FLAGS + [
 ]
 
 CPP_FLAGS = select({
-    "//:ios": GCC_CLANG_CPP_FLAGS,
-    "//:linux": GCC_CLANG_CPP_FLAGS,
-    "//:windows": MSVC_CPP_FLAGS,
+    "//:ios": GCC_CLANG_CPP_FLAGS + WARNING_FLAGS["ios"],
+    "//:linux": GCC_CLANG_CPP_FLAGS + WARNING_FLAGS["linux"],
+    "//:windows": MSVC_CPP_FLAGS + WARNING_FLAGS["windows"],
 })
 
 """
