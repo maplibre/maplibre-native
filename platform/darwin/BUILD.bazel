@@ -11,7 +11,7 @@ objc_library(
         "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
-    copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
+    copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
         "-fmodules",
     ],
     includes = [
