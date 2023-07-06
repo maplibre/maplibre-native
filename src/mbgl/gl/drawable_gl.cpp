@@ -22,7 +22,7 @@ DrawableGL::~DrawableGL() {
 }
 
 void DrawableGL::draw(PaintParameters& parameters) const {
-    if(isCustom) {
+    if (isCustom) {
         return;
     }
 
