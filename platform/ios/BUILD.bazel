@@ -528,7 +528,7 @@ xcodeproj(
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
-    bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin"},
+    bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
     default_xcode_configuration = "Debug",
     xcode_configurations = {
         "Debug": {"//command_line_option:compilation_mode": "dbg"},
