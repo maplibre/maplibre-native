@@ -13,6 +13,8 @@ GCC_CLANG_COMMON_FLAGS = [
     "-Wno-variadic-macros",
     "-Wno-unknown-pragmas",
     "-Wno-unknown-warning-option",
+    "-Wno-psabi",
+    "-Wno-pragmas",
 ]
 
 MSVC_FLAGS = [
