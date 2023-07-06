@@ -49,7 +49,9 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
     }
 }
 
-FillBucket::~FillBucket() = default;
+FillBucket::~FillBucket() {
+    sharedVertices->release();
+}
 
 void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const GeometryCollection& geometry,

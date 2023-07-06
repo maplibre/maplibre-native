@@ -42,6 +42,7 @@ constexpr auto FillOutlineShaderName = "FillOutlineShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
+constexpr auto PosAttribName = "a_pos";
 constexpr auto IconTextureName = "u_image";
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -418,15 +419,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        std::vector<std::array<int16_t, 2>> rawVerts;
-        const auto buildVertices = [&]() {
-            const auto& verts = bucket.vertices.vector();
-            if (rawVerts.size() < verts.size()) {
-                rawVerts.resize(verts.size());
-                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-            }
-        };
-
         gfx::DrawableTweakerPtr tweaker;
         if (fillBuilder) {
             fillBuilder->clearTweakers();
@@ -440,6 +432,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto uniformProps =
             vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
                 binders, evaluated);
+
+        const auto vertexCount = bucket.vertices.elements();
+        if (const auto& attr = vertexAttrs.add(PosAttribName)) {
+            attr->setSharedRawData(bucket.sharedVertices, offsetof(FillLayoutVertex, a1), 0, sizeof(FillLayoutVertex), gfx::AttributeDataType::Short2);
+        }
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
@@ -478,14 +475,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             if (fillBuilder) {
-                buildVertices();
                 fillBuilder->setShader(fillShader);
                 if (outlineBuilder) {
                     fillBuilder->setVertexAttributes(vertexAttrs);
                 } else {
                     fillBuilder->setVertexAttributes(std::move(vertexAttrs));
                 }
-                fillBuilder->addVertices(rawVerts, 0, rawVerts.size());
+                fillBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 fillBuilder->setSegments(gfx::Triangles(),
                                          bucket.triangles.vector(),
                                          bucket.triangleSegments.data(),
@@ -493,10 +489,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*fillBuilder, tileID, interpolateUBO, tileProps);
             }
             if (outlineBuilder) {
-                buildVertices();
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
-                outlineBuilder->addVertices(rawVerts, 0, rawVerts.size());
+                outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
                 finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
@@ -560,7 +555,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             if (patternBuilder) {
-                buildVertices();
                 patternBuilder->setShader(fillShader);
                 patternBuilder->setRenderPass(renderPass);
                 if (outlinePatternBuilder) {
@@ -568,7 +562,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 } else {
                     patternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 }
-                patternBuilder->addVertices(rawVerts, 0, rawVerts.size());
+                patternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.triangles.vector(),
                                             bucket.triangleSegments.data(),
@@ -577,11 +571,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*patternBuilder, tileID, interpolateUBO, tileProps);
             }
             if (outlinePatternBuilder) {
-                buildVertices();
                 outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
-                outlinePatternBuilder->addVertices(rawVerts, 0, rawVerts.size());
+                outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(
                     gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
 
