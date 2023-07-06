@@ -45,8 +45,11 @@ void HillshadeBucket::upload(gfx::UploadPass& uploadPass) {
 }
 
 void HillshadeBucket::clear() {
+#if MLN_LEGACY_RENDERER
     vertexBuffer = {};
     indexBuffer = {};
+#endif // MLN_LEGACY_RENDERER
+
     segments.clear();
     vertices.clear();
     indices.clear();

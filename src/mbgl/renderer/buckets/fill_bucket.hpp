@@ -49,9 +49,11 @@ public:
     SegmentVector<FillAttributes> lineSegments;
     SegmentVector<FillAttributes> triangleSegments;
 
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<FillLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> lineIndexBuffer;
     std::optional<gfx::IndexBuffer> triangleIndexBuffer;
+#endif // MLN_LEGACY_RENDERER
 
     std::map<std::string, FillProgram::Binders> paintPropertyBinders;
 };

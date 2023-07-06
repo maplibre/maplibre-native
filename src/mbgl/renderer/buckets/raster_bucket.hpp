@@ -36,8 +36,10 @@ public:
     gfx::IndexVector<gfx::Triangles> indices;
     SegmentVector<RasterAttributes> segments;
 
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<RasterLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
 };
 
 } // namespace mbgl

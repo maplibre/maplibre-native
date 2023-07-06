@@ -34,8 +34,11 @@ void RasterBucket::upload(gfx::UploadPass& uploadPass) {
 }
 
 void RasterBucket::clear() {
+#if MLN_LEGACY_RENDERER
     vertexBuffer = {};
     indexBuffer = {};
+#endif // MLN_LEGACY_RENDERER
+
     segments.clear();
     vertices.clear();
     indices.clear();

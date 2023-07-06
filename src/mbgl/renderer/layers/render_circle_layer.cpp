@@ -312,7 +312,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
-    std::vector<gfx::DrawablePtr> newTiles;
     constexpr auto renderPass = RenderPass::Translucent;
 
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
@@ -386,8 +385,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         circleBuilder = context.createDrawableBuilder("circle");
         circleBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(circleShader));
-        circleBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                       : gfx::DepthMaskType::ReadOnly);
+        circleBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
         circleBuilder->setColorMode(gfx::ColorMode::alphaBlended());
         circleBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
 

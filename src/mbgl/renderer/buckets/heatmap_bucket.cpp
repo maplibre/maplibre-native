@@ -21,7 +21,9 @@ HeatmapBucket::HeatmapBucket(const BucketParameters& parameters,
     }
 }
 
-HeatmapBucket::~HeatmapBucket() = default;
+HeatmapBucket::~HeatmapBucket() {
+    sharedVertices->release();
+}
 
 void HeatmapBucket::upload(gfx::UploadPass& uploadPass) {
 #if MLN_LEGACY_RENDERER

@@ -162,10 +162,12 @@ public:
         SegmentVector<SymbolTextAttributes> segments;
         std::vector<PlacedSymbol> placedSymbols;
 
+#if MLN_LEGACY_RENDERER
         std::optional<VertexBuffer> vertexBuffer;
         std::optional<DynamicVertexBuffer> dynamicVertexBuffer;
         std::optional<OpacityVertexBuffer> opacityVertexBuffer;
         std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
     } text;
 
     std::unique_ptr<SymbolSizeBinder> iconSizeBinder;
