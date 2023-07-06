@@ -84,9 +84,9 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /// registry instance provided already has conflicting programs present.
     (
         [&]() {
-            using Ty = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>;
-            if (!registry.registerShaderGroup(std::make_shared<ShaderGroupGL<ShaderID>>(programParameters), Ty::name)) {
-                throw std::runtime_error("Failed to register " + std::string(Ty::name) + " with shader registry!");
+            const auto name = std::string(shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name);
+            if (!registry.registerShaderGroup(std::make_shared<ShaderGroupGL<ShaderID>>(programParameters), name)) {
+                throw std::runtime_error("Failed to register " + name + " with shader registry!");
             }
         }(),
         ...);
