@@ -154,6 +154,8 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
         // create empty drawable using a builder
         std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(getID());
         auto& drawable = builder->getCurrentDrawable(true);
+        drawable->setIsCustom(true);
+        drawable->setRenderPass(RenderPass::Translucent);
 
         // assign tweaker to drawable
         drawable->addTweaker(tweaker);

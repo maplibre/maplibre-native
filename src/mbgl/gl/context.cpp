@@ -426,7 +426,7 @@ void Context::reset() {
 #if MLN_DRAWABLE_RENDERER
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
-    bindVertexArray = 0;
+    bindVertexArray = value::BindVertexArray::Default;
     setDepthMode(depthMode);
     setStencilMode(gfx::StencilMode::disabled());
     setColorMode(colorMode);
