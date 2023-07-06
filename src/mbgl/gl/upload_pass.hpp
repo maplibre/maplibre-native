@@ -42,9 +42,9 @@ public:
                                                                         gfx::BufferUsageType) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
+#if MLN_DRAWABLE_RENDERER
     const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, gfx::BufferUsageType);
 
-#if MLN_DRAWABLE_RENDERER
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
         const gfx::AttributeDataType vertexType,

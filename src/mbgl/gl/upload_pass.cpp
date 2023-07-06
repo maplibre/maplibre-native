@@ -135,6 +135,7 @@ struct VertexBufferGL : public gfx::VertexBufferBase {
     std::unique_ptr<gfx::VertexBufferResource> resource;
 };
 
+#if MLN_DRAWABLE_RENDERER
 namespace {
 const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 }
@@ -166,8 +167,6 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
     return noBuffer;
 }
 
-
-#if MLN_DRAWABLE_RENDERER
 static std::size_t padSize(std::size_t size, std::size_t padding) {
     return (padding - (size % padding)) % padding;
 }
