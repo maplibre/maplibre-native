@@ -166,8 +166,8 @@ public:
                 static_cast<float>(components[3])};
     }
 
-    virtual const UniqueDrawableData& getData() const { return drawableData; }
-    virtual void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
+    const UniqueDrawableData& getData() const { return drawableData; }
+    void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
 protected:
     bool enabled = true;

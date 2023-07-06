@@ -21,7 +21,9 @@ CircleBucket::CircleBucket(const std::map<std::string, Immutable<LayerProperties
     }
 }
 
-CircleBucket::~CircleBucket() = default;
+CircleBucket::~CircleBucket() {
+    sharedVertices->release();
+}
 
 void CircleBucket::upload(gfx::UploadPass& uploadPass) {
 #if MLN_LEGACY_RENDERER

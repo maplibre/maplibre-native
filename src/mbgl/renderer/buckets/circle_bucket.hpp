@@ -30,7 +30,10 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
-    gfx::VertexVector<CircleLayoutVertex> vertices;
+    using VertexVector = gfx::VertexVector<CircleLayoutVertex>;
+    std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
     gfx::IndexVector<gfx::Triangles> triangles;
     SegmentVector<CircleAttributes> segments;
 
