@@ -42,7 +42,10 @@ public:
 
     PossiblyEvaluatedLayoutProperties layout;
 
-    gfx::VertexVector<LineLayoutVertex> vertices;
+    using VertexVector = gfx::VertexVector<LineLayoutVertex>;
+    std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
     gfx::IndexVector<gfx::Triangles> triangles;
     SegmentVector<LineAttributes> segments;
 

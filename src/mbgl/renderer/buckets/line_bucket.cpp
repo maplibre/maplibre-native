@@ -25,7 +25,9 @@ LineBucket::LineBucket(LineBucket::PossiblyEvaluatedLayoutProperties layout_,
     }
 }
 
-LineBucket::~LineBucket() = default;
+LineBucket::~LineBucket() {
+    sharedVertices->release();
+}
 
 void LineBucket::addFeature(const GeometryTileFeature& feature,
                             const GeometryCollection& geometryCollection,
