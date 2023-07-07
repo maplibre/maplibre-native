@@ -18,7 +18,7 @@ DrawableGL::DrawableGL(std::string name_)
 
 DrawableGL::~DrawableGL() {
     impl->indexBuffer = {0, nullptr};
-    impl->attributeBuffer.reset();
+    impl->attributeBuffers.clear();
 }
 
 void DrawableGL::draw(PaintParameters& parameters) const {
@@ -159,7 +159,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         const auto& indexAttribute = defaults.get(impl->vertexAttrName);
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
-        std::unique_ptr<gfx::VertexBufferResource> vertexBuffer;
+        std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         auto bindings = uploadPass.buildAttributeBindings(impl->vertexCount,
                                                           impl->vertexType,
                                                           vertexAttributeIndex,
@@ -167,9 +167,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                           defaults,
                                                           overrides,
                                                           usage,
-                                                          vertexBuffer);
+                                                          vertexBuffers);
 
-        impl->attributeBuffer = std::move(vertexBuffer);
+        impl->attributeBuffers = std::move(vertexBuffers);
         impl->indexBuffer = std::move(indexBuffer);
 
         // Create a VAO for each group of vertexes described by a segment

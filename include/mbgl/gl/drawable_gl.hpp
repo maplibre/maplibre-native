@@ -44,7 +44,7 @@ public:
     void setVertexAttributes(const gfx::VertexAttributeArray& value) override;
     void setVertexAttributes(gfx::VertexAttributeArray&& value) override;
 
-    gfx::VertexAttributeArray& mutableVertexAttributes();
+    gfx::VertexAttributeArray& mutableVertexAttributes() override;
 
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;

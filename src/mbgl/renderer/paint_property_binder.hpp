@@ -303,7 +303,9 @@ public:
     }
 
     void upload(gfx::UploadPass& uploadPass) override {
+#if MLN_LEGACY_RENDERER
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertexVector));
+#endif // MLN_LEGACY_RENDERER
     }
 
     std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
@@ -424,7 +426,9 @@ public:
     }
 
     void upload(gfx::UploadPass& uploadPass) override {
+#if MLN_LEGACY_RENDERER
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertexVector));
+#endif // MLN_LEGACY_RENDERER
     }
 
     std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
@@ -533,9 +537,11 @@ public:
         if (!patternToVertexVector.empty()) {
             assert(!zoomInVertexVector.empty());
             assert(!zoomOutVertexVector.empty());
+#if MLN_LEGACY_RENDERER
             patternToVertexBuffer = uploadPass.createVertexBuffer(std::move(patternToVertexVector));
             zoomInVertexBuffer = uploadPass.createVertexBuffer(std::move(zoomInVertexVector));
             zoomOutVertexBuffer = uploadPass.createVertexBuffer(std::move(zoomOutVertexVector));
+#endif // MLN_LEGACY_RENDERER
         }
     }
 

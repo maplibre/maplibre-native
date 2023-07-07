@@ -38,8 +38,8 @@ UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 }
 
 void DrawableBuilder::flush() {
-    const auto vertexCount = curVertexCount();
-    if (vertexCount) {
+    if (curVertexCount())
+    {
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
         draw->setEnabled(enabled);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
@@ -56,25 +56,8 @@ void DrawableBuilder::flush() {
         draw->setTextures(textures);
         draw->setTweakers(tweakers);
 
-        if (auto drawAttrs = getVertexAttributes().clone()) {
-            vertexAttrs.observeAttributes([&](const std::string& iName, const VertexAttribute& iAttr) {
-                if (auto& drawAttr = drawAttrs->getOrAdd(iName)) {
-                    if (iAttr.getCount() == 1) {
-                        // Apply the value to all vertexes
-                        for (std::size_t i = 0; i < vertexCount; ++i) {
-                            drawAttr->setVariant(i, iAttr.get(0));
-                        }
-                    } else if (iAttr.getCount() == vertexCount) {
-                        for (std::size_t i = 0; i < vertexCount; ++i) {
-                            drawAttr->setVariant(i, iAttr.get(i));
-                        }
-                    } else {
-                        // throw?
-                        Log::Warning(Event::General, "Invalid attribute count");
-                    }
-                }
-            });
-
+        const auto& builderAttrs = getVertexAttributes();
+        if (auto drawAttrs = builderAttrs.clone()) {
             draw->setVertexAttributes(std::move(*drawAttrs));
         }
 
@@ -147,7 +130,7 @@ void DrawableBuilder::setVertexAttributes(const VertexAttributeArray& attrs) {
 }
 
 void DrawableBuilder::setVertexAttributes(VertexAttributeArray&& attrs) {
-    vertexAttrs = attrs;
+    vertexAttrs = std::move(attrs);
 }
 
 std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
@@ -169,7 +152,7 @@ void DrawableBuilder::setRawVertices(std::vector<uint8_t>&& data, std::size_t co
 void DrawableBuilder::setSegments(gfx::DrawMode mode,
                                   std::vector<uint16_t> indexes,
                                   const std::vector<SegmentBase>& segments) {
-    setSegments(mode, indexes, segments.data(), segments.size());
+    setSegments(mode, std::move(indexes), segments.data(), segments.size());
 }
 
 void DrawableBuilder::setSegments(gfx::DrawMode mode,
@@ -185,10 +168,13 @@ void DrawableBuilder::setSegments(gfx::DrawMode mode,
         } else if (mode.type == DrawModeType::Lines) {
             assert(seg.indexLength % 2 == 0);
         }
-        assert(seg.vertexOffset + seg.vertexLength <= curVertexCount());
+        const auto vertexCount = curVertexCount();
+        assert(!vertexCount || seg.vertexOffset + seg.vertexLength <= curVertexCount());
         assert(seg.indexOffset + seg.indexLength <= impl->indexes.size());
-        for (decltype(seg.indexLength) j = 0; j < seg.indexLength; ++j) {
-            assert(impl->indexes[seg.indexOffset + j] < curVertexCount());
+        if (vertexCount) {
+            for (decltype(seg.indexLength) j = 0; j < seg.indexLength; ++j) {
+                assert(impl->indexes[seg.indexOffset + j] < vertexCount);
+            }
         }
 #endif
 

@@ -49,7 +49,9 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
     }
 }
 
-FillBucket::~FillBucket() = default;
+FillBucket::~FillBucket() {
+    sharedVertices->release();
+}
 
 void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const GeometryCollection& geometry,
@@ -131,6 +133,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 }
 
 void FillBucket::upload(gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         lineIndexBuffer = uploadPass.createIndexBuffer(std::move(lines));
@@ -141,6 +144,7 @@ void FillBucket::upload(gfx::UploadPass& uploadPass) {
     for (auto& pair : paintPropertyBinders) {
         pair.second.upload(uploadPass);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
 }

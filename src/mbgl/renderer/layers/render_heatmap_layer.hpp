@@ -28,6 +28,7 @@ public:
 #endif
 
 private:
+    void prepare(const LayerPrepareParameters&) override;
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
@@ -72,6 +73,9 @@ private:
     gfx::ShaderGroupPtr heatmapShaderGroup;
     gfx::ShaderProgramBasePtr heatmapTextureShader;
     RenderTargetPtr renderTarget;
+    
+    using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
+    std::shared_ptr<TextureVertexVector> sharedTextureVertices;
 #endif
 };
 
