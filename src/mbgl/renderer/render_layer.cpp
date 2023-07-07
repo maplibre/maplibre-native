@@ -73,8 +73,9 @@ void RenderLayer::layerChanged(const TransitionParameters&,
     layerRemoved(changes);
 }
 
-void RenderLayer::layerRemoved(UniqueChangeRequestVec&) {
+void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     removeAllDrawables();
+    activateLayerGroup(layerGroup, false, changes);
 }
 #endif
 
