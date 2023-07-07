@@ -64,7 +64,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
             texture->upload();
             drawable.setTexture(texture, imageLocation.value());
         }
-        
+
         mat4 matrix;
         matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);

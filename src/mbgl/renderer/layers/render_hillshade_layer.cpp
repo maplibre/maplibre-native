@@ -77,7 +77,8 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
         layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
     }
     for (const auto& pair : renderTargets) {
-        pair.second->getLayerGroup(0)->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
+        pair.second->getLayerGroup(0)->setLayerTweaker(
+            std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
     }
 #endif
 }
@@ -438,7 +439,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom, bucket.getDEMData().getImagePtr()));
+            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(
+                bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom, bucket.getDEMData().getImagePtr()));
             singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
@@ -450,11 +452,11 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         auto* indices = &staticDataIndices;
         auto* segments = &staticDataSegments;
 
-//        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
-//            vertices = &bucket.vertices;
-//            indices = &bucket.indices;
-//            segments = &bucket.segments;
-//        }
+        //        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+        //            vertices = &bucket.vertices;
+        //            indices = &bucket.indices;
+        //            segments = &bucket.segments;
+        //        }
 
         if (auto& attr = hillshadeVertexAttrs.getOrAdd("a_texture_pos")) {
             std::size_t index{0};

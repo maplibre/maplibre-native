@@ -11,7 +11,10 @@ namespace gfx {
 
 class HillshadePrepareDrawableData : public DrawableData {
 public:
-    HillshadePrepareDrawableData(int32_t stride_, Tileset::DEMEncoding encoding_, uint8_t maxzoom_, std::shared_ptr<PremultipliedImage> image_)
+    HillshadePrepareDrawableData(int32_t stride_,
+                                 Tileset::DEMEncoding encoding_,
+                                 uint8_t maxzoom_,
+                                 std::shared_ptr<PremultipliedImage> image_)
         : stride(stride_),
           encoding(encoding_),
           maxzoom(maxzoom_),
