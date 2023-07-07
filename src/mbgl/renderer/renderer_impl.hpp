@@ -26,6 +26,8 @@ private:
 
     void setObserver(RendererObserver*);
 
+    void preRender(const RenderTree&, const std::shared_ptr<UpdateParameters>&);
+
     void render(const RenderTree&);
 
     void reduceMemoryUse();

@@ -22,6 +22,10 @@ DrawableGL::~DrawableGL() {
 }
 
 void DrawableGL::draw(PaintParameters& parameters) const {
+    if (isCustom) {
+        return;
+    }
+
     auto& context = static_cast<gl::Context&>(parameters.context);
 
     if (shader) {

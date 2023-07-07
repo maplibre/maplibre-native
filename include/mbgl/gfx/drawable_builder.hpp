@@ -32,7 +32,7 @@ public:
     virtual ~DrawableBuilder();
 
     /// Get the drawable we're currently working on, if any
-    const UniqueDrawable& getCurrentDrawable(bool createIfNone);
+    UniqueDrawable& getCurrentDrawable(bool createIfNone);
 
     /// Close the current drawable, using a new one for any further work
     void flush();
