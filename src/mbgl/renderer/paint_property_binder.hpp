@@ -132,12 +132,21 @@ public:
 
     virtual std::size_t getVertexCount() const = 0;
 
+    /// Indicates that the vertex data is duplicated for interpolation
+    virtual bool isInterpolated() const { return false; }
+
     virtual std::tuple<ZoomInterpolatedVertexType<As>...> getVertexValue(std::size_t index) const = 0;
+
+    virtual gfx::VertexVectorBasePtr getSharedVertexVector() const = 0;
 
     static std::unique_ptr<PaintPropertyBinder> create(const PossiblyEvaluatedType& value, float zoom, T defaultValue);
 
     PaintPropertyStatistics<T> statistics;
 };
+
+namespace detail {
+    const gfx::VertexVectorBasePtr noVector;
+}
 
 template <class T, class A>
 class ConstantPaintPropertyBinder : public PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A> {
@@ -177,6 +186,8 @@ public:
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t) const override {
         return {ZoomInterpolatedVertexType<A>{0}};
     }
+
+    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return detail::noVector; }
 
 private:
     T constant;
@@ -230,6 +241,8 @@ public:
         return {ZoomInterpolatedVertexType<As>{0}...};
     }
 
+    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return detail::noVector; }
+
 private:
     Faded<T> constant;
     std::tuple<std::array<uint16_t, 4>, std::array<uint16_t, 4>> constantPatternPositions;
@@ -244,6 +257,10 @@ public:
     SourceFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_, T defaultValue_)
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
+    ~SourceFunctionPaintPropertyBinder() override {
+        sharedVertexVector->release();
+    }
+
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
                               const CrossfadeParameters&) override{};
@@ -302,10 +319,9 @@ public:
         }
     }
 
-    void upload([[maybe_unused]] gfx::UploadPass& uploadPass) override {
 #if MLN_LEGACY_RENDERER
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertexVector));
-#endif // MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass& uploadPass) override {
+        vertexBuffer = uploadPass.createVertexBuffer(vertexVector);
     }
 
     std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
@@ -316,6 +332,7 @@ public:
             return std::tuple<std::optional<gfx::AttributeBinding>>{gfx::attributeBinding(*vertexBuffer)};
         }
     }
+#endif // MLN_LEGACY_RENDERER
 
     std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
 
@@ -335,11 +352,19 @@ public:
         return {ZoomInterpolatedVertexType<A>{concatenate(value.a1, value.a1)}};
     }
 
+    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedVertexVector; }
+
 private:
     style::PropertyExpression<T> expression;
     T defaultValue;
-    gfx::VertexVector<BaseVertex> vertexVector;
+
+    gfx::VertexVectorPtr<BaseVertex> sharedVertexVector = std::make_shared<gfx::VertexVector<BaseVertex>>();
+    gfx::VertexVector<BaseVertex>& vertexVector = *sharedVertexVector;
+
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<BaseVertex>> vertexBuffer;
+#endif // MLN_LEGACY_RENDERER
+
     FeatureVertexRangeMap featureMap;
 };
 
@@ -355,6 +380,10 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
+    ~CompositeFunctionPaintPropertyBinder() override {
+        sharedVertexVector->release();
+    }
+
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
                               const CrossfadeParameters&) override{};
@@ -378,13 +407,12 @@ public:
         };
         this->statistics.add(range.min);
         this->statistics.add(range.max);
-        AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max));
-        auto elements = vertexVector.elements();
+        const AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max));
+        const auto elements = vertexVector.elements();
         for (std::size_t i = elements; i < length; ++i) {
             vertexVector.emplace_back(Vertex{value});
         }
-        std::optional<std::string> idStr = featureIDtoString(feature.getID());
-        if (idStr) {
+        if (auto idStr = featureIDtoString(feature.getID())) {
             featureMap[*idStr].emplace_back(FeatureVertexRange{index, elements, length});
         }
     }
@@ -425,10 +453,9 @@ public:
         }
     }
 
-    void upload([[maybe_unused]] gfx::UploadPass& uploadPass) override {
 #if MLN_LEGACY_RENDERER
-        vertexBuffer = uploadPass.createVertexBuffer(std::move(vertexVector));
-#endif // MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass& uploadPass) override {
+        vertexBuffer = uploadPass.createVertexBuffer(vertexVector);
     }
 
     std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
@@ -439,6 +466,7 @@ public:
             return std::tuple<std::optional<gfx::AttributeBinding>>{gfx::attributeBinding(*vertexBuffer)};
         }
     }
+#endif // MLN_LEGACY_RENDERER
 
     std::tuple<float> interpolationFactor(float currentZoom) const override {
         const float possiblyRoundedZoom = expression.useIntegerZoom ? std::floor(currentZoom) : currentZoom;
@@ -458,6 +486,10 @@ public:
 
     std::size_t getVertexCount() const override { return vertexVector.elements(); }
 
+    bool isInterpolated() const override { return true; }
+
+    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedVertexVector; }
+
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
         return {vertexVector.at(index)};
     }
@@ -466,8 +498,14 @@ private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
-    gfx::VertexVector<Vertex> vertexVector;
+
+    gfx::VertexVectorPtr<Vertex> sharedVertexVector = std::make_shared<gfx::VertexVector<Vertex>>();
+    gfx::VertexVector<Vertex>& vertexVector = *sharedVertexVector;
+
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<Vertex>> vertexBuffer;
+#endif // MLN_LEGACY_RENDERER
+
     FeatureVertexRangeMap featureMap;
 };
 
@@ -485,6 +523,9 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
+    ~CompositeCrossFadedPaintPropertyBinder() override {
+        sharedPatternToVertexVector->release();
+    }
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -533,15 +574,14 @@ public:
 
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
 
-    void upload([[maybe_unused]] gfx::UploadPass& uploadPass) override {
+#if MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass& uploadPass) override {
         if (!patternToVertexVector.empty()) {
             assert(!zoomInVertexVector.empty());
             assert(!zoomOutVertexVector.empty());
-#if MLN_LEGACY_RENDERER
-            patternToVertexBuffer = uploadPass.createVertexBuffer(std::move(patternToVertexVector));
-            zoomInVertexBuffer = uploadPass.createVertexBuffer(std::move(zoomInVertexVector));
-            zoomOutVertexBuffer = uploadPass.createVertexBuffer(std::move(zoomOutVertexVector));
-#endif // MLN_LEGACY_RENDERER
+            patternToVertexBuffer = uploadPass.createVertexBuffer(patternToVertexVector);
+            zoomInVertexBuffer = uploadPass.createVertexBuffer(zoomInVertexVector);
+            zoomOutVertexBuffer = uploadPass.createVertexBuffer(zoomOutVertexVector);
         }
     }
 
@@ -562,6 +602,7 @@ public:
                                                                                                           std::nullopt};
         }
     }
+#endif // MLN_LEGACY_RENDERER
 
     std::tuple<float, float> interpolationFactor(float) const override { return std::tuple<float, float>{0.0f, 0.0f}; }
 
@@ -582,16 +623,25 @@ public:
                 ZoomInterpolatedVertexType<A2>{concatenate(zoomValue.a1, zoomValue.a1)}};
     }
 
+    gfx::VertexVectorBasePtr getSharedVertexVector() const override { return sharedPatternToVertexVector; }
+
 private:
     style::PropertyExpression<T> expression;
     T defaultValue;
     Range<float> zoomRange;
-    gfx::VertexVector<Vertex> patternToVertexVector;
+
+    gfx::VertexVectorPtr<Vertex> sharedPatternToVertexVector = std::make_shared<gfx::VertexVector<Vertex>>();
+    gfx::VertexVector<Vertex>& patternToVertexVector = *sharedPatternToVertexVector;
+
     gfx::VertexVector<Vertex2> zoomInVertexVector;
     gfx::VertexVector<Vertex2> zoomOutVertexVector;
+
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<Vertex>> patternToVertexBuffer;
     std::optional<gfx::VertexBuffer<Vertex2>> zoomInVertexBuffer;
     std::optional<gfx::VertexBuffer<Vertex2>> zoomOutVertexBuffer;
+#endif // MLN_LEGACY_RENDERER
+
     CrossfadeParameters crossfade;
 };
 

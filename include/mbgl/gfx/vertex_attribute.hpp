@@ -271,20 +271,36 @@ public:
     template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
     std::vector<std::string> readDataDrivenPaintProperties(const Binders& binders, const Evaluated& evaluated) {
         std::vector<std::string> propertiesAsUniforms;
+        propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (
             [&](const auto& attributeNames) {
                 for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
                     const auto& attributeName = std::string(attributeNames[attrIndex]);
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
+                        using Attribute = typename DataDrivenPaintProperty::Attribute;
+                        using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+                        using Value = typename Type::Value; // std::array<T, N>
+
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
                         if (vertexCount > 0 && !isConstant) {
                             if (auto& attr = getOrAdd("a_" + attributeName)) {
-                                for (std::size_t i = 0; i < vertexCount; ++i) {
-                                    attr->set(i, binder->getVertexValue(i), attrIndex);
+                                if (const auto& sharedVector = binder->getSharedVertexVector()) {
+                                    //[[maybe_unused]] auto dim = Type::Dimensions;
+                                    //[[maybe_unused]] auto dd = DataDrivenPaintProperty::IsDataDriven;
+                                    //[[maybe_unused]] auto ov = DataDrivenPaintProperty::IsOverridable;
+                                    const auto rawSize = sharedVector->getRawSize();
+                                    [[maybe_unused]] const auto expectedSize = sizeof(Value) * (binder->isInterpolated() ? 2 : 1);
+                                    assert(rawSize == expectedSize);
+                                    assert(sharedVector->getRawCount() == vertexCount);
+                                    attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, Type::DataType);
+                                } else {
+                                    for (std::size_t i = 0; i < vertexCount; ++i) {
+                                        attr->set(i, binder->getVertexValue(i), attrIndex);
+                                    }
                                 }
                             }
-                            propertiesAsUniforms.emplace_back("");
+                            propertiesAsUniforms.emplace_back(std::string());
                         } else {
                             propertiesAsUniforms.emplace_back(attributeName);
                         }
