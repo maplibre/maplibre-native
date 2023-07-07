@@ -73,7 +73,7 @@ private:
     gfx::ShaderGroupPtr heatmapShaderGroup;
     gfx::ShaderProgramBasePtr heatmapTextureShader;
     RenderTargetPtr renderTarget;
-    
+
     using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
     std::shared_ptr<TextureVertexVector> sharedTextureVertices;
 #endif

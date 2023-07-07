@@ -52,8 +52,7 @@ public:
           sharedType(other.sharedType),
           sharedOffset(other.sharedOffset),
           sharedVertexOffset(other.sharedVertexOffset),
-          sharedStride(other.sharedStride)
-    {}
+          sharedStride(other.sharedStride) {}
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
           dataType(other.dataType),
@@ -62,8 +61,7 @@ public:
           sharedType(other.sharedType),
           sharedOffset(other.sharedOffset),
           sharedVertexOffset(other.sharedVertexOffset),
-          sharedStride(other.sharedStride)
-    {}
+          sharedStride(other.sharedStride) {}
 
 public:
     virtual ~VertexAttribute() = default;
@@ -138,7 +136,11 @@ public:
     uint32_t getSharedOffset() const { return sharedOffset; }
     uint32_t getSharedVertexOffset() const { return sharedVertexOffset; }
     uint32_t getSharedStride() const { return sharedStride; }
-    void setSharedRawData(std::shared_ptr<VertexVectorBase> data, uint32_t offset, uint32_t vertexOffset, uint32_t stride_, AttributeDataType type) {
+    void setSharedRawData(std::shared_ptr<VertexVectorBase> data,
+                          uint32_t offset,
+                          uint32_t vertexOffset,
+                          uint32_t stride_,
+                          AttributeDataType type) {
         sharedRawData = std::move(data);
         sharedType = type;
         sharedOffset = offset;

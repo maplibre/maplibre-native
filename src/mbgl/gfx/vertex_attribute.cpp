@@ -13,7 +13,6 @@ std::size_t VertexAttribute::getCount() const {
     return sharedRawData ? sharedRawData->getRawCount() : items.size();
 }
 
-
 std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
 
 VertexAttributeArray::VertexAttributeArray(int initCapacity)
