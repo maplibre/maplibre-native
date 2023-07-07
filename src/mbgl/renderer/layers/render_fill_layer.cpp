@@ -527,14 +527,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            gfx::DrawableTweakerPtr tweaker;
             if (patternBuilder) {
                 patternBuilder->clearTweakers();
             }
             if (outlinePatternBuilder) {
                 outlinePatternBuilder->clearTweakers();
             }
-            if ((patternBuilder || outlinePatternBuilder) && !tweaker) {
+            if (patternBuilder || outlinePatternBuilder) {
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     auto tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                                  /*glyphName=*/std::string(),
