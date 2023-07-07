@@ -129,6 +129,10 @@ public:
     bool getIs3D() const { return is3D; }
     void setIs3D(bool value) { is3D = value; }
 
+    /// Is custom
+    bool getIsCustom() const { return isCustom; }
+    void setIsCustom(bool value) { isCustom = value; }
+
     /// The ID of the tile that this drawable represents, if any
     const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
     void setTileID(const OverscaledTileID& value) { tileID = value; }
@@ -139,11 +143,10 @@ public:
     const gfx::ColorMode& getColorMode() const;
     void setColorMode(const gfx::ColorMode&);
 
-    /// Get the number of vertexes
-    std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
-
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
+    virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
+
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
 
@@ -167,16 +170,17 @@ public:
                 static_cast<float>(components[3])};
     }
 
-    virtual const UniqueDrawableData& getData() const { return drawableData; }
-    virtual void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
+    const UniqueDrawableData& getData() const { return drawableData; }
+    void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
 protected:
     bool enabled = true;
     bool enableColor = true;
     bool enableStencil = false;
     bool is3D = false;
+    bool isCustom = false;
     std::string name;
-    util::SimpleIdentity uniqueID;
+    const util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
     mbgl::RenderPass renderPass;
     std::optional<OverscaledTileID> tileID;
@@ -198,7 +202,7 @@ using UniqueDrawable = std::unique_ptr<Drawable>;
 
 /// Comparator for sorting drawable pointers primarily by draw priority
 struct DrawableLessByPriority {
-    DrawableLessByPriority(bool descending)
+    DrawableLessByPriority(bool descending = false)
         : desc(descending) {}
     bool operator()(const Drawable& left, const Drawable& right) const {
         const auto& a = desc ? right : left;
@@ -208,6 +212,8 @@ struct DrawableLessByPriority {
         }
         return a.getId() < b.getId();
     }
+    bool operator()(const Drawable* left, const Drawable* right) const { return operator()(*left, *right); }
+    bool operator()(const UniqueDrawable& left, const UniqueDrawable& right) const { return operator()(*left, *right); }
     bool operator()(const DrawablePtr& left, const DrawablePtr& right) const {
         const auto& a = desc ? right : left;
         const auto& b = desc ? left : right;

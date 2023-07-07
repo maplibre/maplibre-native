@@ -773,27 +773,19 @@ void updateTileDrawable(gfx::Drawable& drawable,
 
     // TODO: detect whether anything has actually changed
     // See `Placement::updateBucketDynamicVertices`
-    if (const auto newAttribs = drawable.getVertexAttributes().clone()) {
-        const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
-        const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
+    const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
+    const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
-        if (auto& attr = newAttribs->getOrAdd(projPosAttribName)) {
-            const auto count = buffer.dynamicVertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
-            }
-        }
-
-        if (auto& attr = newAttribs->getOrAdd(fadeOpacityAttribName)) {
-            const auto count = buffer.opacityVertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, buffer.opacityVertices.at(i).a1[0]);
-            }
-        }
-
-        drawable.setVertexAttributes(std::move(*newAttribs));
+    auto& attribs = drawable.mutableVertexAttributes();
+    if (const auto& attr = attribs.get(projPosAttribName)) {
+        using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
+        attr->setSharedRawData(
+            buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+    }
+    if (const auto& attr = attribs.get(fadeOpacityAttribName)) {
+        using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
+        attr->setSharedRawData(
+            buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
     }
 }
 
@@ -831,14 +823,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
-            drawable.reset();
+        const auto& tileID = drawable.getTileID();
+        if (drawable.getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
             tileBucketInstances.erase(*tileID);
-            ++stats.drawablesRemoved;
+            return false;
         }
+        return true;
     });
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
@@ -884,7 +876,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                                                    const SymbolType type) mutable {
             for (const auto& segment : buffer.segments) {
                 const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
-                assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices.elements());
+                assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices().elements());
                 it = renderableSegments.emplace_hint(
                     it, std::ref(segment), tile, renderData, bucketPaintProperties, key, type, tileID.overscaledZ);
             }
@@ -927,46 +919,38 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         auto& tileInfo = tileCache[tile.id];
 
-        const auto buildVertices = [&](const SymbolBucket::Buffer& buffer_, RawVertexVec& dest) -> auto& {
-            const std::vector<SymbolLayoutVertex>& src = buffer_.vertices.vector();
-            const auto vertSize = sizeof(SymbolLayoutVertex::a1);
-            if (dest.size() != vertSize * src.size()) {
-                dest.resize(vertSize * src.size());
-                for (std::size_t i = 0; i < src.size(); ++i) {
-                    std::memcpy(&dest[vertSize * i], &src[i].a1, vertSize);
-                }
-            }
-            return dest;
-        };
-
         gfx::VertexAttributeArray attrs;
-        if (const auto& attr = attrs.getOrAdd(dataAttibName)) {
-            const auto count = buffer.vertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, util::cast<float>(buffer.vertices.at(i).a2));
-            }
+        const auto vertexCount = buffer.vertices().elements();
+        if (const auto& attr = attrs.add(posOffsetAttribName)) {
+            attr->setSharedRawData(buffer.sharedVertices,
+                                   offsetof(SymbolLayoutVertex, a1),
+                                   0,
+                                   sizeof(SymbolLayoutVertex),
+                                   gfx::AttributeDataType::Short4);
         }
-        if (const auto& attr = attrs.getOrAdd(pixOffsetAttribName)) {
-            const auto count = buffer.vertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, util::cast<float>(buffer.vertices.at(i).a3));
-            }
+        if (const auto& attr = attrs.add(dataAttibName)) {
+            attr->setSharedRawData(buffer.sharedVertices,
+                                   offsetof(SymbolLayoutVertex, a2),
+                                   0,
+                                   sizeof(SymbolLayoutVertex),
+                                   gfx::AttributeDataType::UShort4);
         }
-        if (const auto& attr = attrs.getOrAdd(projPosAttribName)) {
-            const auto count = buffer.dynamicVertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, util::cast<float>(buffer.dynamicVertices.at(i).a1));
-            }
+        if (const auto& attr = attrs.add(pixOffsetAttribName)) {
+            attr->setSharedRawData(buffer.sharedVertices,
+                                   offsetof(SymbolLayoutVertex, a3),
+                                   0,
+                                   sizeof(SymbolLayoutVertex),
+                                   gfx::AttributeDataType::Short4);
         }
-        if (const auto& attr = attrs.getOrAdd(fadeOpacityAttribName)) {
-            const auto count = buffer.opacityVertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, buffer.opacityVertices.at(i).a1[0]);
-            }
+        if (const auto& attr = attrs.add(projPosAttribName)) {
+            using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
+            attr->setSharedRawData(
+                buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+        }
+        if (const auto& attr = attrs.add(fadeOpacityAttribName)) {
+            using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
+            attr->setSharedRawData(
+                buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
         }
 
         const auto uniformProps = isText ? attrs.readDataDrivenPaintProperties<TextOpacity,
@@ -997,10 +981,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
-                              const Segment<SymbolTextAttributes>& segment,
-                              const gfx::IndexVector<gfx::Triangles>& indices,
-                              const RawVertexVec& vertices,
-                              const std::size_t vertexCount,
                               const bool isHalo,
                               const std::string_view suffix) {
             if (!shaderGroup) {
@@ -1031,9 +1011,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             builder->clearTweakers();
             builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
-
+            builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
             builder->setDrawableName(layerPrefix + std::string(suffix));
-            builder->setVertexAttributes(std::move(attrs));
+            builder->setVertexAttributes(attrs);
 
             const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 shaderGroup->getOrCreateShader(context, uniformProps, posOffsetAttribName));
@@ -1047,9 +1027,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
             // gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
 
-            auto raw = vertices;
-            builder->setRawVertices(std::move(raw), vertexCount, gfx::AttributeDataType::Short4);
-            builder->setSegments(gfx::Triangles(), indices.vector(), &segment, 1);
+            auto indexes = buffer.triangles.vector();
+            builder->setSegments(gfx::Triangles(), std::move(indexes), &renderable.segment.get(), 1);
 
             builder->flush();
 
@@ -1078,82 +1057,34 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         if (isText) {
-            const auto& vertices = buildVertices(buffer, tileInfo.textVertices);
-            const auto vertexCount = buffer.vertices.elements();
-            const auto& indices = buffer.triangles;
             if (bucket.iconsInText) {
                 if (textHalo) {
-                    draw(symbolTextAndIconGroup,
-                         renderable.segment,
-                         indices,
-                         vertices,
-                         vertexCount,
-                         /* isHalo = */ true,
-                         "halo");
+                    draw(symbolTextAndIconGroup, /* isHalo = */ true, "halo");
                 }
 
                 if (textFill) {
-                    draw(symbolTextAndIconGroup,
-                         renderable.segment,
-                         indices,
-                         vertices,
-                         vertexCount,
-                         /* isHalo = */ false,
-                         "fill");
+                    draw(symbolTextAndIconGroup, /* isHalo = */ false, "fill");
                 }
             } else {
                 if (textHalo) {
-                    draw(symbolSDFTextGroup,
-                         renderable.segment,
-                         indices,
-                         vertices,
-                         vertexCount,
-                         /* isHalo = */ true,
-                         "halo");
+                    draw(symbolSDFTextGroup, /* isHalo = */ true, "halo");
                 }
 
                 if (textFill) {
-                    draw(symbolSDFTextGroup,
-                         renderable.segment,
-                         indices,
-                         vertices,
-                         vertexCount,
-                         /* isHalo = */ false,
-                         "fill");
+                    draw(symbolSDFTextGroup, /* isHalo = */ false, "fill");
                 }
             }
         } else { // icons
-            const auto& vertices = buildVertices(buffer, tileInfo.iconVertices);
-            const auto vertexCount = buffer.vertices.elements();
-            const auto& indices = buffer.triangles;
             if (sdfIcons) {
                 if (iconHalo) {
-                    draw(symbolSDFIconGroup,
-                         renderable.segment,
-                         indices,
-                         vertices,
-                         vertexCount,
-                         /* isHalo = */ true,
-                         "halo");
+                    draw(symbolSDFIconGroup, /* isHalo = */ true, "halo");
                 }
 
                 if (iconFill) {
-                    draw(symbolSDFIconGroup,
-                         renderable.segment,
-                         indices,
-                         vertices,
-                         vertexCount,
-                         /* isHalo = */ false,
-                         "fill");
+                    draw(symbolSDFIconGroup, /* isHalo = */ false, "fill");
                 }
             } else {
-                draw(symbolIconGroup,
-                     renderable.segment,
-                     indices,
-                     vertices,
-                     vertexCount,
-                     /* isHalo = */ false,
-                     "icon");
+                draw(symbolIconGroup, /* isHalo = */ false, "icon");
             }
         }
     }

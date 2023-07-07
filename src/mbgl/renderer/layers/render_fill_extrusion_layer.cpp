@@ -39,6 +39,7 @@ namespace {
 constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
 constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
 
+constexpr auto PosAttribName = "a_pos";
 constexpr auto NormAttribName = "a_normal_ed";
 
 constexpr auto IconTextureName = "u_image";
@@ -90,14 +91,6 @@ bool RenderFillExtrusionLayer::hasCrossfade() const {
 
 bool RenderFillExtrusionLayer::is3D() const {
     return true;
-}
-
-void RenderFillExtrusionLayer::prepare(const LayerPrepareParameters& params) {
-    RenderLayer::prepare(params);
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
 }
 
 #if MLN_LEGACY_RENDERER
@@ -315,13 +308,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     // in the "3D pass".
     constexpr auto drawPass = RenderPass::Translucent;
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != drawPass || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
-            drawable.reset();
-            ++stats.drawablesRemoved;
-        }
+        return (drawable.getRenderPass() == drawPass &&
+                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
     });
 
     const auto zoom = static_cast<float>(state.getZoom());
@@ -361,8 +351,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         const auto vertexCount = bucket.vertices.elements();
-        constexpr auto vertexSize = sizeof(FillExtrusionLayoutVertex::a1);
-
         const auto defPattern = mbgl::Faded<expression::Image>{"", ""};
         const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
         const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
@@ -461,30 +449,30 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
-            const auto count = bucket.vertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, util::cast<float>(bucket.vertices.at(i).a2)); // int16_t x4
-            }
+        if (const auto& attr = vertexAttrs.getOrAdd(PosAttribName)) {
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillExtrusionLayoutVertex, a1),
+                                   0,
+                                   sizeof(FillExtrusionLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
         }
-
-        std::vector<uint8_t> rawVertices(vertexSize * vertexCount);
-        for (std::size_t i = 0; i < vertexCount; ++i) {
-            std::memcpy(&rawVertices[vertexSize * i], &bucket.vertices.at(i).a1, vertexSize);
+        if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillExtrusionLayoutVertex, a2),
+                                   0,
+                                   sizeof(FillExtrusionLayoutVertex),
+                                   gfx::AttributeDataType::Short4);
         }
 
         colorBuilder->setEnableStencil(doDepthPass);
         if (doDepthPass) {
-            auto vertexCopy = rawVertices;
-            depthBuilder->setRawVertices(std::move(vertexCopy), vertexCount, gfx::AttributeDataType::Short2);
+            depthBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         }
-        colorBuilder->setRawVertices(std::move(rawVertices), vertexCount, gfx::AttributeDataType::Short2);
+        colorBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
 
         if (doDepthPass) {
-            gfx::VertexAttributeArray attribCopy;
-            attribCopy.copy(vertexAttrs);
-            depthBuilder->setVertexAttributes(std::move(attribCopy));
+            auto copy = vertexAttrs.clone();
+            depthBuilder->setVertexAttributes(std::move(*copy));
         }
         colorBuilder->setVertexAttributes(std::move(vertexAttrs));
 

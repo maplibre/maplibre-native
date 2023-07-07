@@ -777,7 +777,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
             const bool pitchWithMap = layout.get<style::IconPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::IconKeepUpright>();
             if (bucket.hasSdfIconData()) {
-                reprojectLineLabels(bucket.sdfIcon.dynamicVertices,
+                reprojectLineLabels(bucket.sdfIcon.dynamicVertices(),
                                     bucket.sdfIcon.placedSymbols,
                                     tile.matrix,
                                     pitchWithMap,
@@ -789,7 +789,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
                 result = true;
             }
             if (bucket.hasIconData()) {
-                reprojectLineLabels(bucket.icon.dynamicVertices,
+                reprojectLineLabels(bucket.icon.dynamicVertices(),
                                     bucket.icon.placedSymbols,
                                     tile.matrix,
                                     pitchWithMap,
@@ -805,7 +805,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
         if (bucket.hasTextData() && layout.get<TextRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::TextPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::TextKeepUpright>();
-            reprojectLineLabels(bucket.text.dynamicVertices,
+            reprojectLineLabels(bucket.text.dynamicVertices(),
                                 bucket.text.placedSymbols,
                                 tile.matrix,
                                 pitchWithMap,
@@ -817,7 +817,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
             result = true;
         }
     } else if (hasVariableAnchors) {
-        bucket.text.dynamicVertices.clear();
+        bucket.text.sharedDynamicVertices->clear();
         bucket.hasVariablePlacement = false;
 
         const auto partiallyEvaluatedSize = bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom()));
@@ -846,7 +846,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
                 // These symbols are from a justification that is not being
                 // used, or a label that wasn't placed so we don't need to do
                 // the extra math to figure out what incremental shift to apply.
-                hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicVertices);
+                hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicVertices());
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
                 const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
@@ -889,25 +889,26 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
                 }
 
                 for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
-                    addDynamicAttributes(shiftedAnchor, symbol.angle, bucket.text.dynamicVertices);
+                    addDynamicAttributes(shiftedAnchor, symbol.angle, bucket.text.dynamicVertices());
                 }
             }
         }
 
         if (updateTextFitIcon && bucket.hasVariablePlacement) {
             auto updateIcon = [&](SymbolBucket::Buffer& iconBuffer) {
-                iconBuffer.dynamicVertices.clear();
+                iconBuffer.sharedDynamicVertices->clear();
                 for (std::size_t i = 0; i < iconBuffer.placedSymbols.size(); ++i) {
                     const PlacedSymbol& placedIcon = iconBuffer.placedSymbols[i];
                     if (placedIcon.hidden || (!placedIcon.placedOrientation && bucket.allowVerticalPlacement)) {
-                        hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicVertices);
+                        hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicVertices());
                     } else {
                         const auto& pair = placedTextShifts.find(i);
                         if (pair == placedTextShifts.end()) {
-                            hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicVertices);
+                            hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicVertices());
                         } else {
                             for (std::size_t j = 0; j < placedIcon.glyphOffsets.size(); ++j) {
-                                addDynamicAttributes(pair->second.second, placedIcon.angle, iconBuffer.dynamicVertices);
+                                addDynamicAttributes(
+                                    pair->second.second, placedIcon.angle, iconBuffer.dynamicVertices());
                             }
                         }
                     }
@@ -920,13 +921,13 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
         result = true;
     } else if (bucket.allowVerticalPlacement && bucket.hasTextData()) {
         const auto updateDynamicVertices = [](SymbolBucket::Buffer& buffer) {
-            buffer.dynamicVertices.clear();
+            buffer.sharedDynamicVertices->clear();
             for (const PlacedSymbol& symbol : buffer.placedSymbols) {
                 if (symbol.hidden || !symbol.placedOrientation) {
-                    hideGlyphs(symbol.glyphOffsets.size(), buffer.dynamicVertices);
+                    hideGlyphs(symbol.glyphOffsets.size(), buffer.dynamicVertices());
                 } else {
                     for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
-                        addDynamicAttributes(symbol.anchorPoint, symbol.angle, buffer.dynamicVertices);
+                        addDynamicAttributes(symbol.anchorPoint, symbol.angle, buffer.dynamicVertices());
                     }
                 }
             }
@@ -948,9 +949,9 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
 void Placement::updateBucketOpacities(SymbolBucket& bucket,
                                       const TransformState& state,
                                       std::set<uint32_t>& seenCrossTileIDs) const {
-    if (bucket.hasTextData()) bucket.text.opacityVertices.clear();
-    if (bucket.hasIconData()) bucket.icon.opacityVertices.clear();
-    if (bucket.hasSdfIconData()) bucket.sdfIcon.opacityVertices.clear();
+    if (bucket.hasTextData()) bucket.text.sharedOpacityVertices->clear();
+    if (bucket.hasIconData()) bucket.icon.sharedOpacityVertices->clear();
+    if (bucket.hasSdfIconData()) bucket.sdfIcon.sharedOpacityVertices->clear();
     if (bucket.hasIconCollisionBoxData()) bucket.iconCollisionBox->dynamicVertices.clear();
     if (bucket.hasIconCollisionCircleData()) bucket.iconCollisionCircle->dynamicVertices.clear();
     if (bucket.hasTextCollisionBoxData()) bucket.textCollisionBox->dynamicVertices.clear();
@@ -1015,7 +1016,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                 bucket.text.placedSymbols[*symbolInstance.placedVerticalTextIndex].hidden = opacityState.isHidden();
             }
 
-            bucket.text.opacityVertices.extend(textOpacityVerticesSize, opacityVertex);
+            bucket.text.opacityVertices().extend(textOpacityVerticesSize, opacityVertex);
 
             style::TextWritingModeType previousOrientation = style::TextWritingModeType::Horizontal;
             if (bucket.allowVerticalPlacement) {
@@ -1047,7 +1048,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                 iconBuffer.placedSymbols[*symbolInstance.placedVerticalIconIndex].hidden = opacityState.isHidden();
             }
 
-            iconBuffer.opacityVertices.extend(iconOpacityVerticesSize, opacityVertex);
+            iconBuffer.opacityVertices().extend(iconOpacityVerticesSize, opacityVertex);
         }
 
         auto updateIconCollisionBox = [&](const auto& feature, const bool placed, const Point<float>& shift) {

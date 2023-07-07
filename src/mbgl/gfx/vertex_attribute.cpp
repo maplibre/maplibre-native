@@ -1,11 +1,17 @@
 #include <mbgl/gfx/vertex_attribute.hpp>
 
+#include <mbgl/gfx/vertex_vector.hpp>
+
 #include <algorithm>
 #include <numeric>
 #include <optional>
 
 namespace mbgl {
 namespace gfx {
+
+std::size_t VertexAttribute::getCount() const {
+    return sharedRawData ? sharedRawData->getRawCount() : items.size();
+}
 
 std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
 

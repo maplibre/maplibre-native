@@ -63,12 +63,13 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
 SymbolBucket::~SymbolBucket() = default;
 
 void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (hasTextData()) {
         if (!staticUploaded) {
             text.indexBuffer = uploadPass.createIndexBuffer(
                 std::move(text.triangles),
                 sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
-            text.vertexBuffer = uploadPass.createVertexBuffer(std::move(text.vertices));
+            text.vertexBuffer = uploadPass.createVertexBuffer(text.vertices());
             for (auto& pair : paintProperties) {
                 pair.second.textBinders.upload(uploadPass);
             }
@@ -78,18 +79,18 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
 
         if (!dynamicUploaded) {
             if (!text.dynamicVertexBuffer) {
-                text.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(text.dynamicVertices),
+                text.dynamicVertexBuffer = uploadPass.createVertexBuffer(text.dynamicVertices(),
                                                                          gfx::BufferUsageType::StreamDraw);
             } else {
-                uploadPass.updateVertexBuffer(*text.dynamicVertexBuffer, std::move(text.dynamicVertices));
+                uploadPass.updateVertexBuffer(*text.dynamicVertexBuffer, text.dynamicVertices());
             }
         }
         if (!placementChangesUploaded) {
             if (!text.opacityVertexBuffer) {
-                text.opacityVertexBuffer = uploadPass.createVertexBuffer(std::move(text.opacityVertices),
+                text.opacityVertexBuffer = uploadPass.createVertexBuffer(text.opacityVertices(),
                                                                          gfx::BufferUsageType::StreamDraw);
             } else {
-                uploadPass.updateVertexBuffer(*text.opacityVertexBuffer, std::move(text.opacityVertices));
+                uploadPass.updateVertexBuffer(*text.opacityVertexBuffer, text.opacityVertices());
             }
         }
     }
@@ -99,7 +100,7 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
             iconBuffer.indexBuffer = uploadPass.createIndexBuffer(
                 std::move(iconBuffer.triangles),
                 sortFeaturesByY ? gfx::BufferUsageType::StreamDraw : gfx::BufferUsageType::StaticDraw);
-            iconBuffer.vertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.vertices));
+            iconBuffer.vertexBuffer = uploadPass.createVertexBuffer(iconBuffer.vertices());
             for (auto& pair : paintProperties) {
                 pair.second.iconBinders.upload(uploadPass);
             }
@@ -108,18 +109,18 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
         }
         if (!dynamicUploaded) {
             if (!iconBuffer.dynamicVertexBuffer) {
-                iconBuffer.dynamicVertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.dynamicVertices),
+                iconBuffer.dynamicVertexBuffer = uploadPass.createVertexBuffer(iconBuffer.dynamicVertices(),
                                                                                gfx::BufferUsageType::StreamDraw);
             } else {
-                uploadPass.updateVertexBuffer(*iconBuffer.dynamicVertexBuffer, std::move(iconBuffer.dynamicVertices));
+                uploadPass.updateVertexBuffer(*iconBuffer.dynamicVertexBuffer, iconBuffer.dynamicVertices());
             }
         }
         if (!placementChangesUploaded) {
             if (!iconBuffer.opacityVertexBuffer) {
-                iconBuffer.opacityVertexBuffer = uploadPass.createVertexBuffer(std::move(iconBuffer.opacityVertices),
+                iconBuffer.opacityVertexBuffer = uploadPass.createVertexBuffer(iconBuffer.opacityVertices(),
                                                                                gfx::BufferUsageType::StreamDraw);
             } else {
-                uploadPass.updateVertexBuffer(*iconBuffer.opacityVertexBuffer, std::move(iconBuffer.opacityVertices));
+                uploadPass.updateVertexBuffer(*iconBuffer.opacityVertexBuffer, iconBuffer.opacityVertices());
             }
         }
     };
@@ -175,6 +176,7 @@ void SymbolBucket::upload(gfx::UploadPass& uploadPass) {
     if (hasTextCollisionCircleData()) {
         updateCollisionCircle(*textCollisionCircle);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
     staticUploaded = true;
