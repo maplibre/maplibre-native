@@ -208,12 +208,8 @@ struct DrawableLessByPriority {
         }
         return a.getId() < b.getId();
     }
-    bool operator()(const Drawable* left, const Drawable* right) const {
-        return operator()(*left, *right);
-    }
-    bool operator()(const UniqueDrawable& left, const UniqueDrawable& right) const {
-        return operator()(*left, *right);
-    }
+    bool operator()(const Drawable* left, const Drawable* right) const { return operator()(*left, *right); }
+    bool operator()(const UniqueDrawable& left, const UniqueDrawable& right) const { return operator()(*left, *right); }
     bool operator()(const DrawablePtr& left, const DrawablePtr& right) const {
         const auto& a = desc ? right : left;
         const auto& b = desc ? left : right;

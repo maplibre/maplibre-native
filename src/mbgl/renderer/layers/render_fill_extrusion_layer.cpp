@@ -317,7 +317,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        return (drawable.getRenderPass() == drawPass && (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
+        return (drawable.getRenderPass() == drawPass &&
+                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
     });
 
     const auto zoom = static_cast<float>(state.getZoom());

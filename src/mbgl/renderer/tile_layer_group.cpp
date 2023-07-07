@@ -23,11 +23,12 @@ struct TileLayerGroupTileKey {
 };
 
 struct TileLayerGroup::Impl {
-    Impl(std::size_t initialCapacity) : drawablesByTile(initialCapacity) {}
+    Impl(std::size_t initialCapacity)
+        : drawablesByTile(initialCapacity) {}
 
     using TileMap = std::unordered_multimap<TileLayerGroupTileKey, gfx::UniqueDrawable, TileLayerGroupTileKey::hash>;
     TileMap drawablesByTile;
-    
+
     using DrawableMap = std::set<gfx::Drawable*, gfx::DrawableLessByPriority>;
     DrawableMap sortedDrawables;
 };
@@ -63,7 +64,7 @@ std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPas
             return std::move(pair.second);
         });
     impl->drawablesByTile.erase(range.first, range.second);
-    std::for_each(result.begin(), result.end(), [&](const auto& item){
+    std::for_each(result.begin(), result.end(), [&](const auto& item) {
         const auto hit = impl->sortedDrawables.find(item.get());
         assert(hit != impl->sortedDrawables.end());
         if (hit != impl->sortedDrawables.end()) {
@@ -84,7 +85,7 @@ void TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& 
 
 void TileLayerGroup::observeDrawables(const std::function<void(gfx::Drawable&)>&& f) {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
-    for (auto* drawable  : impl->sortedDrawables) {
+    for (auto* drawable : impl->sortedDrawables) {
         f(*drawable);
     }
 }
