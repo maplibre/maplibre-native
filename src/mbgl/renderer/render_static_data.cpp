@@ -86,11 +86,14 @@ SegmentVector<HeatmapTextureAttributes> RenderStaticData::heatmapTextureSegments
 
 void RenderStaticData::upload(gfx::UploadPass& uploadPass) {
     if (!uploaded) {
+        // these are still used by stencil buffer rendering
         tileVertexBuffer = uploadPass.createVertexBuffer(tileVertices());
+        quadTriangleIndexBuffer = uploadPass.createIndexBuffer(quadTriangleIndices());
+#if MLN_LEGACY_RENDERER
         rasterVertexBuffer = uploadPass.createVertexBuffer(rasterVertices());
         heatmapTextureVertexBuffer = uploadPass.createVertexBuffer(heatmapTextureVertices());
-        quadTriangleIndexBuffer = uploadPass.createIndexBuffer(quadTriangleIndices());
         tileBorderIndexBuffer = uploadPass.createIndexBuffer(tileLineStripIndices());
+#endif // MLN_LEGACY_RENDERER
         uploaded = true;
     }
 }
