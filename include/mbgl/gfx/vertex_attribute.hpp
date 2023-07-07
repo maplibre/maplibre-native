@@ -279,7 +279,7 @@ public:
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
-                        using Value = typename Type::Value; // std::array<T, N>
+                        using Value = typename Type::Value;    // std::array<T, N>
 
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
@@ -290,7 +290,8 @@ public:
                                     //[[maybe_unused]] auto dd = DataDrivenPaintProperty::IsDataDriven;
                                     //[[maybe_unused]] auto ov = DataDrivenPaintProperty::IsOverridable;
                                     const auto rawSize = sharedVector->getRawSize();
-                                    [[maybe_unused]] const auto expectedSize = sizeof(Value) * (binder->isInterpolated() ? 2 : 1);
+                                    [[maybe_unused]] const auto expectedSize = sizeof(Value) *
+                                                                               (binder->isInterpolated() ? 2 : 1);
                                     assert(rawSize == expectedSize);
                                     assert(sharedVector->getRawCount() == vertexCount);
                                     attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, Type::DataType);

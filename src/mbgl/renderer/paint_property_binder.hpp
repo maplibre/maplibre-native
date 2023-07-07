@@ -145,7 +145,7 @@ public:
 };
 
 namespace detail {
-    const gfx::VertexVectorBasePtr noVector;
+const gfx::VertexVectorBasePtr noVector;
 }
 
 template <class T, class A>
@@ -257,9 +257,7 @@ public:
     SourceFunctionPaintPropertyBinder(style::PropertyExpression<T> expression_, T defaultValue_)
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
-    ~SourceFunctionPaintPropertyBinder() override {
-        sharedVertexVector->release();
-    }
+    ~SourceFunctionPaintPropertyBinder() override { sharedVertexVector->release(); }
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -320,9 +318,7 @@ public:
     }
 
 #if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass& uploadPass) override {
-        vertexBuffer = uploadPass.createVertexBuffer(vertexVector);
-    }
+    void upload(gfx::UploadPass& uploadPass) override { vertexBuffer = uploadPass.createVertexBuffer(vertexVector); }
 
     std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
         const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
@@ -380,9 +376,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeFunctionPaintPropertyBinder() override {
-        sharedVertexVector->release();
-    }
+    ~CompositeFunctionPaintPropertyBinder() override { sharedVertexVector->release(); }
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
@@ -407,7 +401,8 @@ public:
         };
         this->statistics.add(range.min);
         this->statistics.add(range.max);
-        const AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min), attributeValue(range.max));
+        const AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min),
+                                                                    attributeValue(range.max));
         const auto elements = vertexVector.elements();
         for (std::size_t i = elements; i < length; ++i) {
             vertexVector.emplace_back(Vertex{value});
@@ -454,9 +449,7 @@ public:
     }
 
 #if MLN_LEGACY_RENDERER
-    void upload(gfx::UploadPass& uploadPass) override {
-        vertexBuffer = uploadPass.createVertexBuffer(vertexVector);
-    }
+    void upload(gfx::UploadPass& uploadPass) override { vertexBuffer = uploadPass.createVertexBuffer(vertexVector); }
 
     std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
         const PossiblyEvaluatedPropertyValue<T>& currentValue) const override {
@@ -523,9 +516,7 @@ public:
         : expression(std::move(expression_)),
           defaultValue(std::move(defaultValue_)),
           zoomRange({zoom, zoom + 1}) {}
-    ~CompositeCrossFadedPaintPropertyBinder() override {
-        sharedPatternToVertexVector->release();
-    }
+    ~CompositeCrossFadedPaintPropertyBinder() override { sharedPatternToVertexVector->release(); }
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
