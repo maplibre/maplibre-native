@@ -364,13 +364,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         builder.setEnableStencil(true);
     };
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != renderPass || (tileID && newTileIDs.find(*tileID) == newTileIDs.end())) {
-            drawable.reset();
-            ++stats.drawablesRemoved;
-        }
+        return (drawable.getRenderPass() == renderPass && (!drawable.getTileID() || newTileIDs.find(*drawable.getTileID()) != newTileIDs.end()));
     });
 
     for (const RenderTile& tile : *renderTiles) {

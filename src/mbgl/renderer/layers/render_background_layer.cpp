@@ -282,14 +282,14 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    tileLayerGroup->observeDrawables([&](gfx::Drawable& drawable) -> bool {
         // Has this tile dropped out of the cover set?
-        const auto tileID = drawable->getTileID();
+        const auto tileID = drawable.getTileID();
         if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
-            drawable.reset();
             ++stats.drawablesRemoved;
-            return;
+            return false;
         }
+        return true;
     });
 
     // For each tile in the cover set, add a tile drawable if one doesn't already exist.

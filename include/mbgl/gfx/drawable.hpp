@@ -176,7 +176,7 @@ protected:
     bool enableStencil = false;
     bool is3D = false;
     std::string name;
-    util::SimpleIdentity uniqueID;
+    const util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
     mbgl::RenderPass renderPass;
     std::optional<OverscaledTileID> tileID;
@@ -198,7 +198,7 @@ using UniqueDrawable = std::unique_ptr<Drawable>;
 
 /// Comparator for sorting drawable pointers primarily by draw priority
 struct DrawableLessByPriority {
-    DrawableLessByPriority(bool descending)
+    DrawableLessByPriority(bool descending = false)
         : desc(descending) {}
     bool operator()(const Drawable& left, const Drawable& right) const {
         const auto& a = desc ? right : left;
@@ -207,6 +207,12 @@ struct DrawableLessByPriority {
             return a.getDrawPriority() < b.getDrawPriority();
         }
         return a.getId() < b.getId();
+    }
+    bool operator()(const Drawable* left, const Drawable* right) const {
+        return operator()(*left, *right);
+    }
+    bool operator()(const UniqueDrawable& left, const UniqueDrawable& right) const {
+        return operator()(*left, *right);
     }
     bool operator()(const DrawablePtr& left, const DrawablePtr& right) const {
         const auto& a = desc ? right : left;

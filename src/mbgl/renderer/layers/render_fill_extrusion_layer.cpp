@@ -315,13 +315,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     // in the "3D pass".
     constexpr auto drawPass = RenderPass::Translucent;
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != drawPass || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
-            drawable.reset();
-            ++stats.drawablesRemoved;
-        }
+        return (drawable.getRenderPass() == drawPass && (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
     });
 
     const auto zoom = static_cast<float>(state.getZoom());

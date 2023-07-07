@@ -332,13 +332,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
-        const auto tileID = drawable->getTileID();
-        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
-            // remove it
-            drawable.reset();
-            ++stats.drawablesRemoved;
-        }
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+        return (!drawable.getTileID() || newTileIDs.find(*drawable.getTileID()) != newTileIDs.end());
     });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;

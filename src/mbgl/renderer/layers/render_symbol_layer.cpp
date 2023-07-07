@@ -831,14 +831,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
-            drawable.reset();
+        const auto& tileID = drawable.getTileID();
+        if (drawable.getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
             tileBucketInstances.erase(*tileID);
-            ++stats.drawablesRemoved;
+            return false;
         }
+        return true;
     });
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();

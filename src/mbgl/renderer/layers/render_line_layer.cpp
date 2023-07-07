@@ -450,13 +450,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses &
                                                           ~mbgl::underlying_type(RenderPass::Opaque));
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != renderPass || (tileID && newTileIDs.find(*tileID) == newTileIDs.end())) {
-            drawable.reset();
-            ++stats.drawablesRemoved;
-        }
+        return (drawable.getRenderPass() == renderPass && (!drawable.getTileID() || newTileIDs.find(*drawable.getTileID()) != newTileIDs.end()));
     });
 
     auto createLineBuilder = [&](const std::string& name,

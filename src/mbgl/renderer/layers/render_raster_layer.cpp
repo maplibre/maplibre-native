@@ -416,19 +416,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     } else if (renderTiles) {
         if (layerGroup) {
-            layerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+            stats.drawablesRemoved += layerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
                 // Has this tile dropped out of the cover set?
-                if (const auto it = std::find_if(renderTiles->begin(),
-                                                 renderTiles->end(),
-                                                 [&drawable](const auto& renderTile) {
-                                                     return drawable->getTileID() ==
-                                                            renderTile.get().getOverscaledTileID();
-                                                 });
-                    it == renderTiles->end()) {
-                    // remove it
-                    drawable.reset();
-                    ++stats.drawablesRemoved;
-                }
+                const auto hit = std::find_if(renderTiles->begin(),
+                                              renderTiles->end(),
+                                              [&drawable](const auto& renderTile) {
+                                                  return drawable.getTileID() ==
+                    renderTile.get().getOverscaledTileID(); });
+                return (hit != renderTiles->end());
             });
         } else {
             // Set up a tile layer group
