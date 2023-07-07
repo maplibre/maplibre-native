@@ -90,7 +90,7 @@ void RenderLineLayer::prepare(const LayerPrepareParameters& params) {
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
         if (evaluated.get<LineDasharray>().from.empty()) continue;
 
-        auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
+        const auto& bucket = static_cast<const LineBucket&>(*renderData->bucket);
         const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
                                                                                       : LinePatternCap::Square;
         // Ensures that the dash data gets added to the atlas.
@@ -441,22 +441,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         lineSDFShaderGroup = shaders.getShaderGroup("LineSDFShader");
     }
 
-    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-
     const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses &
                                                           ~mbgl::underlying_type(RenderPass::Opaque));
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto tileID = drawable->getTileID();
-        if (drawable->getRenderPass() != renderPass || (tileID && newTileIDs.find(*tileID) == newTileIDs.end())) {
-            drawable.reset();
-            ++stats.drawablesRemoved;
-        }
+        return (drawable.getRenderPass() == renderPass &&
+                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
     });
 
     auto createLineBuilder = [&](const std::string& name,

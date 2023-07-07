@@ -23,7 +23,6 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     bool is3D() const override;
-    void prepare(const LayerPrepareParameters&) override;
 
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
