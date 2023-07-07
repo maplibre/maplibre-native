@@ -325,12 +325,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-
     std::unique_ptr<gfx::DrawableBuilder> fillBuilder;
     std::unique_ptr<gfx::DrawableBuilder> outlineBuilder;
     std::unique_ptr<gfx::DrawableBuilder> patternBuilder;
@@ -367,7 +361,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         return (drawable.getRenderPass() == renderPass &&
-                (!drawable.getTileID() || newTileIDs.find(*drawable.getTileID()) != newTileIDs.end()));
+                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
     });
 
     for (const RenderTile& tile : *renderTiles) {

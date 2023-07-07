@@ -317,12 +317,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-
     std::unique_ptr<gfx::DrawableBuilder> heatmapBuilder;
     std::vector<gfx::DrawablePtr> newTiles;
     gfx::VertexAttributeArray heatmapVertexAttrs;
@@ -333,7 +327,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        return (!drawable.getTileID() || newTileIDs.find(*drawable.getTileID()) != newTileIDs.end());
+        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
     });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;

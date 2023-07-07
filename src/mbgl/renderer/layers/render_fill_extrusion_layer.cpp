@@ -92,14 +92,6 @@ bool RenderFillExtrusionLayer::is3D() const {
     return true;
 }
 
-void RenderFillExtrusionLayer::prepare(const LayerPrepareParameters& params) {
-    RenderLayer::prepare(params);
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
-}
-
 #if MLN_LEGACY_RENDERER
 void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
     assert(renderTiles);

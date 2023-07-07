@@ -58,6 +58,10 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
     addRenderPassesFromTiles();
+
+#if MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {

@@ -203,6 +203,10 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().from.id(), params);
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().to.id(), params);
     }
+
+#if MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 #if MLN_DRAWABLE_RENDERER
@@ -275,21 +279,11 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     const auto indexes = RenderStaticData::quadTriangleIndices();
     const auto segs = RenderStaticData::tileTriangleSegments();
 
-    // Put the tile cover into a searchable form.
-    // TODO: Likely better to sort and `std::binary_search` the vector.
-    // If it's returned in a well-defined order, we might not even need to sort.
-    const std::unordered_set<OverscaledTileID> newTileIDs(tileCover.begin(), tileCover.end());
-
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
     tileLayerGroup->observeDrawables([&](gfx::Drawable& drawable) -> bool {
         // Has this tile dropped out of the cover set?
-        const auto tileID = drawable.getTileID();
-        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
-            ++stats.drawablesRemoved;
-            return false;
-        }
-        return true;
+        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
     });
 
     // For each tile in the cover set, add a tile drawable if one doesn't already exist.

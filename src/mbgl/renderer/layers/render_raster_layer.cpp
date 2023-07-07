@@ -97,6 +97,10 @@ void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     imageData = params.source->getImageRenderData();
     // It is possible image data is not available until the source loads it.
     assert(renderTiles || imageData || !params.source->isEnabled());
+
+#if MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 #if MLN_LEGACY_RENDERER
@@ -418,11 +422,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (layerGroup) {
             stats.drawablesRemoved += layerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
                 // Has this tile dropped out of the cover set?
-                const auto hit = std::find_if(
-                    renderTiles->begin(), renderTiles->end(), [&drawable](const auto& renderTile) {
-                        return drawable.getTileID() == renderTile.get().getOverscaledTileID();
-                    });
-                return (hit != renderTiles->end());
+                return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
             });
         } else {
             // Set up a tile layer group
