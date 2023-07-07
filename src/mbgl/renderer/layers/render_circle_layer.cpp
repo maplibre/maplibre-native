@@ -300,28 +300,17 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-
     std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
     std::vector<gfx::DrawablePtr> newTiles;
     gfx::VertexAttributeArray circleVertexAttrs;
-    auto renderPass = RenderPass::Translucent;
+    constexpr auto renderPass = RenderPass::Translucent;
 
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
-        const auto tileID = drawable->getTileID();
-        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
-            // remove it
-            drawable.reset();
-            ++stats.drawablesRemoved;
-        }
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
     });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
