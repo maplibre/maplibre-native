@@ -106,12 +106,7 @@ void LayerGroupGL::upload(gfx::UploadPass& uploadPass) {
         auto& drawableGL = static_cast<gl::DrawableGL&>(drawable);
 
 #if !defined(NDEBUG)
-        std::string label;
-        if (const auto& tileID = drawable.getTileID()) {
-            label = drawable.getName() + "/" + util::toString(*tileID);
-        }
-        const auto labelPtr = (label.empty() ? drawable.getName() : label).c_str();
-        const auto debugGroup = uploadPass.createDebugGroup(labelPtr);
+        const auto debugGroup = uploadPass.createDebugGroup(drawable.getName().c_str());
 #endif
 
         drawableGL.upload(uploadPass);

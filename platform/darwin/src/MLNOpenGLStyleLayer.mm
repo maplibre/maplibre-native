@@ -6,7 +6,7 @@
 #import "MLNStyleLayer_Private.h"
 #import "MLNGeometry_Private.h"
 
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/math/wrap.hpp>
 
 class MLNOpenGLLayerHost;

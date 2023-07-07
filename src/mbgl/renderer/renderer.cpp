@@ -32,18 +32,7 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
     assert(updateParameters);
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();
-
-#if MLN_DRAWABLE_RENDERER
-        const auto& renderTreeParameters = renderTree->getParameters();
-        const auto& state = renderTreeParameters.transformParams.state;
-
-        if (impl->staticData && impl->staticData->shaders) {
-            auto& context = impl->backend.getContext();
-            auto& shaders = *impl->staticData->shaders;
-            impl->orchestrator.updateLayers(shaders, context, state, updateParameters, *renderTree);
-        }
-#endif
-
+        impl->preRender(*renderTree, updateParameters);
         impl->render(*renderTree);
     }
 }

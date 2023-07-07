@@ -129,6 +129,10 @@ public:
     bool getIs3D() const { return is3D; }
     void setIs3D(bool value) { is3D = value; }
 
+    /// Is custom
+    bool getIsCustom() const { return isCustom; }
+    void setIsCustom(bool value) { isCustom = value; }
+
     /// The ID of the tile that this drawable represents, if any
     const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
     void setTileID(const OverscaledTileID& value) { tileID = value; }
@@ -175,6 +179,7 @@ protected:
     bool enableColor = true;
     bool enableStencil = false;
     bool is3D = false;
+    bool isCustom = false;
     std::string name;
     util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
