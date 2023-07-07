@@ -1,6 +1,9 @@
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 
+#include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/gl/defines.hpp>
+#include <mbgl/gl/upload_pass.hpp>
+#include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 
@@ -112,7 +115,9 @@ bool VertexAttributeGL::get(const gfx::VertexAttribute::ElementType& element, GL
         case GL_FLOAT_MAT2:
             return gl::get<float4>(element, buffer) || gl::get<int4, float4>(element, buffer, [](int4 x) {
                        return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
-                   });
+                    }) || gl::get<ushort8, float4>(element, buffer, [](ushort8 x) {
+                        return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
+                    });
         case GL_INT:
             return gl::get<std::int32_t>(element, buffer) || gl::get<float, std::int32_t>(element, buffer);
         case GL_UNSIGNED_INT:
@@ -146,27 +151,29 @@ std::size_t VertexAttributeGL::getStride() const {
     return getStride(getGLType());
 }
 
-const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(platform::GLenum type) const {
-    if (dirty || rawType != type) {
-        const auto count = getCount();
-        // const auto size_ = getSize(type);
-        const auto stride_ = getStride(type);
-
+namespace {
+const std::vector<std::uint8_t> noData;
+}
+const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr, platform::GLenum type) {
+    const auto count = attr.getCount();
+    const auto stride_ = getStride(type);
+    auto& rawData = attr.getRawData();
+    if (attr.isDirty() || rawData.size() != count * stride_) {
         rawData.resize(stride_ * count);
-        std::fill(rawData.begin(), rawData.end(), 0);
 
         if (!rawData.empty()) {
+            std::fill(rawData.begin(), rawData.end(), 0);
+
             std::uint8_t* outPtr = rawData.data();
             for (std::size_t i = 0; i < count; ++i) {
-                if (!get(items[i], type, outPtr)) {
-                    // throw?
+                if (!get(attr.get(i), type, outPtr)) {
+                    // missing type conversion
+                    assert(false);
                 }
                 outPtr += stride_;
             }
         }
-
-        dirty = false;
-        rawType = type;
+        attr.setDirty(false);
     }
     return rawData;
 }

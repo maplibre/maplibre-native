@@ -51,13 +51,13 @@ public:
 
 public:
     template <class Vertex>
-    VertexBuffer<Vertex> createVertexBuffer(VertexVector<Vertex>&& v,
+    VertexBuffer<Vertex> createVertexBuffer(const VertexVector<Vertex>& v,
                                             const BufferUsageType usage = BufferUsageType::StaticDraw) {
         return {v.elements(), createVertexBufferResource(v.data(), v.bytes(), usage)};
     }
 
     template <class Vertex>
-    void updateVertexBuffer(VertexBuffer<Vertex>& buffer, VertexVector<Vertex>&& v) {
+    void updateVertexBuffer(VertexBuffer<Vertex>& buffer, const VertexVector<Vertex>& v) {
         assert(v.elements() == buffer.elements);
         updateVertexBufferResource(buffer.getResource(), v.data(), v.bytes());
     }
@@ -83,7 +83,7 @@ public:
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
-        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) = 0;
+        /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) = 0;
 #endif
 
 protected:

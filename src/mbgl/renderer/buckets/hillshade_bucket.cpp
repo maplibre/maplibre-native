@@ -29,6 +29,7 @@ void HillshadeBucket::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
+#if MLN_LEGACY_RENDERER
     const PremultipliedImage* image = demdata.getImage();
     dem = uploadPass.createTexture(*image);
 
@@ -38,13 +39,17 @@ void HillshadeBucket::upload(gfx::UploadPass& uploadPass) {
     if (!indices.empty()) {
         indexBuffer = uploadPass.createIndexBuffer(std::move(indices));
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
 }
 
 void HillshadeBucket::clear() {
+#if MLN_LEGACY_RENDERER
     vertexBuffer = {};
     indexBuffer = {};
+#endif // MLN_LEGACY_RENDERER
+
     segments.clear();
     vertices.clear();
     indices.clear();

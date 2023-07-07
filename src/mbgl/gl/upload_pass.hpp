@@ -7,6 +7,8 @@ namespace mbgl {
 namespace gfx {
 
 class CommandEncoder;
+class VertexVectorBase;
+using VertexVectorBasePtr = std::shared_ptr<VertexVectorBase>;
 
 } // namespace gfx
 
@@ -41,6 +43,8 @@ public:
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
 #if MLN_DRAWABLE_RENDERER
+    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, gfx::BufferUsageType);
+
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
         const gfx::AttributeDataType vertexType,
@@ -49,7 +53,7 @@ public:
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
-        /*out*/ std::unique_ptr<gfx::VertexBufferResource>& outBuffer) override;
+        /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
 #endif
 
 public:

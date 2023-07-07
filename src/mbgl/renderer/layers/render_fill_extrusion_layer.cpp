@@ -39,6 +39,7 @@ namespace {
 constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
 constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
 
+constexpr auto PosAttribName = "a_pos";
 constexpr auto NormAttribName = "a_normal_ed";
 
 constexpr auto IconTextureName = "u_image";
@@ -350,8 +351,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         const auto vertexCount = bucket.vertices.elements();
-        constexpr auto vertexSize = sizeof(FillExtrusionLayoutVertex::a1);
-
         const auto defPattern = mbgl::Faded<expression::Image>{"", ""};
         const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
         const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
@@ -450,30 +449,22 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
-            const auto count = bucket.vertices.elements();
-            attr->reserve(count);
-            for (auto i = 0ULL; i < count; ++i) {
-                attr->set(i, util::cast<float>(bucket.vertices.at(i).a2)); // int16_t x4
-            }
+        if (const auto& attr = vertexAttrs.getOrAdd(PosAttribName)) {
+            attr->setSharedRawData(bucket.sharedVertices, offsetof(FillExtrusionLayoutVertex, a1), 0, sizeof(FillExtrusionLayoutVertex), gfx::AttributeDataType::Short2);
         }
-
-        std::vector<uint8_t> rawVertices(vertexSize * vertexCount);
-        for (std::size_t i = 0; i < vertexCount; ++i) {
-            std::memcpy(&rawVertices[vertexSize * i], &bucket.vertices.at(i).a1, vertexSize);
+        if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
+            attr->setSharedRawData(bucket.sharedVertices, offsetof(FillExtrusionLayoutVertex, a2), 0, sizeof(FillExtrusionLayoutVertex), gfx::AttributeDataType::Short4);
         }
 
         colorBuilder->setEnableStencil(doDepthPass);
         if (doDepthPass) {
-            auto vertexCopy = rawVertices;
-            depthBuilder->setRawVertices(std::move(vertexCopy), vertexCount, gfx::AttributeDataType::Short2);
+            depthBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         }
-        colorBuilder->setRawVertices(std::move(rawVertices), vertexCount, gfx::AttributeDataType::Short2);
+        colorBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
 
         if (doDepthPass) {
-            gfx::VertexAttributeArray attribCopy;
-            attribCopy.copy(vertexAttrs);
-            depthBuilder->setVertexAttributes(std::move(attribCopy));
+            auto copy = vertexAttrs.clone();
+            depthBuilder->setVertexAttributes(std::move(*copy));
         }
         colorBuilder->setVertexAttributes(std::move(vertexAttrs));
 

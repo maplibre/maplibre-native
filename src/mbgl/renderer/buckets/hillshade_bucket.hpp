@@ -44,8 +44,10 @@ public:
     gfx::IndexVector<gfx::Triangles> indices;
     SegmentVector<HillshadeAttributes> segments;
 
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<HillshadeLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
 
 private:
     DEMData demdata;

@@ -1,13 +1,18 @@
 #pragma once
 
+#include <mbgl/gfx/types.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
 namespace mbgl {
+namespace gfx {
+class VertexBufferResource;
+} // namespace gfx
 namespace gl {
 
 class VertexAttributeArrayGL;
+class UploadPass;
 
 class VertexAttributeGL final : public gfx::VertexAttribute {
     // Can only be created by VertexAttributeArrayGL
@@ -25,7 +30,6 @@ private:
 public:
     ~VertexAttributeGL() override = default;
 
-public:
     platform::GLenum getGLType() const { return glType; }
     void setGLType(platform::GLenum value);
 
@@ -34,7 +38,7 @@ public:
 
     std::size_t getStride() const;
 
-    const std::vector<std::uint8_t>& getRaw(platform::GLenum) const;
+    static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
 
 private:
     static int getSize(platform::GLenum glType);
@@ -43,7 +47,6 @@ private:
 
 private:
     platform::GLenum glType = 0;
-    mutable platform::GLenum rawType = 0;
     bool normalized = false;
 };
 
