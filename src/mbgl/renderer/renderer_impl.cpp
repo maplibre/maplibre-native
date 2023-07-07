@@ -62,14 +62,8 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
-void Renderer::Impl::render(const RenderTree& renderTree) {
-    if (renderState == RenderState::Never) {
-        observer->onWillStartRenderingMap();
-    }
-
-    observer->onWillStartRenderingFrame();
-    const auto& renderTreeParameters = renderTree.getParameters();
-
+void Renderer::Impl::preRender(const RenderTree& renderTree,
+                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
     auto& context = backend.getContext();
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
@@ -89,7 +83,26 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         // Notify post-shader registration
         observer->onRegisterShaders(*staticData->shaders);
     }
+
+#if MLN_DRAWABLE_RENDERER
+    // update layers
+    const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
+    if (staticData && staticData->shaders) {
+        orchestrator.updateLayers(
+            *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
+    }
+#endif
+}
+
+void Renderer::Impl::render(const RenderTree& renderTree) {
+    if (renderState == RenderState::Never) {
+        observer->onWillStartRenderingMap();
+    }
+
+    observer->onWillStartRenderingFrame();
+    auto& context = backend.getContext();
+    const auto& renderTreeParameters = renderTree.getParameters();
 
     PaintParameters parameters{context,
                                pixelRatio,

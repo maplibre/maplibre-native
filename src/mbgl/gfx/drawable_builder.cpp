@@ -30,7 +30,7 @@ void DrawableBuilder::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
 }
 
-const UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
+UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
         currentDrawable = createDrawable();
     }
