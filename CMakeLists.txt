@@ -26,7 +26,7 @@ if (MLN_WITH_CLANG_TIDY)
     # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized), 
     # that's why we need to disable this `unknown-warning-option` here. 
     # We could check if current compiler supports particular flag before enabling it.
-    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option")
+    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option;--extra-arg=-Wno-error=pragmas")
 endif()
 
 if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
