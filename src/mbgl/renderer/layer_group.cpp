@@ -4,20 +4,18 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
 
-#include <unordered_map>
+#include <set>
 
 namespace mbgl {
 
 struct LayerGroup::Impl {
-    Impl(std::size_t capacity) { drawables.reserve(capacity); }
-
-    using DrawableCollection = std::vector<gfx::UniqueDrawable>;
+    using DrawableCollection = std::set<gfx::UniqueDrawable, gfx::DrawableLessByPriority>;
     DrawableCollection drawables;
 };
 
-LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
+LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t /*initialCapacity*/, std::string name_)
     : LayerGroupBase(layerIndex_, std::move(name_)),
-      impl(std::make_unique<Impl>(initialCapacity)) {}
+      impl(std::make_unique<Impl>()) {}
 
 LayerGroup::~LayerGroup() = default;
 
@@ -26,10 +24,10 @@ std::size_t LayerGroup::getDrawableCount() const {
 }
 
 void LayerGroup::addDrawable(gfx::UniqueDrawable&& drawable) {
-    impl->drawables.emplace_back(std::move(drawable));
+    impl->drawables.emplace(std::move(drawable));
 }
 
-void LayerGroup::observeDrawables(std::function<void(gfx::Drawable&)> f) {
+void LayerGroup::observeDrawables(const std::function<void(gfx::Drawable&)>&& f) {
     for (const auto& item : impl->drawables) {
         if (item) {
             f(*item);
@@ -37,7 +35,7 @@ void LayerGroup::observeDrawables(std::function<void(gfx::Drawable&)> f) {
     }
 }
 
-void LayerGroup::observeDrawables(std::function<void(const gfx::Drawable&)> f) const {
+void LayerGroup::observeDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
     for (const auto& item : impl->drawables) {
         if (item) {
             f(*item);
@@ -45,20 +43,20 @@ void LayerGroup::observeDrawables(std::function<void(const gfx::Drawable&)> f) c
     }
 }
 
-void LayerGroup::observeDrawables(std::function<void(gfx::UniqueDrawable&)> f) {
-    for (auto i = impl->drawables.begin(); i != impl->drawables.end();) {
-        auto& drawable = *i;
-        if (drawable) {
-            f(drawable);
-        }
-        if (drawable) {
-            // Not removed, keep going
-            ++i;
-        } else {
-            // Removed, take it out of the map
-            i = impl->drawables.erase(i);
+std::size_t LayerGroup::observeDrawablesRemove(const std::function<bool(gfx::Drawable&)>&& f) {
+    decltype(impl->drawables) newSet;
+    const auto oldSize = impl->drawables.size();
+    while (!impl->drawables.empty()) {
+        // set members are immutable, since changes could affect its position, so extract each item
+        gfx::UniqueDrawable drawable = std::move(impl->drawables.extract(impl->drawables.begin()).value());
+        if (f(*drawable)) {
+            // Not removed, keep it, but in a new set so that if the key value
+            // has increased, we don't see it again during this iteration.
+            newSet.emplace_hint(newSet.end(), std::move(drawable));
         }
     }
+    std::swap(impl->drawables, newSet);
+    return (oldSize - impl->drawables.size());
 }
 
 std::size_t LayerGroup::clearDrawables() {
