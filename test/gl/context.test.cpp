@@ -3,7 +3,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/gl/context.hpp>
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/map/map.hpp>
