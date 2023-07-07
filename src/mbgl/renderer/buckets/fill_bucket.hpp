@@ -40,15 +40,20 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
-    gfx::VertexVector<FillLayoutVertex> vertices;
+    using VertexVector = gfx::VertexVector<FillLayoutVertex>;
+    std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
     gfx::IndexVector<gfx::Lines> lines;
     gfx::IndexVector<gfx::Triangles> triangles;
     SegmentVector<FillAttributes> lineSegments;
     SegmentVector<FillAttributes> triangleSegments;
 
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<FillLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> lineIndexBuffer;
     std::optional<gfx::IndexBuffer> triangleIndexBuffer;
+#endif // MLN_LEGACY_RENDERER
 
     std::map<std::string, FillProgram::Binders> paintPropertyBinders;
 };
