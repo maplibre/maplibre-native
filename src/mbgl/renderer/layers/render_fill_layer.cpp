@@ -435,14 +435,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         fillVertexAttrs.clear();
         outlineVertexAttrs.clear();
 
-        gfx::DrawableTweakerPtr tweaker;
-        if (fillBuilder) {
-            fillBuilder->clearTweakers();
-        }
-        if (outlineBuilder) {
-            outlineBuilder->clearTweakers();
-        }
-
         // `Fill*Program` all use `style::FillPaintProperties`
         const auto fillUniformProps =
             fillVertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
@@ -529,9 +521,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (tweaker) {
-                        builder->addTweaker(tweaker);
-                    }
                     patternBuilder = std::move(builder);
                 }
             }
@@ -543,24 +532,28 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (tweaker) {
-                        builder->addTweaker(tweaker);
-                    }
                     outlinePatternBuilder = std::move(builder);
                 }
             }
 
-            if ((patternBuilder || outlineBuilder) && !tweaker) {
+            gfx::DrawableTweakerPtr tweaker;
+            if (patternBuilder) {
+                patternBuilder->clearTweakers();
+            }
+            if (outlinePatternBuilder) {
+                outlinePatternBuilder->clearTweakers();
+            }
+            if ((patternBuilder || outlinePatternBuilder) && !tweaker) {
                 if (const auto& atlases = tile.getAtlasTextures()) {
-                    tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                    auto tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                             /*glyphName=*/std::string(),
                                                                             std::string(IconTextureName),
                                                                             /*isText=*/false);
                     if (patternBuilder) {
                         patternBuilder->addTweaker(tweaker);
                     }
-                    if (outlineBuilder) {
-                        outlineBuilder->addTweaker(tweaker);
+                    if (outlinePatternBuilder) {
+                        outlinePatternBuilder->addTweaker(std::move(tweaker));
                     }
                 }
             }
