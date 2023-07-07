@@ -6,6 +6,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
@@ -54,6 +55,16 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto& drawableData = static_cast<const gfx::HillshadePrepareDrawableData&>(*drawable.getData());
 
+        auto imageLocation = drawable.getShader()->getSamplerLocation("u_image");
+        if (imageLocation.has_value()) {
+            std::shared_ptr<gfx::Texture2D> texture = parameters.context.createTexture2D();
+            texture->setImage(drawableData.image);
+            texture->setSamplerConfiguration(
+                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            texture->upload();
+            drawable.setTexture(texture, imageLocation.value());
+        }
+        
         mat4 matrix;
         matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);

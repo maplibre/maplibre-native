@@ -105,6 +105,9 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         // mark HillshadeBucket.prepared as false so it runs through the prepare
         // render pass with the new texture data we just backfilled
         bucket->setPrepared(false);
+#if MLN_DRAWABLE_RENDERER
+        tileDEM.prepared = false;
+#endif
     }
 }
 

@@ -73,11 +73,11 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
-    /*if (renderTarget) {
-        renderTarget->getLayerGroup(0)->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
-    }*/
     if (layerGroup) {
         layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
+    }
+    for (const auto& pair : renderTargets) {
+        pair.second->getLayerGroup(0)->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
     }
 #endif
 }
@@ -259,11 +259,8 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
 void RenderHillshadeLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
 
-    auto renderPass = RenderPass::Translucent;
-    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
     for (const auto& pair : renderTargets) {
-        auto drawableCount = tileLayerGroup->getDrawableCount(renderPass, pair.first);
-        activateRenderTarget(pair.second, willRender && !drawableCount, changes);
+        activateRenderTarget(pair.second, false, changes);
     }
 }
 
@@ -370,6 +367,13 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            if (!bucket.getDEMData().prepared) {
+                const auto result = renderTargets.find(tileID);
+                if (result != renderTargets.end()) {
+                    activateRenderTarget(result->second, true, changes);
+                    bucket.getDEMData().prepared = true;
+                }
+            }
             continue;
         }
 
@@ -383,6 +387,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
         activateRenderTarget(renderTarget, true, changes);
+        bucket.getDEMData().prepared = true;
 
         auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
         if (!singleTileLayerGroup) {
@@ -429,21 +434,11 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadePrepareBuilder->setSegments(
             gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
 
-        auto prepareImageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
-        if (prepareImageLocation.has_value()) {
-            std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
-            texture->setImage(bucket.getDEMData().getImagePtr());
-            texture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            hillshadePrepareBuilder->setTexture(texture, prepareImageLocation.value());
-        }
-
         hillshadePrepareBuilder->flush();
 
         for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(
-                bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom));
+            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom, bucket.getDEMData().getImagePtr()));
             singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
@@ -455,13 +450,11 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         auto* indices = &staticDataIndices;
         auto* segments = &staticDataSegments;
 
-        if (!bucket.vertices.empty() && !bucket.indices.empty()) {
-            vertices = &bucket.vertices;
-            indices = &bucket.indices;
-            if (!bucket.segments.empty()) {
-                segments = &bucket.segments;
-            }
-        }
+//        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+//            vertices = &bucket.vertices;
+//            indices = &bucket.indices;
+//            segments = &bucket.segments;
+//        }
 
         if (auto& attr = hillshadeVertexAttrs.getOrAdd("a_texture_pos")) {
             std::size_t index{0};

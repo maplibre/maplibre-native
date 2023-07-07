@@ -26,6 +26,9 @@ public:
     const int32_t stride;
     const Tileset::DEMEncoding encoding;
 
+#if MLN_DRAWABLE_RENDERER
+    bool prepared = false;
+#endif
 private:
     std::shared_ptr<PremultipliedImage> image;
 
