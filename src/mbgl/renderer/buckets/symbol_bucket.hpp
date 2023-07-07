@@ -13,6 +13,7 @@
 #include <mbgl/text/glyph_range.hpp>
 #include <mbgl/text/placement.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace mbgl {
@@ -132,18 +133,41 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
-    struct Buffer {
-        gfx::VertexVector<SymbolLayoutVertex> vertices;
-        gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>> dynamicVertices;
-        gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>> opacityVertices;
+    using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
+    using VertexBuffer = gfx::VertexBuffer<SymbolLayoutVertex>;
+    using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
+    using DynamicVertexBuffer = gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
+    using OpacityVertexVector = gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>>;
+    using OpacityVertexBuffer = gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>;
+
+    struct Buffer final {
+        ~Buffer() {
+            sharedVertices->release();
+            sharedDynamicVertices->release();
+            sharedOpacityVertices->release();
+        }
+        std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+        VertexVector& vertices() { return *sharedVertices; }
+        const VertexVector& vertices() const { return *sharedVertices; }
+
+        std::shared_ptr<DynamicVertexVector> sharedDynamicVertices = std::make_shared<DynamicVertexVector>();
+        DynamicVertexVector& dynamicVertices() { return *sharedDynamicVertices; }
+        const DynamicVertexVector& dynamicVertices() const { return *sharedDynamicVertices; }
+
+        std::shared_ptr<OpacityVertexVector> sharedOpacityVertices = std::make_shared<OpacityVertexVector>();
+        OpacityVertexVector& opacityVertices() { return *sharedOpacityVertices; }
+        const OpacityVertexVector& opacityVertices() const { return *sharedOpacityVertices; }
+
         gfx::IndexVector<gfx::Triangles> triangles;
         SegmentVector<SymbolTextAttributes> segments;
         std::vector<PlacedSymbol> placedSymbols;
 
-        std::optional<gfx::VertexBuffer<SymbolLayoutVertex>> vertexBuffer;
-        std::optional<gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>> dynamicVertexBuffer;
-        std::optional<gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>> opacityVertexBuffer;
+#if MLN_LEGACY_RENDERER
+        std::optional<VertexBuffer> vertexBuffer;
+        std::optional<DynamicVertexBuffer> dynamicVertexBuffer;
+        std::optional<OpacityVertexBuffer> opacityVertexBuffer;
         std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
     } text;
 
     std::unique_ptr<SymbolSizeBinder> iconSizeBinder;
