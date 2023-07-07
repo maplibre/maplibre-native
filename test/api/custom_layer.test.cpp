@@ -1,7 +1,7 @@
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
