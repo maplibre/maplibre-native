@@ -104,7 +104,7 @@ void RenderLineLayer::prepare(const LayerPrepareParameters& params) {
         params.lineAtlas.getDashPatternTexture(
             evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
     }
-    
+
 #if MLN_DRAWABLE_RENDERER
     updateRenderTileIDs();
 #endif // MLN_DRAWABLE_RENDERER
@@ -477,23 +477,29 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    auto addAttributes = [&](gfx::DrawableBuilder& builder,
-                             const LineBucket& bucket,
-                             gfx::VertexAttributeArray&& vertexAttrs) {
+    auto addAttributes =
+        [&](gfx::DrawableBuilder& builder, const LineBucket& bucket, gfx::VertexAttributeArray&& vertexAttrs) {
+            const auto vertexCount = bucket.vertices.elements();
+            builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
-        const auto vertexCount = bucket.vertices.elements();
-        builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
+            if (const auto& attr = vertexAttrs.add(VertexAttribName)) {
+                attr->setSharedRawData(bucket.sharedVertices,
+                                       offsetof(LineLayoutVertex, a1),
+                                       0,
+                                       sizeof(LineLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
 
-        if (const auto& attr = vertexAttrs.add(VertexAttribName)) {
-            attr->setSharedRawData(bucket.sharedVertices, offsetof(LineLayoutVertex, a1), 0, sizeof(LineLayoutVertex), gfx::AttributeDataType::Short2);
-        }
+            if (const auto& attr = vertexAttrs.add(DataAttribName)) {
+                attr->setSharedRawData(bucket.sharedVertices,
+                                       offsetof(LineLayoutVertex, a2),
+                                       0,
+                                       sizeof(LineLayoutVertex),
+                                       gfx::AttributeDataType::UByte4);
+            }
 
-        if (const auto& attr = vertexAttrs.add(DataAttribName)) {
-            attr->setSharedRawData(bucket.sharedVertices, offsetof(LineLayoutVertex, a2), 0, sizeof(LineLayoutVertex), gfx::AttributeDataType::UByte4);
-        }
-
-        builder.setVertexAttributes(std::move(vertexAttrs));
-    };
+            builder.setVertexAttributes(std::move(vertexAttrs));
+        };
 
     auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
         builder->setSegments(
@@ -594,13 +600,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // dash array line (SDF)
             gfx::VertexAttributeArray vertexAttrs;
             const auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
-                                                                                  LineBlur,
-                                                                                  LineOpacity,
-                                                                                  LineGapWidth,
-                                                                                  LineOffset,
-                                                                                  LineWidth,
-                                                                                  LineFloorWidth>(paintPropertyBinders,
-                                                                                                  evaluated);
+                                                                                        LineBlur,
+                                                                                        LineOpacity,
+                                                                                        LineGapWidth,
+                                                                                        LineOffset,
+                                                                                        LineWidth,
+                                                                                        LineFloorWidth>(
+                paintPropertyBinders, evaluated);
             auto builder = createLineBuilder("lineSDF",
                                              lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
@@ -707,12 +713,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // simple line
             gfx::VertexAttributeArray vertexAttrs;
             const auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
-                                                                                  LineBlur,
-                                                                                  LineOpacity,
-                                                                                  LineGapWidth,
-                                                                                  LineOffset,
-                                                                                  LineWidth>(paintPropertyBinders,
-                                                                                             evaluated);
+                                                                                        LineBlur,
+                                                                                        LineOpacity,
+                                                                                        LineGapWidth,
+                                                                                        LineOffset,
+                                                                                        LineWidth>(paintPropertyBinders,
+                                                                                                   evaluated);
             auto builder = createLineBuilder("line", lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
             // vertices, attributes and segments

@@ -756,21 +756,21 @@ void updateTileDrawable(gfx::Drawable& drawable,
     if (!drawable.getData()) {
         return;
     }
-    
+
     auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
     const auto isText = (drawData.symbolType == SymbolType::Text);
     const auto currentZoom = static_cast<float>(state.getZoom());
-    
+
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
-    
+
     const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
     const auto interpolateUBO = buildInterpUBO(paintProps, isText, currentZoom);
-    
+
     auto& uniforms = drawable.mutableUniformBuffers();
     uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
     uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
-    
+
     // TODO: detect whether anything has actually changed
     // See `Placement::updateBucketDynamicVertices`
     const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
@@ -779,11 +779,13 @@ void updateTileDrawable(gfx::Drawable& drawable,
     auto& attribs = drawable.mutableVertexAttributes();
     if (const auto& attr = attribs.get(projPosAttribName)) {
         using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
-        attr->setSharedRawData(buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+        attr->setSharedRawData(
+            buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
     }
     if (const auto& attr = attribs.get(fadeOpacityAttribName)) {
         using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
-        attr->setSharedRawData(buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
+        attr->setSharedRawData(
+            buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
     }
 }
 
@@ -917,25 +919,38 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         auto& tileInfo = tileCache[tile.id];
 
-
         gfx::VertexAttributeArray attrs;
         const auto vertexCount = buffer.vertices().elements();
         if (const auto& attr = attrs.add(posOffsetAttribName)) {
-            attr->setSharedRawData(buffer.sharedVertices, offsetof(SymbolLayoutVertex, a1), 0, sizeof(SymbolLayoutVertex), gfx::AttributeDataType::Short4);
+            attr->setSharedRawData(buffer.sharedVertices,
+                                   offsetof(SymbolLayoutVertex, a1),
+                                   0,
+                                   sizeof(SymbolLayoutVertex),
+                                   gfx::AttributeDataType::Short4);
         }
         if (const auto& attr = attrs.add(dataAttibName)) {
-            attr->setSharedRawData(buffer.sharedVertices, offsetof(SymbolLayoutVertex, a2), 0, sizeof(SymbolLayoutVertex), gfx::AttributeDataType::UShort4);
+            attr->setSharedRawData(buffer.sharedVertices,
+                                   offsetof(SymbolLayoutVertex, a2),
+                                   0,
+                                   sizeof(SymbolLayoutVertex),
+                                   gfx::AttributeDataType::UShort4);
         }
         if (const auto& attr = attrs.add(pixOffsetAttribName)) {
-            attr->setSharedRawData(buffer.sharedVertices, offsetof(SymbolLayoutVertex, a3), 0, sizeof(SymbolLayoutVertex), gfx::AttributeDataType::Short4);
+            attr->setSharedRawData(buffer.sharedVertices,
+                                   offsetof(SymbolLayoutVertex, a3),
+                                   0,
+                                   sizeof(SymbolLayoutVertex),
+                                   gfx::AttributeDataType::Short4);
         }
         if (const auto& attr = attrs.add(projPosAttribName)) {
             using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
-            attr->setSharedRawData(buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+            attr->setSharedRawData(
+                buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
         }
         if (const auto& attr = attrs.add(fadeOpacityAttribName)) {
             using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
-            attr->setSharedRawData(buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
+            attr->setSharedRawData(
+                buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
         }
 
         const auto uniformProps = isText ? attrs.readDataDrivenPaintProperties<TextOpacity,

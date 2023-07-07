@@ -113,11 +113,15 @@ bool VertexAttributeGL::get(const gfx::VertexAttribute::ElementType& element, GL
             return gl::get<float3>(element, buffer);
         case GL_FLOAT_VEC4:
         case GL_FLOAT_MAT2:
-            return gl::get<float4>(element, buffer) || gl::get<int4, float4>(element, buffer, [](int4 x) {
+            return gl::get<float4>(element, buffer) ||
+                   gl::get<int4, float4>(element,
+                                         buffer,
+                                         [](int4 x) {
+                                             return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
+                                         }) ||
+                   gl::get<ushort8, float4>(element, buffer, [](ushort8 x) {
                        return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
-                    }) || gl::get<ushort8, float4>(element, buffer, [](ushort8 x) {
-                        return float4{(float)x[0], (float)x[1], (float)x[2], (float)x[3]};
-                    });
+                   });
         case GL_INT:
             return gl::get<std::int32_t>(element, buffer) || gl::get<float, std::int32_t>(element, buffer);
         case GL_UNSIGNED_INT:
