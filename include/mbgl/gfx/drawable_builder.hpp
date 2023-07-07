@@ -100,7 +100,7 @@ public:
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// Get the vertex attributes that override default values in the shader program
-    virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
+    const gfx::VertexAttributeArray& getVertexAttributes() const { return vertexAttrs; }
 
     /// Set the name given to new drawables
     void setDrawableName(std::string value) { drawableName = std::move(value); }
@@ -125,7 +125,7 @@ public:
     void addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
 
     /// A set of attribute values to be added for each vertex
-    void setVertexAttributes(const VertexAttributeArray&);
+    void setVertexAttributes(const VertexAttributeArray& value);
     void setVertexAttributes(VertexAttributeArray&&);
 
     /// Add some vertex elements, returns the index of the first one added

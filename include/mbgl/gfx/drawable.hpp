@@ -139,11 +139,10 @@ public:
     const gfx::ColorMode& getColorMode() const;
     void setColorMode(const gfx::ColorMode&);
 
-    /// Get the number of vertexes
-    std::size_t getVertexCount() const { return getVertexAttributes().getMaxCount(); }
-
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
+    virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
+
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
 
@@ -167,8 +166,8 @@ public:
                 static_cast<float>(components[3])};
     }
 
-    virtual const UniqueDrawableData& getData() const { return drawableData; }
-    virtual void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
+    const UniqueDrawableData& getData() const { return drawableData; }
+    void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
 protected:
     bool enabled = true;

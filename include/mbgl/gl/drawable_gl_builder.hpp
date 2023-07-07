@@ -15,10 +15,6 @@ public:
         : gfx::DrawableBuilder(std::move(name_)) {}
     ~DrawableGLBuilder() override = default;
 
-    const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
-    void setVertexAttributes(const VertexAttributeArrayGL& value) { vertexAttributes = value; }
-    void setVertexAttributes(VertexAttributeArrayGL&& value) { vertexAttributes = std::move(value); }
-
 protected:
     gfx::UniqueDrawable createDrawable() const override;
 
@@ -27,9 +23,6 @@ protected:
 
     /// Setup the SDK-specific aspects after all the values are present
     void init() override;
-
-private:
-    VertexAttributeArrayGL vertexAttributes;
 };
 
 } // namespace gl

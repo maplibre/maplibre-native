@@ -45,6 +45,13 @@ RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
 
 RenderHeatmapLayer::~RenderHeatmapLayer() = default;
 
+void RenderHeatmapLayer::prepare(const LayerPrepareParameters& parameters) {
+    RenderLayer::prepare(parameters);
+#if MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs();
+#endif // MLN_DRAWABLE_RENDERER
+}
+
 void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     updateColorRamp();
@@ -260,6 +267,8 @@ void RenderHeatmapLayer::removeAllDrawables() {
     }
 }
 
+namespace {
+
 struct alignas(16) HeatmapInterpolateUBO {
     float weight_t;
     float radius_t;
@@ -267,9 +276,12 @@ struct alignas(16) HeatmapInterpolateUBO {
 };
 static_assert(sizeof(HeatmapInterpolateUBO) % 16 == 0);
 
-static const std::string HeatmapShaderGroupName = "HeatmapShader";
-static const std::string HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-static constexpr std::string_view HeatmapInterpolateUBOName = "HeatmapInterpolateUBO";
+constexpr auto HeatmapShaderGroupName = "HeatmapShader";
+constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
+constexpr auto HeatmapInterpolateUBOName = "HeatmapInterpolateUBO";
+constexpr auto VertexAttribName = "a_pos";
+
+}
 
 void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
@@ -317,16 +329,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-
     std::unique_ptr<gfx::DrawableBuilder> heatmapBuilder;
-    std::vector<gfx::DrawablePtr> newTiles;
-    gfx::VertexAttributeArray heatmapVertexAttrs;
-    auto renderPass = RenderPass::Translucent;
+    constexpr auto renderPass = RenderPass::Translucent;
 
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
@@ -334,7 +338,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
         const auto tileID = drawable->getTileID();
-        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
+        if (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end()) {
             // remove it
             drawable.reset();
             ++stats.drawablesRemoved;
@@ -352,10 +356,11 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
+        const auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
+        const auto vertexCount = bucket.vertices.elements();
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
-        float zoom = static_cast<float>(state.getZoom());
+        const float zoom = static_cast<float>(state.getZoom());
         const HeatmapInterpolateUBO interpolateUBO = {
             /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
             /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
@@ -369,25 +374,19 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        heatmapVertexAttrs.clear();
+        gfx::VertexAttributeArray heatmapVertexAttrs;
 
-        auto propertiesAsUniforms = heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
+        const auto propertiesAsUniforms = heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
             paintPropertyBinders, evaluated);
 
-        auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!heatmapShader) {
             continue;
         }
 
-        std::vector<std::array<int16_t, 2>> rawVerts;
-        const auto buildVertices = [&]() {
-            const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex>&
-                verts = bucket.vertices.vector();
-            if (rawVerts.size() < verts.size()) {
-                rawVerts.resize(verts.size());
-                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-            }
-        };
+        if (const auto& attr = heatmapVertexAttrs.add(VertexAttribName)) {
+            attr->setSharedRawData(bucket.sharedVertices, offsetof(HeatmapLayoutVertex, a1), 0, sizeof(HeatmapLayoutVertex), gfx::AttributeDataType::Short2);
+        }
 
         heatmapBuilder = context.createDrawableBuilder("heatmap");
         heatmapBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(heatmapShader));
@@ -395,13 +394,9 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                                                         : gfx::DepthMaskType::ReadOnly);
         heatmapBuilder->setColorMode(gfx::ColorMode::additive());
         heatmapBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
         heatmapBuilder->setRenderPass(renderPass);
-        heatmapBuilder->setVertexAttributes(heatmapVertexAttrs);
-
-        buildVertices();
-        heatmapBuilder->addVertices(rawVerts, 0, rawVerts.size());
-
+        heatmapBuilder->setVertexAttributes(std::move(heatmapVertexAttrs));
+        heatmapBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         heatmapBuilder->setSegments(
             gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
 
@@ -426,8 +421,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         setLayerGroup(std::move(layerGroup_), changes);
     }
 
-    auto* textureLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
-
     if (!heatmapTextureShader) {
         heatmapTextureShader = context.getGenericShader(shaders, HeatmapTextureShaderGroupName);
     }
@@ -436,19 +429,20 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    auto* textureLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
     textureLayerGroup->clearDrawables();
 
     std::unique_ptr<gfx::DrawableBuilder> heatmapTextureBuilder;
 
-    std::vector<std::array<int16_t, 2>> textureRawVerts;
-    const auto buildTextureVertices = [&]() {
-        const std::vector<gfx::VertexVector<gfx::detail::VertexType<gfx::AttributeType<int16_t, 2>>>::Vertex> verts =
-            RenderStaticData::heatmapTextureVertices().vector();
-        if (textureRawVerts.size() < verts.size()) {
-            textureRawVerts.resize(verts.size());
-            std::transform(verts.begin(), verts.end(), textureRawVerts.begin(), [](const auto& x) { return x.a1; });
-        }
-    };
+    if (!sharedTextureVertices) {
+        sharedTextureVertices = std::make_shared<TextureVertexVector>(RenderStaticData::heatmapTextureVertices());
+    }
+    const auto textureVertexCount = sharedTextureVertices->elements();
+
+    gfx::VertexAttributeArray textureVertexAttrs;
+    if (const auto& attr = textureVertexAttrs.add(VertexAttribName)) {
+        attr->setSharedRawData(sharedTextureVertices, offsetof(HeatmapLayoutVertex, a1), 0, sizeof(HeatmapLayoutVertex), gfx::AttributeDataType::Short2);
+    }
 
     heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
     heatmapTextureBuilder->setShader(heatmapTextureShader);
@@ -456,16 +450,12 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                                                            : gfx::DepthMaskType::ReadOnly);
     heatmapTextureBuilder->setColorMode(gfx::ColorMode::alphaBlended());
     heatmapTextureBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
     heatmapTextureBuilder->setRenderPass(renderPass);
-
-    buildTextureVertices();
-    heatmapTextureBuilder->addVertices(textureRawVerts, 0, textureRawVerts.size());
-
+    heatmapTextureBuilder->setVertexAttributes(std::move(textureVertexAttrs));
+    heatmapTextureBuilder->setRawVertices({}, textureVertexCount, gfx::AttributeDataType::Short2);
     if (segments.empty()) {
         segments = RenderStaticData::heatmapTextureSegments();
     }
-
     heatmapTextureBuilder->setSegments(
         gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
 
@@ -479,7 +469,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         texture->setImage(colorRamp);
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        heatmapTextureBuilder->setTexture(texture, colorRampLocation.value());
+        heatmapTextureBuilder->setTexture(std::move(texture), colorRampLocation.value());
     }
 
     heatmapTextureBuilder->flush();

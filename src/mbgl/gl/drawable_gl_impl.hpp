@@ -41,7 +41,7 @@ public:
     VertexAttributeArrayGL vertexAttributes;
 
     gfx::IndexBuffer indexBuffer = {0, nullptr};
-    gfx::UniqueVertexBufferResource attributeBuffer;
+    std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
 
     UniformBufferArrayGL uniformBuffers;
 
