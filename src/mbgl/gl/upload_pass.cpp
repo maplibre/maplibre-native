@@ -139,15 +139,16 @@ struct VertexBufferGL : public gfx::VertexBufferBase {
 namespace {
 const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 }
-const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec, const gfx::BufferUsageType usage) {
+const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
+                                                             const gfx::BufferUsageType usage) {
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = static_cast<int>(vec->getRawCount() * vec->getRawSize());
-        
+
         // If we already have a buffer...
         if (auto* rawData = static_cast<VertexBufferGL*>(vec->getBuffer()); rawData && rawData->resource) {
             auto& resource = static_cast<gl::VertexBufferResource&>(*rawData->resource);
-            
+
             // If it's changed, update it
             if (rawBufSize <= resource.byteSize) {
                 if (vec->getDirty()) {
@@ -282,7 +283,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                     b->vertexBufferResource = vertBuf.get();
                 }
             });
-            
+
             outBuffers.emplace_back(std::move(vertBuf));
         } else {
             assert(false);
@@ -290,8 +291,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
     }
 
-    assert(std::all_of(bindings.begin(), bindings.end(), [](const auto& b){ return !b || b->vertexBufferResource; }));
-    
+    assert(std::all_of(bindings.begin(), bindings.end(), [](const auto& b) { return !b || b->vertexBufferResource; }));
+
     return bindings;
 }
 #endif

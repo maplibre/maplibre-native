@@ -450,10 +450,18 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (const auto& attr = vertexAttrs.getOrAdd(PosAttribName)) {
-            attr->setSharedRawData(bucket.sharedVertices, offsetof(FillExtrusionLayoutVertex, a1), 0, sizeof(FillExtrusionLayoutVertex), gfx::AttributeDataType::Short2);
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillExtrusionLayoutVertex, a1),
+                                   0,
+                                   sizeof(FillExtrusionLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
         }
         if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
-            attr->setSharedRawData(bucket.sharedVertices, offsetof(FillExtrusionLayoutVertex, a2), 0, sizeof(FillExtrusionLayoutVertex), gfx::AttributeDataType::Short4);
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillExtrusionLayoutVertex, a2),
+                                   0,
+                                   sizeof(FillExtrusionLayoutVertex),
+                                   gfx::AttributeDataType::Short4);
         }
 
         colorBuilder->setEnableStencil(doDepthPass);
