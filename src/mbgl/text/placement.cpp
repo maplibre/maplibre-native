@@ -907,7 +907,8 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
                             hideGlyphs(placedIcon.glyphOffsets.size(), iconBuffer.dynamicVertices());
                         } else {
                             for (std::size_t j = 0; j < placedIcon.glyphOffsets.size(); ++j) {
-                                addDynamicAttributes(pair->second.second, placedIcon.angle, iconBuffer.dynamicVertices());
+                                addDynamicAttributes(
+                                    pair->second.second, placedIcon.angle, iconBuffer.dynamicVertices());
                             }
                         }
                     }

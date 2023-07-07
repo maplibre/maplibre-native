@@ -265,7 +265,6 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 #if MLN_DRAWABLE_RENDERER
 namespace {
 
-
 struct alignas(16) CircleInterpolateUBO {
     float color_t;
     float radius_t;
@@ -363,12 +362,12 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray circleVertexAttrs;
         const auto propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
-                                                                                    CircleRadius,
-                                                                                    CircleBlur,
-                                                                                    CircleOpacity,
-                                                                                    CircleStrokeColor,
-                                                                                    CircleStrokeWidth,
-                                                                                    CircleStrokeOpacity>(
+                                                                                          CircleRadius,
+                                                                                          CircleBlur,
+                                                                                          CircleOpacity,
+                                                                                          CircleStrokeColor,
+                                                                                          CircleStrokeWidth,
+                                                                                          CircleStrokeOpacity>(
             paintPropertyBinders, evaluated);
 
         const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
@@ -377,7 +376,11 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (const auto& attr = circleVertexAttrs.add(VertexAttribName)) {
-            attr->setSharedRawData(bucket.sharedVertices, offsetof(CircleLayoutVertex, a1), 0, sizeof(CircleLayoutVertex), gfx::AttributeDataType::Short2);
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(CircleLayoutVertex, a1),
+                                   0,
+                                   sizeof(CircleLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
         }
 
         circleBuilder = context.createDrawableBuilder("circle");
@@ -388,7 +391,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         circleBuilder->setRenderPass(renderPass);
         circleBuilder->setVertexAttributes(std::move(circleVertexAttrs));
-        
+
         circleBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         circleBuilder->setSegments(
             gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());

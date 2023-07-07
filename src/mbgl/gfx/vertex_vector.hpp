@@ -14,12 +14,11 @@ struct VertexBufferBase {
 class VertexVectorBase {
 public:
     VertexVectorBase() = default;
-    VertexVectorBase(const VertexVectorBase&) {}    // buffer is not copied
-    VertexVectorBase(VertexVectorBase&& other) :
-        buffer(std::move(other.buffer)),
-        dirty(other.dirty),
-        released(other.released)
-    {}
+    VertexVectorBase(const VertexVectorBase&) {} // buffer is not copied
+    VertexVectorBase(VertexVectorBase&& other)
+        : buffer(std::move(other.buffer)),
+          dirty(other.dirty),
+          released(other.released) {}
     virtual ~VertexVectorBase() = default;
 
     virtual const void* getRawData() const = 0;
@@ -47,12 +46,12 @@ public:
     using Vertex = V;
 
     VertexVector() = default;
-    VertexVector(const VertexVector<V>& other) :
-        VertexVectorBase(other),
-        v(other.v) {}
-    VertexVector(VertexVector<V>&& other) :
-        VertexVectorBase(std::move(other)),
-        v(std::move(other.v)) {}
+    VertexVector(const VertexVector<V>& other)
+        : VertexVectorBase(other),
+          v(other.v) {}
+    VertexVector(VertexVector<V>&& other)
+        : VertexVectorBase(std::move(other)),
+          v(std::move(other.v)) {}
     ~VertexVector() override = default;
 
     template <typename Arg>

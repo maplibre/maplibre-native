@@ -281,7 +281,7 @@ constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 constexpr auto HeatmapInterpolateUBOName = "HeatmapInterpolateUBO";
 constexpr auto VertexAttribName = "a_pos";
 
-}
+} // namespace
 
 void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
@@ -371,8 +371,9 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray heatmapVertexAttrs;
 
-        const auto propertiesAsUniforms = heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
-            paintPropertyBinders, evaluated);
+        const auto propertiesAsUniforms =
+            heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(paintPropertyBinders,
+                                                                                           evaluated);
 
         const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!heatmapShader) {
@@ -380,7 +381,11 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (const auto& attr = heatmapVertexAttrs.add(VertexAttribName)) {
-            attr->setSharedRawData(bucket.sharedVertices, offsetof(HeatmapLayoutVertex, a1), 0, sizeof(HeatmapLayoutVertex), gfx::AttributeDataType::Short2);
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(HeatmapLayoutVertex, a1),
+                                   0,
+                                   sizeof(HeatmapLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
         }
 
         heatmapBuilder = context.createDrawableBuilder("heatmap");
@@ -436,7 +441,11 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     gfx::VertexAttributeArray textureVertexAttrs;
     if (const auto& attr = textureVertexAttrs.add(VertexAttribName)) {
-        attr->setSharedRawData(sharedTextureVertices, offsetof(HeatmapLayoutVertex, a1), 0, sizeof(HeatmapLayoutVertex), gfx::AttributeDataType::Short2);
+        attr->setSharedRawData(sharedTextureVertices,
+                               offsetof(HeatmapLayoutVertex, a1),
+                               0,
+                               sizeof(HeatmapLayoutVertex),
+                               gfx::AttributeDataType::Short2);
     }
 
     heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");

@@ -421,12 +421,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         // `Fill*Program` all use `style::FillPaintProperties`
         gfx::VertexAttributeArray vertexAttrs;
         const auto uniformProps =
-            vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
-                binders, evaluated);
+            vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(binders,
+                                                                                                             evaluated);
 
         const auto vertexCount = bucket.vertices.elements();
         if (const auto& attr = vertexAttrs.add(PosAttribName)) {
-            attr->setSharedRawData(bucket.sharedVertices, offsetof(FillLayoutVertex, a1), 0, sizeof(FillLayoutVertex), gfx::AttributeDataType::Short2);
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillLayoutVertex, a1),
+                                   0,
+                                   sizeof(FillLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
         }
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
@@ -436,10 +440,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 fillShaderGroup->getOrCreateShader(context, uniformProps));
-            const auto outlineShader = doOutline
-                                           ? std::static_pointer_cast<gfx::ShaderProgramBase>(
-                                                 outlineShaderGroup->getOrCreateShader(context, uniformProps))
-                                           : nullptr;
+            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
+                                                       outlineShaderGroup->getOrCreateShader(context, uniformProps))
+                                                 : nullptr;
 
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
@@ -497,10 +500,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 patternShaderGroup->getOrCreateShader(context, uniformProps));
-            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
-                                                       outlinePatternShaderGroup->getOrCreateShader(
-                                                           context, uniformProps))
-                                                 : nullptr;
+            const auto outlineShader = doOutline
+                                           ? std::static_pointer_cast<gfx::ShaderProgramBase>(
+                                                 outlinePatternShaderGroup->getOrCreateShader(context, uniformProps))
+                                           : nullptr;
 
             if (!patternBuilder) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
