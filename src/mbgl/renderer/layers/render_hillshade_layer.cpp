@@ -325,12 +325,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    std::unordered_set<OverscaledTileID> newTileIDs(renderTiles->size());
-    std::transform(renderTiles->begin(),
-                   renderTiles->end(),
-                   std::inserter(newTileIDs, newTileIDs.begin()),
-                   [](const auto& renderTile) -> OverscaledTileID { return renderTile.get().getOverscaledTileID(); });
-
     std::unique_ptr<gfx::DrawableBuilder> hillshadeBuilder;
     std::unique_ptr<gfx::DrawableBuilder> hillshadePrepareBuilder;
     std::vector<gfx::DrawablePtr> newTiles;
@@ -342,14 +336,13 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    tileLayerGroup->observeDrawables([&](gfx::UniqueDrawable& drawable) {
-        const auto tileID = drawable->getTileID();
-        if (tileID && newTileIDs.find(*tileID) == newTileIDs.end()) {
-            // remove it
-            drawable.reset();
-            ++stats.drawablesRemoved;
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+        const auto tileID = drawable.getTileID();
+        if (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end()) {
             removeRenderTarget(*tileID, changes);
+            return false;
         }
+        return true;
     });
 
     for (const RenderTile& tile : *renderTiles) {
