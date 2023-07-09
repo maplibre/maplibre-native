@@ -6,14 +6,29 @@ namespace mbgl {
 
 PremultipliedImage decodePNG(const uint8_t*, size_t);
 PremultipliedImage decodeJPEG(const uint8_t*, size_t);
+PremultipliedImage decodeWEBP(const uint8_t*, size_t);
 
 PremultipliedImage decodeImage(const std::string& string) {
     const auto* data = reinterpret_cast<const uint8_t*>(string.data());
     const size_t size = string.size();
 
+    const auto readUInt = [](const uint8_t* imageData, ptrdiff_t offset) -> uint32_t {
+        const auto ptr = imageData + offset;
+        return (static_cast<uint32_t>(ptr[0]) << 24) | (static_cast<uint32_t>(ptr[1]) << 16) |
+               (static_cast<uint32_t>(ptr[2]) << 8) | static_cast<uint32_t>(ptr[3]);
+    };
+
+    if (size >= 16) {
+        uint32_t magic1 = readUInt(data, 0x0);
+        uint32_t magic2 = readUInt(data, 0x8);
+        // RIFF <xxxx = file size> WEBP
+        if (magic1 == 0x52494646 && magic2 == 0x57454250) {
+            return decodeWEBP(data, size);
+        }
+    }
+
     if (size >= 4) {
-        uint32_t magic = (static_cast<uint32_t>(data[0]) << 24) | (static_cast<uint32_t>(data[1]) << 16) |
-                         (static_cast<uint32_t>(data[2]) << 8) | static_cast<uint32_t>(data[3]);
+        uint32_t magic = readUInt(data, 0x0);
         if (magic == 0x89504E47U) {
             return decodePNG(data, size);
         }
