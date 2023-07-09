@@ -12,6 +12,7 @@ if (MLN_WITH_X11)
 endif ()
 find_package(Threads REQUIRED)
 
+pkg_search_module(WEBP libwebp REQUIRED)
 pkg_search_module(LIBUV libuv REQUIRED)
 
 target_sources(
@@ -45,6 +46,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
@@ -100,6 +102,7 @@ target_include_directories(
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
         ${X11_INCLUDE_DIRS}
+        ${WEBP_INCLUDE_DIRS}
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
@@ -127,6 +130,7 @@ target_link_libraries(
         ${LIBUV_LIBRARIES}
         ${X11_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
+        ${WEBP_LIBRARIES}
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>

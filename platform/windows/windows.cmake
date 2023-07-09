@@ -23,6 +23,7 @@ find_package(ICU OPTIONAL_COMPONENTS i18n uc)
 find_package(JPEG REQUIRED)
 find_package(libuv REQUIRED)
 find_package(PNG REQUIRED)
+find_package(WebP REQUIRED)
 find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
 find_path(LIBUV_INCLUDE_DIRS uv.h)
 
@@ -57,6 +58,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
@@ -149,6 +151,7 @@ target_include_directories(
 		${DLFCN_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
+        ${WEBP_INCLUDE_DIRS}
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
@@ -174,6 +177,7 @@ target_link_libraries(
         ${CURL_LIBRARIES}
         ${JPEG_LIBRARIES}
         ${LIBUV_LIBRARIES}
+        ${WEBP_LIBRARIES}
 		dlfcn-win32::dl
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
