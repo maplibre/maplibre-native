@@ -23,6 +23,7 @@ cc_library(
         "-lcurl",
         "-lpng",
         "-ljpeg",
+        "-lwebp",
     ] + ICU_FLAGS,
     visibility = ["//visibility:public"],
     deps = [
