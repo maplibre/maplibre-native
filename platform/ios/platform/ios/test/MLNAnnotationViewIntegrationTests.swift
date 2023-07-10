@@ -1,5 +1,5 @@
 import XCTest
-import Mapbox
+import MapLibre
 
 class CustomAnnotationView: MLNAnnotationView {
     

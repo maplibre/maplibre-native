@@ -33,7 +33,7 @@ ext {
             mockk           : '1.13.3',
             robolectric     : '4.9.1',
             timber          : '5.0.1',
-            okhttp          : '4.10.0',
+            okhttp          : '4.11.0',
             kotlin          : '1.7.20',
             licenses        : '0.8.80',
             lint            : '30.3.1',

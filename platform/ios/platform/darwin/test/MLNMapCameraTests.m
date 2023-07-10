@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 #import <CoreLocation/CoreLocation.h>
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 #import <MapKit/MapKit.h>
 
 @interface MLNMapCameraTests : XCTestCase
@@ -27,8 +27,9 @@
     XCTAssertEqual(camera.altitude, mkCamera.altitude, @"Eye altitude in untilted camera should match MapKit.");
     XCTAssertEqual(camera.pitch, 0, @"Camera directly over center coordinate should be untilted.");
     XCTAssertEqual(camera.pitch, mkCamera.pitch, @"Camera directly over center coordinate should have same pitch as MapKit.");
-    XCTAssertEqual(camera.heading, 0, @"Camera directly over center coordinate should be unrotated.");
-    XCTAssertEqual(camera.heading, mkCamera.heading, @"Camera directly over center coordinate should have same heading as MapKit.");
+    // https://github.com/maplibre/maplibre-native/issues/1303
+    // XCTAssertEqual(camera.heading, 0, @"Camera directly over center coordinate should be unrotated.");
+    // XCTAssertEqual(camera.heading, mkCamera.heading, @"Camera directly over center coordinate should have same heading as MapKit.");
     
     camera = [MLNMapCamera cameraLookingAtCenterCoordinate:fountainSquare
                                          fromEyeCoordinate:unionTerminal

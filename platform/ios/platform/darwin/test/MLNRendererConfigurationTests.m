@@ -1,4 +1,4 @@
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 #import <XCTest/XCTest.h>
 #import "MLNRendererConfiguration.h"
 
@@ -135,13 +135,7 @@ static NSString * const MLNRendererConfigurationTests_collisionBehaviorKey = @"M
     // `MLNIdeographicFontFamilyName` set to an invalid font family names array value
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:@[@"test font 1", @"test font 2", @"test font 3"]];
-        
-        NSString *systemFontFamilyName;
-#if TARGET_OS_IPHONE
-        systemFontFamilyName = [UIFont systemFontOfSize:0 weight:UIFontWeightRegular].familyName;
-#else
-        systemFontFamilyName = [NSFont systemFontOfSize:0 weight:NSFontWeightRegular].familyName;
-#endif
+
         XCTAssertEqualObjects(localFontFamilyName, @"test font 1\ntest font 2\ntest font 3", @"Local font family name should not be validated by MLNRendererConfiguration");
     }
     
