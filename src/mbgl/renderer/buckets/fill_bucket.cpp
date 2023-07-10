@@ -132,7 +132,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
     }
 }
 
-void FillBucket::upload(gfx::UploadPass& uploadPass) {
+void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 #if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
