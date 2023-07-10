@@ -2,6 +2,7 @@
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/index_vector.hpp>
+#include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/programs/segment.hpp>
 
@@ -24,6 +25,8 @@ struct DrawableBuilder::Impl {
     AttributeDataType rawVerticesType = static_cast<AttributeDataType>(-1);
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
+    
+    VertexAttributeArray vertexAttrs;
 };
 
 } // namespace gfx

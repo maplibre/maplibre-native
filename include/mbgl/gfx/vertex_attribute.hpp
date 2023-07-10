@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/gfx_types.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 
 #include <algorithm>
 #include <array>
@@ -149,6 +150,16 @@ public:
     }
     void resetSharedRawData() { sharedRawData.reset(); }
 
+    /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
+    /// RGBA.
+    static float4 colorAttrRGBA(const Color& color) {
+        const auto components = color.toArray();
+        return {static_cast<float>(components[0] / 255.0),
+                static_cast<float>(components[1] / 255.0),
+                static_cast<float>(components[2] / 255.0),
+                static_cast<float>(components[3])};
+    }
+
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
     VertexAttribute& operator=(VertexAttribute&& other) {
@@ -280,21 +291,20 @@ public:
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
                         using Value = typename Type::Value;    // std::array<T, N>
+                        using InterpType = ZoomInterpolatedAttributeType<Type>;
+                        using InterpValue = typename InterpType::Value;    // std::array<T, 2*N>
 
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
                         if (vertexCount > 0 && !isConstant) {
                             if (auto& attr = getOrAdd("a_" + attributeName)) {
                                 if (const auto& sharedVector = binder->getSharedVertexVector()) {
-                                    //[[maybe_unused]] auto dim = Type::Dimensions;
-                                    //[[maybe_unused]] auto dd = DataDrivenPaintProperty::IsDataDriven;
-                                    //[[maybe_unused]] auto ov = DataDrivenPaintProperty::IsOverridable;
                                     const auto rawSize = sharedVector->getRawSize();
-                                    [[maybe_unused]] const auto expectedSize = sizeof(Value) *
-                                                                               (binder->isInterpolated() ? 2 : 1);
-                                    assert(rawSize == expectedSize);
+                                    const bool isInterpolated = binder->isInterpolated();
+                                    const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
+                                    assert(rawSize == isInterpolated ? sizeof(InterpValue) : sizeof(Value));
                                     assert(sharedVector->getRawCount() == vertexCount);
-                                    attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, Type::DataType);
+                                    attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
                                 } else {
                                     for (std::size_t i = 0; i < vertexCount; ++i) {
                                         attr->set(i, binder->getVertexValue(i), attrIndex);

@@ -80,7 +80,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     // UBO depends on more than just evaluated properties, so we need to update every time.
     const FillExtrusionDrawablePropsUBO paramsUBO = {
-        /* .color = */ gfx::Drawable::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
+        /* .color = */ gfx::VertexAttribute::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
         /* .pad = */ 0,
         /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),

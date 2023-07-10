@@ -80,10 +80,10 @@ auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evalua
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
-        /*.fill_color=*/gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated)
+        /*.fill_color=*/gfx::VertexAttribute::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated)
                                                             : constOrDefault<IconColor>(evaluated)),
         /*.halo_color=*/
-        gfx::Drawable::colorAttrRGBA(isText ? constOrDefault<TextHaloColor>(evaluated)
+        gfx::VertexAttribute::colorAttrRGBA(isText ? constOrDefault<TextHaloColor>(evaluated)
                                             : constOrDefault<IconHaloColor>(evaluated)),
         /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
         /*.halo_width=*/
