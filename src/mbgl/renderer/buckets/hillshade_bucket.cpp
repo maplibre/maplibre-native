@@ -26,7 +26,7 @@ DEMData& HillshadeBucket::getDEMData() {
     return demdata;
 }
 
-void HillshadeBucket::upload(gfx::UploadPass& uploadPass) {
+void HillshadeBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     if (!hasData()) {
         return;
     }

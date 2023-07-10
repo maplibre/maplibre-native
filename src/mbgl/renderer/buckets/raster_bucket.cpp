@@ -15,7 +15,7 @@ RasterBucket::RasterBucket(std::shared_ptr<PremultipliedImage> image_)
 
 RasterBucket::~RasterBucket() = default;
 
-void RasterBucket::upload(gfx::UploadPass& uploadPass) {
+void RasterBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     if (!hasData()) {
         return;
     }
