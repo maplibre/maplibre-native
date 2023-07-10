@@ -29,6 +29,7 @@ on:
   pull_request:
     branches:
       - main
+      - topic/drawable
     paths:
       - CMakeLists.txt
       - ".github/actions/qt5-build/**"
