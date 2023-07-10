@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 
 
 @interface MLNComputedShapeSourceTests : XCTestCase
