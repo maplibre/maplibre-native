@@ -25,7 +25,7 @@ struct DrawableBuilder::Impl {
     AttributeDataType rawVerticesType = static_cast<AttributeDataType>(-1);
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
-    
+
     VertexAttributeArray vertexAttrs;
 };
 

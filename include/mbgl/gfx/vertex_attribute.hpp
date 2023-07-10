@@ -292,7 +292,7 @@ public:
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
                         using Value = typename Type::Value;    // std::array<T, N>
                         using InterpType = ZoomInterpolatedAttributeType<Type>;
-                        using InterpValue = typename InterpType::Value;    // std::array<T, 2*N>
+                        using InterpValue = typename InterpType::Value; // std::array<T, 2*N>
 
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
