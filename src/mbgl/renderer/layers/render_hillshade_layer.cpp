@@ -459,7 +459,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(HillshadeLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(VexturePosAttribName)) {
+        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(TexturePosAttribName)) {
             attr->setSharedRawData(staticDataSharedVertices,
                                    offsetof(HillshadeLayoutVertex, a2),
                                    0,
