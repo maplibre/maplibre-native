@@ -120,7 +120,10 @@ public:
 
     virtual void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) = 0;
 
+#if MLN_LEGACY_RENDERER
     virtual void upload(gfx::UploadPass&) = 0;
+#endif // MLN_LEGACY_RENDERER
+
     virtual void setPatternParameters(const std::optional<ImagePosition>&,
                                       const std::optional<ImagePosition>&,
                                       const CrossfadeParameters&) = 0;
@@ -162,7 +165,11 @@ public:
                               const CanonicalTileID&,
                               const style::expression::Value&) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
+    
+#if MLN_LEGACY_RENDERER
     void upload(gfx::UploadPass&) override {}
+#endif // MLN_LEGACY_RENDERER
+
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
                               const CrossfadeParameters&) override{};
@@ -210,7 +217,10 @@ public:
                               const CanonicalTileID&,
                               const style::expression::Value&) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
+
+#if MLN_LEGACY_RENDERER
     void upload(gfx::UploadPass&) override {}
+#endif // MLN_LEGACY_RENDERER
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
                               const std::optional<ImagePosition>& posB,
@@ -757,7 +767,9 @@ public:
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
     }
 
+#if MLN_LEGACY_RENDERER
     void upload(gfx::UploadPass& uploadPass) { util::ignore({(binders.template get<Ps>()->upload(uploadPass), 0)...}); }
+#endif // MLN_LEGACY_RENDERER
 
     template <class P>
     using ZoomInterpolatedAttributeList = typename Property<P>::ZoomInterpolatedAttributeList;

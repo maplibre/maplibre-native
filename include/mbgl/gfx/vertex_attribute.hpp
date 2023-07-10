@@ -299,10 +299,10 @@ public:
                         if (vertexCount > 0 && !isConstant) {
                             if (auto& attr = getOrAdd("a_" + attributeName)) {
                                 if (const auto& sharedVector = binder->getSharedVertexVector()) {
-                                    const auto rawSize = sharedVector->getRawSize();
+                                    const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
                                     const bool isInterpolated = binder->isInterpolated();
                                     const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-                                    assert(rawSize == isInterpolated ? sizeof(InterpValue) : sizeof(Value));
+                                    assert(rawSize == static_cast<uint32_t>(isInterpolated ? sizeof(InterpValue) : sizeof(Value)));
                                     assert(sharedVector->getRawCount() == vertexCount);
                                     attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
                                 } else {
