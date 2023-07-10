@@ -67,7 +67,7 @@ private:
     gfx::ShaderProgramBasePtr hillshadePrepareShader;
     gfx::ShaderProgramBasePtr hillshadeShader;
     std::unordered_map<OverscaledTileID, RenderTargetPtr> renderTargets;
-    
+
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
 #endif

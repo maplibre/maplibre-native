@@ -43,7 +43,7 @@ public:
     using VertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
-    
+
     gfx::IndexVector<gfx::Triangles> indices;
     SegmentVector<HillshadeAttributes> segments;
 

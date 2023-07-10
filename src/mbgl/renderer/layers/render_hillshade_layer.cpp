@@ -93,7 +93,7 @@ bool RenderHillshadeLayer::hasCrossfade() const {
 void RenderHillshadeLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTiles();
     maxzoom = params.source->getMaxZoom();
-    
+
 #if MLN_DRAWABLE_RENDERER
     updateRenderTileIDs();
 #endif // MLN_DRAWABLE_RENDERER
@@ -350,10 +350,10 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
     const auto staticDataIndices = RenderStaticData::quadTriangleIndices();
     const auto staticDataSegments = RenderStaticData::rasterSegments();
-    
+
     std::unique_ptr<gfx::DrawableBuilder> hillshadeBuilder;
     std::unique_ptr<gfx::DrawableBuilder> hillshadePrepareBuilder;
-    
+
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -368,7 +368,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!bucket.hasData()) {
             continue;
         }
-        
+
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
             if (!bucket.getDEMData().prepared) {
                 const auto result = renderTargets.find(tileID);
@@ -400,7 +400,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
 
         gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
-        
+
         if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
             attr->setSharedRawData(staticDataSharedVertices,
                                    offsetof(HillshadeLayoutVertex, a1),
@@ -425,7 +425,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         hillshadePrepareBuilder->setRenderPass(renderPass);
         hillshadePrepareBuilder->setVertexAttributes(std::move(hillshadePrepareVertexAttrs));
-        hillshadePrepareBuilder->setRawVertices({}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
+        hillshadePrepareBuilder->setRawVertices(
+            {}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
         hillshadePrepareBuilder->setSegments(
             gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
 
@@ -451,7 +452,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         }*/
 
         gfx::VertexAttributeArray hillshadeVertexAttrs;
-        
+
         if (const auto& attr = hillshadeVertexAttrs.add(PosAttribName)) {
             attr->setSharedRawData(staticDataSharedVertices,
                                    offsetof(HillshadeLayoutVertex, a1),
