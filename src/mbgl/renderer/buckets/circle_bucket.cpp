@@ -25,7 +25,7 @@ CircleBucket::~CircleBucket() {
     sharedVertices->release();
 }
 
-void CircleBucket::upload(gfx::UploadPass& uploadPass) {
+void CircleBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 #if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));

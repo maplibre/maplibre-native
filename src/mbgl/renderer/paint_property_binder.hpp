@@ -302,7 +302,7 @@ public:
         }
     }
 
-    void upload(gfx::UploadPass& uploadPass) override {
+    void upload([[maybe_unused]] gfx::UploadPass& uploadPass) override {
 #if MLN_LEGACY_RENDERER
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertexVector));
 #endif // MLN_LEGACY_RENDERER
@@ -425,7 +425,7 @@ public:
         }
     }
 
-    void upload(gfx::UploadPass& uploadPass) override {
+    void upload([[maybe_unused]] gfx::UploadPass& uploadPass) override {
 #if MLN_LEGACY_RENDERER
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertexVector));
 #endif // MLN_LEGACY_RENDERER
@@ -533,7 +533,7 @@ public:
 
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
 
-    void upload(gfx::UploadPass& uploadPass) override {
+    void upload([[maybe_unused]] gfx::UploadPass& uploadPass) override {
         if (!patternToVertexVector.empty()) {
             assert(!zoomInVertexVector.empty());
             assert(!zoomOutVertexVector.empty());
