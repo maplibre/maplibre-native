@@ -30,6 +30,11 @@ public:
     std::optional<gfx::Texture> dem;
     std::optional<gfx::Texture> texture;
 
+#if MLN_DRAWABLE_RENDERER
+    RenderTargetPtr renderTarget;
+    bool renderTargetPrepared = false;
+#endif
+    
     TileMask mask{{0, 0, 0}};
 
     const DEMData& getDEMData() const;

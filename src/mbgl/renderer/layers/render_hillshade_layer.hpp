@@ -43,11 +43,8 @@ private:
     void prepare(const LayerPrepareParameters&) override;
 
 #if MLN_DRAWABLE_RENDERER
-    /// Remove render target for the tile
-    void removeRenderTarget(const OverscaledTileID&, UniqueChangeRequestVec&);
-
-    /// Remove all the render targets
-    void removeAllRenderTargets(UniqueChangeRequestVec&);
+    void addRenderTarget(const RenderTargetPtr&, UniqueChangeRequestVec&);
+    void removeRenderTargets(UniqueChangeRequestVec&);
 #endif
 
     // Paint properties
@@ -66,7 +63,7 @@ private:
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr hillshadePrepareShader;
     gfx::ShaderProgramBasePtr hillshadeShader;
-    std::unordered_map<OverscaledTileID, RenderTargetPtr> renderTargets;
+    std::vector<RenderTargetPtr> activatedRenderTargets;
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;

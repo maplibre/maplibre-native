@@ -75,10 +75,6 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     if (layerGroup) {
         layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
     }
-    for (const auto& pair : renderTargets) {
-        pair.second->getLayerGroup(0)->setLayerTweaker(
-            std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
-    }
 #endif
 }
 
@@ -262,30 +258,24 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
 
 void RenderHillshadeLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
-
-    for (const auto& pair : renderTargets) {
-        activateRenderTarget(pair.second, false, changes);
-    }
+    removeRenderTargets(changes);
 }
 
 void RenderHillshadeLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     RenderLayer::layerRemoved(changes);
-    removeAllRenderTargets(changes);
+    removeRenderTargets(changes);
 }
 
-void RenderHillshadeLayer::removeRenderTarget(const OverscaledTileID& tileID, UniqueChangeRequestVec& changes) {
-    const auto result = renderTargets.find(tileID);
-    if (result != renderTargets.end()) {
-        activateRenderTarget(result->second, false, changes);
-        renderTargets.erase(result);
-    }
+void RenderHillshadeLayer::addRenderTarget(const RenderTargetPtr& renderTarget, UniqueChangeRequestVec& changes) {
+    activateRenderTarget(renderTarget, true, changes);
+    activatedRenderTargets.emplace_back(renderTarget);
 }
 
-void RenderHillshadeLayer::removeAllRenderTargets(UniqueChangeRequestVec& changes) {
-    for (const auto& pair : renderTargets) {
-        activateRenderTarget(pair.second, false, changes);
+void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) {
+    for (const auto& renderTarget : activatedRenderTargets) {
+        activateRenderTarget(renderTarget, false, changes);
     }
-    renderTargets.clear();
+    activatedRenderTargets.clear();
 }
 
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
@@ -303,7 +293,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
-        removeAllRenderTargets(changes);
         return;
     }
 
@@ -327,7 +316,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
     if (!hillshadePrepareShader || !hillshadeShader) {
         removeAllDrawables();
-        removeAllRenderTargets(changes);
         return;
     }
 
@@ -337,12 +325,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        const auto tileID = drawable.getTileID();
-        if (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end()) {
-            removeRenderTarget(*tileID, changes);
-            return false;
-        }
-        return true;
+        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
     });
 
     if (!staticDataSharedVertices) {
@@ -360,7 +343,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         auto* bucket_ = tile.getBucket(*baseImpl);
         if (!bucket_) {
             removeTile(renderPass, tileID);
-            removeRenderTarget(tileID, changes);
             continue;
         }
         auto& bucket = static_cast<HillshadeBucket&>(*bucket_);
@@ -369,83 +351,88 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            if (!bucket.getDEMData().prepared) {
-                const auto result = renderTargets.find(tileID);
-                if (result != renderTargets.end()) {
-                    activateRenderTarget(result->second, true, changes);
-                    bucket.getDEMData().prepared = true;
-                }
+        if (!bucket.renderTargetPrepared) {
+            // Set up tile render target
+            const uint16_t tilesize = bucket.getDEMData().dim;
+            auto renderTarget = context.createRenderTarget({tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte);
+            if (!renderTarget) {
+                continue;
             }
+            bucket.renderTarget = renderTarget;
+            bucket.renderTargetPrepared = true;
+            addRenderTarget(renderTarget, changes);
+            
+            auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
+            if (!singleTileLayerGroup) {
+                return;
+            }
+            singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
+            renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
+            
+            gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
+            
+            if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
+                attr->setSharedRawData(staticDataSharedVertices,
+                                       offsetof(HillshadeLayoutVertex, a1),
+                                       0,
+                                       sizeof(HillshadeLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+            if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(TexturePosAttribName)) {
+                attr->setSharedRawData(staticDataSharedVertices,
+                                       offsetof(HillshadeLayoutVertex, a2),
+                                       0,
+                                       sizeof(HillshadeLayoutVertex),
+                                       gfx::AttributeDataType::Short4);
+            }
+            
+            hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
+            hillshadePrepareBuilder->setShader(hillshadePrepareShader);
+            hillshadePrepareBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
+            hillshadePrepareBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+            hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+            
+            hillshadePrepareBuilder->setRenderPass(renderPass);
+            hillshadePrepareBuilder->setVertexAttributes(std::move(hillshadePrepareVertexAttrs));
+            hillshadePrepareBuilder->setRawVertices({}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
+            hillshadePrepareBuilder->setSegments(gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
+            
+            auto imageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
+            if (imageLocation.has_value()) {
+                std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+                texture->setImage(bucket.getDEMData().getImagePtr());
+                texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                hillshadePrepareBuilder->setTexture(texture, imageLocation.value());
+            }
+            
+            hillshadePrepareBuilder->flush();
+            
+            for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
+                drawable->setTileID(tileID);
+                drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride,
+                                                                                      bucket.getDEMData().encoding,
+                                                                                      maxzoom));
+                singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                ++stats.drawablesAdded;
+            }
+        }
+
+        // Set up tile drawable
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
+                if (imageLocation.has_value()) {
+                    drawable.setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
+                }
+            });
             continue;
         }
-
-        // Set up tile render target
-        const uint16_t tilesize = bucket.getDEMData().dim;
-        auto renderTarget = context.createRenderTarget({tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte);
-        if (!renderTarget) {
-            continue;
-        }
-        if (!renderTargets.insert(std::make_pair(tileID, renderTarget)).second) {
-            continue;
-        }
-        activateRenderTarget(renderTarget, true, changes);
-        bucket.getDEMData().prepared = true;
-
-        auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
-        if (!singleTileLayerGroup) {
-            return;
-        }
-        singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
-        renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
-
-        gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
-
-        if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
-            attr->setSharedRawData(staticDataSharedVertices,
-                                   offsetof(HillshadeLayoutVertex, a1),
-                                   0,
-                                   sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-        if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(TexturePosAttribName)) {
-            attr->setSharedRawData(staticDataSharedVertices,
-                                   offsetof(HillshadeLayoutVertex, a2),
-                                   0,
-                                   sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short4);
-        }
-
-        hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
-        hillshadePrepareBuilder->setShader(hillshadePrepareShader);
-        hillshadePrepareBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                                 : gfx::DepthMaskType::ReadOnly);
-        hillshadePrepareBuilder->setColorMode(gfx::ColorMode::alphaBlended());
-        hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
-        hillshadePrepareBuilder->setRenderPass(renderPass);
-        hillshadePrepareBuilder->setVertexAttributes(std::move(hillshadePrepareVertexAttrs));
-        hillshadePrepareBuilder->setRawVertices(
-            {}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
-        hillshadePrepareBuilder->setSegments(
-            gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
-
-        hillshadePrepareBuilder->flush();
-
-        for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
-            drawable->setTileID(tileID);
-            drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(
-                bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom, bucket.getDEMData().getImagePtr()));
-            singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-            ++stats.drawablesAdded;
-        }
-
-        // Continue with tile
+        
         auto vertices = staticDataSharedVertices;
         auto* indices = &staticDataIndices;
         auto* segments = &staticDataSegments;
 
-        /*if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()))  {
+        /*if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
             vertices = bucket.sharedVertices;
             indices = &bucket.indices;
             segments = &bucket.segments;
@@ -470,8 +457,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         hillshadeBuilder = context.createDrawableBuilder("hillshade");
         hillshadeBuilder->setShader(hillshadeShader);
-        hillshadeBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                          : gfx::DepthMaskType::ReadOnly);
+        hillshadeBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
         hillshadeBuilder->setColorMode(gfx::ColorMode::alphaBlended());
         hillshadeBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
 
@@ -482,7 +468,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
         if (imageLocation.has_value()) {
-            hillshadeBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
+            hillshadeBuilder->setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
         }
 
         hillshadeBuilder->flush();

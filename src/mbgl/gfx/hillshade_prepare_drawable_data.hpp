@@ -13,17 +13,14 @@ class HillshadePrepareDrawableData : public DrawableData {
 public:
     HillshadePrepareDrawableData(int32_t stride_,
                                  Tileset::DEMEncoding encoding_,
-                                 uint8_t maxzoom_,
-                                 std::shared_ptr<PremultipliedImage> image_)
+                                 uint8_t maxzoom_)
         : stride(stride_),
           encoding(encoding_),
-          maxzoom(maxzoom_),
-          image(image_) {}
+          maxzoom(maxzoom_) {}
 
     int32_t stride;
     Tileset::DEMEncoding encoding;
     uint8_t maxzoom;
-    std::shared_ptr<PremultipliedImage> image;
 };
 
 using UniqueHillshadePrepareDrawableData = std::unique_ptr<HillshadePrepareDrawableData>;

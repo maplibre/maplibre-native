@@ -106,7 +106,7 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         // render pass with the new texture data we just backfilled
         bucket->setPrepared(false);
 #if MLN_DRAWABLE_RENDERER
-        tileDEM.prepared = false;
+        bucket->renderTargetPrepared = false;
 #endif
     }
 }
