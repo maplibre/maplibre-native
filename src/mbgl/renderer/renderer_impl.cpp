@@ -84,10 +84,11 @@ void Renderer::Impl::preRender(const RenderTree& renderTree,
         observer->onRegisterShaders(*staticData->shaders);
     }
 
-#if MLN_DRAWABLE_RENDERER
-    // update layers
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
+
+#if MLN_DRAWABLE_RENDERER
+    // update layers
     if (staticData && staticData->shaders) {
         orchestrator.updateLayers(
             *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);

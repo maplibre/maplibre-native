@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 #import "MLNFeature_Private.h"
 #import "MLNShapeSource_Private.h"
 #import "MLNSource_Private.h"

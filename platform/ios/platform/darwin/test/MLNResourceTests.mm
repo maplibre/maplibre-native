@@ -1,4 +1,4 @@
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 #import <XCTest/XCTest.h>
 #import <mbgl/storage/resource.hpp>
 
