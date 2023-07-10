@@ -1,5 +1,5 @@
 import XCTest
-import Mapbox
+import MapLibre
 
 /**
  Test cases that ensure the inline examples in the jazzy guides compile.

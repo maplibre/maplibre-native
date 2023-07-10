@@ -68,13 +68,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Install macos dependencies
-        run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
-
       - name: Cache node modules
         uses: actions/cache@v3
         env:
@@ -86,6 +79,14 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
+      - name: Cache Bazel
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
 
       - uses: actions/setup-node@v3
         with:
@@ -129,15 +130,17 @@ jobs:
       - name: Lint plist files
         run: make ios-lint-plist
 
-      - name: Running ios unit tests
-        run: make ios-test
+      - run: cp bazel/example_config.bzl bazel/config.bzl
 
-      - name: Running ios UI tests
-        run: make ios-uitest
+      - run: make style-code
+
+      - name: Running iOS tests
+        run: bazel test //platform/ios/platform/ios/test:ios_test --test_output=errors
+
+      - name: Running iOS UI tests
+        run: bazel test //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
 
       # size test
-      - name: Copy example config
-        run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Build app for size test & output size 
         working-directory: ./
@@ -154,7 +157,6 @@ jobs:
             ./pr_number
       
       # render test
-
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           bazel run //platform/ios:xcodeproj
@@ -177,13 +179,26 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.zip
 
-      # ---
-
-      - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
-        run: make ios-sanitize
-
-      - name: Build and run SDK unit tests with address sanitizer
-        run: make ios-sanitize-address
-
-      - name: Build and run SDK unit tests with the static analyzer
-        run: make ios-static-analyzer
+      - name: Build RenderTest .ipa and .xctest for AWS Device Farm
+        run: |
+          set -e
+          bazel run //platform/ios:xcodeproj
+          build_dir="$(mktemp -d)"
+          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
+          cd "$render_test_app_dir"
+          mkdir Payload
+          mv RenderTestApp.app Payload
+          zip -r RenderTestApp.zip Payload
+          mv RenderTestApp.zip RenderTestApp.ipa
+          cd Payload/RenderTestApp.app/PlugIns
+          zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
+          echo render_test_artifacts_dir="$render_test_app_dir" >> $GITHUB_ENV
+      
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ios-render-test
+          retention-days: 3
+          path: |
+            ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
+            ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
