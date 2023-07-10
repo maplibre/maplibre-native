@@ -354,23 +354,24 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!bucket.renderTargetPrepared) {
             // Set up tile render target
             const uint16_t tilesize = bucket.getDEMData().dim;
-            auto renderTarget = context.createRenderTarget({tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte);
+            auto renderTarget = context.createRenderTarget({tilesize, tilesize},
+                                                           gfx::TextureChannelDataType::UnsignedByte);
             if (!renderTarget) {
                 continue;
             }
             bucket.renderTarget = renderTarget;
             bucket.renderTargetPrepared = true;
             addRenderTarget(renderTarget, changes);
-            
+
             auto singleTileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/1, getID());
             if (!singleTileLayerGroup) {
                 return;
             }
             singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
             renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
-            
+
             gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
-            
+
             if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a1),
@@ -385,33 +386,35 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                        sizeof(HillshadeLayoutVertex),
                                        gfx::AttributeDataType::Short4);
             }
-            
+
             hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
             hillshadePrepareBuilder->setShader(hillshadePrepareShader);
             hillshadePrepareBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
             hillshadePrepareBuilder->setColorMode(gfx::ColorMode::alphaBlended());
             hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            
+
             hillshadePrepareBuilder->setRenderPass(renderPass);
             hillshadePrepareBuilder->setVertexAttributes(std::move(hillshadePrepareVertexAttrs));
-            hillshadePrepareBuilder->setRawVertices({}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
-            hillshadePrepareBuilder->setSegments(gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
-            
+            hillshadePrepareBuilder->setRawVertices(
+                {}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
+            hillshadePrepareBuilder->setSegments(
+                gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
+
             auto imageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
             if (imageLocation.has_value()) {
                 std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
                 texture->setImage(bucket.getDEMData().getImagePtr());
-                texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                texture->setSamplerConfiguration(
+                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
                 hillshadePrepareBuilder->setTexture(texture, imageLocation.value());
             }
-            
+
             hillshadePrepareBuilder->flush();
-            
+
             for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
                 drawable->setTileID(tileID);
-                drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(bucket.getDEMData().stride,
-                                                                                      bucket.getDEMData().encoding,
-                                                                                      maxzoom));
+                drawable->setData(std::make_unique<gfx::HillshadePrepareDrawableData>(
+                    bucket.getDEMData().stride, bucket.getDEMData().encoding, maxzoom));
                 singleTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
@@ -427,7 +430,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             });
             continue;
         }
-        
+
         auto vertices = staticDataSharedVertices;
         auto* indices = &staticDataIndices;
         auto* segments = &staticDataSegments;

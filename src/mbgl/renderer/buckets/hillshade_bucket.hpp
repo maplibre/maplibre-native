@@ -34,7 +34,7 @@ public:
     RenderTargetPtr renderTarget;
     bool renderTargetPrepared = false;
 #endif
-    
+
     TileMask mask{{0, 0, 0}};
 
     const DEMData& getDEMData() const;

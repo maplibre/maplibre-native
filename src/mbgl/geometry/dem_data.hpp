@@ -25,7 +25,7 @@ public:
     const int32_t dim;
     const int32_t stride;
     const Tileset::DEMEncoding encoding;
-    
+
 private:
     std::shared_ptr<PremultipliedImage> image;
 
