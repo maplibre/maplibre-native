@@ -64,7 +64,7 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
 
 void Renderer::Impl::preRender(const RenderTree& renderTree,
                                [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
-    auto& context = backend.getContext();
+    [[maybe_unused]] auto& context = backend.getContext();
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
 
