@@ -86,7 +86,7 @@ void Renderer::Impl::preRender(const RenderTree& renderTree,
 
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
-    
+
 #if MLN_DRAWABLE_RENDERER
     // update layers
     if (staticData && staticData->shaders) {
