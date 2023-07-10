@@ -169,7 +169,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
     }
 }
 
-void FillExtrusionBucket::upload(gfx::UploadPass& uploadPass) {
+void FillExtrusionBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 #if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
