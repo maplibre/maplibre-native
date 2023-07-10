@@ -1,6 +1,8 @@
 #pragma once
 
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/programs/hillshade_program.hpp>
+#include <mbgl/programs/hillshade_prepare_program.hpp>
 #include <mbgl/style/layers/hillshade_layer_impl.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/tile/tile_id.hpp>
@@ -65,6 +67,9 @@ private:
     gfx::ShaderProgramBasePtr hillshadePrepareShader;
     gfx::ShaderProgramBasePtr hillshadeShader;
     std::unordered_map<OverscaledTileID, RenderTargetPtr> renderTargets;
+    
+    using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
+    std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
 #endif
 };
 
