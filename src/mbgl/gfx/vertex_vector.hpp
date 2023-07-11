@@ -105,5 +105,8 @@ private:
     std::vector<Vertex> v;
 };
 
+template <typename T>
+using VertexVectorPtr = std::shared_ptr<VertexVector<T>>;
+
 } // namespace gfx
 } // namespace mbgl

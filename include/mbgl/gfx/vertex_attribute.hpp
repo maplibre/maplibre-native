@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/gfx_types.hpp>
+#include <mbgl/renderer/paint_property_binder.hpp>
 
 #include <algorithm>
 #include <array>
@@ -149,6 +150,16 @@ public:
     }
     void resetSharedRawData() { sharedRawData.reset(); }
 
+    /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
+    /// RGBA.
+    static float4 colorAttrRGBA(const Color& color) {
+        const auto components = color.toArray();
+        return {static_cast<float>(components[0] / 255.0),
+                static_cast<float>(components[1] / 255.0),
+                static_cast<float>(components[2] / 255.0),
+                static_cast<float>(components[3])};
+    }
+
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = default;
     VertexAttribute& operator=(VertexAttribute&& other) {
@@ -271,20 +282,37 @@ public:
     template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
     std::vector<std::string> readDataDrivenPaintProperties(const Binders& binders, const Evaluated& evaluated) {
         std::vector<std::string> propertiesAsUniforms;
+        propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (
             [&](const auto& attributeNames) {
                 for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
                     const auto& attributeName = std::string(attributeNames[attrIndex]);
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
+                        using Attribute = typename DataDrivenPaintProperty::Attribute;
+                        using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+                        using Value = typename Type::Value;    // std::array<T, N>
+                        using InterpType = ZoomInterpolatedAttributeType<Type>;
+                        using InterpValue = typename InterpType::Value; // std::array<T, 2*N>
+
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
                         if (vertexCount > 0 && !isConstant) {
                             if (auto& attr = getOrAdd("a_" + attributeName)) {
-                                for (std::size_t i = 0; i < vertexCount; ++i) {
-                                    attr->set(i, binder->getVertexValue(i), attrIndex);
+                                if (const auto& sharedVector = binder->getSharedVertexVector()) {
+                                    const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
+                                    const bool isInterpolated = binder->isInterpolated();
+                                    const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
+                                    assert(rawSize ==
+                                           static_cast<uint32_t>(isInterpolated ? sizeof(InterpValue) : sizeof(Value)));
+                                    assert(sharedVector->getRawCount() == vertexCount);
+                                    attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
+                                } else {
+                                    for (std::size_t i = 0; i < vertexCount; ++i) {
+                                        attr->set(i, binder->getVertexValue(i), attrIndex);
+                                    }
                                 }
                             }
-                            propertiesAsUniforms.emplace_back("");
+                            propertiesAsUniforms.emplace_back(std::string());
                         } else {
                             propertiesAsUniforms.emplace_back(attributeName);
                         }
