@@ -154,7 +154,7 @@ public:
 
     /// Create a segment wrapper
     virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
-    
+
 protected:
     std::size_t curVertexCount() const;
 

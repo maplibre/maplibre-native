@@ -153,10 +153,10 @@ public:
     /// Provide raw data for vertices
     /// Incompatible with adding primitives
     virtual void setVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType) = 0;
-    
+
     /// Create a segment wrapper
     virtual void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments) = 0;
-    
+
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }

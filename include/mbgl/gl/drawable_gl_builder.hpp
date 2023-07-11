@@ -17,7 +17,7 @@ public:
 
     using DrawSegment = gfx::Drawable::DrawSegment;
     std::unique_ptr<DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) override;
-    
+
 protected:
     gfx::UniqueDrawable createDrawable() const override;
 
