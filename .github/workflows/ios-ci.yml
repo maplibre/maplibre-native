@@ -155,7 +155,7 @@ jobs:
           cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios) ./size
 
       - name: Upload size test result
-        if: ${{ matrix.renderer }} = "drawable"
+        if: ${{ matrix.renderer }} = "legacy"
         uses: actions/upload-artifact@v3
         with:
           name: size-test-result
