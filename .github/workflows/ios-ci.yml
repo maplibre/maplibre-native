@@ -140,10 +140,10 @@ jobs:
       - run: make style-code
 
       - name: Running iOS tests
-        run: bazel test --://renderer=${{ matrix.renderer }} //platform/ios/platform/ios/test:ios_test --test_output=errors
+        run: bazel test --//:renderer=${{ matrix.renderer }} //platform/ios/platform/ios/test:ios_test --test_output=errors
 
       - name: Running iOS UI tests
-        run: bazel test --://renderer=${{ matrix.renderer }} //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
+        run: bazel test --//:renderer=${{ matrix.renderer }} //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
 
       # size test
 
