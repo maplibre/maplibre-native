@@ -64,19 +64,29 @@ There is a an open bounty to extend this Getting Started guide ([#809](https://g
 
 ## Developing
 
-### CMake
+The following are instructions on how to build `maplibre-native` for development purposes. 
 
-The main build tool generator supported by MapLibre Native is CMake. There is a `Makefile` which calls CMake and `xcodebuild` under the hood to complete various development tasks, including building with various kinds of configurations and running tests. This `Makefile` can also can set up an Xcode project for MapLibre Native development by copying a `.xcodeproj` file part of the source tree and combining that with the output of CMake.
+### Downloading Source
 
-To set up an Xcode project and open Xcode, use the following command.
+Download the source and install all submodules if you have not already, by running the following from the root of the repository. 
 
 ```
-make iproj
+git clone git@github.com:maplibre/maplibre-native.git maplibre-native
+cd maplibre-native
+git submodule update --init --recursive
 ```
+
+Next run the following to add required dependencies:
+
+```
+cd platform/ios
+make style-code
+```
+
 
 ### Bazel
 
-The above setup is quite fragile and relies on the `.xcodeproj` files part of the source tree (making changes hard to review). We are looking into a better way to set up an Xcode project for MapLibre Native iOS development. As of May 2023 we are experimenting with [Bazel](https://bazel.build/) together with [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj). Please [share your experiences](https://github.com/maplibre/maplibre-native/discussions/1145).
+[Bazel](https://bazel.build/) together with [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) is the preferred build system. Please [share your experiences](https://github.com/maplibre/maplibre-native/discussions/1145).
 
 You need to install bazelisk, which is a wrapper around Bazel which ensures that the version specified in `.bazelversion` is used.
 
@@ -84,7 +94,75 @@ You need to install bazelisk, which is a wrapper around Bazel which ensures that
 brew install bazelisk
 ```
 
-Next, you can generate an Xcode project for MapLibre Native development using:
+#### Configure Bazel: config.bzl
+
+You will need to edit bazel/config.bzl to match your provisioning team id. If this is your first time building this iOS application, you may not have one. 
+
+If this is a fresh install, the easiest thing to do is to build the xcode project, then open XCode, sign in, and create a new provisioning ID. To get started, from `platform/ios`:
+
+```
+cp bazel/example_config.bzl bazel/config.bzl
+```
+
+Unless you already know your provisioning team ID, skip editing it for now, and move on to creating the XCode project. 
+
+### Create the XCode Project
+
+_These instructions are for XCode 14.3.1_
+
+From `platform/ios`:
+
+```
+bazel run //platform/ios:xcodeproj
+open MapLibre.xcodeproj
+```
+
+Then once in XCode, click on "MapLibre" on the left, then "App" under Targets, then "Signing & Capabilities" in the tabbed menu. In the below screenshot, the "TC45MCF93C" is the default profile that is in `bazel/config.bzl`. To fix this add a valid team and update to a unique bundle identifier. 
+
+<img width="1127" alt="xcode-signing-capabilities" src="https://github.com/polvi/maplibre-native/assets/46035/77b9f60c-d60e-464b-929a-590326723ac9">
+
+Once you have done that, you should see a new profile in `~/Library/MobileDevice/Provisioning\ Profiles/`. For example:
+
+```
+
+~/Library/MobileDevice/Provisioning\ Profiles/5fe347ab-13b4-4669-96eb-198e0890a303.mobileprovision 
+```
+
+To set the correct team id, do the following:
+
+```
+open ~/Library/MobileDevice/Provisioning\ Profiles/
+single-click the name of the profile
+press spacebar
+```
+
+You should see something like the following:
+
+<img width="787" alt="xcode-provisioning-profile" src="https://github.com/polvi/maplibre-native/assets/46035/3172165b-227f-4bce-a9e4-a71665c6074b">
+
+
+Edit bazel/config.bzl:
+
+```
+APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "HXK82SM8MM"
+```
+
+This is a temporary fix until #1341 is fixed, but also edit BUILD.bazel:
+
+```
+--- a/platform/ios/BUILD.bazel
++++ b/platform/ios/BUILD.bazel
+@@ -508,7 +508,7 @@ genrule(
+ 
+ local_provisioning_profile(
+     name = "provisioning_profile",
+-    profile_name = "iOS Team Provisioning Profile: *",
++    profile_name = "5fe347ab-13b4-4669-96eb-198e0890a303",
+     team_id = APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID,
+ )
+```
+
+Once this is done, close XCode and rebuild the project with:
 
 ```
 bazel run //platform/ios:xcodeproj
@@ -97,6 +175,17 @@ It is also possible to build and run the test application in a simulator from th
 ```
 bazel run //platform/ios:App
 ```
+
+### CMake (deprecated)
+
+The original build tool generator supported by MapLibre Native is CMake. There is a `Makefile` which calls CMake and `xcodebuild` under the hood to complete various development tasks, including building with various kinds of configurations and running tests. This `Makefile` can also can set up an Xcode project for MapLibre Native development by copying a `.xcodeproj` file part of the source tree and combining that with the output of CMake.
+
+To set up an Xcode project and open Xcode, use the following command from `platform/ios`:
+
+```
+make iproj
+```
+
 
 ## Documentation
 
