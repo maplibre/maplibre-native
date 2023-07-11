@@ -435,29 +435,29 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         auto* indices = &staticDataIndices;
         auto* segments = &staticDataSegments;
 
-        /*if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
             vertices = bucket.sharedVertices;
             indices = &bucket.indices;
             segments = &bucket.segments;
-        }*/
+        }
 
         gfx::VertexAttributeArray hillshadeVertexAttrs;
 
         if (const auto& attr = hillshadeVertexAttrs.add(PosAttribName)) {
-            attr->setSharedRawData(staticDataSharedVertices,
+            attr->setSharedRawData(vertices,
                                    offsetof(HillshadeLayoutVertex, a1),
                                    0,
                                    sizeof(HillshadeLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
         if (const auto& attr = hillshadeVertexAttrs.getOrAdd(TexturePosAttribName)) {
-            attr->setSharedRawData(staticDataSharedVertices,
+            attr->setSharedRawData(vertices,
                                    offsetof(HillshadeLayoutVertex, a2),
                                    0,
                                    sizeof(HillshadeLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
-
+        
         hillshadeBuilder = context.createDrawableBuilder("hillshade");
         hillshadeBuilder->setShader(hillshadeShader);
         hillshadeBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
