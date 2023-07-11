@@ -64,7 +64,7 @@ There is a an open bounty to extend this Getting Started guide ([#809](https://g
 
 ## Developing
 
-The following are instructions on how to build `maplibre-native` for development purposes. 
+The following are instructions on how to build MapLibre Native for development purposes. 
 
 ### Downloading Source
 
