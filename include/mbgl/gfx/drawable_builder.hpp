@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/types.hpp>
-#include <mbgl/gfx/vertex_attribute.hpp>
 
 #include <array>
 #include <memory>
@@ -16,6 +15,7 @@ namespace gfx {
 
 class DrawableTweaker;
 class ShaderProgramBase;
+class VertexAttributeArray;
 
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
@@ -100,7 +100,7 @@ public:
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// Get the vertex attributes that override default values in the shader program
-    const gfx::VertexAttributeArray& getVertexAttributes() const { return vertexAttrs; }
+    const gfx::VertexAttributeArray& getVertexAttributes() const;
 
     /// Set the name given to new drawables
     void setDrawableName(std::string value) { drawableName = std::move(value); }
@@ -180,7 +180,6 @@ protected:
     gfx::ShaderProgramBasePtr shader;
     UniqueDrawable currentDrawable;
     std::vector<UniqueDrawable> drawables;
-    VertexAttributeArray vertexAttrs;
     gfx::Drawable::Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
 

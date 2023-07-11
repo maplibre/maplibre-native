@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/identity.hpp>
@@ -28,9 +27,11 @@ enum class DepthMaskType : bool;
 class DrawableTweaker;
 class DrawMode;
 class ShaderProgramBase;
-using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
+class VertexAttributeArray;
+
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class Drawable {
@@ -159,16 +160,6 @@ public:
     /// Get the uniform buffers attached to this drawable
     virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
-
-    /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
-    /// RGBA.
-    static gfx::VertexAttribute::float4 colorAttrRGBA(const Color& color) {
-        const auto components = color.toArray();
-        return {static_cast<float>(components[0] / 255.0),
-                static_cast<float>(components[1] / 255.0),
-                static_cast<float>(components[2] / 255.0),
-                static_cast<float>(components[3])};
-    }
 
     const UniqueDrawableData& getData() const { return drawableData; }
     void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
