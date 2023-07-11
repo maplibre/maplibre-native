@@ -71,9 +71,8 @@ The following are instructions on how to build MapLibre Native for development p
 Download the source and install all submodules if you have not already, by running the following from the root of the repository. 
 
 ```
-git clone git@github.com:maplibre/maplibre-native.git maplibre-native
+git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
 cd maplibre-native
-git submodule update --init --recursive
 ```
 
 Next run the following to generate some files that are needed:
