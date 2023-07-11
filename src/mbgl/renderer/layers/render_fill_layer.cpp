@@ -399,24 +399,24 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             /* .padding = */ 0,
             0};
 
-        // TODO: only update if properties re-evaluated?
         const FillDrawableTilePropsUBO tileProps = {
             /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
             /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
         };
 
         // If we already have drawables for this tile, update them.
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            // TODO: Share buffers
-            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                drawable.mutableUniformBuffers().createOrUpdate(
-                    FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
-                drawable.mutableUniformBuffers().createOrUpdate(
-                    FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
-            });
-
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            auto& uniforms = drawable.mutableUniformBuffers();
+            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
+            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
+        };
+        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
+
+        // Share UBO buffers among any drawables created for this tile
+        const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+        const auto tilePropsBuffer = context.createUniformBuffer(&tileProps, sizeof(tileProps));
 
         // `Fill*Program` all use `style::FillPaintProperties`
         gfx::VertexAttributeArray vertexAttrs;

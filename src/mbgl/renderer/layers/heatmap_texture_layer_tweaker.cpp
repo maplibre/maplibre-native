@@ -41,7 +41,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& size = parameters.staticData.backendSize;
         mat4 viewportMat;
         matrix::ortho(viewportMat, 0, size.width, size.height, 0, 0, 1);
-        HeatmapTextureDrawableUBO drawableUBO = {
+        const HeatmapTextureDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(viewportMat),
             /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
             /* .opacity = */ evaluated.get<HeatmapOpacity>(),
