@@ -24,6 +24,10 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
   
   pull_request:
     branches:
@@ -45,6 +49,10 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
 
 jobs:
   build:
