@@ -39,6 +39,9 @@ concurrency:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        renderer: [legacy, drawable]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -65,10 +68,16 @@ jobs:
             libglfw3-dev \
             libwebp-dev
 
+      - if: ${{ matrix.renderer }} == "drawable"
+        run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> $GITHUB_ENV
+
+      - if: ${{ matrix.renderer }} == "legacy"
+        run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> $GITHUB_ENV
+
       - name: Build MapLibre Native Core
         run: |
           cmake --version
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
 
       - name: Archive mbgl-test-runner
