@@ -1,660 +1,660 @@
 {
   "warnings": [
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNCircleStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLCircleStyleLayer.h",
       "line": 318,
-      "symbol": "MLNCircleStyleLayer.circlePitchScale",
+      "symbol": "MGLCircleStyleLayer.circlePitchScale",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNCircleStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLCircleStyleLayer.h",
       "line": 477,
-      "symbol": "MLNCircleStyleLayer.circleTranslate",
+      "symbol": "MGLCircleStyleLayer.circleTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNCircleStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLCircleStyleLayer.h",
       "line": 509,
-      "symbol": "MLNCircleStyleLayer.circleTranslateAnchor",
+      "symbol": "MGLCircleStyleLayer.circleTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNComputedShapeSource.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLComputedShapeSource.h",
       "line": 35,
-      "symbol": "MLNInvalidDatasourceException",
+      "symbol": "MGLInvalidDatasourceException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFeature.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFeature.h",
       "line": 249,
-      "symbol": "MLNMultiPointFeature",
+      "symbol": "MGLMultiPointFeature",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.unexposed",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFeature.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFeature.h",
       "line": 294,
-      "symbol": "MLNShapeCollectionFeature.shapes",
+      "symbol": "MGLShapeCollectionFeature.shapes",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFeature.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFeature.h",
       "line": 296,
-      "symbol": "MLNShapeCollectionFeature.+shapeCollectionWithShapes:",
+      "symbol": "MGLShapeCollectionFeature.+shapeCollectionWithShapes:",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFillExtrusionStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFillExtrusionStyleLayer.h",
       "line": 190,
-      "symbol": "MLNFillExtrusionStyleLayer.fillExtrusionVerticalGradient",
+      "symbol": "MGLFillExtrusionStyleLayer.fillExtrusionVerticalGradient",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFillExtrusionStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFillExtrusionStyleLayer.h",
       "line": 329,
-      "symbol": "MLNFillExtrusionStyleLayer.fillExtrusionTranslate",
+      "symbol": "MGLFillExtrusionStyleLayer.fillExtrusionTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFillExtrusionStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFillExtrusionStyleLayer.h",
       "line": 361,
-      "symbol": "MLNFillExtrusionStyleLayer.fillExtrusionTranslateAnchor",
+      "symbol": "MGLFillExtrusionStyleLayer.fillExtrusionTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFillStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFillStyleLayer.h",
       "line": 122,
-      "symbol": "MLNFillStyleLayer.fillAntialias",
+      "symbol": "MGLFillStyleLayer.fillAntialias",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFillStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFillStyleLayer.h",
       "line": 329,
-      "symbol": "MLNFillStyleLayer.fillTranslate",
+      "symbol": "MGLFillStyleLayer.fillTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNFillStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLFillStyleLayer.h",
       "line": 361,
-      "symbol": "MLNFillStyleLayer.fillTranslateAnchor",
+      "symbol": "MGLFillStyleLayer.fillTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNForegroundStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLForegroundStyleLayer.h",
       "line": 25,
-      "symbol": "MLNForegroundStyleLayer.-init",
+      "symbol": "MGLForegroundStyleLayer.-init",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNGeometry.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLGeometry.h",
       "line": 18,
-      "symbol": "MLNMapPoint",
+      "symbol": "MGLMapPoint",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNGeometry.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLGeometry.h",
       "line": 18,
-      "symbol": "MLNMapPoint",
+      "symbol": "MGLMapPoint",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNGeometry.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLGeometry.h",
       "line": 28,
-      "symbol": "MLNMatrix4",
+      "symbol": "MGLMatrix4",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNGeometry.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLGeometry.h",
       "line": 28,
-      "symbol": "MLNMatrix4",
+      "symbol": "MGLMatrix4",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNLineStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLLineStyleLayer.h",
       "line": 369,
-      "symbol": "MLNLineStyleLayer.lineDasharray",
+      "symbol": "MGLLineStyleLayer.lineDasharray",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNLineStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLLineStyleLayer.h",
       "line": 580,
-      "symbol": "MLNLineStyleLayer.lineTranslate",
+      "symbol": "MGLLineStyleLayer.lineTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNLineStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLLineStyleLayer.h",
       "line": 612,
-      "symbol": "MLNLineStyleLayer.lineTranslateAnchor",
+      "symbol": "MGLLineStyleLayer.lineTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNLoggingConfiguration.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLLoggingConfiguration.h",
       "line": 45,
-      "symbol": "MLNLoggingLevel.MLNLoggingLevelDebug",
+      "symbol": "MGLLoggingLevel.MGLLoggingLevelDebug",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enumcase",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNMapSnapshotter.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLMapSnapshotter.h",
       "line": 228,
-      "symbol": "MLNMapSnapshotter.-init",
+      "symbol": "MGLMapSnapshotter.-init",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNMapSnapshotter.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLMapSnapshotter.h",
       "line": 360,
-      "symbol": "MLNMapSnapshotterDelegate.-mapSnapshotter:didFailLoadingImageNamed:",
+      "symbol": "MGLMapSnapshotterDelegate.-mapSnapshotter:didFailLoadingImageNamed:",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNNetworkConfiguration.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLNetworkConfiguration.h",
       "line": 9,
-      "symbol": "MLNNetworkConfigurationDelegate",
+      "symbol": "MGLNetworkConfigurationDelegate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.protocol",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNOfflinePack.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLOfflinePack.h",
       "line": 9,
-      "symbol": "MLNInvalidOfflinePackException",
+      "symbol": "MGLInvalidOfflinePackException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNOfflineStorage.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLOfflineStorage.h",
       "line": 104,
-      "symbol": "MLNUnsupportedRegionTypeException",
+      "symbol": "MGLUnsupportedRegionTypeException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNOfflineStorage.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLOfflineStorage.h",
       "line": 474,
-      "symbol": "MLNOfflineStorage.-putResourceWithUrl:data:modified:expires:etag:mustRevalidate:",
+      "symbol": "MGLOfflineStorage.-putResourceWithUrl:data:modified:expires:etag:mustRevalidate:",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNOpenGLStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLOpenGLStyleLayer.h",
       "line": 15,
-      "symbol": "MLNStyleLayerDrawingContext",
+      "symbol": "MGLStyleLayerDrawingContext",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.struct",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNOpenGLStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLOpenGLStyleLayer.h",
       "line": 15,
-      "symbol": "MLNStyleLayerDrawingContext",
+      "symbol": "MGLStyleLayerDrawingContext",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNOpenGLStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLOpenGLStyleLayer.h",
       "line": 26,
-      "symbol": "MLNOpenGLStyleLayer",
+      "symbol": "MGLOpenGLStyleLayer",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNRasterStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLRasterStyleLayer.h",
       "line": 120,
-      "symbol": "MLNRasterStyleLayer.rasterBrightnessMax",
+      "symbol": "MGLRasterStyleLayer.rasterBrightnessMax",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNRasterStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLRasterStyleLayer.h",
       "line": 153,
-      "symbol": "MLNRasterStyleLayer.rasterBrightnessMin",
+      "symbol": "MGLRasterStyleLayer.rasterBrightnessMin",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNRasterStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLRasterStyleLayer.h",
       "line": 234,
-      "symbol": "MLNRasterStyleLayer.rasterHueRotate",
+      "symbol": "MGLRasterStyleLayer.rasterHueRotate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNRasterStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLRasterStyleLayer.h",
       "line": 294,
-      "symbol": "MLNRasterStyleLayer.rasterResampling",
+      "symbol": "MGLRasterStyleLayer.rasterResampling",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNShapeOfflineRegion.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLShapeOfflineRegion.h",
       "line": 53,
-      "symbol": "MLNShapeOfflineRegion.-init",
+      "symbol": "MGLShapeOfflineRegion.-init",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSource.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSource.h",
       "line": 8,
-      "symbol": "MLNInvalidStyleSourceException",
+      "symbol": "MGLInvalidStyleSourceException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSource.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSource.h",
       "line": 33,
-      "symbol": "MLNSource.-init",
+      "symbol": "MGLSource.-init",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyle.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyle.h",
       "line": 17,
-      "symbol": "MLNInvalidStyleURLException",
+      "symbol": "MGLInvalidStyleURLException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyle.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyle.h",
       "line": 18,
-      "symbol": "MLNRedundantLayerException",
+      "symbol": "MGLRedundantLayerException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyle.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyle.h",
       "line": 19,
-      "symbol": "MLNRedundantLayerIdentifierException",
+      "symbol": "MGLRedundantLayerIdentifierException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyle.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyle.h",
       "line": 20,
-      "symbol": "MLNRedundantSourceException",
+      "symbol": "MGLRedundantSourceException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyle.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyle.h",
       "line": 21,
-      "symbol": "MLNRedundantSourceIdentifierException",
+      "symbol": "MGLRedundantSourceIdentifierException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleLayer.h",
       "line": 8,
-      "symbol": "MLNInvalidStyleLayerException",
+      "symbol": "MGLInvalidStyleLayerException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleLayer.h",
       "line": 32,
-      "symbol": "MLNStyleLayer.-init",
+      "symbol": "MGLStyleLayer.-init",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 9,
-      "symbol": "MLNStyleFunctionOption",
+      "symbol": "MGLStyleFunctionOption",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 11,
-      "symbol": "MLNStyleFunctionOptionInterpolationBase",
+      "symbol": "MGLStyleFunctionOptionInterpolationBase",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 13,
-      "symbol": "MLNStyleFunctionOptionDefaultValue",
+      "symbol": "MGLStyleFunctionOptionDefaultValue",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 15,
-      "symbol": "MLNInterpolationMode",
+      "symbol": "MGLInterpolationMode",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enum",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 15,
-      "symbol": "MLNInterpolationMode",
+      "symbol": "MGLInterpolationMode",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 23,
-      "symbol": "MLNStyleValue",
+      "symbol": "MGLStyleValue",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 27,
-      "symbol": "MLNConstantStyleValue",
+      "symbol": "MGLConstantStyleValue",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 30,
-      "symbol": "MLNStyleConstantValue",
+      "symbol": "MGLStyleConstantValue",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.unexposed",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 33,
-      "symbol": "MLNStyleFunction",
+      "symbol": "MGLStyleFunction",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 37,
-      "symbol": "MLNCameraStyleFunction",
+      "symbol": "MGLCameraStyleFunction",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 41,
-      "symbol": "MLNSourceStyleFunction",
+      "symbol": "MGLSourceStyleFunction",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNStyleValue.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLStyleValue.h",
       "line": 45,
-      "symbol": "MLNCompositeStyleFunction",
+      "symbol": "MGLCompositeStyleFunction",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.class",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 466,
-      "symbol": "MLNSymbolStyleLayer.iconAllowOverlap",
+      "symbol": "MGLSymbolStyleLayer.iconAllowOverlap",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 530,
-      "symbol": "MLNSymbolStyleLayer.iconIgnorePlacement",
+      "symbol": "MGLSymbolStyleLayer.iconIgnorePlacement",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 565,
-      "symbol": "MLNSymbolStyleLayer.iconImage",
+      "symbol": "MGLSymbolStyleLayer.iconImage",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 714,
-      "symbol": "MLNSymbolStyleLayer.iconRotate",
+      "symbol": "MGLSymbolStyleLayer.iconRotate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 778,
-      "symbol": "MLNSymbolStyleLayer.iconSize",
+      "symbol": "MGLSymbolStyleLayer.iconSize",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 899,
-      "symbol": "MLNSymbolStyleLayer.iconKeepUpright",
+      "symbol": "MGLSymbolStyleLayer.iconKeepUpright",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 933,
-      "symbol": "MLNSymbolStyleLayer.textKeepUpright",
+      "symbol": "MGLSymbolStyleLayer.textKeepUpright",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 966,
-      "symbol": "MLNSymbolStyleLayer.textMaxAngle",
+      "symbol": "MGLSymbolStyleLayer.textMaxAngle",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 995,
-      "symbol": "MLNSymbolStyleLayer.textMaxWidth",
+      "symbol": "MGLSymbolStyleLayer.textMaxWidth",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1030,
-      "symbol": "MLNSymbolStyleLayer.symbolAvoidEdges",
+      "symbol": "MGLSymbolStyleLayer.symbolAvoidEdges",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1165,
-      "symbol": "MLNSymbolStyleLayer.textField",
+      "symbol": "MGLSymbolStyleLayer.textField",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1196,
-      "symbol": "MLNSymbolStyleLayer.textAllowOverlap",
+      "symbol": "MGLSymbolStyleLayer.textAllowOverlap",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1265,
-      "symbol": "MLNSymbolStyleLayer.textFont",
+      "symbol": "MGLSymbolStyleLayer.textFont",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1294,
-      "symbol": "MLNSymbolStyleLayer.textSize",
+      "symbol": "MGLSymbolStyleLayer.textSize",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1324,
-      "symbol": "MLNSymbolStyleLayer.textIgnorePlacement",
+      "symbol": "MGLSymbolStyleLayer.textIgnorePlacement",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1356,
-      "symbol": "MLNSymbolStyleLayer.textJustify",
+      "symbol": "MGLSymbolStyleLayer.textJustify",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1579,
-      "symbol": "MLNSymbolStyleLayer.textRotate",
+      "symbol": "MGLSymbolStyleLayer.textRotate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1715,
-      "symbol": "MLNSymbolStyleLayer.textWritingMode",
+      "symbol": "MGLSymbolStyleLayer.textWritingMode",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 1977,
-      "symbol": "MLNSymbolStyleLayer.iconTranslate",
+      "symbol": "MGLSymbolStyleLayer.iconTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 2009,
-      "symbol": "MLNSymbolStyleLayer.iconTranslateAnchor",
+      "symbol": "MGLSymbolStyleLayer.iconTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 2266,
-      "symbol": "MLNSymbolStyleLayer.textTranslate",
+      "symbol": "MGLSymbolStyleLayer.textTranslate",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNSymbolStyleLayer.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLSymbolStyleLayer.h",
       "line": 2298,
-      "symbol": "MLNSymbolStyleLayer.textTranslateAnchor",
+      "symbol": "MGLSymbolStyleLayer.textTranslateAnchor",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNTilePyramidOfflineRegion.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLTilePyramidOfflineRegion.h",
       "line": 55,
-      "symbol": "MLNTilePyramidOfflineRegion.-init",
+      "symbol": "MGLTilePyramidOfflineRegion.-init",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNTypes.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLTypes.h",
       "line": 26,
-      "symbol": "MLNExceptionName",
+      "symbol": "MGLExceptionName",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MLNTypes.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/MGLTypes.h",
       "line": 106,
-      "symbol": "MLNStringFromMLNTransition",
+      "symbol": "MGLStringFromMGLTransition",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.function",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/NSExpression+MLNAdditions.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/NSExpression+MGLAdditions.h",
       "line": 14,
-      "symbol": "MLNExpressionInterpolationMode",
+      "symbol": "MGLExpressionInterpolationMode",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/NSExpression+MLNAdditions.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/NSExpression+MGLAdditions.h",
       "line": 101,
-      "symbol": "NSExpression(MLNAdditions).featurePropertiesVariableExpression",
+      "symbol": "NSExpression(MGLAdditions).featurePropertiesVariableExpression",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/NSPredicate+MLNAdditions.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/darwin/src/NSPredicate+MGLAdditions.h",
       "line": 5,
-      "symbol": "NSPredicate(MLNAdditions)",
+      "symbol": "NSPredicate(MGLAdditions)",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.category",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNAnnotationView.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLAnnotationView.h",
       "line": 241,
-      "symbol": "MLNAnnotationView.enabled",
+      "symbol": "MGLAnnotationView.enabled",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.property",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapView+IBAdditions.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapView+IBAdditions.h",
       "line": 7,
-      "symbol": "MLNMapView(IBAdditions)",
+      "symbol": "MGLMapView(IBAdditions)",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.category",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapView.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapView.h",
       "line": 109,
-      "symbol": "MLNPanScrollingMode",
+      "symbol": "MGLPanScrollingMode",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.enum",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapView.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapView.h",
       "line": 109,
-      "symbol": "MLNPanScrollingMode",
+      "symbol": "MGLPanScrollingMode",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.typedef",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapView.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapView.h",
       "line": 133,
-      "symbol": "MLNMissingLocationServicesUsageDescriptionException",
+      "symbol": "MGLMissingLocationServicesUsageDescriptionException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapView.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapView.h",
       "line": 134,
-      "symbol": "MLNUserLocationAnnotationTypeException",
+      "symbol": "MGLUserLocationAnnotationTypeException",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.constant",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapViewDelegate.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapViewDelegate.h",
       "line": 212,
-      "symbol": "MLNMapViewDelegate.-mapViewWillStartRenderingMap:",
+      "symbol": "MGLMapViewDelegate.-mapViewWillStartRenderingMap:",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapViewDelegate.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapViewDelegate.h",
       "line": 215,
-      "symbol": "MLNMapViewDelegate.-mapViewDidFinishRenderingMap:fullyRendered:",
+      "symbol": "MGLMapViewDelegate.-mapViewDidFinishRenderingMap:fullyRendered:",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     },
     {
-      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MLNMapViewDelegate.h",
+      "file": "/Users/runner/work/maplibre-native/maplibre-native/platform/ios/platform/ios/src/MGLMapViewDelegate.h",
       "line": 279,
-      "symbol": "MLNMapViewDelegate.-mapView:didFailToLoadImage:",
+      "symbol": "MGLMapViewDelegate.-mapView:didFailToLoadImage:",
       "symbol_kind": "sourcekitten.source.lang.objc.decl.method.instance",
       "warning": "undocumented"
     }
