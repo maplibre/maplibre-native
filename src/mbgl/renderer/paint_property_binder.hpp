@@ -122,13 +122,14 @@ public:
 
 #if MLN_LEGACY_RENDERER
     virtual void upload(gfx::UploadPass&) = 0;
+
+    virtual std::tuple<ExpandToType<As, std::optional<gfx::AttributeBinding>>...> attributeBinding(
+        const PossiblyEvaluatedType& currentValue) const = 0;
 #endif // MLN_LEGACY_RENDERER
 
     virtual void setPatternParameters(const std::optional<ImagePosition>&,
                                       const std::optional<ImagePosition>&,
                                       const CrossfadeParameters&) = 0;
-    virtual std::tuple<ExpandToType<As, std::optional<gfx::AttributeBinding>>...> attributeBinding(
-        const PossiblyEvaluatedType& currentValue) const = 0;
     virtual std::tuple<ExpandToType<As, float>...> interpolationFactor(float currentZoom) const = 0;
     virtual std::tuple<ExpandToType<As, UniformValueType>...> uniformValue(
         const PossiblyEvaluatedType& currentValue) const = 0;
@@ -165,19 +166,19 @@ public:
                               const CanonicalTileID&,
                               const style::expression::Value&) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
-
+    
 #if MLN_LEGACY_RENDERER
     void upload(gfx::UploadPass&) override {}
-#endif // MLN_LEGACY_RENDERER
-
-    void setPatternParameters(const std::optional<ImagePosition>&,
-                              const std::optional<ImagePosition>&,
-                              const CrossfadeParameters&) override{};
 
     std::tuple<std::optional<gfx::AttributeBinding>> attributeBinding(
         const PossiblyEvaluatedPropertyValue<T>&) const override {
         return {};
     }
+#endif // MLN_LEGACY_RENDERER
+
+    void setPatternParameters(const std::optional<ImagePosition>&,
+                              const std::optional<ImagePosition>&,
+                              const CrossfadeParameters&) override{};
 
     std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
 
@@ -220,6 +221,11 @@ public:
 
 #if MLN_LEGACY_RENDERER
     void upload(gfx::UploadPass&) override {}
+
+    std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>> attributeBinding(
+        const PossiblyEvaluatedPropertyValue<Faded<T>>&) const override {
+        return {};
+    }
 #endif // MLN_LEGACY_RENDERER
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
@@ -231,11 +237,6 @@ public:
             constantPatternPositions = std::tuple<std::array<uint16_t, 4>, std::array<uint16_t, 4>>{posB->tlbr(),
                                                                                                     posA->tlbr()};
         }
-    }
-
-    std::tuple<std::optional<gfx::AttributeBinding>, std::optional<gfx::AttributeBinding>> attributeBinding(
-        const PossiblyEvaluatedPropertyValue<Faded<T>>&) const override {
-        return {};
     }
 
     std::tuple<float, float> interpolationFactor(float) const override { return std::tuple<float, float>{0.0f, 0.0f}; }
