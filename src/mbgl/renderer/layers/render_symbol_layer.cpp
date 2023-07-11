@@ -408,7 +408,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
     const auto draw = [&parameters, this](auto& programInstance,
                                           const auto& uniformValues,
                                           const auto& buffers,
-                                          auto& segments,
+                                          const auto& segments,
                                           const auto& symbolSizeBinder,
                                           const auto& binders,
                                           const auto& paintProperties,
@@ -493,7 +493,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          draw,
                          tile,
                          *renderData,
-                         std::ref(bucket.icon.segments),
+                         std::cref(bucket.icon.segments),
                          bucketPaintProperties,
                          parameters,
                          false /*sdfIcon*/
@@ -509,7 +509,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          draw,
                          tile,
                          *renderData,
-                         std::ref(bucket.sdfIcon.segments),
+                         std::cref(bucket.sdfIcon.segments),
                          bucketPaintProperties,
                          parameters,
                          true /*sdfIcon*/
@@ -525,7 +525,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
                          draw,
                          tile,
                          *renderData,
-                         std::ref(bucket.text.segments),
+                         std::cref(bucket.text.segments),
                          bucketPaintProperties,
                          parameters);
             }

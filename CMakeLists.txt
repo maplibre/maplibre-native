@@ -11,8 +11,8 @@ option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
-option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" OFF)
-option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" ON)
+option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
+option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
 option(MLN_RENDERER_SPLIT_VIEW "Enable a split view if both renderers are enabled" ON)
 option(MLN_RENDERER_QUAD_SPLIT_VIEW "When using split view, split opaque and translucent passes as well" OFF)
 
@@ -26,7 +26,7 @@ if (MLN_WITH_CLANG_TIDY)
     # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized), 
     # that's why we need to disable this `unknown-warning-option` here. 
     # We could check if current compiler supports particular flag before enabling it.
-    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option;--extra-arg=-Wno-error=pragmas")
+    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-unknown-warning-option;--extra-arg=-Wno-pragmas")
 endif()
 
 if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -88,6 +88,8 @@ target_compile_options(
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=maybe-uninitialized>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=return-type>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=unknown-pragmas>
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-error=pragmas>
+        $<$<CXX_COMPILER_ID:AppleClang>:-Wno-unknown-warning-option>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=deprecated-declarations>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=unused-parameter>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=unused-property-ivar>
