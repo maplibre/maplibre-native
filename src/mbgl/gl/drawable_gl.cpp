@@ -46,7 +46,10 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     // force disable depth test for debugging
     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    context.setStencilMode(makeStencilMode(parameters));
+    // For 3D mode, stenciling is handled by the layer group
+    if (!is3D) {
+        context.setStencilMode(makeStencilMode(parameters));
+    }
 
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
@@ -211,9 +214,7 @@ gfx::ColorMode DrawableGL::makeColorMode(PaintParameters& parameters) const {
 
 gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const {
     if (enableStencil) {
-        if (is3D) {
-            return parameters.stencilModeFor3D();
-        } else if (tileID) {
+        if (!is3D && tileID) {
             return parameters.stencilModeForClipping(tileID->toUnwrapped());
         }
         assert(false);
