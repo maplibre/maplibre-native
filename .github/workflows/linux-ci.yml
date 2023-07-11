@@ -40,6 +40,7 @@ concurrency:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         renderer: [legacy, drawable]
     runs-on: ubuntu-22.04
