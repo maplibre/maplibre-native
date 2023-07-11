@@ -16,7 +16,7 @@ MapLibre Native for iOS is distributed using the [Swift Package Index](https://s
 
 4. To create a minimal app, update `ContentView.swift` (which should have been automatically created when you initalized the new XCode project) with the following contents:
 
-```
+```swift
 import SwiftUI
 import Mapbox
 
