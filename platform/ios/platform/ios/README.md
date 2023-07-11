@@ -76,7 +76,7 @@ cd maplibre-native
 git submodule update --init --recursive
 ```
 
-Next run the following to add required dependencies:
+Next run the following to generate some files that are needed:
 
 ```
 cd platform/ios
