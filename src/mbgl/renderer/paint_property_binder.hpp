@@ -166,7 +166,7 @@ public:
                               const CanonicalTileID&,
                               const style::expression::Value&) override {}
     void updateVertexVector(std::size_t, std::size_t, const GeometryTileFeature&, const FeatureState&) override {}
-    
+
 #if MLN_LEGACY_RENDERER
     void upload(gfx::UploadPass&) override {}
 
