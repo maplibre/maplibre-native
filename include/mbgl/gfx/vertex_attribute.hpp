@@ -292,7 +292,7 @@ public:
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
                         using InterpType = ZoomInterpolatedAttributeType<Type>;
 #if MLN_LEGACY_RENDERER
-                        using Value = typename Type::Value;    // std::array<T, N>
+                        using Value = typename Type::Value;             // std::array<T, N>
                         using InterpValue = typename InterpType::Value; // std::array<T, 2*N>
 #endif
                         const auto vertexCount = binder->getVertexCount();
