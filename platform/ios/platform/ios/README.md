@@ -16,46 +16,46 @@ MapLibre Native for iOS is distributed using the [Swift Package Index](https://s
 
 4. To create a minimal app, update `ContentView.swift` (which should have been automatically created when you initalized the new XCode project) with the following contents:
 
-    import SwiftUI
-    import Mapbox
+```
+import SwiftUI
+import Mapbox
 
-    struct ContentView: View {
-        var body: some View {
-            MapView().edgesIgnoringSafeArea(.all)
-        }
+struct ContentView: View {
+    var body: some View {
+        MapView().edgesIgnoringSafeArea(.all)
     }
+}
 
-    struct ContentView_Previews: PreviewProvider {
-        static var previews: some View {
-            ContentView()
-        }
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
+}
 
-    struct MapView: UIViewRepresentable {
-        func makeUIView(context: Context) -> MGLMapView {
-            // Build the style URL
-            let styleURL = URL(string: "https://demotiles.maplibre.org/style.json")
-            
-            // Create the map view
-            let mapView = MGLMapView(frame: .zero, styleURL: styleURL)
-            
-            mapView.logoView.isHidden = true
-            
-            mapView.setCenter(
-                CLLocationCoordinate2D(
-                    latitude: 23.16, longitude: -109.50), animated: false)
-            
-            mapView.setZoomLevel(4, animated: false)
-            return mapView
-            
-        }
+struct MapView: UIViewRepresentable {
+    func makeUIView(context: Context) -> MGLMapView {
+        // Build the style URL
+        let styleURL = URL(string: "https://demotiles.maplibre.org/style.json")
         
-        func updateUIView(_ mapView: MGLMapView, context: Context) {
-            // Update the view if needed
-        }
+        // Create the map view
+        let mapView = MGLMapView(frame: .zero, styleURL: styleURL)
+        
+        mapView.logoView.isHidden = true
+        
+        mapView.setCenter(
+            CLLocationCoordinate2D(
+                latitude: 23.16, longitude: -109.50), animated: false)
+        
+        mapView.setZoomLevel(4, animated: false)
+        return mapView
+        
     }
-
-
+    
+    func updateUIView(_ mapView: MGLMapView, context: Context) {
+        // Update the view if needed
+    }
+}
+```
 
 There is a an open bounty to extend this Getting Started guide ([#809](https://github.com/maplibre/maplibre-native/issues/809)). In the meantime, refer to one of these external guides:
 
