@@ -457,7 +457,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(HillshadeLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
-        
+
         hillshadeBuilder = context.createDrawableBuilder("hillshade");
         hillshadeBuilder->setShader(hillshadeShader);
         hillshadeBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
