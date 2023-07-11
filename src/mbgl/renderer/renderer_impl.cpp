@@ -41,10 +41,14 @@ namespace mbgl {
 
 using namespace style;
 
-static RendererObserver& nullObserver() {
+namespace {
+
+RendererObserver& nullObserver() {
     static RendererObserver observer;
     return observer;
 }
+
+} // namespace
 
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
@@ -65,6 +69,7 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
 void Renderer::Impl::preRender([[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
     [[maybe_unused]] auto& context = backend.getContext();
+
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
 
