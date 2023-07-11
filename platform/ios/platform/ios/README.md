@@ -124,7 +124,6 @@ Then once in XCode, click on "MapLibre" on the left, then "App" under Targets, t
 Once you have done that, you should see a new profile in `~/Library/MobileDevice/Provisioning\ Profiles/`. For example:
 
 ```
-
 ~/Library/MobileDevice/Provisioning\ Profiles/5fe347ab-13b4-4669-96eb-198e0890a303.mobileprovision 
 ```
 
