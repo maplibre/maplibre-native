@@ -124,9 +124,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
 
-
-
-    const auto getLinePropsBuffer = [&](){
+    const auto getLinePropsBuffer = [&]() {
         if (!linePropertiesBuffer) {
             const LinePropertiesUBO linePropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
@@ -141,7 +139,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
         return linePropertiesBuffer;
     };
-    const auto getLineGradientPropsBuffer = [&](){
+    const auto getLineGradientPropsBuffer = [&]() {
         if (!lineGradientPropertiesBuffer) {
             const LineGradientPropertiesUBO lineGradientPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -151,11 +149,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
                 0,
                 {0, 0}};
-            lineGradientPropertiesBuffer = context.createUniformBuffer(&lineGradientPropertiesUBO, sizeof(lineGradientPropertiesUBO));
+            lineGradientPropertiesBuffer = context.createUniformBuffer(&lineGradientPropertiesUBO,
+                                                                       sizeof(lineGradientPropertiesUBO));
         }
         return lineGradientPropertiesBuffer;
     };
-    const auto getLineSDFPropsBuffer = [&](){
+    const auto getLineSDFPropsBuffer = [&]() {
         if (!lineSDFPropertiesBuffer) {
             const LineSDFPropertiesUBO lineSDFPropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
@@ -170,7 +169,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
         return lineSDFPropertiesBuffer;
     };
-    
+
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader) {
