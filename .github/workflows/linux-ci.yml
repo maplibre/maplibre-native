@@ -15,6 +15,10 @@ on:
       - "vendor/**"
       - "CMakeLists.txt"
       - metrics/linux-gcc8-release-style.json
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
 
   pull_request:
     branches:
@@ -29,6 +33,10 @@ on:
       - "vendor/**"
       - "CMakeLists.txt"
       - metrics/linux-gcc8-release-style.json
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -60,7 +68,8 @@ jobs:
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
-            libglfw3-dev
+            libglfw3-dev \
+            libwebp-dev
 
       - name: Build MapLibre Native Core
         run: |
@@ -185,7 +194,9 @@ jobs:
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
+            libwebp-dev \
             libglfw3-dev \
+            libsqlite3-dev \
             xserver-xorg-video-dummy \
             xinit
 

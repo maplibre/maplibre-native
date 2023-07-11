@@ -1,4 +1,4 @@
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 #import <XCTest/XCTest.h>
 
 #import "MLNOfflineStorage_Private.h"

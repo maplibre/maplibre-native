@@ -1,4 +1,4 @@
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 
 #import "NSBundle+MLNAdditions.h"
 #import "MLNVectorTileSource_Private.h"
@@ -51,9 +51,13 @@
     [super tearDown];
 }
 
+// TODO: remove backed property _style
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-property-ivar"
 - (MLNStyle *)style {
     return self.mapView.style;
 }
+#pragma clang diagnostic pop
 
 - (void)testName {
     XCTAssertNil(self.style.name);

@@ -78,6 +78,12 @@ TEST(Image, JPEGTile) {
     EXPECT_EQ(256u, image.size.height);
 }
 
+TEST(Image, WebPTile) {
+    PremultipliedImage image = decodeImage(util::read_file("test/fixtures/image/tile.webp"));
+    EXPECT_EQ(256u, image.size.width);
+    EXPECT_EQ(256u, image.size.height);
+}
+
 TEST(Image, Resize) {
     AlphaImage image({0, 0});
 

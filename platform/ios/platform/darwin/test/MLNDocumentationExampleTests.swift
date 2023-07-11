@@ -1,5 +1,5 @@
 import XCTest
-import Mapbox
+import MapLibre
 
 /**
  Test cases that ensure the inline examples in the project documentation
@@ -181,7 +181,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         // We want to use mapbox.terrain-rgb in the example, but using a mapbox:
         // URL requires setting an access token. So this identically named
         // subclass of MLNRasterDEMSource swaps in a nonexistent URL.
-        class MLNRasterDEMSource: Mapbox.MLNRasterDEMSource {
+        class MLNRasterDEMSource: MapLibre.MLNRasterDEMSource {
             override init(identifier: String, configurationURL: URL, tileSize: CGFloat = 256) {
                 let bogusURL = URL(string: "https://example.com/raster-rgb.json")!
                 super.init(identifier: identifier, configurationURL: bogusURL, tileSize: tileSize)
@@ -516,12 +516,12 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
                     0.0
                 ],
                 "type" : "Point"
-            ],
+            ] as [String : Any],
             "properties" : [
                 "cluster" : true,
                 "cluster_id" : 123,
                 "point_count" : 4567,
-            ]
+            ] as [String : Any]
         ]
         
         let clusterShapeData = try! JSONSerialization.data(withJSONObject: geoJSON, options: [])
@@ -591,12 +591,12 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
                     0.0
                 ],
                 "type" : "Point"
-            ],
+            ] as [String : Any],
             "properties" : [
                 "cluster" : true,
                 "cluster_id" : 123,
                 "point_count" : 4567,
-            ]
+            ] as [String : Any]
         ]
 
         let clusterShapeData = try! JSONSerialization.data(withJSONObject: geoJSON, options: [])
