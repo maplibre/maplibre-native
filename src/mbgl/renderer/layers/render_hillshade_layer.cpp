@@ -421,16 +421,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         // Set up tile drawable
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
-                if (imageLocation.has_value()) {
-                    drawable.setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
-                }
-            });
-            continue;
-        }
-
         auto vertices = staticDataSharedVertices;
         auto* indices = &staticDataIndices;
         auto* segments = &staticDataSegments;
@@ -457,8 +447,37 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(HillshadeLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
-
+        
         hillshadeBuilder = context.createDrawableBuilder("hillshade");
+        
+        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                drawable.setVertexAttributes(std::move(hillshadeVertexAttrs));
+                drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
+                
+                std::vector<std::unique_ptr<gfx::Drawable::DrawSegment>> drawSegments;
+                for (std::size_t i = 0; i < segments->size(); ++i) {
+                    const auto& seg = segments->data()[i];
+                    auto segCopy = SegmentBase{
+                        // no copy constructor
+                        seg.vertexOffset,
+                        seg.indexOffset,
+                        seg.vertexLength,
+                        seg.indexLength,
+                        seg.sortKey,
+                    };
+                    drawSegments.emplace_back(hillshadeBuilder->createSegment(gfx::Triangles(), std::move(segCopy)));
+                }
+                drawable.setIndexData(std::move(indices->vector()), std::move(drawSegments));
+                
+                auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
+                if (imageLocation.has_value()) {
+                    drawable.setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
+                }
+            });
+            continue;
+        }
+        
         hillshadeBuilder->setShader(hillshadeShader);
         hillshadeBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
         hillshadeBuilder->setColorMode(gfx::ColorMode::alphaBlended());
