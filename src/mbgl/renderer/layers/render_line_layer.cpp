@@ -502,8 +502,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         };
 
     auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
-        builder->setSegments(
-            gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
+        builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
     };
 
     for (const RenderTile& tile : *renderTiles) {

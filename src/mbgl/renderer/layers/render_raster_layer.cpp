@@ -386,7 +386,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        sizeof(RasterLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
-            
+
             if (auto& attr = vertexAttrs.getOrAdd("a_texture_pos")) {
                 std::size_t index{0};
                 for (auto& v : bucket.vertices.vector()) {

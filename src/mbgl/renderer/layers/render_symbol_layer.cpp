@@ -779,13 +779,19 @@ void updateTileDrawable(gfx::Drawable& drawable,
     auto& attribs = drawable.mutableVertexAttributes();
     if (const auto& attr = attribs.get(projPosAttribName)) {
         using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
-        attr->setSharedRawData(
-            buffer.sharedDynamicVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+        attr->setSharedRawData(buffer.sharedDynamicVertices,
+                               offsetof(Vertex, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(Vertex),
+                               gfx::AttributeDataType::Float3);
     }
     if (const auto& attr = attribs.get(fadeOpacityAttribName)) {
         using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
-        attr->setSharedRawData(
-            buffer.sharedOpacityVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float);
+        attr->setSharedRawData(buffer.sharedOpacityVertices,
+                               offsetof(Vertex, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(Vertex),
+                               gfx::AttributeDataType::Float);
     }
 }
 
@@ -944,13 +950,19 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
         if (const auto& attr = attrs.add(projPosAttribName)) {
             using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
-            attr->setSharedRawData(
-                buffer.sharedDynamicVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+            attr->setSharedRawData(buffer.sharedDynamicVertices,
+                                   offsetof(Vertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(Vertex),
+                                   gfx::AttributeDataType::Float3);
         }
         if (const auto& attr = attrs.add(fadeOpacityAttribName)) {
             using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
-            attr->setSharedRawData(
-                buffer.sharedOpacityVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float);
+            attr->setSharedRawData(buffer.sharedOpacityVertices,
+                                   offsetof(Vertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(Vertex),
+                                   gfx::AttributeDataType::Float);
         }
 
         const auto uniformProps = isText ? attrs.readDataDrivenPaintProperties<TextOpacity,

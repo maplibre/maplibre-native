@@ -103,7 +103,8 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
     impl->vertices.emplace_back(Impl::VT({{{x1, y1}}}));
     impl->vertices.emplace_back(Impl::VT({{{x2, y2}}}));
-    impl->buildIndexes.insert(impl->buildIndexes.end(), {n, static_cast<uint16_t>(n + 1), static_cast<uint16_t>(n + 2)});
+    impl->buildIndexes.insert(impl->buildIndexes.end(),
+                              {n, static_cast<uint16_t>(n + 1), static_cast<uint16_t>(n + 2)});
 
     if (impl->segments.empty()) {
         impl->segments.emplace_back(createSegment(gfx::Triangles(), {0, 0}));
@@ -116,7 +117,8 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
-    impl->buildIndexes.insert(impl->buildIndexes.end(), {static_cast<uint16_t>(n - 2), static_cast<uint16_t>(n - 1), n});
+    impl->buildIndexes.insert(impl->buildIndexes.end(),
+                              {static_cast<uint16_t>(n - 2), static_cast<uint16_t>(n - 1), n});
 
     assert(!impl->segments.empty());
     auto& segment = impl->segments.back();

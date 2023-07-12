@@ -11,12 +11,13 @@ namespace gfx {
 class IndexVectorBase {
 protected:
     std::vector<uint16_t> v;
+
 public:
     using value_type = decltype(v)::value_type;
 
     IndexVectorBase() = default;
-    IndexVectorBase(std::vector<uint16_t>&& indexes) :
-        v(std::move(indexes)) {}
+    IndexVectorBase(std::vector<uint16_t>&& indexes)
+        : v(std::move(indexes)) {}
 
     std::size_t elements() const { return v.size(); }
 
