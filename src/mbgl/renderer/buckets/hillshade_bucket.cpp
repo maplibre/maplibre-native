@@ -14,7 +14,9 @@ HillshadeBucket::HillshadeBucket(PremultipliedImage&& image_, Tileset::DEMEncodi
 HillshadeBucket::HillshadeBucket(DEMData&& demdata_)
     : demdata(std::move(demdata_)) {}
 
-HillshadeBucket::~HillshadeBucket() = default;
+HillshadeBucket::~HillshadeBucket() {
+    sharedVertices->release();
+}
 
 const DEMData& HillshadeBucket::getDEMData() const {
     return demdata;
