@@ -10,7 +10,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/change_request.hpp>
 
-#include <unordered_set>
+#include <unordered_map>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <list>
@@ -205,8 +205,18 @@ protected:
     /// Remove all the drawables for tiles
     virtual void removeAllDrawables();
 
-    // Update `renderTileIDs` from `renderTiles`
+    /// Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
+
+    /// Whether a given tile ID is present in the current cover set (`renderTiles`)
+    bool hasRenderTile(const OverscaledTileID&) const;
+
+    /// Get the bucket ID from which a given tile was built
+    util::SimpleIdentity getRenderTileBucketID(const OverscaledTileID&) const;
+
+    /// Set the bucket ID from which a given tile was built
+    /// @return true if updated, false if missing or unchanged
+    bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 #endif // MLN_DRAWABLE_RENDERER
 
 protected:
@@ -223,9 +233,11 @@ protected:
     // will need to be overriden to handle their activation.
     LayerGroupBasePtr layerGroup;
 
-    // The set of Tile IDs in `renderTiles`
-    std::unordered_set<OverscaledTileID> renderTileIDs;
+    // The set of Tile IDs in `renderTiles`, along with the
+    // identity of the bucket from which they were built.
+    std::unordered_map<OverscaledTileID, util::SimpleIdentity> renderTileIDs;
 #endif
+
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};
 

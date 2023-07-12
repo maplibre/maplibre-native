@@ -363,22 +363,30 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        return (drawable.getRenderPass() == renderPass &&
-                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
+        // If the render pass has changed or the tile has dropped out of the cover set, remove it.
+        return drawable.getRenderPass() == renderPass &&
+               drawable.getTileID() &&
+               hasRenderTile(*drawable.getTileID());
     });
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-        if (!renderData) {
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             removeTile(renderPass, tileID);
             continue;
         }
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
         const auto& binders = bucket.paintPropertyBinders.at(getID());
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);

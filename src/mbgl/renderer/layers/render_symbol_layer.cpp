@@ -826,7 +826,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && renderTileIDs.find(*tileID) == renderTileIDs.end())) {
+        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
             tileBucketInstances.erase(*tileID);
             return false;
         }
@@ -844,7 +844,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
-        if (!optRenderData || !optRenderData->bucket) {
+        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(passes, tileID);
             continue;
         }
@@ -852,11 +852,19 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& renderData = *optRenderData;
         const auto& bucket = static_cast<const SymbolBucket&>(*renderData.bucket);
 
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(passes, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
+
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
+            // TODO: Is this redundant with the bucket ID check above?
             const auto hit = tileBucketInstances.insert(std::make_pair(tileID, bucket.bucketInstanceId));
             if (!hit.second && hit.first->second != bucket.bucketInstanceId) {
                 // The bucket has changed, reset the drawables for this tile.
