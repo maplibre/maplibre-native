@@ -174,6 +174,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
@@ -194,16 +195,20 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_extrusion_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_prepare_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.hpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
@@ -266,7 +271,6 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/platform/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/query.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_frontend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_state.hpp
@@ -1011,6 +1015,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_extrusion_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_heatmap.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf_text.hpp

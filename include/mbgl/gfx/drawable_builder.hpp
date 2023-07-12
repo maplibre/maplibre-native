@@ -152,14 +152,14 @@ public:
                       std::size_t indexLength,
                       std::size_t baseIndex = 0);
 
+    /// Create a segment wrapper
+    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
+
 protected:
     std::size_t curVertexCount() const;
 
     /// Create an instance of the appropriate drawable type
     virtual UniqueDrawable createDrawable() const = 0;
-
-    /// Create a segment wrapper
-    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
