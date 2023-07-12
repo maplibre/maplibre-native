@@ -19,10 +19,14 @@ public:
     LineLayerTweaker(Immutable<style::LayerProperties> properties)
         : LayerTweaker(properties){};
 
-public:
     ~LineLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
+
+protected:
+    gfx::UniformBufferPtr linePropertiesBuffer;
+    gfx::UniformBufferPtr lineGradientPropertiesBuffer;
+    gfx::UniformBufferPtr lineSDFPropertiesBuffer;
 };
 
 } // namespace mbgl

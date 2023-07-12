@@ -67,8 +67,8 @@ public:
     virtual void postRender(RenderOrchestrator&, PaintParameters&) {}
 
     /// Call the provided function for each drawable in priority order
-    virtual void observeDrawables(const std::function<void(gfx::Drawable&)>&&) = 0;
-    virtual void observeDrawables(const std::function<void(const gfx::Drawable&)>&&) const = 0;
+    virtual std::size_t observeDrawables(const std::function<void(gfx::Drawable&)>&&) = 0;
+    virtual std::size_t observeDrawables(const std::function<void(const gfx::Drawable&)>&&) const = 0;
 
     /// Call the provided function for each drawable in undefined order, allowing for removal.
     /// @param f A function called with each drawable, returning true to keep and false to discard it.
@@ -102,15 +102,17 @@ public:
     std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass, const OverscaledTileID&);
     void addDrawable(mbgl::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
 
-    void observeDrawables(const std::function<void(gfx::Drawable&)>&&) override;
-    void observeDrawables(const std::function<void(const gfx::Drawable&)>&&) const override;
+    std::size_t observeDrawables(const std::function<void(gfx::Drawable&)>&&) override;
+    std::size_t observeDrawables(const std::function<void(const gfx::Drawable&)>&&) const override;
     std::size_t observeDrawablesRemove(const std::function<bool(gfx::Drawable&)>&&) override;
 
     /// Call the provided function for each drawable for the given tile
-    void observeDrawables(mbgl::RenderPass, const OverscaledTileID&, const std::function<void(gfx::Drawable&)>&&);
-    void observeDrawables(mbgl::RenderPass,
-                          const OverscaledTileID&,
-                          const std::function<void(const gfx::Drawable&)>&&) const;
+    std::size_t observeDrawables(mbgl::RenderPass,
+                                 const OverscaledTileID&,
+                                 const std::function<void(gfx::Drawable&)>&&);
+    std::size_t observeDrawables(mbgl::RenderPass,
+                                 const OverscaledTileID&,
+                                 const std::function<void(const gfx::Drawable&)>&&) const;
 
     std::size_t clearDrawables() override;
 
@@ -133,8 +135,8 @@ public:
     std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass);
     void addDrawable(gfx::UniqueDrawable&&);
 
-    void observeDrawables(const std::function<void(gfx::Drawable&)>&&) override;
-    void observeDrawables(const std::function<void(const gfx::Drawable&)>&&) const override;
+    std::size_t observeDrawables(const std::function<void(gfx::Drawable&)>&&) override;
+    std::size_t observeDrawables(const std::function<void(const gfx::Drawable&)>&&) const override;
     std::size_t observeDrawablesRemove(const std::function<bool(gfx::Drawable&)>&&) override;
 
     std::size_t clearDrawables() override;

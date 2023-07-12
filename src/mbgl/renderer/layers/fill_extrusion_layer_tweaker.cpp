@@ -64,6 +64,7 @@ auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evalua
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                         const RenderTree& renderTree,
                                         const PaintParameters& parameters) {
+    auto& context = parameters.context;
     const auto& props = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
@@ -78,7 +79,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    // UBO depends on more than just evaluated properties, so we need to update every time.
+    // UBO depends on more than just evaluated properties, so we need to update every time,
+    // but the resulting buffer can be shared across all the drawables from the layer.
     const FillExtrusionDrawablePropsUBO paramsUBO = {
         /* .color = */ gfx::VertexAttribute::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
@@ -94,7 +96,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         0,
         0};
     if (!propsBuffer) {
-        propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+        propsBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     } else {
         propsBuffer->update(&paramsUBO, sizeof(paramsUBO));
     }
@@ -145,7 +147,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, context);
     });
 }
 
