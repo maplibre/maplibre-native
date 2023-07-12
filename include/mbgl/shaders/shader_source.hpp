@@ -24,6 +24,8 @@ enum class BuiltIn {
     FillExtrusionPatternShader,
     HeatmapShader,
     HeatmapTextureShader,
+    HillshadePrepareShader,
+    HillshadeShader,
     RasterShader,
     SymbolIconShader,
     SymbolSDFTextShader,

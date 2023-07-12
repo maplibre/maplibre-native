@@ -45,7 +45,8 @@ protected:
                               const std::array<float, 2>& translation,
                               style::TranslateAnchorType,
                               bool nearClipped,
-                              bool inViewportPixelUnits);
+                              bool inViewportPixelUnits,
+                              bool aligned = false);
 
 protected:
     Immutable<style::LayerProperties> evaluatedProperties;
