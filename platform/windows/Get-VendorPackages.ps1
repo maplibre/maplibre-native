@@ -31,6 +31,7 @@ if(-not (Test-Path "$vcpkg_temp_dir\vcpkg.exe"))
 }
 
 & "$vcpkg_temp_dir\vcpkg.exe" --disable-metrics --overlay-triplets=$([System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')) --triplet=$($Triplet) --clean-after-build install curl dlfcn-win32 glfw3 icu libuv libjpeg-turbo libpng libwebp $($renderer_packages)
+& "$vcpkg_temp_dir\vcpkg.exe" --overlay-triplets=$([System.IO.Path]::Combine($PWD.Path, 'vendor', 'vcpkg-custom-triplets')) --triplet=$($Triplet) upgrade --no-dry-run
 
 subst $vcpkg_temp_dir /D
 
