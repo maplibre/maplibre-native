@@ -9,7 +9,6 @@
 /platform/android/MapboxGLAndroidSDK/build
 /platform/android/MapboxGLAndroidSDKTestApp/.cxx
 /platform/android/MapboxGLAndroidSDKTestApp/build
-/platform/android/.gradle
 /platform/android/x86
 /platform/android/x86_64
 /cmake-build-debug
@@ -18,6 +17,10 @@
 /platform/ios/platform/ios/Mapbox.playground/build/
 /platform/windows/vendor/mesa3d/
 *.code-workspace
+
+/scripts/generate-style-code.list
+
+**/.gradle
 
 .DS_Store
 .cache
