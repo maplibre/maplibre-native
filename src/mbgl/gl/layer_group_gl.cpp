@@ -46,6 +46,14 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         return;
     }
 
+    auto& context = static_cast<gl::Context&>(parameters.context);
+
+    // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
+    // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
+    // drawables end up using the same mode value.
+    bool stencil3d = false;
+    gfx::StencilMode stencilMode3d;
+
     if (getDrawableCount()) {
 #if !defined(NDEBUG)
         const auto label_clip = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
@@ -55,12 +63,23 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
         std::set<UnwrappedTileID> tileIDs;
         observeDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && !drawable.getIs3D() && drawable.getEnableStencil() && drawable.getTileID() &&
-                drawable.hasRenderPass(parameters.pass)) {
-                tileIDs.emplace(drawable.getTileID()->toUnwrapped());
+            if (drawable.getEnabled() && drawable.getEnableStencil() && drawable.hasRenderPass(parameters.pass)) {
+                if (drawable.getIs3D()) {
+                    stencil3d = true;
+                }
+                if (!stencil3d && drawable.getTileID()) {
+                    tileIDs.emplace(drawable.getTileID()->toUnwrapped());
+                }
             }
         });
-        parameters.renderTileClippingMasks(tileIDs);
+
+        // If we're doing 3D stenciling, set up the single-value stencil mask.
+        // If we're doing 2D stenciling, render each tile with a different value.
+        if (stencil3d) {
+            stencilMode3d = parameters.stencilModeFor3D();
+        } else {
+            parameters.renderTileClippingMasks(tileIDs);
+        }
     }
 
 #if !defined(NDEBUG)
@@ -84,6 +103,10 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
+        }
+
+        if (stencil3d) {
+            context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
         }
 
         drawable.draw(parameters);
