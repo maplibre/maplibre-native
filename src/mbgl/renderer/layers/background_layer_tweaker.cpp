@@ -138,12 +138,16 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
             };
             uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
         } else {
-            const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
-                                                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                                                 /* .pad = */ 0,
-                                                 0,
-                                                 0};
-            uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
+            // UBOs can be shared
+            if (!backgroundLayerBuffer) {
+                const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
+                                                     /* .opacity = */ evaluated.get<BackgroundOpacity>(),
+                                                     /* .pad = */ 0,
+                                                     0,
+                                                     0};
+                backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
+            }
+            uniforms.addOrReplace(BackgroundLayerUBOName, backgroundLayerBuffer);
         }
     });
 }

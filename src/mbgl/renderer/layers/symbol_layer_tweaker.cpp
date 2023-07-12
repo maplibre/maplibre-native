@@ -121,11 +121,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto isText = (symbolData.symbolType == SymbolType::Text);
 
         if (isText && !textPaintBuffer) {
-            auto props = buildPaintUBO(true, evaluated);
+            const auto props = buildPaintUBO(true, evaluated);
             textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
         }
         if (!isText && !iconPaintBuffer) {
-            auto props = buildPaintUBO(false, evaluated);
+            const auto props = buildPaintUBO(false, evaluated);
             iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
         }
 
