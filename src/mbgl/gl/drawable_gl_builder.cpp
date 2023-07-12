@@ -35,9 +35,12 @@ void DrawableGLBuilder::init() {
         drawableGL.setVertices(std::move(raw), verts.size(), gfx::AttributeDataType::Short2);
     }
 
-    drawableGL.setIndexData(std::move(impl->indexes), std::move(impl->segments));
+    if (!impl->sharedIndexes && !impl->buildIndexes.empty()) {
+        impl->sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(impl->buildIndexes));
+    }
+    drawableGL.setIndexData(std::move(impl->sharedIndexes), std::move(impl->segments));
 
-    impl->indexes.clear();
+    impl->buildIndexes.clear();
     impl->segments.clear();
     impl->vertices.clear();
 }

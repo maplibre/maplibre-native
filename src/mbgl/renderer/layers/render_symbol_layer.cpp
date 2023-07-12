@@ -780,12 +780,12 @@ void updateTileDrawable(gfx::Drawable& drawable,
     if (const auto& attr = attribs.get(projPosAttribName)) {
         using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
         attr->setSharedRawData(
-            buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+            buffer.sharedDynamicVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float3);
     }
     if (const auto& attr = attribs.get(fadeOpacityAttribName)) {
         using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
         attr->setSharedRawData(
-            buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
+            buffer.sharedOpacityVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float);
     }
 }
 
@@ -924,33 +924,33 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         if (const auto& attr = attrs.add(posOffsetAttribName)) {
             attr->setSharedRawData(buffer.sharedVertices,
                                    offsetof(SymbolLayoutVertex, a1),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(SymbolLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
         if (const auto& attr = attrs.add(dataAttibName)) {
             attr->setSharedRawData(buffer.sharedVertices,
                                    offsetof(SymbolLayoutVertex, a2),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(SymbolLayoutVertex),
                                    gfx::AttributeDataType::UShort4);
         }
         if (const auto& attr = attrs.add(pixOffsetAttribName)) {
             attr->setSharedRawData(buffer.sharedVertices,
                                    offsetof(SymbolLayoutVertex, a3),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(SymbolLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
         if (const auto& attr = attrs.add(projPosAttribName)) {
             using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
             attr->setSharedRawData(
-                buffer.sharedDynamicVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float3);
+                buffer.sharedDynamicVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float3);
         }
         if (const auto& attr = attrs.add(fadeOpacityAttribName)) {
             using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
             attr->setSharedRawData(
-                buffer.sharedOpacityVertices, offsetof(Vertex, a1), 0, sizeof(Vertex), gfx::AttributeDataType::Float);
+                buffer.sharedOpacityVertices, offsetof(Vertex, a1), /*vertexOffset=*/0, sizeof(Vertex), gfx::AttributeDataType::Float);
         }
 
         const auto uniformProps = isText ? attrs.readDataDrivenPaintProperties<TextOpacity,
@@ -1027,8 +1027,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
             // gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
 
-            auto indexes = buffer.triangles.vector();
-            builder->setSegments(gfx::Triangles(), std::move(indexes), &renderable.segment.get(), 1);
+            builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
 
             builder->flush();
 

@@ -485,7 +485,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (const auto& attr = vertexAttrs.add(VertexAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a1),
-                                       0,
+                                       /*vertexOffset=*/0,
                                        sizeof(LineLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
@@ -493,7 +493,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (const auto& attr = vertexAttrs.add(DataAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a2),
-                                       0,
+                                       /*vertexOffset=*/0,
                                        sizeof(LineLayoutVertex),
                                        gfx::AttributeDataType::UByte4);
             }
@@ -503,7 +503,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
         builder->setSegments(
-            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+            gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
     };
 
     for (const RenderTile& tile : *renderTiles) {

@@ -452,14 +452,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         if (const auto& attr = vertexAttrs.getOrAdd(PosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a1),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
         if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
@@ -478,7 +478,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto finish = [&](gfx::DrawableBuilder& builder) {
             builder.setSegments(gfx::Triangles(),
-                                bucket.triangles.vector(),
+                                bucket.sharedTriangles,
                                 bucket.triangleSegments.data(),
                                 bucket.triangleSegments.size());
 

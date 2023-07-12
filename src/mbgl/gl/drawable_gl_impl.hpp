@@ -32,7 +32,7 @@ public:
 
     std::vector<TextureID> textures;
 
-    std::vector<std::uint16_t> indexes;
+    gfx::IndexVectorBasePtr indexes;
 
     std::vector<std::uint8_t> vertexData;
     std::size_t vertexCount = 0;

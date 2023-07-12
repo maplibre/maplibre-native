@@ -397,7 +397,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         circleBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         circleBuilder->setSegments(
-            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+            gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
         circleBuilder->flush();
 

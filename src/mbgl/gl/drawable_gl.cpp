@@ -72,7 +72,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     unbindUniformBuffers();
 }
 
-void DrawableGL::setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments) {
+void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
     impl->indexes = std::move(indexes);
     impl->segments = std::move(segments);
 }
@@ -151,9 +151,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
-        const auto indexBytes = impl->indexes.size() * sizeof(decltype(impl->indexes)::value_type);
-        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes.data(), indexBytes, usage);
-        auto indexBuffer = gfx::IndexBuffer{impl->indexes.size(), std::move(indexBufferResource)};
+        const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
+        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
+        auto indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
 
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
