@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
+#include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -11,7 +12,7 @@ namespace gfx {
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
       vertexAttrName("a_pos"),
-      renderPass(RenderPass::Opaque),
+      renderPass(mbgl::RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
 DrawableBuilder::~DrawableBuilder() = default;
@@ -28,6 +29,10 @@ const gfx::CullFaceMode& DrawableBuilder::getCullFaceMode() const {
 }
 void DrawableBuilder::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
+}
+
+const gfx::VertexAttributeArray& DrawableBuilder::getVertexAttributes() const {
+    return impl->vertexAttrs;
 }
 
 UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
@@ -125,11 +130,11 @@ void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
 }
 
 void DrawableBuilder::setVertexAttributes(const VertexAttributeArray& attrs) {
-    vertexAttrs = attrs;
+    impl->vertexAttrs = attrs;
 }
 
 void DrawableBuilder::setVertexAttributes(VertexAttributeArray&& attrs) {
-    vertexAttrs = std::move(attrs);
+    impl->vertexAttrs = std::move(attrs);
 }
 
 std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
