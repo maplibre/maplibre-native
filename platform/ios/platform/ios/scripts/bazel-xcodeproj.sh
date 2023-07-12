@@ -72,6 +72,8 @@ fi
 # Generate the team ID for Xcode device provisioning
 cat > platform/ios/bazel/config.bzl <<EOF
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
+APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "iOS Team Provisioning Profile: *"
+BUNDLE_ID_PREFIX = "org.maplibre.app"
 EOF
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
