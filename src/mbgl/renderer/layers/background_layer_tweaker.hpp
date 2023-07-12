@@ -28,6 +28,7 @@ public:
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
 protected:
+    gfx::UniformBufferPtr backgroundLayerBuffer;
 };
 
 } // namespace mbgl

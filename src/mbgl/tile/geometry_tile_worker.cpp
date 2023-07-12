@@ -378,7 +378,8 @@ void GeometryTileWorker::parse() {
             continue;
         }
 
-        std::vector<std::string> layerIDs(group.size());
+        std::vector<std::string> layerIDs;
+        layerIDs.reserve(group.size());
         for (const auto& layer : group) {
             layerIDs.push_back(layer->baseImpl->id);
         }
