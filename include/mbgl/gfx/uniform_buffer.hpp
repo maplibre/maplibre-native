@@ -62,7 +62,9 @@ public:
     void createOrUpdate(std::string_view name, const std::vector<uint8_t>& data, gfx::Context&);
     void createOrUpdate(std::string_view name, const void* data, std::size_t size, gfx::Context&);
     template <typename T>
-    void createOrUpdate(std::string_view name, const T* data, gfx::Context& context) {
+    std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(std::string_view name,
+                                                           const T* data,
+                                                           gfx::Context& context) {
         createOrUpdate(name, data, sizeof(T), context);
     }
 

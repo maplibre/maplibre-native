@@ -27,20 +27,22 @@ void LayerGroup::addDrawable(gfx::UniqueDrawable&& drawable) {
     impl->drawables.emplace(std::move(drawable));
 }
 
-void LayerGroup::observeDrawables(const std::function<void(gfx::Drawable&)>&& f) {
+std::size_t LayerGroup::observeDrawables(const std::function<void(gfx::Drawable&)>&& f) {
     for (const auto& item : impl->drawables) {
         if (item) {
             f(*item);
         }
     }
+    return impl->drawables.size();
 }
 
-void LayerGroup::observeDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
+std::size_t LayerGroup::observeDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
     for (const auto& item : impl->drawables) {
         if (item) {
             f(*item);
         }
     }
+    return impl->drawables.size();
 }
 
 std::size_t LayerGroup::observeDrawablesRemove(const std::function<bool(gfx::Drawable&)>&& f) {

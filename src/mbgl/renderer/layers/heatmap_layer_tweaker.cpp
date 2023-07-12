@@ -34,6 +34,7 @@ static constexpr std::string_view HeatmapEvaluatedPropsUBOName = "HeatmapEvaluat
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                   const RenderTree& renderTree,
                                   const PaintParameters& parameters) {
+    auto& context = parameters.context;
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {
@@ -46,7 +47,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     if (!evaluatedPropsUniformBuffer) {
-        HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
+        const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
             /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
             /* .radius = */ evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
             /* .intensity = */ evaluated.get<HeatmapIntensity>(),
@@ -56,7 +57,8 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace(HeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(HeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -71,12 +73,12 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                           TranslateAnchorType::Viewport,
                                           nearClipped,
                                           inViewportPixelUnits);
-        HeatmapDrawableUBO drawableUBO = {
+        const HeatmapDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
             /* .padding = */ {0}};
 
-        drawable.mutableUniformBuffers().createOrUpdate(HeatmapDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(HeatmapDrawableUBOName, &drawableUBO, context);
     });
 }
 

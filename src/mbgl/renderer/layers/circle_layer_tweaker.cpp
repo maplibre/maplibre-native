@@ -47,6 +47,7 @@ static constexpr std::string_view CircleEvaluatedPropsUBOName = "CircleEvaluated
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
+    auto& context = parameters.context;
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {
@@ -58,19 +59,21 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
+    // Updated every frame, but shared across drawables
     const CirclePaintParamsUBO paintParamsUBO = {
         /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
         /* .device_pixel_ratio = */ parameters.pixelRatio,
         /* .padding = */ {0}};
 
     if (!paintParamsUniformBuffer) {
-        paintParamsUniformBuffer = parameters.context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
+        paintParamsUniformBuffer = context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
     } else {
         paintParamsUniformBuffer->update(&paintParamsUBO, sizeof(CirclePaintParamsUBO));
     }
 
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
 
+    // Updated only with evaluated properties
     if (!evaluatedPropsUniformBuffer) {
         const CircleEvaluatedPropsUBO evaluatedPropsUBO = {
             /* .color = */ evaluated.get<CircleColor>().constantOr(CircleColor::defaultValue()),
@@ -84,13 +87,13 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .scale_with_map = */ evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map,
             /* .pitch_with_map = */ pitchWithMap,
             /* .padding = */ 0};
-        evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
-                                                                             sizeof(evaluatedPropsUBO));
+        evaluatedPropsUniformBuffer = context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
     }
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace(CirclePaintParamsUBOName, paintParamsUniformBuffer);
-        drawable.mutableUniformBuffers().addOrReplace(CircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(CirclePaintParamsUBOName, paintParamsUniformBuffer);
+        uniforms.addOrReplace(CircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -106,13 +109,14 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
 
-        CircleDrawableUBO drawableUBO = {
+        // Updated for each drawable on each frame
+        const CircleDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */
             pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits}} : parameters.pixelsToGLUnits,
             /* .padding = */ {0}};
 
-        drawable.mutableUniformBuffers().createOrUpdate(CircleDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(CircleDrawableUBOName, &drawableUBO, context);
     });
 }
 
