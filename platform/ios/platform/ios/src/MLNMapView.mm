@@ -3069,6 +3069,7 @@ static void *windowScreenContext = &windowScreenContext;
     double zoom         = camera.zoom ? *camera.zoom : 0.0;
     mbgl::LatLng center = camera.center ? *camera.center : mbgl::LatLng();
     
+    
     CLLocationDirection heading = mbgl::util::wrap(bearing, 0., 360.);
     CLLocationDistance altitude = MLNAltitudeForZoomLevel(zoom, pitch, 0, self.frame.size);
     self.camera = [MLNMapCamera cameraLookingAtCenterCoordinate:MLNLocationCoordinate2DFromLatLng(center)
@@ -4352,7 +4353,17 @@ static void *windowScreenContext = &windowScreenContext;
     CLLocationDirection direction = cameraOptions.bearing ? mbgl::util::wrap(*cameraOptions.bearing, 0., 360.) : self.direction;
     CGFloat pitch = cameraOptions.pitch ? *cameraOptions.pitch : *mapCamera.pitch;
     CLLocationDistance altitude = MLNAltitudeForZoomLevel(zoomLevel, pitch, centerCoordinate.latitude, self.frame.size);
-    return [MLNMapCamera cameraLookingAtCenterCoordinate:centerCoordinate altitude:altitude pitch:pitch heading:direction];
+
+    MGLEdgeInsets padding = MGLEdgeInsetsZero;
+    if (cameraOptions.padding) {
+        padding = MGLEdgeInsetsMake(
+            cameraOptions.padding->top(),
+            cameraOptions.padding->left(),
+            cameraOptions.padding->bottom(),
+            cameraOptions.padding->right()
+        );
+    }
+    return [MLNMapCamera cameraLookingAtCenterCoordinate:centerCoordinate altitude:altitude pitch:pitch heading:direction padding:padding];
 }
 
 /// Returns a CameraOptions object that specifies parameters for animating to
@@ -4375,6 +4386,9 @@ static void *windowScreenContext = &windowScreenContext;
     if (camera.pitch >= 0)
     {
         options.pitch = camera.pitch;
+    }
+    if (!MGLEdgeInsetsEqual(camera.padding, MGLEdgeInsetsZero)) {
+        options.padding = MLNEdgeInsetsFromNSEdgeInsets(camera.padding);
     }
     return options;
 }

@@ -4,6 +4,22 @@
 
 #import "MLNFoundation.h"
 
+#if TARGET_OS_IPHONE
+    #import <UIKit/UIKit.h>
+#endif
+
+#if TARGET_OS_IPHONE
+    #define MGLEdgeInsets UIEdgeInsets
+    #define MGLEdgeInsetsMake UIEdgeInsetsMake
+    #define MGLEdgeInsetsEqual UIEdgeInsetsEqualToEdgeInsets
+    #define MGLEdgeInsetsZero UIEdgeInsetsZero
+#else
+    #define MGLEdgeInsets NSEdgeInsets
+    #define MGLEdgeInsetsMake NSEdgeInsetsMake
+    #define MGLEdgeInsetsEqual NSEdgeInsetsEqual
+    #define MGLEdgeInsetsZero NSEdgeInsetsZero
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -53,6 +69,11 @@ MLN_EXPORT
  the `pitch` property’s current value.
  */
 @property (nonatomic) CLLocationDistance viewingDistance;
+
+/**
+ Padding around the interior of the view that affects the frame of reference for `center`.
+ */
+@property (nonatomic) MGLEdgeInsets padding;
 
 /** Returns a new camera with all properties set to 0. */
 + (instancetype)camera;
@@ -132,6 +153,28 @@ MLN_EXPORT
                                         heading:(CLLocationDirection)heading
 __attribute__((deprecated("Use -cameraLookingAtCenterCoordinate:acrossDistance:pitch:heading: "
                           "or -cameraLookingAtCenterCoordinate:altitude:pitch:heading:.")));
+
+/**
+ Returns a new camera with the given altitude, pitch, and heading.
+ @param centerCoordinate The geographic coordinate on which the map should be
+    centered.
+ @param altitude The altitude (measured in meters) above the map at which the
+    camera should be situated. The altitude may be less than the distance from
+    the camera’s viewpoint to the camera’s focus point.
+ @param pitch The viewing angle of the camera, measured in degrees. A value of
+    `0` results in a camera pointed straight down at the map. Angles greater
+    than `0` result in a camera angled toward the horizon.
+ @param heading The camera’s heading, measured in degrees clockwise from true
+    north. A value of `0` means that the top edge of the map view corresponds to
+    true north. The value `90` means the top of the map is pointing due east.
+    The value `180` means the top of the map points due south, and so on.
+ @param padding  Padding around the interior of the view that affects the frame of reference for `center`.
+ */
++ (instancetype)cameraLookingAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+                                       altitude:(CLLocationDistance)altitude
+                                          pitch:(CGFloat)pitch
+                                        heading:(CLLocationDirection)heading
+                                        padding:(MGLEdgeInsets)padding;
 
 /**
  Returns a Boolean value indicating whether the given camera is functionally

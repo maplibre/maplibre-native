@@ -44,7 +44,8 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     return [[self alloc] initWithCenterCoordinate:centerCoordinate
                                          altitude:eyeAltitude
                                             pitch:pitch
-                                          heading:heading];
+                                          heading:heading
+                                          padding:MGLEdgeInsetsZero];
 }
 
 + (instancetype)cameraLookingAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -60,7 +61,8 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     return [[self alloc] initWithCenterCoordinate:centerCoordinate
                                          altitude:altitude
                                             pitch:pitch
-                                          heading:heading];
+                                          heading:heading
+                                          padding:MGLEdgeInsetsZero];
 }
 
 + (instancetype)cameraLookingAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -71,7 +73,8 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     return [[self alloc] initWithCenterCoordinate:centerCoordinate
                                          altitude:altitude
                                             pitch:pitch
-                                          heading:heading];
+                                          heading:heading
+                                          padding:MGLEdgeInsetsZero];
 }
 
 + (instancetype)cameraLookingAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -87,18 +90,33 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
                                                  heading:heading];
 }
 
++ (instancetype)cameraLookingAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
+                                       altitude:(CLLocationDistance)altitude
+                                          pitch:(CGFloat)pitch
+                                        heading:(CLLocationDirection)heading
+                                        padding:(MGLEdgeInsets)padding
+{
+    return [[self alloc] initWithCenterCoordinate:centerCoordinate
+                                         altitude:altitude
+                                            pitch:pitch
+                                          heading:heading
+                                          padding:padding];
+}
+
 - (instancetype)initWithCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
                                 altitude:(CLLocationDistance)altitude
                                    pitch:(CGFloat)pitch
                                  heading:(CLLocationDirection)heading
+                                 padding:(MGLEdgeInsets)padding
 {
-    MLNLogDebug(@"Initializing withCenterCoordinate: %@ altitude: %.0fm pitch: %f° heading: %f°", MLNStringFromCLLocationCoordinate2D(centerCoordinate), altitude, pitch, heading);
+    MLNLogDebug(@"Initializing withCenterCoordinate: %@ altitude: %.0fm pitch: %f° heading: %f° padding:%@ padding; %f, %f, %f, %f", MLNStringFromCLLocationCoordinate2D(centerCoordinate), altitude, pitch, heading, padding.top, padding.left, padding.bottom, padding.right);
     if (self = [super init])
     {
         _centerCoordinate = centerCoordinate;
         _altitude = altitude;
         _pitch = pitch;
         _heading = heading;
+        _padding = padding;
     }
     return self;
 }
@@ -113,6 +131,10 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
         _altitude = [coder decodeDoubleForKey:@"altitude"];
         _pitch = [coder decodeDoubleForKey:@"pitch"];
         _heading = [coder decodeDoubleForKey:@"heading"];
+        _padding.left = [coder decodeDoubleForKey:@"paddingLeft"];
+        _padding.right = [coder decodeDoubleForKey:@"paddingRight"];
+        _padding.top = [coder decodeDoubleForKey:@"paddingTop"];
+        _padding.bottom = [coder decodeDoubleForKey:@"paddingBottom"];
     }
     return self;
 }
@@ -124,6 +146,10 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     [coder encodeDouble:_altitude forKey:@"altitude"];
     [coder encodeDouble:_pitch forKey:@"pitch"];
     [coder encodeDouble:_heading forKey:@"heading"];
+    [coder encodeDouble:_padding.left forKey:@"paddingLeft"];
+    [coder encodeDouble:_padding.right forKey:@"paddingRight"];
+    [coder encodeDouble:_padding.top forKey:@"paddingTop"];
+    [coder encodeDouble:_padding.bottom forKey:@"paddingBottom"];
 }
 
 - (id)copyWithZone:(nullable NSZone *)zone
@@ -131,7 +157,8 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     return [[[self class] allocWithZone:zone] initWithCenterCoordinate:_centerCoordinate
                                                               altitude:_altitude
                                                                  pitch:_pitch
-                                                               heading:_heading];
+                                                               heading:_heading
+                                                               padding:_padding];
 }
 
 + (NSSet<NSString *> *)keyPathsForValuesAffectingViewingDistance {
@@ -151,8 +178,8 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p; centerCoordinate = %f, %f; altitude = %.0fm; heading = %.0f°; pitch = %.0f°>",
-            NSStringFromClass([self class]), (void *)self, _centerCoordinate.latitude, _centerCoordinate.longitude, _altitude, _heading, _pitch];
+return [NSString stringWithFormat:@"<%@: %p; centerCoordinate = %f, %f; altitude = %.0fm; heading = %.0f°; pitch = %.0f° ; padding = %f, %f, %f, %f>",
+            NSStringFromClass([self class]), (void *)self, _centerCoordinate.latitude, _centerCoordinate.longitude, _altitude, _heading, _pitch, _padding.top, _padding.left, _padding.bottom, _padding.right];
 }
 
 - (BOOL)isEqual:(id)other
@@ -170,7 +197,8 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
     return (_centerCoordinate.latitude == otherCamera.centerCoordinate.latitude
             && _centerCoordinate.longitude == otherCamera.centerCoordinate.longitude
             && _altitude == otherCamera.altitude
-            && _pitch == otherCamera.pitch && _heading == otherCamera.heading);
+            && _pitch == otherCamera.pitch && _heading == otherCamera.heading
+            && MGLEdgeInsetsEqual(_padding, otherCamera.padding));
 }
 
 - (BOOL)isEqualToMapCamera:(MLNMapCamera *)otherCamera
@@ -184,7 +212,11 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
             && MLNEqualFloatWithAccuracy(_centerCoordinate.longitude, otherCamera.centerCoordinate.longitude, 1e-6)
             && MLNEqualFloatWithAccuracy(_altitude, otherCamera.altitude, 1e-6)
             && MLNEqualFloatWithAccuracy(_pitch, otherCamera.pitch, 1)
-            && MLNEqualFloatWithAccuracy(_heading, otherCamera.heading, 1));
+            && MLNEqualFloatWithAccuracy(_heading, otherCamera.heading, 1))
+            && MLNEqualFloatWithAccuracy(_padding.left, otherCamera.padding.left, 1e-6)
+            && MLNEqualFloatWithAccuracy(_padding.right, otherCamera.padding.right, 1e-6)
+            && MLNEqualFloatWithAccuracy(_padding.top, otherCamera.padding.top, 1e-6)
+            && MLNEqualFloatWithAccuracy(_padding.bottom, otherCamera.padding.bottom, 1e-6);
 }
 
 - (NSUInteger)hash

@@ -66,7 +66,8 @@ typedef NS_ENUM(NSInteger, MBXSettingsAnnotationsRows) {
     MBXSettingsAnnotationsCustomUserDot,
     MBXSettingsAnnotationsRemoveAnnotations,
     MBXSettingsAnnotationSelectRandomOffscreenPointAnnotation,
-    MBXSettingsAnnotationCenterSelectedAnnotation,
+    MBXSettingsAnnotationCenterSelectedAnnotationWithoutPadding,
+    MBXSettingsAnnotationCenterSelectedAnnotationWithPadding,
     MBXSettingsAnnotationAddVisibleAreaPolyline
 };
 
@@ -391,7 +392,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 [NSString stringWithFormat:@"%@ Custom User Dot", (_customUserLocationAnnnotationEnabled ? @"Disable" : @"Enable")],
                 @"Remove Annotations",
                 @"Select an offscreen point annotation",
-                @"Center selected annotation",
+                @"Center selected annotation without padding",
+                @"Center selected annotation with padding",
                 @"Add visible area polyline"
             ]];
             break;
@@ -548,8 +550,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsAnnotationSelectRandomOffscreenPointAnnotation:
                     [self selectAnOffscreenPointAnnotation];
                     break;
-                case MBXSettingsAnnotationCenterSelectedAnnotation:
-                    [self centerSelectedAnnotation];
+                case MBXSettingsAnnotationCenterSelectedAnnotationWithPadding:
+                    [self centerSelectedAnnotationWithPadding];
+                    break;
+                case MBXSettingsAnnotationCenterSelectedAnnotationWithoutPadding:
+                    [self centerSelectedAnnotationWithoutPadding];
                     break;
                 case MBXSettingsAnnotationAddVisibleAreaPolyline:
                     [self addVisibleAreaPolyline];
@@ -1672,7 +1677,24 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 
-- (void)centerSelectedAnnotation {
+- (void)centerSelectedAnnotationWithPadding {
+    id<MLNAnnotation> annotation = self.mapView.selectedAnnotations.firstObject;
+
+    if (!annotation)
+        return;
+
+    CGPoint point = [self.mapView convertCoordinate:annotation.coordinate toPointToView:self.mapView];
+
+    // Animate, so that point becomes the the center
+    CLLocationCoordinate2D center = [self.mapView convertPoint:point toCoordinateFromView:self.mapView];
+    MLNMapCamera *camera = self.mapView.camera.copy;
+    camera.centerCoordinate = center;
+    camera.padding = UIEdgeInsetsMake(200, 50, 10, 4);
+    
+    [self.mapView setCamera:camera animated:YES];
+}
+
+- (void)centerSelectedAnnotationWithoutPadding {
     id<MLNAnnotation> annotation = self.mapView.selectedAnnotations.firstObject;
 
     if (!annotation)
