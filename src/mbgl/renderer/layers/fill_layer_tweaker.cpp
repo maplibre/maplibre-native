@@ -44,6 +44,7 @@ static constexpr std::string_view FillDrawablePropsUBOName = "FillDrawablePropsU
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
                                const PaintParameters& parameters) {
+    auto& context = parameters.context;
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
     const auto& crossfade = props.crossfade;
@@ -65,11 +66,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .padding = */ 0,
             0,
             0};
-        propsBuffer = parameters.context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+        propsBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace(FillDrawablePropsUBOName, propsBuffer);
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(FillDrawablePropsUBOName, propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -114,7 +116,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
         };
 
-        drawable.mutableUniformBuffers().createOrUpdate(FillDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(FillDrawableUBOName, &drawableUBO, context);
     });
 }
 
