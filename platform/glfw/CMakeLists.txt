@@ -73,7 +73,7 @@ if(WIN32)
         mbgl-glfw
         PRIVATE
             glfw
-            $<IF:$<TARGET_EXISTS::uv_a>,uv_a,uv>
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 else()
     target_link_libraries(

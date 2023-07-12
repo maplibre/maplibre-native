@@ -34,18 +34,17 @@ target_link_libraries(
 
 if(WIN32)
     find_package(libuv REQUIRED)
-    set(LIBUV_LIB $<IF:$<TARGET_EXISTS::uv_a>,uv_a,uv>)
 
     target_link_libraries(
-        mbgl-cache PRIVATE ${LIBUV_LIB}
+        mbgl-cache PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 
     target_link_libraries(
-        mbgl-offline PRIVATE ${LIBUV_LIB}
+        mbgl-offline PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 
     target_link_libraries(
-        mbgl-render PRIVATE ${LIBUV_LIB}
+        mbgl-render PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 endif()
 
