@@ -404,20 +404,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
         };
 
-        // If we already have drawables for this tile, update them.
-        auto updateExisting = [&](gfx::Drawable& drawable) {
-            auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
-            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
-        };
-        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
-
-        // Share UBO buffers among any drawables created for this tile
-        const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
-        const auto tilePropsBuffer = context.createUniformBuffer(&tileProps, sizeof(tileProps));
-
         // `Fill*Program` all use `style::FillPaintProperties`
         gfx::VertexAttributeArray vertexAttrs;
         const auto uniformProps =
@@ -432,6 +418,21 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
+
+        // If we already have drawables for this tile, update them.
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            auto& uniforms = drawable.mutableUniformBuffers();
+            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
+            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
+            drawable.setVertexAttributes(vertexAttrs);
+        };
+        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
+            continue;
+        }
+
+        // Share UBO buffers among any drawables created for this tile
+        const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+        const auto tilePropsBuffer = context.createUniformBuffer(&tileProps, sizeof(tileProps));
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
