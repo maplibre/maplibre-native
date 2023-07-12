@@ -352,13 +352,16 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             std::get<0>(paintPropertyBinders.get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
             /* .padding = */ 0};
 
-        tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            drawable.mutableUniformBuffers().createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
-        });
-
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+        // If there are already drawables for this tile, update their UBOs and move on to the next tile.
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            auto& uniforms = drawable.mutableUniformBuffers();
+            uniforms.createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
+        };
+        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
+
+        const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
         gfx::VertexAttributeArray circleVertexAttrs;
         const auto propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
@@ -400,7 +403,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : circleBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->mutableUniformBuffers().createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
+
+            auto& uniforms = drawable->mutableUniformBuffers();
+            uniforms.addOrReplace(CircleInterpolateUBOName, interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

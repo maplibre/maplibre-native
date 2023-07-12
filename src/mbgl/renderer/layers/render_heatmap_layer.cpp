@@ -237,6 +237,7 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
 }
 
 #if MLN_DRAWABLE_RENDERER
+namespace {
 void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
     if (renderTarget_) {
         if (activate) {
@@ -248,6 +249,7 @@ void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, U
         }
     }
 }
+} // namespace
 
 void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
@@ -287,7 +289,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
                                 const TransformState& state,
                                 [[maybe_unused]] const RenderTree& renderTree,
-                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                                UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {

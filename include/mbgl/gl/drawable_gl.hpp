@@ -36,9 +36,9 @@ public:
     void draw(PaintParameters&) const override;
 
     struct DrawSegmentGL;
-    void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments);
+    void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments) override;
 
-    void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType);
+    void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType) override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override;
     void setVertexAttributes(const gfx::VertexAttributeArray& value) override;

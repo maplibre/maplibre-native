@@ -5,15 +5,15 @@
 namespace mbgl {
 
 /**
-    Heatmap layer specific tweaker
+    Hillshade layer specific tweaker
  */
-class HeatmapLayerTweaker : public LayerTweaker {
+class HillshadeLayerTweaker : public LayerTweaker {
 public:
-    HeatmapLayerTweaker(Immutable<style::LayerProperties> properties)
+    HillshadeLayerTweaker(Immutable<style::LayerProperties> properties)
         : LayerTweaker(properties){};
 
 public:
-    ~HeatmapLayerTweaker() override = default;
+    ~HillshadeLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
