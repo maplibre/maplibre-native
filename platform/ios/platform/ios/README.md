@@ -93,85 +93,61 @@ You need to install bazelisk, which is a wrapper around Bazel which ensures that
 brew install bazelisk
 ```
 
-#### Configure Bazel: config.bzl
+#### Creating `config.bzl`
 
-You will need to edit bazel/config.bzl to match your provisioning team id. If this is your first time building this iOS application, you may not have one. 
-
-If this is a fresh install, the easiest thing to do is to build the xcode project, then open XCode, sign in, and create a new provisioning ID. To get started, from `platform/ios`:
+You need to configure Bazel. Copy the example config from `platform/ios`.
 
 ```
 cp bazel/example_config.bzl bazel/config.bzl
 ```
 
-Unless you already know your provisioning team ID, skip editing it for now, and move on to creating the XCode project. 
+You need to set your `BUNDLE_ID_PREFIX` to be unique (ideally use a domain that you own in reverse domain name notation).
 
-### Create the XCode Project
+```
+APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "FFNX6834U8"
+APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "iOS Team Provisioning Profile: *"
+BUNDLE_ID_PREFIX = "com.firstnamelastname"
+```
+
+You can keep leave the `APPLE_MOBILE_PROVISIONING_PROFILE_NAME` alone.
+
+Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work). If you do not know your Team ID, enter the following command in the terminal:
+
+```
+cd ~/Library/MobileDevice/Provisioning\ Profiles && open .
+```
+
+Then select one of the profiles and click spacebar. Your Team ID is the string between parentheses in the value of "Team".
+
+If there are no provisioning profiles available, continue this guide and let Xcode generate a provisioning profile for you. You will need to update the Team ID after this happened.
+
+#### Create the Xcode Project
 
 _These instructions are for XCode 14.3.1_
 
 From `platform/ios`:
 
 ```
-bazel run //platform/ios:xcodeproj
-open MapLibre.xcodeproj
+bazel run xcodeproj
+xed MapLibre.xcodeproj
 ```
 
-Then once in XCode, click on "MapLibre" on the left, then "App" under Targets, then "Signing & Capabilities" in the tabbed menu. In the below screenshot, the "TC45MCF93C" is the default profile that is in `bazel/config.bzl`. To fix this add a valid team and update to a unique bundle identifier. 
+Then once in Xcode, click on "MapLibre" on the left, then "App" under Targets, then "Signing & Capabilities" in the tabbed menu. 
+Confirm that no errors are shown:
 
-<img width="1127" alt="xcode-signing-capabilities" src="https://github.com/polvi/maplibre-native/assets/46035/77b9f60c-d60e-464b-929a-590326723ac9">
+<img width="921" alt="image" src="https://github.com/polvi/maplibre-native/assets/649392/a1ef30cb-97fc-429a-acee-194436f3fb8a">
 
-Once you have done that, you should see a new profile in `~/Library/MobileDevice/Provisioning\ Profiles/`. For example:
+Try to run the example App in the simulator and on a device to confirm your setup works.
 
-```
-~/Library/MobileDevice/Provisioning\ Profiles/5fe347ab-13b4-4669-96eb-198e0890a303.mobileprovision 
-```
-
-To set the correct team id, do the following:
-
-```
-open ~/Library/MobileDevice/Provisioning\ Profiles/
-single-click the name of the profile
-press spacebar
-```
-
-You should see something like the following:
-
-<img width="787" alt="xcode-provisioning-profile" src="https://github.com/polvi/maplibre-native/assets/46035/3172165b-227f-4bce-a9e4-a71665c6074b">
-
-
-Edit bazel/config.bzl:
-
-```
-APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "HXK82SM8MM"
-```
-
-This is a temporary fix until #1341 is fixed, but also edit BUILD.bazel:
-
-```
---- a/platform/ios/BUILD.bazel
-+++ b/platform/ios/BUILD.bazel
-@@ -508,7 +508,7 @@ genrule(
- 
- local_provisioning_profile(
-     name = "provisioning_profile",
--    profile_name = "iOS Team Provisioning Profile: *",
-+    profile_name = "5fe347ab-13b4-4669-96eb-198e0890a303",
-     team_id = APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID,
- )
-```
-
-Once this is done, close XCode and rebuild the project with:
-
-```
-bazel run //platform/ios:xcodeproj
-```
-
-You can now open `platform/ios/MapLibre.xcodeproj` with Xcode to get started.
+#### Using Bazel from the Command Line
 
 It is also possible to build and run the test application in a simulator from the command line without opening Xcode.
 
 ```
 bazel run //platform/ios:App
+
+# run the iOS tests
+bazel test //platform/ios/platform/ios/test:ios_test --test_output=errors
 ```
 
 ### CMake (deprecated)
