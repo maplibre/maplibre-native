@@ -80,7 +80,8 @@ fi
 
 cat > platform/ios/bazel/__generated__/provisioning_profile.bzl <<EOF
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
-APPLE_MOBILE_PROVISIONING_PROFILE_UUID = "$uuid"
+APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "iOS Team Provisioning Profile: *"
+BUNDLE_ID_PREFIX = "org.maplibre.app"
 EOF
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
