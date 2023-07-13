@@ -32,8 +32,7 @@ void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters)
     assert(updateParameters);
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();
-        impl->preRender(*renderTree, updateParameters);
-        impl->render(*renderTree);
+        impl->render(*renderTree, updateParameters);
     }
 }
 

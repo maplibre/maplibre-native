@@ -882,9 +882,20 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
         };
 
-        addRenderables(bucket.icon, SymbolType::IconRGBA);
-        addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
-        addRenderables(bucket.text, SymbolType::Text);
+        const auto& atlases = tile.getAtlasTextures();
+        if (!atlases) {
+            continue;
+        }
+
+        if (bucket.hasIconData() && atlases->icon) {
+            addRenderables(bucket.icon, SymbolType::IconRGBA);
+        }
+        if (bucket.hasSdfIconData() && atlases->icon) {
+            addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
+        }
+        if (bucket.hasTextData() && atlases->glyph) {
+            addRenderables(bucket.text, SymbolType::Text);
+        }
     }
 
     // We'll be processing renderables across tiles, potentially out-of-order, so keep
@@ -1004,16 +1015,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setRenderPass(passes);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setColorMode(passes == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                builder->setColorMode(((mbgl::underlying_type(passes) & mbgl::underlying_type(RenderPass::Translucent)) != 0) ? gfx::ColorMode::alphaBlended()
                                                                         : gfx::ColorMode::unblended());
                 builder->setVertexAttrName(posOffsetAttribName);
             }
-
-            builder->clearTweakers();
-            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
-            builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
-            builder->setDrawableName(layerPrefix + std::string(suffix));
-            builder->setVertexAttributes(attrs);
 
             const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 shaderGroup->getOrCreateShader(context, uniformProps, posOffsetAttribName));
@@ -1021,6 +1026,25 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
             builder->setShader(shader);
+
+            // textures
+            {
+                builder->clearTextures();
+                if (shader) {
+                    if (const auto samplerLocation = shader->getSamplerLocation(texUniformName)) {
+                        if (const auto iconSamplerLocation = shader->getSamplerLocation(iconTexUniformName)) {
+                            assert(*samplerLocation != *iconSamplerLocation);
+                            builder->setTexture(atlases->glyph, *samplerLocation);
+                            builder->setTexture(atlases->icon, *iconSamplerLocation);
+                        } else {
+                            builder->setTexture(isText ? atlases->glyph : atlases->icon, *samplerLocation);
+                        }
+                    }
+                }
+            }
+            builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
+            builder->setDrawableName(layerPrefix + std::string(suffix));
+            builder->setVertexAttributes(attrs);
 
             // TODO: texture filtering
             // const bool linear = parameters.state.isChanging() || transformed ||
