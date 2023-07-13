@@ -4,10 +4,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-* 💥 Breaking: Changed the prefix of files, classes, methods, variables and everything from `MGL` to `MLN`. ([#919](https://github.com/maplibre/maplibre-native/pull/919)).
+* Add padding to `MLNMapCamera` [#1361](https://github.com/maplibre/maplibre-native/issues/1361)
+* 💥 Breaking: Changed the prefix of files, classes, methods, variables and everything from `MGL` to `MLN`. [#919](https://github.com/maplibre/maplibre-native/pull/919).
 
   > To migrate:  
-  > Change all your `MGL` prefixes to `MLN`. If you are using `NSKeyedArchiver` or similar mechanishm to save the state, the app may crash after this change when trying to unarchive the state using old names of the classes. You need to clean the saved state of the app and save it using new classes.
+  > Change all your `MGL` prefixes to `MLN`. If you are using `NSKeyedArchiver` or similar mechanism to save the state, the app may crash after this change when trying to unarchive the state using old names of the classes. You need to clean the saved state of the app and save it using new classes.
 
 ## 5.13.0 - January 05, 2023
 
