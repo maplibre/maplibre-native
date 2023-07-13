@@ -48,7 +48,7 @@ public:
     struct DrawSegment;
     using UniqueDrawSegment = std::unique_ptr<DrawSegment>;
 
-    const util::SimpleIdentity& getId() const { return uniqueID; }
+    const util::SimpleIdentity& getID() const { return uniqueID; }
 
     /// Draw the drawable
     virtual void draw(PaintParameters&) const = 0;
@@ -208,7 +208,7 @@ struct DrawableLessByPriority {
         if (a.getDrawPriority() != b.getDrawPriority()) {
             return a.getDrawPriority() < b.getDrawPriority();
         }
-        return a.getId() < b.getId();
+        return a.getID() < b.getID();
     }
     bool operator()(const Drawable* left, const Drawable* right) const { return operator()(*left, *right); }
     bool operator()(const UniqueDrawable& left, const UniqueDrawable& right) const { return operator()(*left, *right); }

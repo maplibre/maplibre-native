@@ -4,6 +4,8 @@
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/layer_impl.hpp>
+#include <mbgl/util/identity.hpp>
+
 #include <atomic>
 
 namespace mbgl {
@@ -65,9 +67,13 @@ public:
     virtual void updateVertices(
         const Placement&, bool /*updateOpacities*/, const TransformState&, const RenderTile&, std::set<uint32_t>&) {}
 
+    const util::SimpleIdentity& getID() const { return bucketID; }
+
 protected:
     Bucket() = default;
     std::atomic<bool> uploaded{false};
+
+    util::SimpleIdentity bucketID;
 };
 
 } // namespace mbgl
