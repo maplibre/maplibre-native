@@ -41,11 +41,17 @@ public:
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
-    std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
 
-    gfx::IndexVector<gfx::Lines> lines;
-    gfx::IndexVector<gfx::Triangles> triangles;
+    using LineIndexVector = gfx::IndexVector<gfx::Lines>;
+    const std::shared_ptr<LineIndexVector> sharedLines = std::make_shared<LineIndexVector>();
+    LineIndexVector& lines = *sharedLines;
+
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+    TriangleIndexVector& triangles = *sharedTriangles;
+
     SegmentVector<FillAttributes> lineSegments;
     SegmentVector<FillAttributes> triangleSegments;
 

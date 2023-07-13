@@ -14,10 +14,12 @@ class SegmentBase;
 namespace gfx {
 
 class DrawableTweaker;
+class IndexVectorBase;
 class ShaderProgramBase;
 class VertexAttributeArray;
 
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 
@@ -137,8 +139,8 @@ public:
     /// Incompatible with adding primitives
     void setRawVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType);
 
-    void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const std::vector<SegmentBase>&);
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
+    void setSegments(gfx::DrawMode, gfx::IndexVectorBasePtr, const SegmentBase*, std::size_t segmentCount);
 
     /// Add lines based on existing vertices
     void addLines(const std::vector<uint16_t>& indexes,

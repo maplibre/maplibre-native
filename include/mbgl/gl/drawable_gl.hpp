@@ -19,7 +19,7 @@ class IndexBuffer;
 class UploadPass;
 class VertexBufferResource;
 
-using UniqueVertexBufferResource = std::unique_ptr<gfx::VertexBufferResource>;
+using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
 } // namespace gfx
 
@@ -36,7 +36,7 @@ public:
     void draw(PaintParameters&) const override;
 
     struct DrawSegmentGL;
-    void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments) override;
+    void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
 
     void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType) override;
 
