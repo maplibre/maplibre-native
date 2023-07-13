@@ -1037,8 +1037,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
             // gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
 
-            auto indexes = buffer.triangles.vector();
-            builder->setSegments(gfx::Triangles(), std::move(indexes), &renderable.segment.get(), 1);
+            builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
 
             builder->flush();
 
