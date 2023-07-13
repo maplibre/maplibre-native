@@ -420,7 +420,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (const auto& attr = vertexAttrs.add(PosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
@@ -484,7 +484,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 fillBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 fillBuilder->setSegments(gfx::Triangles(),
-                                         bucket.triangles.vector(),
+                                         bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
                 finish(*fillBuilder, tileID, interpolateUBO, tileProps);
@@ -494,7 +494,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
-                    gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
+                    gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
                 finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
             }
         } else { // FillPattern is defined
@@ -565,7 +565,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 patternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
-                                            bucket.triangles.vector(),
+                                            bucket.sharedTriangles,
                                             bucket.triangleSegments.data(),
                                             bucket.triangleSegments.size());
 
@@ -577,7 +577,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(
-                    gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
+                    gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
 
                 finish(*outlinePatternBuilder, tileID, interpolateUBO, tileProps);
             }

@@ -391,7 +391,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (const auto& attr = heatmapVertexAttrs.add(VertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(HeatmapLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
@@ -406,7 +406,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         heatmapBuilder->setVertexAttributes(std::move(heatmapVertexAttrs));
         heatmapBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         heatmapBuilder->setSegments(
-            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+            gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
         heatmapBuilder->flush();
 
@@ -451,7 +451,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     if (const auto& attr = textureVertexAttrs.add(VertexAttribName)) {
         attr->setSharedRawData(sharedTextureVertices,
                                offsetof(HeatmapLayoutVertex, a1),
-                               0,
+                               /*vertexOffset=*/0,
                                sizeof(HeatmapLayoutVertex),
                                gfx::AttributeDataType::Short2);
     }

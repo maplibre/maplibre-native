@@ -19,7 +19,8 @@ struct DrawableBuilder::Impl {
     std::vector<uint8_t> rawVertices;
     std::size_t rawVerticesCount = 0;
 
-    std::vector<uint16_t> indexes;
+    std::vector<uint16_t> buildIndexes;
+    std::shared_ptr<gfx::IndexVectorBase> sharedIndexes;
     std::vector<std::unique_ptr<Drawable::DrawSegment>> segments;
 
     AttributeDataType rawVerticesType = static_cast<AttributeDataType>(-1);

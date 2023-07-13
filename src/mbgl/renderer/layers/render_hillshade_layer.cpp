@@ -471,7 +471,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                     };
                     drawSegments.emplace_back(hillshadeBuilder->createSegment(gfx::Triangles(), std::move(segCopy)));
                 }
-                drawable.setIndexData(std::move(indices->vector()), std::move(drawSegments));
+                drawable.setIndexData(indices->vector(), std::move(drawSegments));
 
                 auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
                 if (imageLocation.has_value()) {

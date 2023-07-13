@@ -32,8 +32,14 @@ public:
 
     // Bucket specific vertices are used for Image Sources only
     // Raster Tile Sources use the default buffers from Painter
-    gfx::VertexVector<RasterLayoutVertex> vertices;
-    gfx::IndexVector<gfx::Triangles> indices;
+    using VertexVector = gfx::VertexVector<RasterLayoutVertex>;
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+    TriangleIndexVector& indices = *sharedTriangles;
+
     SegmentVector<RasterAttributes> segments;
 
 #if MLN_LEGACY_RENDERER
