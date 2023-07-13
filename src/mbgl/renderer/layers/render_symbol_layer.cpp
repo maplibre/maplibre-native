@@ -1027,21 +1027,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
             builder->setShader(shader);
 
-            // textures
-            {
-                builder->clearTextures();
-                if (shader) {
-                    if (const auto samplerLocation = shader->getSamplerLocation(texUniformName)) {
-                        if (const auto iconSamplerLocation = shader->getSamplerLocation(iconTexUniformName)) {
-                            assert(*samplerLocation != *iconSamplerLocation);
-                            builder->setTexture(atlases->glyph, *samplerLocation);
-                            builder->setTexture(atlases->icon, *iconSamplerLocation);
-                        } else {
-                            builder->setTexture(isText ? atlases->glyph : atlases->icon, *samplerLocation);
-                        }
-                    }
-                }
-            }
+            builder->clearTweakers();
+            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);            
             builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(attrs);

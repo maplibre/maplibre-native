@@ -112,7 +112,6 @@ public:
     /// @param texture Texture2D instance
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
-    void clearTextures() { textures.clear(); }
 
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
     void clearTweakers() { tweakers.clear(); }
