@@ -34,7 +34,7 @@ public:
         constexpr auto CI_RETRIES = 3;
         for (int i = 0; i < CI_RETRIES; i++) {
 #endif
-        xDisplay = XOpenDisplay(nullptr);
+            xDisplay = XOpenDisplay(nullptr);
 #ifdef CI_BUILD
             if (xDisplay != nullptr) {
                 break;
