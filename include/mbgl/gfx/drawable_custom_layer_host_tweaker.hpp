@@ -21,8 +21,8 @@ public:
         : host(host_) {}
     ~DrawableCustomLayerHostTweaker() override = default;
 
-    void init(Drawable&) override {};
-    
+    void init(Drawable&) override{};
+
     void execute(Drawable&, const PaintParameters&) override;
 
 protected:

@@ -1040,7 +1040,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             builder->setShader(shader);
 
             builder->clearTweakers();
-            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);            
+            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
             builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(attrs);
