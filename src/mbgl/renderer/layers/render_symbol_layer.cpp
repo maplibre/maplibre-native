@@ -748,14 +748,12 @@ constexpr auto fadeOpacityAttribName = "a_fade_opacity";
 constexpr auto texUniformName = "u_texture";
 constexpr auto iconTexUniformName = "u_texture_icon";
 
-std::vector<std::string> updateTileAttributes(
-        gfx::Context& context,
-        const SymbolBucket::Buffer& buffer,
-        const bool isText,
-        const SymbolBucket::PaintProperties& paintProps,
-        const SymbolPaintProperties::PossiblyEvaluated& evaluated,
-        gfx::VertexAttributeArray& attribs) {
-
+std::vector<std::string> updateTileAttributes(gfx::Context& context,
+                                              const SymbolBucket::Buffer& buffer,
+                                              const bool isText,
+                                              const SymbolBucket::PaintProperties& paintProps,
+                                              const SymbolPaintProperties::PossiblyEvaluated& evaluated,
+                                              gfx::VertexAttributeArray& attribs) {
     if (const auto& attr = attribs.getOrAdd(posOffsetAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -794,19 +792,14 @@ std::vector<std::string> updateTileAttributes(
                                sizeof(Vertex),
                                gfx::AttributeDataType::Float);
     }
-    
-    return isText ? attribs.readDataDrivenPaintProperties<TextOpacity,
-                                                          TextColor,
-                                                          TextHaloColor,
-                                                          TextHaloWidth,
-                                                          TextHaloBlur>(
-                          paintProps.textBinders, evaluated)
-                    : attribs.readDataDrivenPaintProperties<IconOpacity,
-                                                          IconColor,
-                                                          IconHaloColor,
-                                                          IconHaloWidth,
-                                                          IconHaloBlur>(
-                          paintProps.iconBinders, evaluated);
+
+    return isText
+               ? attribs
+                     .readDataDrivenPaintProperties<TextOpacity, TextColor, TextHaloColor, TextHaloWidth, TextHaloBlur>(
+                         paintProps.textBinders, evaluated)
+               : attribs
+                     .readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
+                         paintProps.iconBinders, evaluated);
 }
 
 void updateTileDrawable(gfx::Drawable& drawable,
@@ -980,7 +973,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = buffer.vertices().elements();
 
         gfx::VertexAttributeArray attribs;
-        const auto uniformProps = updateTileAttributes(context, buffer, isText, bucketPaintProperties, evaluated, attribs);
+        const auto uniformProps = updateTileAttributes(
+            context, buffer, isText, bucketPaintProperties, evaluated, attribs);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
