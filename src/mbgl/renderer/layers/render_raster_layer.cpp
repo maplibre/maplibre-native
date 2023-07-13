@@ -271,7 +271,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
+    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                                 const RasterBucket& bucket) {
         // textures
         auto location0 = rasterShader->getSamplerLocation("u_image0");
         if (location0.has_value()) {
@@ -289,7 +290,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
-    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
+    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                             const RasterBucket& bucket) {
         auto buildRenderData = [](const TileMask& mask,
                                   std::vector<std::array<int16_t, 2>>& vertices,
                                   std::vector<std::array<int16_t, 2>>& attributes,
@@ -422,7 +424,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (layerGroup) {
             stats.drawablesRemoved += layerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
                 // Has this tile dropped out of the cover set?
-                return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
+                return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
             });
         } else {
             // Set up a tile layer group
@@ -437,12 +439,21 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         auto builder = createBuilder();
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
-            auto* bucket_ = tile.getBucket(*baseImpl);
-            if (!bucket_) {
+
+            const auto* bucket_ = tile.getBucket(*baseImpl);
+            if (!bucket_ || !bucket_->hasData()) {
+                removeTile(renderPass, tileID);
                 continue;
             }
-            auto& bucket = static_cast<RasterBucket&>(*bucket_);
-            if (!bucket.hasData()) continue;
+
+            const auto& bucket = static_cast<const RasterBucket&>(*bucket_);
+
+            const auto prevBucketID = getRenderTileBucketID(tileID);
+            if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+                // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+                removeTile(renderPass, tileID);
+            }
+            setRenderTileBucketID(tileID, bucket.getID());
 
             if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
 

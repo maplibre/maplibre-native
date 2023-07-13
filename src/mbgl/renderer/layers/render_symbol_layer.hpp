@@ -125,8 +125,6 @@ private:
     gfx::ShaderGroupPtr symbolSDFIconGroup;
     gfx::ShaderGroupPtr symbolSDFTextGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
-
-    std::unordered_map<OverscaledTileID, uint32_t> tileBucketInstances;
 #endif // MLN_DRAWABLE_RENDERER
 };
 

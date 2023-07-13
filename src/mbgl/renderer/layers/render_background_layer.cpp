@@ -283,7 +283,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     tileLayerGroup->observeDrawables([&](gfx::Drawable& drawable) -> bool {
         // Has this tile dropped out of the cover set?
-        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
+        return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
     });
 
     // For each tile in the cover set, add a tile drawable if one doesn't already exist.

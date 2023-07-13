@@ -311,7 +311,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         return (drawable.getRenderPass() == drawPass &&
-                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
+                (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())));
     });
 
     const auto zoom = static_cast<float>(state.getZoom());
@@ -332,7 +332,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
-        if (!optRenderData || !optRenderData->bucket) {
+        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(drawPass, tileID);
             continue;
         }
@@ -340,7 +340,12 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto& renderData = *optRenderData;
         const auto& bucket = static_cast<const FillExtrusionBucket&>(*renderData.bucket);
 
-        gfx::VertexAttributeArray vertexAttrs;
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(passes, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         gfx::DrawableTweakerPtr tweaker;
         if (depthBuilder) {
@@ -389,6 +394,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        gfx::VertexAttributeArray vertexAttrs;
         const auto uniformProps = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
                                                                             FillExtrusionColor,
                                                                             FillExtrusionHeight,

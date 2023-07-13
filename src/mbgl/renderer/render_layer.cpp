@@ -71,10 +71,9 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
 #if MLN_DRAWABLE_RENDERER
 void RenderLayer::layerChanged(const TransitionParameters&,
                                const Immutable<style::Layer::Impl>&,
-                               UniqueChangeRequestVec& changes) {
-    // Treat a layer change the same as a remove.
-    // It will be set up again when `update()` is called.
-    layerRemoved(changes);
+                               UniqueChangeRequestVec&) {
+    // When a layer changes, the bucket won't be replaced until the new source(s) load.
+    // If we remove the drawables here, they will just be re-created based on the current data.
 }
 
 void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
@@ -150,15 +149,36 @@ void RenderLayer::removeAllDrawables() {
 }
 
 void RenderLayer::updateRenderTileIDs() {
-    renderTileIDs.clear();
+    const auto oldMap = std::move(renderTileIDs);
     if (renderTiles) {
-        const auto inserter = std::inserter(renderTileIDs, renderTileIDs.end());
-        const auto getID = [](const auto& tile) {
-            return tile.get().getOverscaledTileID();
-        };
         renderTileIDs.reserve(renderTiles->size());
-        std::transform(renderTiles->begin(), renderTiles->end(), inserter, getID);
+        for (const auto& tile : *renderTiles) {
+            // If the tile existed previously, retain the mapped value
+            const auto tileID = tile.get().getOverscaledTileID();
+            const auto hit = oldMap.find(tileID);
+            const auto bucketID = (hit != oldMap.end()) ? hit->second : util::SimpleIdentity::Empty;
+            [[maybe_unused]] const auto result = renderTileIDs.insert(std::make_pair(tileID, bucketID));
+            assert(result.second && "Unexpected duplicate TileID in renderTiles");
+        }
     }
+}
+
+bool RenderLayer::hasRenderTile(const OverscaledTileID& tileID) const {
+    return renderTileIDs.find(tileID) != renderTileIDs.end();
+}
+
+util::SimpleIdentity RenderLayer::getRenderTileBucketID(const OverscaledTileID& tileID) const {
+    const auto hit = renderTileIDs.find(tileID);
+    return (hit != renderTileIDs.end()) ? hit->second : util::SimpleIdentity::Empty;
+}
+
+bool RenderLayer::setRenderTileBucketID(const OverscaledTileID& tileID, util::SimpleIdentity bucketID) {
+    const auto hit = renderTileIDs.find(tileID);
+    if (hit != renderTileIDs.end() && hit->second != bucketID) {
+        hit->second = bucketID;
+        return true;
+    }
+    return false;
 }
 
 void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
