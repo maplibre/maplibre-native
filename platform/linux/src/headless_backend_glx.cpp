@@ -40,7 +40,7 @@ public:
                 break;
             }
             Log::Warning(Event::OpenGL, "[CI] Failed to open X display, retrying...");
-            std::this_thread::sleep_for(std::chrono::milliseconds);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
 #endif
         if (xDisplay == nullptr) {
