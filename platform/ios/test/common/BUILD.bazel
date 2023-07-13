@@ -1,4 +1,5 @@
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
+load("//platform/ios:bazel/config.bzl", "BUNDLE_ID_PREFIX")
 
 cc_library(
     name = "ios_test_runner_lib",
@@ -31,7 +32,7 @@ objc_library(
 
 ios_application(
     name = "RenderTestApp",
-    bundle_id = "org.maplibre.RenderTestApp",
+    bundle_id = "{}.maplibre.RenderTestApp".format(BUNDLE_ID_PREFIX),
     families = ["iphone"],
     infoplists = [
         "//render-test/ios:Info.plist",
