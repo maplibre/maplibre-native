@@ -155,8 +155,15 @@ target_compile_definitions(
     mbgl-test-runner
     PRIVATE
         WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
-        $<DEFINED ENV{CI},CI_BUILD=1>
 )
+
+if (DEFINED ENV{CI})
+    target_compile_definitions(
+        mbgl-test-runner
+        PRIVATE
+            CI_BUILD=1
+    )
+endif()
 
 target_link_libraries(
     mbgl-test-runner
