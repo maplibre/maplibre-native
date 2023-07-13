@@ -1,12 +1,20 @@
 #include <mbgl/renderer/layer_group.hpp>
 
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
 
 #include <set>
 
 namespace mbgl {
+
+void LayerGroupBase::addDrawable(gfx::UniqueDrawable& drawable) {
+    // init their tweakers
+    for (const auto& tweaker : drawable->getTweakers()) {
+        tweaker->init(*drawable);
+    }
+}
 
 struct LayerGroup::Impl {
     using DrawableCollection = std::set<gfx::UniqueDrawable, gfx::DrawableLessByPriority>;
@@ -24,6 +32,7 @@ std::size_t LayerGroup::getDrawableCount() const {
 }
 
 void LayerGroup::addDrawable(gfx::UniqueDrawable&& drawable) {
+    LayerGroupBase::addDrawable(drawable);
     impl->drawables.emplace(std::move(drawable));
 }
 
