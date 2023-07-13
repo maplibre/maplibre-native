@@ -35,7 +35,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         }
     }
     if (!shader || context.program.getCurrentValue() == 0) {
-        mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getId()) + "/" + getName());
+        mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
         assert(false);
         return;
     }

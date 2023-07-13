@@ -114,7 +114,7 @@ void Texture2D::create() noexcept {
 }
 
 platform::GLuint Texture2D::getTextureID() const noexcept {
-    return static_cast<gl::TextureResource&>(*textureResource).texture;
+    return textureResource ? static_cast<gl::TextureResource&>(*textureResource).texture : 0;
 }
 
 void Texture2D::updateSamplerConfiguration() noexcept {
