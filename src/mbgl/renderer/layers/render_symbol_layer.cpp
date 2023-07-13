@@ -827,7 +827,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
         if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            tileBucketInstances.erase(*tileID);
             return false;
         }
         return true;
@@ -864,19 +863,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
-            // TODO: Is this redundant with the bucket ID check above?
-            const auto hit = tileBucketInstances.insert(std::make_pair(tileID, bucket.bucketInstanceId));
-            if (!hit.second && hit.first->second != bucket.bucketInstanceId) {
-                // The bucket has changed, reset the drawables for this tile.
-                tileLayerGroup->removeDrawables(passes, tileID);
-                hit.first->second = bucket.bucketInstanceId;
-            } else {
-                // Just update the drawables we already created
-                tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
-                    updateTileDrawable(drawable, context, bucket, bucketPaintProperties, state);
-                });
-                continue;
-            }
+            // Just update the drawables we already created
+            Log::Warning(Event::General, getID() + " updating " + util::toString(tileID));
+            tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                updateTileDrawable(drawable, context, bucket, bucketPaintProperties, state);
+            });
+            continue;
         }
 
         float serialKey = 1.0f;
