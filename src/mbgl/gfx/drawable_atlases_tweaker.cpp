@@ -7,7 +7,7 @@
 namespace mbgl {
 namespace gfx {
 
-void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, const PaintParameters&) {
+void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable) {
     if (const auto& shader = drawable.getShader()) {
         if (const auto samplerLocation = shader->getSamplerLocation(glyphName)) {
             if (const auto iconSamplerLocation = shader->getSamplerLocation(iconName)) {
@@ -19,6 +19,14 @@ void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, const PaintParamet
             }
         }
     }
+}
+
+void DrawableAtlasesTweaker::init(gfx::Drawable& drawable) {
+    setupTextures(drawable);
+}
+
+void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, const PaintParameters&) {
+    setupTextures(drawable);
 }
 
 } // namespace gfx
