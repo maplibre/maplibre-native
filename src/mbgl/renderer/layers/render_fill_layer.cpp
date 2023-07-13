@@ -363,22 +363,28 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        return (drawable.getRenderPass() == renderPass &&
-                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
+        // If the render pass has changed or the tile has dropped out of the cover set, remove it.
+        return drawable.getRenderPass() == renderPass && drawable.getTileID() && hasRenderTile(*drawable.getTileID());
     });
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-        if (!renderData) {
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             removeTile(renderPass, tileID);
             continue;
         }
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
         const auto& binders = bucket.paintPropertyBinders.at(getID());
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
@@ -404,20 +410,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
         };
 
-        // If we already have drawables for this tile, update them.
-        auto updateExisting = [&](gfx::Drawable& drawable) {
-            auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
-            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
-        };
-        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
-
-        // Share UBO buffers among any drawables created for this tile
-        const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
-        const auto tilePropsBuffer = context.createUniformBuffer(&tileProps, sizeof(tileProps));
-
         // `Fill*Program` all use `style::FillPaintProperties`
         gfx::VertexAttributeArray vertexAttrs;
         const auto uniformProps =
@@ -428,10 +420,25 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (const auto& attr = vertexAttrs.add(PosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
+
+        // If we already have drawables for this tile, update them.
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            auto& uniforms = drawable.mutableUniformBuffers();
+            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
+            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
+            drawable.setVertexAttributes(vertexAttrs);
+        };
+        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
+            continue;
+        }
+
+        // Share UBO buffers among any drawables created for this tile
+        const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+        const auto tilePropsBuffer = context.createUniformBuffer(&tileProps, sizeof(tileProps));
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
@@ -477,7 +484,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 fillBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 fillBuilder->setSegments(gfx::Triangles(),
-                                         bucket.triangles.vector(),
+                                         bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
                 finish(*fillBuilder, tileID, interpolateUBO, tileProps);
@@ -487,7 +494,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
-                    gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
+                    gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
                 finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
             }
         } else { // FillPattern is defined
@@ -558,7 +565,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 patternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
-                                            bucket.triangles.vector(),
+                                            bucket.sharedTriangles,
                                             bucket.triangleSegments.data(),
                                             bucket.triangleSegments.size());
 
@@ -570,7 +577,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(
-                    gfx::Lines(2), bucket.lines.vector(), bucket.lineSegments.data(), bucket.lineSegments.size());
+                    gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
 
                 finish(*outlinePatternBuilder, tileID, interpolateUBO, tileProps);
             }

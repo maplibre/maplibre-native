@@ -311,7 +311,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         return (drawable.getRenderPass() == drawPass &&
-                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
+                (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())));
     });
 
     const auto zoom = static_cast<float>(state.getZoom());
@@ -332,7 +332,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
-        if (!optRenderData || !optRenderData->bucket) {
+        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(drawPass, tileID);
             continue;
         }
@@ -340,7 +340,12 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto& renderData = *optRenderData;
         const auto& bucket = static_cast<const FillExtrusionBucket&>(*renderData.bucket);
 
-        gfx::VertexAttributeArray vertexAttrs;
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(passes, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         gfx::DrawableTweakerPtr tweaker;
         if (depthBuilder) {
@@ -389,6 +394,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        gfx::VertexAttributeArray vertexAttrs;
         const auto uniformProps = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
                                                                             FillExtrusionColor,
                                                                             FillExtrusionHeight,
@@ -452,14 +458,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         if (const auto& attr = vertexAttrs.getOrAdd(PosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a1),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
         if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short4);
         }
@@ -478,7 +484,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto finish = [&](gfx::DrawableBuilder& builder) {
             builder.setSegments(gfx::Triangles(),
-                                bucket.triangles.vector(),
+                                bucket.sharedTriangles,
                                 bucket.triangleSegments.data(),
                                 bucket.triangleSegments.size());
 

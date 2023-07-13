@@ -271,7 +271,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
+    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                                 const RasterBucket& bucket) {
         // textures
         auto location0 = rasterShader->getSamplerLocation("u_image0");
         if (location0.has_value()) {
@@ -289,7 +290,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
-    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
+    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                             const RasterBucket& bucket) {
         auto buildRenderData = [](const TileMask& mask,
                                   std::vector<std::array<int16_t, 2>>& vertices,
                                   std::vector<std::array<int16_t, 2>>& attributes,
@@ -297,6 +299,12 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                   std::vector<SegmentBase>& segments) {
             constexpr const uint16_t vertexLength = 4;
 
+            if (vertices.empty()) {
+                vertices.reserve(mask.size() * vertexLength);
+                attributes.reserve(mask.size() * vertexLength);
+                indices.reserve(mask.size() * 6);
+                segments.reserve(mask.size());
+            }
             // Create the vertex buffer for the specified tile mask.
             for (const auto& id : mask) {
                 // Create a quad for every masked tile.
@@ -332,11 +340,12 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 // 0, 1, 2
                 // 1, 2, 3
                 indices.insert(indices.end(),
-                               {offset, static_cast<uint16_t>(offset + 1), static_cast<uint16_t>(offset + 2u)});
-                indices.insert(indices.end(),
-                               {static_cast<uint16_t>(offset + 1),
-                                static_cast<uint16_t>(offset + 2),
-                                static_cast<uint16_t>(offset + 3)});
+                               {offset,
+                                static_cast<uint16_t>(offset + 1u),
+                                static_cast<uint16_t>(offset + 2u),
+                                static_cast<uint16_t>(offset + 1u),
+                                static_cast<uint16_t>(offset + 2u),
+                                static_cast<uint16_t>(offset + 3u)});
 
                 segment.vertexLength += vertexLength;
                 segment.indexLength += 6;
@@ -348,14 +357,15 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         std::vector<SegmentBase> segments;
         buildRenderData(bucket.mask, vertices, attributes, indices, segments);
         builder->addVertices(vertices, 0, vertices.size());
-        builder->setSegments(gfx::Triangles(), indices, segments);
+        builder->setSegments(gfx::Triangles(), indices, segments.data(), segments.size());
 
         // attributes
         {
             gfx::VertexAttributeArray vertexAttrs;
-            if (auto& attr = vertexAttrs.getOrAdd("a_texture_pos")) {
+            if (const auto& attr = vertexAttrs.getOrAdd("a_texture_pos")) {
+                attr->reserve(attributes.size());
                 std::size_t index{0};
-                for (auto& a : attributes) {
+                for (const auto& a : attributes) {
                     attr->set<gfx::VertexAttribute::int2>(index++, {a[0], a[1]});
                 }
             }
@@ -367,18 +377,18 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     auto buildImageDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, RasterBucket& bucket) {
-        std::vector<std::array<int16_t, 2>> vertices(bucket.vertices.vector().size());
-        std::transform(
-            bucket.vertices.vector().begin(), bucket.vertices.vector().end(), vertices.begin(), [](const auto& x) {
-                return x.a1;
-            });
-        builder->addVertices(vertices, 0, vertices.size());
-
-        builder->setSegments(gfx::Triangles(), bucket.indices.vector(), bucket.segments.data(), bucket.segments.size());
-
         // attributes
         {
             gfx::VertexAttributeArray vertexAttrs;
+
+            if (auto& attr = vertexAttrs.add("a_pos")) {
+                attr->setSharedRawData(bucket.sharedVertices,
+                                       offsetof(RasterLayoutVertex, a1),
+                                       /*vertexOffset=*/0,
+                                       sizeof(RasterLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+
             if (auto& attr = vertexAttrs.getOrAdd("a_texture_pos")) {
                 std::size_t index{0};
                 for (auto& v : bucket.vertices.vector()) {
@@ -387,6 +397,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
             builder->setVertexAttributes(std::move(vertexAttrs));
         }
+
+        builder->setRawVertices({}, bucket.vertices.elements(), gfx::AttributeDataType::Short2);
+        builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
         // textures
         setTextures(builder, bucket);
@@ -422,7 +435,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (layerGroup) {
             stats.drawablesRemoved += layerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
                 // Has this tile dropped out of the cover set?
-                return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
+                return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
             });
         } else {
             // Set up a tile layer group
@@ -437,12 +450,21 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         auto builder = createBuilder();
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
-            auto* bucket_ = tile.getBucket(*baseImpl);
-            if (!bucket_) {
+
+            const auto* bucket_ = tile.getBucket(*baseImpl);
+            if (!bucket_ || !bucket_->hasData()) {
+                removeTile(renderPass, tileID);
                 continue;
             }
-            auto& bucket = static_cast<RasterBucket&>(*bucket_);
-            if (!bucket.hasData()) continue;
+
+            const auto& bucket = static_cast<const RasterBucket&>(*bucket_);
+
+            const auto prevBucketID = getRenderTileBucketID(tileID);
+            if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+                // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+                removeTile(renderPass, tileID);
+            }
+            setRenderTileBucketID(tileID, bucket.getID());
 
             if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) continue;
 

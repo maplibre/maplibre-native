@@ -338,9 +338,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
-    });
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
+        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
@@ -356,6 +355,13 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         const auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
         const auto vertexCount = bucket.vertices.elements();
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         const float zoom = static_cast<float>(state.getZoom());
         const HeatmapInterpolateUBO interpolateUBO = {
@@ -385,7 +391,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (const auto& attr = heatmapVertexAttrs.add(VertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
-                                   0,
+                                   /*vertexOffset=*/0,
                                    sizeof(HeatmapLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
@@ -400,7 +406,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         heatmapBuilder->setVertexAttributes(std::move(heatmapVertexAttrs));
         heatmapBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         heatmapBuilder->setSegments(
-            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+            gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
         heatmapBuilder->flush();
 
@@ -445,7 +451,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     if (const auto& attr = textureVertexAttrs.add(VertexAttribName)) {
         attr->setSharedRawData(sharedTextureVertices,
                                offsetof(HeatmapLayoutVertex, a1),
-                               0,
+                               /*vertexOffset=*/0,
                                sizeof(HeatmapLayoutVertex),
                                gfx::AttributeDataType::Short2);
     }

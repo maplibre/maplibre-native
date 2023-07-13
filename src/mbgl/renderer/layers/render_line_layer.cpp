@@ -458,7 +458,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         return (drawable.getRenderPass() == renderPass &&
-                (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end()));
+                (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())));
     });
 
     auto createLineBuilder = [&](const std::string& name,
@@ -485,7 +485,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (const auto& attr = vertexAttrs.add(VertexAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a1),
-                                       0,
+                                       /*vertexOffset=*/0,
                                        sizeof(LineLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
@@ -493,7 +493,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (const auto& attr = vertexAttrs.add(DataAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a2),
-                                       0,
+                                       /*vertexOffset=*/0,
                                        sizeof(LineLayoutVertex),
                                        gfx::AttributeDataType::UByte4);
             }
@@ -502,8 +502,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         };
 
     auto setSegments = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
-        builder->setSegments(
-            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+        builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
     };
 
     for (const RenderTile& tile : *renderTiles) {
@@ -519,6 +518,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         // interpolation UBOs
         const float zoom = static_cast<float>(state.getZoom());

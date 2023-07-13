@@ -158,7 +158,10 @@ public:
         OpacityVertexVector& opacityVertices() { return *sharedOpacityVertices; }
         const OpacityVertexVector& opacityVertices() const { return *sharedOpacityVertices; }
 
-        gfx::IndexVector<gfx::Triangles> triangles;
+        using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+        const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+        TriangleIndexVector& triangles = *sharedTriangles;
+
         SegmentVector<SymbolTextAttributes> segments;
         std::vector<PlacedSymbol> placedSymbols;
 

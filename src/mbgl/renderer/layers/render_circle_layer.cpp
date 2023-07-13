@@ -319,9 +319,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
-    });
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
+        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
@@ -329,7 +328,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-        if (!renderData) {
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             removeTile(renderPass, tileID);
             continue;
         }
@@ -337,6 +336,13 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         const auto& bucket = static_cast<const CircleBucket&>(*renderData->bucket);
         const auto vertexCount = bucket.vertices.elements();
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         const float zoom = static_cast<float>(state.getZoom());
         const CircleInterpolateUBO interpolateUBO = {
@@ -397,7 +403,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         circleBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         circleBuilder->setSegments(
-            gfx::Triangles(), bucket.triangles.vector(), bucket.segments.data(), bucket.segments.size());
+            gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
         circleBuilder->flush();
 
