@@ -1044,7 +1044,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(attribs);
-            
+
             // TODO: texture filtering
             // const bool linear = parameters.state.isChanging() || transformed ||
             // !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
