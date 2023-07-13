@@ -983,8 +983,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = buffer.vertices().elements();
 
         gfx::VertexAttributeArray attribs;
-        const auto uniformProps = updateTileAttributes(
-            buffer, isText, bucketPaintProperties, evaluated, attribs);
+        const auto uniformProps = updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
