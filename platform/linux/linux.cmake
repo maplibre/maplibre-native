@@ -158,6 +158,7 @@ target_compile_definitions(
 )
 
 if (DEFINED ENV{CI})
+    message("Building for CI")
     target_compile_definitions(
         mbgl-test-runner
         PRIVATE
