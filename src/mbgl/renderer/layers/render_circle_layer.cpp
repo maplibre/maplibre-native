@@ -319,9 +319,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
-    });
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
+        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 

@@ -72,7 +72,7 @@ public:
 protected:
     Bucket() = default;
     std::atomic<bool> uploaded{false};
-    
+
     util::SimpleIdentity bucketID;
 };
 

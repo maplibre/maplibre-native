@@ -324,9 +324,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
-    });
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
+        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
 
     if (!staticDataSharedVertices) {
         staticDataSharedVertices = std::make_shared<HillshadeVertexVector>(RenderStaticData::rasterVertices());

@@ -271,7 +271,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder, const RasterBucket& bucket) {
+    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                                 const RasterBucket& bucket) {
         // textures
         auto location0 = rasterShader->getSamplerLocation("u_image0");
         if (location0.has_value()) {
@@ -289,7 +290,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
-    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, const RasterBucket& bucket) {
+    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                             const RasterBucket& bucket) {
         auto buildRenderData = [](const TileMask& mask,
                                   std::vector<std::array<int16_t, 2>>& vertices,
                                   std::vector<std::array<int16_t, 2>>& attributes,

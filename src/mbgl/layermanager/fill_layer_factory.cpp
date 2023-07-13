@@ -14,7 +14,7 @@ const style::LayerTypeInfo* FillLayerFactory::getTypeInfo() const noexcept {
 std::unique_ptr<style::Layer> FillLayerFactory::createLayer(const std::string& id,
                                                             const style::conversion::Convertible& value) noexcept {
     const auto source = getSource(value);
-    return std::unique_ptr<style::Layer>(source ? new(std::nothrow) style::FillLayer(id, *source) : nullptr);
+    return std::unique_ptr<style::Layer>(source ? new (std::nothrow) style::FillLayer(id, *source) : nullptr);
 }
 
 std::unique_ptr<Layout> FillLayerFactory::createLayout(
