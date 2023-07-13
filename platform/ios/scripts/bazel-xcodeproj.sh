@@ -33,7 +33,7 @@ token_file2=~/maplibre
 token="$(cat $token_file 2>/dev/null || cat $token_file2 2>/dev/null || echo $MLN_API_KEY)"
 flavor="legacy" # Renderer build flavor: legacy, drawable, split
 teamid="0000000000" # Provisioning profile team ID, required for targeting physical devices
-uuid="iOS Team Provisioning Profile: *" # provisioning profile name/UUID
+bundleidprefix="org.maplibre.app" # bundle id prefix
 
 while [[ $# -gt 0 ]]; do
    case $1 in
@@ -47,9 +47,9 @@ while [[ $# -gt 0 ]]; do
       teamid="$1"
       shift
       ;;
-   --profile-uuid)
+   --bundleidprefix)
       shift
-      uuid="$1"
+      bundleidprefix="$1"
       shift
       ;;
    --apikey)
@@ -81,7 +81,7 @@ fi
 cat > platform/ios/bazel/__generated__/provisioning_profile.bzl <<EOF
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
 APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "iOS Team Provisioning Profile: *"
-BUNDLE_ID_PREFIX = "org.maplibre.app"
+BUNDLE_ID_PREFIX = "$bundleidprefix"
 EOF
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
