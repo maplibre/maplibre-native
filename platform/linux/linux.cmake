@@ -153,7 +153,9 @@ add_executable(
 
 target_compile_definitions(
     mbgl-test-runner
-    PRIVATE WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
+    PRIVATE
+        WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
+        $<DEFINED ENV{CI},CI_BUILD=1>
 )
 
 target_link_libraries(
