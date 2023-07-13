@@ -748,8 +748,7 @@ constexpr auto fadeOpacityAttribName = "a_fade_opacity";
 constexpr auto texUniformName = "u_texture";
 constexpr auto iconTexUniformName = "u_texture_icon";
 
-std::vector<std::string> updateTileAttributes(gfx::Context& context,
-                                              const SymbolBucket::Buffer& buffer,
+std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer,
                                               const bool isText,
                                               const SymbolBucket::PaintProperties& paintProps,
                                               const SymbolPaintProperties::PossiblyEvaluated& evaluated,
@@ -836,7 +835,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // See `Placement::updateBucketDynamicVertices`
 
     gfx::VertexAttributeArray attribs;
-    updateTileAttributes(context, buffer, isText, paintProps, evaluated, attribs);
+    updateTileAttributes(buffer, isText, paintProps, evaluated, attribs);
     drawable.setVertexAttributes(std::move(attribs));
 }
 
@@ -933,9 +932,20 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
         };
 
-        addRenderables(bucket.icon, SymbolType::IconRGBA);
-        addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
-        addRenderables(bucket.text, SymbolType::Text);
+        const auto& atlases = tile.getAtlasTextures();
+        if (!atlases) {
+            continue;
+        }
+
+        if (bucket.hasIconData() && atlases->icon) {
+            addRenderables(bucket.icon, SymbolType::IconRGBA);
+        }
+        if (bucket.hasSdfIconData() && atlases->icon) {
+            addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
+        }
+        if (bucket.hasTextData() && atlases->glyph) {
+            addRenderables(bucket.text, SymbolType::Text);
+        }
     }
 
     // We'll be processing renderables across tiles, potentially out-of-order, so keep
@@ -973,8 +983,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = buffer.vertices().elements();
 
         gfx::VertexAttributeArray attribs;
-        const auto uniformProps = updateTileAttributes(
-            context, buffer, isText, bucketPaintProperties, evaluated, attribs);
+        const auto uniformProps = updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1014,16 +1023,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setRenderPass(passes);
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setColorMode(passes == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
-                                                                        : gfx::ColorMode::unblended());
+                builder->setColorMode(
+                    ((mbgl::underlying_type(passes) & mbgl::underlying_type(RenderPass::Translucent)) != 0)
+                        ? gfx::ColorMode::alphaBlended()
+                        : gfx::ColorMode::unblended());
                 builder->setVertexAttrName(posOffsetAttribName);
             }
-
-            builder->clearTweakers();
-            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
-            builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
-            builder->setDrawableName(layerPrefix + std::string(suffix));
-            builder->setVertexAttributes(attribs);
 
             const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 shaderGroup->getOrCreateShader(context, uniformProps, posOffsetAttribName));
@@ -1031,6 +1036,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
             builder->setShader(shader);
+
+            builder->clearTweakers();
+            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
+            builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
+            builder->setDrawableName(layerPrefix + std::string(suffix));
+            builder->setVertexAttributes(attribs);
 
             // TODO: texture filtering
             // const bool linear = parameters.state.isChanging() || transformed ||
