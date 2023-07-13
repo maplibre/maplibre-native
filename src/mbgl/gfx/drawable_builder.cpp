@@ -73,7 +73,7 @@ void DrawableBuilder::flush() {
 }
 
 util::SimpleIdentity DrawableBuilder::getDrawableId() {
-    return currentDrawable ? currentDrawable->getId() : util::SimpleIdentity::Empty;
+    return currentDrawable ? currentDrawable->getID() : util::SimpleIdentity::Empty;
 }
 
 DrawPriority DrawableBuilder::getDrawPriority() const {
