@@ -748,8 +748,7 @@ constexpr auto fadeOpacityAttribName = "a_fade_opacity";
 constexpr auto texUniformName = "u_texture";
 constexpr auto iconTexUniformName = "u_texture_icon";
 
-std::vector<std::string> updateTileAttributes(gfx::Context& context,
-                                              const SymbolBucket::Buffer& buffer,
+std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer,
                                               const bool isText,
                                               const SymbolBucket::PaintProperties& paintProps,
                                               const SymbolPaintProperties::PossiblyEvaluated& evaluated,
@@ -836,7 +835,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // See `Placement::updateBucketDynamicVertices`
 
     gfx::VertexAttributeArray attribs;
-    updateTileAttributes(context, buffer, isText, paintProps, evaluated, attribs);
+    updateTileAttributes(buffer, isText, paintProps, evaluated, attribs);
     drawable.setVertexAttributes(std::move(attribs));
 }
 
@@ -985,7 +984,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray attribs;
         const auto uniformProps = updateTileAttributes(
-            context, buffer, isText, bucketPaintProperties, evaluated, attribs);
+            buffer, isText, bucketPaintProperties, evaluated, attribs);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
