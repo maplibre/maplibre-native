@@ -162,6 +162,13 @@ jobs:
           path: |
             ./size
             ./pr_number
+
+      - name: Upload PR number
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr-number
+          path: |
+            ./pr_number
       
       # render test
 
