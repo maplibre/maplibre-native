@@ -60,7 +60,7 @@ jobs:
           name: RenderTest.xctest.zip
           type: XCTEST_TEST_PACKAGE
 
-      - name: Upload Android UI test
+      - name: Upload iOS Render test
         run: |
           curl -T RenderTestApp.ipa '${{ steps.upload-ios-app.outputs.url }}'
           curl -T RenderTest.xctest.zip '${{ steps.upload-ios-test.outputs.url }}'
@@ -68,11 +68,11 @@ jobs:
       - name: Schedule test run
         uses: realm/aws-devicefarm/test-application@master
         with:
-          name: MapLibre Native Android Instrumentation Test
+          name: MapLibre Native iOS Render Test
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           device_pool_arn: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/d84a2883-0000-44b5-afc4-af22084caf85"
           app_arn: ${{ steps.upload-ios-app.outputs.arn }}
-          app_type: ANDROID_APP
+          app_type: IOS_APP
           test_type: INSTRUMENTATION
           test_package_arn: ${{ steps.upload-ios-test.outputs.arn }}
           timeout: 28800
