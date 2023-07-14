@@ -16,7 +16,7 @@ cc_library(
     linkopts = [
         "-lGL",
         "-lglfw",
-        "-lEGL",
+        "-lX11",
         "-lsqlite3",
         "-luv",
         "-lz",
