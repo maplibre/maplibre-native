@@ -219,7 +219,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --test-env=DISPLAY
+          xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --test_env=DISPLAY
 
       - name: Upload coverage report
         if: '!cancelled()'
