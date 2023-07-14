@@ -10,7 +10,7 @@ cc_library(
     name = "impl",
     srcs = [
         "src/gl_functions.cpp",
-        "src/headless_backend_egl.cpp",
+        "src/headless_backend_glx.cpp.cpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     linkopts = [
