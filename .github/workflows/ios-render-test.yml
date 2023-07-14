@@ -17,11 +17,6 @@ jobs:
           artifact-name: ios-render-test
           expect-files: "RenderTest.xctest.zip, RenderTestApp.ipa"
 
-      - uses: .github/actions/download-workflow-run-artifact
-        with:
-          artifact-name: pr-number
-          expect-files: "pr_number"
-
       - run: echo ${{ github.event.workflow_run }}
 
       - name: Generate token
