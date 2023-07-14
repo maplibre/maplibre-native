@@ -66,9 +66,9 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
-void Renderer::Impl::preRender([[maybe_unused]] const RenderTree& renderTree,
-                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
-    [[maybe_unused]] auto& context = backend.getContext();
+void Renderer::Impl::render(const RenderTree& renderTree,
+                            [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
+    auto& context = backend.getContext();
 
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
@@ -92,23 +92,11 @@ void Renderer::Impl::preRender([[maybe_unused]] const RenderTree& renderTree,
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
 
-#if MLN_DRAWABLE_RENDERER
-    // update layers
-    if (staticData && staticData->shaders) {
-        orchestrator.updateLayers(
-            *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
-    }
-#endif
-}
-
-void Renderer::Impl::render(const RenderTree& renderTree) {
     if (renderState == RenderState::Never) {
         observer->onWillStartRenderingMap();
     }
 
     observer->onWillStartRenderingFrame();
-    auto& context = backend.getContext();
-    const auto& renderTreeParameters = renderTree.getParameters();
 
     PaintParameters parameters{context,
                                pixelRatio,
@@ -127,22 +115,6 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
     const auto& layerRenderItems = renderTree.getLayerRenderItems();
 
-#if MLN_DRAWABLE_RENDERER
-    // Run changes
-    orchestrator.processChanges();
-
-    // Run layer tweakers to update any dynamic elements
-    orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
-        if (layerGroup.getLayerTweaker()) {
-            layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
-        }
-    });
-
-    // Give the layers a chance to do setup
-    // orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
-    // });
-#endif
-
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
     {
@@ -158,15 +130,41 @@ void Renderer::Impl::render(const RenderTree& renderTree) {
         staticData->upload(*uploadPass);
         renderTree.getLineAtlas().upload(*uploadPass);
         renderTree.getPatternAtlas().upload(*uploadPass);
+    }
 
 #if MLN_DRAWABLE_RENDERER
+    // - LAYER GROUP UPDATE ------------------------------------------------------------------------
+    // Updates all layer groups and process changes
+    if (staticData && staticData->shaders) {
+        orchestrator.updateLayers(
+            *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
+    }
+
+    // Run changes
+    orchestrator.processChanges();
+
+    // Run layer tweakers to update any dynamic elements
+    orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+        if (layerGroup.getLayerTweaker()) {
+            layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
+        }
+    });
+
+    // Give the layers a chance to do setup
+    // orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
+    // });
+
+    // Upload layer groups
+    {
+        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload");
+
         // Give the layers a chance to upload
         orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
 
         // Give the render targets a chance to upload
         orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
-#endif
     }
+#endif
 
     // - 3D PASS
     // -------------------------------------------------------------------------------------

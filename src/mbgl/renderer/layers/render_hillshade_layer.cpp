@@ -324,9 +324,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
-        return (!drawable.getTileID() || renderTileIDs.find(*drawable.getTileID()) != renderTileIDs.end());
-    });
+    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
+        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
 
     if (!staticDataSharedVertices) {
         staticDataSharedVertices = std::make_shared<HillshadeVertexVector>(RenderStaticData::rasterVertices());
@@ -341,15 +340,19 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         auto* bucket_ = tile.getBucket(*baseImpl);
-        if (!bucket_) {
+        if (!bucket_ || !bucket_->hasData()) {
             removeTile(renderPass, tileID);
             continue;
         }
+
         auto& bucket = static_cast<HillshadeBucket&>(*bucket_);
 
-        if (!bucket.hasData()) {
-            continue;
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
         }
+        setRenderTileBucketID(tileID, bucket.getID());
 
         if (!bucket.renderTargetPrepared) {
             // Set up tile render target
@@ -468,7 +471,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                     };
                     drawSegments.emplace_back(hillshadeBuilder->createSegment(gfx::Triangles(), std::move(segCopy)));
                 }
-                drawable.setIndexData(std::move(indices->vector()), std::move(drawSegments));
+                drawable.setIndexData(indices->vector(), std::move(drawSegments));
 
                 auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
                 if (imageLocation.has_value()) {

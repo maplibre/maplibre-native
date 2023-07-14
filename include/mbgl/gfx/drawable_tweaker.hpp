@@ -20,6 +20,9 @@ protected:
 public:
     virtual ~DrawableTweaker() = default;
 
+    /// Called as the drawable gets added to the layer
+    virtual void init(Drawable&) = 0;
+
     /// Called just before rendering
     virtual void execute(Drawable&, const PaintParameters&) = 0;
 };

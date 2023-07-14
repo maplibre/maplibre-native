@@ -26,11 +26,13 @@ class CullFaceMode;
 enum class DepthMaskType : bool;
 class DrawableTweaker;
 class DrawMode;
+class IndexVectorBase;
 class ShaderProgramBase;
 class VertexAttributeArray;
 
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 
@@ -48,7 +50,7 @@ public:
     struct DrawSegment;
     using UniqueDrawSegment = std::unique_ptr<DrawSegment>;
 
-    const util::SimpleIdentity& getId() const { return uniqueID; }
+    const util::SimpleIdentity& getID() const { return uniqueID; }
 
     /// Draw the drawable
     virtual void draw(PaintParameters&) const = 0;
@@ -155,8 +157,9 @@ public:
     /// Incompatible with adding primitives
     virtual void setVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType) = 0;
 
-    /// Create a segment wrapper
-    virtual void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment> segments) = 0;
+    /// Provide raw indexes and segments
+    void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment>);
+    virtual void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment>) = 0;
 
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
@@ -208,7 +211,7 @@ struct DrawableLessByPriority {
         if (a.getDrawPriority() != b.getDrawPriority()) {
             return a.getDrawPriority() < b.getDrawPriority();
         }
-        return a.getId() < b.getId();
+        return a.getID() < b.getID();
     }
     bool operator()(const Drawable* left, const Drawable* right) const { return operator()(*left, *right); }
     bool operator()(const UniqueDrawable& left, const UniqueDrawable& right) const { return operator()(*left, *right); }

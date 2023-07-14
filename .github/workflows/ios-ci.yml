@@ -24,6 +24,10 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
   
   pull_request:
     branches:
@@ -45,6 +49,10 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
 
 jobs:
   build:
@@ -130,6 +138,10 @@ jobs:
         run: make ios-lint-plist
 
       - run: cp bazel/example_config.bzl bazel/config.bzl
+
+      - name: Generate app plists
+        working-directory: ./
+        run: bash platform/ios/platform/ios/scripts/bazel-generate-plists.sh
 
       - run: make style-code
 

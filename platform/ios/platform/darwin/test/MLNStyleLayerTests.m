@@ -44,6 +44,11 @@
                 return;
             }
 
+            // not recognized as verb
+            if ([components.lastObject isEqualToString:@"antialiased"]) {
+                return;
+            }
+
             if (![components.lastObject.lexicalClasses containsObject:NSLinguisticTagAdjective]) {
                 XCTAssertTrue([components.lastObject.lexicalClasses containsObject:NSLinguisticTagVerb],
                               @"Boolean getter %@ that starts with “is” should contain an adjective, past participle, or verb.", name);

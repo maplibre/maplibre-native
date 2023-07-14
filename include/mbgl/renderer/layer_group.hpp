@@ -57,6 +57,9 @@ public:
 
     virtual std::size_t clearDrawables() = 0;
 
+    /// Add a drawable
+    void addDrawable(gfx::UniqueDrawable&);
+
     /// Called before starting each frame
     virtual void preRender(RenderOrchestrator&, PaintParameters&) {}
     /// Called during the upload pass

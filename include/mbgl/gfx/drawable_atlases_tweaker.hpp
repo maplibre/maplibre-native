@@ -26,9 +26,13 @@ public:
           isText(isText_) {}
     ~DrawableAtlasesTweaker() override = default;
 
+    void init(Drawable&) override;
+
     void execute(Drawable&, const PaintParameters&) override;
 
 protected:
+    void setupTextures(Drawable&);
+
     TileAtlasTexturesPtr atlases;
     std::string iconName;
     std::string glyphName;
