@@ -1,0 +1,23 @@
+name: ios-render-test
+
+on:
+  workflow_run:
+    workflows: [ios-ci]
+    types:
+      - completed
+
+jobs:
+  ios-render-test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: .github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: ios-render-test
+          expect-files: "RenderTest.xctest.zip, RenderTestApp.ipa"
+
+      - uses: .github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: pr-number
+          expect-files: "pr_number"
