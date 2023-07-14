@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/programs/raster_program.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/gfx/context.hpp>
@@ -52,6 +53,15 @@ private:
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr rasterShader;
     LayerGroupPtr imageLayerGroup;
+
+    using RasterVertexVector = gfx::VertexVector<RasterLayoutVertex>;
+    std::shared_ptr<RasterVertexVector> staticDataSharedVertices;
+
+    using RasterIndexVector = gfx::IndexVector<gfx::Triangles>;
+    std::shared_ptr<RasterIndexVector> staticDataIndices;
+
+    using RasterSegmentVector = SegmentVector<RasterAttributes>;
+    std::shared_ptr<RasterSegmentVector> staticDataSegments;
 #endif
 };
 
