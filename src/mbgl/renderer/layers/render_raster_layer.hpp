@@ -56,10 +56,10 @@ private:
 
     using RasterVertexVector = gfx::VertexVector<RasterLayoutVertex>;
     std::shared_ptr<RasterVertexVector> staticDataSharedVertices;
-    
+
     using RasterIndexVector = gfx::IndexVector<gfx::Triangles>;
     std::shared_ptr<RasterIndexVector> staticDataIndices;
-    
+
     using RasterSegmentVector = SegmentVector<RasterAttributes>;
     std::shared_ptr<RasterSegmentVector> staticDataSegments;
 #endif

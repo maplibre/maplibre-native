@@ -259,10 +259,10 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     if (!staticDataSharedVertices) {
         staticDataSharedVertices = std::make_shared<RasterVertexVector>(RenderStaticData::rasterVertices());
     }
-    if(!staticDataIndices) {
+    if (!staticDataIndices) {
         staticDataIndices = std::make_shared<RasterIndexVector>(RenderStaticData::quadTriangleIndices());
     }
-    if(!staticDataSegments) {
+    if (!staticDataSegments) {
         staticDataSegments = std::make_shared<RasterSegmentVector>(RenderStaticData::rasterSegments());
     }
 
@@ -392,7 +392,10 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         setTextures(builder, bucket);
     };
 
-    auto updateTileDrawables = [&](std::unique_ptr<gfx::DrawableBuilder>& builder, auto* tileLayerGroup, const auto& tileID, const RasterBucket& bucket) {
+    auto updateTileDrawables = [&](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                   auto* tileLayerGroup,
+                                   const auto& tileID,
+                                   const RasterBucket& bucket) {
         // Set up tile drawable
         auto vertices = staticDataSharedVertices;
         auto indices = staticDataIndices;
@@ -406,7 +409,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
         // attributes
         gfx::VertexAttributeArray vertexAttrs;
-        
+
         if (const auto& attr = vertexAttrs.add(PosAttribName)) {
             attr->setSharedRawData(vertices,
                                    offsetof(RasterLayoutVertex, a1),
@@ -442,8 +445,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             drawable.setIndexData(indices->vector(), std::move(drawSegments));
         });
     };
-    
-    auto buildImageDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder, const RasterBucket& bucket) {
+
+    auto buildImageDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                              const RasterBucket& bucket) {
         // attributes
         {
             gfx::VertexAttributeArray vertexAttrs;
@@ -532,7 +536,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 removeTile(renderPass, tileID);
             }
             setRenderTileBucketID(tileID, bucket.getID());
-            
+
             if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
                 updateTileDrawables(builder, tileLayerGroup, tileID, bucket);
                 continue;
