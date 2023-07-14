@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
+
+pushd ../../../../../
 
 # "static" or "dynamic"
 build_type="static"
@@ -11,8 +13,11 @@ release_type="release"
 # Renderer flavor
 flavor="legacy"
 
-# Provisioning team ID
-teamid="0000000000"
+echo "------ Determining Maplibre version and hash ------"
+sem_version=$(git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//')
+hash=$(git log | head -1 | awk '{ print $2 }' | cut -c 1-10) && true
+
+args=("--sem-ver" "$sem_version" "--hash" "$hash")
 
 # Provisioning profile name/UUID
 uuid="iOS Team Provisioning Profile: *"
@@ -39,6 +44,16 @@ while [[ $# -gt 0 ]]; do
       build_type="link"
       shift
       ;;
+   --teamid)
+      shift
+      args+=("--team-id" "$1")
+      shift
+      ;;
+   --bundleidprefix)
+      shift
+      args+=("--bundleidprefix" "$1")
+      shift
+      ;;
    --help)
       echo "Build the maplibre xcframework using the bazel build files. You must install Baselisk to build using this method."
       echo "Usage: .bazel-package.sh --static|--dynamic --release|--debug"
@@ -48,16 +63,6 @@ while [[ $# -gt 0 ]]; do
    --flavor)
       shift
       flavor="$1"
-      shift
-      ;;
-   --teamid)
-      shift
-      teamid="$1"
-      shift
-      ;;
-   --profile-uuid)
-      shift
-      uuid="$1"
       shift
       ;;
    -*|--*)
@@ -76,34 +81,13 @@ if [ "$release_type" = "debug" ]; then
    compilation_mode="dbg"
 fi;
 
-echo "------ Determining Maplibre version and hash ------"
-
-sem_version=$(git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//')
-hash=$(git log | head -1 | awk '{ print $2 }' | cut -c 1-10) && true
-
-# Move and configure the info plists with the semantic version and hash.
-temp_info_static_plist="platform/ios/build/Info-static.plist"
-temp_info_plist="platform/ios/build/Info.plist"
-
 if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
 fi
 
-cp platform/ios/framework/Info-static.plist "$temp_info_static_plist"
-cp platform/ios//framework/Info.plist "$temp_info_plist"
-
-plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
-plutil -replace MLNCommitHash -string "$hash" "$temp_info_static_plist"
-plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_plist"
-plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
+bash "platform/ios/platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
-
-# Generate provisioning team ID
-cat > platform/ios/bazel/config.bzl <<EOF
-APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
-APPLE_MOBILE_PROVISIONING_PROFILE_UUID = "$uuid"
-EOF
 
 # Build
 ncpu=$(sysctl -n hw.ncpu)

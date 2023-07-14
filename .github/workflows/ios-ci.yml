@@ -125,11 +125,11 @@ jobs:
 
       - run: cp bazel/example_config.bzl bazel/config.bzl
 
-      - name: Check debug symbols
-        run: bazel run //platform:check-public-symbols
+      - name: Generate app plists
+        working-directory: ./
+        run: bash platform/ios/platform/ios/scripts/bazel-generate-plists.sh
 
-      - name: Lint plist files
-        run: bazel run //platform/ios:lint-plists
+      - run: make style-code
 
       - name: Running iOS tests
         run: bazel test //platform/ios/test:ios_test --test_output=errors
