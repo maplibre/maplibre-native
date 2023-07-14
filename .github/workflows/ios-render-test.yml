@@ -35,7 +35,6 @@ jobs:
           sha: ${{ github.event.workflow_run.sha }}
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -62,7 +61,6 @@ jobs:
           type: XCTEST_TEST_PACKAGE
 
       - name: Upload Android UI test
-        if: github.ref == 'refs/heads/main'
         run: |
           curl -T RenderTestApp.ipa '${{ steps.upload-ios-app.outputs.url }}'
           curl -T RenderTest.xctest.zip '${{ steps.upload-ios-test.outputs.url }}'
