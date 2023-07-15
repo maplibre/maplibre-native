@@ -19,10 +19,8 @@
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #endif
 
 #if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)

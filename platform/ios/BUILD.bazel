@@ -277,11 +277,13 @@ objc_library(
         "platform/ios/src/MLNMapProjection.mm",
         "platform/ios/src/MLNMapView.mm",
         "platform/ios/src/MLNMapView+Impl.mm",
-        "platform/ios/src/MLNMapView+OpenGL.mm",
         "platform/ios/src/MLNScaleBar.mm",
         "platform/ios/src/UIColor+MLNAdditions.mm",
         "platform/ios/src/UIImage+MLNAdditions.mm",
-    ],
+    ] + select({
+        "//:metal_renderer": ["platform/ios/src/MLNMapView+Metal.mm"],
+        "//conditions:default": ["platform/ios/src/MLNMapView+OpenGL.mm"],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
         "-fmodules",
@@ -296,10 +298,11 @@ objc_library(
     sdk_frameworks = [
         "CoreImage",
         "CoreLocation",
-        "GLKit",
-        "OpenGLES",
         "QuartzCore",
-    ],
+    ] + select({
+        "//:metal_renderer": ["MetalKit", "Metal"],
+        "//conditions:default": ["GLKit", "OpenGLES"],
+    }),
     defines = ["GLES_SILENCE_DEPRECATION=1"],
     deps = [
         "objc-headers",
@@ -392,8 +395,6 @@ objc_library(
     name = "iosapp",
     defines = ["GLES_SILENCE_DEPRECATION"],
     srcs = [
-        "platform/darwin/app/LimeGreenStyleLayer.h",
-        "platform/darwin/app/LimeGreenStyleLayer.m",
         "platform/ios/app/MBXAnnotationView.m",
         "platform/ios/app/MBXAppDelegate.m",
         "platform/ios/app/MBXCustomCalloutView.h",
@@ -409,7 +410,13 @@ objc_library(
         "platform/ios/app/MBXUserLocationAnnotationView.m",
         "platform/ios/app/MBXViewController.m",
         "platform/ios/app/main.m",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "platform/darwin/app/LimeGreenStyleLayer.h",
+            "platform/darwin/app/LimeGreenStyleLayer.m"
+        ],
+    }),
     hdrs = [
         "platform/ios/app/MBXAnnotationView.h",
         "platform/ios/app/MBXAppDelegate.h",
@@ -433,9 +440,12 @@ objc_library(
         "platform/darwin/src",
         "platform/ios/src",
     ],
-    sdk_frameworks = [
-        "GLKit",  # needed for LimeGreenStyleLayer
-    ],
+    sdk_frameworks =  select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "GLKit",  # needed for LimeGreenStyleLayer
+        ],
+    }),
     deps = [
         "sdk-headers",
     ],

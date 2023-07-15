@@ -11,6 +11,10 @@ load("//bazel:core.bzl",
     "MLN_OPENGL_HEADERS",
     "MLN_DRAWABLES_SOURCE",
     "MLN_DRAWABLES_HEADERS",
+    "MLN_DRAWABLES_GL_SOURCE",
+    "MLN_DRAWABLES_GL_HEADERS",
+    "MLN_DRAWABLES_MTL_SOURCE",
+    "MLN_DRAWABLES_MTL_HEADERS"
 )
 load("//bazel:macros.bzl", "appendList")
 
@@ -85,33 +89,41 @@ cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE
         + PREFIXED["MLN_GENERATED_STYLE_SOURCE"]
-        + MLN_OPENGL_SOURCE
         + select({
-            ":drawable_renderer": MLN_DRAWABLES_SOURCE,
-            ":split_renderer": MLN_DRAWABLES_SOURCE,
-            "//conditions:default": []
+            ":legacy_renderer": MLN_OPENGL_SOURCE,
+            ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+            ":split_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+            ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE
         }),
     hdrs = MLN_CORE_HEADERS
-        + MLN_OPENGL_HEADERS
         + select({
-            ":drawable_renderer": MLN_DRAWABLES_HEADERS,
-            ":split_renderer": MLN_DRAWABLES_HEADERS,
-            "//conditions:default": []
+            ":legacy_renderer": MLN_OPENGL_HEADERS,
+            ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+            ":split_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+            ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS
         }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
         ":legacy_renderer": [
+            "MLN_RENDER_BACKEND_OPENGL=1",
             "MLN_LEGACY_RENDERER=1",
             "MLN_DRAWABLE_RENDERER=0"
         ],
         ":drawable_renderer": [
+            "MLN_RENDER_BACKEND_OPENGL=1",
             "MLN_LEGACY_RENDERER=0",
             "MLN_DRAWABLE_RENDERER=1"
         ],
         ":split_renderer": [
+            "MLN_RENDER_BACKEND_OPENGL=1",
             "MLN_LEGACY_RENDERER=1",
             "MLN_DRAWABLE_RENDERER=1",
             "MLN_RENDERER_SPLIT_VIEW=1"
+        ],
+        ":metal_renderer": [
+            "MLN_RENDER_BACKEND_METAL=1",
+            "MLN_LEGACY_RENDERER=0",
+            "MLN_DRAWABLE_RENDERER=1"
         ],
     }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
@@ -120,6 +132,7 @@ cc_library(
     includes = [
         "include",
         "src",
+        "vendor/metal-cpp",
     ],
     local_defines = [
         r"MLN_VERSION_REV=\"standalone\"",
@@ -194,7 +207,7 @@ config_setting(
 string_flag(
     name = "renderer",
     build_setting_default = "legacy",
-    values=["legacy", "drawable", "split"]
+    values=["legacy", "drawable", "split", "metal"]
 )
 
 config_setting(
@@ -215,6 +228,13 @@ config_setting(
     name = "split_renderer",
     flag_values = {
         ":renderer": "split"
+    }
+)
+
+config_setting(
+    name = "metal_renderer",
+    flag_values = {
+        ":renderer": "metal"
     }
 )
 

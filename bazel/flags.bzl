@@ -107,13 +107,9 @@ Not important for any vendors that are imported.
 
 MAPLIBRE_FLAGS = select({
     "//:windows": [
-        "/DMBGL_USE_GLES2=1",
-        "/DMBGL_RENDER_BACKEND_OPENGL=1",
         "/D_USE_MATH_DEFINES",
     ],
     "//conditions:default": [
-        "-DMBGL_USE_GLES2=1",
-        "-DMBGL_RENDER_BACKEND_OPENGL=1",
         "-DGLES_SILENCE_DEPRECATION",
     ]
 })

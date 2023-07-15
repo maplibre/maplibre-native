@@ -30,7 +30,6 @@ objc_library(
     srcs = [
         "src/CFHandle.hpp",
         "src/collator.mm",
-        "src/headless_backend_eagl.mm",
         "src/http_file_source.mm",
         "src/image.mm",
         "src/local_glyph_rasterizer.mm",
@@ -38,7 +37,10 @@ objc_library(
         "src/nsthread.mm",
         "src/number_format.mm",
         "src/string_nsstring.mm",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["src/headless_backend_eagl.mm"],
+    }),
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
         "include/mbgl/storage/reachability.h",
@@ -75,9 +77,11 @@ objc_library(
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     sdk_frameworks = [
-        "OpenGLES",
         "SystemConfiguration",
-    ],
+    ] + select({
+        "//:metal_renderer": ["Metal"],
+        "//conditions:default": ["OpenGLES"],
+    }),
     visibility = ["//platform/default:__pkg__"],
     deps = [
         "//:mbgl-core",

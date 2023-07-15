@@ -976,7 +976,7 @@ if(MLN_WITH_OPENGL)
     target_compile_definitions(
         mbgl-core
         PRIVATE
-            MBGL_RENDER_BACKEND_OPENGL=1
+            MLN_RENDER_BACKEND_OPENGL=1
             "MLN_RENDERER_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_SPLIT_VIEW}>"
             "MLN_RENDERER_QUAD_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_QUAD_SPLIT_VIEW}>"
         PUBLIC

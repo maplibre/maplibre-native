@@ -93,7 +93,9 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingRasterTileSource,
     MBXSettingsRuntimeStylingImageSource,
     MBXSettingsRuntimeStylingRouteLine,
+#if MLN_RENDER_BACKEND_OPENGL
     MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
+#endif
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
@@ -630,9 +632,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingRouteLine:
                     [self styleRouteLine];
                     break;
+#if MLN_RENDER_BACKEND_OPENGL
                 case MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer:
                     [self styleAddLimeGreenTriangleLayer];
                     break;
+#endif
                 case MBXSettingsRuntimeStylingDDSPolygon:
                     [self stylePolygonWithDDS];
                     break;
@@ -1553,11 +1557,13 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
+#if MLN_RENDER_BACKEND_OPENGL
 - (void)styleAddLimeGreenTriangleLayer
 {
     LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
+#endif
 
 - (void)stylePolygonWithDDS {
     CLLocationCoordinate2D leftCoords[] = {

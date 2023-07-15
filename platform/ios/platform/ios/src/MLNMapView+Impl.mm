@@ -1,10 +1,20 @@
 #import "MLNMapView+Impl.h"
-#import "MLNMapView+OpenGL.h"
+#import "MLNMapView_Private.h"
 #import "MLNStyle_Private.h"
 #import "NSBundle+MLNAdditions.h"
 
+#if MLN_RENDER_BACKEND_OPENGL
+#import "MLNMapView+OpenGL.h"
+#elif MLN_RENDER_BACKEND_METAL
+#import "MLNMapView+Metal.h"
+#endif
+
 std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
+#if MLN_RENDER_BACKEND_OPENGL
     return std::make_unique<MLNMapViewOpenGLImpl>(nativeView);
+#elif MLN_RENDER_BACKEND_METAL
+    return std::make_unique<MLNMapViewMetalImpl>(nativeView);;
+#endif
 }
 
 MLNMapViewImpl::MLNMapViewImpl(MLNMapView* nativeView_) : mapView(nativeView_) {

@@ -134,6 +134,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/geometry/line_atlas.hpp",
     "src/mbgl/gfx/attribute.cpp",
     "src/mbgl/gfx/attribute.hpp",
+    "include/mbgl/gfx/backend.hpp",
     "src/mbgl/gfx/color_mode.hpp",
     "src/mbgl/gfx/command_encoder.hpp",
     "src/mbgl/gfx/context.hpp",
@@ -160,6 +161,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/gfx/vertex_vector.hpp",
     "src/mbgl/layermanager/background_layer_factory.cpp",
     "src/mbgl/layermanager/circle_layer_factory.cpp",
+    "src/mbgl/layermanager/custom_layer_factory.cpp",
     "src/mbgl/layermanager/fill_extrusion_layer_factory.cpp",
     "src/mbgl/layermanager/fill_layer_factory.cpp",
     "src/mbgl/layermanager/heatmap_layer_factory.cpp",
@@ -281,6 +283,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/renderer/layers/render_background_layer.hpp",
     "src/mbgl/renderer/layers/render_circle_layer.cpp",
     "src/mbgl/renderer/layers/render_circle_layer.hpp",
+    "src/mbgl/renderer/layers/render_custom_layer.cpp",
+    "src/mbgl/renderer/layers/render_custom_layer.hpp",
     "src/mbgl/renderer/layers/render_fill_extrusion_layer.cpp",
     "src/mbgl/renderer/layers/render_fill_extrusion_layer.hpp",
     "src/mbgl/renderer/layers/render_fill_layer.cpp",
@@ -437,6 +441,9 @@ MLN_CORE_SOURCE = [
     "src/mbgl/style/layers/background_layer_impl.hpp",
     "src/mbgl/style/layers/circle_layer_impl.cpp",
     "src/mbgl/style/layers/circle_layer_impl.hpp",
+    "src/mbgl/style/layers/custom_layer.cpp",
+    "src/mbgl/style/layers/custom_layer_impl.cpp",
+    "src/mbgl/style/layers/custom_layer_impl.hpp",
     "src/mbgl/style/layers/fill_extrusion_layer_impl.cpp",
     "src/mbgl/style/layers/fill_extrusion_layer_impl.hpp",
     "src/mbgl/style/layers/fill_layer_impl.cpp",
@@ -649,6 +656,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/i18n/number_format.hpp",
     "include/mbgl/layermanager/background_layer_factory.hpp",
     "include/mbgl/layermanager/circle_layer_factory.hpp",
+    "include/mbgl/layermanager/custom_layer_factory.hpp",
     "include/mbgl/layermanager/fill_extrusion_layer_factory.hpp",
     "include/mbgl/layermanager/fill_layer_factory.hpp",
     "include/mbgl/layermanager/heatmap_layer_factory.hpp",
@@ -752,6 +760,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/style/image.hpp",
     "include/mbgl/style/layer.hpp",
     "include/mbgl/style/layer_properties.hpp",
+    "include/mbgl/style/layers/custom_layer.hpp",
     "include/mbgl/style/position.hpp",
     "include/mbgl/style/property_expression.hpp",
     "include/mbgl/style/property_value.hpp",
@@ -827,10 +836,6 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/command_encoder.hpp",
     "src/mbgl/gl/context.cpp",
     "src/mbgl/gl/context.hpp",
-    "src/mbgl/style/layers/custom_layer.cpp",
-    "src/mbgl/layermanager/custom_layer_factory.cpp",
-    "src/mbgl/style/layers/custom_layer_impl.cpp",
-    "src/mbgl/style/layers/custom_layer_impl.hpp",
     "src/mbgl/gl/debugging_extension.cpp",
     "src/mbgl/gl/debugging_extension.hpp",
     "src/mbgl/gl/defines.hpp",
@@ -846,8 +851,6 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/offscreen_texture.cpp",
     "src/mbgl/gl/offscreen_texture.hpp",
     "src/mbgl/gl/program.hpp",
-    "src/mbgl/renderer/layers/render_custom_layer.cpp",
-    "src/mbgl/renderer/layers/render_custom_layer.hpp",
     "src/mbgl/gl/render_pass.cpp",
     "src/mbgl/gl/render_pass.hpp",
     "src/mbgl/gl/renderbuffer_resource.hpp",
@@ -877,9 +880,6 @@ MLN_OPENGL_SOURCE = [
 ]
 
 MLN_OPENGL_HEADERS = [
-    "include/mbgl/gfx/backend.hpp",
-    "include/mbgl/style/layers/custom_layer.hpp",
-    "include/mbgl/layermanager/custom_layer_factory.hpp",
     "include/mbgl/gl/renderable_resource.hpp",
     "include/mbgl/gl/renderer_backend.hpp",
     "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
@@ -927,18 +927,7 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/renderer/layers/symbol_layer_tweaker.cpp",
     "src/mbgl/renderer/layers/symbol_layer_tweaker.hpp",
     "src/mbgl/shaders/shader_program_base.cpp",
-    "src/mbgl/shaders/mtl/shader_program_mtl.cpp",
-    "src/mbgl/shaders/gl/shader_program_gl.cpp",
-    "src/mbgl/util/identity.cpp",
-    "src/mbgl/gl/drawable_gl.cpp",
-    "src/mbgl/gl/drawable_gl_builder.cpp",
-    "src/mbgl/gl/drawable_gl_impl.hpp",
-    "src/mbgl/gl/layer_group_gl.cpp",
-    "src/mbgl/gl/render_target_gl.cpp",
-    "src/mbgl/gl/texture2d.cpp",
-    "src/mbgl/gl/uniform_block_gl.cpp",
-    "src/mbgl/gl/uniform_buffer_gl.cpp",
-    "src/mbgl/gl/vertex_attribute_gl.cpp"
+    "src/mbgl/util/identity.cpp"
 ]
 
 MLN_DRAWABLES_HEADERS = [
@@ -958,11 +947,24 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/renderer/layer_tweaker.hpp",
     "include/mbgl/renderer/render_target.hpp",
     "include/mbgl/shaders/shader_program_base.hpp",
-    "include/mbgl/shaders/mtl/shader_program_mtl.hpp",
     "include/mbgl/util/identity.hpp",
-    "include/mbgl/util/suppress_copies.hpp",
-    "include/mbgl/shaders/gl/shader_program_gl.hpp",
-    "include/mbgl/shaders/gl/shader_group_gl.hpp",
+    "include/mbgl/util/suppress_copies.hpp"
+]
+
+MLN_DRAWABLES_GL_SOURCE = [
+    "src/mbgl/gl/drawable_gl.cpp",
+    "src/mbgl/gl/drawable_gl_builder.cpp",
+    "src/mbgl/gl/drawable_gl_impl.hpp",
+    "src/mbgl/gl/layer_group_gl.cpp",
+    "src/mbgl/gl/render_target_gl.cpp",
+    "src/mbgl/gl/texture2d.cpp",
+    "src/mbgl/gl/uniform_block_gl.cpp",
+    "src/mbgl/gl/uniform_buffer_gl.cpp",
+    "src/mbgl/gl/vertex_attribute_gl.cpp",
+    "src/mbgl/shaders/gl/shader_program_gl.cpp"
+]
+
+MLN_DRAWABLES_GL_HEADERS = [
     "include/mbgl/gl/drawable_gl.hpp",
     "include/mbgl/gl/drawable_gl_builder.hpp",
     "include/mbgl/gl/layer_group_gl.hpp",
@@ -970,5 +972,19 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/gl/uniform_block_gl.hpp",
     "include/mbgl/gl/uniform_buffer_gl.hpp",
     "include/mbgl/gl/vertex_attribute_gl.hpp",
-    "include/mbgl/gl/texture2d.hpp"
+    "include/mbgl/gl/texture2d.hpp",
+    "include/mbgl/shaders/gl/shader_program_gl.hpp",
+    "include/mbgl/shaders/gl/shader_group_gl.hpp"
+]
+
+MLN_DRAWABLES_MTL_SOURCE = [
+    "src/mbgl/mtl/renderer_backend.cpp",
+    "src/mbgl/shaders/mtl/shader_program_mtl.cpp"
+]
+
+MLN_DRAWABLES_MTL_HEADERS = [
+    "include/mbgl/mtl/renderer_backend.hpp",
+    "include/mbgl/mtl/renderable_resource.hpp",
+    "include/mbgl/shaders/mtl/shader_group_mtl.hpp",
+    "include/mbgl/shaders/mtl/shader_program_mtl.hpp"
 ]
