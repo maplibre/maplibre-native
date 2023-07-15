@@ -11,9 +11,9 @@ class Backend {
 public:
     /// @brief The active graphics API/backend type.
     enum class Type : uint8_t {
-        OpenGL,   ///< The OpenGL API backend
+        OpenGL, ///< The OpenGL API backend
 #if MLN_RENDER_BACKEND_METAL
-        Metal,    ///< The Metal API backend
+        Metal, ///< The Metal API backend
 #endif
         TYPE_MAX, ///< Not a valid backend type, used to determine the number
                   ///< of available backends (ie for array allocation).

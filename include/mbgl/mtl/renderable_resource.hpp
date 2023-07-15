@@ -18,5 +18,5 @@ public:
     }
 };
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl

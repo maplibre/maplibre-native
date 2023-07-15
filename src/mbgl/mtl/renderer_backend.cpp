@@ -1,7 +1,7 @@
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-//#include <mbgl/mtl/context.hpp>
+// #include <mbgl/mtl/context.hpp>
 #include <mbgl/shaders/mtl/shader_group_mtl.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
@@ -33,7 +33,7 @@ std::unique_ptr<gfx::Context> RendererBackend::createContext() {
 
 PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {
     return PremultipliedImage(size);
-    //return getContext<mtl::Context>().readFramebuffer<PremultipliedImage>(size);
+    // return getContext<mtl::Context>().readFramebuffer<PremultipliedImage>(size);
 }
 
 void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID fbo) {
@@ -55,7 +55,7 @@ void RendererBackend::assumeScissorTest(bool enabled) {
 
 bool RendererBackend::implicitFramebufferBound() {
     return false;
-    //return getContext<mtl::Context>().bindFramebuffer.getCurrentValue() == ImplicitFramebufferBinding;
+    // return getContext<mtl::Context>().bindFramebuffer.getCurrentValue() == ImplicitFramebufferBinding;
 }
 
 void RendererBackend::setFramebufferBinding(const mtl::FramebufferID fbo) {
