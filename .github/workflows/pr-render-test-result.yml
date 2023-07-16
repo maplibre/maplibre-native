@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: .github/actions/download-workflow-run-artifact
+      - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: render-test-result
           expect-files: "./pr_number, metrics/linux-gcc8-release-style.html"
