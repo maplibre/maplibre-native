@@ -162,7 +162,6 @@ jobs:
       - run: chmod +x ./mbgl-render-test-runner
 
       - name: Run render test
-        continue-on-error: true
         id: render_test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
@@ -221,7 +220,7 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core //render-test:render-test --//:maplibre_platform=linux --test_env=DISPLAY --test_env=XAUTHORITY
+          xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core //render-test:render-test --//:maplibre_platform=linux --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1
 
       - name: Upload coverage report
         if: '!cancelled()'
