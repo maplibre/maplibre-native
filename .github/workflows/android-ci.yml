@@ -192,6 +192,17 @@ jobs:
           name: uploadsEnv
           path: uploads.env
 
+
+      # render test
+      - name: Build Render Test App
+        run: ./gradlew build
+        working-directory: ./render-test/android
+
+      - name: Store Render Test .apk
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./render-test/android/app/build/outputs/apk/release/app-release.apk
+
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3
         with:
