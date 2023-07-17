@@ -1124,6 +1124,13 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_tweaker.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
     )
 endif()
 

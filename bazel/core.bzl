@@ -978,8 +978,14 @@ MLN_DRAWABLES_GL_HEADERS = [
 ]
 
 MLN_DRAWABLES_MTL_SOURCE = [
+    "src/mbgl/mtl/command_encoder.cpp",
+    "src/mbgl/mtl/command_encoder.hpp",
+    "src/mbgl/mtl/context.cpp",
+    "src/mbgl/mtl/context.hpp",
     "src/mbgl/mtl/renderer_backend.cpp",
-    "src/mbgl/shaders/mtl/shader_program_mtl.cpp"
+    "src/mbgl/mtl/upload_pass.cpp",
+    "src/mbgl/mtl/upload_pass.hpp",
+    "src/mbgl/shaders/mtl/shader_program_mtl.cpp",
 ]
 
 MLN_DRAWABLES_MTL_HEADERS = [

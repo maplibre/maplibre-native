@@ -1,7 +1,8 @@
 #include <mbgl/mtl/renderer_backend.hpp>
+
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-// #include <mbgl/mtl/context.hpp>
+#include <mbgl/mtl/context.hpp>
 #include <mbgl/shaders/mtl/shader_group_mtl.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
@@ -25,10 +26,7 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_) {}
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
-    /*auto result = std::make_unique<mtl::Context>(*this);
-    result->enableDebugging();
-    return result;*/
-    return nullptr;
+    return std::make_unique<mtl::Context>(*this);
 }
 
 PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {

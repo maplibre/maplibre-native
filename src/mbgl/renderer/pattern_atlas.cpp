@@ -93,7 +93,9 @@ void PatternAtlas::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 #if MLN_DRAWABLE_RENDERER
     if (!atlasTexture2D) {
         atlasTexture2D = uploadPass.getContext().createTexture2D();
-        atlasTexture2D->upload(atlasImage);
+        if (atlasTexture2D) {
+            atlasTexture2D->upload(atlasImage);
+        }
     } else if (dirty) {
         atlasTexture2D->upload(atlasImage);
     }

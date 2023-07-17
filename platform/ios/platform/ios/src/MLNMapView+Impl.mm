@@ -13,7 +13,7 @@ std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
 #if MLN_RENDER_BACKEND_OPENGL
     return std::make_unique<MLNMapViewOpenGLImpl>(nativeView);
 #elif MLN_RENDER_BACKEND_METAL
-    return std::make_unique<MLNMapViewMetalImpl>(nativeView);;
+    return std::make_unique<MLNMapViewMetalImpl>(nativeView);
 #endif
 }
 

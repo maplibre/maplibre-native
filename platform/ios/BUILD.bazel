@@ -85,12 +85,20 @@ _PUBLIC_HEADERS = [
     "platform/ios/src/MLNCompassButton.h",
     "platform/ios/src/MLNMapProjection.h",
     "platform/ios/src/MLNMapView+IBAdditions.h",
+    "platform/ios/src/MLNMapView+Impl.h",
     "platform/ios/src/MLNMapView.h",
     "platform/ios/src/MLNMapViewDelegate.h",
     "platform/ios/src/MLNUserLocation.h",
     "platform/ios/src/MLNUserLocationAnnotationView.h",
     "platform/ios/src/MLNUserLocationAnnotationViewStyle.h",
-]
+] + select({
+    "//:metal_renderer": [
+        "platform/ios/src/MLNMapView+Metal.h",
+    ],
+    "//conditions:default": [
+        "platform/ios/src/MLNMapView+OpenGL.h",
+    ],
+})
 
 apple_static_xcframework(
     name = "Mapbox.static",
