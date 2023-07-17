@@ -160,17 +160,18 @@ jobs:
       - run: chmod +x ./mbgl-render-test-runner
 
       - name: Run render test
-        continue-on-error: true
         id: render_test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
       - name: Save PR number
+        if: always() && steps.render_test.outcome != 'failure'
         env:
           PR_NUMBER: ${{ github.event.number }}
         run: |
           echo $PR_NUMBER > ./pr_number
 
       - name: Upload render test result
+        if: always() && steps.render_test.outcome != 'failure'
         uses: actions/upload-artifact@v3
         with:
           name: render-test-result

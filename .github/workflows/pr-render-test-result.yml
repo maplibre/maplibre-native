@@ -13,11 +13,11 @@ on:
 jobs:
   upload-render-test-result:
     runs-on: ubuntu-22.04
-    if: github.event.workflow_run.event == 'pull_request'
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'failure'
     steps:
       - uses: actions/checkout@v3
 
-      - uses: .github/actions/download-workflow-run-artifact
+      - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: render-test-result
           expect-files: "./pr_number, metrics/linux-gcc8-release-style.html"
