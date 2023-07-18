@@ -2,8 +2,6 @@
 
 set -eo pipefail
 
-pushd ../../../../../
-
 # "static" or "dynamic"
 build_type="static"
 
@@ -82,7 +80,7 @@ if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
 fi
 
-bash "platform/ios/platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
+bash "platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 

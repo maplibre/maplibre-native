@@ -45,7 +45,7 @@ while [[ $# -gt 0 ]]; do
    esac
 done
 
-bash "platform/ios/platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
+bash "platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
