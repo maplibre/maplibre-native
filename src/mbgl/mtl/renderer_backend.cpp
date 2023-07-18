@@ -23,7 +23,17 @@ namespace mbgl {
 namespace mtl {
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
-    : gfx::RendererBackend(contextMode_) {}
+    : gfx::RendererBackend(contextMode_),
+    device(MTL::CreateSystemDefaultDevice()) {
+    assert(device);
+}
+
+RendererBackend::~RendererBackend() {
+    if (device) {
+        device->release();
+        device = nullptr;
+    }
+}
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
     return std::make_unique<mtl::Context>(*this);
@@ -72,8 +82,6 @@ void RendererBackend::setScissorTest(bool enabled) {
     /*getContext<mtl::Context>().scissorTest = enabled;
     assert(mtl::value::ScissorTest::Get() == getContext<mtl::Context>().scissorTest.getCurrentValue());*/
 }
-
-RendererBackend::~RendererBackend() = default;
 
 #if MLN_DRAWABLE_RENDERER
 /// @brief Register a list of types with a shader registry instance

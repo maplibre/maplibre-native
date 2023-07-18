@@ -152,7 +152,7 @@ void drawIcon(const RenderSymbolLayer::Programs& programs,
 
     const Size& iconSize = tile.getIconAtlasTexture()->getSize();
     const bool variablePlacedIcon = bucket.hasVariablePlacement && layout.get<IconTextFit>() != IconTextFitType::None;
-
+    
     if (sdfIcons) {
         if (values.hasHalo) {
             draw(*programs.symbolSDFIconProgram,

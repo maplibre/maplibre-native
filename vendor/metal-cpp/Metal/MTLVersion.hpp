@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 //
-// Metal/MTLFunctionHandle.hpp
+// Metal/MTLVersion.hpp
 //
 // Copyright 2020-2023 Apple Inc.
 //
@@ -20,42 +20,13 @@
 
 #pragma once
 
-#include "MTLDefines.hpp"
-#include "MTLHeaderBridge.hpp"
-#include "MTLPrivate.hpp"
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#include <Foundation/Foundation.hpp>
+#define METALCPP_VERSION_MAJOR 306
+#define METALCPP_VERSION_MINOR 5
+#define METALCPP_VERSION_PATCH 16
 
-#include "MTLLibrary.hpp"
-
-namespace MTL
-{
-class FunctionHandle : public NS::Referencing<FunctionHandle>
-{
-public:
-    MTL::FunctionType functionType() const;
-
-    NS::String*       name() const;
-
-    class Device*     device() const;
-};
-
-}
-
-// property: functionType
-_MTL_INLINE MTL::FunctionType MTL::FunctionHandle::functionType() const
-{
-    return Object::sendMessage<MTL::FunctionType>(this, _MTL_PRIVATE_SEL(functionType));
-}
-
-// property: name
-_MTL_INLINE NS::String* MTL::FunctionHandle::name() const
-{
-    return Object::sendMessage<NS::String*>(this, _MTL_PRIVATE_SEL(name));
-}
-
-// property: device
-_MTL_INLINE MTL::Device* MTL::FunctionHandle::device() const
-{
-    return Object::sendMessage<MTL::Device*>(this, _MTL_PRIVATE_SEL(device));
-}
+#define METALCPP_SUPPORTS_VERSION(major, minor, patch) \
+    ((major < METALCPP_VERSION_MAJOR) || \
+    (major == METALCPP_VERSION_MAJOR && minor < METALCPP_VERSION_MINOR) || \
+    (major == METALCPP_VERSION_MAJOR && minor == METALCPP_VERSION_MINOR && patch <= METALCPP_VERSION_PATCH))

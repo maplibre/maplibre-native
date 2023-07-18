@@ -2,7 +2,7 @@
 //
 // Foundation/NSObjCRuntime.hpp
 //
-// Copyright 2020-2021 Apple Inc.
+// Copyright 2020-2023 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ namespace NS
 {
 
 _NS_ENUM(Integer, ComparisonResult) {
-    OrderedAscending = -1,
-    OrderedSame = 0,
-    OrderedDescending = 1,
+    OrderedAscending = -1L,
+    OrderedSame,
+    OrderedDescending
 };
 
 const Integer NotFound = IntegerMax;

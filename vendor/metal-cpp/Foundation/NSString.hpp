@@ -2,7 +2,7 @@
 //
 // Foundation/NSString.hpp
 //
-// Copyright 2020-2021 Apple Inc.
+// Copyright 2020-2023 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #include "NSDefines.hpp"
+#include "NSObjCRuntime.hpp"
 #include "NSObject.hpp"
 #include "NSPrivate.hpp"
 #include "NSRange.hpp"
@@ -78,37 +79,40 @@ using unichar = unsigned short;
 class String : public Copying<String>
 {
 public:
-    static String* string();
-    static String* string(const String* pString);
-    static String* string(const char* pString, StringEncoding encoding);
+    static String*   string();
+    static String*   string(const String* pString);
+    static String*   string(const char* pString, StringEncoding encoding);
 
-    static String* alloc();
-    String*        init();
-    String*        init(const String* pString);
-    String*        init(const char* pString, StringEncoding encoding);
-    String*        init(void* pBytes, UInteger len, StringEncoding encoding, bool freeBuffer);
+    static String*   alloc();
+    String*          init();
+    String*          init(const String* pString);
+    String*          init(const char* pString, StringEncoding encoding);
+    String*          init(void* pBytes, UInteger len, StringEncoding encoding, bool freeBuffer);
 
-    unichar        character(UInteger index) const;
-    UInteger       length() const;
+    unichar          character(UInteger index) const;
+    UInteger         length() const;
 
-    const char*    cString(StringEncoding encoding) const;
-    const char*    utf8String() const;
-    UInteger       maximumLengthOfBytes(StringEncoding encoding) const;
-    UInteger       lengthOfBytes(StringEncoding encoding) const;
+    const char*      cString(StringEncoding encoding) const;
+    const char*      utf8String() const;
+    UInteger         maximumLengthOfBytes(StringEncoding encoding) const;
+    UInteger         lengthOfBytes(StringEncoding encoding) const;
 
-    bool           isEqualToString(const String* pString) const;
-    Range          rangeOfString(const String* pString, StringCompareOptions options) const;
+    bool             isEqualToString(const String* pString) const;
+    Range            rangeOfString(const String* pString, StringCompareOptions options) const;
 
-    const char*    fileSystemRepresentation() const;
+    const char*      fileSystemRepresentation() const;
 
-    String*        stringByAppendingString(const String* pString) const;
-
+    String*          stringByAppendingString(const String* pString) const;
+    ComparisonResult caseInsensitiveCompare(const String* pString) const;
 };
 
-template< std::size_t _StringLen >
-constexpr const String* MakeConstantString( const char ( &str )[_StringLen] )
+/// Create an NS::String* from a string literal.
+#define MTLSTR(literal) (NS::String*)__builtin___CFStringMakeConstantString("" literal "")
+
+template <std::size_t _StringLen>
+[[deprecated("please use MTLSTR(str)")]] constexpr const String* MakeConstantString(const char (&str)[_StringLen])
 {
-    return reinterpret_cast< const String* >( __CFStringMakeConstantString( str ) );
+    return reinterpret_cast<const String*>(__CFStringMakeConstantString(str));
 }
 
 }
@@ -227,7 +231,6 @@ _NS_INLINE NS::Range NS::String::rangeOfString(const NS::String* pString, NS::St
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 _NS_INLINE const char* NS::String::fileSystemRepresentation() const
@@ -240,6 +243,13 @@ _NS_INLINE const char* NS::String::fileSystemRepresentation() const
 _NS_INLINE NS::String* NS::String::stringByAppendingString(const String* pString) const
 {
     return Object::sendMessage<NS::String*>(this, _NS_PRIVATE_SEL(stringByAppendingString_), pString);
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+_NS_INLINE NS::ComparisonResult NS::String::caseInsensitiveCompare(const String* pString) const
+{
+    return Object::sendMessage<NS::ComparisonResult>(this, _NS_PRIVATE_SEL(caseInsensitiveCompare_), pString);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------

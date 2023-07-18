@@ -2,7 +2,7 @@
 //
 // Metal/MTLCommandBuffer.hpp
 //
-// Copyright 2020-2021 Apple Inc.
+// Copyright 2020-2023 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ _MTL_ENUM(NS::UInteger, CommandBufferStatus) {
 
 _MTL_ENUM(NS::UInteger, CommandBufferError) {
     CommandBufferErrorNone = 0,
+    CommandBufferErrorInternal = 1,
     CommandBufferErrorTimeout = 2,
     CommandBufferErrorPageFault = 3,
     CommandBufferErrorAccessRevoked = 4,
@@ -175,6 +176,8 @@ public:
     class ResourceStateCommandEncoder*         resourceStateCommandEncoder(const class ResourceStatePassDescriptor* resourceStatePassDescriptor);
 
     class AccelerationStructureCommandEncoder* accelerationStructureCommandEncoder();
+
+    class AccelerationStructureCommandEncoder* accelerationStructureCommandEncoder(const class AccelerationStructurePassDescriptor* descriptor);
 
     void                                       pushDebugGroup(const NS::String* string);
 
@@ -450,6 +453,12 @@ _MTL_INLINE MTL::ResourceStateCommandEncoder* MTL::CommandBuffer::resourceStateC
 _MTL_INLINE MTL::AccelerationStructureCommandEncoder* MTL::CommandBuffer::accelerationStructureCommandEncoder()
 {
     return Object::sendMessage<MTL::AccelerationStructureCommandEncoder*>(this, _MTL_PRIVATE_SEL(accelerationStructureCommandEncoder));
+}
+
+// method: accelerationStructureCommandEncoderWithDescriptor:
+_MTL_INLINE MTL::AccelerationStructureCommandEncoder* MTL::CommandBuffer::accelerationStructureCommandEncoder(const MTL::AccelerationStructurePassDescriptor* descriptor)
+{
+    return Object::sendMessage<MTL::AccelerationStructureCommandEncoder*>(this, _MTL_PRIVATE_SEL(accelerationStructureCommandEncoderWithDescriptor_), descriptor);
 }
 
 // method: pushDebugGroup:

@@ -2,7 +2,7 @@
 //
 // Metal/MTLRasterizationRate.hpp
 //
-// Copyright 2020-2021 Apple Inc.
+// Copyright 2020-2023 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public:
 
     static class RasterizationRateMapDescriptor* rasterizationRateMapDescriptor(MTL::Size screenSize, const class RasterizationRateLayerDescriptor* layer);
 
-    static class RasterizationRateMapDescriptor* rasterizationRateMapDescriptor(MTL::Size screenSize, NS::UInteger layerCount, MTL::RasterizationRateLayerDescriptor* const* layers);
+    static class RasterizationRateMapDescriptor* rasterizationRateMapDescriptor(MTL::Size screenSize, NS::UInteger layerCount, const class RasterizationRateLayerDescriptor* const* layers);
 
     class RasterizationRateLayerDescriptor*      layer(NS::UInteger layerIndex);
 
@@ -274,7 +274,7 @@ _MTL_INLINE MTL::RasterizationRateMapDescriptor* MTL::RasterizationRateMapDescri
 }
 
 // static method: rasterizationRateMapDescriptorWithScreenSize:layerCount:layers:
-_MTL_INLINE MTL::RasterizationRateMapDescriptor* MTL::RasterizationRateMapDescriptor::rasterizationRateMapDescriptor(MTL::Size screenSize, NS::UInteger layerCount, MTL::RasterizationRateLayerDescriptor* const* layers)
+_MTL_INLINE MTL::RasterizationRateMapDescriptor* MTL::RasterizationRateMapDescriptor::rasterizationRateMapDescriptor(MTL::Size screenSize, NS::UInteger layerCount, const MTL::RasterizationRateLayerDescriptor* const* layers)
 {
     return Object::sendMessage<MTL::RasterizationRateMapDescriptor*>(_MTL_PRIVATE_CLS(MTLRasterizationRateMapDescriptor), _MTL_PRIVATE_SEL(rasterizationRateMapDescriptorWithScreenSize_layerCount_layers_), screenSize, layerCount, layers);
 }

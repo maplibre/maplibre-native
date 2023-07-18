@@ -5,6 +5,10 @@
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/util.hpp>
 
+namespace MTL {
+class Device;
+}
+
 namespace mbgl {
 
 class ProgramParameters;
@@ -26,6 +30,8 @@ public:
     /// One-time shader initialization
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
 #endif
+
+    MTL::Device* getDevice() const { return device; }
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
@@ -51,6 +57,9 @@ public:
     void setFramebufferBinding(FramebufferID fbo);
     void setViewport(int32_t x, int32_t y, const Size&);
     void setScissorTest(bool);
+
+protected:
+    MTL::Device* device;
 };
 
 } // namespace mtl

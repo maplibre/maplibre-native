@@ -2,7 +2,7 @@
 //
 // Metal/MTLResourceStateCommandEncoder.hpp
 //
-// Copyright 2020-2021 Apple Inc.
+// Copyright 2020-2023 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include <Foundation/Foundation.hpp>
 
 #include "MTLCommandEncoder.hpp"
+#include "MTLTypes.hpp"
 
 namespace MTL
 {
@@ -59,6 +60,8 @@ public:
     void updateFence(const class Fence* fence);
 
     void waitForFence(const class Fence* fence);
+
+    void moveTextureMappingsFromTexture(const class Texture* sourceTexture, NS::UInteger sourceSlice, NS::UInteger sourceLevel, MTL::Origin sourceOrigin, MTL::Size sourceSize, const class Texture* destinationTexture, NS::UInteger destinationSlice, NS::UInteger destinationLevel, MTL::Origin destinationOrigin);
 };
 
 }
@@ -91,4 +94,10 @@ _MTL_INLINE void MTL::ResourceStateCommandEncoder::updateFence(const MTL::Fence*
 _MTL_INLINE void MTL::ResourceStateCommandEncoder::waitForFence(const MTL::Fence* fence)
 {
     Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(waitForFence_), fence);
+}
+
+// method: moveTextureMappingsFromTexture:sourceSlice:sourceLevel:sourceOrigin:sourceSize:toTexture:destinationSlice:destinationLevel:destinationOrigin:
+_MTL_INLINE void MTL::ResourceStateCommandEncoder::moveTextureMappingsFromTexture(const MTL::Texture* sourceTexture, NS::UInteger sourceSlice, NS::UInteger sourceLevel, MTL::Origin sourceOrigin, MTL::Size sourceSize, const MTL::Texture* destinationTexture, NS::UInteger destinationSlice, NS::UInteger destinationLevel, MTL::Origin destinationOrigin)
+{
+    Object::sendMessage<void>(this, _MTL_PRIVATE_SEL(moveTextureMappingsFromTexture_sourceSlice_sourceLevel_sourceOrigin_sourceSize_toTexture_destinationSlice_destinationLevel_destinationOrigin_), sourceTexture, sourceSlice, sourceLevel, sourceOrigin, sourceSize, destinationTexture, destinationSlice, destinationLevel, destinationOrigin);
 }

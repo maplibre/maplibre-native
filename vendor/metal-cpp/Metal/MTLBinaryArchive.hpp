@@ -2,7 +2,7 @@
 //
 // Metal/MTLBinaryArchive.hpp
 //
-// Copyright 2020-2021 Apple Inc.
+// Copyright 2020-2023 Apple Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ _MTL_ENUM(NS::UInteger, BinaryArchiveError) {
     BinaryArchiveErrorInvalidFile = 1,
     BinaryArchiveErrorUnexpectedElement = 2,
     BinaryArchiveErrorCompilationFailure = 3,
+    BinaryArchiveErrorInternalError = 4,
 };
 
 class BinaryArchiveDescriptor : public NS::Copying<BinaryArchiveDescriptor>

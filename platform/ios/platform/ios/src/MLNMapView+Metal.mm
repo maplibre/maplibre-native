@@ -2,11 +2,13 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+Metal.h"
 
-#include <mbgl/mtl/renderable_resource.hpp>
+#import <mbgl/mtl/renderable_resource.hpp>
 
 #import <MetalKit/MetalKit.h>
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
+
+#import <Metal/Metal.hpp>
 
 @interface MLNMapViewImplDelegate : NSObject <MTKViewDelegate>
 @end
@@ -65,6 +67,9 @@ public:
         return { static_cast<uint32_t>(mtlView.drawableSize.width),
                  static_cast<uint32_t>(mtlView.drawableSize.height) };
     }
+
+    MLNMapViewMetalImpl& getBackend() { return backend; }
+    const MLNMapViewMetalImpl& getBackend() const { return backend; }
 
 private:
     MLNMapViewMetalImpl& backend;
@@ -131,8 +136,9 @@ void MLNMapViewMetalImpl::createView() {
         assert(resource.context);
     }*/
 
-    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-    
+    //id<MTLDevice> device = NS::Object::bridgingCast<MTLDevice*>(resource.getBackend().getDevice());
+    id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice();
+
     resource.mtlView = [[MTKView alloc] initWithFrame:mapView.bounds device:device];
     resource.mtlView.delegate = resource.delegate;
     resource.mtlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
