@@ -17,9 +17,7 @@ public:
 
     // Implementation of mbgl::gfx::RendererBackend
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override {
-        return *this;
-    }
+    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 private:
     void activate() override;
@@ -36,9 +34,7 @@ private:
 
     // Implementation of MLNMapViewImpl
 public:
-    mbgl::gfx::RendererBackend& getRendererBackend() override {
-        return *this;
-    }
+    mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
     mbgl::PremultipliedImage readStillImage() override;
     CGLContextObj getCGLContextObj() override;

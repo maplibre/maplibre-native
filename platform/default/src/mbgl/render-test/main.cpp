@@ -1,16 +1,16 @@
 #include <mbgl/render_test.hpp>
 
 #ifdef __APPLE
-#   if defined(TARGET_IPHONE_SIMULATOR)
-#       define IS_IOS
-#   elif defined(TARGET_OS_IPHONE)
-#       define IS_IOS
-#   endif
+#if defined(TARGET_IPHONE_SIMULATOR)
+#define IS_IOS
+#elif defined(TARGET_OS_IPHONE)
+#define IS_IOS
+#endif
 #endif
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 #ifdef IS_IOS
-try {
+    try {
 #endif
     return mbgl::runRenderTests(argc, argv);
 #ifdef IS_IOS
