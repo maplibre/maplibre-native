@@ -23,6 +23,10 @@
 #include <mbgl/renderer/render_target.hpp>
 #endif
 
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mbgl/gl/defines.hpp>
+#endif // MLN_RENDER_BACKEND_OPENGL
+
 #if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)
 // DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
 // Drawables will be on the left, vanilla rendering on the right
@@ -311,6 +315,18 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     };
 #endif // MLN_LEGACY_RENDERER
 
+    const auto enableScissorTest = [](bool enable) {
+#if MLN_RENDER_BACKEND_OPENGL
+        using namespace platform;
+        enable ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
+#endif // MLN_RENDER_BACKEND_OPENGL
+    };
+    const auto setScissor = [](int x, int y, int w, int h) {
+#if MLN_RENDER_BACKEND_OPENGL
+        platform::glScissor(x, y, w, h);
+#endif // MLN_RENDER_BACKEND_OPENGL
+    };
+
 #if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     if (parameters.staticData.has3D) {
         common3DPass();
@@ -332,11 +348,11 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_RENDERER_SPLIT_VIEW
     [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
     [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
-    [[maybe_unused]] const auto halfW = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width *
+    [[maybe_unused]] const auto halfW = static_cast<int>(backend.getDefaultRenderable().getSize().width *
                                                                        0.5f);
-    [[maybe_unused]] const auto halfH = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().height *
+    [[maybe_unused]] const auto halfH = static_cast<int>(backend.getDefaultRenderable().getSize().height *
                                                                        0.5f);
-    platform::glEnable(GL_SCISSOR_TEST);
+    enableScissorTest(true);
 #if MLN_RENDERER_QUAD_SPLIT_VIEW
     if (parameters.staticData.has3D) {
         common3DPass();
@@ -347,25 +363,25 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Drawable LayerGroups on the left
     // Opaque only on top
-    platform::glScissor(0, 0, halfW, H);
+    setScissor(0, 0, halfW, H);
     drawableTargetsPass();
     commonClearPass();
     drawableOpaquePass();
 
     // Composite (Opaque+Translucent) on bottom
-    platform::glScissor(0, 0, halfW, halfH);
+    setScissor(0, 0, halfW, halfH);
     drawableTranslucentPass();
 
     // RenderLayers on the right
     // Opaque only on top
-    platform::glScissor(halfW, 0, halfW, H);
+    setScissor(halfW, 0, halfW, H);
     commonClearPass();
     // Clipping masks were drawn only on the other side
     parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
 
     // Composite (Opaque+Translucent) on bottom
-    platform::glScissor(halfW, 0, halfW, halfH);
+    setScissor(halfW, 0, halfW, halfH);
     renderLayerTranslucentPass();
 #else  // MLN_RENDERER_QUAD_SPLIT_VIEW
     if (parameters.staticData.has3D) {
@@ -376,7 +392,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     // Drawable LayerGroups on the left
-    platform::glScissor(0, 0, halfW, H);
+    setScissor(0, 0, halfW, H);
     drawableTargetsPass();
     commonClearPass();
     parameters.clearTileClippingMasks();
@@ -384,15 +400,15 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     drawableTranslucentPass();
 
     // RenderLayers on the right
-    platform::glScissor(halfW, 0, W, H);
+    setScissor(halfW, 0, W, H);
     commonClearPass();
     parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
 #endif // MLN_RENDERER_QUAD_SPLIT_VIEW
     // Reset viewport
-    platform::glScissor(0, 0, W, H);
-    platform::glDisable(GL_SCISSOR_TEST);
+    setScissor(0, 0, W, H);
+    enableScissorTest(false);
 #else  // if MLN_RENDERER_SPLIT_VIEW
     if (parameters.staticData.has3D) {
         common3DPass();
