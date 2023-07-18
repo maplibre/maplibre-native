@@ -24,7 +24,6 @@ jobs:
       - name: Install macos dependencies
         run: |
           brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
           brew list pkg-config || brew install pkg-config
           brew list glfw || brew install glfw
 
@@ -42,27 +41,6 @@ jobs:
 
       - name: npm install
         run: npm ci --ignore-scripts          
-
-      - name: Prepare ccache
-        run: ccache --clear       
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1     
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats            
 
       - name: Install iOS packaging dependencies
         run: |

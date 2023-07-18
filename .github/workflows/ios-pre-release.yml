@@ -26,7 +26,6 @@ jobs:
         run: |
           which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           brew list cmake 1> /dev/null || brew install cmake
-          brew list ccache 1> /dev/null || brew install ccache
           brew list pkg-config 1> /dev/null || brew install pkg-config
           brew list glfw 1> /dev/null || brew install glfw
           brew list node 1> /dev/null || brew install node
@@ -46,27 +45,6 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts          
-
-      - name: Prepare ccache
-        run: ccache --clear       
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1     
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats            
 
       - name: Install iOS packaging dependencies
         run: |

@@ -1,0 +1,7 @@
+exports_files([
+    "src/NSImage+MLNAdditions.h",
+    "src/NSImage+MLNAdditions.mm",
+
+    "src/NSProcessInfo+MLNAdditions.h",
+    "src/NSProcessInfo+MLNAdditions.m",
+])

@@ -8,7 +8,6 @@ on:
     tags:
       - 'ios-*'
     paths:
-      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"
@@ -33,7 +32,6 @@ on:
     branches:
       - main
     paths:
-      - CMakeLists.txt
       - 'platform/ios/**'
       - 'platform/darwin/**'
       - ".github/workflows/ios-ci.yml"
@@ -102,27 +100,6 @@ jobs:
       - name: npm install
         run: npm ci --ignore-scripts
 
-      - name: Prepare ccache
-        run: ccache --clear
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
-
       - name: Save PR number
         if: github.event_name == 'pull_request'
         working-directory: ./
@@ -132,10 +109,12 @@ jobs:
           echo $PR_NUMBER > ./pr_number
 
       - name: Check debug symbols
-        run: make darwin-check-public-symbols
+        run: node platform/darwin/scripts/check-public-symbols.js macOS iOS
 
       - name: Lint plist files
-        run: make ios-lint-plist
+        run: |
+          find framework -type f -name "*.plist" | xargs plutil -lint
+          find app -type f -name "*.plist" | xargs plutil -lint
 
       - run: cp bazel/example_config.bzl bazel/config.bzl
 
@@ -146,10 +125,10 @@ jobs:
       - run: make style-code
 
       - name: Running iOS tests
-        run: bazel test //platform/ios/platform/ios/test:ios_test --test_output=errors
+        run: bazel test //platform/ios/test:ios_test --test_output=errors
 
       - name: Running iOS UI tests
-        run: bazel test //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors
 
       # size test
 

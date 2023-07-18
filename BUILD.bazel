@@ -15,15 +15,6 @@ load("//bazel:core.bzl",
 load("//bazel:macros.bzl", "appendList")
 
 # Generate code required by the core
-# All generated code is placed in the prefix location __generated__
-# by our generator scripts and genrules
-PREFIXED = {
-    "MLN_PUBLIC_GENERATED_STYLE_HEADERS": appendList(MLN_PUBLIC_GENERATED_STYLE_HEADERS, "__generated__/"),
-    "MLN_PRIVATE_GENERATED_STYLE_HEADERS": appendList(MLN_PRIVATE_GENERATED_STYLE_HEADERS, "__generated__/"),
-    "MLN_GENERATED_STYLE_SOURCE": appendList(MLN_GENERATED_STYLE_SOURCE, "__generated__/"),
-    "MLN_GENERATED_SHADER_HEADERS": appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
-}
-
 filegroup(
     name = "style_data",
     srcs = glob(["**/*.ejs"], allow_empty = False)
@@ -34,9 +25,9 @@ genrule(
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
     srcs = ["style_data"],
-    outs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
-        + PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"]
-        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"],
+    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS
+        + MLN_PRIVATE_GENERATED_STYLE_HEADERS
+        + MLN_GENERATED_STYLE_SOURCE,
 )
 
 filegroup(
@@ -49,7 +40,7 @@ genrule(
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
     srcs = ["shader_data"],
-    outs = PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
+    outs = MLN_GENERATED_SHADER_HEADERS,
 )
 
 # This header only target strips the __generated__ prefix for the compiler
@@ -57,9 +48,8 @@ genrule(
 cc_library(
     name = "mbgl-core-generated-public-artifacts",
     srcs = [],
-    hdrs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
-        + PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
-    strip_include_prefix = "__generated__/include",
+    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS
+        + MLN_GENERATED_SHADER_HEADERS,
     visibility = ["//visibility:public"],
     deps = [
         ":generated_style_code",
@@ -71,8 +61,7 @@ cc_library(
 cc_library(
     name = "mbgl-core-generated-private-artifacts",
     srcs = [],
-    hdrs = PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"],
-    strip_include_prefix = "__generated__/src",
+    hdrs = MLN_PRIVATE_GENERATED_STYLE_HEADERS,
     visibility = ["//visibility:private"],
     deps = [
         ":generated_style_code",
@@ -84,7 +73,7 @@ cc_library(
 cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE
-        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"]
+        + MLN_GENERATED_STYLE_SOURCE
         + MLN_OPENGL_SOURCE
         + select({
             ":drawable_renderer": MLN_DRAWABLES_SOURCE,
