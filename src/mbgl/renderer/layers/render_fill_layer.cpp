@@ -549,7 +549,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                                                  false,
                                                                                  style::AlignmentType::Auto,
                                                                                  false,
-                                                                                 true);
+                                                                                 false);
                     if (patternBuilder) {
                         patternBuilder->addTweaker(tweaker);
                     }
