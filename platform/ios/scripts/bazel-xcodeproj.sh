@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-pushd ../../../../../
-
 echo "------ Determining Maplibre version and hash ------"
 
 sem_version=0.0.0
@@ -17,8 +15,8 @@ if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
 fi
 
-cp platform/ios/platform/ios/framework/Info-static.plist "$temp_info_static_plist"
-cp platform/ios/platform/ios/framework/Info.plist "$temp_info_plist"
+cp platform/ios/framework/Info-static.plist "$temp_info_static_plist"
+cp platform/ios/framework/Info.plist "$temp_info_plist"
 
 plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
 plutil -replace MLNCommitHash -string "$hash" "$temp_info_static_plist"
@@ -28,5 +26,3 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
 bazel run //platform/ios:xcodeproj
-
-popd

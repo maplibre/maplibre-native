@@ -52,8 +52,6 @@ if [ "$release_type" = "debug" ]; then
    compilation_mode="dbg"
 fi;
 
-pushd ../../../../../
-
 echo "------ Determining Maplibre version and hash ------"
 
 sem_version=$(git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//')
@@ -67,8 +65,8 @@ if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
 fi
 
-cp platform/ios/platform/ios/framework/Info-static.plist "$temp_info_static_plist"
-cp platform/ios/platform/ios/framework/Info.plist "$temp_info_plist"
+cp platform/ios/framework/Info-static.plist "$temp_info_static_plist"
+cp platform/ios//framework/Info.plist "$temp_info_plist"
 
 plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
 plutil -replace MLNCommitHash -string "$hash" "$temp_info_static_plist"
@@ -84,8 +82,6 @@ bazel build //platform/ios:"$target" --apple_platform_type=ios \
    --objc_enable_binary_stripping \
    --copt=-Wall --copt=-Wextra --copt=-Wpedantic \
    --copt=-Werror
-
-popd
 
 echo "Done."
 echo "Package will be available in \"/bazel-bin/platform/ios/$target.xcframework.zip\""

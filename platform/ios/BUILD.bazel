@@ -9,9 +9,9 @@ load(
     "xcodeproj",
     "xcode_schemes",
 )
-load("bazel/macros.bzl", "info_plist")
-load("bazel/config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_NAME", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID", "BUNDLE_ID_PREFIX")
-load("bazel/files.bzl",
+load("//platform/ios/bazel:macros.bzl", "info_plist")
+load("//platform/ios/bazel:config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_NAME", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID", "BUNDLE_ID_PREFIX")
+load("//platform/ios/bazel:files.bzl",
     "MLN_IOS_PUBLIC_SOURCE",
     "MLN_IOS_PUBLIC_HEADERS",
     "MLN_IOS_PRIVATE_HEADERS",
@@ -19,6 +19,8 @@ load("bazel/files.bzl",
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
     "MLN_PUBLIC_IOS_APP_SOPURCE",
 )
+load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
+configure_device_profiles()
 
 filegroup(
     name = "ios_public_hdrs",
@@ -198,19 +200,6 @@ genrule(
     """,
 )
 
-local_provisioning_profile(
-    name = "provisioning_profile",
-    profile_name = APPLE_MOBILE_PROVISIONING_PROFILE_NAME,
-    team_id = APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID,
-)
-
-xcode_provisioning_profile(
-    name = "xcode_profile",
-    managed_by_xcode = True,
-    provisioning_profile = ":provisioning_profile",
-    visibility = ["//visibility:public"],
-)
-
 xcodeproj(
     name = "xcodeproj",
     build_mode = "xcode",
@@ -238,8 +227,20 @@ xcodeproj(
                 "device",
             ],
         ),
-        "//platform/ios/test:ios_test",
-        "//platform/ios/iosapp-UITests:uitest",
+        top_level_target(
+            "//platform/ios/iosapp-UITests:uitest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/test:ios_test",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
     ],
 )
 

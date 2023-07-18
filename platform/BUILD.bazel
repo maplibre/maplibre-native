@@ -60,7 +60,7 @@ objc_library(
         "darwin/include",
         "darwin/src",
     ],
-    copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
+    copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
         "-fmodules",
         "-Wno-gnu-zero-variadic-macro-arguments",
         "-Wno-variadic-macros",

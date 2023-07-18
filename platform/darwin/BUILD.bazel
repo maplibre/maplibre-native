@@ -12,7 +12,6 @@ load(
     "@build_bazel_rules_swift//swift:swift.bzl",
     "swift_library",
 )
-load("//bazel:macros.bzl", "appendList")
 
 filegroup(
     name = "darwin_private_hdrs",
@@ -121,7 +120,7 @@ objc_library(
         ],
         allow_empty = False,
     ),
-    copts = MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
+    copts = MAPLIBRE_FLAGS + WARNING_FLAGS,
     data = glob(
         [
             "test/Media.xcassets/**",
@@ -152,7 +151,7 @@ objc_library(
             "test/MLNOfflineStorageTests.mm",
         ],
     ),
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + ["-Wno-deprecated-declarations"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS + ["-Wno-deprecated-declarations"],
     visibility = [
         "//platform/ios/test:__pkg__",
     ],
@@ -209,7 +208,7 @@ objc_library(
         "include/mbgl/storage/reachability.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ],
-    copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
+    copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
         "-fmodules",
     ],
     defines = ["GLES_SILENCE_DEPRECATION=1", "GL_SILENCE_DEPRECATION=1"],

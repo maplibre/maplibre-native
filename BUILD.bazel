@@ -10,7 +10,6 @@ load("//bazel:core.bzl",
     "MLN_OPENGL_SOURCE",
     "MLN_OPENGL_HEADERS",
 )
-load("//bazel:macros.bzl", "appendList")
 
 # Generate code required by the core
 filegroup(

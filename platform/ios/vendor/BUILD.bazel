@@ -17,7 +17,7 @@ objc_library(
         allow_empty = False,
     ),
     sdk_frameworks = ["UIKit"],
-    copts = WARNING_FLAGS["ios"],
+    copts = WARNING_FLAGS,
     includes = ["SMCalloutView"],
     visibility = ["//platform/ios:__pkg__", "//platform:__pkg__"],
     tags = ["manual"],

@@ -96,6 +96,7 @@ cc_library(
         "//platform/darwin:__pkg__",
         "//platform/ios:__pkg__",
         "//platform/linux:__pkg__",
+        "//platform:__pkg__",
     ],
     deps = [
         "//:mbgl-core",
