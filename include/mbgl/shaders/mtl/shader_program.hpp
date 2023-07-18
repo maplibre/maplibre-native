@@ -5,11 +5,11 @@
 namespace mbgl {
 namespace mtl {
 
-class ShaderProgramMTL : public gfx::ShaderProgramBase {
+class ShaderProgram : public gfx::ShaderProgramBase {
 public:
-    ShaderProgramMTL()
+    ShaderProgram()
         : ShaderProgramBase() {}
-    ~ShaderProgramMTL() noexcept override = default;
+    ~ShaderProgram() noexcept override = default;
 
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }

@@ -613,8 +613,16 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                         LineWidth,
                                                                                         LineFloorWidth>(
                 paintPropertyBinders, evaluated);
-            auto builder = createLineBuilder("lineSDF",
-                                             lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+
+            if (!lineSDFShaderGroup) {
+                continue;
+            }
+            auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            if (!shader) {
+                continue;
+            }
+
+            auto builder = createLineBuilder("lineSDF", std::move(shader));
 
             // vertices, attributes and segments
             addAttributes(*builder, bucket, std::move(vertexAttrs));
@@ -644,8 +652,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                   LineWidth,
                                                                                   LinePattern>(paintPropertyBinders,
                                                                                                evaluated);
-            auto builder = createLineBuilder("linePattern",
-                                             linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+
+            auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            if (!shader) {
+                continue;
+            }
+            auto builder = createLineBuilder("linePattern", std::move(shader));
 
             // vertices and attributes
             addAttributes(*builder, bucket, std::move(vertexAttrs));
@@ -680,8 +692,14 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 vertexAttrs.readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
                     paintPropertyBinders, evaluated);
 
-            auto builder = createLineBuilder("lineGradient",
-                                             lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+            if (!lineGradientShaderGroup) {
+                continue;
+            }
+            auto shader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            if (!shader) {
+                continue;
+            }
+            auto builder = createLineBuilder("lineGradient", std::move(shader));
 
             // vertices and attributes
             addAttributes(*builder, bucket, std::move(vertexAttrs));
@@ -725,7 +743,15 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                         LineOffset,
                                                                                         LineWidth>(paintPropertyBinders,
                                                                                                    evaluated);
-            auto builder = createLineBuilder("line", lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+            if (!lineShaderGroup) {
+                continue;
+            }
+            auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            if (!shader) {
+                continue;
+            }
+
+            auto builder = createLineBuilder("line", std::move(shader));
 
             // vertices, attributes and segments
             addAttributes(*builder, bucket, std::move(vertexAttrs));

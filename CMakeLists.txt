@@ -154,7 +154,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/render_target.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program_mtl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
         
@@ -210,7 +210,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
@@ -1115,22 +1115,29 @@ if(MBGL_WITH_METAL)
     )
     list(APPEND 
         INCLUDE_FILES
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_builder.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/command_encoder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/context.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/tile_layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/upload_pass.hpp
     )
     list(APPEND 
         SRC_FILES
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_builder.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_tweaker.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/tile_layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
     )
 endif()
 

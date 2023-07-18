@@ -52,22 +52,32 @@ public:
         static std::unique_ptr<Instance> createInstance(gl::Context& context,
                                                         const ProgramParameters& programParameters,
                                                         const std::string& additionalDefines) {
+#if MLN_RENDER_BACKEND_OPENGL
+            constexpr auto backend = gfx::Backend::Type::OpenGL;
+#elif MLN_RENDER_BACKEND_METAL
+            constexpr auto backend = gfx::Backend::Type::Metal;
+#endif
+
+#if MLN_RENDER_BACKEND_METAL
+            return std::make_unique<Instance>(context);
+#else
             // Compile the shader
             std::initializer_list<const char*> vertexSource = {
                 "#version 300 es\n",
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
-                shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::vertex,
+                shaders::ShaderSource<shaders::BuiltIn::Prelude, backend>::vertex,
                 programParameters.vertexSource(gfx::Backend::Type::OpenGL).c_str()};
 
             std::initializer_list<const char*> fragmentSource = {
                 "#version 300 es\n",
                 programParameters.getDefines().c_str(),
                 additionalDefines.c_str(),
-                shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
+                shaders::ShaderSource<shaders::BuiltIn::Prelude, backend>::fragment,
                 programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()};
 
             return std::make_unique<Instance>(context, vertexSource, fragmentSource);
+#endif
         }
 
         UniqueProgram program;

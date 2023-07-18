@@ -1,6 +1,7 @@
 #include <mbgl/mtl/command_encoder.hpp>
 
 #include <mbgl/mtl/context.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 
 #include <cstring>
@@ -18,8 +19,7 @@ std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* na
 
 std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* name,
                                                                   const gfx::RenderPassDescriptor& descriptor) {
-    assert(false);
-    return nullptr;//std::make_unique<gl::RenderPass>(*this, name, descriptor);
+    return std::make_unique<RenderPass>(*this, name, descriptor);
 }
 
 void CommandEncoder::present(gfx::Renderable& renderable) {

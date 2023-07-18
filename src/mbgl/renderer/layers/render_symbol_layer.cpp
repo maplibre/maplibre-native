@@ -1030,6 +1030,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setVertexAttrName(posOffsetAttribName);
             }
 
+            if (!shaderGroup) {
+                return;
+            }
             const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 shaderGroup->getOrCreateShader(context, uniformProps, posOffsetAttribName));
             if (!shader) {

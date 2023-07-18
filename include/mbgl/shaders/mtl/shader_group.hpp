@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/shaders/mtl/shader_program_mtl.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 
@@ -9,12 +9,12 @@ namespace mbgl {
 namespace mtl {
 
 template <shaders::BuiltIn ShaderID>
-class ShaderGroupMTL final : public gfx::ShaderGroup {
+class ShaderGroup final : public gfx::ShaderGroup {
 public:
-    ShaderGroupMTL(const ProgramParameters& programParameters_)
+    ShaderGroup(const ProgramParameters& programParameters_)
         : ShaderGroup(),
           programParameters(programParameters_){};
-    ~ShaderGroupMTL() noexcept override = default;
+    ~ShaderGroup() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const std::vector<std::string>& propertiesAsUniforms,
@@ -35,10 +35,10 @@ public:
             additionalDefines += "\n";
         }
         const std::string shaderName = std::string(name) + "#" + std::to_string(key);
-        auto shader = get<mtl::ShaderProgramMTL>(shaderName);
+        auto shader = get<mtl::ShaderProgram>(shaderName);
         /*if (!shader) {
             auto& glContext = static_cast<gl::Context&>(context);
-            shader = ShaderProgramMTL::create(
+            shader = ShaderProgram::create(
                 glContext, programParameters, shaderName, firstAttribName, vert, frag, additionalDefines);
             if (!shader || !registerShader(shader, shaderName)) {
                 throw std::runtime_error("Failed to register " + shaderName + " with shader group!");

@@ -74,7 +74,7 @@ public:
 protected:
     const std::shared_ptr<UniformBuffer>& add(const std::string_view name, std::shared_ptr<UniformBuffer>&&);
 
-    virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer& uniformBuffer) = 0;
+    virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer&) { }
 
 protected:
     UniformBufferMap uniformBufferMap;

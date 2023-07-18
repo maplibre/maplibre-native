@@ -979,18 +979,31 @@ MLN_DRAWABLES_GL_HEADERS = [
 
 MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/mtl/command_encoder.cpp",
-    "src/mbgl/mtl/command_encoder.hpp",
     "src/mbgl/mtl/context.cpp",
-    "src/mbgl/mtl/context.hpp",
+    "src/mbgl/mtl/drawable.cpp",
+    "src/mbgl/mtl/drawable_impl.hpp",
+    "src/mbgl/mtl/drawable_builder.cpp",
+    "src/mbgl/mtl/layer_group.cpp",
     "src/mbgl/mtl/renderer_backend.cpp",
+    "src/mbgl/mtl/texture2d.cpp",
+    "src/mbgl/mtl/render_pass.cpp",
+    "src/mbgl/mtl/tile_layer_group.cpp",
     "src/mbgl/mtl/upload_pass.cpp",
-    "src/mbgl/mtl/upload_pass.hpp",
-    "src/mbgl/shaders/mtl/shader_program_mtl.cpp",
+    "src/mbgl/shaders/mtl/shader_program.cpp",
 ]
 
 MLN_DRAWABLES_MTL_HEADERS = [
+    "include/mbgl/mtl/command_encoder.hpp",
+    "include/mbgl/mtl/context.hpp",
+    "include/mbgl/mtl/drawable.hpp",
+    "include/mbgl/mtl/drawable_builder.hpp",
+    "include/mbgl/mtl/layer_group.hpp",
+    "include/mbgl/mtl/render_pass.hpp",
     "include/mbgl/mtl/renderer_backend.hpp",
     "include/mbgl/mtl/renderable_resource.hpp",
-    "include/mbgl/shaders/mtl/shader_group_mtl.hpp",
-    "include/mbgl/shaders/mtl/shader_program_mtl.hpp"
+    "include/mbgl/mtl/texture2d.hpp",
+    "include/mbgl/mtl/tile_layer_group.hpp",
+    "include/mbgl/mtl/upload_pass.hpp",
+    "include/mbgl/shaders/mtl/shader_group.hpp",
+    "include/mbgl/shaders/mtl/shader_program.hpp"
 ]

@@ -445,6 +445,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             // Outline always occurs in translucent pass, defaults to fill color
             const auto doOutline = evaluated.get<FillAntialias>();
 
+            if (!fillShaderGroup || (doOutline && !outlineShaderGroup)) {
+                continue;
+            }
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 fillShaderGroup->getOrCreateShader(context, uniformProps));
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
@@ -505,6 +508,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             // Outline does not default to fill in the pattern case
             const auto doOutline = evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined();
 
+            if (!patternShaderGroup || (doOutline && !outlinePatternShaderGroup)) {
+                continue;
+            }
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 patternShaderGroup->getOrCreateShader(context, uniformProps));
             const auto outlineShader = doOutline

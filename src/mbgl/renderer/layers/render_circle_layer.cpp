@@ -379,6 +379,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                                                           CircleStrokeOpacity>(
             paintPropertyBinders, evaluated);
 
+        if (!circleShaderGroup) {
+            continue;
+        }
         const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!circleShader) {
             continue;

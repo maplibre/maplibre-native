@@ -36,8 +36,7 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
 //    commandEncoder.context.vertexBuffer = result;
 //    MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
 //    return std::make_unique<gl::VertexBufferResource>(std::move(result), static_cast<int>(size));
-    assert(false);
-    return nullptr;
+    return std::make_unique<VertexBufferResource>();
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
@@ -58,8 +57,7 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
 //    commandEncoder.context.globalVertexArrayState.indexBuffer = result;
 //    MBGL_CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
 //    return std::make_unique<gl::IndexBufferResource>(std::move(result), static_cast<int>(size));
-    assert(false);
-    return nullptr;
+    return std::make_unique<IndexBufferResource>();
 }
 
 void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
@@ -82,8 +80,7 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
 //    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 //    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 //    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-    assert(false);
-    return nullptr;
+    return std::make_unique<TextureResource>();
 }
 
 void UploadPass::updateTextureResource(gfx::TextureResource& resource,
@@ -102,8 +99,8 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                           gfx::TextureChannelDataType type) {
 }
 
-struct VertexBufferMTL : public gfx::VertexBufferBase {
-    ~VertexBufferMTL() override = default;
+struct VertexBuffer : public gfx::VertexBufferBase {
+    ~VertexBuffer() override = default;
 
     std::unique_ptr<gfx::VertexBufferResource> resource;
 };

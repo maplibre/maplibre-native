@@ -400,10 +400,12 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                                                             FillExtrusionHeight,
                                                                             FillExtrusionPattern>(binders, evaluated);
 
+        if (!shaderGroup) {
+            continue;
+        }
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, uniformProps));
         if (!shader) {
-            assert(false);
             continue;
         }
 

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <mbgl/gfx/index_buffer.hpp>
+#include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gfx/vertex_buffer.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -17,6 +20,20 @@ class CommandEncoder;
 class Context;
 class VertexArray;
 class Texture2D;
+
+class VertexBufferResource : public gfx::VertexBufferResource {
+public:
+    VertexBufferResource() = default;
+};
+class IndexBufferResource : public gfx::IndexBufferResource {
+public:
+    IndexBufferResource() = default;
+};
+class TextureResource : public gfx::TextureResource {
+public:
+    TextureResource() = default;
+};
+
 
 class UploadPass final : public gfx::UploadPass {
 public:

@@ -2,6 +2,9 @@
 
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
+#include <mbgl/mtl/layer_group.hpp>
+#include <mbgl/mtl/texture2d.hpp>
+#include <mbgl/mtl/tile_layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
@@ -54,18 +57,15 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry&, const 
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    assert(false);
-    return nullptr;
+    return std::make_shared<TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
 }
 
 LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    assert(false);
-    return nullptr;
+    return std::make_shared<LayerGroup>(layerIndex, initialCapacity, name);
 }
 
 gfx::Texture2DPtr Context::createTexture2D() {
-    assert(false);
-    return nullptr;
+    return std::make_shared<Texture2D>(*this);
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {

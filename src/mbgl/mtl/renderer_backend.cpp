@@ -3,7 +3,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/context.hpp>
-#include <mbgl/shaders/mtl/shader_group_mtl.hpp>
+#include <mbgl/shaders/mtl/shader_group.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -91,7 +91,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /*(
         [&]() {
             const auto name = std::string(shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::name);
-            if (!registry.registerShaderGroup(std::make_shared<ShaderGroupMTL<ShaderID>>(programParameters), name)) {
+            if (!registry.registerShaderGroup(std::make_shared<ShaderGroup<ShaderID>>(programParameters), name)) {
                 throw std::runtime_error("Failed to register " + name + " with shader registry!");
             }
         }(),
