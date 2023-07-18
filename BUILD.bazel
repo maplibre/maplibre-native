@@ -1,27 +1,85 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("//bazel:core.bzl",
+    "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
+    "MLN_GENERATED_STYLE_SOURCE",
+    "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_CORE_SOURCE",
+    "MLN_CORE_HEADERS",
+    "MLN_OPENGL_SOURCE",
+    "MLN_OPENGL_HEADERS",
+)
+load("//bazel:macros.bzl", "appendList")
 
-# This is defined by both
-# platform/default/filesource-files.json
-# and
-# src/core-files.json
-# because they have dependencies on each other
+# Generate code required by the core
+filegroup(
+    name = "style_data",
+    srcs = glob(["**/*.ejs"], allow_empty = False)
+)
+
+genrule(
+    name = "generated_style_code",
+    cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
+    tools = ["scripts/generate-style-code.js"],
+    srcs = ["style_data"],
+    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS
+        + MLN_PRIVATE_GENERATED_STYLE_HEADERS
+        + MLN_GENERATED_STYLE_SOURCE,
+)
+
+filegroup(
+    name = "shader_data",
+    srcs = ["shaders/manifest.json"] + glob(["shaders/*.glsl"], allow_empty = False)
+)
+
+genrule(
+    name = "generated_shaders",
+    cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
+    tools = ["shaders/generate_shader_code.js"],
+    srcs = ["shader_data"],
+    outs = MLN_GENERATED_SHADER_HEADERS,
+)
+
+# This header only target strips the __generated__ prefix for the compiler
+# search paths, making the location of generated code transparent to the build
+cc_library(
+    name = "mbgl-core-generated-public-artifacts",
+    srcs = [],
+    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS
+        + MLN_GENERATED_SHADER_HEADERS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":generated_style_code",
+        ":generated_shaders",
+    ],
+)
+
+# ditto, but for private headers (under the src/ path)
+cc_library(
+    name = "mbgl-core-generated-private-artifacts",
+    srcs = [],
+    hdrs = MLN_PRIVATE_GENERATED_STYLE_HEADERS,
+    visibility = ["//visibility:private"],
+    deps = [
+        ":generated_style_code",
+    ],
+)
+
+# Generated source is inserted directly into the core target, no need to remove
+# the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = glob(
-        [
-            "src/**/*.cpp",
-            "src/**/*.hpp",
-        ],
-        allow_empty = False,
-    ),
-    hdrs = glob(
-        [
-            "include/**/*.hpp",
-        ],
-        allow_empty = False,
-    ),
+    srcs = MLN_CORE_SOURCE
+        + MLN_GENERATED_STYLE_SOURCE
+        + MLN_OPENGL_SOURCE,
+    hdrs = MLN_CORE_HEADERS
+        + MLN_OPENGL_HEADERS,
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    defines = select({
+        "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
+        "//conditions:default": []
+    }),
     includes = [
         "include",
         "src",
@@ -31,6 +89,8 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":mbgl-core-generated-public-artifacts",
+        ":mbgl-core-generated-private-artifacts",
         "//vendor:boost",
         "//vendor:csscolorparser",
         "//vendor:earcut.hpp",
@@ -46,7 +106,7 @@ cc_library(
         "//:ios": [
             "//vendor:icu",
         ],
-        "//:linux": [],
+        "//conditions:default": [],
     }),
 )
 
@@ -82,6 +142,13 @@ config_setting(
     name = "ios",
     flag_values = {
         ":maplibre_platform": "ios",
+    },
+)
+
+config_setting(
+    name = "windows",
+    flag_values = {
+        ":maplibre_platform": "windows",
     },
 )
 

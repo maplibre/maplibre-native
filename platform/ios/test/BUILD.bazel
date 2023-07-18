@@ -18,8 +18,8 @@ objc_library(
         ],
     ),
     deps = [
-        "//platform/ios:sdk",
-        "//platform/ios/platform/darwin/test:test_utility",
+        "//platform:ios-sdk",
+        "//platform/darwin:test_utility",
     ],
 )
 
@@ -32,9 +32,9 @@ objc_library(
         ],
         allow_empty = False,
     ),
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS,
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
     deps = [
-        "//platform/ios:sdk",
+        "//platform:ios-sdk",
     ],
 )
 
@@ -45,10 +45,10 @@ swift_library(
         ["*.swift"],
         allow_empty = False,
     ) + [
-        "//platform/ios/platform/darwin/test:MLNSDKTestHelpers.swift",
+        "//platform/darwin:test/MLNSDKTestHelpers.swift",
     ],
     deps = [
-        "//platform/ios:sdk",
+        "//platform:ios-sdk",
     ],
 )
 
@@ -63,8 +63,8 @@ ios_unit_test(
         "ios_tests_objc_srcs",
         "ios_tests_objcpp_srcs",
         "ios_tests_swift_srcs",
-        "//platform/ios/platform/darwin/test:shared_tests_objc_srcs",
-        "//platform/ios/platform/darwin/test:shared_tests_objcpp_srcs",
-        "//platform/ios/platform/darwin/test:shared_tests_swift_srcs",
+        "//platform/darwin:shared_tests_objc_srcs",
+        "//platform/darwin:shared_tests_objcpp_srcs",
+        "//platform/darwin:shared_tests_swift_srcs",
     ],
 )

@@ -1,12 +1,26 @@
 #!/usr/bin/env node
 'use strict';
 
+const { ArgumentParser } = require("argparse");
+const path = require('path');
 const fs = require('fs');
 const ejs = require('ejs');
 const spec = require('./style-spec');
 const colorParser = require('csscolorparser');
 
 require('./style-code');
+
+// Parse command line
+const args = (() => {
+  const parser = new ArgumentParser({
+      description: "MapLibre Shader Tools"
+  });
+  parser.add_argument("--root", "--r", {
+      help: "Directory root to place generated code",
+      required: false
+  });
+  return parser.parse_args();
+})();
 
 function parseCSSColor(str) {
   const color = colorParser.parseCSSColor(str);
@@ -208,10 +222,10 @@ global.defaultValue = function (property) {
   }
 };
 
-const layerHpp = ejs.compile(fs.readFileSync(`${__dirname}/../include/mbgl/style/layers/layer.hpp.ejs`, 'utf8'), {strict: true});
-const layerCpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/layers/layer.cpp.ejs`, 'utf8'), {strict: true});
-const propertiesHpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/layers/layer_properties.hpp.ejs`, 'utf8'), {strict: true});
-const propertiesCpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/layers/layer_properties.cpp.ejs`, 'utf8'), {strict: true});
+const layerHpp = ejs.compile(fs.readFileSync(`include/mbgl/style/layers/layer.hpp.ejs`, 'utf8'), {strict: true});
+const layerCpp = ejs.compile(fs.readFileSync(`src/mbgl/style/layers/layer.cpp.ejs`, 'utf8'), {strict: true});
+const propertiesHpp = ejs.compile(fs.readFileSync(`src/mbgl/style/layers/layer_properties.hpp.ejs`, 'utf8'), {strict: true});
+const propertiesCpp = ejs.compile(fs.readFileSync(`src/mbgl/style/layers/layer_properties.cpp.ejs`, 'utf8'), {strict: true});
 
 const collator = new Intl.Collator("en-US");
 
@@ -259,16 +273,16 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
 for (const layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
-  writeIfModified(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer));
-  writeIfModified(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer));
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), args.root);
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer), args.root);
 
   // Remove our fake property for the external interace.
   if (layer.type === 'line') {
     layer.paintProperties = layer.paintProperties.filter(property => property.name !== 'line-floor-width');
   }
 
-  writeIfModified(`${__dirname}/../include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer));
-  writeIfModified(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer));
+  writeIfModified(`include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer), args.root);
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), args.root);
 }
 
 // Light
@@ -284,7 +298,7 @@ const lightProperties = Object.keys(spec[`light`]).reduce((memo, name) => {
 // to get a deterministic order.
 lightProperties.sort((a, b) => collator.compare(a.name, b.name));
 
-const lightHpp = ejs.compile(fs.readFileSync(`${__dirname}/../include/mbgl/style/light.hpp.ejs`, 'utf8'), {strict: true});
-const lightCpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/light.cpp.ejs`, 'utf8'), {strict: true});
-writeIfModified(`${__dirname}/../include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}));
-writeIfModified(`${__dirname}/../src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}));
+const lightHpp = ejs.compile(fs.readFileSync(`include/mbgl/style/light.hpp.ejs`, 'utf8'), {strict: true});
+const lightCpp = ejs.compile(fs.readFileSync(`src/mbgl/style/light.cpp.ejs`, 'utf8'), {strict: true});
+writeIfModified(`include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}), args.root);
+writeIfModified(`src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}), args.root);
