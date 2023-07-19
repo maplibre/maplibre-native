@@ -1,16 +1,10 @@
 #pragma once
 
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
 
 #include <optional>
 #include <memory>
-
-namespace NS {
-template <class T> class SharedPtr;
-} // namespace NS
-namespace MTL {
-class Function;
-} // namespace MTL
 
 namespace mbgl {
 namespace mtl {
@@ -28,12 +22,15 @@ using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 class ShaderProgram final : public gfx::ShaderProgramBase {
 public:
     ShaderProgram(std::string name,
-                  NS::SharedPtr<MTL::Function> vertexFunction,
-                  NS::SharedPtr<MTL::Function> fragmentFunction);
+                  MTLDevicePtr device,
+                  MTLFunctionPtr vertexFunction,
+                  MTLFunctionPtr fragmentFunction);
     ~ShaderProgram() noexcept override;
 
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }
+
+    const MTLRenderPipelineStatePtr& getRenderPipelineState() const;
 
     std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
 
@@ -46,6 +43,8 @@ public:
     gfx::VertexAttributeArray& mutableVertexAttributes() override;
 
 protected:
+    std::string shaderName;
+
     struct Impl;
     std::unique_ptr<Impl> impl;
 };

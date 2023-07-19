@@ -1001,6 +1001,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/mtl/drawable.hpp",
     "include/mbgl/mtl/drawable_builder.hpp",
     "include/mbgl/mtl/layer_group.hpp",
+    "include/mbgl/mtl/mtl_fwd.hpp",
     "include/mbgl/mtl/render_pass.hpp",
     "include/mbgl/mtl/renderer_backend.hpp",
     "include/mbgl/mtl/renderable_resource.hpp",

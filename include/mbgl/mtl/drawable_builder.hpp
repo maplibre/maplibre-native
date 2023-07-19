@@ -4,16 +4,16 @@
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 
 namespace mbgl {
-namespace gl {
+namespace mtl {
 
 /**
-    Base class for OpenGL-specific drawable builders.
+    Base class for Metal-specific drawable builders.
  */
-class DrawableGLBuilder final : public gfx::DrawableBuilder {
+class DrawableBuilder final : public gfx::DrawableBuilder {
 public:
-    DrawableGLBuilder(std::string name_)
+    DrawableBuilder(std::string name_)
         : gfx::DrawableBuilder(std::move(name_)) {}
-    ~DrawableGLBuilder() override = default;
+    ~DrawableBuilder() override = default;
 
     using DrawSegment = gfx::Drawable::DrawSegment;
     std::unique_ptr<DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) override;
@@ -25,5 +25,5 @@ protected:
     void init() override;
 };
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl

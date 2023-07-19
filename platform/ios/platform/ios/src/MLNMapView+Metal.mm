@@ -136,8 +136,7 @@ void MLNMapViewMetalImpl::createView() {
         assert(resource.context);
     }*/
 
-    //id<MTLDevice> device = NS::Object::bridgingCast<MTLDevice*>(resource.getBackend().getDevice());
-    id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice();
+    id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
 
     resource.mtlView = [[MTKView alloc] initWithFrame:mapView.bounds device:device];
     resource.mtlView.delegate = resource.delegate;

@@ -1,13 +1,10 @@
 #pragma once
 
 #include <mbgl/gfx/renderer_backend.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/util.hpp>
-
-namespace MTL {
-class Device;
-}
 
 namespace mbgl {
 
@@ -31,7 +28,8 @@ public:
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
 #endif
 
-    MTL::Device* getDevice() const { return device; }
+    const MTLDevicePtr& getDevice() const;
+    const MTLCommandQueuePtr& getCommandQueue() const;
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
@@ -59,7 +57,8 @@ public:
     void setScissorTest(bool);
 
 protected:
-    MTL::Device* device;
+    struct Impl;
+    std::unique_ptr<Impl> impl;
 };
 
 } // namespace mtl

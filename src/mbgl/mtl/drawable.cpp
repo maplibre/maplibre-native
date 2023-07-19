@@ -27,13 +27,14 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     auto& context = static_cast<Context&>(parameters.context);
 
-    /*
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgram&>(*shader);
-        if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
-            context.program = shaderGL.getGLProgramID();
-        }
+        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
+        const auto& state = shaderMTL.getRenderPipelineState();
+//        if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
+//            context.program = shaderGL.getGLProgramID();
+//        }
     }
+    /*
     if (!shader || context.program.getCurrentValue() == 0) {
         mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
         assert(false);

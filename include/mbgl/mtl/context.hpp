@@ -16,10 +16,14 @@
 #include <unordered_map>
 
 namespace mbgl {
+
 class ProgramParameters;
+
 namespace mtl {
+
 class RendererBackend;
 class ShaderProgram;
+
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
 class Context final : public gfx::Context {
@@ -144,6 +148,9 @@ private:
     bool cleanupOnDestruction = true;
 
     gfx::RenderingStats stats;
+    
+    struct Impl;
+    std::unique_ptr<Impl> impl;
 };
 
 } // namespace gl

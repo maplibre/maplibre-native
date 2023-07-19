@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/index_buffer.hpp>
+#include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>

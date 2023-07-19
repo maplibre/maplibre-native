@@ -2,11 +2,14 @@
 
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
+#include <mbgl/mtl/drawable_builder.hpp>
 #include <mbgl/mtl/layer_group.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/tile_layer_group.hpp>
+#include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
+#include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/traits.hpp>
@@ -16,13 +19,20 @@
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 
+#include <algorithm>
+
 namespace mbgl {
 namespace mtl {
+
+struct Context::Impl {
+    MTLRenderPassDescriptorPtr renderPassDescriptor;
+};
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(16), // TODO
       backend(backend_),
-      stats() {}
+      stats(),
+      impl(std::make_unique<Impl>()) {}
 
 Context::~Context() noexcept {
 /*
@@ -34,7 +44,26 @@ Context::~Context() noexcept {
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
-    return std::make_unique<mtl::CommandEncoder>(*this);
+    if (!impl->renderPassDescriptor) {
+        impl->renderPassDescriptor = NS::RetainPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
+        
+        //colorAttachments() const;
+        //setDepthAttachment(const class RenderPassDepthAttachmentDescriptor* depthAttachment);
+        //setStencilAttachment(const class RenderPassStencilAttachmentDescriptor* stencilAttachment);
+        impl->renderPassDescriptor->setRenderTargetWidth(100);
+        impl->renderPassDescriptor->setRenderTargetHeight(100);
+        impl->renderPassDescriptor->setDefaultRasterSampleCount(1);
+    }
+
+    if (const auto& queue = backend.getCommandQueue()) {
+        if (auto* buffer = queue->commandBuffer()) {
+            if (auto encoder = NS::RetainPtr(buffer->renderCommandEncoder(impl->renderPassDescriptor.get()))) {
+                return std::make_unique<mtl::CommandEncoder>(*this, std::move(encoder));
+            }
+        }
+    }
+    assert(false);
+    return nullptr;
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
@@ -44,45 +73,57 @@ UniqueShaderProgram Context::createProgram(std::string name,
                                            const ProgramParameters& programParameters,
                                            const std::unordered_map<std::string, std::string>& additionalDefines)
 {
-    auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
+    const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
-    auto device = backend.getDevice();
+    const auto device = backend.getDevice();
 
-    auto defines = NS::Dictionary::alloc()->init();
+    // No NSMutableDictionary?
+    const auto& programDefines = programParameters.getDefines();
+    const auto numDefines = programDefines.size() + additionalDefines.size();
+    
+    std::vector<NS::Object*> rawDefines;
+    rawDefines.reserve(2 * numDefines);
+    const auto addDefine = [&rawDefines](const auto& pair){
+        auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
+        auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
+        rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size()/2), nsKey);
+        rawDefines.insert(rawDefines.end(), nsVal);
+    };
+    std::for_each(programDefines.begin(), programDefines.end(), addDefine);
+    std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
+    
+    const auto nsDefines = NS::Dictionary::dictionary(&rawDefines[numDefines],
+                                                      rawDefines.data(),
+                                                      static_cast<NS::UInteger>(numDefines));
+    rawDefines.clear();
 
-    //auto options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
     auto options = MTL::CompileOptions::alloc()->init();
-
-    options->setPreprocessorMacros(defines);
+    options->setPreprocessorMacros(nsDefines);
     options->setFastMathEnabled(true);
     options->setLanguageVersion(MTL::LanguageVersion3_0);
     options->setLibraryType(MTL::LibraryTypeExecutable);
-    //options->setInstallName(const NS::String* installName);
-    //options->setLibraries(const NS::Array* libraries);
     options->setPreserveInvariance(true);
     options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
     options->setCompileSymbolVisibility(MTL::CompileSymbolVisibilityDefault);
     options->setAllowReferencingUndefinedSymbols(false);
     //options->setMaxTotalThreadsPerThreadgroup(NS::UInteger);
 
+    
     NS::Error* error = nullptr;
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
 
     MTL::Library* library = device->newLibrary(nsSource, nullptr, &error);
-    if (!library)
+    if (!library || error)
     {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
-        if (errPtr && errPtr[0]) {
-            Log::Error(Event::Shader, name + " compile failed: " + std::string(errPtr));
-        } else {
-            Log::Error(Event::Shader, name + " compile failed");
-        }
+        const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
+        Log::Error(Event::Shader, name + " compile failed" + errStr);
         assert(false);
         return nullptr;
     }
 
     const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
-    NS::SharedPtr<MTL::Function> vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
+    NS::SharedPtr<MTL::Function> vertexFunction = NS::RetainPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
         assert(false);
@@ -93,7 +134,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     NS::SharedPtr<MTL::Function> fragmentFunction;
     if (!fragmentName.empty()) {
         const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
-        fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
+        fragmentFunction = NS::RetainPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
             assert(false);
@@ -101,7 +142,10 @@ UniqueShaderProgram Context::createProgram(std::string name,
         }
     }
     
-    return std::make_unique<ShaderProgram>(std::move(name), std::move(vertexFunction), std::move(fragmentFunction));
+    return std::make_unique<ShaderProgram>(std::move(name),
+                                           device,
+                                           std::move(vertexFunction),
+                                           std::move(fragmentFunction));
 }
 
 void Context::performCleanup() {
@@ -112,13 +156,11 @@ void Context::reduceMemoryUsage() {
 
 #if MLN_DRAWABLE_RENDERER
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
-    assert(false);
-    return nullptr;
+    return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
-    assert(false);
-    return nullptr;
+    return std::make_shared<UniformBuffer>(data, size);
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {

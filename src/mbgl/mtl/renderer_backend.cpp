@@ -51,6 +51,12 @@ half4 fragment fragmentMain(v2f in [[stage_in]]) {
 )";
 };
 
+template <>
+struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> :
+        public ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>{
+    static constexpr auto name = "BackgroundPatternShader";
+};
+
 } // namespace shaders
 } // namespace mbgl
 
@@ -59,17 +65,30 @@ half4 fragment fragmentMain(v2f in [[stage_in]]) {
 namespace mbgl {
 namespace mtl {
 
+struct RendererBackend::Impl {
+    MTLDevicePtr device;
+    MTLCommandQueuePtr commandQueue;
+};
+
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
-    device(MTL::CreateSystemDefaultDevice()) {
-    assert(device);
+      impl(std::make_unique<Impl>()) {
+
+    impl->device = NS::TransferPtr(MTL::CreateSystemDefaultDevice());
+    assert(impl->device);
+
+    impl->commandQueue = NS::TransferPtr(impl->device->newCommandQueue());
+    assert(impl->commandQueue);
 }
 
-RendererBackend::~RendererBackend() {
-    if (device) {
-        device->release();
-        device = nullptr;
-    }
+RendererBackend::~RendererBackend() = default;
+
+const MTLDevicePtr& RendererBackend::getDevice() const {
+    return impl->device;
+}
+
+const MTLCommandQueuePtr& RendererBackend::getCommandQueue() const {
+    return impl->commandQueue;
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
@@ -144,8 +163,8 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 }
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
-    registerTypes<shaders::BuiltIn::BackgroundShader/*,
-                  shaders::BuiltIn::BackgroundPatternShader,
+    registerTypes<shaders::BuiltIn::BackgroundShader,
+                  shaders::BuiltIn::BackgroundPatternShader/*,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,

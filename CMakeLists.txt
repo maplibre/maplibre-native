@@ -1121,6 +1121,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/mtl_fwd.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/tile_layer_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_block.hpp

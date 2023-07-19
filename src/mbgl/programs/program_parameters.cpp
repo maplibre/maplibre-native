@@ -1,22 +1,19 @@
 #include <mbgl/programs/program_parameters.hpp>
+
 #include <mbgl/util/string.hpp>
+
 #include <string_view>
 #include <stdexcept>
 
 namespace mbgl {
 
 ProgramParameters::ProgramParameters(const float pixelRatio, const bool overdraw)
-    : defines([&] {
-          std::string result;
-          result.reserve(32);
-          result += "#define DEVICE_PIXEL_RATIO ";
-          result += util::toString(pixelRatio, true);
-          result += '\n';
-          if (overdraw) {
-              result += "#define OVERDRAW_INSPECTOR\n";
-          }
-          return result;
-      }()) {}
+    : defines(2) {
+    defines["DEVICE_PIXEL_RATIO"] = util::toString(pixelRatio, true);
+    if (overdraw) {
+        defines["OVERDRAW_INSPECTOR"] = std::string();
+    }
+}
 
 ProgramParameters ProgramParameters::withShaderSource(const ProgramSource& source) const noexcept {
     assert(gfx::Backend::Type::TYPE_MAX != source.backend);
@@ -34,8 +31,19 @@ ProgramParameters ProgramParameters::withDefaultSource(const ProgramSource& sour
     return params;
 }
 
-const std::string& ProgramParameters::getDefines() const {
-    return defines;
+const std::string& ProgramParameters::getDefinesString() {
+    if (definesStr.empty() && !defines.empty()) {
+        definesStr.assign(defines.size() * 32, '\0');
+        definesStr.clear();
+        for (const auto& pair : defines) {
+            definesStr.append("#define ").append(pair.first);
+            if (!pair.second.empty()) {
+                definesStr.append(" ").append(pair.second);
+            }
+            definesStr.append("\n");
+        }
+    }
+    return definesStr;
 }
 
 const std::string& ProgramParameters::vertexSource(gfx::Backend::Type backend) const {

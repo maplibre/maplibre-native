@@ -1,6 +1,9 @@
 #pragma once
 
 #include <mbgl/gfx/command_encoder.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
+
+#include <memory>
 
 namespace mbgl {
 namespace mtl {
@@ -9,9 +12,8 @@ class Context;
 
 class CommandEncoder final : public gfx::CommandEncoder {
 public:
-    explicit CommandEncoder(Context& context_)
-        : context(context_) {}
-
+    explicit CommandEncoder(Context& context_,
+                            MTLRenderCommandEncoderPtr);
     ~CommandEncoder() override;
 
     //friend class UploadPass;
@@ -27,6 +29,9 @@ private:
 
 public:
     mtl::Context& context;
+    
+    struct Impl;
+    std::unique_ptr<Impl> impl;
 };
 
 } // namespace mtl

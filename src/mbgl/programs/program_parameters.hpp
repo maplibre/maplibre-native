@@ -5,6 +5,7 @@
 #include <array>
 #include <cassert>
 #include <string>
+#include <unordered_map>
 
 namespace mbgl {
 
@@ -18,8 +19,7 @@ public:
         ProgramSource() = default;
 
         /// @brief Construct a new ProgramSource object
-        /// @param forBackend The provided source code is intended for use with the give
-        /// rendering backend.
+        /// @param forBackend The provided source code is intended for use with the given rendering backend.
         /// @param vertex_ The vertex shader source code, or empty string if not provided.
         /// @param fragment_ The fragment shader source code, or empty string if not provided.
         ProgramSource(gfx::Backend::Type forBackend, const std::string& vertex_, const std::string& fragment_)
@@ -45,7 +45,11 @@ public:
     /// @brief Get a list of built-in shader preprocessor defines
     /// @return Shader source string
     /// @todo With the addition of future backends, defines should also be backend-aware
-    const std::string& getDefines() const;
+    const std::string& getDefinesString();
+
+    /// @brief Get a list of built-in shader preprocessor defines
+    /// @return Map of key-value pairs representing preprocessor definitions
+    const std::unordered_map<std::string, std::string>& getDefines() const { return defines; }
 
     /// @brief Get source code for the vertex shader compatible with the requested backend
     /// @param backend Backend type
@@ -58,7 +62,8 @@ public:
     const std::string& fragmentSource(gfx::Backend::Type backend) const;
 
 private:
-    std::string defines;
+    std::unordered_map<std::string, std::string> defines;
+    std::string definesStr;
 
     std::array<ProgramSource, static_cast<size_t>(gfx::Backend::Type::TYPE_MAX)> defaultSources;
     std::array<ProgramSource, static_cast<size_t>(gfx::Backend::Type::TYPE_MAX)> userSources;
