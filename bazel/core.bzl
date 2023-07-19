@@ -988,7 +988,10 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/mtl/texture2d.cpp",
     "src/mbgl/mtl/render_pass.cpp",
     "src/mbgl/mtl/tile_layer_group.cpp",
+    "src/mbgl/mtl/uniform_block.cpp",
+    "src/mbgl/mtl/uniform_buffer.cpp",
     "src/mbgl/mtl/upload_pass.cpp",
+    "src/mbgl/mtl/vertex_attribute.cpp",
     "src/mbgl/shaders/mtl/shader_program.cpp",
 ]
 
@@ -1003,7 +1006,10 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/mtl/renderable_resource.hpp",
     "include/mbgl/mtl/texture2d.hpp",
     "include/mbgl/mtl/tile_layer_group.hpp",
+    "include/mbgl/mtl/uniform_block.hpp",
+    "include/mbgl/mtl/uniform_buffer.hpp",
     "include/mbgl/mtl/upload_pass.hpp",
+    "include/mbgl/mtl/vertex_attribute.hpp",
     "include/mbgl/shaders/mtl/shader_group.hpp",
     "include/mbgl/shaders/mtl/shader_program.hpp"
 ]

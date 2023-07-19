@@ -22,7 +22,12 @@ using mat4 = std::array<double, 4 * 4>;
 namespace gfx {
 
 class ShaderProgramBase;
+class VertexAttribute;
+class VertexAttributeArray;
 class VertexVectorBase;
+
+using UniqueVertexAttribute = std::unique_ptr<VertexAttribute>;
+using UniqueVertexAttributeArray = std::unique_ptr<VertexAttributeArray>;
 
 class VertexAttribute {
 public:
@@ -211,15 +216,15 @@ public:
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const std::unique_ptr<VertexAttribute>& get(const std::string& name) const;
+    const UniqueVertexAttribute& get(const std::string& name) const;
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const std::unique_ptr<VertexAttribute>& add(std::string name,
-                                                int index = -1,
-                                                AttributeDataType = AttributeDataType::Invalid,
-                                                std::size_t count = 1);
+    const UniqueVertexAttribute& add(std::string name,
+                                     int index = -1,
+                                     AttributeDataType = AttributeDataType::Invalid,
+                                     std::size_t count = 1);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
@@ -227,10 +232,10 @@ public:
     /// @param index index to match, or -1 for any
     /// @param type type to match, or `Invalid` for any
     /// @param count type to match, or 0 for any
-    const std::unique_ptr<VertexAttribute>& getOrAdd(std::string name,
-                                                     int index = -1,
-                                                     AttributeDataType type = AttributeDataType::Invalid,
-                                                     std::size_t count = 0);
+    const UniqueVertexAttribute& getOrAdd(std::string name,
+                                          int index = -1,
+                                          AttributeDataType type = AttributeDataType::Invalid,
+                                          std::size_t count = 0);
 
     // Set a value if the element is present
     template <typename T>
@@ -266,14 +271,14 @@ public:
     }
 
     using ResolveDelegate =
-        std::function<void(const std::string&, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
+        std::function<void(const std::string&, VertexAttribute&, const UniqueVertexAttribute&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
     VertexAttributeArray& operator=(VertexAttributeArray&&);
     VertexAttributeArray& operator=(const VertexAttributeArray&);
 
-    virtual std::unique_ptr<VertexAttributeArray> clone() const {
+    virtual UniqueVertexAttributeArray clone() const {
         auto newAttrs = std::make_unique<VertexAttributeArray>();
         newAttrs->copy(*this);
         return newAttrs;
@@ -332,27 +337,18 @@ public:
     }
 
 protected:
-    const std::unique_ptr<VertexAttribute>& add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
-        const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
-        if (result.second) {
-            result.first->second = std::move(attr);
-            return result.first->second;
-        } else {
-            return nullref;
-        }
-    }
+    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&& attr);
 
-    virtual std::unique_ptr<VertexAttribute> create(int index, AttributeDataType dataType, std::size_t count) const {
+    virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);
     }
 
-    virtual std::unique_ptr<VertexAttribute> copy(const gfx::VertexAttribute& attr) const {
+    virtual UniqueVertexAttribute copy(const gfx::VertexAttribute& attr) const {
         return std::make_unique<VertexAttribute>(attr);
     }
 
 protected:
     AttributeMap attrs;
-    static std::unique_ptr<VertexAttribute> nullref;
 };
 
 } // namespace gfx

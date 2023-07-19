@@ -1123,7 +1123,10 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_tweaker.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/tile_layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_block.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/upload_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_attribute.hpp
     )
     list(APPEND 
         SRC_FILES
@@ -1136,7 +1139,10 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/tile_layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_block.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
     )
 endif()

@@ -33,6 +33,10 @@ class TextureResource : public gfx::TextureResource {
 public:
     TextureResource() = default;
 };
+class RenderbufferResource : public gfx::RenderbufferResource {
+public:
+    RenderbufferResource() = default;
+};
 
 
 class UploadPass final : public gfx::UploadPass {

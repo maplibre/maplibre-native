@@ -12,10 +12,15 @@
 #include <mbgl/gfx/texture2d.hpp>
 #endif
 
-namespace mbgl {
-namespace mtl {
+#include <memory>
+#include <unordered_map>
 
+namespace mbgl {
+class ProgramParameters;
+namespace mtl {
 class RendererBackend;
+class ShaderProgram;
+using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
 class Context final : public gfx::Context {
 public:
@@ -28,9 +33,14 @@ public:
 
     const gfx::RenderingStats& renderingStats() const override { return stats; }
 
+    UniqueShaderProgram createProgram(std::string name,
+                                      std::string_view source,
+                                      std::string_view vertexName,
+                                      std::string_view fragmentName,
+                                      const ProgramParameters& programParameters,
+                                      const std::unordered_map<std::string, std::string>& additionalDefines);
+
     /*
-    UniqueShader createShader(ShaderType type, const std::initializer_list<const char*>& sources);
-    UniqueProgram createProgram(ShaderID vertexShader, ShaderID fragmentShader, const char* location0AttribName);
     void verifyProgramLinkage(ProgramID);
     void linkProgram(ProgramID);
     UniqueTexture createUniqueTexture();

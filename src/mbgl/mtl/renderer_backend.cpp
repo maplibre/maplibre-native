@@ -19,6 +19,43 @@
 
 #include <cassert>
 
+
+namespace mbgl {
+namespace shaders {
+template <>
+struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "BackgroundShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto source = R"(
+#include <metal_stdlib>
+using namespace metal;
+
+struct v2f {
+    float4 position [[position]];
+    half3 color;
+};
+
+v2f vertex vertexMain(uint vertexId [[vertex_id]],
+                      device const float3* positions [[buffer(0)]],
+                      device const float3* colors [[buffer(1)]]) {
+    v2f o;
+    o.position = float4(positions[vertexId], 1.0);
+    o.color = half3(colors[ vertexId ]);
+    return o;
+}
+
+half4 fragment fragmentMain(v2f in [[stage_in]]) {
+    return half4(in.color, 1.0);
+}
+)";
+};
+
+} // namespace shaders
+} // namespace mbgl
+
+
+
 namespace mbgl {
 namespace mtl {
 
@@ -96,18 +133,18 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /// Registration calls are wrapped in a lambda that throws on registration
     /// failure, we shouldn't expect registration to faill unless the shader
     /// registry instance provided already has conflicting programs present.
-    /*(
+    (
         [&]() {
             const auto name = std::string(shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::name);
             if (!registry.registerShaderGroup(std::make_shared<ShaderGroup<ShaderID>>(programParameters), name)) {
                 throw std::runtime_error("Failed to register " + name + " with shader registry!");
             }
         }(),
-    ...);*/
+    ...);
 }
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
-    registerTypes<shaders::BuiltIn::BackgroundShader,
+    registerTypes<shaders::BuiltIn::BackgroundShader/*,
                   shaders::BuiltIn::BackgroundPatternShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::FillShader,
@@ -128,7 +165,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFTextShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
-                  shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
+                  shaders::BuiltIn::SymbolTextAndIconShader*/>(shaders, programParameters);
 }
 #endif
 
