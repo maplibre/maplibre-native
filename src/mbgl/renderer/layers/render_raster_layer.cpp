@@ -256,16 +256,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         rasterShader = context.getGenericShader(shaders, "RasterShader");
     }
 
-    if (!staticDataSharedVertices) {
-        staticDataSharedVertices = std::make_shared<RasterVertexVector>(RenderStaticData::rasterVertices());
-    }
-    if (!staticDataIndices) {
-        staticDataIndices = std::make_shared<RasterIndexVector>(RenderStaticData::quadTriangleIndices());
-    }
-    if (!staticDataSegments) {
-        staticDataSegments = std::make_shared<RasterSegmentVector>(RenderStaticData::rasterSegments());
-    }
-
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
     RasterProgram::Binders paintAttributeData{evaluated, 0};
 
