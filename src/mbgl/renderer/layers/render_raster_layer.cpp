@@ -306,72 +306,74 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
-    auto buildTileDrawables = [&setTextures](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                             const RasterBucket& bucket) {
-        auto buildRenderData = [](const TileMask& mask,
-                                  std::vector<std::array<int16_t, 2>>& vertices,
-                                  std::vector<std::array<int16_t, 2>>& attributes,
-                                  std::vector<uint16_t>& indices,
-                                  std::vector<SegmentBase>& segments) {
-            constexpr const uint16_t vertexLength = 4;
+    auto buildRenderData = [](const TileMask& mask,
+                              std::vector<std::array<int16_t, 2>>& vertices,
+                              std::vector<std::array<int16_t, 2>>& attributes,
+                              std::vector<uint16_t>& indices,
+                              std::vector<SegmentBase>& segments) {
+        constexpr const size_t vertexLength = 4;
 
-            if (vertices.empty()) {
-                vertices.reserve(mask.size() * vertexLength);
-                attributes.reserve(mask.size() * vertexLength);
-                indices.reserve(mask.size() * 6);
-                segments.reserve(mask.size());
+        if (vertices.empty()) {
+            vertices.reserve(mask.size() * vertexLength);
+            attributes.reserve(mask.size() * vertexLength);
+            indices.reserve(mask.size() * 6);
+            segments.reserve(mask.size());
+        }
+        // Create the vertex buffer for the specified tile mask.
+        for (const auto& id : mask) {
+            // Create a quad for every masked tile.
+            const int32_t vertexExtent = util::EXTENT >> id.z;
+
+            const Point<int16_t> tlVertex = {static_cast<int16_t>(id.x * vertexExtent),
+                                             static_cast<int16_t>(id.y * vertexExtent)};
+            const Point<int16_t> brVertex = {static_cast<int16_t>(tlVertex.x + vertexExtent),
+                                             static_cast<int16_t>(tlVertex.y + vertexExtent)};
+
+            if (segments.empty() ||
+                (segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max())) {
+                // Move to a new segments because the old one can't hold the geometry.
+                segments.emplace_back(vertices.size(), indices.size());
             }
-            // Create the vertex buffer for the specified tile mask.
-            for (const auto& id : mask) {
-                // Create a quad for every masked tile.
-                const int32_t vertexExtent = util::EXTENT >> id.z;
 
-                const Point<int16_t> tlVertex = {static_cast<int16_t>(id.x * vertexExtent),
-                                                 static_cast<int16_t>(id.y * vertexExtent)};
-                const Point<int16_t> brVertex = {static_cast<int16_t>(tlVertex.x + vertexExtent),
-                                                 static_cast<int16_t>(tlVertex.y + vertexExtent)};
+            vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
 
-                if (segments.empty() ||
-                    (segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max())) {
-                    // Move to a new segments because the old one can't hold the geometry.
-                    segments.emplace_back(vertices.size(), indices.size());
-                }
+            vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
 
-                vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
-                attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
+            vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
 
-                vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
-                attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
+            vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
 
-                vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
-                attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
+            auto& segment = segments.back();
+            assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
+            const auto offset = static_cast<uint16_t>(segment.vertexLength);
 
-                vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
-                attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
+            // 0, 1, 2
+            // 1, 2, 3
+            indices.insert(indices.end(),
+                           {offset,
+                            static_cast<uint16_t>(offset + 1u),
+                            static_cast<uint16_t>(offset + 2u),
+                            static_cast<uint16_t>(offset + 1u),
+                            static_cast<uint16_t>(offset + 2u),
+                            static_cast<uint16_t>(offset + 3u)});
 
-                auto& segment = segments.back();
-                assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-                const auto offset = static_cast<uint16_t>(segment.vertexLength);
+            segment.vertexLength += vertexLength;
+            segment.indexLength += 6;
+        }
+    };
 
-                // 0, 1, 2
-                // 1, 2, 3
-                indices.insert(indices.end(),
-                               {offset,
-                                static_cast<uint16_t>(offset + 1u),
-                                static_cast<uint16_t>(offset + 2u),
-                                static_cast<uint16_t>(offset + 1u),
-                                static_cast<uint16_t>(offset + 2u),
-                                static_cast<uint16_t>(offset + 3u)});
-
-                segment.vertexLength += vertexLength;
-                segment.indexLength += 6;
-            }
-        };
-
+    auto buildTileDrawables = [&setTextures, &buildRenderData](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                                               const RasterBucket& bucket) {
         std::vector<std::array<int16_t, 2>> vertices, attributes;
         std::vector<uint16_t> indices;
         std::vector<SegmentBase> segments;
+
         buildRenderData(bucket.mask, vertices, attributes, indices, segments);
+
         builder->addVertices(vertices, 0, vertices.size());
         builder->setSegments(gfx::Triangles(), indices, segments.data(), segments.size());
 
@@ -396,53 +398,34 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                    auto* tileLayerGroup,
                                    const auto& tileID,
                                    const RasterBucket& bucket) {
-        // Set up tile drawable
-        auto vertices = staticDataSharedVertices;
-        auto indices = staticDataIndices;
-        const RasterSegmentVector* segments = staticDataSegments.get();
+        // TODO: check for oportunity to skip
 
-        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
-            vertices = bucket.sharedVertices;
-            indices = bucket.sharedTriangles;
-            segments = &bucket.segments;
-        }
+        std::vector<std::array<int16_t, 2>> vertices, attributes;
+        std::vector<uint16_t> indices;
+        std::vector<SegmentBase> segments;
+
+        buildRenderData(bucket.mask, vertices, attributes, indices, segments);
+
+        builder->addVertices(vertices, 0, vertices.size());
+        builder->setSegments(gfx::Triangles(), indices, segments.data(), segments.size());
 
         // attributes
-        gfx::VertexAttributeArray vertexAttrs;
-
-        if (const auto& attr = vertexAttrs.add(PosAttribName)) {
-            attr->setSharedRawData(vertices,
-                                   offsetof(RasterLayoutVertex, a1),
-                                   0,
-                                   sizeof(RasterLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-        if (const auto& attr = vertexAttrs.getOrAdd(TexturePosAttribName)) {
-            attr->setSharedRawData(vertices,
-                                   offsetof(RasterLayoutVertex, a2),
-                                   0,
-                                   sizeof(RasterLayoutVertex),
-                                   gfx::AttributeDataType::Short4);
+        {
+            gfx::VertexAttributeArray vertexAttrs;
+            if (const auto& attr = vertexAttrs.getOrAdd(TexturePosAttribName)) {
+                attr->reserve(attributes.size());
+                std::size_t index{0};
+                for (const auto& a : attributes) {
+                    attr->set<gfx::VertexAttribute::int2>(index++, {a[0], a[1]});
+                }
+            }
+            builder->setVertexAttributes(std::move(vertexAttrs));
         }
 
         tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            drawable.setVertexAttributes(std::move(vertexAttrs));
-            drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
-
-            std::vector<std::unique_ptr<gfx::Drawable::DrawSegment>> drawSegments;
-            for (std::size_t i = 0; i < segments->size(); ++i) {
-                const auto& seg = segments->data()[i];
-                auto segCopy = SegmentBase{
-                    // no copy constructor
-                    seg.vertexOffset,
-                    seg.indexOffset,
-                    seg.vertexLength,
-                    seg.indexLength,
-                    seg.sortKey,
-                };
-                drawSegments.emplace_back(builder->createSegment(gfx::Triangles(), std::move(segCopy)));
+            for (auto& tex : drawable.getTextures()) {
+                builder->setTexture(tex.second, tex.first);
             }
-            drawable.setIndexData(indices->vector(), std::move(drawSegments));
         });
     };
 
@@ -538,21 +521,23 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             setRenderTileBucketID(tileID, bucket.getID());
 
             if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+                // re-create drawable geometry and pass texture
                 updateTileDrawables(builder, tileLayerGroup, tileID, bucket);
-                continue;
-            }
 
-            if (bucket.image) {
+                // erase current drawable
+                removeTile(renderPass, tileID);
+            } else if (bucket.image) {
+                // build new drawable for this tile
                 buildTileDrawables(builder, bucket);
-
-                // finish
-                builder->flush();
-                for (auto& drawable : builder->clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
-                }
             };
+
+            // finish
+            builder->flush();
+            for (auto& drawable : builder->clearDrawables()) {
+                drawable->setTileID(tileID);
+                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                ++stats.drawablesAdded;
+            }
         }
     }
 }
