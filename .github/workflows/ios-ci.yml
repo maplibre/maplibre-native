@@ -137,7 +137,7 @@ jobs:
         run: bazel run //platform:check-public-symbols
 
       - name: Lint plist files
-        run: make ios-lint-plistl
+        run: make ios-lint-plist
 
       - run: make style-code
 
