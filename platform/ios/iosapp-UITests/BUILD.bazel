@@ -29,3 +29,7 @@ ios_ui_test(
         "uitest_srcs",
     ],
 )
+
+exports_files([
+    "Info.plist",
+])

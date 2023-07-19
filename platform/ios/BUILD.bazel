@@ -244,6 +244,21 @@ xcodeproj(
     ],
 )
 
+sh_binary(
+    name = "lint-plists",
+    srcs = ["//platform/ios:scripts/lint-plists.sh"],
+    data = [
+        "app/Info.plist",
+        "bench_UITests/Info.plist",
+        "benchmark/Info.plist",
+        "framework/Info.plist",
+        "framework/Info-static.plist",
+        "Integration_Test_Harness/Info.plist",
+        "Integration_Tests/Info.plist",
+        "//platform/ios/iosapp-UITests:Info.plist",
+        "//platform/ios/test:Info.plist",
+    ]
+)
 
 exports_files(MLN_IOS_PUBLIC_HEADERS
     + MLN_IOS_PRIVATE_HEADERS

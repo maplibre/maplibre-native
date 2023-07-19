@@ -68,3 +68,7 @@ ios_unit_test(
         "//platform/darwin:shared_tests_swift_srcs",
     ],
 )
+
+exports_files([
+    "Info.plist",
+])

@@ -137,7 +137,7 @@ jobs:
         run: bazel run //platform:check-public-symbols
 
       - name: Lint plist files
-        run: make ios-lint-plist
+        run: bazel run //platform/ios:lint-plists
 
       - name: Running iOS tests
         run: bazel test //platform/ios/platform/ios/test:ios_test --test_output=errors
