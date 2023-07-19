@@ -140,10 +140,10 @@ jobs:
         run: bazel run //platform/ios:lint-plists
 
       - name: Running iOS tests
-        run: bazel test //platform/ios/platform/ios/test:ios_test --test_output=errors
+        run: bazel test //platform/ios/test:ios_test --test_output=errors
 
       - name: Running iOS UI tests
-        run: bazel test //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors
 
       # size test
 
