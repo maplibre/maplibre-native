@@ -17,7 +17,6 @@ jobs:
           artifact-name: ios-render-test
           expect-files: "RenderTest.xctest.zip, RenderTestApp.ipa"
 
-      - run: echo ${{ github.event.workflow_run }}
 
       - name: Generate token
         id: generate_token
@@ -32,7 +31,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
           status: in_progress
           name: iOS Render Test
-          sha: ${{ github.event.workflow_run.sha }}
+          sha: ${{ github.event.workflow_run.head_sha }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
