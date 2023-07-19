@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - topic/drawable
     tags:
       - 'android-*'
     paths:
@@ -25,7 +26,8 @@ on:
       - "!**/*.md"
   pull_request:
     branches:
-      - '*'
+      - main
+      - topic/drawable
     paths:
       - CMakeLists.txt
       - 'platform/android/**'

@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - topic/drawable
     tags:
       - 'node-*'
     paths:
@@ -32,7 +33,8 @@ on:
 
   pull_request:
     branches:
-      - '*'
+      - main
+      - topic/drawable
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
