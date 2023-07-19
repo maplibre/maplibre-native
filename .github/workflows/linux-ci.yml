@@ -178,7 +178,7 @@ jobs:
           exit 1
 
       - name: Upload render test result
-        if: always() && steps.render_test.outcome != 'failure'
+        if: always() && steps.render_test.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with:
           name: render-test-result

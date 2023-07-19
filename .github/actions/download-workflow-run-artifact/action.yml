@@ -23,6 +23,7 @@ runs:
           let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
             return artifact.name == "${{ inputs.artifact-name }}"
           })[0];
+          if (!matchArtifact) throw new Error("Could not find artifact ${{ inputs.artifact-name }}");
           let download = await github.rest.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
