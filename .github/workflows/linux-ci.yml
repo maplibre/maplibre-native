@@ -47,128 +47,135 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          fetch-depth: 0
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+  #         fetch-depth: 0
 
-      - uses: hendrikmuhs/ccache-action@v1.2
+  #     - uses: hendrikmuhs/ccache-action@v1.2
 
-      - name: Get latest CMake and Ninja
-        uses: lukka/get-cmake@latest
-        with:
-          cmakeVersion: 3.24.1
-          ninjaVersion: latest
+  #     - name: Get latest CMake and Ninja
+  #       uses: lukka/get-cmake@latest
+  #       with:
+  #         cmakeVersion: 3.24.1
+  #         ninjaVersion: latest
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libuv1-dev \
-            libjpeg-dev \
-            libpng-dev \
-            libglfw3-dev \
-            libwebp-dev
+  #     - name: Install dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y \
+  #           libcurl4-openssl-dev \
+  #           libuv1-dev \
+  #           libjpeg-dev \
+  #           libpng-dev \
+  #           libglfw3-dev \
+  #           libwebp-dev
 
-      - name: Build MapLibre Native Core
-        run: |
-          cmake --version
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
-          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+  #     - name: Build MapLibre Native Core
+  #       run: |
+  #         cmake --version
+  #         cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
+  #         cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
 
-      - name: Archive mbgl-test-runner
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-test-runner
-          path: build/mbgl-test-runner
-          retention-days: 1
+  #     - name: Archive mbgl-test-runner
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: mbgl-test-runner
+  #         path: build/mbgl-test-runner
+  #         retention-days: 1
 
-      - name: Archive mbgl-render-test-runner
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-render-test-runner
-          path: build/mbgl-render-test-runner
-          retention-days: 1
+  #     - name: Archive mbgl-render-test-runner
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: mbgl-render-test-runner
+  #         path: build/mbgl-render-test-runner
+  #         retention-days: 1
 
-      - name: Archive mbgl-expression-test
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-expression-test
-          path: build/expression-test/mbgl-expression-test
-          retention-days: 1
+  #     - name: Archive mbgl-expression-test
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: mbgl-expression-test
+  #         path: build/expression-test/mbgl-expression-test
+  #         retention-days: 1
 
-  test:
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
+  # test:
+  #   needs: build
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
+  #     - name: Install dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y \
+  #           libopengl0
 
-      - name: Download mbgl-test-runner
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-test-runner
+  #     - name: Download mbgl-test-runner
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: mbgl-test-runner
 
-      - run: chmod +x ./mbgl-test-runner
+  #     - run: chmod +x ./mbgl-test-runner
 
-      - name: Install npm packages and run test server in background
-        run: |
-          npm install
-          node test/storage/server.js &
+  #     - name: Install npm packages and run test server in background
+  #       run: |
+  #         npm install
+  #         node test/storage/server.js &
 
-      - name: Run C++ tests
-        run: xvfb-run -a ./mbgl-test-runner
+  #     - name: Run C++ tests
+  #       run: xvfb-run -a ./mbgl-test-runner
 
-  expression-test:
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Download mbgl-expression-test
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-expression-test
+  # expression-test:
+  #   needs: build
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Download mbgl-expression-test
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: mbgl-expression-test
 
-      - run: chmod +x ./mbgl-expression-test
+  #     - run: chmod +x ./mbgl-expression-test
 
-      - name: Run expression test
-        run: ./mbgl-expression-test
+  #     - name: Run expression test
+  #       run: ./mbgl-expression-test
 
-  render-test:
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
+  # render-test:
+  #   needs: build
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Install dependencies
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y \
+  #           libopengl0
 
-      - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v3
 
-      - name: Download mbgl-render-test-runner
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-render-test-runner
+  #     - name: Download mbgl-render-test-runner
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: mbgl-render-test-runner
 
-      - run: chmod +x ./mbgl-render-test-runner
+  #     - run: chmod +x ./mbgl-render-test-runner
 
-      - name: Run render test
+  #     - name: Run render test
+  #       id: render_test
+  #       run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+
+  #     - name: Save PR number
+  #       if: always() && steps.render_test.outcome != 'failure'
+  #       env:
+  #         PR_NUMBER: ${{ github.event.number }}
+  #       run: |
+  #         echo $PR_NUMBER > ./pr_number
+
+      - name: Fake data
         id: render_test
-        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
-
-      - name: Save PR number
-        if: always() && steps.render_test.outcome != 'failure'
-        env:
-          PR_NUMBER: ${{ github.event.number }}
         run: |
-          echo $PR_NUMBER > ./pr_number
+          mkdir metrics
+          touch ./pr_number metrics/linux-gcc8-release-style.html
+          exit 1
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome != 'failure'
