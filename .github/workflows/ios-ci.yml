@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - topic/drawable
     tags:
       - 'ios-*'
     paths:
@@ -32,6 +33,7 @@ on:
   pull_request:
     branches:
       - main
+      - topic/drawable
     paths:
       - CMakeLists.txt
       - 'platform/ios/**'
@@ -56,6 +58,10 @@ on:
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [legacy, drawable]
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
@@ -146,20 +152,22 @@ jobs:
       - run: make style-code
 
       - name: Running iOS tests
-        run: bazel test //platform/ios/platform/ios/test:ios_test --test_output=errors
+        run: bazel test --//:renderer=${{ matrix.renderer }} //platform/ios/platform/ios/test:ios_test --test_output=errors
 
       - name: Running iOS UI tests
-        run: bazel test //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
+        run: bazel test --//:renderer=${{ matrix.renderer }} //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
 
       # size test
 
-      - name: Build app for size test & output size 
+      - name: Build app for size test & output size
+        if: ${{ matrix.renderer }} = "legacy"
         working-directory: ./
         run: | 
           bazel build --compilation_mode=opt //platform/ios:size --//:maplibre_platform=ios
           cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios) ./size
 
       - name: Upload size test result
+        if: ${{ matrix.renderer }} = "legacy"
         uses: actions/upload-artifact@v3
         with:
           name: size-test-result
@@ -170,6 +178,7 @@ jobs:
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
+        if: ${{ matrix.renderer }} = "legacy"
         run: |
           set -e
           bazel run //platform/ios:xcodeproj
@@ -186,6 +195,7 @@ jobs:
           echo render_test_artifacts_dir="$render_test_app_dir" >> $GITHUB_ENV
       
       - uses: actions/upload-artifact@v3
+        if: ${{ matrix.renderer }} = "legacy"
         with:
           name: ios-render-test
           retention-days: 3
