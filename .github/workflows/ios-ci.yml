@@ -131,7 +131,7 @@ jobs:
         run: |
           echo $PR_NUMBER > ./pr_number
 
-      - run: cp bazel/example_config.bzl bazel/config.bz
+      - run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Check debug symbols
         run: bazel run //platform:check-public-symbols
