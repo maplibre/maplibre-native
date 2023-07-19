@@ -290,6 +290,8 @@ exports_files(
         "app/LimeGreenStyleLayer.h",
         "app/LimeGreenStyleLayer.m",
         "include/mbgl/util/image+MLNAdditions.hpp",
+        "scripts/check-public-symbols.js",
+        "scripts/check-public-symbols.sh",
     ]
     + MLN_DARWIN_PUBLIC_OBJC_SOURCE
     + MLN_DARWIN_PUBLIC_OBJCPP_SOURCE

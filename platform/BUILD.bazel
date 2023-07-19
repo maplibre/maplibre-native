@@ -173,3 +173,30 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
 )
+
+sh_binary(
+    name = "check-public-symbols",
+    srcs = ["//platform/darwin:scripts/check-public-symbols.sh"],
+    data = [
+        "//platform/darwin:scripts/check-public-symbols.js",
+        "//platform/darwin:generated_style_srcs",
+        "//platform/darwin:generated_style_hdrs",
+        "//platform/darwin:darwin_objcpp_srcs",
+        "//platform/darwin:darwin_objc_srcs",
+        "//platform/darwin:darwin_private_hdrs",
+        "//platform/darwin:darwin_public_hdrs",
+
+        "//platform/macos:macos_objcpp_srcs",
+        "//platform/macos:macos_objc_srcs",
+        "//platform/macos:macos_private_hdrs",
+        "//platform/macos:macos_public_hdrs",
+
+        "//platform/ios:ios_objcpp_srcs",
+        "//platform/ios:ios_objc_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+    ],
+    deps = [
+        "//platform/darwin:generated_code",
+    ],
+)
