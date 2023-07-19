@@ -10,7 +10,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-      # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
     - name: Download ${{ inputs.artifact-name }} artifact
       uses: actions/github-script@v6
       with:
