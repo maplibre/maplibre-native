@@ -11,7 +11,7 @@ runs:
   using: "composite"
   steps:
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
-    - name: 'Download render-test-result artifact'
+    - name: Download ${{ inputs.artifact-name }} artifact
       uses: actions/github-script@v6
       with:
         script: |
@@ -21,8 +21,9 @@ runs:
               run_id: context.payload.workflow_run.id,
           });
           let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-            return artifact.name == ${{ inputs.artifact-name }}
+            return artifact.name == "${{ inputs.artifact-name }}"
           })[0];
+          if (!matchArtifact) throw new Error("Could not find artifact ${{ inputs.artifact-name }}");
           let download = await github.rest.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
