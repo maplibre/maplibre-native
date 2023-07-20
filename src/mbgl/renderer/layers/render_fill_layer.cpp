@@ -551,7 +551,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     auto tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                                  /*glyphName=*/std::string(),
                                                                                  std::string(IconTextureName),
-                                                                                 /*isText=*/false);
+                                                                                 /*isText=*/false,
+                                                                                 false,
+                                                                                 style::AlignmentType::Auto,
+                                                                                 false,
+                                                                                 false);
                     if (patternBuilder) {
                         patternBuilder->addTweaker(tweaker);
                     }

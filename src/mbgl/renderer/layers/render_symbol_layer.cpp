@@ -1008,12 +1008,27 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             // We can use the same tweakers for all the segments in a tile
             if (isText && !tileInfo.textTweaker) {
-                tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                    atlases, iconTexUniformName, texUniformName, isText);
+                const bool textSizeIsZoomConstant =
+                    bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom())).isZoomConstant;
+                tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                                     iconTexUniformName,
+                                                                                     texUniformName,
+                                                                                     isText,
+                                                                                     false,
+                                                                                     values.rotationAlignment,
+                                                                                     false,
+                                                                                     textSizeIsZoomConstant);
             }
             if (!isText && !tileInfo.iconTweaker) {
-                tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                    atlases, iconTexUniformName, texUniformName, isText);
+                const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
+                tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                                     iconTexUniformName,
+                                                                                     texUniformName,
+                                                                                     isText,
+                                                                                     sdfIcons,
+                                                                                     values.rotationAlignment,
+                                                                                     iconScaled,
+                                                                                     false);
             }
 
             if (!builder) {
@@ -1045,11 +1060,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(attribs);
-
-            // TODO: texture filtering
-            // const bool linear = parameters.state.isChanging() || transformed ||
-            // !partiallyEvaluatedTextSize.isZoomConstant; const auto filterType = linear ?
-            // gfx::TextureFilterType::Linear : gfx::TextureFilterType::Nearest;
 
             builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
 
