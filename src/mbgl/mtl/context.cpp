@@ -5,6 +5,7 @@
 #include <mbgl/mtl/drawable_builder.hpp>
 #include <mbgl/mtl/layer_group.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
+#include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/tile_layer_group.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
@@ -20,6 +21,7 @@
 #include <Metal/Metal.hpp>
 
 #include <algorithm>
+#include <cstring>
 
 namespace mbgl {
 namespace mtl {
@@ -44,26 +46,24 @@ Context::~Context() noexcept {
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
-    if (!impl->renderPassDescriptor) {
-        impl->renderPassDescriptor = NS::RetainPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
-        
-        //colorAttachments() const;
-        //setDepthAttachment(const class RenderPassDepthAttachmentDescriptor* depthAttachment);
-        //setStencilAttachment(const class RenderPassStencilAttachmentDescriptor* stencilAttachment);
-        impl->renderPassDescriptor->setRenderTargetWidth(100);
-        impl->renderPassDescriptor->setRenderTargetHeight(100);
-        impl->renderPassDescriptor->setDefaultRasterSampleCount(1);
-    }
+    return std::make_unique<CommandEncoder>(*this);
+}
 
-    if (const auto& queue = backend.getCommandQueue()) {
-        if (auto* buffer = queue->commandBuffer()) {
-            if (auto encoder = NS::RetainPtr(buffer->renderCommandEncoder(impl->renderPassDescriptor.get()))) {
-                return std::make_unique<mtl::CommandEncoder>(*this, std::move(encoder));
+MTLBufferPtr Context::createBuffer(std::size_t size, const void* data, NS::UInteger storageMode) const {
+    const auto& device = backend.getDevice();
+    auto buffer = NS::TransferPtr(device->newBuffer(static_cast<NS::UInteger>(size), storageMode));
+    if (data && buffer) {
+        if (auto* content = buffer->contents()) {
+            std::memcpy(content, data, size);
+
+#if TARGET_OS_MAC || TARGET_OS_MACCATALYST
+            if (storageMode == MTL::StorageModeManaged) {
+                buffer->didModifyRange(NS::Range::Make(0, size));
             }
+#endif
         }
     }
-    assert(false);
-    return nullptr;
+    return buffer;
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
@@ -74,8 +74,6 @@ UniqueShaderProgram Context::createProgram(std::string name,
                                            const std::unordered_map<std::string, std::string>& additionalDefines)
 {
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
-
-    const auto device = backend.getDevice();
 
     // No NSMutableDictionary?
     const auto& programDefines = programParameters.getDefines();
@@ -112,6 +110,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     NS::Error* error = nullptr;
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
 
+    const auto& device = backend.getDevice();
     MTL::Library* library = device->newLibrary(nsSource, nullptr, &error);
     if (!library || error)
     {
@@ -143,7 +142,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
     
     return std::make_unique<ShaderProgram>(std::move(name),
-                                           device,
+                                           backend,
                                            std::move(vertexFunction),
                                            std::move(fragmentFunction));
 }

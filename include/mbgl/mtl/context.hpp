@@ -5,12 +5,10 @@
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/util/noncopyable.hpp>
-
-#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/texture2d.hpp>
-#endif
+#include <mbgl/gfx/context.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/util/noncopyable.hpp>
 
 #include <memory>
 #include <unordered_map>
@@ -36,6 +34,8 @@ public:
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
     const gfx::RenderingStats& renderingStats() const override { return stats; }
+
+    MTLBufferPtr createBuffer(std::size_t size, const void* data = nullptr, NS::UInteger storageMode = 0) const;
 
     UniqueShaderProgram createProgram(std::string name,
                                       std::string_view source,

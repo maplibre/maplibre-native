@@ -9,20 +9,15 @@
 namespace mbgl {
 namespace mtl {
 
-enum class ShaderType : uint32_t {
-    Vertex = 0,
-    Fragment = 1,
-    Compute = 2,
-    Mesh = 3,
-};
-
+class RenderableResource;
+class RendererBackend;
 class ShaderProgram;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
 class ShaderProgram final : public gfx::ShaderProgramBase {
 public:
     ShaderProgram(std::string name,
-                  MTLDevicePtr device,
+                  RendererBackend& backend,
                   MTLFunctionPtr vertexFunction,
                   MTLFunctionPtr fragmentFunction);
     ~ShaderProgram() noexcept override;
@@ -30,7 +25,7 @@ public:
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }
 
-    const MTLRenderPipelineStatePtr& getRenderPipelineState() const;
+    MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::RenderPassDescriptor&) const;
 
     std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
 
@@ -44,6 +39,8 @@ public:
 
 protected:
     std::string shaderName;
+
+    RendererBackend& backend;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

@@ -1,12 +1,21 @@
 #include <mbgl/mtl/drawable.hpp>
 
+#include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable_impl.hpp>
 #include <mbgl/mtl/texture2d.hpp>
+#include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
+
+#include <Metal/Metal.hpp>
+
+#include <simd/simd.h>
+
+#include <cassert>
 
 namespace mbgl {
 namespace mtl {
@@ -16,8 +25,6 @@ Drawable::Drawable(std::string name_)
       impl(std::make_unique<Impl>()) {}
 
 Drawable::~Drawable() {
-    //impl->indexBuffer = {0, nullptr};
-    //impl->attributeBuffers.clear();
 }
 
 void Drawable::draw(PaintParameters& parameters) const {
@@ -25,22 +32,49 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    auto& context = static_cast<Context&>(parameters.context);
-
-    if (shader) {
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        const auto& state = shaderMTL.getRenderPipelineState();
-//        if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
-//            context.program = shaderGL.getGLProgramID();
-//        }
-    }
-    /*
-    if (!shader || context.program.getCurrentValue() == 0) {
-        mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+    const auto& context = static_cast<Context&>(parameters.context);
+    const auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
+    const auto& encoder = renderPass.getMetalEncoder();
+    if (!encoder) {
         assert(false);
         return;
     }
 
+    if (shader) {
+        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
+        if (auto state = shaderMTL.getRenderPipelineState(renderPass.getDescriptor())) {
+            encoder->setRenderPipelineState(state.get());
+        } else {
+            assert(false);
+        }
+    } else {
+        Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        assert(false);
+        return;
+    }
+
+    const simd::float3 positions[3] = {
+        { -0.8f,  0.8f, 0.0f },
+        {  0.0f, -0.8f, 0.0f },
+        { +0.8f,  0.8f, 0.0f }
+    };
+    auto posBuf = context.createBuffer(sizeof(positions), positions, MTL::ResourceStorageModeShared);
+
+    const simd::float3 colors[3] = {
+        {  1.0, 0.3f, 0.2f },
+        {  0.8f, 1.0, 0.0f },
+        {  0.8f, 0.0f, 1.0 }
+    };
+    auto colorBuf = context.createBuffer(sizeof(colors), colors, MTL::ResourceStorageModeShared);
+
+    encoder->setVertexBuffer(posBuf.get(), /*offset=*/0, /*index=*/0);
+    encoder->setVertexBuffer(colorBuf.get(), /*offset=*/0, /*index=*/1);
+
+    constexpr NS::UInteger vertexStart = 0;
+    constexpr NS::UInteger vertexCount = 3;
+    encoder->drawPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, vertexStart, vertexCount);
+
+    /*
     context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
                                    : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
 

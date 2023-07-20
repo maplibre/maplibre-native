@@ -53,10 +53,23 @@ public:
         if (!commandQueue) {
             commandQueue = [mtlView.device newCommandQueue];
         }
+
         commandBuffer = [commandQueue commandBuffer];
+        commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+
         currentDrawable = [mtlView currentDrawable];
     }
-    
+
+    const mbgl::mtl::RendererBackend& getBackend() const override { return backend; }
+
+    const mbgl::mtl::MTLCommandBufferPtr& getCommandBuffer() const override {
+        return commandBufferPtr;
+    }
+
+    mbgl::mtl::MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
+        return NS::RetainPtr((__bridge MTL::RenderPassDescriptor*)mtlView.currentRenderPassDescriptor);
+    }
+
     void swap() override {
         [commandBuffer presentDrawable:currentDrawable];
         [commandBuffer commit];
@@ -68,11 +81,9 @@ public:
                  static_cast<uint32_t>(mtlView.drawableSize.height) };
     }
 
-    MLNMapViewMetalImpl& getBackend() { return backend; }
-    const MLNMapViewMetalImpl& getBackend() const { return backend; }
-
 private:
     MLNMapViewMetalImpl& backend;
+    mbgl::mtl::MTLCommandBufferPtr commandBufferPtr;
 
 public:
     MLNMapViewImplDelegate* delegate = nil;

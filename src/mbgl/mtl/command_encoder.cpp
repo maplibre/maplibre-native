@@ -2,6 +2,7 @@
 
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 
 #include <Metal/Metal.hpp>
@@ -11,22 +12,11 @@
 namespace mbgl {
 namespace mtl {
 
-struct CommandEncoder::Impl {
-    Impl(MTLRenderCommandEncoderPtr&& encoder_) : encoder(std::move(encoder_)) {}
-
-    MTLRenderCommandEncoderPtr encoder;
-};
-
-CommandEncoder::CommandEncoder(Context& context_, MTLRenderCommandEncoderPtr encoder_)
-    : context(context_),
-      impl(std::make_unique<Impl>(std::move(encoder_))) {
+CommandEncoder::CommandEncoder(Context& context_)
+    : context(context_) {
 }
 
 CommandEncoder::~CommandEncoder() {
-    if (impl->encoder) {
-        impl->encoder->endEncoding();
-        impl->encoder.reset();
-    }
     context.performCleanup();
 }
 
@@ -40,8 +30,9 @@ std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* na
 }
 
 void CommandEncoder::present(gfx::Renderable& renderable) {
-    //renderable.getResource<gl::RenderableResource>().swap();
+    renderable.getResource<RenderableResource>().swap();
 }
+
 
 void CommandEncoder::pushDebugGroup(const char* /*name*/) {
 }

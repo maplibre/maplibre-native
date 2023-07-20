@@ -12,15 +12,12 @@ class Context;
 
 class CommandEncoder final : public gfx::CommandEncoder {
 public:
-    explicit CommandEncoder(Context& context_,
-                            MTLRenderCommandEncoderPtr);
+    explicit CommandEncoder(Context& context_);
     ~CommandEncoder() override;
-
-    //friend class UploadPass;
-    //friend class RenderPass;
 
     std::unique_ptr<gfx::UploadPass> createUploadPass(const char* name) override;
     std::unique_ptr<gfx::RenderPass> createRenderPass(const char* name, const gfx::RenderPassDescriptor&) override;
+
     void present(gfx::Renderable&) override;
 
 private:
@@ -29,9 +26,6 @@ private:
 
 public:
     mtl::Context& context;
-    
-    struct Impl;
-    std::unique_ptr<Impl> impl;
 };
 
 } // namespace mtl
