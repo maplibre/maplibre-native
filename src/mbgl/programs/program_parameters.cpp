@@ -31,7 +31,7 @@ ProgramParameters ProgramParameters::withDefaultSource(const ProgramSource& sour
     return params;
 }
 
-const std::string& ProgramParameters::getDefinesString() {
+const std::string& ProgramParameters::getDefinesString() const {
     if (definesStr.empty() && !defines.empty()) {
         definesStr.assign(defines.size() * 32, '\0');
         definesStr.clear();

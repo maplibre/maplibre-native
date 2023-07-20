@@ -154,7 +154,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/render_target.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
         
@@ -176,7 +175,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
@@ -210,7 +209,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
@@ -981,7 +979,7 @@ if(MLN_WITH_OPENGL)
             "MLN_RENDERER_QUAD_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_QUAD_SPLIT_VIEW}>"
         PUBLIC
             "MLN_LEGACY_RENDERER=$<BOOL:${MLN_LEGACY_RENDERER}>"
-            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"    
+            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"
     )
     list(APPEND 
         INCLUDE_FILES
@@ -1105,6 +1103,32 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
     )
+
+    if(MLN_DRAWABLE_RENDERER)
+        list(APPEND INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/render_target_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
+        )
+        list(APPEND SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_target_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
+        )
+    endif()
 endif()
 
 if(MBGL_WITH_METAL)
@@ -1128,7 +1152,8 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/upload_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_attribute.hpp
-    )
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
+            )
     list(APPEND 
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp

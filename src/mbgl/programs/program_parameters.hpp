@@ -45,7 +45,7 @@ public:
     /// @brief Get a list of built-in shader preprocessor defines
     /// @return Shader source string
     /// @todo With the addition of future backends, defines should also be backend-aware
-    const std::string& getDefinesString();
+    const std::string& getDefinesString() const;
 
     /// @brief Get a list of built-in shader preprocessor defines
     /// @return Map of key-value pairs representing preprocessor definitions
@@ -63,7 +63,9 @@ public:
 
 private:
     std::unordered_map<std::string, std::string> defines;
-    std::string definesStr;
+
+    // cached value of `defines` converted to string format
+    mutable std::string definesStr;
 
     std::array<ProgramSource, static_cast<size_t>(gfx::Backend::Type::TYPE_MAX)> defaultSources;
     std::array<ProgramSource, static_cast<size_t>(gfx::Backend::Type::TYPE_MAX)> userSources;
