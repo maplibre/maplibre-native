@@ -4,12 +4,12 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 objc_library(
     name = "objcpp-sdk",
     srcs = [
-        "//platform/darwin:darwin_public_hdrs",
-        "//platform/ios:ios_private_hdrs",
-
-        "//platform/darwin:generated_style_srcs",
         "//platform/darwin:darwin_objcpp_srcs",
+        "//platform/darwin:generated_style_srcs",
         "//platform/ios:ios_objcpp_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
@@ -18,13 +18,14 @@ objc_library(
         "-Wno-gnu-zero-variadic-macro-arguments",
         "-Wno-gnu-conditional-omitted-operand",
         "-Wno-gnu-statement-expression",
+        "-Wno-deprecated-declarations",
     ],
     includes = [
         "darwin/include",
-        "darwin/src",
     ],
     sdk_frameworks = [
         "CoreImage",
+        "CoreGraphics",
         "CoreLocation",
         "GLKit",
         "OpenGLES",
@@ -46,32 +47,36 @@ objc_library(
 objc_library(
     name = "objc-sdk",
     srcs = [
-        "//platform/darwin:darwin_private_hdrs",
-        "//platform/darwin:darwin_public_hdrs",
-        "//platform/ios:ios_private_hdrs",
-        "//platform/ios:ios_public_hdrs",
         "//platform/darwin:darwin_objc_srcs",
         "//platform/ios:ios_objc_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ],
+    sdk_frameworks = [
+        "CoreGraphics",
+        "CoreLocation",
+        "QuartzCore",
     ],
     hdrs = [
         "//platform/darwin:include/mbgl/util/image+MLNAdditions.hpp",
     ],
     includes = [
         "darwin/include",
-        "darwin/src",
     ],
     copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
         "-fmodules",
         "-Wno-gnu-zero-variadic-macro-arguments",
         "-Wno-variadic-macros",
         "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-deprecated-declarations",
     ],
     deps = [
         ":objc-headers",
         "//:mbgl-core",
         "//platform/darwin:darwin-objc",
         "//platform/darwin:darwin-generated-style-artifacts",
-        "//platform/default:mbgl-default",
+        "//platform/default:mbgl-default", 
         "//platform/ios/vendor:SMCalloutView",
     ],
 )
@@ -79,36 +84,33 @@ objc_library(
 # Common headers between objc and objcpp libraries.
 objc_library(
     name = "objc-headers",
+    srcs = glob([
+        "darwin/src/*.h",
+        "ios/src/*.h",
+    ]),
+    includes = [
+        "darwin/src",
+        "ios/src",
+    ],
     sdk_frameworks = [
         "CoreGraphics",
         "CoreLocation",
         "QuartzCore",
     ],
     deps = [
-        ":ios-sdk-headers",
         "//platform/darwin:darwin-objc",
-    ],
-)
-
-objc_library(
-    name = "ios-sdk-headers",
-    hdrs = [
-        "//platform/darwin:darwin_public_hdrs",
-        "//platform/darwin:generated_style_hdrs",
-        "//platform/ios:ios_public_hdrs",
-    ],
-    includes = [
-        "darwin/src",
-        "ios/src",
-    ],
-    deps = [
-        "//platform/darwin:darwin-generated-style-artifacts",
+        "//platform/darwin:darwin-objcpp",
     ],
 )
 
 # sdk for the static target which includes the resources.
 objc_library(
     name = "ios-sdk",
+    hdrs = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:generated_style_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ],
     data = ["//platform/ios:resources"],
     module_name = "MapLibre",
     sdk_dylibs = [
@@ -183,18 +185,18 @@ sh_binary(
         "//platform/darwin:generated_style_hdrs",
         "//platform/darwin:darwin_objcpp_srcs",
         "//platform/darwin:darwin_objc_srcs",
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objcpp_hdrs",
         "//platform/darwin:darwin_private_hdrs",
-        "//platform/darwin:darwin_public_hdrs",
-
         "//platform/macos:macos_objcpp_srcs",
         "//platform/macos:macos_objc_srcs",
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
-
         "//platform/ios:ios_objcpp_srcs",
         "//platform/ios:ios_objc_srcs",
         "//platform/ios:ios_private_hdrs",
         "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
     ],
     deps = [
         "//platform/darwin:generated_code",

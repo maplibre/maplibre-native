@@ -12,7 +12,7 @@ load(
 load("//platform/ios/bazel:macros.bzl", "info_plist")
 load("//platform/ios/bazel:config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_NAME", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID", "BUNDLE_ID_PREFIX")
 load("//platform/ios/bazel:files.bzl",
-    "MLN_IOS_PUBLIC_SOURCE",
+    "MLN_IOS_SDK_HEADERS",
     "MLN_IOS_PUBLIC_HEADERS",
     "MLN_IOS_PRIVATE_HEADERS",
     "MLN_IOS_PUBLIC_OBJC_SOURCE",
@@ -21,6 +21,12 @@ load("//platform/ios/bazel:files.bzl",
 )
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 configure_device_profiles()
+
+filegroup(
+    name = "ios_sdk_hdrs",
+    visibility = ["//visibility:public"],
+    srcs = MLN_IOS_SDK_HEADERS,
+)
 
 filegroup(
     name = "ios_public_hdrs",
@@ -65,7 +71,9 @@ apple_static_xcframework(
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = [
         ":ios_public_hdrs",
-        "//platform/darwin:darwin_public_hdrs"
+        ":ios_sdk_hdrs",
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objcpp_hdrs",
     ],
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
@@ -103,7 +111,9 @@ apple_xcframework(
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = [
         ":ios_public_hdrs",
-        "//platform/darwin:darwin_public_hdrs"
+        ":ios_sdk_hdrs",
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objcpp_hdrs",
     ],
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],

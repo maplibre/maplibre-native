@@ -3,7 +3,9 @@ load("bazel/files.bzl",
     "MLN_GENERATED_DARWIN_TEST_CODE",
     "MLN_GENERATED_DARWIN_STYLE_SOURCE",
     "MLN_GENERATED_DARWIN_STYLE_HEADERS",
-    "MLN_DARWIN_PUBLIC_HEADERS",
+    "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
+    "MLN_DARWIN_OBJC_HEADERS",
+    "MLN_DARWIN_OBJCPP_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
     "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
@@ -20,8 +22,13 @@ filegroup(
 )
 
 filegroup(
-    name = "darwin_public_hdrs",
-    srcs = MLN_DARWIN_PUBLIC_HEADERS,
+    name = "darwin_objc_hdrs",
+    srcs = MLN_DARWIN_OBJC_HEADERS,
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "darwin_objcpp_hdrs",
+    srcs = MLN_DARWIN_OBJCPP_HEADERS,
     visibility = ["//visibility:public"],
 )
 
@@ -46,6 +53,12 @@ filegroup(
 filegroup(
     name = "generated_style_hdrs",
     srcs = MLN_GENERATED_DARWIN_STYLE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "generated_style_public_hdrs",
+    srcs = MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS,
     visibility = ["//visibility:public"],
 )
 
@@ -185,7 +198,8 @@ cc_library(
     name = "darwin-generated-style-artifacts",
     srcs = [
         ":darwin_private_hdrs",
-        ":darwin_public_hdrs",
+        ":darwin_objc_hdrs",
+        ":darwin_objcpp_hdrs",
         ":generated_style_hdrs",
     ],
     hdrs = [
@@ -296,5 +310,6 @@ exports_files(
     + MLN_DARWIN_PUBLIC_OBJC_SOURCE
     + MLN_DARWIN_PUBLIC_OBJCPP_SOURCE
     + MLN_DARWIN_PRIVATE_HEADERS
-    + MLN_DARWIN_PUBLIC_HEADERS
+    + MLN_DARWIN_OBJC_HEADERS
+    + MLN_DARWIN_OBJCPP_HEADERS
 )
