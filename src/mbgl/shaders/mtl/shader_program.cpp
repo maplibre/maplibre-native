@@ -20,10 +20,9 @@ namespace mbgl {
 namespace mtl {
 
 struct ShaderProgram::Impl {
-    Impl(MTLFunctionPtr&& vert,
-         MTLFunctionPtr&& frag) :
-        vertexFunction(std::move(vert)),
-        fragmentFunction(std::move(frag)) {}
+    Impl(MTLFunctionPtr&& vert, MTLFunctionPtr&& frag)
+        : vertexFunction(std::move(vert)),
+          fragmentFunction(std::move(frag)) {}
 
     MTLFunctionPtr vertexFunction;
     MTLFunctionPtr fragmentFunction;
@@ -36,9 +35,7 @@ ShaderProgram::ShaderProgram(std::string name,
     : ShaderProgramBase(),
       shaderName(std::move(name)),
       backend(backend_),
-      impl(std::make_unique<Impl>(std::move(vertexFunction),
-                                  std::move(fragmentFunction))) {
-}
+      impl(std::make_unique<Impl>(std::move(vertexFunction), std::move(fragmentFunction))) {}
 
 ShaderProgram::~ShaderProgram() noexcept = default;
 
@@ -114,7 +111,7 @@ std::optional<uint32_t> ShaderProgram::getSamplerLocation(std::string_view name)
 namespace {
 static UniformBlockArray noUniforms;
 static VertexAttributeArray noAttribs;
-}
+} // namespace
 const gfx::UniformBlockArray& ShaderProgram::getUniformBlocks() const {
     return noUniforms;
 }

@@ -1,10 +1,10 @@
 #include <mbgl/mtl/texture2d.hpp>
 
-//#include <mbgl/gl/context.hpp>
-//#include <mbgl/gl/defines.hpp>
-//#include <mbgl/gl/enum.hpp>
-//#include <mbgl/platform/gl_functions.hpp>
-//#include <mbgl/gl/texture_resource.hpp>
+// #include <mbgl/gl/context.hpp>
+// #include <mbgl/gl/defines.hpp>
+// #include <mbgl/gl/enum.hpp>
+// #include <mbgl/platform/gl_functions.hpp>
+// #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 
@@ -13,18 +13,18 @@ namespace mtl {
 
 Texture2D::Texture2D(Context& context_)
     : context(context_),
-    textureResource(std::make_unique<TextureResource>())
-{}
+      textureResource(std::make_unique<TextureResource>()) {}
 
 Texture2D::~Texture2D() {}
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
-    //samplerState = samplerState_;
-    //samplerStateDirty = textureResource != nullptr;
+    // samplerState = samplerState_;
+    // samplerStateDirty = textureResource != nullptr;
     return *this;
 }
 
-gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::TextureChannelDataType channelType_) noexcept {
+gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
+                                     gfx::TextureChannelDataType channelType_) noexcept {
     /*
     if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
         return *this;
@@ -40,12 +40,12 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::Te
 
 gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
     size = size_;
-    //storageDirty = true;
+    // storageDirty = true;
     return *this;
 }
 
 gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) noexcept {
-    //image = std::move(image_);
+    // image = std::move(image_);
     return *this;
 }
 
@@ -210,26 +210,26 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
-/*
-    using namespace platform;
+    /*
+        using namespace platform;
 
-    assert(textureResource);
-    assert(!samplerStateDirty);
+        assert(textureResource);
+        assert(!samplerStateDirty);
 
-    // Bind to TU 0 and upload
-    context.activeTextureUnit = 0;
-    context.texture[0] = getTextureID();
-    context.pixelStoreUnpack = {1};
-    MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
-                                     0,
-                                     xOffset,
-                                     yOffset,
-                                     size_.width,
-                                     size_.height,
-                                     Enum<gfx::TexturePixelType>::to(pixelFormat),
-                                     Enum<gfx::TextureChannelDataType>::to(channelType),
-                                     pixelData));
- */
+        // Bind to TU 0 and upload
+        context.activeTextureUnit = 0;
+        context.texture[0] = getTextureID();
+        context.pixelStoreUnpack = {1};
+        MBGL_CHECK_ERROR(glTexSubImage2D(GL_TEXTURE_2D,
+                                         0,
+                                         xOffset,
+                                         yOffset,
+                                         size_.width,
+                                         size_.height,
+                                         Enum<gfx::TexturePixelType>::to(pixelFormat),
+                                         Enum<gfx::TextureChannelDataType>::to(channelType),
+                                         pixelData));
+     */
 }
 
 void Texture2D::upload() noexcept {

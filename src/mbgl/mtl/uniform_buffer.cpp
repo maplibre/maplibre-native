@@ -9,17 +9,17 @@ namespace mtl {
 
 UniformBuffer::UniformBuffer(const void* data, std::size_t size_)
     : gfx::UniformBuffer(size_) {
-//    MBGL_CHECK_ERROR(glGenBuffers(1, &id));
-//    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, id));
-//    MBGL_CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW));
-//    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
+    //    MBGL_CHECK_ERROR(glGenBuffers(1, &id));
+    //    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, id));
+    //    MBGL_CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW));
+    //    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
 }
 
 UniformBuffer::~UniformBuffer() {
-//    if (id) {
-//        MBGL_CHECK_ERROR(glDeleteBuffers(1, &id));
-//        id = 0;
-//    }
+    //    if (id) {
+    //        MBGL_CHECK_ERROR(glDeleteBuffers(1, &id));
+    //        id = 0;
+    //    }
 }
 
 void UniformBuffer::update(const void* data, std::size_t size_) {
@@ -31,9 +31,9 @@ void UniformBuffer::update(const void* data, std::size_t size_) {
         return;
     }
 
-//    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, id));
-//    MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, size_, data));
-//    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
+    //    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, id));
+    //    MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, size_, data));
+    //    MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
 }
 
 } // namespace mtl

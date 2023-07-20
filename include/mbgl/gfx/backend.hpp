@@ -11,8 +11,8 @@ class Backend {
 public:
     /// @brief The active graphics API/backend type.
     enum class Type : uint8_t {
-        OpenGL, ///< The OpenGL API backend
-        Metal, ///< The Metal API backend
+        OpenGL,   ///< The OpenGL API backend
+        Metal,    ///< The Metal API backend
         TYPE_MAX, ///< Not a valid backend type, used to determine the number
                   ///< of available backends (ie for array allocation).
     };
@@ -22,10 +22,11 @@ public:
 #elif MLN_RENDER_BACKEND_METAL
     static constexpr Type DefaultType = Type::Metal;
 #else
-    static_assert(false, "Must define one of ("
-                         "MLN_RENDER_BACKEND_OPENGL, "
-                         "MLN_RENDER_BACKEND_METAL"
-                         ")");
+    static_assert(false,
+                  "Must define one of ("
+                  "MLN_RENDER_BACKEND_OPENGL, "
+                  "MLN_RENDER_BACKEND_METAL"
+                  ")");
 #endif
 
     static void SetType(const Type value) {

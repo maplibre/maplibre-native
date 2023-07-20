@@ -43,27 +43,27 @@ public:
         return *textureResource;
     }
 
-    bool needsUpload() const noexcept override { return false/*!!image*/; };
+    bool needsUpload() const noexcept override { return false /*!!image*/; };
 
 public:
     /// @brief Get the OpenGL handle ID for the underlying resource
     /// @return GLuint
-    //platform::GLuint getTextureID() const noexcept;
+    // platform::GLuint getTextureID() const noexcept;
 
-    //void updateSamplerConfiguration() noexcept;
+    // void updateSamplerConfiguration() noexcept;
 
     /// @brief Bind this texture to the specified texture unit
     /// @param location Location index of texture sampler in a shader
     /// @param textureUnit Unit to bind to. A maximum of gl::MaxActiveTextureUnits
     /// texture units are available for binding.
-    //void bind(int32_t location, int32_t textureUnit) noexcept;
+    // void bind(int32_t location, int32_t textureUnit) noexcept;
 
     /// @brief Unbind the texture, if it was bound
-    //void unbind() noexcept;
+    // void unbind() noexcept;
 
 private:
-    //void createObject() noexcept;
-    //void createStorage(const void* data = nullptr) noexcept;
+    // void createObject() noexcept;
+    // void createStorage(const void* data = nullptr) noexcept;
 
 private:
     Context& context;
@@ -73,17 +73,17 @@ private:
     gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
 
     std::unique_ptr<gfx::TextureResource> textureResource{nullptr};
-/*
+    /*
 
-    SamplerState samplerState{};
+        SamplerState samplerState{};
 
-    std::shared_ptr<PremultipliedImage> image{nullptr};
-    bool samplerStateDirty{false};
-    bool storageDirty{false};
+        std::shared_ptr<PremultipliedImage> image{nullptr};
+        bool samplerStateDirty{false};
+        bool storageDirty{false};
 
-    int32_t boundTextureUnit{-1};
-    int32_t boundLocation{-1};
-*/
+        int32_t boundTextureUnit{-1};
+        int32_t boundLocation{-1};
+    */
 };
 
 } // namespace mtl

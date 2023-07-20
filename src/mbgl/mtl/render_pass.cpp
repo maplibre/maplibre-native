@@ -14,13 +14,11 @@ struct RenderPass::Impl {
     MTLRenderCommandEncoderPtr encoder;
 };
 
-RenderPass::RenderPass(CommandEncoder& commandEncoder_,
-                       const char* name,
-                       const gfx::RenderPassDescriptor& descriptor)
+RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor)
     : descriptor(descriptor),
       commandEncoder(commandEncoder_),
       impl(std::make_unique<Impl>())
-    //, debugGroup(commandEncoder.createDebugGroup(name))
+//, debugGroup(commandEncoder.createDebugGroup(name))
 {
     auto& resource = descriptor.renderable.getResource<RenderableResource>();
 
@@ -31,9 +29,9 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_,
             impl->encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
         }
     }
-    
-    //const auto clearDebugGroup(commandEncoder.createDebugGroup("clear"));
-    //commandEncoder.context.clear(descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil);
+
+    // const auto clearDebugGroup(commandEncoder.createDebugGroup("clear"));
+    // commandEncoder.context.clear(descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil);
 }
 
 RenderPass::~RenderPass() {
@@ -52,11 +50,11 @@ const MTLRenderCommandEncoderPtr& RenderPass::getMetalEncoder() const {
 }
 
 void RenderPass::pushDebugGroup(const char* name) {
-    //commandEncoder.pushDebugGroup(name);
+    // commandEncoder.pushDebugGroup(name);
 }
 
 void RenderPass::popDebugGroup() {
-    //commandEncoder.popDebugGroup();
+    // commandEncoder.popDebugGroup();
 }
 
 } // namespace mtl

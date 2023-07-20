@@ -13,8 +13,7 @@ namespace mbgl {
 namespace mtl {
 
 CommandEncoder::CommandEncoder(Context& context_)
-    : context(context_) {
-}
+    : context(context_) {}
 
 CommandEncoder::~CommandEncoder() {
     context.performCleanup();
@@ -33,12 +32,9 @@ void CommandEncoder::present(gfx::Renderable& renderable) {
     renderable.getResource<RenderableResource>().swap();
 }
 
+void CommandEncoder::pushDebugGroup(const char* /*name*/) {}
 
-void CommandEncoder::pushDebugGroup(const char* /*name*/) {
-}
-
-void CommandEncoder::popDebugGroup() {
-}
+void CommandEncoder::popDebugGroup() {}
 
 } // namespace mtl
 } // namespace mbgl

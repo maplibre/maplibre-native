@@ -30,4 +30,3 @@ public:
 
 } // namespace mtl
 } // namespace mbgl
-

@@ -270,8 +270,7 @@ public:
         });
     }
 
-    using ResolveDelegate =
-        std::function<void(const std::string&, VertexAttribute&, const UniqueVertexAttribute&)>;
+    using ResolveDelegate = std::function<void(const std::string&, VertexAttribute&, const UniqueVertexAttribute&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 

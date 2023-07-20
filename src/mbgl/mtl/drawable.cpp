@@ -24,8 +24,7 @@ Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-Drawable::~Drawable() {
-}
+Drawable::~Drawable() {}
 
 void Drawable::draw(PaintParameters& parameters) const {
     if (isCustom) {
@@ -53,18 +52,10 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    const simd::float3 positions[3] = {
-        { -0.8f,  0.8f, 0.0f },
-        {  0.0f, -0.8f, 0.0f },
-        { +0.8f,  0.8f, 0.0f }
-    };
+    const simd::float3 positions[3] = {{-0.8f, 0.8f, 0.0f}, {0.0f, -0.8f, 0.0f}, {+0.8f, 0.8f, 0.0f}};
     auto posBuf = context.createBuffer(sizeof(positions), positions, MTL::ResourceStorageModeShared);
 
-    const simd::float3 colors[3] = {
-        {  1.0, 0.3f, 0.2f },
-        {  0.8f, 1.0, 0.0f },
-        {  0.8f, 0.0f, 1.0 }
-    };
+    const simd::float3 colors[3] = {{1.0, 0.3f, 0.2f}, {0.8f, 1.0, 0.0f}, {0.8f, 0.0f, 1.0}};
     auto colorBuf = context.createBuffer(sizeof(colors), colors, MTL::ResourceStorageModeShared);
 
     encoder->setVertexBuffer(posBuf.get(), /*offset=*/0, /*index=*/0);
@@ -109,14 +100,14 @@ void Drawable::draw(PaintParameters& parameters) const {
 }
 
 void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
-    //impl->indexes = std::move(indexes);
-    //impl->segments = std::move(segments);
+    // impl->indexes = std::move(indexes);
+    // impl->segments = std::move(segments);
 }
 
 void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
-    //impl->vertexData = std::move(data);
-    //impl->vertexCount = count;
-    //impl->vertexType = type;
+    // impl->vertexData = std::move(data);
+    // impl->vertexCount = count;
+    // impl->vertexType = type;
 }
 
 const gfx::VertexAttributeArray& Drawable::getVertexAttributes() const {
@@ -128,10 +119,10 @@ gfx::VertexAttributeArray& Drawable::mutableVertexAttributes() {
 }
 
 void Drawable::setVertexAttributes(const gfx::VertexAttributeArray& value) {
-    //impl->vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
+    // impl->vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
 }
 void Drawable::setVertexAttributes(gfx::VertexAttributeArray&& value) {
-    //impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
+    // impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
 }
 
 const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {

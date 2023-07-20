@@ -7,7 +7,8 @@ class MetalDrawable;
 } // namespace CA
 
 namespace NS {
-template <class T> class SharedPtr;
+template <class T>
+class SharedPtr;
 using UInteger = std::uintptr_t;
 } // namespace NS
 

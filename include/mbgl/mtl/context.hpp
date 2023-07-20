@@ -83,22 +83,22 @@ public:
 
     void reduceMemoryUsage() override;
 
-/*
-    // Drain pools and remove abandoned objects, in preparation for destroying the store.
-    // Only call this while the OpenGL context is exclusive to this thread.
-    void reset();
+    /*
+        // Drain pools and remove abandoned objects, in preparation for destroying the store.
+        // Only call this while the OpenGL context is exclusive to this thread.
+        void reset();
 
-    bool empty() const {
-        return pooledTextures.empty() && abandonedPrograms.empty() && abandonedShaders.empty() &&
-               abandonedBuffers.empty() && abandonedTextures.empty() && abandonedVertexArrays.empty() &&
-               abandonedFramebuffers.empty();
-    }
+        bool empty() const {
+            return pooledTextures.empty() && abandonedPrograms.empty() && abandonedShaders.empty() &&
+                   abandonedBuffers.empty() && abandonedTextures.empty() && abandonedVertexArrays.empty() &&
+                   abandonedFramebuffers.empty();
+        }
 
-    extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
+        extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 
-    void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
-*/
-    
+        void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
+    */
+
 #if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
@@ -113,23 +113,23 @@ public:
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
-    //UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
+    // UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
 
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 #endif
 
     void setDirtyState() override;
 
-     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
-     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
-                                                                 gfx::TexturePixelType,
-                                                                 gfx::TextureChannelDataType) override;
+    std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
+                                                                gfx::TexturePixelType,
+                                                                gfx::TextureChannelDataType) override;
 
-     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
-                                                                           Size size) override;
+    std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
+                                                                          Size size) override;
 
-     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
+    std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
 /*
      UniqueFramebuffer createFramebuffer();
      std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
@@ -137,22 +137,21 @@ public:
      VertexArray createVertexArray();
 */
 #if !defined(NDEBUG)
-     void visualizeStencilBuffer() override;
-     void visualizeDepthBuffer(float depthRangeSize) override;
+    void visualizeStencilBuffer() override;
+    void visualizeDepthBuffer(float depthRangeSize) override;
 #endif
 
-     void clearStencilBuffer(int32_t) override;
+    void clearStencilBuffer(int32_t) override;
 
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
 
     gfx::RenderingStats stats;
-    
+
     struct Impl;
     std::unique_ptr<Impl> impl;
 };
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl
-

@@ -19,7 +19,6 @@
 
 #include <cassert>
 
-
 namespace mbgl {
 namespace shaders {
 template <>
@@ -52,15 +51,13 @@ half4 fragment fragmentMain(v2f in [[stage_in]]) {
 };
 
 template <>
-struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> :
-        public ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>{
+struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
+    : public ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "BackgroundPatternShader";
 };
 
 } // namespace shaders
 } // namespace mbgl
-
-
 
 namespace mbgl {
 namespace mtl {
@@ -73,7 +70,6 @@ struct RendererBackend::Impl {
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
       impl(std::make_unique<Impl>()) {
-
     impl->device = NS::TransferPtr(MTL::CreateSystemDefaultDevice());
     assert(impl->device);
 
@@ -159,7 +155,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
                 throw std::runtime_error("Failed to register " + name + " with shader registry!");
             }
         }(),
-    ...);
+        ...);
 }
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {

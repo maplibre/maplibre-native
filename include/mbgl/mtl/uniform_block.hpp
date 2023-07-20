@@ -48,8 +48,7 @@ private:
         return std::unique_ptr<gfx::UniformBlock>(new UniformBlock(index, size));
     }
     std::unique_ptr<gfx::UniformBlock> copy(const gfx::UniformBlock& uniformBlocks) override {
-        return std::unique_ptr<gfx::UniformBlock>(
-            new UniformBlock(static_cast<const UniformBlock&>(uniformBlocks)));
+        return std::unique_ptr<gfx::UniformBlock>(new UniformBlock(static_cast<const UniformBlock&>(uniformBlocks)));
     }
 };
 

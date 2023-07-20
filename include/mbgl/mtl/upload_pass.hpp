@@ -39,7 +39,6 @@ public:
     RenderbufferResource() = default;
 };
 
-
 class UploadPass final : public gfx::UploadPass {
 public:
     UploadPass(CommandEncoder&, const char* name);

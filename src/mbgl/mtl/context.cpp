@@ -37,12 +37,12 @@ Context::Context(RendererBackend& backend_)
       impl(std::make_unique<Impl>()) {}
 
 Context::~Context() noexcept {
-/*
-    if (cleanupOnDestruction) {
-        reset();
-        assert(stats.isZero());
-    }
- */
+    /*
+        if (cleanupOnDestruction) {
+            reset();
+            assert(stats.isZero());
+        }
+     */
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
@@ -71,28 +71,26 @@ UniqueShaderProgram Context::createProgram(std::string name,
                                            const std::string_view vertexName,
                                            const std::string_view fragmentName,
                                            const ProgramParameters& programParameters,
-                                           const std::unordered_map<std::string, std::string>& additionalDefines)
-{
+                                           const std::unordered_map<std::string, std::string>& additionalDefines) {
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     // No NSMutableDictionary?
     const auto& programDefines = programParameters.getDefines();
     const auto numDefines = programDefines.size() + additionalDefines.size();
-    
+
     std::vector<NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
-    const auto addDefine = [&rawDefines](const auto& pair){
+    const auto addDefine = [&rawDefines](const auto& pair) {
         auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
         auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
-        rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size()/2), nsKey);
+        rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
         rawDefines.insert(rawDefines.end(), nsVal);
     };
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
-    
-    const auto nsDefines = NS::Dictionary::dictionary(&rawDefines[numDefines],
-                                                      rawDefines.data(),
-                                                      static_cast<NS::UInteger>(numDefines));
+
+    const auto nsDefines = NS::Dictionary::dictionary(
+        &rawDefines[numDefines], rawDefines.data(), static_cast<NS::UInteger>(numDefines));
     rawDefines.clear();
 
     auto options = MTL::CompileOptions::alloc()->init();
@@ -104,16 +102,14 @@ UniqueShaderProgram Context::createProgram(std::string name,
     options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
     options->setCompileSymbolVisibility(MTL::CompileSymbolVisibilityDefault);
     options->setAllowReferencingUndefinedSymbols(false);
-    //options->setMaxTotalThreadsPerThreadgroup(NS::UInteger);
+    // options->setMaxTotalThreadsPerThreadgroup(NS::UInteger);
 
-    
     NS::Error* error = nullptr;
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
 
     const auto& device = backend.getDevice();
     MTL::Library* library = device->newLibrary(nsSource, nullptr, &error);
-    if (!library || error)
-    {
+    if (!library || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
         Log::Error(Event::Shader, name + " compile failed" + errStr);
@@ -140,18 +136,14 @@ UniqueShaderProgram Context::createProgram(std::string name,
             return nullptr;
         }
     }
-    
-    return std::make_unique<ShaderProgram>(std::move(name),
-                                           backend,
-                                           std::move(vertexFunction),
-                                           std::move(fragmentFunction));
+
+    return std::make_unique<ShaderProgram>(
+        std::move(name), backend, std::move(vertexFunction), std::move(fragmentFunction));
 }
 
-void Context::performCleanup() {
-}
+void Context::performCleanup() {}
 
-void Context::reduceMemoryUsage() {
-}
+void Context::reduceMemoryUsage() {}
 
 #if MLN_DRAWABLE_RENDERER
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
@@ -185,13 +177,11 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return nullptr;
 }
 
-void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
-}
+void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
 
 #endif // MLN_DRAWABLE_RENDERER
 
-void Context::setDirtyState() {
-}
+void Context::setDirtyState() {}
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size, gfx::TextureChannelDataType) {
     assert(false);
@@ -199,14 +189,13 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size, gfx
 }
 
 std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
-                                                         gfx::TexturePixelType,
-                                                         gfx::TextureChannelDataType) {
+                                                                     gfx::TexturePixelType,
+                                                                     gfx::TextureChannelDataType) {
     assert(false);
     return nullptr;
 }
 
-std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType,
-                                                                   Size size) {
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size size) {
     return std::make_unique<RenderbufferResource>();
 }
 
@@ -216,16 +205,12 @@ std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
 }
 
 #if !defined(NDEBUG)
-void Context::visualizeStencilBuffer() {
-}
+void Context::visualizeStencilBuffer() {}
 
-void Context::visualizeDepthBuffer(float depthRangeSize) {
-}
+void Context::visualizeDepthBuffer(float depthRangeSize) {}
 #endif // !defined(NDEBUG)
 
-void Context::clearStencilBuffer(int32_t) {
-}
+void Context::clearStencilBuffer(int32_t) {}
 
 } // namespace mtl
 } // namespace mbgl
-

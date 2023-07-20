@@ -47,9 +47,9 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    //void setVertexAttrName(std::string);
+    // void setVertexAttrName(std::string);
 
-    //void upload(gfx::UploadPass&);
+    // void upload(gfx::UploadPass&);
 
 protected:
     class Impl;
@@ -73,5 +73,5 @@ private:
      */
 };
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl

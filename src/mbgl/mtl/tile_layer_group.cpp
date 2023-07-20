@@ -38,7 +38,7 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
         const auto debugGroup = uploadPass.createDebugGroup(labelPtr);
 #endif
 
-        //drawableMTL.upload(uploadPass);
+        // drawableMTL.upload(uploadPass);
     });
 }
 
@@ -117,7 +117,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // For layer groups with 3D features, enable either the single-value
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
-        //if (features3d) {
+        // if (features3d) {
         //    context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
         //}
 

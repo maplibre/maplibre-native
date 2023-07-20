@@ -26,24 +26,24 @@ private:
 public:
     ~VertexAttribute() override = default;
 
-    //platform::GLenum getGLType() const { return glType; }
-    //void setGLType(platform::GLenum value);
+    // platform::GLenum getGLType() const { return glType; }
+    // void setGLType(platform::GLenum value);
 
-    //bool getNormalized() const { return normalized; }
-    //void setNormalized(bool value) { normalized = value; }
+    // bool getNormalized() const { return normalized; }
+    // void setNormalized(bool value) { normalized = value; }
 
     std::size_t getStride() const;
 
-    //static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
+    // static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
 
 private:
-    //static int getSize(platform::GLenum glType);
-    //static int getStride(platform::GLenum glType);
-    //static bool get(const gfx::VertexAttribute::ElementType&, platform::GLenum glType, uint8_t* buffer);
+    // static int getSize(platform::GLenum glType);
+    // static int getStride(platform::GLenum glType);
+    // static bool get(const gfx::VertexAttribute::ElementType&, platform::GLenum glType, uint8_t* buffer);
 
 private:
-    //platform::GLenum glType = 0;
-    //bool normalized = false;
+    // platform::GLenum glType = 0;
+    // bool normalized = false;
 };
 
 /// Stores a collection of vertex attributes by name
@@ -70,19 +70,16 @@ public:
     }
 
 private:
-    gfx::UniqueVertexAttribute create(int index,
-                                      gfx::AttributeDataType dataType,
-                                      std::size_t count) const override {
+    gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
         return gfx::UniqueVertexAttribute(new VertexAttribute(index, dataType, count));
     }
-    
+
     using gfx::VertexAttributeArray::copy;
 
     gfx::UniqueVertexAttribute copy(const gfx::VertexAttribute& attr) const override {
-        return gfx::UniqueVertexAttribute(
-            new VertexAttribute(static_cast<const VertexAttribute&>(attr)));
+        return gfx::UniqueVertexAttribute(new VertexAttribute(static_cast<const VertexAttribute&>(attr)));
     }
 };
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl

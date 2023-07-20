@@ -55,7 +55,7 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
-    : orchestrator(false/*!backend_.contextIsShared()*/, localFontFamily_),
+    : orchestrator(false /*!backend_.contextIsShared()*/, localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
@@ -348,10 +348,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_RENDERER_SPLIT_VIEW
     [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
     [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
-    [[maybe_unused]] const auto halfW = static_cast<int>(backend.getDefaultRenderable().getSize().width *
-                                                                       0.5f);
-    [[maybe_unused]] const auto halfH = static_cast<int>(backend.getDefaultRenderable().getSize().height *
-                                                                       0.5f);
+    [[maybe_unused]] const auto halfW = static_cast<int>(backend.getDefaultRenderable().getSize().width * 0.5f);
+    [[maybe_unused]] const auto halfH = static_cast<int>(backend.getDefaultRenderable().getSize().height * 0.5f);
     enableScissorTest(true);
 #if MLN_RENDERER_QUAD_SPLIT_VIEW
     if (parameters.staticData.has3D) {

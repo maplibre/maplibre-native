@@ -13,9 +13,7 @@ class Context;
 
 class RenderPass final : public gfx::RenderPass {
 public:
-    RenderPass(CommandEncoder&,
-               const char* name,
-               const gfx::RenderPassDescriptor&);
+    RenderPass(CommandEncoder&, const char* name, const gfx::RenderPassDescriptor&);
     ~RenderPass() override;
 
     const MTLRenderCommandEncoderPtr& getMetalEncoder() const;
@@ -30,8 +28,8 @@ private:
 private:
     gfx::RenderPassDescriptor descriptor;
     mtl::CommandEncoder& commandEncoder;
-    //const gfx::DebugGroup<gfx::CommandEncoder> debugGroup;
-    
+    // const gfx::DebugGroup<gfx::CommandEncoder> debugGroup;
+
     struct Impl;
     std::unique_ptr<Impl> impl;
 };

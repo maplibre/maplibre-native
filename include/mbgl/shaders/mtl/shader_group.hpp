@@ -29,7 +29,7 @@ public:
         constexpr auto& fragMain = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::fragmentMainFunction;
 
         uint32_t key = 0;
-        std::unordered_map<std::string,std::string> additionalDefines;
+        std::unordered_map<std::string, std::string> additionalDefines;
         for (unsigned int i = 0; i < propertiesAsUniforms.size(); i++) {
             if (!propertiesAsUniforms[i].empty()) {
                 key |= 1 << i;
@@ -42,7 +42,8 @@ public:
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {
             auto& context = static_cast<Context&>(gfxContext);
-            shader = context.createProgram(shaderName, source, vertMain, fragMain, programParameters, additionalDefines);
+            shader = context.createProgram(
+                shaderName, source, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);
