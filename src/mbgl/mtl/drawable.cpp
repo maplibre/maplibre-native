@@ -7,6 +7,8 @@
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
+#include <mbgl/mtl/uniform_buffer.hpp>
+#include <mbgl/mtl/vertex_attribute.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
@@ -58,8 +60,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     const simd::float3 colors[3] = {{1.0, 0.3f, 0.2f}, {0.8f, 1.0, 0.0f}, {0.8f, 0.0f, 1.0}};
     auto colorBuf = context.createBuffer(colors, sizeof(colors), gfx::BufferUsageType::StaticDraw);
 
-    encoder->setVertexBuffer(posBuf.get().get(), /*offset=*/0, /*index=*/0);
-    encoder->setVertexBuffer(colorBuf.get().get(), /*offset=*/0, /*index=*/1);
+    encoder->setVertexBuffer(posBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/0);
+    encoder->setVertexBuffer(colorBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/1);
 
     constexpr NS::UInteger vertexStart = 0;
     constexpr NS::UInteger vertexCount = 3;
@@ -100,13 +102,13 @@ void Drawable::draw(PaintParameters& parameters) const {
 }
 
 void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
-    // impl->indexes = std::move(indexes);
-    // impl->segments = std::move(segments);
+    impl->indexes = std::move(indexes);
+    impl->segments = std::move(segments);
 }
 
 void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
     // impl->vertexData = std::move(data);
-    // impl->vertexCount = count;
+    impl->vertexCount = count;
     // impl->vertexType = type;
 }
 
@@ -119,10 +121,10 @@ gfx::VertexAttributeArray& Drawable::mutableVertexAttributes() {
 }
 
 void Drawable::setVertexAttributes(const gfx::VertexAttributeArray& value) {
-    // impl->vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
+    impl->vertexAttributes = static_cast<const VertexAttributeArray&>(value);
 }
 void Drawable::setVertexAttributes(gfx::VertexAttributeArray&& value) {
-    // impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
+    impl->vertexAttributes = std::move(static_cast<VertexAttributeArray&&>(value));
 }
 
 const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {
@@ -132,15 +134,16 @@ const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {
 gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
-/*
+
 void Drawable::setVertexAttrName(std::string value) {
     impl->vertexAttrName = std::move(value);
 }
 
-void Drawable::bindUniformBuffers() const {
+void Drawable::bindUniformBuffers(RenderPass& renderPass) const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
+        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
+        const auto& encoder = renderPass.getMetalEncoder();
+        for (const auto& element : shaderMTL.getUniformBlocks().getMap()) {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
             if (!uniformBuffer) {
                 using namespace std::string_literals;
@@ -149,16 +152,22 @@ void Drawable::bindUniformBuffers() const {
                 assert(false);
                 continue;
             }
-            element.second->bindBuffer(*uniformBuffer);
+
+            const auto& bufferMTL = static_cast<UniformBuffer&>(*uniformBuffer.get());
+            const auto& resource = bufferMTL.getBufferResource();
+            const auto index = element.second->getIndex();
+            encoder->setVertexBuffer(resource.getMetalBuffer().get(), /*offset=*/0, index);
         }
     }
 }
 
-void Drawable::unbindUniformBuffers() const {
+void Drawable::unbindUniformBuffers(RenderPass& renderPass) const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
-            element.second->unbindBuffer();
+        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
+        const auto& encoder = renderPass.getMetalEncoder();
+        for (const auto& element : shaderMTL.getUniformBlocks().getMap()) {
+            const auto index = element.second->getIndex();
+            encoder->setVertexBuffer(nullptr, 0, index);
         }
     }
 }
@@ -168,14 +177,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    const bool build = impl->vertexAttributes.isDirty() ||
+    const bool build = impl->vertexAttributes.isDirty() /*||
                        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
-                           return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
-                       });
+                           return !static_cast<const DrawSegment&>(*seg).getVertexArray().isValid();
+                       })*/;
 
     if (build) {
-        auto& context = uploadPass.getContext();
-        auto& glContext = static_cast<gl::Context&>(context);
+        auto& contextBase = uploadPass.getContext();
+        auto& context = static_cast<Context&>(contextBase);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
         const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
@@ -203,9 +212,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         impl->indexBuffer = std::move(indexBuffer);
 
         // Create a VAO for each group of vertexes described by a segment
-        for (const auto& seg : impl->segments) {
-            auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
-            const auto& mlSeg = glSeg.getSegment();
+        for (const auto& iseg : impl->segments) {
+            auto& seg = static_cast<DrawSegment&>(*iseg);
+            const auto& mlSeg = seg.getSegment();
 
             if (mlSeg.indexLength == 0) {
                 continue;
@@ -217,24 +226,25 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                 }
             }
 
-            auto vertexArray = glContext.createVertexArray();
-
-            vertexArray.bind(glContext, impl->indexBuffer, bindings);
-
+            /*
+            auto vertexArray = context.createVertexArray();
+            vertexArray.bind(context, impl->indexBuffer, bindings);
             assert(vertexArray.isValid());
-
             glSeg.setVertexArray(std::move(vertexArray));
+             */
         };
     }
 
+    /*
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
 
     if (texturesNeedUpload) {
         uploadTextures();
     }
+     */
 }
-
+/*
 gfx::ColorMode Drawable::makeColorMode(PaintParameters& parameters) const {
     return enableColor ? parameters.colorModeForRenderPass() : gfx::ColorMode::disabled();
 }

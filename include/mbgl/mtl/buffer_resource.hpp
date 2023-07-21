@@ -22,7 +22,7 @@ public:
     std::size_t getSizeInBytes() const { return buffer ? buffer->length() : 0; }
     void* contents() const { return buffer ? buffer->contents() : nullptr; }
 
-    const MTLBufferPtr& get() const { return buffer; }
+    const MTLBufferPtr& getMetalBuffer() const { return buffer; }
 
     operator bool() const { return buffer.operator bool(); }
 

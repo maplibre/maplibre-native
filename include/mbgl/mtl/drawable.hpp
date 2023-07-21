@@ -24,6 +24,7 @@ using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
 namespace mtl {
 
+class RenderPass;
 class Texture2D;
 class VertexArray;
 
@@ -34,6 +35,7 @@ public:
 
     void draw(PaintParameters&) const override;
 
+    struct DrawSegment;
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
 
     void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType) override;
@@ -47,9 +49,9 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    // void setVertexAttrName(std::string);
+    void setVertexAttrName(std::string);
 
-    // void upload(gfx::UploadPass&);
+    void upload(gfx::UploadPass&);
 
 protected:
     class Impl;
@@ -64,10 +66,11 @@ private:
     gfx::StencilMode makeStencilMode(PaintParameters&) const;
 
     void uploadTextures() const;
+     */
 
-    void bindUniformBuffers() const;
-    void unbindUniformBuffers() const;
-
+    void bindUniformBuffers(RenderPass& renderPass) const;
+    void unbindUniformBuffers(RenderPass& renderPass) const;
+/*
     void bindTextures() const;
     void unbindTextures() const;
      */
