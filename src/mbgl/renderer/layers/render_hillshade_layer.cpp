@@ -327,11 +327,106 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
         [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
 
-    if (!staticDataSharedVertices) {
-        staticDataSharedVertices = std::make_shared<HillshadeVertexVector>(RenderStaticData::rasterVertices());
-    }
-    const auto staticDataIndices = RenderStaticData::quadTriangleIndices();
-    const auto staticDataSegments = RenderStaticData::rasterSegments();
+    // helper functions
+    auto buildRenderData = [](const TileMask& mask,
+                              std::vector<std::array<int16_t, 2>>& vertices,
+                              std::vector<std::array<int16_t, 2>>& attributes,
+                              std::vector<uint16_t>& indices,
+                              std::vector<SegmentBase>& segments) {
+        constexpr const size_t vertexLength = 4;
+
+        if (vertices.empty()) {
+            vertices.reserve(mask.size() * vertexLength);
+            attributes.reserve(mask.size() * vertexLength);
+            indices.reserve(mask.size() * 6);
+            segments.reserve(mask.size());
+        }
+        // Create the vertex buffer for the specified tile mask.
+        for (const auto& id : mask) {
+            // Create a quad for every masked tile.
+            const int32_t vertexExtent = util::EXTENT >> id.z;
+
+            const Point<int16_t> tlVertex = {static_cast<int16_t>(id.x * vertexExtent),
+                                             static_cast<int16_t>(id.y * vertexExtent)};
+            const Point<int16_t> brVertex = {static_cast<int16_t>(tlVertex.x + vertexExtent),
+                                             static_cast<int16_t>(tlVertex.y + vertexExtent)};
+
+            if (segments.empty() ||
+                (segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max())) {
+                // Move to a new segments because the old one can't hold the geometry.
+                segments.emplace_back(vertices.size(), indices.size());
+            }
+
+            vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, tlVertex.y}});
+
+            vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, tlVertex.y}});
+
+            vertices.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{tlVertex.x, brVertex.y}});
+
+            vertices.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
+            attributes.emplace_back(std::array<int16_t, 2>{{brVertex.x, brVertex.y}});
+
+            auto& segment = segments.back();
+            assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
+            const auto offset = static_cast<uint16_t>(segment.vertexLength);
+
+            // 0, 1, 2
+            // 1, 2, 3
+            indices.insert(indices.end(),
+                           {offset,
+                            static_cast<uint16_t>(offset + 1u),
+                            static_cast<uint16_t>(offset + 2u),
+                            static_cast<uint16_t>(offset + 1u),
+                            static_cast<uint16_t>(offset + 2u),
+                            static_cast<uint16_t>(offset + 3u)});
+
+            segment.vertexLength += vertexLength;
+            segment.indexLength += 6;
+        }
+    };
+
+    auto buildTileDrawables = [this, &context, &buildRenderData](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                                                 const HillshadeBucket& bucket,
+                                                                 bool prepare = false) {
+        std::vector<std::array<int16_t, 2>> vertices, attributes;
+        std::vector<uint16_t> indices;
+        std::vector<SegmentBase> segments;
+
+        buildRenderData(bucket.mask, vertices, attributes, indices, segments);
+
+        builder->addVertices(vertices, 0, vertices.size());
+        builder->setSegments(gfx::Triangles(), indices, segments.data(), segments.size());
+
+        // attributes
+        {
+            gfx::VertexAttributeArray vertexAttrs;
+            if (const auto& attr = vertexAttrs.getOrAdd(TexturePosAttribName)) {
+                attr->reserve(attributes.size());
+                std::size_t index{0};
+                for (const auto& a : attributes) {
+                    attr->set<gfx::VertexAttribute::int2>(index++, {a[0], a[1]});
+                }
+            }
+            builder->setVertexAttributes(std::move(vertexAttrs));
+        }
+
+        // textures
+        auto imageLocation = builder->getShader()->getSamplerLocation("u_image");
+        if (imageLocation.has_value()) {
+            if (prepare) {
+                std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+                texture->setImage(bucket.getDEMData().getImagePtr());
+                texture->setSamplerConfiguration(
+                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                builder->setTexture(texture, imageLocation.value());
+            } else {
+                builder->setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
+            }
+        }
+    };
 
     std::unique_ptr<gfx::DrawableBuilder> hillshadeBuilder;
     std::unique_ptr<gfx::DrawableBuilder> hillshadePrepareBuilder;
@@ -373,44 +468,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
             renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
 
-            gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
-
-            if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
-                attr->setSharedRawData(staticDataSharedVertices,
-                                       offsetof(HillshadeLayoutVertex, a1),
-                                       0,
-                                       sizeof(HillshadeLayoutVertex),
-                                       gfx::AttributeDataType::Short2);
-            }
-            if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(TexturePosAttribName)) {
-                attr->setSharedRawData(staticDataSharedVertices,
-                                       offsetof(HillshadeLayoutVertex, a2),
-                                       0,
-                                       sizeof(HillshadeLayoutVertex),
-                                       gfx::AttributeDataType::Short4);
-            }
-
             hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
             hillshadePrepareBuilder->setShader(hillshadePrepareShader);
             hillshadePrepareBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
-            hillshadePrepareBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+            hillshadePrepareBuilder->setColorMode(gfx::ColorMode::unblended());
             hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
             hillshadePrepareBuilder->setRenderPass(renderPass);
-            hillshadePrepareBuilder->setVertexAttributes(std::move(hillshadePrepareVertexAttrs));
-            hillshadePrepareBuilder->setRawVertices(
-                {}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
-            hillshadePrepareBuilder->setSegments(
-                gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
 
-            auto imageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
-            if (imageLocation.has_value()) {
-                std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
-                texture->setImage(bucket.getDEMData().getImagePtr());
-                texture->setSamplerConfiguration(
-                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-                hillshadePrepareBuilder->setTexture(texture, imageLocation.value());
-            }
+            buildTileDrawables(hillshadePrepareBuilder, bucket, true);
 
             hillshadePrepareBuilder->flush();
 
@@ -423,78 +488,20 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        // Set up tile drawable
-        auto vertices = staticDataSharedVertices;
-        auto* indices = &staticDataIndices;
-        auto* segments = &staticDataSegments;
-
-        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
-            vertices = bucket.sharedVertices;
-            indices = &bucket.indices;
-            segments = &bucket.segments;
-        }
-
-        gfx::VertexAttributeArray hillshadeVertexAttrs;
-
-        if (const auto& attr = hillshadeVertexAttrs.add(PosAttribName)) {
-            attr->setSharedRawData(vertices,
-                                   offsetof(HillshadeLayoutVertex, a1),
-                                   0,
-                                   sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(TexturePosAttribName)) {
-            attr->setSharedRawData(vertices,
-                                   offsetof(HillshadeLayoutVertex, a2),
-                                   0,
-                                   sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short4);
-        }
-
-        hillshadeBuilder = context.createDrawableBuilder("hillshade");
-
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                drawable.setVertexAttributes(std::move(hillshadeVertexAttrs));
-                drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
-
-                std::vector<std::unique_ptr<gfx::Drawable::DrawSegment>> drawSegments;
-                for (std::size_t i = 0; i < segments->size(); ++i) {
-                    const auto& seg = segments->data()[i];
-                    auto segCopy = SegmentBase{
-                        // no copy constructor
-                        seg.vertexOffset,
-                        seg.indexOffset,
-                        seg.vertexLength,
-                        seg.indexLength,
-                        seg.sortKey,
-                    };
-                    drawSegments.emplace_back(hillshadeBuilder->createSegment(gfx::Triangles(), std::move(segCopy)));
-                }
-                drawable.setIndexData(indices->vector(), std::move(drawSegments));
-
-                auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
-                if (imageLocation.has_value()) {
-                    drawable.setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
-                }
-            });
-            continue;
+            // TODO: check whether to remove tile
+            removeTile(renderPass, tileID);
         }
 
+        // Set up tile drawable
+        hillshadeBuilder = context.createDrawableBuilder("hillshade");
         hillshadeBuilder->setShader(hillshadeShader);
         hillshadeBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
         hillshadeBuilder->setColorMode(gfx::ColorMode::alphaBlended());
         hillshadeBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
         hillshadeBuilder->setRenderPass(renderPass);
-        hillshadeBuilder->setVertexAttributes(std::move(hillshadeVertexAttrs));
-        hillshadeBuilder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
-        hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
-        auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
-        if (imageLocation.has_value()) {
-            hillshadeBuilder->setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
-        }
+        buildTileDrawables(hillshadeBuilder, bucket);
 
         hillshadeBuilder->flush();
 
