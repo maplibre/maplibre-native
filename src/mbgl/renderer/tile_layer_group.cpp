@@ -84,7 +84,7 @@ void TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& 
     }
 }
 
-std::size_t TileLayerGroup::observeDrawables(const std::function<void(gfx::Drawable&)>&& f) {
+std::size_t TileLayerGroup::visitDrawables(const std::function<void(gfx::Drawable&)>&& f) {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     for (auto* drawable : impl->sortedDrawables) {
         f(*drawable);
@@ -92,7 +92,7 @@ std::size_t TileLayerGroup::observeDrawables(const std::function<void(gfx::Drawa
     return impl->sortedDrawables.size();
 }
 
-std::size_t TileLayerGroup::observeDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
+std::size_t TileLayerGroup::visitDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     for (const auto* drawable : impl->sortedDrawables) {
         f(*drawable);
@@ -100,7 +100,7 @@ std::size_t TileLayerGroup::observeDrawables(const std::function<void(const gfx:
     return impl->sortedDrawables.size();
 }
 
-std::size_t TileLayerGroup::observeDrawablesRemove(const std::function<bool(gfx::Drawable&)>&& f) {
+std::size_t TileLayerGroup::eraseDrawablesIf(const std::function<bool(gfx::Drawable&)>&& f) {
     const auto oldSize = impl->drawablesByTile.size();
     for (auto i = impl->drawablesByTile.begin(); i != impl->drawablesByTile.end();) {
         auto& drawable = i->second;
@@ -117,7 +117,7 @@ std::size_t TileLayerGroup::observeDrawablesRemove(const std::function<bool(gfx:
     return (oldSize - impl->drawablesByTile.size());
 }
 
-std::size_t TileLayerGroup::observeDrawables(mbgl::RenderPass pass,
+std::size_t TileLayerGroup::visitDrawables(mbgl::RenderPass pass,
                                              const OverscaledTileID& tileID,
                                              const std::function<void(gfx::Drawable&)>&& f) {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
@@ -126,7 +126,7 @@ std::size_t TileLayerGroup::observeDrawables(mbgl::RenderPass pass,
     return std::distance(range.first, range.second);
 }
 
-std::size_t TileLayerGroup::observeDrawables(mbgl::RenderPass pass,
+std::size_t TileLayerGroup::visitDrawables(mbgl::RenderPass pass,
                                              const OverscaledTileID& tileID,
                                              const std::function<void(const gfx::Drawable&)>&& f) const {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
