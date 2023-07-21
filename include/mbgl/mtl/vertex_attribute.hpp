@@ -32,7 +32,7 @@ public:
     // bool getNormalized() const { return normalized; }
     // void setNormalized(bool value) { normalized = value; }
 
-    //std::size_t getStride() const;
+    // std::size_t getStride() const;
 
     // static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
 

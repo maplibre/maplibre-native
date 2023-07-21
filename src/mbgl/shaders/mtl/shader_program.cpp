@@ -20,10 +20,7 @@
 namespace mbgl {
 namespace mtl {
 
-ShaderProgram::ShaderProgram(std::string name,
-                             RendererBackend& backend_,
-                             MTLFunctionPtr vert,
-                             MTLFunctionPtr frag)
+ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFunctionPtr vert, MTLFunctionPtr frag)
     : ShaderProgramBase(),
       shaderName(std::move(name)),
       backend(backend_),

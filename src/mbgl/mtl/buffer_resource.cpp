@@ -14,8 +14,8 @@ BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size
 }
 
 BufferResource::BufferResource(const BufferResource& other)
-       : device(other.device),
-         usage(other.usage) {
+    : device(other.device),
+      usage(other.usage) {
     if (other.buffer) {
         buffer = NS::TransferPtr(device->newBuffer(other.buffer->contents(), other.buffer->length(), other.usage));
     }
@@ -24,8 +24,7 @@ BufferResource::BufferResource(const BufferResource& other)
 BufferResource::BufferResource(BufferResource&& other)
     : device(std::move(other.device)),
       buffer(std::move(other.buffer)),
-      usage(other.usage) {
-}
+      usage(other.usage) {}
 
 void BufferResource::update(const void* data, std::size_t size, std::size_t offset) {
     if (buffer && data) {
@@ -38,4 +37,3 @@ void BufferResource::update(const void* data, std::size_t size, std::size_t offs
 
 } // namespace mtl
 } // namespace mbgl
-

@@ -28,9 +28,9 @@ public:
 
     std::vector<UniqueDrawSegment> segments;
 
-/*
-    std::vector<TextureID> textures;
-*/
+    /*
+        std::vector<TextureID> textures;
+    */
     gfx::IndexVectorBasePtr indexes;
     std::vector<std::uint8_t> vertexData;
     std::size_t vertexCount = 0;
@@ -49,19 +49,19 @@ public:
     std::string vertexAttrName = "a_pos";
 };
 
- struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {
-     DrawSegment(gfx::DrawMode mode_, SegmentBase&& segment_, VertexArray&& vertexArray_)
-         : gfx::Drawable::DrawSegment(mode_, std::move(segment_))
-           //,vertexArray(std::move(vertexArray_))
-     {}
-     ~DrawSegment() override = default;
+struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {
+    DrawSegment(gfx::DrawMode mode_, SegmentBase&& segment_, VertexArray&& vertexArray_)
+        : gfx::Drawable::DrawSegment(mode_, std::move(segment_))
+    //,vertexArray(std::move(vertexArray_))
+    {}
+    ~DrawSegment() override = default;
 
-     //const VertexArray& getVertexArray() const { return vertexArray; }
-     //void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
+    // const VertexArray& getVertexArray() const { return vertexArray; }
+    // void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
 
- protected:
-     //VertexArray vertexArray;
- };
+protected:
+    // VertexArray vertexArray;
+};
 
 } // namespace mtl
 } // namespace mbgl

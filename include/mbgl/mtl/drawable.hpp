@@ -70,10 +70,10 @@ private:
 
     void bindUniformBuffers(RenderPass& renderPass) const;
     void unbindUniformBuffers(RenderPass& renderPass) const;
-/*
-    void bindTextures() const;
-    void unbindTextures() const;
-     */
+    /*
+        void bindTextures() const;
+        void unbindTextures() const;
+         */
 };
 
 } // namespace mtl

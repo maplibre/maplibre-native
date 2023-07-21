@@ -11,8 +11,7 @@ void UniformBlock::bindBuffer(const gfx::UniformBuffer& uniformBuffer) {
     assert(size == uniformBuffer.getSize());
 }
 
-void UniformBlock::unbindBuffer() {
-}
+void UniformBlock::unbindBuffer() {}
 
 } // namespace mtl
 } // namespace mbgl

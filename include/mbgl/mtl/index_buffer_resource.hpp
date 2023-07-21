@@ -8,8 +8,10 @@ namespace mtl {
 class IndexBufferResource : public gfx::IndexBufferResource {
 public:
     IndexBufferResource() = default;
-    IndexBufferResource(BufferResource&& ptr) : buffer(std::move(ptr)) {}
-    IndexBufferResource(IndexBufferResource&& other) : buffer(std::move(other.buffer)) {}
+    IndexBufferResource(BufferResource&& ptr)
+        : buffer(std::move(ptr)) {}
+    IndexBufferResource(IndexBufferResource&& other)
+        : buffer(std::move(other.buffer)) {}
 
     std::size_t getSizeInBytes() const { return buffer.getSizeInBytes(); }
     void* contents() const { return buffer.contents(); }

@@ -177,10 +177,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    const bool build = impl->vertexAttributes.isDirty() /*||
-                       std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
-                           return !static_cast<const DrawSegment&>(*seg).getVertexArray().isValid();
-                       })*/;
+    const bool build =
+        impl->vertexAttributes
+            .isDirty() /*||
+std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
+return !static_cast<const DrawSegment&>(*seg).getVertexArray().isValid();
+})*/;
 
     if (build) {
         auto& contextBase = uploadPass.getContext();

@@ -239,8 +239,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
     }
 
-    assert(std::all_of(bindings.begin(), bindings.end(), [](const auto& b) { return !b || b->vertexBufferResource;
-    }));
+    assert(std::all_of(bindings.begin(), bindings.end(), [](const auto& b) { return !b || b->vertexBufferResource; }));
 
     return bindings;
 }

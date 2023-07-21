@@ -8,8 +8,10 @@ namespace mtl {
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
     VertexBufferResource() = default;
-    VertexBufferResource(BufferResource&& ptr) : buffer(std::move(ptr)) {}
-    VertexBufferResource(VertexBufferResource&& other) : buffer(std::move(other.buffer)) {}
+    VertexBufferResource(BufferResource&& ptr)
+        : buffer(std::move(ptr)) {}
+    VertexBufferResource(VertexBufferResource&& other)
+        : buffer(std::move(other.buffer)) {}
 
     std::size_t getSizeInBytes() const { return buffer.getSizeInBytes(); }
     void* contents() const { return buffer.contents(); }
