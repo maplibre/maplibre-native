@@ -6,6 +6,10 @@
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/util.hpp>
 
+#include <Foundation/NSSharedPtr.hpp>
+#include <Metal/MTLDevice.hpp>
+#include <Metal/MTLCommandQueue.hpp>
+
 namespace mbgl {
 
 class ProgramParameters;
@@ -26,8 +30,8 @@ public:
     /// One-time shader initialization
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
 
-    const MTLDevicePtr& getDevice() const;
-    const MTLCommandQueuePtr& getCommandQueue() const;
+    const MTLDevicePtr& getDevice() const { return device; }
+    const MTLCommandQueuePtr& getCommandQueue() const { return commandQueue; }
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
@@ -55,8 +59,8 @@ public:
     void setScissorTest(bool);
 
 protected:
-    struct Impl;
-    std::unique_ptr<Impl> impl;
+    MTLDevicePtr device;
+    MTLCommandQueuePtr commandQueue;
 };
 
 } // namespace mtl

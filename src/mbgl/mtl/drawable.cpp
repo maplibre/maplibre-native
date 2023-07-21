@@ -53,13 +53,13 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     const simd::float3 positions[3] = {{-0.8f, 0.8f, 0.0f}, {0.0f, -0.8f, 0.0f}, {+0.8f, 0.8f, 0.0f}};
-    auto posBuf = context.createBuffer(sizeof(positions), positions, MTL::ResourceStorageModeShared);
+    auto posBuf = context.createBuffer(positions, sizeof(positions), gfx::BufferUsageType::StaticDraw);
 
     const simd::float3 colors[3] = {{1.0, 0.3f, 0.2f}, {0.8f, 1.0, 0.0f}, {0.8f, 0.0f, 1.0}};
-    auto colorBuf = context.createBuffer(sizeof(colors), colors, MTL::ResourceStorageModeShared);
+    auto colorBuf = context.createBuffer(colors, sizeof(colors), gfx::BufferUsageType::StaticDraw);
 
-    encoder->setVertexBuffer(posBuf.get(), /*offset=*/0, /*index=*/0);
-    encoder->setVertexBuffer(colorBuf.get(), /*offset=*/0, /*index=*/1);
+    encoder->setVertexBuffer(posBuf.get().get(), /*offset=*/0, /*index=*/0);
+    encoder->setVertexBuffer(colorBuf.get().get(), /*offset=*/0, /*index=*/1);
 
     constexpr NS::UInteger vertexStart = 0;
     constexpr NS::UInteger vertexCount = 3;

@@ -17,19 +17,12 @@ using VertexVectorBasePtr = std::shared_ptr<VertexVectorBase>;
 
 namespace mtl {
 
+class BufferResource;
 class CommandEncoder;
 class Context;
 class VertexArray;
 class Texture2D;
 
-class VertexBufferResource : public gfx::VertexBufferResource {
-public:
-    VertexBufferResource() = default;
-};
-class IndexBufferResource : public gfx::IndexBufferResource {
-public:
-    IndexBufferResource() = default;
-};
 class TextureResource : public gfx::TextureResource {
 public:
     TextureResource() = default;
@@ -57,10 +50,13 @@ public:
                                                                           std::size_t size,
                                                                           gfx::BufferUsageType) override;
     void updateVertexBufferResource(gfx::VertexBufferResource&, const void* data, std::size_t size) override;
+    
     std::unique_ptr<gfx::IndexBufferResource> createIndexBufferResource(const void* data,
                                                                         std::size_t size,
                                                                         gfx::BufferUsageType) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
+
+    void updateResource(BufferResource&, const void* data, std::size_t size);
 
 #if MLN_DRAWABLE_RENDERER
     const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, gfx::BufferUsageType);

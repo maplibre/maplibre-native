@@ -1139,12 +1139,14 @@ if(MBGL_WITH_METAL)
     )
     list(APPEND 
         INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/context.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/layer_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/index_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/mtl_fwd.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/tile_layer_group.hpp
@@ -1152,10 +1154,12 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/upload_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_attribute.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
             )
     list(APPEND 
         SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
@@ -1163,6 +1167,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/mtl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/tile_layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_block.cpp

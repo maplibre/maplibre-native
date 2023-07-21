@@ -7,6 +7,7 @@
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/mtl/buffer_resource.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
@@ -35,7 +36,7 @@ public:
 
     const gfx::RenderingStats& renderingStats() const override { return stats; }
 
-    MTLBufferPtr createBuffer(std::size_t size, const void* data = nullptr, NS::UInteger storageMode = 0) const;
+    BufferResource createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const;
 
     UniqueShaderProgram createProgram(std::string name,
                                       std::string_view source,
@@ -148,9 +149,6 @@ private:
     bool cleanupOnDestruction = true;
 
     gfx::RenderingStats stats;
-
-    struct Impl;
-    std::unique_ptr<Impl> impl;
 };
 
 } // namespace mtl

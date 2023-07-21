@@ -3,8 +3,11 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 
+#include <Foundation/NSSharedPtr.hpp>
+#include <Metal/MTLLibrary.hpp>
+
 #include <optional>
-#include <memory>
+#include <string>
 
 namespace mbgl {
 namespace mtl {
@@ -20,7 +23,7 @@ public:
                   RendererBackend& backend,
                   MTLFunctionPtr vertexFunction,
                   MTLFunctionPtr fragmentFunction);
-    ~ShaderProgram() noexcept override;
+    ~ShaderProgram() noexcept override = default;
 
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }
@@ -39,11 +42,9 @@ public:
 
 protected:
     std::string shaderName;
-
     RendererBackend& backend;
-
-    struct Impl;
-    std::unique_ptr<Impl> impl;
+    MTLFunctionPtr vertexFunction;
+    MTLFunctionPtr fragmentFunction;
 };
 
 } // namespace mtl

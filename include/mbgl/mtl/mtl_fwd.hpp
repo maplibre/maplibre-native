@@ -1,5 +1,8 @@
 #pragma once
 
+// Forward-declarations for metal-cpp types, allowing
+// references without including any third-party headers
+
 #include <memory>
 
 namespace CA {

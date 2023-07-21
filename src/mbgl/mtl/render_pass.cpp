@@ -10,14 +10,9 @@
 namespace mbgl {
 namespace mtl {
 
-struct RenderPass::Impl {
-    MTLRenderCommandEncoderPtr encoder;
-};
-
 RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor)
     : descriptor(descriptor),
-      commandEncoder(commandEncoder_),
-      impl(std::make_unique<Impl>())
+      commandEncoder(commandEncoder_)
 //, debugGroup(commandEncoder.createDebugGroup(name))
 {
     auto& resource = descriptor.renderable.getResource<RenderableResource>();
@@ -26,7 +21,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     if (const auto& buffer = resource.getCommandBuffer()) {
         if (const auto& rpd = resource.getRenderPassDescriptor()) {
-            impl->encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
+            encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
         }
     }
 
@@ -39,14 +34,10 @@ RenderPass::~RenderPass() {
 }
 
 void RenderPass::endEncoding() {
-    if (impl->encoder) {
-        impl->encoder->endEncoding();
-        impl->encoder.reset();
+    if (encoder) {
+        encoder->endEncoding();
+        encoder.reset();
     }
-}
-
-const MTLRenderCommandEncoderPtr& RenderPass::getMetalEncoder() const {
-    return impl->encoder;
 }
 
 void RenderPass::pushDebugGroup(const char* name) {

@@ -11,7 +11,8 @@
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
 
-#include <Metal/Metal.hpp>
+#include <Metal/MTLRenderPass.hpp>
+#include <Metal/MTLRenderPipeline.hpp>
 
 #include <cstring>
 #include <utility>
@@ -19,25 +20,15 @@
 namespace mbgl {
 namespace mtl {
 
-struct ShaderProgram::Impl {
-    Impl(MTLFunctionPtr&& vert, MTLFunctionPtr&& frag)
-        : vertexFunction(std::move(vert)),
-          fragmentFunction(std::move(frag)) {}
-
-    MTLFunctionPtr vertexFunction;
-    MTLFunctionPtr fragmentFunction;
-};
-
 ShaderProgram::ShaderProgram(std::string name,
                              RendererBackend& backend_,
-                             MTLFunctionPtr vertexFunction,
-                             MTLFunctionPtr fragmentFunction)
+                             MTLFunctionPtr vert,
+                             MTLFunctionPtr frag)
     : ShaderProgramBase(),
       shaderName(std::move(name)),
       backend(backend_),
-      impl(std::make_unique<Impl>(std::move(vertexFunction), std::move(fragmentFunction))) {}
-
-ShaderProgram::~ShaderProgram() noexcept = default;
+      vertexFunction(std::move(vert)),
+      fragmentFunction(std::move(frag)) {}
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::RenderPassDescriptor& descriptor) const {
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
@@ -68,8 +59,8 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
 
     auto* desc = MTL::RenderPipelineDescriptor::alloc()->init();
     desc->setLabel(NS::String::string(shaderName.data(), NS::UTF8StringEncoding));
-    desc->setVertexFunction(impl->vertexFunction.get());
-    desc->setFragmentFunction(impl->fragmentFunction.get());
+    desc->setVertexFunction(vertexFunction.get());
+    desc->setFragmentFunction(fragmentFunction.get());
 
     if (auto* colorTarget = desc->colorAttachments()->object(0)) {
         colorTarget->setPixelFormat(colorFormat);

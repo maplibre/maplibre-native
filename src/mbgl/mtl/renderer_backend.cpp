@@ -7,16 +7,6 @@
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
 
-// metal-cpp is a header-only library.
-// To generate the implementation,
-// add the following code in one of your .cpp files:
-#define NS_PRIVATE_IMPLEMENTATION
-#define CA_PRIVATE_IMPLEMENTATION
-#define MTL_PRIVATE_IMPLEMENTATION
-#include <Foundation/Foundation.hpp>
-#include <Metal/Metal.hpp>
-#include <QuartzCore/QuartzCore.hpp>
-
 #include <cassert>
 
 namespace mbgl {
@@ -62,30 +52,15 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
 namespace mbgl {
 namespace mtl {
 
-struct RendererBackend::Impl {
-    MTLDevicePtr device;
-    MTLCommandQueuePtr commandQueue;
-};
-
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
-      impl(std::make_unique<Impl>()) {
-    impl->device = NS::TransferPtr(MTL::CreateSystemDefaultDevice());
-    assert(impl->device);
-
-    impl->commandQueue = NS::TransferPtr(impl->device->newCommandQueue());
-    assert(impl->commandQueue);
+      device(NS::TransferPtr(MTL::CreateSystemDefaultDevice())),
+      commandQueue(NS::TransferPtr(device->newCommandQueue())) {
+    assert(device);
+    assert(commandQueue);
 }
 
 RendererBackend::~RendererBackend() = default;
-
-const MTLDevicePtr& RendererBackend::getDevice() const {
-    return impl->device;
-}
-
-const MTLCommandQueuePtr& RendererBackend::getCommandQueue() const {
-    return impl->commandQueue;
-}
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
     return std::make_unique<mtl::Context>(*this);

@@ -26,15 +26,10 @@
 namespace mbgl {
 namespace mtl {
 
-struct Context::Impl {
-    MTLRenderPassDescriptorPtr renderPassDescriptor;
-};
-
 Context::Context(RendererBackend& backend_)
     : gfx::Context(16), // TODO
       backend(backend_),
-      stats(),
-      impl(std::make_unique<Impl>()) {}
+      stats() {}
 
 Context::~Context() noexcept {
     /*
@@ -49,21 +44,8 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<CommandEncoder>(*this);
 }
 
-MTLBufferPtr Context::createBuffer(std::size_t size, const void* data, NS::UInteger storageMode) const {
-    const auto& device = backend.getDevice();
-    auto buffer = NS::TransferPtr(device->newBuffer(static_cast<NS::UInteger>(size), storageMode));
-    if (data && buffer) {
-        if (auto* content = buffer->contents()) {
-            std::memcpy(content, data, size);
-
-#if TARGET_OS_MAC || TARGET_OS_MACCATALYST
-            if (storageMode == MTL::StorageModeManaged) {
-                buffer->didModifyRange(NS::Range::Make(0, size));
-            }
-#endif
-        }
-    }
-    return buffer;
+BufferResource Context::createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const {
+    return { backend.getDevice(), data, size, MTL::ResourceStorageModeShared };
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
@@ -151,7 +133,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
-    return std::make_shared<UniformBuffer>(data, size);
+    return std::make_shared<UniformBuffer>(createBuffer(data, size, gfx::BufferUsageType::StaticDraw));
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
