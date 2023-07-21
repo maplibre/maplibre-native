@@ -387,10 +387,10 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             segment.indexLength += 6;
         }
     };
-    
+
     auto buildTileDrawables = [&context, &buildRenderData](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                                                 const HillshadeBucket& bucket,
-                                                                 bool prepare = false) {
+                                                           const HillshadeBucket& bucket,
+                                                           bool prepare = false) {
         std::vector<std::array<int16_t, 2>> vertices, attributes;
         std::vector<uint16_t> indices;
         std::vector<SegmentBase> segments;
@@ -400,8 +400,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             attributes = vertices;
             indices = {0, 1, 2, 1, 2, 3};
             segments.emplace_back(0, 0, vertices.size(), indices.size());
-        }
-        else {
+        } else {
             buildRenderData(bucket.mask, vertices, attributes, indices, segments);
         }
 
