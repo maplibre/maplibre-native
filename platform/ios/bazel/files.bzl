@@ -7,6 +7,7 @@ MLN_IOS_SDK_HEADERS = [
     "src/MLNMapProjection.h",
     "src/MLNMapView+IBAdditions.h",
     "src/MLNMapViewDelegate.h",
+    "src/MLNMapView.h",
     "src/MLNUserLocation.h",
     "src/MLNUserLocationAnnotationView.h",
     "src/MLNUserLocationAnnotationViewStyle.h",    
