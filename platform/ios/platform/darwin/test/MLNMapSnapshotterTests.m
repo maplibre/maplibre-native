@@ -1,4 +1,4 @@
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 #import <XCTest/XCTest.h>
 
 MLNImage *MLNNormalizedImage(MLNImage *sourceImage) {

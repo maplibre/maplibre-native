@@ -8,8 +8,6 @@
   <string>${PRODUCT_NAME}</string>
   <key>CFBundleExecutable</key>
   <string>RenderTestApp</string>
-  <key>CFBundleIdentifier</key>
-  <string>org.maplibre.RenderTestApp</string>
   <key>CFBundleGetInfoString</key>
   <string>org.maplibre.RenderTestApp</string>
   <key>CFBundleInfoDictionaryVersion</key>

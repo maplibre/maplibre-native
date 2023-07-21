@@ -181,6 +181,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
 
+/**
+ Tells the delegate that the `mapView` is missing an image. The image should be added synchronously with `-[MLNStyle setImage:forName:]` to be rendered on the current zoom level. When loading icons asynchronously, you can load a placeholder image and replace it when your image has loaded.
+
+ @param mapView The map view that is loading the image.
+ @param imageName The name of the image that is missing.
+ */
 - (nullable NSImage *)mapView:(MLNMapView *)mapView didFailToLoadImage:(NSString *)imageName;
 
 /**

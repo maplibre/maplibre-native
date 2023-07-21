@@ -15,6 +15,10 @@ on:
       - "vendor/**"
       - "CMakeLists.txt"
       - metrics/linux-gcc8-release-style.json
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
 
   pull_request:
     branches:
@@ -29,6 +33,10 @@ on:
       - "vendor/**"
       - "CMakeLists.txt"
       - metrics/linux-gcc8-release-style.json
+      - WORKSPACE
+      - BUILD.bazel
+      - .bazelrc
+      - .bazelversion
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -60,7 +68,8 @@ jobs:
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
-            libglfw3-dev
+            libglfw3-dev \
+            libwebp-dev
 
       - name: Build MapLibre Native Core
         run: |
@@ -151,23 +160,16 @@ jobs:
       - run: chmod +x ./mbgl-render-test-runner
 
       - name: Run render test
-        continue-on-error: true
         id: render_test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
-      - name: Save PR number
-        env:
-          PR_NUMBER: ${{ github.event.number }}
-        run: |
-          echo $PR_NUMBER > ./pr_number
-
       - name: Upload render test result
+        if: always() && steps.render_test.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with:
           name: render-test-result
           path: |
             metrics/linux-gcc8-release-style.html
-            ./pr_number
 
   coverage:
     runs-on: ubuntu-22.04
@@ -185,7 +187,9 @@ jobs:
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
+            libwebp-dev \
             libglfw3-dev \
+            libsqlite3-dev \
             xserver-xorg-video-dummy \
             xinit
 
