@@ -165,7 +165,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["build/Info-app.plist"],
+    infoplists = ["app/Info.plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
