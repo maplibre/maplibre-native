@@ -1,0 +1,17 @@
+[
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        0.0,
+        0.0
+      ]
+    },
+    "properties": {
+      "radius": 20
+    },
+    "source": "mapbox",
+    "state": {}
+  }
+]

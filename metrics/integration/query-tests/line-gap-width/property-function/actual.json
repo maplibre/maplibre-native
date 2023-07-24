@@ -1,0 +1,23 @@
+[
+  {
+    "type": "Feature",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          10.01953125,
+          10.012129557908139
+        ],
+        [
+          10.01953125,
+          -10.012129557908139
+        ]
+      ]
+    },
+    "properties": {
+      "gap": 20
+    },
+    "source": "geojson",
+    "state": {}
+  }
+]
