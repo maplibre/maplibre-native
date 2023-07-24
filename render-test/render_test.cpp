@@ -14,6 +14,7 @@
 #include "parser.hpp"
 #include "runner.hpp"
 
+#ifdef SHOW_ANSI_COLORS
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_YELLOW "\x1b[33m"
@@ -23,6 +24,17 @@
 #define ANSI_COLOR_GRAY "\x1b[37m"
 #define ANSI_COLOR_LIGHT_GRAY "\x1b[90m"
 #define ANSI_COLOR_RESET "\x1b[0m"
+#else
+#define ANSI_COLOR_RED ""
+#define ANSI_COLOR_GREEN ""
+#define ANSI_COLOR_YELLOW ""
+#define ANSI_COLOR_BLUE ""
+#define ANSI_COLOR_MAGENTA ""
+#define ANSI_COLOR_CYAN ""
+#define ANSI_COLOR_GRAY ""
+#define ANSI_COLOR_LIGHT_GRAY ""
+#define ANSI_COLOR_RESET ""
+#endif
 
 #if !defined(SANITIZE)
 void* operator new(std::size_t sz) {
@@ -51,7 +63,7 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
         {"metrics", TestRunner::UpdateResults::METRICS},
         {"rebaseline", TestRunner::UpdateResults::REBASELINE}};
 
-    args::ArgumentParser argumentParser("Mapbox GL Test Runner");
+    args::ArgumentParser argumentParser("MapLibre Native Test Runner");
 
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
 
@@ -156,6 +168,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
     TestStatistics stats;
 
     for (auto& testPath : testPaths) {
+        std::cout << "Running tests from " << testPath.stylePath << std::endl;
         TestMetadata metadata = parseTestMetadata(testPath);
 
         if (!recycleMap) {
