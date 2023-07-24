@@ -68,6 +68,27 @@ jobs:
           curl -T RenderTestApp.ipa "${{ env.app_url }}"
           curl -T RenderTest.xctest.zip "${{ env.test_package_url }}"
 
+          max_checks=10
+          sleep_time=5
+
+          check_status()
+            echo "$(aws devicefarm get-upload --arn $1 | jq -r '.upload.status')"
+          end
+
+          for i in {1..$max_checks}; do
+            status_app=$(check_status "${{ env.app_arn }}")
+            status_test_package=$(check_status "${{ env.test_package_arn }}")
+
+            echo status_app=$status_app
+            echo status_test_package=$status_test_package
+
+            if [[ "$status_app" == "SUCCEEDED" && "$status_test_package" == "SUCCEEDED" ]]; then
+              exit 0
+            fi
+
+            sleep $sleep_time
+          done
+
       - name: Schedule test run
         uses: realm/aws-devicefarm/test-application@master
         with:
