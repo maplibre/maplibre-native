@@ -315,17 +315,15 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     };
 #endif // MLN_LEGACY_RENDERER
 
-    const auto enableScissorTest = [](bool enable) {
 #if MLN_RENDER_BACKEND_OPENGL
+    const auto enableScissorTest = [](bool enable) {
         using namespace platform;
         enable ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
-#endif // MLN_RENDER_BACKEND_OPENGL
     };
     const auto setScissor = [](int x, int y, int w, int h) {
-#if MLN_RENDER_BACKEND_OPENGL
         platform::glScissor(x, y, w, h);
-#endif // MLN_RENDER_BACKEND_OPENGL
     };
+#endif // MLN_RENDER_BACKEND_OPENGL
 
 #if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     if (parameters.staticData.has3D) {
