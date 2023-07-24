@@ -165,13 +165,6 @@ jobs:
         id: render_test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
-      - name: Save PR number
-        if: always() && steps.render_test.outcome == 'failure'
-        env:
-          PR_NUMBER: ${{ github.event.number }}
-        run: |
-          echo $PR_NUMBER > ./pr_number
-
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
         uses: actions/upload-artifact@v3
@@ -179,7 +172,6 @@ jobs:
           name: render-test-result
           path: |
             metrics/linux-gcc8-release-style.html
-            ./pr_number
 
   coverage:
     runs-on: ubuntu-22.04
@@ -221,6 +213,7 @@ jobs:
       - name: Generate coverage report
         run: |
           xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core //render-test:render-test --//:maplibre_platform=linux --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1
+          echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
         if: '!cancelled()'
