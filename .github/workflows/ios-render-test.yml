@@ -79,14 +79,14 @@ jobs:
             status_app="$(check_status "${{ env.app_arn }}")"
             status_test_package="$(check_status "${{ env.test_package_arn }}")"
 
-            echo status_app="$status_app"
+            echo status_app=$status_app
             echo status_test_package="$status_test_package"
 
             if [[ "$status_app" == "SUCCEEDED" && "$status_test_package" == "SUCCEEDED" ]]; then
               exit 0
             fi
 
-            sleep "$sleep_time"
+            sleep $sleep_time
           done
 
       - name: Schedule test run
