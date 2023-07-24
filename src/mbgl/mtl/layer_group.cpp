@@ -33,7 +33,7 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
         const auto debugGroup = uploadPass.createDebugGroup(drawable.getName().c_str());
 #endif
 
-        // drawableGL.upload(uploadPass);
+        drawableGL.upload(uploadPass);
     });
 }
 

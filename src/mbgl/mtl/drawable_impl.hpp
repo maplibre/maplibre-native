@@ -7,10 +7,14 @@
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
+
+#include <Foundation/NSSharedPtr.hpp>
+#include <Metal/MTLVertexDescriptor.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -50,17 +54,15 @@ public:
 };
 
 struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {
-    DrawSegment(gfx::DrawMode mode_, SegmentBase&& segment_ /*, VertexArray&& vertexArray_*/)
-        : gfx::Drawable::DrawSegment(mode_, std::move(segment_))
-    //,vertexArray(std::move(vertexArray_))
-    {}
+    DrawSegment(gfx::DrawMode mode_, SegmentBase&& segment_)
+        : gfx::Drawable::DrawSegment(mode_, std::move(segment_)) {}
     ~DrawSegment() override = default;
 
-    // const VertexArray& getVertexArray() const { return vertexArray; }
-    // void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
+    const MTLVertexDescriptorPtr& getVertexDesc() const { return vertexDesc; }
+    void setVertexDesc(MTLVertexDescriptorPtr&& value) { vertexDesc = std::move(value); }
 
 protected:
-    // VertexArray vertexArray;
+    MTLVertexDescriptorPtr vertexDesc;
 };
 
 } // namespace mtl

@@ -24,6 +24,9 @@ class Function;
 class RenderCommandEncoder;
 class RenderPipelineState;
 class RenderPassDescriptor;
+class VertexAttributeDescriptor;
+class VertexBufferLayoutDescriptor;
+class VertexDescriptor;
 } // namespace MTL
 
 namespace mbgl {
@@ -38,5 +41,8 @@ using MTLFunctionPtr = NS::SharedPtr<MTL::Function>;
 using MTLRenderCommandEncoderPtr = NS::SharedPtr<MTL::RenderCommandEncoder>;
 using MTLRenderPassDescriptorPtr = NS::SharedPtr<MTL::RenderPassDescriptor>;
 using MTLRenderPipelineStatePtr = NS::SharedPtr<MTL::RenderPipelineState>;
+using MTLVertexAttributeDescriptorPtr = NS::SharedPtr<MTL::VertexAttributeDescriptor>;
+using MTLVertexBufferLayoutDescriptorPtr = NS::SharedPtr<MTL::VertexBufferLayoutDescriptor>;
+using MTLVertexDescriptorPtr = NS::SharedPtr<MTL::VertexDescriptor>;
 } // namespace mtl
 } // namespace mbgl

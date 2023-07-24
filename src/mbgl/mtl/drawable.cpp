@@ -107,9 +107,9 @@ void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueD
 }
 
 void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
-    // impl->vertexData = std::move(data);
+    impl->vertexData = std::move(data);
     impl->vertexCount = count;
-    // impl->vertexType = type;
+    impl->vertexType = type;
 }
 
 const gfx::VertexAttributeArray& Drawable::getVertexAttributes() const {
@@ -172,17 +172,54 @@ void Drawable::unbindUniformBuffers(RenderPass& renderPass) const {
     }
 }
 
+namespace {
+MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {
+    switch (type) {
+        case gfx::AttributeDataType::Byte: return MTL::VertexFormatChar;
+        case gfx::AttributeDataType::Byte2: return MTL::VertexFormatChar2;
+        case gfx::AttributeDataType::Byte3: return MTL::VertexFormatChar3;
+        case gfx::AttributeDataType::Byte4: return MTL::VertexFormatChar4;
+        case gfx::AttributeDataType::UByte: return MTL::VertexFormatUChar;
+        case gfx::AttributeDataType::UByte2: return MTL::VertexFormatUChar2;
+        case gfx::AttributeDataType::UByte3: return MTL::VertexFormatUChar3;
+        case gfx::AttributeDataType::UByte4: return MTL::VertexFormatUChar4;
+        case gfx::AttributeDataType::Short: return MTL::VertexFormatShort;
+        case gfx::AttributeDataType::Short2: return MTL::VertexFormatShort2;
+        case gfx::AttributeDataType::Short3: return MTL::VertexFormatShort3;
+        case gfx::AttributeDataType::Short4: return MTL::VertexFormatShort4;
+        case gfx::AttributeDataType::UShort: return MTL::VertexFormatUShort;
+        case gfx::AttributeDataType::UShort2: return MTL::VertexFormatUShort2;
+        case gfx::AttributeDataType::UShort3: return MTL::VertexFormatUShort3;
+        case gfx::AttributeDataType::UShort4: return MTL::VertexFormatUShort4;
+        //case gfx::AttributeDataType::UShort8: return MTL::VertexFormatUShort8;
+        case gfx::AttributeDataType::Int: return MTL::VertexFormatInt;
+        case gfx::AttributeDataType::Int2: return MTL::VertexFormatInt2;
+        case gfx::AttributeDataType::Int3: return MTL::VertexFormatInt3;
+        case gfx::AttributeDataType::Int4: return MTL::VertexFormatInt4;
+        case gfx::AttributeDataType::UInt: return MTL::VertexFormatUInt;
+        case gfx::AttributeDataType::UInt2: return MTL::VertexFormatUInt2;
+        case gfx::AttributeDataType::UInt3: return MTL::VertexFormatUInt3;
+        case gfx::AttributeDataType::UInt4: return MTL::VertexFormatUInt4;
+        case gfx::AttributeDataType::Float: return MTL::VertexFormatFloat;
+        case gfx::AttributeDataType::Float2: return MTL::VertexFormatFloat2;
+        case gfx::AttributeDataType::Float3: return MTL::VertexFormatFloat3;
+        case gfx::AttributeDataType::Float4: return MTL::VertexFormatFloat4;
+        default:
+            assert(!"Unsupported vertex attribute format");
+            return MTL::VertexFormatInvalid;
+    }
+}
+} // namespace
+
 void Drawable::upload(gfx::UploadPass& uploadPass) {
     if (!shader) {
         return;
     }
 
-    const bool build =
-        impl->vertexAttributes
-            .isDirty() /*||
-std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
-return !static_cast<const DrawSegment&>(*seg).getVertexArray().isValid();
-})*/;
+    const bool build = impl->vertexAttributes.isDirty() ||
+        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
+            return !static_cast<const DrawSegment&>(*seg).getVertexDesc();
+        });
 
     if (build) {
         auto& contextBase = uploadPass.getContext();
@@ -213,7 +250,7 @@ return !static_cast<const DrawSegment&>(*seg).getVertexArray().isValid();
         impl->attributeBuffers = std::move(vertexBuffers);
         impl->indexBuffer = std::move(indexBuffer);
 
-        // Create a VAO for each group of vertexes described by a segment
+        // Create a layout descriptor for each group of vertexes described by a segment
         for (const auto& iseg : impl->segments) {
             auto& seg = static_cast<DrawSegment&>(*iseg);
             const auto& mlSeg = seg.getSegment();
@@ -222,18 +259,36 @@ return !static_cast<const DrawSegment&>(*seg).getVertexArray().isValid();
                 continue;
             }
 
-            for (auto& binding : bindings) {
+            auto vertDesc = NS::TransferPtr(MTL::VertexDescriptor::vertexDescriptor());
+
+            NS::UInteger index = 0;
+            for (const auto& binding : bindings) {
                 if (binding) {
-                    binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                    auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
+                    attribDesc->setBufferIndex(index);
+                    attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
+
+                    //binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                    attribDesc->setOffset(static_cast<NS::UInteger>(mlSeg.vertexOffset));
+
+                    auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
+
+                    // if (single default value)
+                    //stepFunction = MTL::VertexStepFunctionConstant;
+                    //stepRate = 0;
+
+                    layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
+                    layoutDesc->setStepRate(1);
+                    layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
+
+                    vertDesc->attributes()->setObject(attribDesc.get(), index);
+                    vertDesc->layouts()->setObject(layoutDesc.get(), index);
                 }
+    
+                index += 1;
             }
 
-            /*
-            auto vertexArray = context.createVertexArray();
-            vertexArray.bind(context, impl->indexBuffer, bindings);
-            assert(vertexArray.isValid());
-            glSeg.setVertexArray(std::move(vertexArray));
-             */
+            seg.setVertexDesc(std::move(vertDesc));
         };
     }
 

@@ -38,7 +38,7 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
         const auto debugGroup = uploadPass.createDebugGroup(labelPtr);
 #endif
 
-        // drawableMTL.upload(uploadPass);
+        drawableMTL.upload(uploadPass);
     });
 }
 
