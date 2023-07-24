@@ -408,7 +408,7 @@ public:
         return propertiesAsUniforms;
     }
 
-    /// Copy another collection into this one
+    /// Copy another collection into this one. Only attributes that have values are copied.
     virtual void copy(const VertexAttributeArray& other) {
         for (const auto& kv : other.attrs) {
             if (kv.second) {
