@@ -118,12 +118,10 @@ public:
     std::size_t removeDrawablesIf(const std::function<bool(gfx::Drawable&)>&&) override;
 
     /// Call the provided function for each drawable for the given tile
+    std::size_t visitDrawables(mbgl::RenderPass, const OverscaledTileID&, const std::function<void(gfx::Drawable&)>&&);
     std::size_t visitDrawables(mbgl::RenderPass,
-                                 const OverscaledTileID&,
-                                 const std::function<void(gfx::Drawable&)>&&);
-    std::size_t visitDrawables(mbgl::RenderPass,
-                                 const OverscaledTileID&,
-                                 const std::function<void(const gfx::Drawable&)>&&) const;
+                               const OverscaledTileID&,
+                               const std::function<void(const gfx::Drawable&)>&&) const;
 
     std::size_t clearDrawables() override;
 

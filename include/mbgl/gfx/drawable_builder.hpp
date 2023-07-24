@@ -78,7 +78,7 @@ public:
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
-    /// Set depth type 
+    /// Set depth type
     void setDepthType(DepthMaskType value) { depthType = value; }
 
     /// Uses 3D depth mode
@@ -167,10 +167,10 @@ public:
     /// Provide raw data for vertices. Incompatible with adding primitives
     void setRawVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType);
 
-    /// Set indexes and segments 
+    /// Set indexes and segments
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
 
-    /// Set shared indices and segments 
+    /// Set shared indices and segments
     void setSegments(gfx::DrawMode, gfx::IndexVectorBasePtr, const SegmentBase*, std::size_t segmentCount);
 
     /// Add lines based on existing vertices

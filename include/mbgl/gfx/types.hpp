@@ -11,8 +11,8 @@ namespace gfx {
 enum class ColorBlendEquationType : uint8_t {
     Add,      ///< The source and destination colors are added to each other. O = sS + dD. The The s and d are blending
               ///< parameters that are multiplied into each of S and D before the addition.
-    Subtract, ///< Subtracts the destination from the source. O = sS - dD. The source and dest are multiplied by blending
-              ///< parameters.
+    Subtract, ///< Subtracts the destination from the source. O = sS - dD. The source and dest are multiplied by
+              ///< blending parameters.
     ReverseSubtract, ///< Subtracts the source from the destination. O = dD - sS. The source and dest are multiplied by
                      ///< blending parameters.
 };
@@ -74,8 +74,8 @@ enum class StencilOpType : uint8_t {
     Increment,     ///< Increments the current stencil buffer value. Clamps to the maximum representable unsigned value.
     Decrement,     ///< Decrements the current stencil buffer value. Clamps to 0.
     Invert,        ///< Bitwise inverts the current stencil buffer value.
-    IncrementWrap, ///< Increments the current stencil buffer value. Wraps stencil buffer value to zero when incrementing
-                   ///< the maximum representable unsigned value.
+    IncrementWrap, ///< Increments the current stencil buffer value. Wraps stencil buffer value to zero when
+                   ///< incrementing the maximum representable unsigned value.
     DecrementWrap, ///< Decrements the current stencil buffer value. Wraps stencil buffer value to the maximum
                    ///< representable unsigned value when decrementing a stencil buffer value of zero.
 };

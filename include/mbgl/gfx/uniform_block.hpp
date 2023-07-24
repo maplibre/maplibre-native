@@ -13,8 +13,8 @@ class UniformBuffer;
 class UniformBlock {
 protected:
     /// @brief Constructor. Can only be created by UniformBlockArray implementations
-    /// @param index_ 
-    /// @param size_ 
+    /// @param index_
+    /// @param size_
     UniformBlock(int index_, std::size_t size_)
         : index(index_),
           size(size_) {}
@@ -36,7 +36,7 @@ public:
     std::size_t getSize() const { return size; }
 
     /// @brief Binds the buffer
-    /// @param uniformBuffer 
+    /// @param uniformBuffer
     virtual void bindBuffer(const UniformBuffer& uniformBuffer) = 0;
 
     /// @brief Unbinds the uniform buffer
@@ -66,7 +66,7 @@ public:
 
     /// @brief Move constructor
     UniformBlockArray(UniformBlockArray&&);
-    
+
     /// @brief Copy constructor. Would need to use the virtual assignment operator
     UniformBlockArray(const UniformBlockArray&) = delete;
 

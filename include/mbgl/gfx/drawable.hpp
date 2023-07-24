@@ -145,7 +145,7 @@ public:
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
-    /// Set depth type 
+    /// Set depth type
     void setDepthType(DepthMaskType value) { depthType = value; }
 
     /// Uses 3D depth mode
@@ -205,7 +205,7 @@ public:
     /// Add a tweaker to this drawable
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
 
-    /// Set the entire tweaker collection 
+    /// Set the entire tweaker collection
     void setTweakers(std::vector<DrawableTweakerPtr> value) { tweakers = std::move(value); }
 
     /// Clear the tweaker collection
@@ -219,8 +219,8 @@ public:
 
     /// Get drawable data
     const UniqueDrawableData& getData() const { return drawableData; }
-    
-    /// Set drawable data 
+
+    /// Set drawable data
     void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
 protected:

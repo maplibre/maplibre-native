@@ -118,8 +118,8 @@ std::size_t TileLayerGroup::removeDrawablesIf(const std::function<bool(gfx::Draw
 }
 
 std::size_t TileLayerGroup::visitDrawables(mbgl::RenderPass pass,
-                                             const OverscaledTileID& tileID,
-                                             const std::function<void(gfx::Drawable&)>&& f) {
+                                           const OverscaledTileID& tileID,
+                                           const std::function<void(gfx::Drawable&)>&& f) {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     const auto range = impl->drawablesByTile.equal_range({pass, tileID});
     std::for_each(range.first, range.second, [&f](const auto& pair) { f(*pair.second); });
@@ -127,8 +127,8 @@ std::size_t TileLayerGroup::visitDrawables(mbgl::RenderPass pass,
 }
 
 std::size_t TileLayerGroup::visitDrawables(mbgl::RenderPass pass,
-                                             const OverscaledTileID& tileID,
-                                             const std::function<void(const gfx::Drawable&)>&& f) const {
+                                           const OverscaledTileID& tileID,
+                                           const std::function<void(const gfx::Drawable&)>&& f) const {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     const auto range = impl->drawablesByTile.equal_range({pass, tileID});
     std::for_each(range.first, range.second, [&f](const auto& pair) { f(*pair.second); });
