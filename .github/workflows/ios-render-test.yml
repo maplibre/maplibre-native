@@ -9,6 +9,7 @@ on:
 jobs:
   ios-render-test:
     runs-on: ubuntu-22.04
+    if: secrets.MAPLIBRE_NATIVE_BOT_APP_ID
     steps:
       - uses: actions/checkout@v3
 
