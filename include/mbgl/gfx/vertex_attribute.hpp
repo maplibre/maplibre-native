@@ -358,7 +358,12 @@ public:
         return newAttrs;
     }
 
-    /// Specialized DataDrivenPaintProperty reader
+    /// @brief Specialized reader of data driven paint properties
+    /// @tparam Binders Type for paint property binders 
+    /// @tparam Evaluated Type for evaluated properties
+    /// @param binders paint property binders
+    /// @param evaluated evaluated properties
+    /// @return vector of uniform names
     template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
     std::vector<std::string> readDataDrivenPaintProperties(const Binders& binders, const Evaluated& evaluated) {
         std::vector<std::string> propertiesAsUniforms;
