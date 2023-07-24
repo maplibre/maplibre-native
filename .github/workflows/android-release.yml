@@ -117,8 +117,8 @@ jobs:
         run: |
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
           ./scripts/release-notes.js > ${RELEASE_NOTES_PATH}
-          echo ::set-output name=release_notes::${RELEASE_NOTES_PATH}
-          echo ::set-output name=version_tag::$( git describe --tags --match=android-v*.*.* --abbrev=0 )
+          echo release_notes=${RELEASE_NOTES_PATH} >> "$GITHUB_OUTPUT"
+          echo version_tag=$( git describe --tags --match=android-v*.*.* --abbrev=0 ) >> "$GITHUB_OUTPUT"
         shell: bash          
 
       - name: Create release
