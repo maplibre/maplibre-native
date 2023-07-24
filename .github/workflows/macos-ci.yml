@@ -88,9 +88,9 @@ jobs:
 
       - name: Run macOS C++ unit tests
         run: |
-          cmake -S . -B $BUILD_DIR
-          cmake --build $BUILD_DIR --target mbgl-test-runner
-          ctest -VV --test-dir $BUILD_DIR -R mbgl-test-runner
+          cmake -S . -B "$BUILD_DIR"
+          cmake --build "$BUILD_DIR" --target mbgl-test-runner
+          ctest -VV --test-dir "$BUILD_DIR" -R mbgl-test-runner
         env:
           BUILD_DIR: ../../../maplibre-gl-native-macostestbuild
 
