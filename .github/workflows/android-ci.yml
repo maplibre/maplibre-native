@@ -216,7 +216,7 @@ jobs:
           name: uploadsEnv
 
       - name: Read uploads.env
-        run: cat uploads.env >> $GITHUB_ENV
+        run: cat uploads.env >> "$GITHUB_ENV"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2

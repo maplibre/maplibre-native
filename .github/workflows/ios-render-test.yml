@@ -71,16 +71,16 @@ jobs:
           max_checks=10
           sleep_time=5
 
-          check_status()
-            echo "$(aws devicefarm get-upload --arn $1 | jq -r '.upload.status')"
-          end
+          check_status() {
+            aws devicefarm get-upload --arn "$1" | jq -r '.upload.status'
+          }
 
-          for i in {1..$max_checks}; do
-            status_app=$(check_status "${{ env.app_arn }}")
-            status_test_package=$(check_status "${{ env.test_package_arn }}")
+          while ((max_checks--)); do
+            status_app="$(check_status "${{ env.app_arn }}")"
+            status_test_package="$(check_status "${{ env.test_package_arn }}")"
 
-            echo status_app=$status_app
-            echo status_test_package=$status_test_package
+            echo status_app="$status_app"
+            echo status_test_package="$status_test_package"
 
             if [[ "$status_app" == "SUCCEEDED" && "$status_test_package" == "SUCCEEDED" ]]; then
               exit 0

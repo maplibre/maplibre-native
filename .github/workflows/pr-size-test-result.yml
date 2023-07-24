@@ -41,9 +41,11 @@ jobs:
           key: ios-size
 
       - run: |
-          echo old_size="$(cat ./size_main)" >> "$GITHUB_ENV"
-          echo new_size="$(cat ./size)" >> "$GITHUB_ENV"
-          echo percentage_change=$(awk 'NR==FNR{a=$0;next}{printf "%+.2f%%\n", 100*($0-a)/a}' ./size ./size_main) >> "$GITHUB_ENV"
+          {
+            echo old_size="$(cat ./size_main)"
+            echo new_size="$(cat ./size)"
+            echo percentage_change="$(awk 'NR==FNR{a=$0;next}{printf "%+.2f%%\n", 100*($0-a)/a}' ./size ./size_main)"
+          } >> "$GITHUB_ENV"
         if: github.event.workflow_run.event == 'pull_request'
 
       - name: 'Leave comment on PR with test results'
