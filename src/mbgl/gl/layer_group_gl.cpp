@@ -21,7 +21,7 @@ void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
+    visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled()) {
             return;
         }
@@ -64,7 +64,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 
         // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
         std::set<UnwrappedTileID> tileIDs;
-        observeDrawables([&](const gfx::Drawable& drawable) {
+        visitDrawables([&](const gfx::Drawable& drawable) {
             if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
                 return;
             }
@@ -95,7 +95,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     const auto debugGroupRender = parameters.encoder->createDebugGroup(label_render.c_str());
 #endif
 
-    observeDrawables([&](gfx::Drawable& drawable) {
+    visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
@@ -132,7 +132,7 @@ void LayerGroupGL::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
+    visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled()) {
             return;
         }
@@ -152,7 +152,7 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
+    visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }

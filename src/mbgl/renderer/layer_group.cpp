@@ -36,7 +36,7 @@ void LayerGroup::addDrawable(gfx::UniqueDrawable&& drawable) {
     impl->drawables.emplace(std::move(drawable));
 }
 
-std::size_t LayerGroup::observeDrawables(const std::function<void(gfx::Drawable&)>&& f) {
+std::size_t LayerGroup::visitDrawables(const std::function<void(gfx::Drawable&)>&& f) {
     for (const auto& item : impl->drawables) {
         if (item) {
             f(*item);
@@ -45,7 +45,7 @@ std::size_t LayerGroup::observeDrawables(const std::function<void(gfx::Drawable&
     return impl->drawables.size();
 }
 
-std::size_t LayerGroup::observeDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
+std::size_t LayerGroup::visitDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
     for (const auto& item : impl->drawables) {
         if (item) {
             f(*item);
@@ -54,13 +54,13 @@ std::size_t LayerGroup::observeDrawables(const std::function<void(const gfx::Dra
     return impl->drawables.size();
 }
 
-std::size_t LayerGroup::observeDrawablesRemove(const std::function<bool(gfx::Drawable&)>&& f) {
+std::size_t LayerGroup::removeDrawablesIf(const std::function<bool(gfx::Drawable&)>&& f) {
     decltype(impl->drawables) newSet;
     const auto oldSize = impl->drawables.size();
     while (!impl->drawables.empty()) {
         // set members are immutable, since changes could affect its position, so extract each item
         gfx::UniqueDrawable drawable = std::move(impl->drawables.extract(impl->drawables.begin()).value());
-        if (f(*drawable)) {
+        if (!f(*drawable)) {
             // Not removed, keep it, but in a new set so that if the key value
             // has increased, we don't see it again during this iteration.
             newSet.emplace_hint(newSet.end(), std::move(drawable));

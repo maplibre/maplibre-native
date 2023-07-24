@@ -34,7 +34,7 @@ RenderTargetGL::~RenderTargetGL() {
 }
 
 void RenderTargetGL::upload(gfx::UploadPass& uploadPass) {
-    observeLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
+    visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
 
 void RenderTargetGL::render(RenderOrchestrator& orchestrator,
@@ -52,7 +52,7 @@ void RenderTargetGL::render(RenderOrchestrator& orchestrator,
     glContext.clear(Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {});
 
     // Run layer tweakers to update any dynamic elements
-    observeLayerGroups([&](LayerGroupBase& layerGroup) {
+    visitLayerGroups([&](LayerGroupBase& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
             layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
@@ -63,7 +63,7 @@ void RenderTargetGL::render(RenderOrchestrator& orchestrator,
     parameters.currentLayer = 0;
     parameters.depthRangeSize = 1 - (numLayerGroups() + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
-    observeLayerGroups([&](LayerGroupBase& layerGroup) {
+    visitLayerGroups([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
         parameters.currentLayer++;
     });
@@ -73,7 +73,7 @@ void RenderTargetGL::render(RenderOrchestrator& orchestrator,
     parameters.currentLayer = static_cast<int32_t>(numLayerGroups()) - 1;
     parameters.depthRangeSize = 1 - (numLayerGroups() + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
-    observeLayerGroups([&](LayerGroupBase& layerGroup) {
+    visitLayerGroups([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
         if (parameters.currentLayer != 0) {
             parameters.currentLayer--;
