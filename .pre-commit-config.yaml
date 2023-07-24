@@ -13,11 +13,6 @@ repos:
   rev: 6.1.0.2
   hooks:
     - id: buildifier
--   repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.5
-    hooks:
-    -   id: shellcheck
-        exclude: ''
 - repo: https://github.com/rhysd/actionlint
   rev: v1.6.25
   hooks:
