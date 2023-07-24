@@ -168,7 +168,6 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
     TestStatistics stats;
 
     for (auto& testPath : testPaths) {
-        std::cout << "Running tests from " << testPath.stylePath << std::endl;
         TestMetadata metadata = parseTestMetadata(testPath);
 
         if (!recycleMap) {
