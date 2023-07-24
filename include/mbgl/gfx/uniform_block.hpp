@@ -9,9 +9,12 @@ namespace gfx {
 
 class UniformBuffer;
 
+/// @brief This class represents an uniform block
 class UniformBlock {
-    // Can only be created by UniformBlockArray implementations
 protected:
+    /// @brief Constructor. Can only be created by UniformBlockArray implementations
+    /// @param index_ 
+    /// @param size_ 
     UniformBlock(int index_, std::size_t size_)
         : index(index_),
           size(size_) {}
@@ -21,13 +24,22 @@ protected:
           size(other.size) {}
 
 public:
+    /// @brief Destructor
     virtual ~UniformBlock() = default;
 
+    /// @brief Retrieves the index of this uniform block
+    /// @return int
     int getIndex() const { return index; }
 
+    /// @brief Get the size of the uniform block
+    /// @return std::size_t
     std::size_t getSize() const { return size; }
 
+    /// @brief Binds the buffer
+    /// @param uniformBuffer 
     virtual void bindBuffer(const UniformBuffer& uniformBuffer) = 0;
+
+    /// @brief Unbinds the uniform buffer
     virtual void unbindBuffer() = 0;
 
 protected:
@@ -48,27 +60,40 @@ class UniformBlockArray {
 public:
     using UniformBlockMap = std::unordered_map<std::string, std::unique_ptr<UniformBlock>>;
 
+    /// @brief Constructor
+    /// @param initCapacity initial collection capacity
     UniformBlockArray(int initCapacity = 10);
+
+    /// @brief Move constructor
     UniformBlockArray(UniformBlockArray&&);
-    // Would need to use the virtual assignment operator
+    
+    /// @brief Copy constructor. Would need to use the virtual assignment operator
     UniformBlockArray(const UniformBlockArray&) = delete;
+
+    /// @brief  Destructor
     virtual ~UniformBlockArray() = default;
 
-    /// Get map of elements.
+    /// @brief Get map of elements.
     const UniformBlockMap& getMap() const { return uniformBlockMap; }
 
-    /// Number of elements
+    /// @brief Number of elements
     std::size_t size() const { return uniformBlockMap.size(); }
 
-    /// Get an uniform block element.
-    /// Returns a pointer to the element on success, or null if the uniform block doesn't exists.
+    /// @brief Get an uniform block element.
+    /// @return Pointer to the element on success, or null if the uniform block doesn't exists.
     const std::unique_ptr<UniformBlock>& get(const std::string& name) const;
 
-    /// Add a new uniform block element.
-    /// Returns a pointer to the new element on success, or null if the uniform block already exists.
+    /// @brief Add a new uniform block element.
+    /// @param name
+    /// @param index
+    /// @param size
+    /// @return Pointer to the new element on success, or null if the uniform block already exists.
     const std::unique_ptr<UniformBlock>& add(std::string name, int index, std::size_t size);
 
+    /// @brief  Move assignment operator
     UniformBlockArray& operator=(UniformBlockArray&&);
+
+    /// @brief  Copy assignment operator
     UniformBlockArray& operator=(const UniformBlockArray&);
 
 protected:
