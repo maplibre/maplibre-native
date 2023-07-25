@@ -31,6 +31,7 @@ protected:
     DrawableBuilder(std::string name);
 
 public:
+    /// Destructor
     virtual ~DrawableBuilder();
 
     /// Get the drawable we're currently working on, if any
@@ -54,14 +55,20 @@ public:
 
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
+
+    /// Set whether the drawable should be enabled
     void setEnabled(bool value) { enabled = value; }
 
     /// The pass on which we'll be rendered
     mbgl::RenderPass getRenderPass() const { return renderPass; }
+
+    /// Set the pass on which the drawable will render
     void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
 
     /// The draw priority assigned to generated drawables
     DrawPriority getDrawPriority() const;
+
+    /// Set drawable's draw priority
     void setDrawPriority(DrawPriority);
 
     /// Determines depth range within the layer for 2D drawables
@@ -70,10 +77,14 @@ public:
 
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
+
+    /// Set depth type
     void setDepthType(DepthMaskType value) { depthType = value; }
 
     /// Uses 3D depth mode
     bool getIs3D() const { return is3D; }
+
+    /// Set 3D mode
     void setIs3D(bool value) { is3D = value; }
 
     /// Set the draw priority on all drawables including those already generated
@@ -81,24 +92,38 @@ public:
 
     /// Width for lines
     float getLineWidth() const { return lineWidth; }
+
+    /// Set line width
     void setLineWidth(float value) { lineWidth = value; }
 
     /// Whether to render to the color target
     bool getEnableColor() const { return enableColor; }
+
+    /// Set whether to render to the color target
     void setEnableColor(bool value) { enableColor = value; }
 
     /// Whether to do stenciling (based on the Tile ID or 3D)
     bool getEnableStencil() const { return enableStencil; }
+
+    /// Set stencil usage
     void setEnableStencil(bool value) { enableStencil = value; }
 
+    /// Get color mode
     const gfx::ColorMode& getColorMode() const;
+
+    /// Set color mode
     void setColorMode(const gfx::ColorMode& value);
 
+    /// Get cull face mode
     const gfx::CullFaceMode& getCullFaceMode() const;
+
+    /// Set cull face mode
     void setCullFaceMode(const gfx::CullFaceMode& value);
 
     /// Which shader to use when rendering emitted drawables
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
+
+    /// Set the shader to be used
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// Get the vertex attributes that override default values in the shader program
@@ -115,7 +140,10 @@ public:
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
 
+    /// Add a tweaker to emitted drawable
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
+
+    /// Clear the tweaker collection
     void clearTweakers() { tweakers.clear(); }
 
     /// Add a triangle
@@ -135,11 +163,13 @@ public:
                             std::size_t vertexOffset,
                             std::size_t vertexLength);
 
-    /// Provide raw data for vertices
-    /// Incompatible with adding primitives
+    /// Provide raw data for vertices. Incompatible with adding primitives
     void setRawVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType);
 
+    /// Set indexes and segments
     void setSegments(gfx::DrawMode, std::vector<uint16_t> indexes, const SegmentBase*, std::size_t segmentCount);
+
+    /// Set shared indices and segments
     void setSegments(gfx::DrawMode, gfx::IndexVectorBasePtr, const SegmentBase*, std::size_t segmentCount);
 
     /// Add lines based on existing vertices

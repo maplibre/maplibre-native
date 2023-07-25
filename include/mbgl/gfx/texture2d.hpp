@@ -85,10 +85,21 @@ public:
         upload(img.data ? img.data.get() : nullptr, img.size);
     }
 
+    /// @brief Upload a subregion of the texture resource
+    /// @param pixelData image pixel data pointer
+    /// @param size image dimensions
+    /// @param xOffset destination x coordinate
+    /// @param yOffset destination y coordinate
     virtual void uploadSubRegion(const void* pixelData,
                                  const Size& size,
                                  uint16_t xOffset,
                                  uint16_t yOffset) noexcept = 0;
+
+    /// @brief Upload a subregion of the texture resource
+    /// @tparam Image Image object type
+    /// @param img Image to upload
+    /// @param xOffset Destination x coordinate
+    /// @param yOffset Destination y coordinate
     template <typename Image>
     void uploadSubRegion(const Image& img, uint16_t xOffset, uint16_t yOffset) noexcept {
         assert(Image::channels == numChannels());
@@ -108,6 +119,7 @@ public:
     virtual gfx::TextureResource& getResource() const = 0;
 
     /// @brief Check whether the texture needs upload
+    /// @return bool
     virtual bool needsUpload() const noexcept = 0;
 };
 

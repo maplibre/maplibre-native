@@ -84,7 +84,7 @@ void TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& 
     }
 }
 
-std::size_t TileLayerGroup::observeDrawables(const std::function<void(gfx::Drawable&)>&& f) {
+std::size_t TileLayerGroup::visitDrawables(const std::function<void(gfx::Drawable&)>&& f) {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     for (auto* drawable : impl->sortedDrawables) {
         f(*drawable);
@@ -92,7 +92,7 @@ std::size_t TileLayerGroup::observeDrawables(const std::function<void(gfx::Drawa
     return impl->sortedDrawables.size();
 }
 
-std::size_t TileLayerGroup::observeDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
+std::size_t TileLayerGroup::visitDrawables(const std::function<void(const gfx::Drawable&)>&& f) const {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     for (const auto* drawable : impl->sortedDrawables) {
         f(*drawable);
@@ -100,11 +100,11 @@ std::size_t TileLayerGroup::observeDrawables(const std::function<void(const gfx:
     return impl->sortedDrawables.size();
 }
 
-std::size_t TileLayerGroup::observeDrawablesRemove(const std::function<bool(gfx::Drawable&)>&& f) {
+std::size_t TileLayerGroup::removeDrawablesIf(const std::function<bool(gfx::Drawable&)>&& f) {
     const auto oldSize = impl->drawablesByTile.size();
     for (auto i = impl->drawablesByTile.begin(); i != impl->drawablesByTile.end();) {
         auto& drawable = i->second;
-        if (f(*drawable)) {
+        if (!f(*drawable)) {
             // Not removed, keep going
             ++i;
         } else {
@@ -117,18 +117,18 @@ std::size_t TileLayerGroup::observeDrawablesRemove(const std::function<bool(gfx:
     return (oldSize - impl->drawablesByTile.size());
 }
 
-std::size_t TileLayerGroup::observeDrawables(mbgl::RenderPass pass,
-                                             const OverscaledTileID& tileID,
-                                             const std::function<void(gfx::Drawable&)>&& f) {
+std::size_t TileLayerGroup::visitDrawables(mbgl::RenderPass pass,
+                                           const OverscaledTileID& tileID,
+                                           const std::function<void(gfx::Drawable&)>&& f) {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     const auto range = impl->drawablesByTile.equal_range({pass, tileID});
     std::for_each(range.first, range.second, [&f](const auto& pair) { f(*pair.second); });
     return std::distance(range.first, range.second);
 }
 
-std::size_t TileLayerGroup::observeDrawables(mbgl::RenderPass pass,
-                                             const OverscaledTileID& tileID,
-                                             const std::function<void(const gfx::Drawable&)>&& f) const {
+std::size_t TileLayerGroup::visitDrawables(mbgl::RenderPass pass,
+                                           const OverscaledTileID& tileID,
+                                           const std::function<void(const gfx::Drawable&)>&& f) const {
     assert(impl->drawablesByTile.size() == impl->sortedDrawables.size());
     const auto range = impl->drawablesByTile.equal_range({pass, tileID});
     std::for_each(range.first, range.second, [&f](const auto& pair) { f(*pair.second); });
