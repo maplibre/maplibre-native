@@ -254,6 +254,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!rasterShader) {
         rasterShader = context.getGenericShader(shaders, "RasterShader");
+        if (!rasterShader) {
+            return;
+        }
     }
 
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
