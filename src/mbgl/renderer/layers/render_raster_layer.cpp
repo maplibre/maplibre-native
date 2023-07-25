@@ -311,14 +311,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         TriangleIndexVectorPtr indices = staticDataIndices;
         const RasterSegmentVector* segments = staticDataSegments.get();
 
-        std::vector<std::array<int16_t, 2>> vertices, attributes;
-        std::vector<uint16_t> indices;
-        std::vector<SegmentBase> segments;
-
-        buildRenderData(bucket.mask, vertices, attributes, indices, segments);
-
-        builder->addVertices(vertices, 0, vertices.size());
-        builder->setSegments(gfx::Triangles(), indices, segments.data(), segments.size());
+        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+            vertices = bucket.sharedVertices;
+            indices = bucket.sharedTriangles;
+            segments = &bucket.segments;
+        }
 
         // attributes
         {
