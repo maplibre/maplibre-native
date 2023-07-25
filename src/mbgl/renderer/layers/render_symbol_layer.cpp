@@ -873,13 +873,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
         if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     });
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
@@ -914,7 +914,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
             // Just update the drawables we already created
-            tileLayerGroup->observeDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+            tileLayerGroup->visitDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
                 updateTileDrawable(drawable, context, bucket, bucketPaintProperties, evaluated, state);
             });

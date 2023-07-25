@@ -425,7 +425,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short4);
         }
 
-        tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             drawable.setVertexAttributes(std::move(vertexAttrs));
             drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
 
@@ -504,9 +504,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     } else if (renderTiles) {
         if (layerGroup) {
-            stats.drawablesRemoved += layerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+            stats.drawablesRemoved += layerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
                 // Has this tile dropped out of the cover set?
-                return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
+                return !(!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
             });
         } else {
             // Set up a tile layer group

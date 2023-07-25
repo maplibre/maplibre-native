@@ -101,7 +101,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         propsBuffer->update(&paramsUBO, sizeof(paramsUBO));
     }
 
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.addOrReplace(FillExtrusionDrawablePropsUBOName, propsBuffer);
 

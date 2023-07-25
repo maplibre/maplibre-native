@@ -319,8 +319,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
-        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf(
+        [&](gfx::Drawable& drawable) { return !(!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
 
@@ -363,7 +363,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable.mutableUniformBuffers();
             uniforms.createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
         };
-        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
