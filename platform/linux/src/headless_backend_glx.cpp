@@ -31,7 +31,7 @@ public:
 
 #ifdef CI_BUILD
         // XOpenDisplay has proven very unreliable on CI, perform some retries if it fails
-        constexpr auto CI_RETRIES = 3;
+        constexpr auto CI_RETRIES = 10;
         for (int i = 0; i < CI_RETRIES; i++) {
 #endif
             xDisplay = XOpenDisplay(nullptr);

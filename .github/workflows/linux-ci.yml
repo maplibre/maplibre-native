@@ -184,7 +184,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
             libcurl4-openssl-dev \
             libuv1-dev \
             libjpeg-dev \
@@ -192,8 +192,8 @@ jobs:
             libwebp-dev \
             libglfw3-dev \
             libsqlite3-dev \
-            xserver-xorg-video-dummy \
-            xinit
+            xvfb \
+            x11-xserver-utils
 
       - name: Cache Bazel
         uses: actions/cache@v3
@@ -208,11 +208,9 @@ jobs:
           npm install --ignore-scripts
           node test/storage/server.js &
 
-      - run: echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
-
       - name: Generate coverage report
         run: |
-          xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core //render-test:render-test --//:maplibre_platform=linux --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1
+          xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
