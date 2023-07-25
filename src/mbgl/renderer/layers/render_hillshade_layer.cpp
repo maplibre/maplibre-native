@@ -406,7 +406,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 const auto& verts = staticDataSharedVertices->vector();
                 if (prepareRawVerts.size() < verts.size()) {
                     prepareRawVerts.resize(verts.size());
-                    std::transform(verts.begin(), verts.end(), prepareRawVerts.begin(), [](const auto& x) { return x.a1; });
+                    std::transform(
+                        verts.begin(), verts.end(), prepareRawVerts.begin(), [](const auto& x) { return x.a1; });
                 }
             };
 #endif
