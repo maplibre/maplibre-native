@@ -311,7 +311,15 @@ objc_library(
         "//:metal_renderer": ["MetalKit", "Metal"],
         "//conditions:default": ["GLKit", "OpenGLES"],
     }),
-    defines = ["GLES_SILENCE_DEPRECATION=1"],
+    defines = ["GLES_SILENCE_DEPRECATION=1"] +
+        select({
+            "//:metal_renderer": [
+                "MLN_RENDER_BACKEND_METAL=1",
+            ],
+            "//conditions:default": [
+                "MLN_RENDER_BACKEND_OPENGL=1",
+            ],
+        }),
     deps = [
         "objc-headers",
         "//:mbgl-core",
@@ -401,7 +409,15 @@ objc_library(
 
 objc_library(
     name = "iosapp",
-    defines = ["GLES_SILENCE_DEPRECATION"],
+    defines = ["GLES_SILENCE_DEPRECATION"] +
+        select({
+            "//:metal_renderer": [
+                "MLN_RENDER_BACKEND_METAL=1",
+            ],
+            "//conditions:default": [
+                "MLN_RENDER_BACKEND_OPENGL=1",
+            ],
+        }),
     srcs = [
         "platform/ios/app/MBXAnnotationView.m",
         "platform/ios/app/MBXAppDelegate.m",

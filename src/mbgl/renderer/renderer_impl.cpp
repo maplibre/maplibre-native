@@ -23,9 +23,9 @@
 #include <mbgl/renderer/render_target.hpp>
 #endif
 
-#if MLN_RENDER_BACKEND_OPENGL
+#if !MLN_RENDER_BACKEND_METAL
 #include <mbgl/gl/defines.hpp>
-#endif // MLN_RENDER_BACKEND_OPENGL
+#endif // !MLN_RENDER_BACKEND_METAL
 
 #if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)
 // DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
@@ -315,7 +315,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     };
 #endif // MLN_LEGACY_RENDERER
 
-#if MLN_RENDER_BACKEND_OPENGL
+#if (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
     const auto enableScissorTest = [](bool enable) {
         using namespace platform;
         enable ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
@@ -323,7 +323,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     const auto setScissor = [](int x, int y, int w, int h) {
         platform::glScissor(x, y, w, h);
     };
-#endif // MLN_RENDER_BACKEND_OPENGL
+#endif // MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER
 
 #if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     if (parameters.staticData.has3D) {

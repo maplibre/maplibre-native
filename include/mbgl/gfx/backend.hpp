@@ -17,16 +17,10 @@ public:
                   ///< of available backends (ie for array allocation).
     };
 
-#if MLN_RENDER_BACKEND_OPENGL
-    static constexpr Type DefaultType = Type::OpenGL;
-#elif MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL
     static constexpr Type DefaultType = Type::Metal;
-#else
-    static_assert(false,
-                  "Must define one of ("
-                  "MLN_RENDER_BACKEND_OPENGL, "
-                  "MLN_RENDER_BACKEND_METAL"
-                  ")");
+#else // assume MLN_RENDER_BACKEND_METAL
+    static constexpr Type DefaultType = Type::OpenGL;
 #endif
 
     static void SetType(const Type value) {

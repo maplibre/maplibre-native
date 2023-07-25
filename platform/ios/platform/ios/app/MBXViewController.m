@@ -7,12 +7,15 @@
 #import "MBXOfflinePacksTableViewController.h"
 #import "MBXAnnotationView.h"
 #import "MBXUserLocationAnnotationView.h"
-#import "LimeGreenStyleLayer.h"
 #import "MBXEmbeddedMapViewController.h"
 #import "MBXOrnamentsViewController.h"
 #import "MBXStateManager.h"
 #import "MBXState.h"
 #import "MLNSettings.h"
+
+#if !MLN_RENDER_BACKEND_METAL
+#import "LimeGreenStyleLayer.h"
+#endif
 
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
@@ -93,7 +96,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingRasterTileSource,
     MBXSettingsRuntimeStylingImageSource,
     MBXSettingsRuntimeStylingRouteLine,
-#if MLN_RENDER_BACKEND_OPENGL
+#if !MLN_RENDER_BACKEND_METAL
     MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
 #endif
     MBXSettingsRuntimeStylingDDSPolygon,
@@ -632,7 +635,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingRouteLine:
                     [self styleRouteLine];
                     break;
-#if MLN_RENDER_BACKEND_OPENGL
+#if !MLN_RENDER_BACKEND_METAL
                 case MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer:
                     [self styleAddLimeGreenTriangleLayer];
                     break;
@@ -1557,7 +1560,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-#if MLN_RENDER_BACKEND_OPENGL
+#if !MLN_RENDER_BACKEND_METAL
 - (void)styleAddLimeGreenTriangleLayer
 {
     LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
