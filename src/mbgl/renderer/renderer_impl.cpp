@@ -144,14 +144,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     orchestrator.processChanges();
 
     // Run layer tweakers to update any dynamic elements
-    orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+    orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
             layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
     });
 
     // Give the layers a chance to do setup
-    // orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
+    // orchestrator.visitLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
     // });
 
     // Upload layer groups
@@ -159,7 +159,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload");
 
         // Give the layers a chance to upload
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
 
         // Give the render targets a chance to upload
         orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
@@ -194,7 +194,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         parameters.currentLayer = 0;
 
         // draw layer groups, opaque pass
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             parameters.currentLayer++;
         });
@@ -252,7 +252,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             parameters.currentLayer++;
         });
@@ -266,7 +266,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             if (parameters.currentLayer != 0) {
                 parameters.currentLayer--;
@@ -443,7 +443,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
 #if MLN_DRAWABLE_RENDERER
     //     Give the layers a chance to do cleanup
-    orchestrator.observeLayerGroups(
+    orchestrator.visitLayerGroups(
         [&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 #endif
 

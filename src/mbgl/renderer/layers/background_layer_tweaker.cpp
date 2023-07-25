@@ -82,7 +82,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
     layerGroup.setEnabled(true);
 
     int32_t samplerLocation = -1;
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
 
         // We assume that drawables don't change between pattern and non-pattern.
