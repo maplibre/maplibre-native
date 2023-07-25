@@ -69,7 +69,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         propsBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
     }
 
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.addOrReplace(FillDrawablePropsUBOName, propsBuffer);
 

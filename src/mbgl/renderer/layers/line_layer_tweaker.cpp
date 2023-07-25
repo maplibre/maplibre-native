@@ -170,7 +170,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         return lineSDFPropertiesBuffer;
     };
 
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader) {
             return;
