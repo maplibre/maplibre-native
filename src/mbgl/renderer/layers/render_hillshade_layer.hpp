@@ -64,6 +64,9 @@ private:
     gfx::ShaderProgramBasePtr hillshadePrepareShader;
     gfx::ShaderProgramBasePtr hillshadeShader;
     std::vector<RenderTargetPtr> activatedRenderTargets;
+
+    using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
+    std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
 #endif
 };
 
