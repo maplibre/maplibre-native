@@ -1,4 +1,8 @@
 repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: check-yaml
 - repo: https://github.com/pre-commit/mirrors-clang-format
   rev: v16.0.6
   hooks:
@@ -9,6 +13,10 @@ repos:
   rev: 6.1.0.2
   hooks:
     - id: buildifier
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.6.25
+  hooks:
+    - id: actionlint
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]

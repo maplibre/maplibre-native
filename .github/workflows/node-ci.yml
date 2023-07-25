@@ -132,7 +132,8 @@ jobs:
             libc++-9-dev \
             libc++abi-9-dev \
             libjpeg-dev \
-            libpng-dev
+            libpng-dev \
+            libwebp-dev
           /usr/sbin/update-ccache-symlinks
 
       - name: Setup node
@@ -218,7 +219,7 @@ jobs:
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'

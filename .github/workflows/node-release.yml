@@ -38,7 +38,7 @@ jobs:
 
       - name: npm version
         run: |
-          echo "NPM_VERSION=$(npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version)" >> $GITHUB_ENV
+          echo "NPM_VERSION=$(npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version)" >> "$GITHUB_ENV"
 
       - name: Push version to git
         run: |
@@ -128,7 +128,8 @@ jobs:
             libc++-9-dev \
             libc++abi-9-dev \
             libjpeg-dev \
-            libpng-dev
+            libpng-dev \
+            libwebp-dev
           /usr/sbin/update-ccache-symlinks
 
       - name: Setup node
@@ -211,7 +212,7 @@ jobs:
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
@@ -261,7 +262,7 @@ jobs:
       - name: Publish to NPM (release)
         if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major')
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
@@ -269,7 +270,7 @@ jobs:
       - name: Publish to NPM (prerelease)
         if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'prerelease' || github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor')
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}

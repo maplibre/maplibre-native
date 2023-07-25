@@ -1,0 +1,91 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
+load(
+    "@build_bazel_rules_swift//swift:swift.bzl",
+    "swift_library",
+)
+
+objc_library(
+    name = "test_utility",
+    srcs = [
+        "MLNTestUtility.h",
+    ],
+    includes = ["."],
+    visibility = [
+        "//platform/ios/platform/ios/test:__pkg__",
+    ],
+)
+
+objc_library(
+    name = "shared_tests_objc_srcs",
+    srcs = glob(
+        [
+            "*.m",
+            "*.h",
+        ],
+        allow_empty = False,
+    ),
+    copts = MAPLIBRE_FLAGS + WARNING_FLAGS,
+    data = glob(
+        [
+            "Media.xcassets/**",
+        ],
+        allow_empty = False,
+    ),
+    sdk_frameworks = [
+        "MapKit",
+    ],
+    visibility = [
+        "//platform/ios/platform/ios/test:__pkg__",
+    ],
+    deps = [
+        "test_utility",
+        "//platform/ios:sdk",
+    ],
+)
+
+objc_library(
+    name = "shared_tests_objcpp_srcs",
+    srcs = glob(
+        [
+            "*.h",
+            "*.mm",
+        ],
+        allow_empty = False,
+        exclude = [
+            "MLNOfflineStorageTests.mm",
+        ],
+    ),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS + ["-Wno-deprecated-declarations"],
+    visibility = [
+        "//platform/ios/platform/ios/test:__pkg__",
+    ],
+    deps = [
+        "//platform/ios:sdk",
+    ],
+)
+
+swift_library(
+    name = "shared_tests_swift_srcs",
+    testonly = True,
+    srcs = glob(
+        [
+            "*.swift",
+        ],
+        allow_empty = False,
+    ),
+    data = [
+        "amsterdam.geojson",
+        "one-liner.json",
+    ],
+    visibility = [
+        "//platform/ios/platform/ios/test:__pkg__",
+    ],
+    deps = [
+        "//platform/ios:sdk",
+    ],
+)
+
+exports_files([
+    "amsterdam.geojson",
+    "MLNSDKTestHelpers.swift",
+])

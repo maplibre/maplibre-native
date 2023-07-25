@@ -69,13 +69,13 @@
 
         BOOL fileFound = [fileManager fileExistsAtPath: self.styleResultPath];
         if (fileFound == NO) {
-            NSLog(@"Style test result file '%@' doese not exit ", self.styleResultPath);
+            NSLog(@"Style test result file '%@' does not exit ", self.styleResultPath);
             self.testStatus = NO;
         }
 
         fileFound = [fileManager fileExistsAtPath: self.metricResultPath];
         if (fileFound == NO) {
-            NSLog(@"Metric test result file '%@' doese not exit ", self.metricResultPath);
+            NSLog(@"Metric test result file '%@' does not exit ", self.metricResultPath);
             self.testStatus = NO;
         }
 
@@ -96,7 +96,7 @@
             }
         }
         else {
-           NSLog(@"Metric path '%@' doese not exit ", rebaselinePath);
+           NSLog(@"Metric path '%@' does not exit ", rebaselinePath);
         }
 
         if (needArchiving) {
@@ -110,7 +110,7 @@
                     progressHandler:nil];
 
             if (success) {
-                NSLog(@"Successfully archive all of the metrics into metrics.zip");
+                NSLog(@"Successfully archived all of the metrics into metrics.zip");
                 self.metricPath =  archivePath;
             }
             else {

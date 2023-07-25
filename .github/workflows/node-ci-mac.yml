@@ -73,8 +73,6 @@ jobs:
         include:
           - runs-on: macos-12
             arch: x86_64
-          - runs-on: macos-12-arm
-            arch: arm64
     continue-on-error: true
     env:
       BUILDTYPE: 'Release'
@@ -216,7 +214,7 @@ jobs:
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
