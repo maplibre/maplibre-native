@@ -104,8 +104,8 @@ public:
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
-    void observeLayerGroups(std::function<void(LayerGroupBase&)>);
-    void observeLayerGroups(std::function<void(const LayerGroupBase&)>) const;
+    void visitLayerGroups(std::function<void(LayerGroupBase&)>);
+    void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
 
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,

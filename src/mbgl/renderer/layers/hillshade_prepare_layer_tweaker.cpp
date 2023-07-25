@@ -47,7 +47,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
         }
