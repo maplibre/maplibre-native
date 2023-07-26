@@ -93,10 +93,10 @@ cc_library(
         "include",
     ],
     visibility = [
+        "//platform:__pkg__",
         "//platform/darwin:__pkg__",
         "//platform/ios:__pkg__",
         "//platform/linux:__pkg__",
-        "//platform:__pkg__",
     ],
     deps = [
         "//:mbgl-core",

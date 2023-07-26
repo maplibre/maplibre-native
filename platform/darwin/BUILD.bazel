@@ -1,14 +1,15 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
-load("bazel/files.bzl",
-    "MLN_GENERATED_DARWIN_TEST_CODE",
-    "MLN_GENERATED_DARWIN_STYLE_SOURCE",
-    "MLN_GENERATED_DARWIN_STYLE_HEADERS",
-    "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
-    "MLN_DARWIN_OBJC_HEADERS",
+load(
+    "bazel/files.bzl",
     "MLN_DARWIN_OBJCPP_HEADERS",
+    "MLN_DARWIN_OBJC_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
     "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
+    "MLN_GENERATED_DARWIN_STYLE_HEADERS",
+    "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
+    "MLN_GENERATED_DARWIN_STYLE_SOURCE",
+    "MLN_GENERATED_DARWIN_TEST_CODE",
 )
 load(
     "@build_bazel_rules_swift//swift:swift.bzl",
@@ -26,6 +27,7 @@ filegroup(
     srcs = MLN_DARWIN_OBJC_HEADERS,
     visibility = ["//visibility:public"],
 )
+
 filegroup(
     name = "darwin_objcpp_hdrs",
     srcs = MLN_DARWIN_OBJCPP_HEADERS,
@@ -71,9 +73,9 @@ filegroup(
 filegroup(
     name = "test_ejs_templates",
     srcs = [
+        "test/MLNDocumentationGuideTests.swift",
         "test/MLNLightTest.mm.ejs",
         "test/MLNStyleLayerTests.mm.ejs",
-        "test/MLNDocumentationGuideTests.swift",
     ],
     visibility = ["//visibility:public"],
 )
@@ -93,23 +95,23 @@ filegroup(
     srcs = [
         "src/MLNLight.h.ejs",
         "src/MLNLight.mm.ejs",
-        "src/MLNStyleLayer_Private.h.ejs",
         "src/MLNStyleLayer.h.ejs",
         "src/MLNStyleLayer.mm.ejs",
-    ]
+        "src/MLNStyleLayer_Private.h.ejs",
+    ],
 )
 
 genrule(
     name = "generated_code",
-    cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)/../../",
-    tools = ["scripts/generate-style-code.js"],
     srcs = [
         ":generator_data",
         ":test_ejs_templates",
         ":docs_ejs_templates",
     ],
-    outs = MLN_GENERATED_DARWIN_STYLE_SOURCE
-        + MLN_GENERATED_DARWIN_STYLE_HEADERS + MLN_GENERATED_DARWIN_TEST_CODE,
+    outs = MLN_GENERATED_DARWIN_STYLE_SOURCE +
+           MLN_GENERATED_DARWIN_STYLE_HEADERS + MLN_GENERATED_DARWIN_TEST_CODE,
+    cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)/../../",
+    tools = ["scripts/generate-style-code.js"],
     visibility = ["//visibility:public"],
 )
 
@@ -197,9 +199,9 @@ swift_library(
 cc_library(
     name = "darwin-generated-style-artifacts",
     srcs = [
-        ":darwin_private_hdrs",
         ":darwin_objc_hdrs",
         ":darwin_objcpp_hdrs",
+        ":darwin_private_hdrs",
         ":generated_style_hdrs",
     ],
     hdrs = [
@@ -225,7 +227,10 @@ objc_library(
     copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
         "-fmodules",
     ],
-    defines = ["GLES_SILENCE_DEPRECATION=1", "GL_SILENCE_DEPRECATION=1"],
+    defines = [
+        "GLES_SILENCE_DEPRECATION=1",
+        "GL_SILENCE_DEPRECATION=1",
+    ],
     includes = [
         "include",
     ],
@@ -286,7 +291,10 @@ objc_library(
         "src/timer.cpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-    defines = ["GLES_SILENCE_DEPRECATION=1", "GL_SILENCE_DEPRECATION=1"],
+    defines = [
+        "GLES_SILENCE_DEPRECATION=1",
+        "GL_SILENCE_DEPRECATION=1",
+    ],
     sdk_frameworks = [
         "OpenGLES",
         "SystemConfiguration",
@@ -306,10 +314,9 @@ exports_files(
         "include/mbgl/util/image+MLNAdditions.hpp",
         "scripts/check-public-symbols.js",
         "scripts/check-public-symbols.sh",
-    ]
-    + MLN_DARWIN_PUBLIC_OBJC_SOURCE
-    + MLN_DARWIN_PUBLIC_OBJCPP_SOURCE
-    + MLN_DARWIN_PRIVATE_HEADERS
-    + MLN_DARWIN_OBJC_HEADERS
-    + MLN_DARWIN_OBJCPP_HEADERS
+    ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
+    MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
+    MLN_DARWIN_PRIVATE_HEADERS +
+    MLN_DARWIN_OBJC_HEADERS +
+    MLN_DARWIN_OBJCPP_HEADERS,
 )

@@ -46,7 +46,7 @@ MLN_GENERATED_DARWIN_TEST_CODE = [
     "test/MLNFillStyleLayerTests.mm",
     "test/MLNHillshadeStyleLayerTests.mm",
     "test/MLNLineStyleLayerTests.mm",
-    "test/MLNSymbolStyleLayerTests.mm", 
+    "test/MLNSymbolStyleLayerTests.mm",
 ]
 
 MLN_DARWIN_OBJC_HEADERS = [

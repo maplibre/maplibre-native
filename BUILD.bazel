@@ -1,43 +1,50 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-load("//bazel:core.bzl",
-    "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
-    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
-    "MLN_GENERATED_STYLE_SOURCE",
-    "MLN_GENERATED_SHADER_HEADERS",
-    "MLN_CORE_SOURCE",
+load(
+    "//bazel:core.bzl",
     "MLN_CORE_HEADERS",
-    "MLN_OPENGL_SOURCE",
+    "MLN_CORE_SOURCE",
+    "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
+    "MLN_OPENGL_SOURCE",
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
+    "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
 )
 
 # Generate code required by the core
 filegroup(
     name = "style_data",
-    srcs = glob(["**/*.ejs"], allow_empty = False)
+    srcs = glob(
+        ["**/*.ejs"],
+        allow_empty = False,
+    ),
 )
 
 genrule(
     name = "generated_style_code",
+    srcs = ["style_data"],
+    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
+           MLN_PRIVATE_GENERATED_STYLE_HEADERS +
+           MLN_GENERATED_STYLE_SOURCE,
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
-    srcs = ["style_data"],
-    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS
-        + MLN_PRIVATE_GENERATED_STYLE_HEADERS
-        + MLN_GENERATED_STYLE_SOURCE,
 )
 
 filegroup(
     name = "shader_data",
-    srcs = ["shaders/manifest.json"] + glob(["shaders/*.glsl"], allow_empty = False)
+    srcs = ["shaders/manifest.json"] + glob(
+        ["shaders/*.glsl"],
+        allow_empty = False,
+    ),
 )
 
 genrule(
     name = "generated_shaders",
-    cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
-    tools = ["shaders/generate_shader_code.js"],
     srcs = ["shader_data"],
     outs = MLN_GENERATED_SHADER_HEADERS,
+    cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
+    tools = ["shaders/generate_shader_code.js"],
 )
 
 # This header only target strips the __generated__ prefix for the compiler
@@ -45,12 +52,12 @@ genrule(
 cc_library(
     name = "mbgl-core-generated-public-artifacts",
     srcs = [],
-    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS
-        + MLN_GENERATED_SHADER_HEADERS,
+    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
+           MLN_GENERATED_SHADER_HEADERS,
     visibility = ["//visibility:public"],
     deps = [
-        ":generated_style_code",
         ":generated_shaders",
+        ":generated_style_code",
     ],
 )
 
@@ -69,15 +76,15 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE
-        + MLN_GENERATED_STYLE_SOURCE
-        + MLN_OPENGL_SOURCE,
-    hdrs = MLN_CORE_HEADERS
-        + MLN_OPENGL_HEADERS,
+    srcs = MLN_CORE_SOURCE +
+           MLN_GENERATED_STYLE_SOURCE +
+           MLN_OPENGL_SOURCE,
+    hdrs = MLN_CORE_HEADERS +
+           MLN_OPENGL_HEADERS,
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
-        "//conditions:default": []
+        "//conditions:default": [],
     }),
     includes = [
         "include",
@@ -88,8 +95,8 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":mbgl-core-generated-public-artifacts",
         ":mbgl-core-generated-private-artifacts",
+        ":mbgl-core-generated-public-artifacts",
         "//vendor:boost",
         "//vendor:csscolorparser",
         "//vendor:earcut.hpp",

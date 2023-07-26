@@ -1,6 +1,6 @@
 load("@build_bazel_rules_apple//apple:apple.bzl", "local_provisioning_profile")
 load("@rules_xcodeproj//xcodeproj:defs.bzl", "xcode_provisioning_profile")
-load("config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_NAME", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID", "BUNDLE_ID_PREFIX")
+load("config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_NAME", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID")
 
 def configure_device_profiles():
     local_provisioning_profile(

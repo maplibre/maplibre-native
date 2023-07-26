@@ -4,6 +4,7 @@ load(
 )
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_ui_test")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
+
 configure_device_profiles()
 
 swift_library(
@@ -20,8 +21,8 @@ swift_library(
 ios_ui_test(
     name = "uitest",
     minimum_os_version = "12.0",
-    test_host = "//platform/ios:App",
     provisioning_profile = "xcode_profile",
+    test_host = "//platform/ios:App",
     visibility = [
         "@rules_xcodeproj//xcodeproj:generated",
     ],

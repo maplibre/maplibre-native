@@ -1,61 +1,60 @@
-load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework", "local_provisioning_profile")
+load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
-load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
-    "xcode_provisioning_profile",
     "xcodeproj",
-    "xcode_schemes",
 )
 load("//platform/ios/bazel:macros.bzl", "info_plist")
-load("//platform/ios/bazel:config.bzl", "APPLE_MOBILE_PROVISIONING_PROFILE_NAME", "APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID", "BUNDLE_ID_PREFIX")
-load("//platform/ios/bazel:files.bzl",
-    "MLN_IOS_SDK_HEADERS",
-    "MLN_IOS_PUBLIC_HEADERS",
+load("//platform/ios/bazel:config.bzl", "BUNDLE_ID_PREFIX")
+load(
+    "//platform/ios/bazel:files.bzl",
     "MLN_IOS_PRIVATE_HEADERS",
-    "MLN_IOS_PUBLIC_OBJC_SOURCE",
+    "MLN_IOS_PUBLIC_HEADERS",
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
+    "MLN_IOS_PUBLIC_OBJC_SOURCE",
+    "MLN_IOS_SDK_HEADERS",
     "MLN_PUBLIC_IOS_APP_SOPURCE",
 )
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
+
 configure_device_profiles()
 
 filegroup(
     name = "ios_sdk_hdrs",
-    visibility = ["//visibility:public"],
     srcs = MLN_IOS_SDK_HEADERS,
+    visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "ios_public_hdrs",
-    visibility = ["//visibility:public"],
     srcs = MLN_IOS_PUBLIC_HEADERS,
+    visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "ios_private_hdrs",
-    visibility = ["//visibility:public"],
     srcs = MLN_IOS_PRIVATE_HEADERS,
+    visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "ios_objcpp_srcs",
-    visibility = ["//visibility:public"],
     srcs = MLN_IOS_PUBLIC_OBJCPP_SOURCE,
+    visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "ios_objc_srcs",
-    visibility = ["//visibility:public"],
     srcs = MLN_IOS_PUBLIC_OBJC_SOURCE,
+    visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "ios_app_srcs",
-    visibility = ["//visibility:public"],
     srcs = MLN_PUBLIC_IOS_APP_SOPURCE,
+    visibility = ["//visibility:public"],
 )
 
 apple_static_xcframework(
@@ -135,11 +134,11 @@ apple_resource_bundle(
     bundle_id = "com.maplibre.mapbox",
     bundle_name = "Mapbox",
     infoplists = ["info_static_plist"],
-    visibility = ["//visibility:public"],
     resources = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
     ]),
+    visibility = ["//visibility:public"],
 )
 
 _IOS_APPLICATION_RESOURCES = [
@@ -188,9 +187,9 @@ ios_application(
     ],
     infoplists = ["app/Info.plist"],
     minimum_os_version = "12.0",
+    provisioning_profile = ":xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
-    provisioning_profile = ":xcode_profile",
     deps = [
         "//platform:iosapp",
     ],
@@ -213,16 +212,12 @@ genrule(
 
 xcodeproj(
     name = "xcodeproj",
+    bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
     build_mode = "xcode",
+    default_xcode_configuration = "Debug",
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
-    bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
-    default_xcode_configuration = "Debug",
-    xcode_configurations = {
-        "Debug": {"//command_line_option:compilation_mode": "dbg"},
-        "Release": {"//command_line_option:compilation_mode": "opt"}
-    },
     top_level_targets = [
         top_level_target(
             "App",
@@ -253,27 +248,32 @@ xcodeproj(
             ],
         ),
     ],
+    xcode_configurations = {
+        "Debug": {"//command_line_option:compilation_mode": "dbg"},
+        "Release": {"//command_line_option:compilation_mode": "opt"},
+    },
 )
 
 sh_binary(
     name = "lint-plists",
     srcs = ["//platform/ios:scripts/lint-plists.sh"],
     data = [
+        "Integration_Test_Harness/Info.plist",
+        "Integration_Tests/Info.plist",
         "app/Info.plist",
         "bench_UITests/Info.plist",
         "benchmark/Info.plist",
         "framework/Info.plist",
         "framework/Info-static.plist",
-        "Integration_Test_Harness/Info.plist",
-        "Integration_Tests/Info.plist",
         "//platform/ios/iosapp-UITests:Info.plist",
         "//platform/ios/test:Info.plist",
-    ]
+    ],
 )
 
-exports_files(MLN_IOS_PUBLIC_HEADERS
-    + MLN_IOS_PRIVATE_HEADERS
-    + MLN_IOS_PUBLIC_OBJCPP_SOURCE
-    + MLN_IOS_PUBLIC_OBJC_SOURCE
-    + MLN_PUBLIC_IOS_APP_SOPURCE
+exports_files(
+    MLN_IOS_PUBLIC_HEADERS +
+    MLN_IOS_PRIVATE_HEADERS +
+    MLN_IOS_PUBLIC_OBJCPP_SOURCE +
+    MLN_IOS_PUBLIC_OBJC_SOURCE +
+    MLN_PUBLIC_IOS_APP_SOPURCE,
 )

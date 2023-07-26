@@ -602,7 +602,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/utf.hpp",
     "src/mbgl/util/version.cpp",
     "src/mbgl/util/version.hpp",
-    "src/mbgl/util/work_request.cpp"
+    "src/mbgl/util/work_request.cpp",
 ]
 
 MLN_CORE_HEADERS = [
@@ -792,7 +792,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/vectors.hpp",
     "include/mbgl/util/work_request.hpp",
     "include/mbgl/util/work_task.hpp",
-    "include/mbgl/util/work_task_impl.hpp"
+    "include/mbgl/util/work_task_impl.hpp",
 ]
 
 MLN_OPENGL_SOURCE = [
@@ -858,5 +858,5 @@ MLN_OPENGL_HEADERS = [
     "include/mbgl/gl/renderable_resource.hpp",
     "include/mbgl/gl/renderer_backend.hpp",
     "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
-    "include/mbgl/platform/gl_functions.hpp"
+    "include/mbgl/platform/gl_functions.hpp",
 ]

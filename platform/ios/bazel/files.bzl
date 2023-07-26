@@ -10,7 +10,7 @@ MLN_IOS_SDK_HEADERS = [
     "src/MLNMapView.h",
     "src/MLNUserLocation.h",
     "src/MLNUserLocationAnnotationView.h",
-    "src/MLNUserLocationAnnotationViewStyle.h",    
+    "src/MLNUserLocationAnnotationViewStyle.h",
 ]
 
 MLN_IOS_PUBLIC_HEADERS = [
