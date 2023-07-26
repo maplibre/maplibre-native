@@ -1,0 +1,27 @@
+load("//bazel:flags.bzl", "WARNING_FLAGS")
+
+# SMCalloutView
+objc_library(
+    name = "SMCalloutView",
+    srcs = glob(
+        [
+            "SMCalloutView/*.h",
+            "SMCalloutView/*.m",
+        ],
+        allow_empty = False,
+    ),
+    hdrs = glob(
+        [
+            "SMCalloutView/*.h",
+        ],
+        allow_empty = False,
+    ),
+    copts = WARNING_FLAGS,
+    includes = ["SMCalloutView"],
+    sdk_frameworks = ["UIKit"],
+    tags = ["manual"],
+    visibility = [
+        "//platform:__pkg__",
+        "//platform/ios:__pkg__",
+    ],
+)
