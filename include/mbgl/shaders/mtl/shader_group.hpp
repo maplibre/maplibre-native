@@ -15,9 +15,11 @@ namespace mtl {
 template <shaders::BuiltIn ShaderID>
 class ShaderGroup final : public gfx::ShaderGroup {
 public:
-    ShaderGroup(const ProgramParameters& programParameters_)
+    ShaderGroup(const ProgramParameters& programParameters_,
+                std::vector<std::string> bufferNames_)
         : gfx::ShaderGroup(),
-          programParameters(programParameters_){};
+          programParameters(programParameters_),
+          bufferNames(std::move(bufferNames_)) {}
     ~ShaderGroup() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
@@ -49,12 +51,14 @@ public:
                 assert(false);
                 throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
             }
+            shader->setBufferNames(bufferNames);
         }
         return shader;
     }
 
 private:
     ProgramParameters programParameters;
+    std::vector<std::string> bufferNames;
 };
 
 } // namespace mtl

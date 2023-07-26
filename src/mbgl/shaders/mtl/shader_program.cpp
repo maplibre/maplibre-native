@@ -27,10 +27,11 @@ ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFun
       vertexFunction(std::move(vert)),
       fragmentFunction(std::move(frag)) {}
 
-MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::RenderPassDescriptor& descriptor) const {
+MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::RenderPassDescriptor& renderPassDescriptor,
+                                                                const MTLVertexDescriptorPtr& vertexDescriptor) const {
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
-    const auto& renderable = descriptor.renderable;
+    const auto& renderable = renderPassDescriptor.renderable;
     const auto& renderableResource = renderable.getResource<RenderableResource>();
 
     auto colorFormat = MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB;
@@ -58,6 +59,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     desc->setLabel(NS::String::string(shaderName.data(), NS::UTF8StringEncoding));
     desc->setVertexFunction(vertexFunction.get());
     desc->setFragmentFunction(fragmentFunction.get());
+    desc->setVertexDescriptor(vertexDescriptor.get());
 
     if (auto* colorTarget = desc->colorAttachments()->object(0)) {
         colorTarget->setPixelFormat(colorFormat);

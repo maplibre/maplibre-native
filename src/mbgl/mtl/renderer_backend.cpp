@@ -8,34 +8,36 @@
 #include <mbgl/util/logging.hpp>
 
 #include <cassert>
+#include <string>
 
 namespace mbgl {
 namespace shaders {
+
 template <>
 struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "BackgroundShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static constexpr auto bufferNames = std::array<std::string_view, 1>{"a_pos"};
+
     static constexpr auto source = R"(
 #include <metal_stdlib>
 using namespace metal;
 
 struct v2f {
     float4 position [[position]];
-    half3 color;
 };
 
 v2f vertex vertexMain(uint vertexId [[vertex_id]],
-                      device const float3* positions [[buffer(0)]],
-                      device const float3* colors [[buffer(1)]]) {
+                      device const float3* positions [[buffer(0)]]) {
     v2f o;
     o.position = float4(positions[vertexId], 1.0);
-    o.color = half3(colors[ vertexId ]);
     return o;
 }
 
 half4 fragment fragmentMain(v2f in [[stage_in]]) {
-    return half4(in.color, 1.0);
+    return half4(1, 0, 1, 1);
 }
 )";
 };
@@ -110,7 +112,6 @@ void RendererBackend::setScissorTest(bool enabled) {
     assert(mtl::value::ScissorTest::Get() == getContext<mtl::Context>().scissorTest.getCurrentValue());*/
 }
 
-#if MLN_DRAWABLE_RENDERER
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
 /// @param registry A shader registry instance
@@ -125,9 +126,13 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /// registry instance provided already has conflicting programs present.
     (
         [&]() {
-            const auto name = std::string(shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::name);
-            if (!registry.registerShaderGroup(std::make_shared<ShaderGroup<ShaderID>>(programParameters), name)) {
-                throw std::runtime_error("Failed to register " + name + " with shader registry!");
+            using namespace std::string_literals;
+            using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
+            auto bufferNames = std::vector<std::string>(ShaderClass::bufferNames.begin(), ShaderClass::bufferNames.end());
+            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters, std::move(bufferNames));
+            if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
+                assert(!"duplicate shader group");
+                throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
             }
         }(),
         ...);
@@ -157,7 +162,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFIconShader,
                   shaders::BuiltIn::SymbolTextAndIconShader*/>(shaders, programParameters);
 }
-#endif
 
 } // namespace mtl
 } // namespace mbgl

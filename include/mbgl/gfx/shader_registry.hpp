@@ -56,7 +56,7 @@ public:
     /// @return True if the shader group was registered, false if another shader group is
     /// already present with a conflicting name.
     [[nodiscard]] virtual bool registerShaderGroup(ShaderGroupPtr&& shaderGroup,
-                                                   const std::string& shaderGroupName) noexcept;
+                                                   std::string shaderGroupName) noexcept;
 
 private:
     gfx::ShaderGroup legacyGroup;

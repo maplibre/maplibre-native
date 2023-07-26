@@ -26,24 +26,14 @@ private:
 public:
     ~VertexAttribute() override = default;
 
-    // platform::GLenum getGLType() const { return glType; }
-    // void setGLType(platform::GLenum value);
+    /// Get the Metal buffer, if it has already been set up
+    const gfx::UniqueVertexBufferResource& getBuffer() const { return buffer; }
 
-    // bool getNormalized() const { return normalized; }
-    // void setNormalized(bool value) { normalized = value; }
-
-    // std::size_t getStride() const;
-
-    // static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
+    /// Get the Metal buffer, creating it if necessary
+    const gfx::UniqueVertexBufferResource& getBuffer(UploadPass&, const gfx::BufferUsageType);
 
 private:
-    // static int getSize(platform::GLenum glType);
-    // static int getStride(platform::GLenum glType);
-    // static bool get(const gfx::VertexAttribute::ElementType&, platform::GLenum glType, uint8_t* buffer);
-
-private:
-    // platform::GLenum glType = 0;
-    // bool normalized = false;
+    gfx::UniqueVertexBufferResource buffer;
 };
 
 /// Stores a collection of vertex attributes by name

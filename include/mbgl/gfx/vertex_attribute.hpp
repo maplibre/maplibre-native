@@ -136,6 +136,7 @@ public:
 
     std::vector<std::uint8_t>& getRawData() { return rawData; }
     const std::vector<std::uint8_t>& getRawData() const { return rawData; }
+    void setRawData(std::vector<std::uint8_t> value) { rawData = std::move(value); }
 
     const std::shared_ptr<VertexVectorBase>& getSharedRawData() const { return sharedRawData; }
     AttributeDataType getSharedType() const { return sharedType; }
@@ -253,6 +254,22 @@ public:
     }
 
     void clear();
+
+    void visitAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
+        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
+            if (kv.second) {
+                f(kv.first, *kv.second);
+            }
+        });
+    }
+
+    void visitAttributes(const std::function<void(const std::string&, const VertexAttribute&)>& f) const {
+        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
+            if (kv.second) {
+                f(kv.first, *kv.second);
+            }
+        });
+    }
 
     /// Do something with each attribute
     void observeAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
