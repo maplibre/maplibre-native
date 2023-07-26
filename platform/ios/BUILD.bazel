@@ -156,6 +156,7 @@ _IOS_APPLICATION_RESOURCES = [
     "//platform/darwin:test/amsterdam.geojson",
 ] + glob([
     "app/*.lproj/**",
+    "app/Assets.xcassets/**",
 ])
 
 ios_application(
