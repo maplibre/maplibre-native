@@ -284,9 +284,6 @@ static const std::string HillshadeShaderGroupName = "HillshadeShader";
 constexpr auto PosAttribName = "a_pos";
 constexpr auto TexturePosAttribName = "a_texture_pos";
 
-// #define RENDER_TARGET_SHARED_VERTICES      1
-// #define TILE_SHARED_VERTICES               1
-
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
@@ -378,7 +375,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
             gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
 
-#if RENDER_TARGET_SHARED_VERTICES
             if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a1),
@@ -391,26 +387,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                        offsetof(HillshadeLayoutVertex, a2),
                                        0,
                                        sizeof(HillshadeLayoutVertex),
-                                       gfx::AttributeDataType::Short4);
+                                       gfx::AttributeDataType::Short2);
             }
-#else
-            if (auto& attr = hillshadePrepareVertexAttrs.getOrAdd("a_texture_pos")) {
-                std::size_t index{0};
-                for (auto& v : staticDataSharedVertices->vector()) {
-                    attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
-                }
-            }
-
-            std::vector<std::array<int16_t, 2>> prepareRawVerts;
-            const auto buildPrepareVertices = [&]() {
-                const auto& verts = staticDataSharedVertices->vector();
-                if (prepareRawVerts.size() < verts.size()) {
-                    prepareRawVerts.resize(verts.size());
-                    std::transform(
-                        verts.begin(), verts.end(), prepareRawVerts.begin(), [](const auto& x) { return x.a1; });
-                }
-            };
-#endif
 
             hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
             hillshadePrepareBuilder->setShader(hillshadePrepareShader);
@@ -419,15 +397,9 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
 
             hillshadePrepareBuilder->setRenderPass(renderPass);
-#if RENDER_TARGET_SHARED_VERTICES
             hillshadePrepareBuilder->setVertexAttributes(std::move(hillshadePrepareVertexAttrs));
             hillshadePrepareBuilder->setRawVertices(
                 {}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
-#else
-            hillshadePrepareBuilder->setVertexAttributes(hillshadePrepareVertexAttrs);
-            buildPrepareVertices();
-            hillshadePrepareBuilder->addVertices(prepareRawVerts, 0, prepareRawVerts.size());
-#endif
             hillshadePrepareBuilder->setSegments(
                 gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
 
@@ -464,7 +436,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray hillshadeVertexAttrs;
 
-#if TILE_SHARED_VERTICES
         if (const auto& attr = hillshadeVertexAttrs.add(PosAttribName)) {
             attr->setSharedRawData(vertices,
                                    offsetof(HillshadeLayoutVertex, a1),
@@ -477,30 +448,13 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                    offsetof(HillshadeLayoutVertex, a2),
                                    0,
                                    sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short4);
+                                   gfx::AttributeDataType::Short2);
         }
-#else
-        if (auto& attr = hillshadeVertexAttrs.getOrAdd("a_texture_pos")) {
-            std::size_t index{0};
-            for (auto& v : vertices->vector()) {
-                attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
-            }
-        }
-
-        std::vector<std::array<int16_t, 2>> rawVerts;
-        const auto buildVertices = [&]() {
-            const auto& verts = vertices->vector();
-            if (rawVerts.size() < verts.size()) {
-                rawVerts.resize(verts.size());
-                std::transform(verts.begin(), verts.end(), rawVerts.begin(), [](const auto& x) { return x.a1; });
-            }
-        };
-#endif
 
         hillshadeBuilder = context.createDrawableBuilder("hillshade");
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            /*tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
                 drawable.setVertexAttributes(std::move(hillshadeVertexAttrs));
                 drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
 
@@ -524,8 +478,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                     drawable.setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
                 }
             });
-            continue;*/
-            removeTile(renderPass, tileID);
+            continue;
         }
 
         hillshadeBuilder->setShader(hillshadeShader);
@@ -534,14 +487,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadeBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
 
         hillshadeBuilder->setRenderPass(renderPass);
-#if TILE_SHARED_VERTICES
         hillshadeBuilder->setVertexAttributes(std::move(hillshadeVertexAttrs));
         hillshadeBuilder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
-#else
-        hillshadeBuilder->setVertexAttributes(hillshadeVertexAttrs);
-        buildVertices();
-        hillshadeBuilder->addVertices(rawVerts, 0, rawVerts.size());
-#endif
         hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
         auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
