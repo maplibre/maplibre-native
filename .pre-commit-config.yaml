@@ -13,10 +13,11 @@ repos:
   rev: 6.1.0.2
   hooks:
     - id: buildifier
-- repo: https://github.com/rhysd/actionlint
-  rev: v1.6.25
+- repo: https://github.com/Mateusz-Grzelinski/actionlint-py
+  rev: v1.6.25.9
   hooks:
     - id: actionlint
+      additional_dependencies: [shellcheck-py]
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]
