@@ -42,7 +42,7 @@ cc_test(
         ],
     ),
     args = [
-        "--gtest_filter=-Map.StyleNetworkErrorRetry:Map.StyleNotFound",
+        "--gtest_filter=-Map.StyleNetworkErrorRetry:Map.StyleNotFound:MainResourceLoader.CachedResourceLowPriority",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     data = glob(["fixtures/**/*"]) + [

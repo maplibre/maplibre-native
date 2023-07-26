@@ -129,25 +129,23 @@ jobs:
           ccache --max-size=2G
           ccache --show-stats
 
-      - name: Check debug symbols
-        run: make darwin-check-public-symbols
-
-      - name: Lint plist files
-        run: make ios-lint-plist
-
       - run: cp bazel/example_config.bzl bazel/config.bzl
+
+      - name: Check debug symbols
+        run: bazel run //platform:check-public-symbols
 
       - name: Generate app plists
         working-directory: ./
         run: bash platform/ios/platform/ios/scripts/bazel-generate-plists.sh
-
-      - run: make style-code
+        
+      - name: Lint plist files
+        run: bazel run //platform/ios:lint-plists
 
       - name: Running iOS tests
-        run: bazel test --//:renderer=${{ matrix.renderer }} //platform/ios/platform/ios/test:ios_test --test_output=errors
+        run: bazel test //platform/ios/test:ios_test --test_output=errors
 
       - name: Running iOS UI tests
-        run: bazel test --//:renderer=${{ matrix.renderer }} //platform/ios/platform/ios/iosapp-UITests:uitest --test_output=errors
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors
 
       # size test
 
@@ -156,7 +154,7 @@ jobs:
         working-directory: ./
         run: | 
           bazel build --compilation_mode=opt //platform/ios:size --//:maplibre_platform=ios
-          cp $(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios) ./size
+          cp "$(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios)" ./size
 
       - name: Upload size test result
         if: ${{ matrix.renderer }} = "legacy"
@@ -183,7 +181,7 @@ jobs:
           mv RenderTestApp.zip RenderTestApp.ipa
           cd Payload/RenderTestApp.app/PlugIns
           zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
-          echo render_test_artifacts_dir="$render_test_app_dir" >> $GITHUB_ENV
+          echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
       
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.renderer }} = "legacy"

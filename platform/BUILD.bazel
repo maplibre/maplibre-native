@@ -1,0 +1,204 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
+
+# Objcpp files for the iOS source
+objc_library(
+    name = "objcpp-sdk",
+    srcs = [
+        "//platform/darwin:darwin_objcpp_srcs",
+        "//platform/darwin:generated_style_srcs",
+        "//platform/ios:ios_objcpp_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
+        "-fcxx-modules",
+        "-fmodules",
+        "-Wno-c99-extensions",
+        "-Wno-gnu-zero-variadic-macro-arguments",
+        "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-gnu-statement-expression",
+        "-Wno-deprecated-declarations",
+    ],
+    defines = ["GLES_SILENCE_DEPRECATION=1"],
+    includes = [
+        "darwin/include",
+    ],
+    sdk_frameworks = [
+        "CoreImage",
+        "CoreGraphics",
+        "CoreLocation",
+        "GLKit",
+        "OpenGLES",
+        "QuartzCore",
+    ],
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
+        "//platform/darwin:darwin-generated-style-artifacts",
+        "//platform/darwin:darwin-objcpp",
+        "//platform/default:mbgl-default",
+        "//platform/ios/vendor:SMCalloutView",
+    ],
+)
+
+# platform/ios/sdk-files.json
+# Objc files for the iOS source
+objc_library(
+    name = "objc-sdk",
+    srcs = [
+        "//platform/darwin:darwin_objc_srcs",
+        "//platform/ios:ios_objc_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ],
+    hdrs = [
+        "//platform/darwin:include/mbgl/util/image+MLNAdditions.hpp",
+    ],
+    copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
+        "-fmodules",
+        "-Wno-gnu-zero-variadic-macro-arguments",
+        "-Wno-variadic-macros",
+        "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-deprecated-declarations",
+    ],
+    includes = [
+        "darwin/include",
+    ],
+    sdk_frameworks = [
+        "CoreGraphics",
+        "CoreLocation",
+        "QuartzCore",
+    ],
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
+        "//platform/darwin:darwin-generated-style-artifacts",
+        "//platform/darwin:darwin-objc",
+        "//platform/default:mbgl-default",
+        "//platform/ios/vendor:SMCalloutView",
+    ],
+)
+
+# Common headers between objc and objcpp libraries.
+objc_library(
+    name = "objc-headers",
+    srcs = glob([
+        "darwin/src/*.h",
+        "ios/src/*.h",
+    ]),
+    includes = [
+        "darwin/src",
+        "ios/src",
+    ],
+    sdk_frameworks = [
+        "CoreGraphics",
+        "CoreLocation",
+        "QuartzCore",
+    ],
+    deps = [
+        "//platform/darwin:darwin-objc",
+        "//platform/darwin:darwin-objcpp",
+    ],
+)
+
+# sdk for the static target which includes the resources.
+objc_library(
+    name = "ios-sdk",
+    hdrs = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:generated_style_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ],
+    data = ["//platform/ios:resources"],
+    module_name = "MapLibre",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "MobileCoreServices",
+        "Security",
+        "WebKit",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":objc-sdk",
+        ":objcpp-sdk",
+    ],
+)
+
+# sdk for the dynamic target. Lacking the resources bundle since for dynamic
+# they are in the main package.
+objc_library(
+    name = "ios-sdk-dynamic",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "MobileCoreServices",
+        "Security",
+        "WebKit",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:objc-sdk",
+        "//:objcpp-sdk",
+    ],
+)
+
+objc_library(
+    name = "iosapp",
+    srcs = [
+        "//platform/darwin:app/LimeGreenStyleLayer.h",
+        "//platform/darwin:app/LimeGreenStyleLayer.m",
+        "//platform/ios:ios_app_srcs",
+    ],
+    data = glob([
+        "app/Assets.xcassets/**",
+    ]),
+    defines = ["GLES_SILENCE_DEPRECATION"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+        "ios/src",
+    ],
+    sdk_frameworks = [
+        "GLKit",  # needed for LimeGreenStyleLayer
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ios-sdk",
+    ],
+)
+
+sh_binary(
+    name = "check-public-symbols",
+    srcs = ["//platform/darwin:scripts/check-public-symbols.sh"],
+    data = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objc_srcs",
+        "//platform/darwin:darwin_objcpp_hdrs",
+        "//platform/darwin:darwin_objcpp_srcs",
+        "//platform/darwin:darwin_private_hdrs",
+        "//platform/darwin:generated_style_hdrs",
+        "//platform/darwin:generated_style_srcs",
+        "//platform/darwin:scripts/check-public-symbols.js",
+        "//platform/ios:ios_objc_srcs",
+        "//platform/ios:ios_objcpp_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+        "//platform/macos:macos_objc_srcs",
+        "//platform/macos:macos_objcpp_srcs",
+        "//platform/macos:macos_private_hdrs",
+        "//platform/macos:macos_public_hdrs",
+    ],
+    deps = [
+        "//platform/darwin:generated_code",
+    ],
+)
