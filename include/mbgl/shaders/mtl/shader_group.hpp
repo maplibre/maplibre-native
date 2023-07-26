@@ -15,8 +15,7 @@ namespace mtl {
 template <shaders::BuiltIn ShaderID>
 class ShaderGroup final : public gfx::ShaderGroup {
 public:
-    ShaderGroup(const ProgramParameters& programParameters_,
-                std::vector<std::string> bufferNames_)
+    ShaderGroup(const ProgramParameters& programParameters_, std::vector<std::string> bufferNames_)
         : gfx::ShaderGroup(),
           programParameters(programParameters_),
           bufferNames(std::move(bufferNames_)) {}

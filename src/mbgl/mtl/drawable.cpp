@@ -56,8 +56,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     const simd::float3 colors[3] = {{1.0, 0.3f, 0.2f}, {0.8f, 1.0, 0.0f}, {0.8f, 0.0f, 1.0}};
     auto colorBuf = context.createBuffer(colors, sizeof(colors), gfx::BufferUsageType::StaticDraw);
 
-    //encoder->setVertexBuffer(posBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/0);
-    //encoder->setVertexBuffer(colorBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/1);
+    // encoder->setVertexBuffer(posBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/0);
+    // encoder->setVertexBuffer(colorBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/1);
 
     getVertexAttributes().visitAttributes([&](const std::string& name, const gfx::VertexAttribute& attrib_) {
         const auto& attrib = static_cast<const VertexAttribute&>(attrib_);
@@ -75,7 +75,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
         }
     });
-    
+
     const auto& renderPassDescriptor = renderPass.getDescriptor();
 
     for (const auto& seg_ : impl->segments) {
@@ -363,7 +363,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         // Generate buffers from raw data
         impl->vertexAttributes.visitAttributes([&](const std::string& attribName, gfx::VertexAttribute& attrib_) {
             auto& attrib = static_cast<VertexAttribute&>(attrib_);
-            
+
             const auto& bufferNames = shaderMTL.getBufferNames();
             const auto hit = std::find(bufferNames.begin(), bufferNames.end(), attribName);
             assert(hit != bufferNames.end());

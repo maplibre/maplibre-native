@@ -128,7 +128,8 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         [&]() {
             using namespace std::string_literals;
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
-            auto bufferNames = std::vector<std::string>(ShaderClass::bufferNames.begin(), ShaderClass::bufferNames.end());
+            auto bufferNames = std::vector<std::string>(ShaderClass::bufferNames.begin(),
+                                                        ShaderClass::bufferNames.end());
             auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters, std::move(bufferNames));
             if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
                 assert(!"duplicate shader group");
