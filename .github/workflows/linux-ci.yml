@@ -210,8 +210,11 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          xvfb-run -a bazel coverage --test_output=errors --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core --//:maplibre_platform=linux --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1
-          echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
+          xvfb-run -a \
+            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
+            --test_output=errors --local_test_jobs=1 \
+            --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1 \
+            //test:core
 
       - name: Upload coverage report
         if: '!cancelled()'
