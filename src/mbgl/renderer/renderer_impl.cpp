@@ -91,6 +91,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
+    staticData->backendSize = backend.getDefaultRenderable().getSize();
 
     if (renderState == RenderState::Never) {
         observer->onWillStartRenderingMap();

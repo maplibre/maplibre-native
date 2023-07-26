@@ -40,8 +40,12 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         return;
     }
 
-    context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
-                                   : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+    if (enableDepth) {
+        context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
+                                       : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+    } else {
+        context.setDepthMode(gfx::DepthMode::disabled());
+    }
 
     // force disable depth test for debugging
     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
