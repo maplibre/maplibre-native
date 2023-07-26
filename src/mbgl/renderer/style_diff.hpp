@@ -4,7 +4,6 @@
 #include <mbgl/style/source_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/util/immutable.hpp>
-#include <mbgl/util/variant.hpp>
 
 #include <unordered_map>
 

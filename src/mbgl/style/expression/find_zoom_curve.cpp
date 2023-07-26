@@ -4,10 +4,6 @@
 #include <mbgl/style/expression/coalesce.hpp>
 #include <mbgl/style/expression/is_constant.hpp>
 
-#include <mbgl/util/variant.hpp>
-
-#include <optional>
-
 namespace mbgl {
 namespace style {
 namespace expression {

@@ -2,7 +2,8 @@
 
 #include <mbgl/style/sources/raster_source.hpp>
 #include <mbgl/util/tileset.hpp>
-#include <mbgl/util/variant.hpp>
+
+#include <variant>
 
 namespace mbgl {
 
@@ -12,7 +13,7 @@ namespace style {
 
 class RasterDEMSource : public RasterSource {
 public:
-    RasterDEMSource(std::string id, variant<std::string, Tileset> urlOrTileset, uint16_t tileSize);
+    RasterDEMSource(std::string id, std::variant<std::string, Tileset> urlOrTileset, uint16_t tileSize);
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 };
 

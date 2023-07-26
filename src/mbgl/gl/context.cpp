@@ -9,12 +9,14 @@
 #include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
 #include <mbgl/gl/defines.hpp>
-#include <mbgl/util/traits.hpp>
-#include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/overloaded.hpp>
+#include <mbgl/util/std.hpp>
+#include <mbgl/util/traits.hpp>
 
 #include <cstring>
 #include <iterator>
+#include <variant>
 
 namespace mbgl {
 namespace gl {
@@ -501,28 +503,26 @@ void Context::setDepthMode(const gfx::DepthMode& depth) {
 }
 
 void Context::setStencilMode(const gfx::StencilMode& stencil) {
-    if (stencil.test.is<gfx::StencilMode::Always>() && !stencil.mask) {
+    if (std::holds_alternative<gfx::StencilMode::Always>(stencil.test) && !stencil.mask) {
         stencilTest = false;
     } else {
         stencilTest = true;
         stencilMask = stencil.mask;
-        stencilOp = {stencil.fail, stencil.depthFail, stencil.pass};
-        apply_visitor([&](const auto& test) { stencilFunc = {test.func, stencil.ref, test.mask}; }, stencil.test);
+        stencilOp = { stencil.fail, stencil.depthFail, stencil.pass };
+        std::visit([&](const auto& test) { stencilFunc = { test.func, stencil.ref, test.mask }; }, stencil.test);
     }
 }
 
 void Context::setColorMode(const gfx::ColorMode& color) {
-    if (color.blendFunction.is<gfx::ColorMode::Replace>()) {
+    if (std::holds_alternative<gfx::ColorMode::Replace>(color.blendFunction)) {
         blend = false;
     } else {
         blend = true;
         blendColor = color.blendColor;
-        apply_visitor(
-            [&](const auto& blendFunction) {
-                blendEquation = gfx::ColorBlendEquationType(blendFunction.equation);
-                blendFunc = {blendFunction.srcFactor, blendFunction.dstFactor};
-            },
-            color.blendFunction);
+        std::visit([&] (const auto& blendFunction) {
+            blendEquation = gfx::ColorBlendEquationType(blendFunction.equation);
+            blendFunc = { blendFunction.srcFactor, blendFunction.dstFactor };
+        }, color.blendFunction);
     }
 
     colorMask = color.mask;

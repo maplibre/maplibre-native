@@ -328,11 +328,11 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
     TestMetrics result;
 
     auto maybeJson = readJson(path.string());
-    if (!maybeJson.is<mbgl::JSDocument>()) { // NOLINT
+    if (!std::holds_alternative<mbgl::JSDocument>(maybeJson)) { // NOLINT
         return result;
     }
 
-    const auto& document = maybeJson.get<mbgl::JSDocument>();
+    const auto& document = std::get<mbgl::JSDocument>(maybeJson);
 
     if (document.HasMember("file-size")) {
         const mbgl::JSValue& fileSizeValue = document["file-size"];
@@ -452,12 +452,12 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
     metadata.paths = paths;
 
     auto maybeJson = readJson(paths.stylePath.string());
-    if (!maybeJson.is<mbgl::JSDocument>()) { // NOLINT
+    if (!std::holds_alternative<mbgl::JSDocument>(maybeJson)) { // NOLINT
         metadata.errorMessage = std::string("Unable to parse: ") + metadata.paths.stylePath.string();
         return metadata;
     }
 
-    metadata.document = std::move(maybeJson.get<mbgl::JSDocument>());
+    metadata.document = std::move(std::get<mbgl::JSDocument>(maybeJson));
     if (!metadata.document.HasMember("metadata")) {
         mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': " + paths.stylePath.string());
         return metadata;

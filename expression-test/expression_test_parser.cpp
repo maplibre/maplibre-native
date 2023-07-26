@@ -6,7 +6,6 @@
 
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/variant.hpp>
 #include <mbgl/style/conversion/function.hpp>
 #include <mbgl/style/rapidjson_conversion.hpp>
 #include <mbgl/style/expression/parsing_context.hpp>
@@ -19,6 +18,7 @@
 #include <args.hxx>
 
 #include <regex>
+#include <variant>
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -52,7 +52,7 @@ void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const V
 }
 
 using ErrorMessage = std::string;
-using JSONReply = variant<JSDocument, ErrorMessage>;
+using JSONReply = std::variant<JSDocument, ErrorMessage>;
 JSONReply readJson(const filesystem::path& jsonPath) {
     auto maybeJSON = util::readFile(jsonPath);
     if (!maybeJSON) {
@@ -384,11 +384,11 @@ Ignores parseExpressionIgnores() {
     Ignores ignores;
     const auto mainIgnoresPath = filesystem::path(TEST_RUNNER_ROOT_PATH).append("metrics/ignores/platform-all.json");
     auto maybeIgnores = readJson(mainIgnoresPath);
-    if (!maybeIgnores.is<JSDocument>()) { // NOLINT
+    if (!std::holds_alternative<JSDocument>(maybeIgnores)) { // NOLINT
         return {};
     }
 
-    for (const auto& property : maybeIgnores.get<JSDocument>().GetObject()) {
+    for (const auto& property : std::get<JSDocument>(maybeIgnores).GetObject()) {
         std::string id{toString(property.name)};
         // Keep only expression-test ignores
         if (id.rfind("expression-tests", 0) != 0) {
@@ -405,12 +405,12 @@ std::optional<TestData> parseTestData(const filesystem::path& path) {
     try {
         TestData data;
         auto maybeJson = readJson(path.string());
-        if (!maybeJson.is<JSDocument>()) { // NOLINT
+        if (!std::holds_alternative<JSDocument>(maybeJson)) { // NOLINT
             mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
             return std::nullopt;
         }
 
-        data.document = std::move(maybeJson.get<JSDocument>());
+        data.document = std::move(std::get<JSDocument>(maybeJson));
 
         // Check that mandatory test data members are present.
         if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {

@@ -173,8 +173,8 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
 
     for (const auto& entry : expectedJsonPaths) {
         auto maybeExpectedJson = readJson(entry);
-        if (maybeExpectedJson.is<mbgl::JSDocument>()) {
-            auto& expected = maybeExpectedJson.get<mbgl::JSDocument>();
+        if (std::holds_alternative<mbgl::JSDocument>(maybeExpectedJson)) {
+            auto& expected = std::get<mbgl::JSDocument>(maybeExpectedJson);
 
             mbgl::JSDocument actual;
             actual.Parse<0>(metadata.actualJson);

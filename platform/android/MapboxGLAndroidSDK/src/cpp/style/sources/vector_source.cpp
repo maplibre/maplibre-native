@@ -12,8 +12,6 @@
 #include "../../geojson/feature.hpp"
 #include "../conversion/url_or_tileset.hpp"
 
-#include <mbgl/util/variant.hpp>
-
 #include <string>
 #include <vector>
 
