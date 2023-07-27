@@ -4,6 +4,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/shaders/mtl/shader_group.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -19,7 +20,12 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr auto bufferNames = std::array<std::string_view, 1>{"a_pos"};
+    static constexpr AttributeInfo attributes[] = {
+        { 0, "a_pos", gfx::AttributeDataType::Float3, 1 },
+    };
+    static constexpr UniformBlockInfo uniforms[] = {
+//        { 1, 32, "xxUBO" },
+    };
 
     static constexpr auto source = R"(
 #include <metal_stdlib>
@@ -30,9 +36,9 @@ struct v2f {
 };
 
 v2f vertex vertexMain(uint vertexId [[vertex_id]],
-                      device const float3* positions [[buffer(0)]]) {
+                      device const short2* positions [[buffer(0)]]) {
     v2f o;
-    o.position = float4(positions[vertexId], 1.0);
+    o.position = float4(positions[vertexId].x, positions[vertexId].y, 0.0, 1.0);
     return o;
 }
 
@@ -128,9 +134,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         [&]() {
             using namespace std::string_literals;
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
-            auto bufferNames = std::vector<std::string>(ShaderClass::bufferNames.begin(),
-                                                        ShaderClass::bufferNames.end());
-            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters, std::move(bufferNames));
+            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters);
             if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
                 assert(!"duplicate shader group");
                 throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");

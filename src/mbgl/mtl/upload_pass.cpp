@@ -147,6 +147,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         bindings.resize(std::max(bindings.size(), index + 1));
 
+        // If the attribute references data shared with a bucket, get the corresponding buffer.
         if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
@@ -157,44 +158,20 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
-        assert(false);
-#if 0
-        // Get the raw data for the values in the desired format
-        const auto& rawData = VertexAttribute::getRaw(effectiveAttr, defaultAttr.getGLType());
-        if (rawData.empty()) {
-            VertexAttributeGL::getRaw(effectiveAttr, defaultAttr.getGLType());
-        }
+        assert(effectiveAttr.getStride() > 0);
 
-        if (rawData.size() == stride * vertexCount) {
-            // The override provided a value for each vertex, append it as-is
-            allData.insert(allData.end(), rawData.begin(), rawData.end());
-        } else if (rawData.size() == stride) {
-            // We only have one value, append a copy for each vertex
-            for (std::size_t i = 0; i < vertexCount; ++i) {
-                allData.insert(allData.end(), rawData.begin(), rawData.end());
-            }
-        } else {
-            // something else, the binding is invalid
-            // TODO: throw?
-            Log::Warning(Event::General,
-                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name + "' (" +
-                             util::toString(defaultGL.getIndex()) + "), expected " + util::toString(stride) + " or
-                             " + util::toString(stride * vertexCount));
+        // Otherwise, turn the data managed by the attribute into a buffer.
+        if (const auto& buffer = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
+            bindings[index] = {
+                /*.attribute = */ {effectiveAttr.getDataType(), 0},
+                /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
+                /*.vertexBufferResource = */ buffer.get(),
+                /*.vertexOffset = */ 0,
+            };
             return;
         }
-
-        bindings[index] = {
-            /*.attribute = */ {defaultAttr.getDataType(), offset},
-            /* vertexStride = */ static_cast<uint32_t>(stride),
-            /* vertexBufferResource = */ nullptr, // buffer details established later
-            /* vertexOffset = */ 0,
-        };
-
-        pad(allData, align, padding);
-
-        // The vertex stride is the sum of the attribute strides
-        vertexStride += static_cast<uint32_t>(stride);
-#endif
+        
+        assert(false);
     };
     defaults.resolve(overrides, resolveAttr);
 

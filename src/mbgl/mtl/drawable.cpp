@@ -29,6 +29,28 @@ Drawable::Drawable(std::string name_)
 
 Drawable::~Drawable() {}
 
+namespace {
+// Downcast a generic vertex buffer resource and extract the Metal buffer
+MTL::Buffer* getMetalBuffer(const gfx::VertexBufferResource* resource_) {
+    if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
+        if (const auto& bufferResource = resource->get()) {
+            return bufferResource.getMetalBuffer().get();
+        }
+    }
+    return nullptr;
+}
+MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
+    switch (type) {
+        default:
+            assert(false);
+            [[fallthrough]];
+        case gfx::DrawModeType::Points: return MTL::PrimitiveType::PrimitiveTypePoint;
+        case gfx::DrawModeType::Lines: return MTL::PrimitiveType::PrimitiveTypeLine;
+        case gfx::DrawModeType::Triangles: return MTL::PrimitiveType::PrimitiveTypeTriangle;
+    }
+}
+}
+
 void Drawable::draw(PaintParameters& parameters) const {
     if (isCustom) {
         return;
@@ -50,31 +72,14 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
-    const simd::float3 positions[3] = {{-0.8f, 0.8f, 0.0f}, {0.0f, -0.8f, 0.0f}, {+0.8f, 0.8f, 0.0f}};
-    auto posBuf = context.createBuffer(positions, sizeof(positions), gfx::BufferUsageType::StaticDraw);
-
-    const simd::float3 colors[3] = {{1.0, 0.3f, 0.2f}, {0.8f, 1.0, 0.0f}, {0.8f, 0.0f, 1.0}};
-    auto colorBuf = context.createBuffer(colors, sizeof(colors), gfx::BufferUsageType::StaticDraw);
-
-    // encoder->setVertexBuffer(posBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/0);
-    // encoder->setVertexBuffer(colorBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/1);
-
-    getVertexAttributes().visitAttributes([&](const std::string& name, const gfx::VertexAttribute& attrib_) {
-        const auto& attrib = static_cast<const VertexAttribute&>(attrib_);
-        if (attrib.getIndex() < 0) {
-            assert(!"Missing attribute index");
-            return;
+    NS::UInteger attributeIndex = 0;
+    for (const auto& binding : attributeBindings) {
+        if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
+            const auto index = static_cast<NS::UInteger>(attributeIndex);
+            encoder->setVertexBuffer(buffer, /*offset=*/0, index);
         }
-        if (const auto& resource_ = attrib.getBuffer()) {
-            const auto& resource = static_cast<VertexBufferResource&>(*resource_);
-            if (const auto& bufferResource = resource.get()) {
-                if (const auto& metalBuffer = bufferResource.getMetalBuffer()) {
-                    const auto index = static_cast<NS::UInteger>(attrib.getIndex());
-                    encoder->setVertexBuffer(metalBuffer.get(), /*offset=*/0, index);
-                }
-            }
-        }
-    });
+        attributeIndex += 1;
+    }
 
     const auto& renderPassDescriptor = renderPass.getDescriptor();
 
@@ -82,6 +87,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
+            const auto& mode = segment.getMode();
             if (const auto& desc = segment.getVertexDesc()) {
                 if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, desc)) {
                     encoder->setRenderPipelineState(state.get());
@@ -90,9 +96,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                     continue;
                 }
 
-                constexpr NS::UInteger vertexStart = 0;
-                constexpr NS::UInteger vertexCount = 3;
-                encoder->drawPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, vertexStart, vertexCount);
+                encoder->drawPrimitives(getPrimitiveType(mode.type), mlSegment.indexOffset, mlSegment.indexLength);
             }
         }
     }
@@ -141,8 +145,12 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
     impl->vertexType = type;
 
     if (count && type != gfx::AttributeDataType::Invalid && !data.empty() && !impl->vertexAttrName.empty()) {
-        if (auto& attrib = impl->vertexAttributes.getOrAdd(impl->vertexAttrName)) {
+        if (auto& attrib = impl->vertexAttributes.getOrAdd(impl->vertexAttrName, /*index=*/-1, type)) {
             attrib->setRawData(std::move(data));
+            attrib->setStride(VertexAttribute::getStrideOf(type));
+        } else {
+            Log::Warning(Event::General, "Vertex attribute type mismatch: " + name + " / " + impl->vertexAttrName);
+            assert(false);
         }
     }
 }
@@ -307,14 +315,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         const auto& overrides = impl->vertexAttributes;
 
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
-        auto bindings = uploadPass.buildAttributeBindings(impl->vertexCount,
-                                                          impl->vertexType,
-                                                          /*vertexAttributeIndex=*/-1,
-                                                          /*vertexData=*/{},
-                                                          defaults,
-                                                          overrides,
-                                                          usage,
-                                                          vertexBuffers);
+        attributeBindings = uploadPass.buildAttributeBindings(impl->vertexCount,
+                                                              impl->vertexType,
+                                                              /*vertexAttributeIndex=*/-1,
+                                                              /*vertexData=*/{},
+                                                              defaults,
+                                                              overrides,
+                                                              usage,
+                                                              vertexBuffers);
 
         impl->attributeBuffers = std::move(vertexBuffers);
         impl->indexBuffer = std::move(indexBuffer);
@@ -331,7 +339,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
 
             NS::UInteger index = 0;
-            for (const auto& binding : bindings) {
+            for (const auto& binding : attributeBindings) {
                 if (binding) {
                     auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
                     attribDesc->setBufferIndex(index);
@@ -348,6 +356,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
                     layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
                     layoutDesc->setStepRate(1);
+
+                    assert(binding->vertexStride > 0);
                     layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
 
                     vertDesc->attributes()->setObject(attribDesc.get(), index);
@@ -359,21 +369,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
             seg.setVertexDesc(std::move(vertDesc));
         };
-
-        // Generate buffers from raw data
-        impl->vertexAttributes.visitAttributes([&](const std::string& attribName, gfx::VertexAttribute& attrib_) {
-            auto& attrib = static_cast<VertexAttribute&>(attrib_);
-
-            const auto& bufferNames = shaderMTL.getBufferNames();
-            const auto hit = std::find(bufferNames.begin(), bufferNames.end(), attribName);
-            assert(hit != bufferNames.end());
-            if (hit != bufferNames.end()) {
-                const auto index = std::distance(bufferNames.begin(), hit);
-                attrib.setIndex(static_cast<int>(index));
-            }
-
-            attrib.getBuffer(uploadPass, gfx::BufferUsageType::StaticDraw);
-        });
     }
 
     /*

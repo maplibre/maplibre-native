@@ -98,24 +98,12 @@ std::optional<uint32_t> ShaderProgram::getSamplerLocation(std::string_view name)
     return std::nullopt;
 }
 
-namespace {
-static UniformBlockArray noUniforms;
-static VertexAttributeArray noAttribs;
-} // namespace
-const gfx::UniformBlockArray& ShaderProgram::getUniformBlocks() const {
-    return noUniforms;
+void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
+    vertexAttributes.add(std::string(info.name), static_cast<int>(info.index), info.dataType, info.count);
 }
 
-const gfx::VertexAttributeArray& ShaderProgram::getVertexAttributes() const {
-    return noAttribs;
-}
-
-gfx::UniformBlockArray& ShaderProgram::mutableUniformBlocks() {
-    return noUniforms;
-}
-
-gfx::VertexAttributeArray& ShaderProgram::mutableVertexAttributes() {
-    return noAttribs;
+void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
+    uniformBlocks.add(info.name.data(), static_cast<int>(info.index), info.size);
 }
 
 } // namespace mtl

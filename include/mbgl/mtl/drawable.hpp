@@ -54,19 +54,8 @@ public:
     void upload(gfx::UploadPass&);
 
 protected:
-    class Impl;
-    const std::unique_ptr<Impl> impl;
-
     // For testing only.
     Drawable(std::unique_ptr<Impl>);
-
-private:
-    /*
-    gfx::ColorMode makeColorMode(PaintParameters&) const;
-    gfx::StencilMode makeStencilMode(PaintParameters&) const;
-
-    void uploadTextures() const;
-     */
 
     void bindUniformBuffers(RenderPass& renderPass) const;
     void unbindUniformBuffers(RenderPass& renderPass) const;
@@ -74,6 +63,11 @@ private:
         void bindTextures() const;
         void unbindTextures() const;
          */
+
+    class Impl;
+    const std::unique_ptr<Impl> impl;
+
+    gfx::AttributeBindingArray attributeBindings;
 };
 
 } // namespace mtl

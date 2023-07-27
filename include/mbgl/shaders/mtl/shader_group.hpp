@@ -15,10 +15,9 @@ namespace mtl {
 template <shaders::BuiltIn ShaderID>
 class ShaderGroup final : public gfx::ShaderGroup {
 public:
-    ShaderGroup(const ProgramParameters& programParameters_, std::vector<std::string> bufferNames_)
+    ShaderGroup(const ProgramParameters& programParameters_)
         : gfx::ShaderGroup(),
-          programParameters(programParameters_),
-          bufferNames(std::move(bufferNames_)) {}
+          programParameters(programParameters_) {}
     ~ShaderGroup() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
@@ -30,10 +29,11 @@ public:
         constexpr auto& fragMain = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::fragmentMainFunction;
 
         uint32_t key = 0;
-        std::unordered_map<std::string, std::string> additionalDefines;
+        assert(propertiesAsUniforms.size() < 32);
+        std::unordered_map<std::string, std::string> additionalDefines(propertiesAsUniforms.size());
         for (unsigned int i = 0; i < propertiesAsUniforms.size(); i++) {
             if (!propertiesAsUniforms[i].empty()) {
-                key |= 1 << i;
+                key |= 1U << i;
                 auto name = std::string("HAS_UNIFORM_u_") + propertiesAsUniforms[i];
                 additionalDefines.insert(std::make_pair(std::move(name), "1"));
             }
@@ -50,14 +50,20 @@ public:
                 assert(false);
                 throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
             }
-            shader->setBufferNames(bufferNames);
+
+            using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
+            for (const auto& attrib : ShaderClass::attributes) {
+                shader->initAttribute(attrib);
+            }
+            for (const auto& uniform : ShaderClass::uniforms) {
+                shader->initUniformBlock(uniform);
+            }
         }
         return shader;
     }
 
 private:
     ProgramParameters programParameters;
-    std::vector<std::string> bufferNames;
 };
 
 } // namespace mtl
