@@ -129,7 +129,8 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                 const auto primitiveType = getPrimitiveType(mode.type);
                 constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
-                encoder->drawIndexedPrimitives(primitiveType, mlSegment.indexLength, indexType, indexBuffer, mlSegment.indexOffset);
+                encoder->drawIndexedPrimitives(
+                    primitiveType, mlSegment.indexLength, indexType, indexBuffer, mlSegment.indexOffset);
             }
         }
     }
@@ -226,11 +227,9 @@ void Drawable::unbindUniformBuffers(const RenderPass& renderPass) const {
     }
 }
 
-void Drawable::bindTextures(const RenderPass& renderPass) const {
-}
+void Drawable::bindTextures(const RenderPass& renderPass) const {}
 
-void Drawable::unbindTextures(const RenderPass& renderPass) const {
-}
+void Drawable::unbindTextures(const RenderPass& renderPass) const {}
 
 namespace {
 MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {

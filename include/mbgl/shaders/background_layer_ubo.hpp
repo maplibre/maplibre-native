@@ -13,7 +13,6 @@ struct alignas(16) BackgroundDrawableUBO {
 static_assert(sizeof(BackgroundDrawableUBO) % 16 == 0);
 static constexpr auto BackgroundDrawableUBOName = "BackgroundDrawableUBO";
 
-
 struct alignas(16) BackgroundLayerUBO {
     /*  0 */ Color color;
     /* 16 */ float opacity;
@@ -22,7 +21,6 @@ struct alignas(16) BackgroundLayerUBO {
 };
 static_assert(sizeof(BackgroundLayerUBO) == 32);
 static constexpr auto BackgroundLayerUBOName = "BackgroundLayerUBO";
-
 
 struct alignas(16) BackgroundPatternLayerUBO {
     /*  0 */ std::array<float, 2> pattern_tl_a;
