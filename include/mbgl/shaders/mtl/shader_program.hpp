@@ -22,6 +22,8 @@ struct AttributeInfo {
 struct UniformBlockInfo {
     std::size_t index;
     std::size_t size;
+    bool vertex;
+    bool fragment;
     std::string_view name;
 };
 } // namespace shaders

@@ -1106,6 +1106,7 @@ if(MLN_WITH_OPENGL)
 
     if(MLN_DRAWABLE_RENDERER)
         list(APPEND INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp

@@ -84,6 +84,26 @@ void Drawable::draw(PaintParameters& parameters) const {
         attributeIndex += 1;
     }
 
+    /*
+     context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
+                                    : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+
+     // force disable depth test for debugging
+     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
+
+     // For 3D mode, stenciling is handled by the layer group
+     if (!is3D) {
+         context.setStencilMode(makeStencilMode(parameters));
+     }
+
+     context.setColorMode(getColorMode());
+     context.setCullFaceMode(getCullFaceMode());
+
+     */
+
+    bindUniformBuffers(renderPass);
+    bindTextures(renderPass);
+
     const auto& renderPassDescriptor = renderPass.getDescriptor();
 
     for (const auto& seg_ : impl->segments) {
@@ -104,38 +124,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    /*
-    context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
-                                   : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
-
-    // force disable depth test for debugging
-    // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
-
-    // For 3D mode, stenciling is handled by the layer group
-    if (!is3D) {
-        context.setStencilMode(makeStencilMode(parameters));
-    }
-
-    context.setColorMode(getColorMode());
-    context.setCullFaceMode(getCullFaceMode());
-
-    bindUniformBuffers();
-    bindTextures();
-
-    for (const auto& seg : impl->segments) {
-        const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
-        const auto& mlSeg = glSeg.getSegment();
-        if (mlSeg.indexLength > 0 && glSeg.getVertexArray().isValid()) {
-            context.bindVertexArray = glSeg.getVertexArray().getID();
-            context.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
-        }
-    }
-
-    context.bindVertexArray = value::BindVertexArray::Default;
-
-    unbindTextures();
-    unbindUniformBuffers();
-     */
+    unbindTextures(renderPass);
+    unbindUniformBuffers(renderPass);
 }
 
 void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
@@ -185,7 +175,7 @@ void Drawable::setVertexAttrName(std::string value) {
     impl->vertexAttrName = std::move(value);
 }
 
-void Drawable::bindUniformBuffers(RenderPass& renderPass) const {
+void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {
     if (shader) {
         const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
         const auto& encoder = renderPass.getMetalEncoder();
@@ -199,15 +189,23 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const {
                 continue;
             }
 
-            const auto& bufferMTL = static_cast<UniformBuffer&>(*uniformBuffer.get());
-            const auto& resource = bufferMTL.getBufferResource();
-            const auto index = element.second->getIndex();
-            encoder->setVertexBuffer(resource.getMetalBuffer().get(), /*offset=*/0, index);
+            const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
+            const auto& bufferMTL = buffer.getBufferResource().getMetalBuffer().get();
+
+            const auto& block = static_cast<const UniformBlock&>(*element.second);
+            const auto index = block.getIndex();
+
+            if (block.getBindVertex()) {
+                encoder->setVertexBuffer(bufferMTL, /*offset=*/0, index);
+            }
+            if (block.getBindFragment()) {
+                encoder->setFragmentBuffer(bufferMTL, /*offset=*/0, index);
+            }
         }
     }
 }
 
-void Drawable::unbindUniformBuffers(RenderPass& renderPass) const {
+void Drawable::unbindUniformBuffers(const RenderPass& renderPass) const {
     if (shader) {
         const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
         const auto& encoder = renderPass.getMetalEncoder();
@@ -216,6 +214,12 @@ void Drawable::unbindUniformBuffers(RenderPass& renderPass) const {
             encoder->setVertexBuffer(nullptr, 0, index);
         }
     }
+}
+
+void Drawable::bindTextures(const RenderPass& renderPass) const {
+}
+
+void Drawable::unbindTextures(const RenderPass& renderPass) const {
 }
 
 namespace {
@@ -290,6 +294,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         return;
     }
 
+    if (!shader) {
+        Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        assert(false);
+        return;
+    }
+    const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
+    const auto& shaderUniforms = shaderMTL.getUniformBlocks();
+
     const bool build = impl->vertexAttributes.isDirty() ||
                        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
                            return !static_cast<const DrawSegment&>(*seg).getVertexDesc();
@@ -301,13 +313,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         auto& contextBase = uploadPass.getContext();
         auto& context = static_cast<Context&>(contextBase);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
-
-        if (!shader) {
-            Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
-            assert(false);
-            return;
-        }
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
         const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
         auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);

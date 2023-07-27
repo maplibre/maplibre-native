@@ -946,6 +946,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/renderer/layer_group.hpp",
     "include/mbgl/renderer/layer_tweaker.hpp",
     "include/mbgl/renderer/render_target.hpp",
+    "include/mbgl/shaders/background_layer_ubo.hpp",
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/util/identity.hpp",
     "include/mbgl/util/suppress_copies.hpp"

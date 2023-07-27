@@ -107,16 +107,6 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
     return noBuffer;
 }
 
-// static std::size_t padSize(std::size_t size, std::size_t padding) {
-//     return (padding - (size % padding)) % padding;
-// }
-// template <typename T>
-// static std::size_t pad(std::vector<T>& vector, std::size_t size, T value) {
-//     const auto count = padSize(vector.size(), size);
-//     vector.insert(vector.end(), count, value);
-//     return count;
-// }
-
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::size_t vertexCount,
     const gfx::AttributeDataType vertexType,
