@@ -3,9 +3,10 @@
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable_impl.hpp>
-#include <mbgl/mtl/texture2d.hpp>
+#include <mbgl/mtl/index_buffer_resource.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
+#include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
@@ -106,6 +107,13 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     const auto& renderPassDescriptor = renderPass.getDescriptor();
 
+    const auto& indexResource = impl->indexBuffer.getResource<IndexBufferResource>().get();
+    const auto& indexBuffer = indexResource.getMetalBuffer().get();
+    if (!indexBuffer) {
+        assert(!"Index buffer missing");
+        return;
+    }
+
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
@@ -115,11 +123,13 @@ void Drawable::draw(PaintParameters& parameters) const {
                 if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, desc)) {
                     encoder->setRenderPipelineState(state.get());
                 } else {
-                    assert(false);
+                    assert(!"Failed to create render pipeline state");
                     continue;
                 }
 
-                encoder->drawPrimitives(getPrimitiveType(mode.type), mlSegment.indexOffset, mlSegment.indexLength);
+                const auto primitiveType = getPrimitiveType(mode.type);
+                constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
+                encoder->drawIndexedPrimitives(primitiveType, mlSegment.indexLength, indexType, indexBuffer, mlSegment.indexOffset);
             }
         }
     }
