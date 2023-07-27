@@ -88,6 +88,8 @@ private:
     gfx::ShaderGroupPtr lineGradientShaderGroup;
     gfx::ShaderGroupPtr lineSDFShaderGroup;
     gfx::ShaderGroupPtr linePatternShaderGroup;
+
+    gfx::DrawableTweakerPtr iconTweaker;
 #endif
 };
 
