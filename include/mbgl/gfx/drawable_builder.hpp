@@ -68,6 +68,10 @@ public:
     int32_t getSubLayerIndex() const { return subLayerIndex; }
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
+    /// Whether to enable depth testing
+    bool getEnableDepth() { return enableDepth; }
+    void setEnableDepth(bool value) { enableDepth = value; }
+
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
     void setDepthType(DepthMaskType value) { depthType = value; }
@@ -174,6 +178,7 @@ protected:
     bool enabled = true;
     bool enableColor = true;
     bool enableStencil = false;
+    bool enableDepth = true;
     bool is3D = false;
     float lineWidth = 1.0f;
     DrawPriority drawPriority = 0;
