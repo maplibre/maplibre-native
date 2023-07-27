@@ -102,7 +102,8 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
             if (!samplerLocation.has_value()) {
                 samplerLocation = shader->getSamplerLocation(texUniformName);
                 if (const auto& tex = parameters.patternAtlas.texture()) {
-                    tex->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                    tex->setSamplerConfiguration(
+                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
                 }
             }
             if (samplerLocation.has_value()) {
