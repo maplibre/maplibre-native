@@ -44,12 +44,15 @@ MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
         default:
             assert(false);
             [[fallthrough]];
-        case gfx::DrawModeType::Points: return MTL::PrimitiveType::PrimitiveTypePoint;
-        case gfx::DrawModeType::Lines: return MTL::PrimitiveType::PrimitiveTypeLine;
-        case gfx::DrawModeType::Triangles: return MTL::PrimitiveType::PrimitiveTypeTriangle;
+        case gfx::DrawModeType::Points:
+            return MTL::PrimitiveType::PrimitiveTypePoint;
+        case gfx::DrawModeType::Lines:
+            return MTL::PrimitiveType::PrimitiveTypeLine;
+        case gfx::DrawModeType::Triangles:
+            return MTL::PrimitiveType::PrimitiveTypeTriangle;
     }
 }
-}
+} // namespace
 
 void Drawable::draw(PaintParameters& parameters) const {
     if (isCustom) {

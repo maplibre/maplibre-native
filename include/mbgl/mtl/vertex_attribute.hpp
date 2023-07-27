@@ -27,7 +27,7 @@ public:
     ~VertexAttribute() override = default;
 
     /// Get the Metal buffer, creating it if necessary
-    //const gfx::UniqueVertexBufferResource& getBuffer(UploadPass&, const gfx::BufferUsageType);
+    // const gfx::UniqueVertexBufferResource& getBuffer(UploadPass&, const gfx::BufferUsageType);
 
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,

@@ -21,10 +21,10 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static constexpr AttributeInfo attributes[] = {
-        { 0, "a_pos", gfx::AttributeDataType::Float3, 1 },
+        {0, "a_pos", gfx::AttributeDataType::Float3, 1},
     };
     static constexpr UniformBlockInfo uniforms[] = {
-//        { 1, 32, "xxUBO" },
+        //        { 1, 32, "xxUBO" },
     };
 
     static constexpr auto source = R"(

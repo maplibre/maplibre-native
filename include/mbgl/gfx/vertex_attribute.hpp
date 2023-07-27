@@ -199,7 +199,7 @@ protected:
     uint32_t sharedOffset = 0;
     uint32_t sharedVertexOffset = 0;
     uint32_t sharedStride = 0;
-    
+
     gfx::UniqueVertexBufferResource buffer;
 };
 

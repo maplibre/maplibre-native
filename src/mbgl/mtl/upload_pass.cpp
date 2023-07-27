@@ -170,7 +170,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             };
             return;
         }
-        
+
         assert(false);
     };
     defaults.resolve(overrides, resolveAttr);
