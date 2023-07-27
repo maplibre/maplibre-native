@@ -21,6 +21,7 @@
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/line_layer_tweaker.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
@@ -418,6 +419,8 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
 static constexpr std::string_view LinePatternTilePropertiesUBOName = "LinePatternTilePropertiesUBO";
 
+static constexpr auto LineImageUniformName = "u_image";
+
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
@@ -652,24 +655,34 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // texture
             if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
-                    builder->setTexture(atlases->icon, samplerLocation.value());
+                if (!iconTweaker) {
+                    iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                        atlases,
+                        "",
+                        LineImageUniformName,
+                        /*isText*/ false,
+                        /*sdfIcons*/ true, // to force linear filter
+                        /*rotationAlignment_*/ AlignmentType::Auto,
+                        /*iconScaled*/ false,
+                        /*textSizeIsZoomConstant_*/ false);
+                }
 
-                    // segments
-                    setSegments(builder, bucket);
+                builder->addTweaker(iconTweaker);
 
-                    // finish
-                    builder->flush();
-                    for (auto& drawable : builder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-                        drawable->mutableUniformBuffers().createOrUpdate(
-                            LinePatternInterpolationUBOName, &linePatternInterpolationUBO, context);
-                        drawable->mutableUniformBuffers().createOrUpdate(
-                            LinePatternTilePropertiesUBOName, &linePatternTilePropertiesUBO, context);
+                // segments
+                setSegments(builder, bucket);
 
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.drawablesAdded;
-                    }
+                // finish
+                builder->flush();
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setTileID(tileID);
+                    drawable->mutableUniformBuffers().createOrUpdate(
+                        LinePatternInterpolationUBOName, &linePatternInterpolationUBO, context);
+                    drawable->mutableUniformBuffers().createOrUpdate(
+                        LinePatternTilePropertiesUBOName, &linePatternTilePropertiesUBO, context);
+
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
                 }
             }
 
@@ -687,7 +700,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
             // texture
-            if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
+            if (const auto samplerLocation = builder->getShader()->getSamplerLocation(LineImageUniformName)) {
                 if (!colorRampTexture2D && colorRamp->valid()) {
                     // create texture. to be reused for all the tiles of the layer
                     colorRampTexture2D = context.createTexture2D();
