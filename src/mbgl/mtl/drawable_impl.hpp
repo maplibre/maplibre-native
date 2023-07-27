@@ -36,9 +36,8 @@ public:
         std::vector<TextureID> textures;
     */
     gfx::IndexVectorBasePtr indexes;
-    std::vector<std::uint8_t> vertexData;
     std::size_t vertexCount = 0;
-    gfx::AttributeDataType vertexType = static_cast<gfx::AttributeDataType>(-1);
+    gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
     gfx::VertexAttributeArray vertexAttributes;
 
     gfx::IndexBuffer indexBuffer = {0, nullptr};

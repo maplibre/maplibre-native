@@ -8,6 +8,7 @@
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
+#include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
@@ -41,18 +42,13 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    if (shader) {
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        if (auto state = shaderMTL.getRenderPipelineState(renderPass.getDescriptor())) {
-            encoder->setRenderPipelineState(state.get());
-        } else {
-            assert(false);
-        }
-    } else {
+    if (!shader) {
         Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
         assert(false);
         return;
     }
+
+    const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
     const simd::float3 positions[3] = {{-0.8f, 0.8f, 0.0f}, {0.0f, -0.8f, 0.0f}, {+0.8f, 0.8f, 0.0f}};
     auto posBuf = context.createBuffer(positions, sizeof(positions), gfx::BufferUsageType::StaticDraw);
@@ -60,12 +56,46 @@ void Drawable::draw(PaintParameters& parameters) const {
     const simd::float3 colors[3] = {{1.0, 0.3f, 0.2f}, {0.8f, 1.0, 0.0f}, {0.8f, 0.0f, 1.0}};
     auto colorBuf = context.createBuffer(colors, sizeof(colors), gfx::BufferUsageType::StaticDraw);
 
-    encoder->setVertexBuffer(posBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/0);
-    encoder->setVertexBuffer(colorBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/1);
+    // encoder->setVertexBuffer(posBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/0);
+    // encoder->setVertexBuffer(colorBuf.getMetalBuffer().get(), /*offset=*/0, /*index=*/1);
 
-    constexpr NS::UInteger vertexStart = 0;
-    constexpr NS::UInteger vertexCount = 3;
-    encoder->drawPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, vertexStart, vertexCount);
+    getVertexAttributes().visitAttributes([&](const std::string& name, const gfx::VertexAttribute& attrib_) {
+        const auto& attrib = static_cast<const VertexAttribute&>(attrib_);
+        if (attrib.getIndex() < 0) {
+            assert(!"Missing attribute index");
+            return;
+        }
+        if (const auto& resource_ = attrib.getBuffer()) {
+            const auto& resource = static_cast<VertexBufferResource&>(*resource_);
+            if (const auto& bufferResource = resource.get()) {
+                if (const auto& metalBuffer = bufferResource.getMetalBuffer()) {
+                    const auto index = static_cast<NS::UInteger>(attrib.getIndex());
+                    encoder->setVertexBuffer(metalBuffer.get(), /*offset=*/0, index);
+                }
+            }
+        }
+    });
+
+    const auto& renderPassDescriptor = renderPass.getDescriptor();
+
+    for (const auto& seg_ : impl->segments) {
+        const auto& segment = static_cast<DrawSegment&>(*seg_);
+        const auto& mlSegment = segment.getSegment();
+        if (mlSegment.indexLength > 0) {
+            if (const auto& desc = segment.getVertexDesc()) {
+                if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, desc)) {
+                    encoder->setRenderPipelineState(state.get());
+                } else {
+                    assert(false);
+                    continue;
+                }
+
+                constexpr NS::UInteger vertexStart = 0;
+                constexpr NS::UInteger vertexCount = 3;
+                encoder->drawPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, vertexStart, vertexCount);
+            }
+        }
+    }
 
     /*
     context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
@@ -107,9 +137,14 @@ void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueD
 }
 
 void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
-    impl->vertexData = std::move(data);
     impl->vertexCount = count;
     impl->vertexType = type;
+
+    if (count && type != gfx::AttributeDataType::Invalid && !data.empty() && !impl->vertexAttrName.empty()) {
+        if (auto& attrib = impl->vertexAttributes.getOrAdd(impl->vertexAttrName)) {
+            attrib->setRawData(std::move(data));
+        }
+    }
 }
 
 const gfx::VertexAttributeArray& Drawable::getVertexAttributes() const {
@@ -239,7 +274,7 @@ MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {
 }
 } // namespace
 
-void Drawable::upload(gfx::UploadPass& uploadPass) {
+void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (!shader) {
         return;
     }
@@ -250,9 +285,18 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                        });
 
     if (build) {
+        auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
+
         auto& contextBase = uploadPass.getContext();
         auto& context = static_cast<Context&>(contextBase);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
+
+        if (!shader) {
+            Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+            assert(false);
+            return;
+        }
+        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
         const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
         auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
@@ -262,14 +306,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
         const auto& defaults = shader->getVertexAttributes();
         const auto& overrides = impl->vertexAttributes;
 
-        const auto& indexAttribute = defaults.get(impl->vertexAttrName);
-        const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
-
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         auto bindings = uploadPass.buildAttributeBindings(impl->vertexCount,
                                                           impl->vertexType,
-                                                          vertexAttributeIndex,
-                                                          impl->vertexData,
+                                                          /*vertexAttributeIndex=*/-1,
+                                                          /*vertexData=*/{},
                                                           defaults,
                                                           overrides,
                                                           usage,
@@ -287,7 +328,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
                 continue;
             }
 
-            auto vertDesc = NS::TransferPtr(MTL::VertexDescriptor::vertexDescriptor());
+            auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
 
             NS::UInteger index = 0;
             for (const auto& binding : bindings) {
@@ -318,6 +359,21 @@ void Drawable::upload(gfx::UploadPass& uploadPass) {
 
             seg.setVertexDesc(std::move(vertDesc));
         };
+
+        // Generate buffers from raw data
+        impl->vertexAttributes.visitAttributes([&](const std::string& attribName, gfx::VertexAttribute& attrib_) {
+            auto& attrib = static_cast<VertexAttribute&>(attrib_);
+
+            const auto& bufferNames = shaderMTL.getBufferNames();
+            const auto hit = std::find(bufferNames.begin(), bufferNames.end(), attribName);
+            assert(hit != bufferNames.end());
+            if (hit != bufferNames.end()) {
+                const auto index = std::distance(bufferNames.begin(), hit);
+                attrib.setIndex(static_cast<int>(index));
+            }
+
+            attrib.getBuffer(uploadPass, gfx::BufferUsageType::StaticDraw);
+        });
     }
 
     /*

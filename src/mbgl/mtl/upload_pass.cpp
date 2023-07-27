@@ -7,11 +7,6 @@
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/util/logging.hpp>
 
-#if MLN_DRAWABLE_RENDERER
-#include <mbgl/gl/vertex_attribute_gl.hpp>
-#include <mbgl/gl/texture2d.hpp>
-#endif
-
 #include <algorithm>
 
 namespace mbgl {
@@ -80,7 +75,6 @@ struct VertexBuffer : public gfx::VertexBufferBase {
     std::unique_ptr<gfx::VertexBufferResource> resource;
 };
 
-#if MLN_DRAWABLE_RENDERER
 namespace {
 const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 }
@@ -139,21 +133,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     constexpr std::uint8_t padding = 0;
 
     std::vector<std::uint8_t> allData;
-    allData.reserve(vertexData.size() + (defaults.getTotalSize() + align) * vertexCount);
+    allData.reserve((defaults.getTotalSize() + align) * vertexCount);
 
     uint32_t vertexStride = 0;
-    if (vertexAttributeIndex != static_cast<std::size_t>(-1)) {
-        // Fill in vertices
-        allData.insert(allData.end(), vertexData.begin(), vertexData.end());
-        bindings.resize(vertexAttributeIndex + 1);
-        vertexStride = static_cast<uint32_t>(vertexData.size() / vertexCount);
-        bindings[vertexAttributeIndex] = {
-            /*.attribute = */ {vertexType, 0},
-            /* vertexStride = */ vertexStride,
-            /* vertexBufferResource = */ nullptr, // buffer details established later
-            /* vertexOffset = */ 0,
-        };
-    }
 
     // For each attribute in the program, with the corresponding default and optional override...
     const auto resolveAttr = [&](const std::string& name, auto& default_, auto& override_) -> void {
@@ -172,11 +154,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                 /*.vertexBufferResource = */ buffer.get(),
                 /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
             };
-            return;
-        }
-
-        if (index == vertexAttributeIndex) {
-            // already handled
             return;
         }
 
@@ -243,13 +220,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
     return bindings;
 }
-#endif
 
 void UploadPass::pushDebugGroup(const char* name) {}
 
 void UploadPass::popDebugGroup() {}
 
-#if MLN_DRAWABLE_RENDERER
 gfx::Context& UploadPass::getContext() {
     return commandEncoder.context;
 }
@@ -257,7 +232,6 @@ gfx::Context& UploadPass::getContext() {
 const gfx::Context& UploadPass::getContext() const {
     return commandEncoder.context;
 }
-#endif
 
 } // namespace mtl
 } // namespace mbgl

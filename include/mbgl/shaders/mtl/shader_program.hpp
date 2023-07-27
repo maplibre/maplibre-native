@@ -28,7 +28,8 @@ public:
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }
 
-    MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::RenderPassDescriptor&) const;
+    MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::RenderPassDescriptor&,
+                                                     const MTLVertexDescriptorPtr&) const;
 
     std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
 
@@ -40,11 +41,15 @@ public:
 
     gfx::VertexAttributeArray& mutableVertexAttributes() override;
 
+    const std::vector<std::string>& getBufferNames() const { return bufferNames; }
+    void setBufferNames(std::vector<std::string> value) { bufferNames = std::move(value); }
+
 protected:
     std::string shaderName;
     RendererBackend& backend;
     MTLFunctionPtr vertexFunction;
     MTLFunctionPtr fragmentFunction;
+    std::vector<std::string> bufferNames;
 };
 
 } // namespace mtl
