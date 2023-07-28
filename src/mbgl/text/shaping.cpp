@@ -404,7 +404,7 @@ void shapeLines(Shaping& shaping,
         for (std::size_t i = 0; i < line.length(); i++) {
             const std::size_t sectionIndex = line.getSectionIndex(i);
             const SectionOptions& section = line.sectionAt(sectionIndex);
-            const HBShapeAdjust *adjust = nullptr;
+            const HBShapeAdjust* adjust = nullptr;
             if (section.adjusts) {
                 assert(section.startIndex >= 0);
                 adjust = &(*section.adjusts)[i - section.startIndex];
@@ -421,8 +421,7 @@ void shapeLines(Shaping& shaping,
             assert(sectionScale);
 
             const bool vertical = !(
-                writingMode == WritingModeType::Horizontal ||
-                codePoint.complex.type != GlyphIDType::FontPBF ||
+                writingMode == WritingModeType::Horizontal || codePoint.complex.type != GlyphIDType::FontPBF ||
                 // Don't verticalize glyphs that have no upright orientation
                 // if vertical placement is disabled.
                 (!allowVerticalPlacement && !util::i18n::hasUprightVerticalOrientation(codePoint)) ||
@@ -454,9 +453,8 @@ void shapeLines(Shaping& shaping,
                     metrics = (*glyph->second)->metrics;
                 }
                 advance = static_cast<float>(metrics.advance);
-                
-                if (adjust)
-                    advance = adjust->advance;
+
+                if (adjust) advance = adjust->advance;
                 if (adjust) {
                     xHBOffset = (float)adjust->x_offset * section.scale;
                     yHBOffset = (float)adjust->y_offset * section.scale;
@@ -591,8 +589,8 @@ Shaping getShaping(const TaggedString& formattedString,
                 reorderedLines.emplace_back(formattedString);
             } else {
                 auto untaggedLines = bidi.processText(
-                                                      formattedString.rawText(),
-                                                      determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
+                    formattedString.rawText(),
+                    determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
                 for (const auto& line : untaggedLines) {
                     reorderedLines.emplace_back(line, formattedString.sectionAt(0));
                 }
@@ -601,28 +599,28 @@ Shaping getShaping(const TaggedString& formattedString,
             StyledText subString;
             auto sectionIndex = formattedString.getSectionIndex(0);
             auto strLen = formattedString.getStyledText().first.length();
-            const auto &sections = formattedString.getSections();
-            
+            const auto& sections = formattedString.getSections();
+
             std::vector<SectionOptions> formattedSections = formattedString.getSections();
-            
+
             std::vector<StyledText> pendLines;
-            
+
             auto processAline = [&](StyledText line) {
                 reorderedLines.emplace_back(line, formattedSections);
-                
+
                 size_t cutLens = line.first.length();
-                
-                for (auto &sec : formattedSections) {
+
+                for (auto& sec : formattedSections) {
                     sec.startIndex -= cutLens;
                 }
             };
-            
+
             auto applyLines = [&](StyledText line) {
                 if (pendLines.empty()) {
                     processAline(line);
                 } else {
                     StyledText combine;
-                    for (auto &pendLine : pendLines) {
+                    for (auto& pendLine : pendLines) {
                         combine.first.append(pendLine.first);
                         combine.second.insert(combine.second.end(), pendLine.second.begin(), pendLine.second.end());
                     }
@@ -631,27 +629,26 @@ Shaping getShaping(const TaggedString& formattedString,
                     combine.second.insert(combine.second.end(), line.second.begin(), line.second.end());
                     processAline(combine);
                 }
-               
             };
-            
+
             auto applySubString = [&]() {
-                if (subString.first.length())
-                {
-                    auto &section = sections[sectionIndex];
+                if (subString.first.length()) {
+                    auto& section = sections[sectionIndex];
                     if (GlyphIDType::FontPBF == section.type) {
-                        auto processedLines = bidi.processStyledText(subString,
-                                                                     determineLineBreaks({subString, formattedString.getSections()},
-                                                                                         spacing,
-                                                                                         maxWidth,
-                                                                                         glyphMap,
-                                                                                         imagePositions, layoutTextSize));
-                        
+                        auto processedLines = bidi.processStyledText(
+                            subString,
+                            determineLineBreaks({subString, formattedString.getSections()},
+                                                spacing,
+                                                maxWidth,
+                                                glyphMap,
+                                                imagePositions,
+                                                layoutTextSize));
+
                         auto lastChar = u'x';
-                        if (!subString.first.empty())
-                            lastChar = subString.first[subString.first.length() - 1];
-                        
+                        if (!subString.first.empty()) lastChar = subString.first[subString.first.length() - 1];
+
                         if (section.lineSection || u'\n' == lastChar) {
-                            for (const auto &line : processedLines) {
+                            for (const auto& line : processedLines) {
                                 applyLines(line);
                             }
                         } else {
@@ -665,40 +662,37 @@ Shaping getShaping(const TaggedString& formattedString,
                                 pendLines.push_back(processedLines[lineCount - 1]);
                             }
                         }
-                        
+
                     } else {
                         if (section.lineSection) {
                             applyLines(subString);
                         } else {
                             pendLines.push_back(subString);
                         }
-                            
                     }
-                    
                 }
             };
-            
-            for (size_t charIndex = 0; charIndex < strLen; ++charIndex)
-            {
-                auto &ch = formattedString.getStyledText().first[charIndex];
-                auto &sec = formattedString.getStyledText().second[charIndex];
-                
+
+            for (size_t charIndex = 0; charIndex < strLen; ++charIndex) {
+                auto& ch = formattedString.getStyledText().first[charIndex];
+                auto& sec = formattedString.getStyledText().second[charIndex];
+
                 if (sectionIndex != sec) {
                     applySubString();
-                    
+
                     subString.first.clear();
                     subString.second.clear();
                     sectionIndex = sec;
                 }
-                
+
                 subString.first += ch;
                 subString.second.emplace_back(sec);
             }
-            
+
             applySubString();
         }
     }
-    
+
     Shaping shaping(translate[0], translate[1], writingMode);
     shapeLines(shaping,
                reorderedLines,

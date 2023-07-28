@@ -23,20 +23,32 @@ union GlyphID {
         char16_t code;
         GlyphIDType type;
     } complex;
-    
-    GlyphID(int codepoint) { complex.type = FontPBF; complex.code = codepoint; }
-    GlyphID(uint32_t codepoint) { complex.type = FontPBF; complex.code = codepoint; }
-    GlyphID(char16_t codepoint) { complex.type = FontPBF; complex.code = codepoint; }
-    
-    GlyphID(char16_t index, GlyphIDType t) { complex.type = t; complex.code = index; }
-    
+
+    GlyphID(int codepoint) {
+        complex.type = FontPBF;
+        complex.code = codepoint;
+    }
+    GlyphID(uint32_t codepoint) {
+        complex.type = FontPBF;
+        complex.code = codepoint;
+    }
+    GlyphID(char16_t codepoint) {
+        complex.type = FontPBF;
+        complex.code = codepoint;
+    }
+
+    GlyphID(char16_t index, GlyphIDType t) {
+        complex.type = t;
+        complex.code = index;
+    }
+
     operator char16_t() { return complex.code; }
-    operator char32_t() { return hash;}
-    bool operator <(const GlyphID &other) const { return hash < other.hash; }
-    bool operator >(const GlyphID &other) const { return hash > other.hash; }
-    
-    bool operator <(const uint16_t &other) const { return hash < other; }
-    bool operator >(const uint16_t &other) const { return hash > other; }
+    operator char32_t() { return hash; }
+    bool operator<(const GlyphID &other) const { return hash < other.hash; }
+    bool operator>(const GlyphID &other) const { return hash > other.hash; }
+
+    bool operator<(const uint16_t &other) const { return hash < other; }
+    bool operator>(const uint16_t &other) const { return hash > other; }
 };
 
 GlyphIDType charGlyphIDType(char16_t ch, GlyphIDType lastChType);
@@ -56,7 +68,7 @@ struct GlyphMetrics {
     uint32_t advance = 0;
 };
 
-inline bool operator==(const GlyphMetrics& lhs, const GlyphMetrics& rhs) {
+inline bool operator==(const GlyphMetrics &lhs, const GlyphMetrics &rhs) {
     return lhs.width == rhs.width && lhs.height == rhs.height && lhs.left == rhs.left && lhs.top == rhs.top &&
            lhs.advance == rhs.advance;
 }
@@ -138,7 +150,7 @@ public:
     float right = 0;
     WritingModeType writingMode;
     explicit operator bool() const {
-        return std::any_of(positionedLines.begin(), positionedLines.end(), [](const auto& line) {
+        return std::any_of(positionedLines.begin(), positionedLines.end(), [](const auto &line) {
             return !line.positionedGlyphs.empty();
         });
     }
@@ -158,12 +170,14 @@ struct HBShapeRequest {
     std::u16string str;
     FontStack fontStack;
     GlyphIDType type;
-    
-    HBShapeRequest(const std::u16string &str_,  const FontStack &fontStack_, GlyphIDType type_) : str(str_), fontStack(fontStack_), type(type_) {}
+
+    HBShapeRequest(const std::u16string &str_, const FontStack &fontStack_, GlyphIDType type_)
+        : str(str_),
+          fontStack(fontStack_),
+          type(type_) {}
 };
 
-using HBShapeRequests = std::map<FontStack,
-                                 std::map<GlyphIDType, std::set<std::u16string>>>;
+using HBShapeRequests = std::map<FontStack, std::map<GlyphIDType, std::set<std::u16string>>>;
 
 struct GlyphDependencies {
     std::map<FontStack, GlyphIDs> glyphs;

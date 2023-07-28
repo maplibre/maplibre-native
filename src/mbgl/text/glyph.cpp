@@ -3,42 +3,36 @@
 
 namespace mbgl {
 
-GlyphRange::GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_) : first((uint16_t)first_), second((uint16_t)second_), type(type_)
-{
-    
-}
+GlyphRange::GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_)
+    : first((uint16_t)first_),
+      second((uint16_t)second_),
+      type(type_) {}
 
 bool GlyphRange::operator==(const GlyphRange &other) const {
     return first == other.first && second == other.second && type == other.type;
 }
 
 bool GlyphRange::operator<(const GlyphRange &other) const {
-    if (first < other.first)
-        return true;
-    if (first > other.first)
-        return false;
-    
-    if (second < other.second)
-        return true;
-    if (second > other.second)
-        return false;
-    
+    if (first < other.first) return true;
+    if (first > other.first) return false;
+
+    if (second < other.second) return true;
+    if (second > other.second) return false;
+
     return type < other.type;
 }
 
-
-const std::string
-getGlyphRangeName(GlyphIDType type) {
+const std::string getGlyphRangeName(GlyphIDType type) {
     switch (type) {
         case GlyphIDType::Khmer:
             return "khmer";
-            
+
         case GlyphIDType::Myanmar:
             return "myanmar";
-        
+
         case GlyphIDType::Devanagari:
             return "devanagari";
-            
+
         default:
             return "";
     }

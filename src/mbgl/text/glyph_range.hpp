@@ -19,9 +19,9 @@ public:
     uint16_t first = 0;
     uint16_t second = 0;
     GlyphIDType type = GlyphIDType::FontPBF;
-    
+
     GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_);
-    
+
     bool operator==(const GlyphRange &other) const;
     bool operator<(const GlyphRange &other) const;
 };
@@ -37,7 +37,7 @@ namespace std {
 
 template <>
 struct hash<mbgl::GlyphRange> {
-    std::size_t operator()(const mbgl::GlyphRange& range) const { return mbgl::util::hash(range.first, range.second); }
+    std::size_t operator()(const mbgl::GlyphRange &range) const { return mbgl::util::hash(range.first, range.second); }
 };
 
 } // namespace std

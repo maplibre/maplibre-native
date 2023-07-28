@@ -748,11 +748,9 @@ void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
     } else {
         ss << (int)glyphRange.type << "(font file)";
     }
-    ss << " for font stack " << fontStackToString(fontStack)
-        << ":( " << util::toString(error) << ")";
+    ss << " for font stack " << fontStackToString(fontStack) << ":( " << util::toString(error) << ")";
     auto errorDetail = ss.str();
-    Log::Error(Event::Style,
-               errorDetail);
+    Log::Error(Event::Style, errorDetail);
     observer->onResourceError(error);
 }
 

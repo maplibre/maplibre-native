@@ -292,8 +292,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
                     std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
                     if (pendingGlyphIDs.erase(glyphID)) {
-                        if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF))
-                        {
+                        if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF)) {
                             glyphs.emplace(glyphID, std::move(glyph));
                         }
                     }
@@ -301,25 +300,25 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
             }
         }
     }
-    
+
     if (!results.empty()) {
         pendingGlyphDependencies.shapes.clear();
-        
-        for (auto &newFontGlyphs : newGlyphMap) {
-            FontStackHash fontStack  = newFontGlyphs.first;
-            Glyphs        &newGlyphs = newFontGlyphs.second;
 
-            Glyphs    &glyphs = glyphMap[fontStack];
-            for (auto &newGlyph : newGlyphs) {
-                const GlyphID              &glyphID = newGlyph.first;
-                std::optional<Immutable<Glyph>> &glyph   = newGlyph.second;
-                
+        for (auto& newFontGlyphs : newGlyphMap) {
+            FontStackHash fontStack = newFontGlyphs.first;
+            Glyphs& newGlyphs = newFontGlyphs.second;
+
+            Glyphs& glyphs = glyphMap[fontStack];
+            for (auto& newGlyph : newGlyphs) {
+                const GlyphID& glyphID = newGlyph.first;
+                std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
+
                 if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF))
                     glyphs.emplace(glyphID, std::move(glyph));
             }
         }
-        
-        for (auto &layout : layouts) {
+
+        for (auto& layout : layouts) {
             if (layout && layout->needfinalizeSymbols()) {
                 layout->finalizeSymbols(results);
             }
@@ -351,17 +350,14 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
             }
         }
     }
-    for (auto &fontDependencies : glyphDependencies.shapes)
-    {
-        auto &fontStack = fontDependencies.first;
-        for (auto typeDependencies : fontDependencies.second)
-        {
-            auto &type =  typeDependencies.first;
-            auto &strs = typeDependencies.second;
-            for (auto &str : strs) {
+    for (auto& fontDependencies : glyphDependencies.shapes) {
+        auto& fontStack = fontDependencies.first;
+        for (auto typeDependencies : fontDependencies.second) {
+            auto& type = typeDependencies.first;
+            auto& strs = typeDependencies.second;
+            for (auto& str : strs) {
                 pendingGlyphDependencies.shapes[fontStack][type].insert(str);
             }
-            
         }
     }
     if (!pendingGlyphDependencies.glyphs.empty()) {

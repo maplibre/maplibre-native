@@ -10,7 +10,11 @@
 namespace mbgl {
 
 struct SectionOptions {
-    SectionOptions(double scale_, FontStack fontStack_, GlyphIDType type_, uint32_t startIndex_, std::optional<Color> textColor_ = std::nullopt)
+    SectionOptions(double scale_,
+                   FontStack fontStack_,
+                   GlyphIDType type_,
+                   uint32_t startIndex_,
+                   std::optional<Color> textColor_ = std::nullopt)
         : scale(scale_),
           fontStack(fontStack_),
           fontStackHash(FontStackHasher()(std::move(fontStack_))),
@@ -23,9 +27,12 @@ struct SectionOptions {
                    GlyphIDType type_,
                    uint32_t startIndex_,
                    std::optional<Color> textColor_ = std::nullopt)
-                    : scale(scale_), fontStackHash(fontStackHash_), type(type_), startIndex(startIndex_), textColor(std::move(textColor_))
-            {}
-    
+        : scale(scale_),
+          fontStackHash(fontStackHash_),
+          type(type_),
+          startIndex(startIndex_),
+          textColor(std::move(textColor_)) {}
+
     explicit SectionOptions(std::string imageID_)
         : scale(1.0),
           imageID(std::move(imageID_)) {}
@@ -33,16 +40,15 @@ struct SectionOptions {
     double scale;
     FontStack fontStack;
     FontStackHash fontStackHash;
-    
-    GlyphIDType   type;
-    
+
+    GlyphIDType type;
+
     std::shared_ptr<std::vector<HBShapeAdjust>> adjusts;
 
-    int32_t      startIndex;
-    bool         lineSection = true;
-    
+    int32_t startIndex;
+    bool lineSection = true;
+
     std::optional<std::string> imageID;
-    
 
     std::optional<Color> textColor;
 };
@@ -94,12 +100,12 @@ struct TaggedString {
                         GlyphIDType type,
                         bool lineSection = true,
                         std::optional<Color> textColor_ = std::nullopt);
-    
-    void addTextSection(const std::u16string &text,
+
+    void addTextSection(const std::u16string& text,
                         double scale,
-                        const FontStack &fontStack,
+                        const FontStack& fontStack,
                         GlyphIDType type,
-                        std::shared_ptr<std::vector<HBShapeAdjust>> &adjusts,
+                        std::shared_ptr<std::vector<HBShapeAdjust>>& adjusts,
                         bool lineSection = true,
                         std::optional<Color> textColor_ = std::nullopt);
 
@@ -116,11 +122,11 @@ struct TaggedString {
 
     void verticalizePunctuation();
     bool allowsVerticalWritingMode();
-    
+
     bool hbShaped() const { return textHBShaped; }
-            
+
     void setHBShaped(bool shaped) { textHBShaped = shaped; }
-    
+
     bool hasNeedHBShapeText() const { return hasNeedShapeTextVal; }
 
 private:

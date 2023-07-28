@@ -218,8 +218,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     if (!parser.glyphURL.empty()) {
         uint32_t ttfCount = 0;
-        if (!parser.fontURL.empty())
-            ttfCount = 2; // khmer + myanmar
+        if (!parser.fontURL.empty()) ttfCount = 2; // khmer + myanmar
         result->requiredResourceCount += parser.fontStacks().size() *
                                          (definition.match([](auto& reg) { return reg.includeIdeographs; })
                                               ? GLYPH_RANGES_PER_FONT_STACK + ttfCount
@@ -340,14 +339,17 @@ void OfflineDownload::activateDownload() {
                     // characters, the entire range will be fixed width.
                     if (includeIdeographs || !util::i18n::allowsFixedWidthGlyphGeneration(i * GLYPHS_PER_GLYPH_RANGE)) {
                         auto range = getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE);
-                        queueResource(
-                                      Resource::glyphs(parser.glyphURL, fontStack, std::pair<uint16_t, uint16_t>{ range.first, range.second }));
+                        queueResource(Resource::glyphs(
+                            parser.glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second}));
                     }
-                    
+
                     if (!parser.fontURL.empty()) {
-                        queueResource(Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Khmer)));
-                        queueResource(Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Myanmar)));
-                        queueResource(Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
+                        queueResource(
+                            Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Khmer)));
+                        queueResource(
+                            Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Myanmar)));
+                        queueResource(
+                            Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
                     }
                 }
             }

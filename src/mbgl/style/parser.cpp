@@ -115,12 +115,10 @@ StyleParseResult Parser::parse(const std::string& json) {
             glyphURL = {glyphs.GetString(), glyphs.GetStringLength()};
         }
     }
-    
-    if (document.HasMember("fonts"))
-    {
-        const JSValue &fonts = document["fonts"];
-        if (fonts.IsString())
-        {
+
+    if (document.HasMember("fonts")) {
+        const JSValue& fonts = document["fonts"];
+        if (fonts.IsString()) {
             fontURL = {fonts.GetString(), fonts.GetStringLength()};
         }
     }

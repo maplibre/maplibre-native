@@ -55,7 +55,7 @@ DEFINE_IS_IN_UNICODE_BLOCK(Devanagari, 0x0900, 0x097F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Thai, 0x0E00, 0x0E7F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Lao, 0x0E80, 0x0EFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Tibetan, 0x0F00, 0x0FFF)
- DEFINE_IS_IN_UNICODE_BLOCK(Myanmar, 0x1000, 0x109F)
+DEFINE_IS_IN_UNICODE_BLOCK(Myanmar, 0x1000, 0x109F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Georgian, 0x10A0, 0x10FF)
 DEFINE_IS_IN_UNICODE_BLOCK(HangulJamo, 0x1100, 0x11FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Ethiopic, 0x1200, 0x137F)
@@ -633,17 +633,10 @@ GlyphIDType charGlyphIDType(char16_t ch, GlyphIDType lastChType) {
     if (u'\uFE00' == ch) {
         return lastChType;
     }
-    
 
-    if (isInKhmer(ch))
-        return GlyphIDType::Khmer;
-    if (isInMyanmar(ch) ||
-        isInMyanmarExtendedA(ch) ||
-        isInMyanmarExtendedB(ch) )
-        return GlyphIDType::Myanmar;
-    if (isInDevanagari(ch) ||
-        isInDevanagariExtended(ch))
-        return GlyphIDType::Devanagari;
+    if (isInKhmer(ch)) return GlyphIDType::Khmer;
+    if (isInMyanmar(ch) || isInMyanmarExtendedA(ch) || isInMyanmarExtendedB(ch)) return GlyphIDType::Myanmar;
+    if (isInDevanagari(ch) || isInDevanagariExtended(ch)) return GlyphIDType::Devanagari;
 
     return GlyphIDType::FontPBF;
 }

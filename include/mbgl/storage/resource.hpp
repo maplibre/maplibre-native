@@ -84,7 +84,7 @@ public:
                            const std::pair<uint16_t, uint16_t>& glyphRange);
     static Resource glyphs(const std::string& urlTemplate,
                            const FontStack& fontStack,
-                           const std::string &glyphlanguage);
+                           const std::string& glyphlanguage);
     static Resource spriteImage(const std::string& base, float pixelRatio);
     static Resource spriteJSON(const std::string& base, float pixelRatio);
     static Resource image(const std::string& url);

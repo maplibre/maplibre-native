@@ -392,7 +392,7 @@ const std::string& Style::Impl::getGlyphURL() const {
     return glyphURL;
 }
 
-const std::string & Style::Impl::getFontsURL() const {
+const std::string& Style::Impl::getFontsURL() const {
     return fontURL;
 }
 

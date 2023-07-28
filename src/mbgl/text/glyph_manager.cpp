@@ -77,7 +77,7 @@ void GlyphManager::requestRange(GlyphRequest& request,
     if (request.req) {
         return;
     }
-    
+
     Resource res(Resource::Kind::Unknown, "");
     switch (range.type) {
         case GlyphIDType::Khmer:
@@ -87,13 +87,12 @@ void GlyphManager::requestRange(GlyphRequest& request,
             break;
         case GlyphIDType::FontPBF:
         default:
-            res =  Resource::glyphs(glyphURL, fontStack, std::pair<uint16_t, uint16_t>{ range.first, range.second });
+            res = Resource::glyphs(glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second});
             break;
     }
 
     request.req = fileSource.request(
-        res,
-        [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
+        res, [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
 }
 
 void GlyphManager::processResponse(const Response& res, const FontStack& fontStack, const GlyphRange& range) {
@@ -116,7 +115,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
             if (range.type == GlyphIDType::FontPBF) {
                 glyphs = parseGlyphPBF(range, *res.data);
             } else {
-                if(loadHBShaper(fontStack, range.type, *res.data)) {
+                if (loadHBShaper(fontStack, range.type, *res.data)) {
                     Glyph temp;
                     temp.id = GlyphID(0, range.type);
                     glyphs.emplace_back(std::move(temp));
@@ -190,32 +189,28 @@ void GlyphManager::evict(const std::set<FontStack>& keep) {
     util::erase_if(entries, [&](const auto& entry) { return keep.count(entry.first) == 0; });
 }
 
-std::shared_ptr<HBShaper> GlyphManager::getHBShaper(FontStack fontStack, GlyphIDType type)
-{
+std::shared_ptr<HBShaper> GlyphManager::getHBShaper(FontStack fontStack, GlyphIDType type) {
     if (hbShapers.find(fontStack) != hbShapers.end()) {
-        auto &glyphs = hbShapers[fontStack];
+        auto& glyphs = hbShapers[fontStack];
         if (glyphs.find(type) != glyphs.end()) {
             return glyphs[type];
         }
     }
-    
+
     return nullptr;
 }
 
-bool GlyphManager::loadHBShaper(const FontStack &fontStack, GlyphIDType type, const std::string &data)
-{
+bool GlyphManager::loadHBShaper(const FontStack& fontStack, GlyphIDType type, const std::string& data) {
     auto shaper = std::make_shared<HBShaper>(type, data, ftLibrary);
-    if (!shaper->Valid())
-        return false;
+    if (!shaper->Valid()) return false;
     hbShapers[fontStack][type] = shaper;
     return true;
 }
 
-Immutable<Glyph> GlyphManager::getGlyph(const FontStack &fontStack, GlyphID glyphID) {
-    auto &entry = entries[fontStack];
-    if (entry.glyphs.find(glyphID) != entry.glyphs.end())
-        return entry.glyphs.at(glyphID);
-    
+Immutable<Glyph> GlyphManager::getGlyph(const FontStack& fontStack, GlyphID glyphID) {
+    auto& entry = entries[fontStack];
+    if (entry.glyphs.find(glyphID) != entry.glyphs.end()) return entry.glyphs.at(glyphID);
+
     if (glyphID.complex.type != FontPBF) {
         auto shaper = getHBShaper(fontStack, glyphID.complex.type);
         if (shaper) {
@@ -226,13 +221,17 @@ Immutable<Glyph> GlyphManager::getGlyph(const FontStack &fontStack, GlyphID glyp
             return entry.glyphs.at(glyphID);
         }
     }
-    
+
     Glyph empty;
-    
+
     return makeMutable<Glyph>(std::move(empty));
 }
 
-void GlyphManager::hbShaping(const std::u16string &text, const FontStack &font, GlyphIDType type, std::vector<GlyphID> &glyphIDs, std::vector<HBShapeAdjust> &adjusts) {
+void GlyphManager::hbShaping(const std::u16string& text,
+                             const FontStack& font,
+                             GlyphIDType type,
+                             std::vector<GlyphID>& glyphIDs,
+                             std::vector<HBShapeAdjust>& adjusts) {
     auto shaper = getHBShaper(font, type);
     if (shaper) {
         shaper->CreateComplexGlyphIDs(text, glyphIDs, adjusts);
