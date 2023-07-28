@@ -767,6 +767,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/shaping.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/tagged_string.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/tagged_string.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_geometry_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_geometry_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/geojson_tile.cpp
@@ -1037,6 +1041,37 @@ include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 
+set(FT_DISABLE_BROTLI ON CACHE BOOL "freetype option")
+set(FT_REQUIRE_BROTLI OFF CACHE BOOL "freetype option")
+add_subdirectory(vendor/freetype)
+
+set_target_properties(
+    freetype
+    PROPERTIES
+        INTERFACE_MAPBOX_NAME "freetype"
+        INTERFACE_MAPBOX_URL "https://github.com/freetype/freetype"
+        INTERFACE_MAPBOX_AUTHOR "David Turner"
+        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/freetype/docs/FTL.TXT
+)
+
+add_subdirectory(vendor/harfbuzz)
+
+set_target_properties(
+    harfbuzz
+    PROPERTIES
+        INTERFACE_MAPBOX_NAME "harfbuzz"
+        INTERFACE_MAPBOX_URL "https://github.com/harfbuzz/harfbuzz"
+        INTERFACE_MAPBOX_AUTHOR  ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/AUTHORS
+        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/COPYING
+)
+
+set_property(TARGET harfbuzz PROPERTY FOLDER Core)
+set_property(TARGET freetype PROPERTY FOLDER Core)
+
+# set_target_properties(harfbuzz freetype PROPERTIES
+#     XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_BINARY_DIR}/\$(CONFIGURATION)\$(EFFECTIVE_PLATFORM_NAME)"
+# )
+
 target_link_libraries(
     mbgl-core
     PRIVATE
@@ -1056,6 +1091,8 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+        freetype
+        harfbuzz
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1093,6 +1130,8 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    freetype
+    harfbuzz
 
     FILE MapboxCoreTargets.cmake
 )

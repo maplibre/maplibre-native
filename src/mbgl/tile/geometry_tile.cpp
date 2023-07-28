@@ -254,8 +254,49 @@ void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelat
     observer->onTileError(*this, std::move(err));
 }
 
-void GeometryTile::onGlyphsAvailable(GlyphMap glyphs) {
-    worker.self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphs));
+void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, HBShapeRequests requests) {
+    HBShapeResults results;
+    for (auto &fontStackIT : requests) {
+        auto fontStack = fontStackIT.first;
+        auto &fontTypes = fontStackIT.second;
+        for (auto &typesIT : fontTypes) {
+            auto type = typesIT.first;
+            auto &strs = typesIT.second;
+            
+            for (auto &str : strs) {
+                std::vector<GlyphID> shapedGlyphIDs;
+                std::shared_ptr<std::vector<HBShapeAdjust>> shapedAdjusts = std::make_shared<std::vector<HBShapeAdjust>>();
+                glyphManager.hbShaping(str, fontStack, type, shapedGlyphIDs, *shapedAdjusts);
+                std::u16string shapedstr;
+                
+                shapedstr.reserve(shapedGlyphIDs.size());
+                for (size_t iGlyphIndex = 0; iGlyphIndex < shapedGlyphIDs.size(); ++iGlyphIndex) {
+                    auto &glyphID = shapedGlyphIDs[iGlyphIndex];
+                    
+                    shapedstr += glyphID.complex.code;
+                    
+                    
+                    auto fontStackHash = FontStackHasher()(fontStack);
+                    bool needShape = true;
+                    if (glyphMap.find(fontStackHash) != glyphMap.end()) {
+                        auto &glyphs = glyphMap[fontStackHash];
+                        if (glyphs.find(glyphID) != glyphs.end())
+                            needShape = false;
+                    }
+                    if (needShape) {
+                        auto glyph = glyphManager.getGlyph(fontStack, glyphID);
+                        glyphMap[fontStackHash].emplace(glyph->id, glyph);
+                        
+                    }
+                    
+                }
+                
+                results[fontStack][type][str] = HBShapeResult{shapedstr, shapedAdjusts} ;//.emplace(str, shapedstr, shapedAdjusts);
+            }
+        }
+    }
+   
+    worker.self().invoke(&GeometryTileWorker::onGlyphsAvailable, std::move(glyphMap),  std::move(results) );
 }
 
 void GeometryTile::getGlyphs(GlyphDependencies glyphDependencies) {

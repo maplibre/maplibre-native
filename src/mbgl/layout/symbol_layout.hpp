@@ -30,6 +30,10 @@ public:
                  const LayoutParameters& parameters);
 
     ~SymbolLayout() final = default;
+    
+    virtual bool needfinalizeSymbols() override { return needfinalizeSymbolsVal; }
+    
+    void finalizeSymbols(HBShapeResults &) override;
 
     void prepareSymbols(const GlyphMap& glyphMap,
                         const GlyphPositions&,
@@ -139,6 +143,8 @@ private:
     BiDi bidi; // Consider moving this up to geometry tile worker to reduce
                // reinstantiation costs; use of BiDi/ubiditransform object must
                // be constrained to one thread
+    
+    bool needfinalizeSymbolsVal = false;
 };
 
 } // namespace mbgl

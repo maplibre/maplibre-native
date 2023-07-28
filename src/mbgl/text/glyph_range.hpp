@@ -7,7 +7,24 @@
 
 namespace mbgl {
 
-using GlyphRange = std::pair<uint16_t, uint16_t>;
+enum GlyphIDType : short {
+    FontPBF = 0x00,
+    Khmer = 0x01,
+    Myanmar = 0x02,
+    Devanagari = 0x03,
+};
+
+class GlyphRange {
+public:
+    uint16_t first = 0;
+    uint16_t second = 0;
+    GlyphIDType type = GlyphIDType::FontPBF;
+    
+    GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_);
+    
+    bool operator==(const GlyphRange &other) const;
+    bool operator<(const GlyphRange &other) const;
+};
 
 constexpr uint32_t GLYPHS_PER_GLYPH_RANGE = 256;
 constexpr uint32_t GLYPH_RANGES_PER_FONT_STACK = 256;

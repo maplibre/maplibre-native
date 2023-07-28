@@ -7,6 +7,7 @@
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/text/get_anchors.hpp>
 #include <mbgl/text/shaping.hpp>
+#include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/utf.hpp>
@@ -147,7 +148,9 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
             FontStack baseFontStack = layout->evaluate<TextFont>(zoom, ft, canonicalID);
 
             ft.formattedText = TaggedString();
-            for (const auto& section : formatted.sections) {
+            std::map<std::size_t, std::size_t> sectionTable;
+            for (std::size_t sectionIndex = 0; sectionIndex < formatted.sections.size(); sectionIndex++) {
+                const auto  &section = formatted.sections[sectionIndex];
                 if (!section.image) {
                     std::string u8string = section.text;
                     if (textTransform == TextTransformType::Uppercase) {
@@ -155,11 +158,50 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                     } else if (textTransform == TextTransformType::Lowercase) {
                         u8string = platform::lowercase(u8string);
                     }
-
-                    ft.formattedText->addTextSection(applyArabicShaping(util::convertUTF8ToUTF16(u8string)),
-                                                     section.fontScale ? *section.fontScale : 1.0,
-                                                     section.fontStack ? *section.fontStack : baseFontStack,
-                                                     section.textColor);
+                    
+                    auto u16String = applyArabicShaping(util::convertUTF8ToUTF16(u8string));
+                                        
+                    const char16_t *u16Char = &u16String[0];
+                    std::u16string subString;
+                    GlyphIDType subStringtype = charGlyphIDType(*u16Char, GlyphIDType::FontPBF);
+                    
+                    while (*u16Char) {
+                        const auto chType = charGlyphIDType(*u16Char, subStringtype);
+                        if (chType != subStringtype) {
+                            if (subString.length())
+                            {
+                                ft.formattedText->addTextSection(subString,
+                                                                 section.fontScale ? *section.fontScale : 1.0,
+                                                                 section.fontStack ? *section.fontStack : baseFontStack, subStringtype,
+                                                                 false,
+                                                                 section.textColor);
+                                sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
+                                if (subStringtype != GlyphIDType::FontPBF) {
+                                    layoutParameters.glyphDependencies.shapes[section.fontStack ? *section.fontStack : baseFontStack][subStringtype].insert(subString);
+                                }
+                            }
+                            
+                            subString.clear();
+                            subStringtype = chType;
+                        }
+                        
+                        subString += *u16Char;
+                        
+                        ++u16Char;
+                    }
+                    
+                    if (subString.length())
+                    {
+                        ft.formattedText->addTextSection(subString,
+                                                         section.fontScale ? *section.fontScale : 1.0,
+                                                         section.fontStack ? *section.fontStack : baseFontStack, subStringtype,
+                                                         true,
+                                                         section.textColor);
+                        sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
+                        if (subStringtype != GlyphIDType::FontPBF) {
+                            layoutParameters.glyphDependencies.shapes[section.fontStack ? *section.fontStack : baseFontStack][subStringtype].insert(subString);
+                        }
+                    }
                 } else {
                     layoutParameters.imageDependencies.emplace(section.image->id(), ImageType::Icon);
                     ft.formattedText->addImageSection(section.image->id());
@@ -172,17 +214,22 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
 
             // Loop through all characters of this text and collect unique codepoints.
             for (std::size_t j = 0; j < ft.formattedText->length(); j++) {
-                const auto& section = formatted.sections[ft.formattedText->getSectionIndex(j)];
-                if (section.image) continue;
-
-                const auto& sectionFontStack = section.fontStack;
-                GlyphIDs& dependencies =
-                    layoutParameters.glyphDependencies[sectionFontStack ? *sectionFontStack : baseFontStack];
-                char16_t codePoint = ft.formattedText->getCharCodeAt(j);
-                dependencies.insert(codePoint);
-                if (canVerticalizeText || (allowVerticalPlacement && ft.formattedText->allowsVerticalWritingMode())) {
-                    if (char16_t verticalChr = util::i18n::verticalizePunctuation(codePoint)) {
-                        dependencies.insert(verticalChr);
+                uint8_t sectionIndex = ft.formattedText->getSectionIndex(j);
+                auto &section = ft.formattedText->getSections()[sectionIndex];
+                const auto &sectionFontStack = formatted.sections[sectionTable[sectionIndex]].fontStack;
+                GlyphIDs   &dependencies     = layoutParameters.glyphDependencies.glyphs[sectionFontStack ? *sectionFontStack : baseFontStack];
+                if (section.type != FontPBF) {
+                    dependencies.insert(GlyphID(0, section.type));
+                    needfinalizeSymbolsVal = true;
+                } else {
+                    char16_t   codePoint         = ft.formattedText->getCharCodeAt(j);
+                    dependencies.insert(codePoint);
+                    if (canVerticalizeText)
+                    {
+                        if (char16_t verticalChr = util::i18n::verticalizePunctuation(codePoint))
+                        {
+                            dependencies.insert(verticalChr);
+                        }
                     }
                 }
             }
@@ -208,6 +255,69 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         util::mergeLines(features);
     }
 }
+
+
+void SymbolLayout::finalizeSymbols(HBShapeResults &results) {
+   for (auto it = features.begin(); it != features.end(); ++it)
+   {
+       auto &feature = *it;
+       if (feature.geometry.empty())
+       { continue; }
+       
+       if (feature.formattedText && feature.formattedText->hasNeedHBShapeText() && !feature.formattedText->hbShaped()) {
+
+           auto shapedString = TaggedString();
+           
+           const auto &sections = feature.formattedText->getSections();
+           const auto &styleText = feature.formattedText->getStyledText();
+           
+           std::u16string subString;
+           auto sectionIndex = styleText.second[0];
+           auto strLen = styleText.first.length();
+           
+           auto applySubString = [&]() {
+               if (subString.length())
+               {
+                   auto &section = sections[sectionIndex];
+                   if (GlyphIDType::FontPBF == section.type) {
+                       shapedString.addTextSection(subString, section.scale, section.fontStack, section.type, section.lineSection, section.textColor);
+                   } else {
+                       auto &fontstackResults = results[section.fontStack];
+                       auto &typeResults = fontstackResults[section.type];
+                       auto &result = typeResults[subString];
+                       
+                       shapedString.addTextSection(result.str, section.scale, section.fontStack, section.type, result.adjusts, section.lineSection, section.textColor);
+                   }
+                   
+               }
+           };
+           
+           for (size_t charIndex = 0; charIndex < strLen; ++charIndex)
+           {
+               auto &ch = styleText.first[charIndex];
+               auto &sec = styleText.second[charIndex];
+               
+               if (sectionIndex != sec) {
+                   applySubString();
+                   
+                   subString.clear();
+                   sectionIndex = sec;
+               }
+               
+               subString += ch;
+           }
+           
+           applySubString();
+           
+           shapedString.setHBShaped(true);
+           feature.formattedText = shapedString;
+       
+          
+       } // feature.formattedText
+   } // for (auto it = feature ..
+   
+   needfinalizeSymbolsVal = false;
+} // SymbolLayout::finalizeSymbols
 
 bool SymbolLayout::hasDependencies() const {
     return !features.empty();

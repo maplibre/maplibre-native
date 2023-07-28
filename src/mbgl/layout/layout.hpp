@@ -3,6 +3,7 @@
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/text/glyph_atlas.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/text/glyph_manager.hpp>
 #include <memory>
 
 namespace mbgl {
@@ -12,6 +13,7 @@ class BucketParameters;
 class RenderLayer;
 class FeatureIndex;
 class LayerRenderData;
+class GlyphManager;
 
 class Layout {
 public:
@@ -25,6 +27,10 @@ public:
                               const CanonicalTileID&) = 0;
 
     virtual void prepareSymbols(const GlyphMap&, const GlyphPositions&, const ImageMap&, const ImagePositions&){};
+    
+    virtual void finalizeSymbols(HBShapeResults &) {}
+            
+    virtual bool needfinalizeSymbols() { return false; }
 
     virtual bool hasSymbolInstances() const { return true; };
 

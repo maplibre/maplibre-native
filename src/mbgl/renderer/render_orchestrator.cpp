@@ -175,6 +175,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         updateParameters->prefetchZoomDelta};
 
     glyphManager->setURL(updateParameters->glyphURL);
+    glyphManager->setFontURL(updateParameters->fontURL);
 
     // Update light.
     const bool lightChanged = renderLight.impl != updateParameters->light;
@@ -740,10 +741,18 @@ void RenderOrchestrator::clearData() {
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        const GlyphRange& glyphRange,
                                        std::exception_ptr error) {
+    std::stringstream ss;
+    ss << "Failed to load glyph range ";
+    if (glyphRange.type == FontPBF) {
+        ss << glyphRange.first << "-" << glyphRange.second;
+    } else {
+        ss << (int)glyphRange.type << "(font file)";
+    }
+    ss << " for font stack " << fontStackToString(fontStack)
+        << ":( " << util::toString(error) << ")";
+    auto errorDetail = ss.str();
     Log::Error(Event::Style,
-               "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" +
-                   std::to_string(glyphRange.second) + " for font stack " + fontStackToString(fontStack) + ": " +
-                   util::toString(error));
+               errorDetail);
     observer->onResourceError(error);
 }
 

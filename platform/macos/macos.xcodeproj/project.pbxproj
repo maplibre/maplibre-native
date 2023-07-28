@@ -111,6 +111,9 @@
 		747ABE67219B2C3200523B67 /* MLNSymbolStyleLayer_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 747ABE66219B2C3200523B67 /* MLNSymbolStyleLayer_Private.h */; };
 		749EC8912199CCB9005608D7 /* MLNStyleLayerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 749EC88F2199CCB8005608D7 /* MLNStyleLayerManager.h */; };
 		749EC8932199CCB9005608D7 /* MLNStyleLayerManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 749EC8902199CCB9005608D7 /* MLNStyleLayerManager.mm */; };
+		7EBE9C0B2A4EA0830098C76C /* libfreetyped.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EBE9C0A2A4EA0830098C76C /* libfreetyped.a */; };
+		7EBE9C0D2A4EA0830098C76C /* libharfbuzz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EBE9C0C2A4EA0830098C76C /* libharfbuzz.a */; };
+		7EBE9C112A4EA55F0098C76C /* libbz2.1.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EBE9C102A4EA55F0098C76C /* libbz2.1.0.tbd */; };
 		89462399200D199100DA8EF2 /* heatmap.json in Resources */ = {isa = PBXBuildFile; fileRef = 89462398200D199100DA8EF2 /* heatmap.json */; };
 		8946239D200E744800DA8EF2 /* MLNHeatmapStyleLayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 8946239A200E73CA00DA8EF2 /* MLNHeatmapStyleLayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		894623A0200E748000DA8EF2 /* MLNHeatmapStyleLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8946239B200E73CA00DA8EF2 /* MLNHeatmapStyleLayer.mm */; };
@@ -447,6 +450,10 @@
 		747ABE66219B2C3200523B67 /* MLNSymbolStyleLayer_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNSymbolStyleLayer_Private.h; sourceTree = "<group>"; };
 		749EC88F2199CCB8005608D7 /* MLNStyleLayerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNStyleLayerManager.h; sourceTree = "<group>"; };
 		749EC8902199CCB9005608D7 /* MLNStyleLayerManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MLNStyleLayerManager.mm; sourceTree = "<group>"; };
+		7EBE9C0A2A4EA0830098C76C /* libfreetyped.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libfreetyped.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EBE9C0C2A4EA0830098C76C /* libharfbuzz.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libharfbuzz.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7EBE9C0E2A4EA5470098C76C /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
+		7EBE9C102A4EA55F0098C76C /* libbz2.1.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.1.0.tbd; path = usr/lib/libbz2.1.0.tbd; sourceTree = SDKROOT; };
 		89462398200D199100DA8EF2 /* heatmap.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = heatmap.json; sourceTree = "<group>"; };
 		8946239A200E73CA00DA8EF2 /* MLNHeatmapStyleLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNHeatmapStyleLayer.h; sourceTree = "<group>"; };
 		8946239B200E73CA00DA8EF2 /* MLNHeatmapStyleLayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MLNHeatmapStyleLayer.mm; sourceTree = "<group>"; };
@@ -757,6 +764,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7EBE9C112A4EA55F0098C76C /* libbz2.1.0.tbd in Frameworks */,
+				7EBE9C0B2A4EA0830098C76C /* libfreetyped.a in Frameworks */,
+				7EBE9C0D2A4EA0830098C76C /* libharfbuzz.a in Frameworks */,
 				5548BE781D09E718005DDE81 /* libmbgl-core.a in Frameworks */,
 				DA35D9C92409205B0013ECB0 /* libmbgl-vendor-csscolorparser.a in Frameworks */,
 				55CF7533213EDADF00ED86C4 /* libmbgl-vendor-icu.a in Frameworks */,
@@ -1180,6 +1190,10 @@
 		DAE6C31E1CC308BC00DB3429 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7EBE9C102A4EA55F0098C76C /* libbz2.1.0.tbd */,
+				7EBE9C0E2A4EA5470098C76C /* libbz2.tbd */,
+				7EBE9C0A2A4EA0830098C76C /* libfreetyped.a */,
+				7EBE9C0C2A4EA0830098C76C /* libharfbuzz.a */,
 				DAE6C3451CC31D1200DB3429 /* libmbgl-core.a */,
 				DA35D9C82409205B0013ECB0 /* libmbgl-vendor-csscolorparser.a */,
 				55CF7532213EDADF00ED86C4 /* libmbgl-vendor-icu.a */,

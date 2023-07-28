@@ -217,10 +217,13 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     }
 
     if (!parser.glyphURL.empty()) {
+        uint32_t ttfCount = 0;
+        if (!parser.fontURL.empty())
+            ttfCount = 2; // khmer + myanmar
         result->requiredResourceCount += parser.fontStacks().size() *
                                          (definition.match([](auto& reg) { return reg.includeIdeographs; })
-                                              ? GLYPH_RANGES_PER_FONT_STACK
-                                              : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
+                                              ? GLYPH_RANGES_PER_FONT_STACK + ttfCount
+                                              : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK + ttfCount);
     }
 
     if (!parser.spriteURL.empty()) {
@@ -336,8 +339,15 @@ void OfflineDownload::activateDownload() {
                     // Assumes that if a glyph range starts with fixed width/ideographic
                     // characters, the entire range will be fixed width.
                     if (includeIdeographs || !util::i18n::allowsFixedWidthGlyphGeneration(i * GLYPHS_PER_GLYPH_RANGE)) {
+                        auto range = getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE);
                         queueResource(
-                            Resource::glyphs(parser.glyphURL, fontStack, getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE)));
+                                      Resource::glyphs(parser.glyphURL, fontStack, std::pair<uint16_t, uint16_t>{ range.first, range.second }));
+                    }
+                    
+                    if (!parser.fontURL.empty()) {
+                        queueResource(Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Khmer)));
+                        queueResource(Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Myanmar)));
+                        queueResource(Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
                     }
                 }
             }

@@ -28,6 +28,7 @@ public:
     const TransformState transformState;
 
     const std::string glyphURL;
+    const std::string fontURL;
     const bool spriteLoaded;
     const style::TransitionOptions transitionOptions;
     const Immutable<style::Light::Impl> light;

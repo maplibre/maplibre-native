@@ -17,11 +17,36 @@
 
 namespace mbgl {
 
-using GlyphID = char16_t;
+union GlyphID {
+    char32_t hash;
+    struct {
+        char16_t code;
+        GlyphIDType type;
+    } complex;
+    
+    GlyphID(int codepoint) { complex.type = FontPBF; complex.code = codepoint; }
+    GlyphID(uint32_t codepoint) { complex.type = FontPBF; complex.code = codepoint; }
+    GlyphID(char16_t codepoint) { complex.type = FontPBF; complex.code = codepoint; }
+    
+    GlyphID(char16_t index, GlyphIDType t) { complex.type = t; complex.code = index; }
+    
+    operator char16_t() { return complex.code; }
+    operator char32_t() { return hash;}
+    bool operator <(const GlyphID &other) const { return hash < other.hash; }
+    bool operator >(const GlyphID &other) const { return hash > other.hash; }
+    
+    bool operator <(const uint16_t &other) const { return hash < other; }
+    bool operator >(const uint16_t &other) const { return hash > other; }
+};
+
+GlyphIDType charGlyphIDType(char16_t ch, GlyphIDType lastChType);
+
 using GlyphIDs = std::set<GlyphID>;
 
 // Note: this only works for the BMP
 GlyphRange getGlyphRange(GlyphID glyph);
+
+const std::string getGlyphRangeName(GlyphIDType type);
 
 struct GlyphMetrics {
     uint32_t width = 0;
@@ -129,7 +154,21 @@ enum class WritingModeType : uint8_t {
     Vertical = 1 << 1,
 };
 
-using GlyphDependencies = std::map<FontStack, GlyphIDs>;
+struct HBShapeRequest {
+    std::u16string str;
+    FontStack fontStack;
+    GlyphIDType type;
+    
+    HBShapeRequest(const std::u16string &str_,  const FontStack &fontStack_, GlyphIDType type_) : str(str_), fontStack(fontStack_), type(type_) {}
+};
+
+using HBShapeRequests = std::map<FontStack,
+                                 std::map<GlyphIDType, std::set<std::u16string>>>;
+
+struct GlyphDependencies {
+    std::map<FontStack, GlyphIDs> glyphs;
+    HBShapeRequests shapes;
+};
 using GlyphRangeDependencies = std::map<FontStack, std::unordered_set<GlyphRange>>;
 
 } // end namespace mbgl

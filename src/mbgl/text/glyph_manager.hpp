@@ -10,15 +10,29 @@
 #include <string>
 #include <unordered_map>
 
+#include "freetype.hpp"
+#include "harfbuzz.hpp"
+
 namespace mbgl {
 
 class FileSource;
 class AsyncRequest;
 class Response;
 
+struct HBShapeResult {
+    std::u16string str;
+    
+    std::shared_ptr<std::vector<HBShapeAdjust>> adjusts;
+    
+    HBShapeResult() {}
+    
+    HBShapeResult(const std::u16string &str_, std::shared_ptr<std::vector<HBShapeAdjust>> adjusts_) : str(str_), adjusts(adjusts_) {}
+};
+using HBShapeResults = std::map<FontStack, std::map<GlyphIDType, std::map<std::u16string, HBShapeResult>>>;
+
 class GlyphRequestor {
 public:
-    virtual void onGlyphsAvailable(GlyphMap) = 0;
+    virtual void onGlyphsAvailable(GlyphMap, HBShapeRequests) = 0;
 
 protected:
     virtual ~GlyphRequestor() = default;
@@ -41,15 +55,23 @@ public:
     void removeRequestor(GlyphRequestor&);
 
     void setURL(const std::string& url) { glyphURL = url; }
+    void setFontURL(const std::string &url) { fontURL = url; }
 
     void setObserver(GlyphManagerObserver*);
 
     // Remove glyphs for all but the supplied font stacks.
     void evict(const std::set<FontStack>&);
+    
+    std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
+            
+    Immutable<Glyph> getGlyph(const FontStack &, GlyphID);
+    
+    void hbShaping(const std::u16string &text, const FontStack &font, GlyphIDType type, std::vector<GlyphID> &glyphIDs, std::vector<HBShapeAdjust> &adjusts);
 
 private:
     Glyph generateLocalSDF(const FontStack& fontStack, GlyphID glyphID);
     std::string glyphURL;
+    std::string fontURL;
 
     struct GlyphRequest {
         bool parsed = false;
@@ -71,6 +93,12 @@ private:
     GlyphManagerObserver* observer = nullptr;
 
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
+    
+    FreeTypeLibrary ftLibrary;
+    std::map<FontStack, std::map<GlyphIDType, std::shared_ptr<HBShaper>> > hbShapers;
+    
+    bool
+    loadHBShaper(const FontStack &fontStack, GlyphIDType type, const std::string &data);
 };
 
 } // namespace mbgl
