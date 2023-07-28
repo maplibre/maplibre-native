@@ -1,15 +1,17 @@
 #include <mbgl/renderer/layers/render_circle_layer.hpp>
+
+#include <mbgl/geometry/feature_index.hpp>
+#include <mbgl/gfx/cull_face_mode.hpp>
+#include <mbgl/gfx/shader_group.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/programs/circle_program.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 
@@ -265,23 +267,12 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 #if MLN_DRAWABLE_RENDERER
 namespace {
 
-struct alignas(16) CircleInterpolateUBO {
-    float color_t;
-    float radius_t;
-    float blur_t;
-    float opacity_t;
-    float stroke_color_t;
-    float stroke_width_t;
-    float stroke_opacity_t;
-    float padding;
-};
-static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
-
 constexpr auto CircleShaderGroupName = "CircleShader";
-constexpr auto CircleInterpolateUBOName = "CircleInterpolateUBO";
 constexpr auto VertexAttribName = "a_pos";
 
 } // namespace
+
+using namespace shaders;
 
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
