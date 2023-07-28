@@ -89,6 +89,8 @@ cc_library(
     includes = [
         "include",
         "src",
+        "vendor/harfbuzz/src",
+        "vendor/freetype/include",
     ],
     local_defines = [
         r"MLN_VERSION_REV=\"standalone\"",
@@ -108,6 +110,8 @@ cc_library(
         "//vendor:unique_resource",
         "//vendor:vector-tile",
         "//vendor:wagyu",
+        "//vendor:freetype",
+        "//vendor:harfbuzz",
     ] + select({
         "//:ios": [
             "//vendor:icu",

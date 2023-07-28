@@ -1,4 +1,5 @@
 load("//bazel:flags.bzl", "CPP_FLAGS")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 # vendor/mapbox-base-files.json
 cc_library(
@@ -233,4 +234,38 @@ cc_library(
     deps = [
         "nunicode-gen",
     ],
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+
+cmake(
+    name = "freetype",
+    lib_source = ":srcs",
+    generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON"],
+    cache_entries = select({
+        "//conditions:default": {"CMAKE_BUILD_TYPE": "Release"},
+    }),
+    working_directory = "freetype",
+    out_include_dir = "include",
+    out_static_libs = select({
+        "//conditions:default": ["libfreetype.a"],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+cmake(
+    name = "harfbuzz",
+    lib_source = ":srcs",
+    generate_args = ["-DHB_HAVE_FREETYPE=1"],
+    out_include_dir = "include",
+    working_directory = "harfbuzz",
+    # the name of the static library != <name>.a, put it explicitly
+    out_static_libs = select({
+        "//conditions:default": ["libharfbuzz.a", "libharfbuzz-subset.a"],
+    }),
+    visibility = ["//visibility:public"],
 )
