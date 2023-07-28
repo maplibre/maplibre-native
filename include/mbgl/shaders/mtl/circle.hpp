@@ -17,9 +17,9 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
         {0, "a_pos", gfx::AttributeDataType::Float3, 1},
     };
     static constexpr UniformBlockInfo uniforms[] = {
-        { 8, sizeof(CircleDrawableUBO), true, false, "CircleDrawableUBO" },
-        { 9, sizeof(CirclePaintParamsUBO), true, true, "CirclePaintParamsUBO" },
-        { 10, sizeof(CircleEvaluatedPropsUBO), true, true, "CircleEvaluatedPropsUBO" },
+        {8, sizeof(CircleDrawableUBO), true, false, "CircleDrawableUBO"},
+        {9, sizeof(CirclePaintParamsUBO), true, true, "CirclePaintParamsUBO"},
+        {10, sizeof(CircleEvaluatedPropsUBO), true, true, "CircleEvaluatedPropsUBO"},
     };
 
     static constexpr auto source = R"(
@@ -79,7 +79,6 @@ half4 fragment fragmentMain(v2f in [[stage_in]],
 }
 )";
 };
-
 
 } // namespace shaders
 } // namespace mbgl

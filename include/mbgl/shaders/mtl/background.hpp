@@ -16,8 +16,8 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
         {0, "a_pos", gfx::AttributeDataType::Float3, 1},
     };
     static constexpr UniformBlockInfo uniforms[] = {
-        { 1, sizeof(BackgroundLayerUBO), true, true, "BackgroundLayerUBO" },
-        { 2, sizeof(BackgroundDrawableUBO), true, false, "BackgroundDrawableUBO" },
+        {1, sizeof(BackgroundLayerUBO), true, true, "BackgroundLayerUBO"},
+        {2, sizeof(BackgroundDrawableUBO), true, false, "BackgroundDrawableUBO"},
     };
 
     static constexpr auto source = R"(
@@ -53,7 +53,6 @@ half4 fragment fragmentMain(v2f in [[stage_in]],
 }
 )";
 };
-
 
 } // namespace shaders
 } // namespace mbgl

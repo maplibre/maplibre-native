@@ -11,7 +11,6 @@ struct alignas(16) CircleDrawableUBO {
 static_assert(sizeof(CircleDrawableUBO) % 16 == 0);
 static constexpr std::string_view CircleDrawableUBOName = "CircleDrawableUBO";
 
-
 struct alignas(16) CirclePaintParamsUBO {
     float camera_to_center_distance;
     float device_pixel_ratio;
@@ -19,7 +18,6 @@ struct alignas(16) CirclePaintParamsUBO {
 };
 static_assert(sizeof(CirclePaintParamsUBO) % 16 == 0);
 static constexpr std::string_view CirclePaintParamsUBOName = "CirclePaintParamsUBO";
-
 
 struct alignas(16) CircleEvaluatedPropsUBO {
     Color color;
