@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
@@ -14,17 +15,52 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static constexpr AttributeInfo attributes[] = {
-        {0, "a_pos", gfx::AttributeDataType::Float3, 1},
+        { 0, gfx::AttributeDataType::Short2, 1, "a_pos" },
+        { 1, gfx::AttributeDataType::Float2, 1, "a_color" },
+        { 2, gfx::AttributeDataType::Float2, 1, "a_radius" },
+        { 3, gfx::AttributeDataType::Float2, 1, "a_blur" },
+        { 4, gfx::AttributeDataType::Float2, 1, "a_opacity" },
+        { 5, gfx::AttributeDataType::Float4, 1, "a_stroke_color" },
+        { 6, gfx::AttributeDataType::Float2, 1, "a_stroke_width" },
+        { 7, gfx::AttributeDataType::Float2, 1, "a_stroke_opacity" },
     };
     static constexpr UniformBlockInfo uniforms[] = {
-        {8, sizeof(CircleDrawableUBO), true, false, "CircleDrawableUBO"},
-        {9, sizeof(CirclePaintParamsUBO), true, true, "CirclePaintParamsUBO"},
-        {10, sizeof(CircleEvaluatedPropsUBO), true, true, "CircleEvaluatedPropsUBO"},
+        MLN_MTL_UNIFORM_BLOCK( 8, true, false, CircleDrawableUBO),
+        MLN_MTL_UNIFORM_BLOCK( 9, true,  true, CirclePaintParamsUBO),
+        MLN_MTL_UNIFORM_BLOCK(10, true,  true, CircleEvaluatedPropsUBO),
+        MLN_MTL_UNIFORM_BLOCK(11, true, false, CircleInterpolateUBO),
+        MLN_MTL_UNIFORM_BLOCK(12, true,  true, CirclePermutationUBO),
+        MLN_MTL_UNIFORM_BLOCK(13, true, false, ExpressionInputsUBO),
     };
 
     static constexpr auto source = R"(
 #include <metal_stdlib>
 using namespace metal;
+
+struct VertexStage {
+    short2 position [[attribute(0)]];
+    float2 color [[attribute(1)]];
+    float2 radius [[attribute(2)]];
+    float2 blur [[attribute(3)]];
+    float2 opacity [[attribute(4)]];
+    float4 stroke_color [[attribute(5)]];
+    float2 stroke_width [[attribute(6)]];
+    float2 stroke_opacity [[attribute(7)]];
+};
+
+struct FragmentStage {
+    float4 position [[position, invariant]];
+    float4 color;
+    float radius;
+    half blur;
+    half opacity;
+    float4 stroke_color;
+    float stroke_width;
+    half stroke_opacity;
+
+    float2 extrude;
+    half antialiasblur;
+};
 
 struct alignas(16) CircleDrawableUBO {
     float4x4 matrix;
@@ -49,33 +85,192 @@ struct alignas(16) CircleEvaluatedPropsUBO {
     float padding;
 };
 
-struct v2f {
-    float4 position [[position]];
+struct alignas(16) CircleInterpolateUBO {
+    float color_t;
+    float radius_t;
+    float blur_t;
+    float opacity_t;
+    float stroke_color_t;
+    float stroke_width_t;
+    float stroke_opacity_t;
+    float pad1_;
 };
 
-v2f vertex vertexMain(uint vertexId [[vertex_id]],
-                      device const short2* positions [[buffer(0)]],
-                      device const float4* a_color [[buffer(1)]],
-                      device const float2* a_radius [[buffer(2)]],
-                      device const float2* a_blur [[buffer(3)]],
-                      device const float2* a_opacity [[buffer(4)]],
-                      device const float4* a_stroke_color [[buffer(5)]],
-                      device const float2* a_stroke_width [[buffer(6)]],
-                      device const float2* a_stroke_opacity [[buffer(7)]],
-                      device const CircleDrawableUBO& drawableUBO [[buffer(8)]],
-                      device const CirclePaintParamsUBO& paramsUBO [[buffer(9)]],
-                      device const CircleEvaluatedPropsUBO& propsUBO [[buffer(10)]]) {
-    return { drawableUBO.matrix * float4(positions[vertexId].x, positions[vertexId].y, 0.0, 1.0) };
+enum class AttributeSource : int32_t {
+    Constant,
+    PerVertex,
+    Computed,
+};
+
+struct Expression {};
+
+struct Attribute {
+    AttributeSource source;
+    Expression expression;
+};
+
+struct alignas(16) ExpressionInputsUBO {
+    float zoom;
+    float time;
+    uint64_t frame;
+};
+
+struct alignas(16) CirclePermutationUBO {
+    Attribute color;
+    Attribute radius;
+    Attribute blur;
+    Attribute opacity;
+    Attribute stroke_color;
+    Attribute stroke_width;
+    Attribute stroke_opacity;
+    bool overdrawInspector;
+};
+
+// Unpack a pair of values that have been packed into a single float.
+// The packed values are assumed to be 8-bit unsigned integers, and are
+// packed like so: packedValue = floor(input[0]) * 256 + input[1],
+float2 unpack_float(const float packedValue) {
+    const int packedIntValue = int(packedValue);
+    const int v0 = packedIntValue / 256;
+    return float2(v0, packedIntValue - v0 * 256);
+}
+float2 unpack_opacity(const float packedOpacity) {
+    return float2(float(int(packedOpacity) / 2) / 127.0, fmod(packedOpacity, 2.0));
+}
+// To minimize the number of attributes needed, we encode a 4-component
+// color into a pair of floats (i.e. a vec2) as follows:
+// [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.g * 255 ]
+float4 decode_color(const float2 encoded) {
+    return float4(unpack_float(encoded[0]) / 255, unpack_float(encoded[1]) / 255);
+}
+// Unpack a pair of paint values and interpolate between them.
+float unpack_mix_float(const float2 packedValue, const float t) {
+    return mix(packedValue[0], packedValue[1], t);
+}
+// Unpack a pair of paint values and interpolate between them.
+float4 unpack_mix_color(const float4 packedColors, const float t) {
+    return mix(decode_color(float2(packedColors[0], packedColors[1])),
+               decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
-half4 fragment fragmentMain(v2f in [[stage_in]],
-                            device const CirclePaintParamsUBO& paramsUBO [[buffer(2)]],
-                            device const CircleEvaluatedPropsUBO& propsUBO [[buffer(3)]]) {
-#ifdef OVERDRAW_INSPECTOR
-    return half4(1.0);
-#else
-    return half4(propsUBO.color) * propsUBO.opacity;
-#endif
+float valueFor(device const Attribute& attrib,
+               device const float& constValue,
+               thread const float2& vertexValue,
+               device const float& t,
+               device const ExpressionInputsUBO&) {
+    switch (attrib.source) {
+        case AttributeSource::PerVertex: return unpack_mix_float(vertexValue, t);
+        case AttributeSource::Computed:  // TODO
+        default:
+        case AttributeSource::Constant: return constValue;
+    }
+}
+// single packed color
+float4 colorFor(device const Attribute& attrib,
+                device const float4& constValue,
+                thread const float2& vertexValue,
+                device const ExpressionInputsUBO&) {
+    switch (attrib.source) {
+        case AttributeSource::PerVertex: return decode_color(float2(vertexValue[0], vertexValue[1]));
+        case AttributeSource::Computed:  // TODO
+        default:
+        case AttributeSource::Constant: return constValue;
+    }
+}
+// interpolated packed colors
+float4 colorFor(device const Attribute& attrib,
+                device const float4& constValue,
+                thread const float4& vertexValue,
+                device const float& t,
+                device const ExpressionInputsUBO&) {
+    switch (attrib.source) {
+        case AttributeSource::PerVertex: return unpack_mix_color(vertexValue, t);
+        case AttributeSource::Computed:  // TODO
+        default:
+        case AttributeSource::Constant: return constValue;
+    }
+}
+
+
+FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+                                device const CircleDrawableUBO& drawable [[buffer(8)]],
+                                device const CirclePaintParamsUBO& params [[buffer(9)]],
+                                device const CircleEvaluatedPropsUBO& props [[buffer(10)]],
+                                device const CircleInterpolateUBO& interp [[buffer(11)]],
+                                device const CirclePermutationUBO& permutation [[buffer(12)]],
+                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
+
+    const auto color          = colorFor(permutation.color,          props.color,          vertx.color,                                   expr);
+    const auto radius         = valueFor(permutation.radius,         props.radius,         vertx.radius,         interp.radius_t,         expr);
+    const auto blur           = valueFor(permutation.blur,           props.blur,           vertx.blur,           interp.blur_t,           expr);
+    const auto opacity        = valueFor(permutation.opacity,        props.opacity,        vertx.opacity,        interp.opacity_t,        expr);
+    const auto stroke_color   = colorFor(permutation.stroke_color,   props.stroke_color,   vertx.stroke_color,   interp.stroke_color_t,   expr);
+    const auto stroke_width   = valueFor(permutation.stroke_width,   props.stroke_width,   vertx.stroke_width,   interp.stroke_width_t,   expr);
+    const auto stroke_opacity = valueFor(permutation.stroke_opacity, props.stroke_opacity, vertx.stroke_opacity, interp.stroke_opacity_t, expr);
+
+    // unencode the extrusion vector that we snuck into the a_pos vector
+    const float2 extrude = fmod(float2(vertx.position), 2.0) * 2.0 - 1.0;
+    const float2 scaled_extrude = extrude * drawable.extrude_scale;
+
+    // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
+    const float2 circle_center = floor(float2(vertx.position) * 0.5);
+
+    float4 position;
+    if (props.pitch_with_map) {
+        float2 corner_position = circle_center;
+        if (props.scale_with_map) {
+            corner_position += scaled_extrude * (radius + stroke_width);
+        } else {
+            // Pitching the circle with the map effectively scales it with the map
+            // To counteract the effect for pitch-scale: viewport, we rescale the
+            // whole circle based on the pitch scaling effect at its central point
+            float4 projected_center = drawable.matrix * float4(circle_center, 0, 1);
+            corner_position += scaled_extrude * (radius + stroke_width) *
+                               (projected_center.w / params.camera_to_center_distance);
+        }
+
+        position = drawable.matrix * float4(corner_position, 0, 1);
+    } else {
+        position = drawable.matrix * float4(circle_center, 0, 1);
+
+        const float factor = props.scale_with_map ? params.camera_to_center_distance : position.w;
+        position.xy += scaled_extrude * (radius + stroke_width) * factor;
+    }
+
+    // This is a minimum blur distance that serves as a faux-antialiasing for
+    // the circle. since blur is a ratio of the circle's size and the intent is
+    // to keep the blur at roughly 1px, the two are inversely related.
+    const half antialiasblur = 1.0 / params.device_pixel_ratio / (radius + stroke_width);
+
+    return {
+        .position       = position,
+        .color          = color,
+        .radius         = radius,
+        .blur           = half(blur),
+        .opacity        = half(opacity),
+        .stroke_color   = stroke_color,
+        .stroke_width   = stroke_width,
+        .stroke_opacity = half(stroke_opacity),
+        .extrude        = extrude,
+        .antialiasblur  = antialiasblur,
+    };
+}
+
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+                            device const CirclePaintParamsUBO& params [[buffer(9)]],
+                            device const CircleEvaluatedPropsUBO& props [[buffer(10)]],
+                            device const CirclePermutationUBO& permutation [[buffer(12)]]) {
+    if (permutation.overdrawInspector) {
+        return half4(1.0);
+    }
+
+    const float extrude_length = length(in.extrude);
+    const float antialiased_blur = -max(in.blur, in.antialiasblur);
+    const float opacity_t = smoothstep(0.0, antialiased_blur, extrude_length - 1.0);
+    const float color_t = (in.stroke_width < 0.01) ? 0.0 :
+        smoothstep(antialiased_blur, 0.0, extrude_length - in.radius / (in.radius + in.stroke_width));
+
+    return half4(opacity_t * mix(in.color * in.opacity, in.stroke_color * in.stroke_opacity, color_t));
 }
 )";
 };

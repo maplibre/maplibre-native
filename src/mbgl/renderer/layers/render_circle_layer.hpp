@@ -7,6 +7,9 @@
 namespace mbgl {
 
 class CircleProgram;
+class CircleLayerTweaker;
+
+using CircleLayerTweakerPtr = std::shared_ptr<CircleLayerTweaker>;
 
 class RenderCircleLayer final : public RenderLayer {
 public:
@@ -50,6 +53,9 @@ private:
 #endif
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr circleShaderGroup;
+
+    CircleLayerTweakerPtr tweaker;
+    std::vector<std::string> propertiesAsUniforms;
 #endif
 };
 

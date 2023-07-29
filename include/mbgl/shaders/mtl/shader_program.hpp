@@ -15,15 +15,15 @@ namespace mbgl {
 namespace shaders {
 struct AttributeInfo {
     std::size_t index;
-    std::string_view name;
     gfx::AttributeDataType dataType;
     std::size_t count;
+    std::string_view name;
 };
 struct UniformBlockInfo {
     std::size_t index;
-    std::size_t size;
     bool vertex;
     bool fragment;
+    std::size_t size;
     std::string_view name;
 };
 } // namespace shaders

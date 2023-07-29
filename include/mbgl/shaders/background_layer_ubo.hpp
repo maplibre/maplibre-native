@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 
 #include <memory>
 
@@ -11,7 +11,6 @@ struct alignas(16) BackgroundDrawableUBO {
     std::array<float, 4 * 4> matrix;
 };
 static_assert(sizeof(BackgroundDrawableUBO) % 16 == 0);
-static constexpr auto BackgroundDrawableUBOName = "BackgroundDrawableUBO";
 
 struct alignas(16) BackgroundLayerUBO {
     /*  0 */ Color color;
@@ -20,7 +19,6 @@ struct alignas(16) BackgroundLayerUBO {
     /* 32 */
 };
 static_assert(sizeof(BackgroundLayerUBO) == 32);
-static constexpr auto BackgroundLayerUBOName = "BackgroundLayerUBO";
 
 struct alignas(16) BackgroundPatternLayerUBO {
     /*  0 */ std::array<float, 2> pattern_tl_a;
@@ -41,7 +39,6 @@ struct alignas(16) BackgroundPatternLayerUBO {
     /* 96 */
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
-static constexpr auto BackgroundPatternLayerUBOName = "BackgroundPatternLayerUBO";
 
 } // namespace shaders
 } // namespace mbgl

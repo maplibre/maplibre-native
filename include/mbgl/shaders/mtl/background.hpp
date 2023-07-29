@@ -1,7 +1,9 @@
 #pragma once
 
-#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/background_layer_ubo.hpp>
+#include <mbgl/shaders/mtl/common.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -13,16 +15,24 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static constexpr AttributeInfo attributes[] = {
-        {0, "a_pos", gfx::AttributeDataType::Float3, 1},
+        { 0, gfx::AttributeDataType::Float3, 1, "a_pos" },
     };
     static constexpr UniformBlockInfo uniforms[] = {
-        {1, sizeof(BackgroundLayerUBO), true, true, "BackgroundLayerUBO"},
-        {2, sizeof(BackgroundDrawableUBO), true, false, "BackgroundDrawableUBO"},
+        MLN_MTL_UNIFORM_BLOCK(1, true, true, BackgroundLayerUBO),
+        MLN_MTL_UNIFORM_BLOCK(2, true, false, BackgroundDrawableUBO),
     };
 
     static constexpr auto source = R"(
 #include <metal_stdlib>
 using namespace metal;
+
+struct VertexStage {
+    short2 position [[attribute(0)]];
+};
+
+struct FragmentStage {
+    float4 position [[position, invariant]];
+};
 
 struct alignas(16) BackgroundDrawableUBO {
     float4x4 matrix;
@@ -32,23 +42,20 @@ struct alignas(16) BackgroundLayerUBO {
     float opacity, pad1, pad2, pad3;
 };
 
-struct v2f {
-    float4 position [[position]];
-};
-
-v2f vertex vertexMain(uint vertexId [[vertex_id]],
-                      device const short2* positions [[buffer(0)]],
-                      device const BackgroundLayerUBO& layerUBO [[buffer(1)]],
-                      device const BackgroundDrawableUBO& drawableUBO [[buffer(2)]]) {
-    return { drawableUBO.matrix * float4(positions[vertexId].x, positions[vertexId].y, 0.0, 1.0) };
+FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
+                                device const BackgroundLayerUBO& layerUBO [[buffer(1)]],
+                                device const BackgroundDrawableUBO& drawableUBO [[buffer(2)]]) {
+    return {
+        .position = drawableUBO.matrix * float4(float2(in.position.xy), 0, 1)
+    };
 }
 
-half4 fragment fragmentMain(v2f in [[stage_in]],
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const BackgroundLayerUBO& layerUBO [[buffer(1)]]) {
 #ifdef OVERDRAW_INSPECTOR
     return half4(1.0);
 #else
-    return half4(layerUBO.color) * layerUBO.opacity;
+    return half4(float4(layerUBO.color.rgb, layerUBO.color.a * layerUBO.opacity));
 #endif
 }
 )";

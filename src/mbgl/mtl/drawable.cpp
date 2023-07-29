@@ -79,8 +79,9 @@ void Drawable::draw(PaintParameters& parameters) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            const auto index = static_cast<NS::UInteger>(attributeIndex);
-            encoder->setVertexBuffer(buffer, /*offset=*/0, index);
+            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
+        } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
+            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         }
         attributeIndex += 1;
     }
@@ -300,10 +301,6 @@ MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {
 
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (!shader) {
-        return;
-    }
-
-    if (!shader) {
         Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
         assert(false);
         return;
@@ -311,21 +308,22 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
     const auto& shaderUniforms = shaderMTL.getUniformBlocks();
 
+    auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
+    auto& contextBase = uploadPass.getContext();
+    auto& context = static_cast<Context&>(contextBase);
+
     const bool build = impl->vertexAttributes.isDirty() ||
                        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
                            return !static_cast<const DrawSegment&>(*seg).getVertexDesc();
                        });
 
     if (build) {
-        auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
 
-        auto& contextBase = uploadPass.getContext();
-        auto& context = static_cast<Context&>(contextBase);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
         const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
         auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
-        auto indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
+        impl->indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
 
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
@@ -340,9 +338,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                               overrides,
                                                               usage,
                                                               vertexBuffers);
-
         impl->attributeBuffers = std::move(vertexBuffers);
-        impl->indexBuffer = std::move(indexBuffer);
 
         // Create a layout descriptor for each group of vertexes described by a segment
         for (const auto& iseg : impl->segments) {
@@ -356,30 +352,38 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
 
             NS::UInteger index = 0;
-            for (const auto& binding : attributeBindings) {
-                if (binding) {
-                    auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
-                    attribDesc->setBufferIndex(index);
-                    attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
+            for (auto& binding : attributeBindings) {
+                if (!binding) {
+                    assert("Missing attribute binding");
+                    continue;
+                }
 
-                    // binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
-                    attribDesc->setOffset(static_cast<NS::UInteger>(mlSeg.vertexOffset));
+                if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
+                    impl->noBindingBuffer = uploadPass.createVertexBufferResource(nullptr, 64, gfx::BufferUsageType::StaticDraw);
+                }
 
-                    auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
+                auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
+                attribDesc->setBufferIndex(index);
 
-                    // if (single default value)
-                    // stepFunction = MTL::VertexStepFunctionConstant;
-                    // stepRate = 0;
+                // binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                attribDesc->setOffset(static_cast<NS::UInteger>(mlSeg.vertexOffset));
 
+                auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
+
+                attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
+                assert(binding->vertexStride > 0);
+                layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
+
+                if (binding->vertexBufferResource) {
                     layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
                     layoutDesc->setStepRate(1);
-
-                    assert(binding->vertexStride > 0);
-                    layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
-
-                    vertDesc->attributes()->setObject(attribDesc.get(), index);
-                    vertDesc->layouts()->setObject(layoutDesc.get(), index);
+                } else {
+                    layoutDesc->setStepFunction(MTL::VertexStepFunctionConstant);
+                    layoutDesc->setStepRate(0);
                 }
+
+                vertDesc->attributes()->setObject(attribDesc.get(), index);
+                vertDesc->layouts()->setObject(layoutDesc.get(), index);
 
                 index += 1;
             }

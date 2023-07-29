@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/shaders/layer_ubo.hpp>
+
 namespace mbgl {
 namespace shaders {
 
@@ -9,7 +11,6 @@ struct alignas(16) CircleDrawableUBO {
     std::array<float, 2> padding;
 };
 static_assert(sizeof(CircleDrawableUBO) % 16 == 0);
-static constexpr std::string_view CircleDrawableUBOName = "CircleDrawableUBO";
 
 struct alignas(16) CirclePaintParamsUBO {
     float camera_to_center_distance;
@@ -17,7 +18,6 @@ struct alignas(16) CirclePaintParamsUBO {
     std::array<float, 2> padding;
 };
 static_assert(sizeof(CirclePaintParamsUBO) % 16 == 0);
-static constexpr std::string_view CirclePaintParamsUBOName = "CirclePaintParamsUBO";
 
 struct alignas(16) CircleEvaluatedPropsUBO {
     Color color;
@@ -32,7 +32,6 @@ struct alignas(16) CircleEvaluatedPropsUBO {
     float padding;
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) % 16 == 0);
-static constexpr std::string_view CircleEvaluatedPropsUBOName = "CircleEvaluatedPropsUBO";
 
 struct alignas(16) CircleInterpolateUBO {
     float color_t;
@@ -45,7 +44,20 @@ struct alignas(16) CircleInterpolateUBO {
     float padding;
 };
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
-static constexpr auto CircleInterpolateUBOName = "CircleInterpolateUBO";
+
+struct alignas(16) CirclePermutationUBO {
+    /*  0 */ Attribute color;
+    /*  8 */ Attribute radius;
+    /* 16 */ Attribute blur;
+    /* 24 */ Attribute opacity;
+    /* 32 */ Attribute stroke_color;
+    /* 40 */ Attribute stroke_width;
+    /* 48 */ Attribute stroke_opacity;
+    /* 56 */ bool overdrawInspector;
+    /* 57 */ std::array<uint8_t, 7> pad;
+    /* 64 */
+};
+static_assert(sizeof(CirclePermutationUBO) == 4 * 16);
 
 } // namespace shaders
 } // namespace mbgl

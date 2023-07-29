@@ -55,7 +55,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         }
     }
 
-    auto* desc = MTL::RenderPipelineDescriptor::alloc()->init();
+    auto desc = NS::TransferPtr(MTL::RenderPipelineDescriptor::alloc()->init());
     desc->setLabel(NS::String::string(shaderName.data(), NS::UTF8StringEncoding));
     desc->setVertexFunction(vertexFunction.get());
     desc->setFragmentFunction(fragmentFunction.get());
@@ -82,7 +82,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
 
     NS::Error* error = nullptr;
     const auto& device = backend.getDevice();
-    auto rps = NS::RetainPtr(device->newRenderPipelineState(desc, &error));
+    auto rps = NS::TransferPtr(device->newRenderPipelineState(desc.get(), &error));
 
     if (!rps || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;

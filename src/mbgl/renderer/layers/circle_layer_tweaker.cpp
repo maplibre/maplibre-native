@@ -6,13 +6,24 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
+#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+
+#include <cstring>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
+
+void CircleLayerTweaker::setPropertiesAsUniforms(std::vector<std::string> props) {
+    if (props != propertiesAsUniforms) {
+        // clear buffer
+        propertiesAsUniforms = std::move(props);
+    }
+}
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
@@ -62,8 +73,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(CirclePaintParamsUBOName, paintParamsUniformBuffer);
-        uniforms.addOrReplace(CircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        uniforms.addOrReplace(MLN_STRINGIZE(CirclePaintParamsUBO), paintParamsUniformBuffer);
+        uniforms.addOrReplace(MLN_STRINGIZE(CircleEvaluatedPropsUBO), evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -86,7 +97,37 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits}} : parameters.pixelsToGLUnits,
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(CircleDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(MLN_STRINGIZE(CircleDrawableUBO), &drawableUBO, context);
+
+        const auto source = [&](const std::string_view& attrName) {
+            const auto hit = std::find_if(propertiesAsUniforms.begin(),
+                                          propertiesAsUniforms.end(), [&](const auto& name){
+                return name.size() + 2 == attrName.size() &&
+                        0 == std::strcmp(name.data(), attrName.data() + 2);
+            });
+            return (hit == propertiesAsUniforms.end()) ? AttributeSource::PerVertex : AttributeSource::Constant;
+        };
+
+        using ShaderClass = shaders::ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
+        const CirclePermutationUBO permutationUBO = {
+            /* .color = */ { /*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{} },
+            /* .radius = */ { /*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{} },
+            /* .blur = */ { /*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{} },
+            /* .opacity = */ { /*.source=*/source(ShaderClass::attributes[4].name), /*.expression=*/{} },
+            /* .stroke_color = */ { /*.source=*/source(ShaderClass::attributes[5].name), /*.expression=*/{} },
+            /* .stroke_width = */ { /*.source=*/source(ShaderClass::attributes[6].name), /*.expression=*/{} },
+            /* .stroke_opacity = */ { /*.source=*/source(ShaderClass::attributes[7].name), /*.expression=*/{} },
+            /* .overdrawInspector = */ false,
+            /* .pad = */ {0},
+            };
+        uniforms.createOrUpdate(MLN_STRINGIZE(CirclePermutationUBO), &permutationUBO, context);
+
+        const ExpressionInputsUBO expressionUBO = {
+            /* .zoom = */ 0,
+            /* .time = */ 0,
+            /* .frame = */ 0,
+            };
+        uniforms.createOrUpdate(MLN_STRINGIZE(ExpressionInputsUBO), &expressionUBO, context);
     });
 }
 

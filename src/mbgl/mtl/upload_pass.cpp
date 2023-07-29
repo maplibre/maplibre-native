@@ -137,6 +137,16 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         bindings.resize(std::max(bindings.size(), index + 1));
 
+        if (!override_) {
+            bindings[index] = {
+                /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
+                /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
+                /*.vertexBufferResource = */ nullptr,
+                /*.vertexOffset = */ 0,
+            };
+            return;
+        }
+
         // If the attribute references data shared with a bucket, get the corresponding buffer.
         if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
             bindings[index] = {
@@ -153,7 +163,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         // Otherwise, turn the data managed by the attribute into a buffer.
         if (const auto& buffer = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
             bindings[index] = {
-                /*.attribute = */ {effectiveAttr.getDataType(), 0},
+                /*.attribute = */ {effectiveAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
                 /*.vertexBufferResource = */ buffer.get(),
                 /*.vertexOffset = */ 0,
@@ -182,8 +192,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return {};
         }
     }
-
-    assert(std::all_of(bindings.begin(), bindings.end(), [](const auto& b) { return !b || b->vertexBufferResource; }));
 
     return bindings;
 }
