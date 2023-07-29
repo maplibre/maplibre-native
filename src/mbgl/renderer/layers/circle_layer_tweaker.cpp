@@ -7,9 +7,12 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/mtl/circle.hpp>
+#endif
 
 #include <cstring>
 
@@ -108,6 +111,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             return (hit == propertiesAsUniforms.end()) ? AttributeSource::PerVertex : AttributeSource::Constant;
         };
 
+#if MLN_RENDER_BACKEND_METAL
         using ShaderClass = shaders::ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
         const CirclePermutationUBO permutationUBO = {
             /* .color = */ { /*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{} },
@@ -128,6 +132,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .frame = */ 0,
             };
         uniforms.createOrUpdate(MLN_STRINGIZE(ExpressionInputsUBO), &expressionUBO, context);
+#endif
+
     });
 }
 
