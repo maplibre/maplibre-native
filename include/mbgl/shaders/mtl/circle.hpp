@@ -15,21 +15,21 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static constexpr AttributeInfo attributes[] = {
-        { 0, gfx::AttributeDataType::Short2, 1, "a_pos" },
-        { 1, gfx::AttributeDataType::Float2, 1, "a_color" },
-        { 2, gfx::AttributeDataType::Float2, 1, "a_radius" },
-        { 3, gfx::AttributeDataType::Float2, 1, "a_blur" },
-        { 4, gfx::AttributeDataType::Float2, 1, "a_opacity" },
-        { 5, gfx::AttributeDataType::Float4, 1, "a_stroke_color" },
-        { 6, gfx::AttributeDataType::Float2, 1, "a_stroke_width" },
-        { 7, gfx::AttributeDataType::Float2, 1, "a_stroke_opacity" },
+        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
+        {1, gfx::AttributeDataType::Float2, 1, "a_color"},
+        {2, gfx::AttributeDataType::Float2, 1, "a_radius"},
+        {3, gfx::AttributeDataType::Float2, 1, "a_blur"},
+        {4, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+        {5, gfx::AttributeDataType::Float4, 1, "a_stroke_color"},
+        {6, gfx::AttributeDataType::Float2, 1, "a_stroke_width"},
+        {7, gfx::AttributeDataType::Float2, 1, "a_stroke_opacity"},
     };
     static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK( 8, true, false, CircleDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK( 9, true,  true, CirclePaintParamsUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true,  true, CircleEvaluatedPropsUBO),
+        MLN_MTL_UNIFORM_BLOCK(8, true, false, CircleDrawableUBO),
+        MLN_MTL_UNIFORM_BLOCK(9, true, true, CirclePaintParamsUBO),
+        MLN_MTL_UNIFORM_BLOCK(10, true, true, CircleEvaluatedPropsUBO),
         MLN_MTL_UNIFORM_BLOCK(11, true, false, CircleInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(12, true,  true, CirclePermutationUBO),
+        MLN_MTL_UNIFORM_BLOCK(12, true, true, CirclePermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(13, true, false, ExpressionInputsUBO),
     };
 

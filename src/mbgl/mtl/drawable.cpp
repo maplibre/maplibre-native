@@ -318,7 +318,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                        });
 
     if (build) {
-
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
         const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
@@ -359,7 +358,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                 }
 
                 if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
-                    impl->noBindingBuffer = uploadPass.createVertexBufferResource(nullptr, 64, gfx::BufferUsageType::StaticDraw);
+                    impl->noBindingBuffer = uploadPass.createVertexBufferResource(
+                        nullptr, 64, gfx::BufferUsageType::StaticDraw);
                 }
 
                 auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());

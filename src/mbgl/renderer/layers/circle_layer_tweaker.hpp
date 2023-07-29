@@ -13,8 +13,8 @@ namespace mbgl {
 class CircleLayerTweaker : public LayerTweaker {
 public:
     CircleLayerTweaker(Immutable<style::LayerProperties> properties)
-    : LayerTweaker(properties){};
-    
+        : LayerTweaker(properties){};
+
 public:
     ~CircleLayerTweaker() override = default;
 

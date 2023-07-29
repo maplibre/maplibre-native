@@ -385,7 +385,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         if (tweaker) {
             tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
-        
+
         if (const auto& attr = circleVertexAttrs.add(VertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),

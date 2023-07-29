@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static constexpr AttributeInfo attributes[] = {
-        { 0, gfx::AttributeDataType::Float3, 1, "a_pos" },
+        {0, gfx::AttributeDataType::Float3, 1, "a_pos"},
     };
     static constexpr UniformBlockInfo uniforms[] = {
         MLN_MTL_UNIFORM_BLOCK(1, true, true, BackgroundLayerUBO),

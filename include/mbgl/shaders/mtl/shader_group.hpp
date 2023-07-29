@@ -40,7 +40,7 @@ public:
             }
         }
 
-        const std::string shaderName = std::string(name);// + "#" + std::to_string(key);
+        const std::string shaderName = std::string(name); // + "#" + std::to_string(key);
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {
