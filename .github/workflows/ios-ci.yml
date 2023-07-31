@@ -136,7 +136,7 @@ jobs:
 
       - name: Generate app plists
         working-directory: ./
-        run: bash platform/ios/platform/ios/scripts/bazel-generate-plists.sh
+        run: bash platform/ios/scripts/bazel-generate-plists.sh
         
       - name: Lint plist files
         run: bazel run //platform/ios:lint-plists
