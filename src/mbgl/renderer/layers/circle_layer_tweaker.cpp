@@ -138,11 +138,11 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         const CircleDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */
-            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits,pixelsToTileUnits}} : parameters.pixelsToGLUnits,
+            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits, pixelsToTileUnits}} : parameters.pixelsToGLUnits,
             /* .padding = */ {0}};
 
         uniforms.createOrUpdate(MLN_STRINGIZE(CircleDrawableUBO), &drawableUBO, context);
-        
+
 #if MLN_RENDER_BACKEND_METAL
         uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
         uniforms.addOrReplace(MLN_STRINGIZE(CirclePermutationUBO), permutationUniformBuffer);

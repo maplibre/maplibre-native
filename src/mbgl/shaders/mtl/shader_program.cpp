@@ -62,7 +62,8 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     desc->setVertexDescriptor(vertexDescriptor.get());
 
     if (auto* colorTarget = desc->colorAttachments()->object(0)) {
-        const auto srcFactor = renderPassDescriptor.preMultipledAlpha ? MTL::BlendFactorOne : MTL::BlendFactorSourceAlpha;
+        const auto srcFactor = renderPassDescriptor.preMultipledAlpha ? MTL::BlendFactorOne
+                                                                      : MTL::BlendFactorSourceAlpha;
 
         colorTarget->setPixelFormat(colorFormat);
         colorTarget->setBlendingEnabled(true);

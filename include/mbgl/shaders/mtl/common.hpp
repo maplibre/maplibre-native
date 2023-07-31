@@ -97,4 +97,4 @@ float4 colorFor(device const Attribute& attrib,
 )";
 
 }
-}
+} // namespace mbgl
