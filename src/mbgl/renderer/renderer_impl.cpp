@@ -443,8 +443,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
 #if MLN_DRAWABLE_RENDERER
     //     Give the layers a chance to do cleanup
-    orchestrator.visitLayerGroups(
-        [&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+    orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 #endif
 
     // Ends the RenderPass
