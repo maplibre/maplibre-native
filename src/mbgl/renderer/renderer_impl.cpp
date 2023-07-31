@@ -55,7 +55,7 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
-    : orchestrator(false /*!backend_.contextIsShared()*/, localFontFamily_),
+    : orchestrator(!backend_.contextIsShared(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
