@@ -50,6 +50,8 @@ public:
     gfx::CullFaceMode cullFaceMode;
     // GLfloat pointSize = 0.0f;
     std::string vertexAttrName = "a_pos";
+
+    gfx::UniqueVertexBufferResource noBindingBuffer;
 };
 
 struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {

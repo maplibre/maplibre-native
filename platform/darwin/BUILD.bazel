@@ -71,10 +71,12 @@ objc_library(
     name = "darwin-loop",
     srcs = [
         "src/async_task.cpp",
-        "src/gl_functions.cpp",
         "src/run_loop.cpp",
         "src/timer.cpp",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["src/gl_functions.cpp"],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     sdk_frameworks = [
         "SystemConfiguration",

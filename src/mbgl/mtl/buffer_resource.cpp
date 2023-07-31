@@ -10,6 +10,8 @@ BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size
       usage(usage_) {
     if (data && size) {
         buffer = NS::TransferPtr(device->newBuffer(data, static_cast<NS::UInteger>(size), usage));
+    } else {
+        buffer = NS::TransferPtr(device->newBuffer(static_cast<NS::UInteger>(size), usage));
     }
 }
 

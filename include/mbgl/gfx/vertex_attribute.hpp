@@ -53,6 +53,7 @@ public:
     VertexAttribute(const VertexAttribute& other)
         : index(other.index),
           dataType(other.dataType),
+          stride(other.stride),
           items(other.items),
           sharedRawData(other.sharedRawData),
           sharedType(other.sharedType),
@@ -62,6 +63,7 @@ public:
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
           dataType(other.dataType),
+          stride(other.stride),
           items(std::move(other.items)),
           sharedRawData(std::move(other.sharedRawData)),
           sharedType(other.sharedType),
@@ -76,6 +78,7 @@ public:
     void setIndex(int value) { index = value; }
 
     std::size_t getStride() const { return stride; }
+    void setStride(std::size_t value) { stride = value; }
 
     std::size_t getCount() const;
     AttributeDataType getDataType() const { return dataType; }
@@ -156,6 +159,9 @@ public:
     }
     void resetSharedRawData() { sharedRawData.reset(); }
 
+    const gfx::UniqueVertexBufferResource& getBuffer() const { return buffer; }
+    void setBuffer(gfx::UniqueVertexBufferResource&& value) { buffer = std::move(value); }
+
     /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
     /// RGBA.
     static float4 colorAttrRGBA(const Color& color) {
@@ -193,6 +199,8 @@ protected:
     uint32_t sharedOffset = 0;
     uint32_t sharedVertexOffset = 0;
     uint32_t sharedStride = 0;
+
+    gfx::UniqueVertexBufferResource buffer;
 };
 
 /// Stores a collection of vertex attributes by name

@@ -26,14 +26,14 @@ private:
 public:
     ~VertexAttribute() override = default;
 
-    /// Get the Metal buffer, if it has already been set up
-    const gfx::UniqueVertexBufferResource& getBuffer() const { return buffer; }
-
     /// Get the Metal buffer, creating it if necessary
-    const gfx::UniqueVertexBufferResource& getBuffer(UploadPass&, const gfx::BufferUsageType);
+    // const gfx::UniqueVertexBufferResource& getBuffer(UploadPass&, const gfx::BufferUsageType);
 
-private:
-    gfx::UniqueVertexBufferResource buffer;
+    static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
+                                                            UploadPass&,
+                                                            const gfx::BufferUsageType);
+
+    static std::size_t getStrideOf(gfx::AttributeDataType);
 };
 
 /// Stores a collection of vertex attributes by name

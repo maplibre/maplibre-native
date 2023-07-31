@@ -946,6 +946,9 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/renderer/layer_group.hpp",
     "include/mbgl/renderer/layer_tweaker.hpp",
     "include/mbgl/renderer/render_target.hpp",
+    "include/mbgl/shaders/circle_layer_ubo.hpp",
+    "include/mbgl/shaders/layer_ubo.hpp",
+    "include/mbgl/shaders/background_layer_ubo.hpp",
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/util/identity.hpp",
     "include/mbgl/util/suppress_copies.hpp"
@@ -1016,6 +1019,10 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/mtl/upload_pass.hpp",
     "include/mbgl/mtl/vertex_attribute.hpp",
     "include/mbgl/mtl/vertex_buffer_resource.hpp",
+    "include/mbgl/shaders/mtl/background.hpp",
+    "include/mbgl/shaders/mtl/background_pattern.hpp",
+    "include/mbgl/shaders/mtl/circle.hpp",
+    "include/mbgl/shaders/mtl/common.hpp",
     "include/mbgl/shaders/mtl/shader_group.hpp",
-    "include/mbgl/shaders/mtl/shader_program.hpp"
+    "include/mbgl/shaders/mtl/shader_program.hpp",
 ]

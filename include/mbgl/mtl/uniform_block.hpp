@@ -23,6 +23,16 @@ private:
 public:
     void bindBuffer(const gfx::UniformBuffer& uniformBuffer) override;
     void unbindBuffer() override;
+
+    bool getBindVertex() const { return bindVertex; }
+    void setBindVertex(bool value) { bindVertex = value; }
+
+    bool getBindFragment() const { return bindFragment; }
+    void setBindFragment(bool value) { bindFragment = value; }
+
+protected:
+    bool bindVertex = false;
+    bool bindFragment = false;
 };
 
 /// Stores a collection of uniform blocks by name

@@ -2,6 +2,9 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 
+#include <string>
+#include <vector>
+
 namespace mbgl {
 
 /**
@@ -15,11 +18,15 @@ public:
 public:
     ~CircleLayerTweaker() override = default;
 
+    void setPropertiesAsUniforms(std::vector<std::string>);
+
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
 protected:
     gfx::UniformBufferPtr paintParamsUniformBuffer;
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
+
+    std::vector<std::string> propertiesAsUniforms;
 };
 
 } // namespace mbgl

@@ -55,7 +55,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         }
     }
 
-    auto* desc = MTL::RenderPipelineDescriptor::alloc()->init();
+    auto desc = NS::TransferPtr(MTL::RenderPipelineDescriptor::alloc()->init());
     desc->setLabel(NS::String::string(shaderName.data(), NS::UTF8StringEncoding));
     desc->setVertexFunction(vertexFunction.get());
     desc->setFragmentFunction(fragmentFunction.get());
@@ -82,7 +82,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
 
     NS::Error* error = nullptr;
     const auto& device = backend.getDevice();
-    auto rps = NS::RetainPtr(device->newRenderPipelineState(desc, &error));
+    auto rps = NS::TransferPtr(device->newRenderPipelineState(desc.get(), &error));
 
     if (!rps || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
@@ -98,24 +98,16 @@ std::optional<uint32_t> ShaderProgram::getSamplerLocation(std::string_view name)
     return std::nullopt;
 }
 
-namespace {
-static UniformBlockArray noUniforms;
-static VertexAttributeArray noAttribs;
-} // namespace
-const gfx::UniformBlockArray& ShaderProgram::getUniformBlocks() const {
-    return noUniforms;
+void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
+    vertexAttributes.add(std::string(info.name), static_cast<int>(info.index), info.dataType, info.count);
 }
 
-const gfx::VertexAttributeArray& ShaderProgram::getVertexAttributes() const {
-    return noAttribs;
-}
-
-gfx::UniformBlockArray& ShaderProgram::mutableUniformBlocks() {
-    return noUniforms;
-}
-
-gfx::VertexAttributeArray& ShaderProgram::mutableVertexAttributes() {
-    return noAttribs;
+void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
+    if (const auto& block_ = uniformBlocks.add(info.name.data(), static_cast<int>(info.index), info.size)) {
+        auto& block = static_cast<UniformBlock&>(*block_);
+        block.setBindVertex(info.vertex);
+        block.setBindFragment(info.fragment);
+    }
 }
 
 } // namespace mtl

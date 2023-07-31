@@ -132,8 +132,12 @@ cc_library(
     includes = [
         "include",
         "src",
-        "vendor/metal-cpp",
-    ],
+    ] + select({
+        ":metal_renderer": [
+            "vendor/metal-cpp",
+        ],
+        "//conditions:default": []
+    }),
     local_defines = [
         r"MLN_VERSION_REV=\"standalone\"",
     ],

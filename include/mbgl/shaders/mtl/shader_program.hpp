@@ -2,6 +2,8 @@
 
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/uniform_block.hpp>
+#include <mbgl/mtl/vertex_attribute.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLLibrary.hpp>
@@ -10,8 +12,22 @@
 #include <string>
 
 namespace mbgl {
+namespace shaders {
+struct AttributeInfo {
+    std::size_t index;
+    gfx::AttributeDataType dataType;
+    std::size_t count;
+    std::string_view name;
+};
+struct UniformBlockInfo {
+    std::size_t index;
+    bool vertex;
+    bool fragment;
+    std::size_t size;
+    std::string_view name;
+};
+} // namespace shaders
 namespace mtl {
-
 class RenderableResource;
 class RendererBackend;
 class ShaderProgram;
@@ -33,23 +49,22 @@ public:
 
     std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
 
-    const gfx::UniformBlockArray& getUniformBlocks() const override;
+    const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
+    gfx::VertexAttributeArray& mutableVertexAttributes() override { return vertexAttributes; }
 
-    const gfx::VertexAttributeArray& getVertexAttributes() const override;
+    const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
+    gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
 
-    gfx::UniformBlockArray& mutableUniformBlocks() override;
-
-    gfx::VertexAttributeArray& mutableVertexAttributes() override;
-
-    const std::vector<std::string>& getBufferNames() const { return bufferNames; }
-    void setBufferNames(std::vector<std::string> value) { bufferNames = std::move(value); }
+    void initAttribute(const shaders::AttributeInfo&);
+    void initUniformBlock(const shaders::UniformBlockInfo&);
 
 protected:
     std::string shaderName;
     RendererBackend& backend;
     MTLFunctionPtr vertexFunction;
     MTLFunctionPtr fragmentFunction;
-    std::vector<std::string> bufferNames;
+    UniformBlockArray uniformBlocks;
+    VertexAttributeArray vertexAttributes;
 };
 
 } // namespace mtl

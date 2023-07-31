@@ -3,53 +3,20 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/context.hpp>
+#include <mbgl/shaders/background_layer_ubo.hpp>
+
 #include <mbgl/shaders/mtl/shader_group.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
 
+// ... shader_manifest.hpp
+#include <mbgl/shaders/mtl/background.hpp>
+#include <mbgl/shaders/mtl/background_pattern.hpp>
+#include <mbgl/shaders/mtl/circle.hpp>
+
 #include <cassert>
 #include <string>
-
-namespace mbgl {
-namespace shaders {
-
-template <>
-struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "BackgroundShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static constexpr auto bufferNames = std::array<std::string_view, 1>{"a_pos"};
-
-    static constexpr auto source = R"(
-#include <metal_stdlib>
-using namespace metal;
-
-struct v2f {
-    float4 position [[position]];
-};
-
-v2f vertex vertexMain(uint vertexId [[vertex_id]],
-                      device const float3* positions [[buffer(0)]]) {
-    v2f o;
-    o.position = float4(positions[vertexId], 1.0);
-    return o;
-}
-
-half4 fragment fragmentMain(v2f in [[stage_in]]) {
-    return half4(1, 0, 1, 1);
-}
-)";
-};
-
-template <>
-struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
-    : public ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "BackgroundPatternShader";
-};
-
-} // namespace shaders
-} // namespace mbgl
 
 namespace mbgl {
 namespace mtl {
@@ -128,9 +95,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         [&]() {
             using namespace std::string_literals;
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
-            auto bufferNames = std::vector<std::string>(ShaderClass::bufferNames.begin(),
-                                                        ShaderClass::bufferNames.end());
-            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters, std::move(bufferNames));
+            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters);
             if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
                 assert(!"duplicate shader group");
                 throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
@@ -141,8 +106,8 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
     registerTypes<shaders::BuiltIn::BackgroundShader,
-                  shaders::BuiltIn::BackgroundPatternShader/*,
-                  shaders::BuiltIn::CircleShader,
+                  shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::CircleShader/*,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
                   shaders::BuiltIn::LineShader,
