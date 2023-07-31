@@ -17,9 +17,15 @@ public:
 
 public:
     ~CircleLayerTweaker() override = default;
-
+    
+#if MLN_RENDER_BACKEND_METAL
     void setPropertiesAsUniforms(std::vector<std::string>);
-
+    bool hasPropertyAsUniform(std::string_view) const;
+    
+#endif // MLN_RENDER_BACKEND_METAL
+    
+    void enableOverdrawInspector(bool);
+    
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
 protected:
@@ -31,8 +37,10 @@ protected:
     gfx::UniformBufferPtr expressionUniformBuffer;
 
     std::vector<std::string> propertiesAsUniforms;
-    bool propertiesChanged = true;
 #endif // MLN_RENDER_BACKEND_METAL
+
+    bool propertiesChanged = true;
+    bool overdrawInspector = false;
 };
 
 } // namespace mbgl

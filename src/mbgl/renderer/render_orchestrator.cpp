@@ -878,7 +878,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     for (const auto& item : renderTree.getLayerRenderItems()) {
         auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
-        renderLayer.update(shaders, context, state, renderTree, changes);
+        renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
     addChanges(changes);
 }

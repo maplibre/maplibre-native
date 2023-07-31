@@ -4,22 +4,23 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/programs/programs.hpp>
+#include <mbgl/programs/circle_program.hpp>
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/circle_program.hpp>
-#include <mbgl/tile/tile.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
+#include <mbgl/tile/tile.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layers/circle_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
 #endif
 
 namespace mbgl {
@@ -89,13 +90,7 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
-#if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        tweaker = std::make_shared<CircleLayerTweaker>(evaluatedProperties);
-        tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-        layerGroup->setLayerTweaker(tweaker);
-    }
-#endif
+    updateLayerTweaker();
 }
 
 bool RenderCircleLayer::hasTransition() const {
@@ -276,9 +271,21 @@ constexpr auto VertexAttribName = "a_pos";
 
 using namespace shaders;
 
+void RenderCircleLayer::updateLayerTweaker() {
+    if (layerGroup) {
+        tweaker = std::make_shared<CircleLayerTweaker>(evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+#endif //MLN_RENDER_BACKEND_METAL
+        tweaker->enableOverdrawInspector(overdrawInspector);
+        layerGroup->setLayerTweaker(tweaker);
+    }
+}
+
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
+                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -288,17 +295,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    // Set up a layer group
-    if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            tweaker = std::make_shared<CircleLayerTweaker>(evaluatedProperties);
-            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-            layerGroup_->setLayerTweaker(tweaker);
-            setLayerGroup(std::move(layerGroup_), changes);
-        }
-    }
-    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-
     if (!circleShaderGroup) {
         circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);
     }
@@ -306,6 +302,23 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
+
+    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
+    if (overdrawInspector != overdraw) {
+        overdrawInspector = overdraw;
+        if (tweaker) {
+            tweaker->enableOverdrawInspector(overdrawInspector);
+        }
+    }
+
+    // Set up a layer group
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            setLayerGroup(std::move(layerGroup_), changes);
+            updateLayerTweaker();
+        }
+    }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
     constexpr auto renderPass = RenderPass::Translucent;
@@ -365,26 +378,29 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
         gfx::VertexAttributeArray circleVertexAttrs;
-        propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
-                                                                               CircleRadius,
-                                                                               CircleBlur,
-                                                                               CircleOpacity,
-                                                                               CircleStrokeColor,
-                                                                               CircleStrokeWidth,
-                                                                               CircleStrokeOpacity>(
+        auto propertiesAsUniforms_ = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
+                                                                                     CircleRadius,
+                                                                                     CircleBlur,
+                                                                                     CircleOpacity,
+                                                                                     CircleStrokeColor,
+                                                                                     CircleStrokeWidth,
+                                                                                     CircleStrokeOpacity>(
             paintPropertyBinders, evaluated);
 
         if (!circleShaderGroup) {
             continue;
         }
-        const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms_);
         if (!circleShader) {
             continue;
         }
 
+#if MLN_RENDER_BACKEND_METAL
+        propertiesAsUniforms = std::move(propertiesAsUniforms_);
         if (tweaker) {
             tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
+#endif // MLN_RENDER_BACKEND_METAL
 
         if (const auto& attr = circleVertexAttrs.add(VertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,

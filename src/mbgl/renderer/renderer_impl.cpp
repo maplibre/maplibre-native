@@ -110,7 +110,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                renderTreeParameters.transformParams,
                                *staticData,
                                renderTree.getLineAtlas(),
-                               renderTree.getPatternAtlas()};
+                               renderTree.getPatternAtlas(),
+                               frameCount};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -478,6 +479,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         renderState = RenderState::Fully;
         observer->onDidFinishRenderingMap();
     }
+    
+    frameCount += 1;
 }
 
 void Renderer::Impl::reduceMemoryUse() {

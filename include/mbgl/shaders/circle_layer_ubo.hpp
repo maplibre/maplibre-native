@@ -6,18 +6,20 @@ namespace mbgl {
 namespace shaders {
 
 struct alignas(16) CircleDrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 2> extrude_scale;
-    std::array<float, 2> padding;
+    /*  0 */ std::array<float, 4 * 4> matrix;        // composite model-view-projection matrix
+    /* 64 */ std::array<float, 2> extrude_scale;
+    /* 72 */ float pad;
+    /* 80 */
 };
-static_assert(sizeof(CircleDrawableUBO) % 16 == 0);
+static_assert(sizeof(CircleDrawableUBO) == 5 * 16);
 
 struct alignas(16) CirclePaintParamsUBO {
-    float camera_to_center_distance;
-    float device_pixel_ratio;
-    std::array<float, 2> padding;
+    /*  0 */ float camera_to_center_distance;
+    /*  4 */ float device_pixel_ratio;
+    /*  8 */ float pad1, pad2;
+    /* 16 */
 };
-static_assert(sizeof(CirclePaintParamsUBO) % 16 == 0);
+static_assert(sizeof(CirclePaintParamsUBO) == 1 * 16);
 
 struct alignas(16) CircleEvaluatedPropsUBO {
     Color color;

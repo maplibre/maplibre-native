@@ -39,6 +39,7 @@ public:
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif

@@ -73,11 +73,6 @@ std::array<float, 2> toArray(const Size& s) {
 constexpr auto texUniformName = "u_texture";
 constexpr auto texIconUniformName = "u_texture_icon";
 
-template <typename T, class... Is, class... Ts>
-auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
-    return evaluated.template get<T>().constantOr(T::defaultValue());
-}
-
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
         /*.fill_color=*/gfx::VertexAttribute::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated)

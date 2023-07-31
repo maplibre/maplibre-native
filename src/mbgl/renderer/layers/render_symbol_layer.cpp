@@ -844,6 +844,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
+                               const std::shared_ptr<UpdateParameters>&,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {

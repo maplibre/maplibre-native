@@ -54,11 +54,6 @@ constexpr auto FillExtrusionDrawablePropsUBOName = "FillExtrusionDrawablePropsUB
 
 constexpr auto texUniformName = "u_image";
 
-template <typename T, class... Is, class... Ts>
-auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
-    return evaluated.template get<T>().constantOr(T::defaultValue());
-}
-
 } // namespace
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
