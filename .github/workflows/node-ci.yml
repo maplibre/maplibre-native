@@ -77,6 +77,7 @@ jobs:
     continue-on-error: true
     env:
       BUILDTYPE: 'Release'
+      NODE_MODULE_CACHE_DIR: 'build/headers'
 
     defaults:
       run:
@@ -169,6 +170,12 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
+      - name: Cache cmake-node-module deps
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.NODE_MODULE_CACHE_DIR }}
+          key: ${{ matrix.runs-on }}-cmake-node-module-deps
+
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
@@ -176,6 +183,7 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DNODE_MODULE_CACHE_DIR=${{ env.NODE_MODULE_CACHE_DIR }} \
             -DMLN_WITH_NODE=ON
 
       - name: Configure maplibre-native (Linux)
@@ -187,6 +195,7 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_C_COMPILER=gcc-10 \
             -DCMAKE_CXX_COMPILER=g++-10 \
+            -DNODE_MODULE_CACHE_DIR=${{ env.NODE_MODULE_CACHE_DIR }} \
             -DMLN_WITH_NODE=ON
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
@@ -214,6 +223,7 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DNODE_MODULE_CACHE_DIR=${{ env.NODE_MODULE_CACHE_DIR }} \
             -DMLN_WITH_NODE=ON
 
       - name: Build maplibre-native (MacOS/Linux)
