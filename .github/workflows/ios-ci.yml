@@ -129,12 +129,15 @@ jobs:
           ccache --max-size=2G
           ccache --show-stats
 
-      - run: cp bazel/example_config.bzl bazel/config.bzl
-
       - name: Generate app plists
         working-directory: ./
         run: bash platform/ios/scripts/bazel-generate-plists.sh
-        
+      
+      - run: cp bazel/example_config.bzl bazel/config.bzl
+
+      - name: Check debug symbols
+        run: bazel run //platform:check-public-symbols
+
       - name: Lint plist files
         run: bazel run //platform/ios:lint-plists
 
