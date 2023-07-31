@@ -20,13 +20,21 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     resource.bind();
 
     if (const auto& buffer = resource.getCommandBuffer()) {
-        if (const auto& rpd = resource.getRenderPassDescriptor()) {
+        if (auto rpd = resource.getRenderPassDescriptor()) {
+            if (descriptor.clearColor) {
+                if (auto copy = NS::TransferPtr(rpd->copy())) {
+                    if (auto* colorTarget = copy->colorAttachments()->object(0)) {
+                        const auto& c = *descriptor.clearColor;
+                        colorTarget->setClearColor(MTL::ClearColor::Make(c.r, c.g, c.b, c.a));
+                        rpd = copy;
+                    }
+                }
+            }
             encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
         }
     }
 
     // const auto clearDebugGroup(commandEncoder.createDebugGroup("clear"));
-    // commandEncoder.context.clear(descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil);
 }
 
 RenderPass::~RenderPass() {

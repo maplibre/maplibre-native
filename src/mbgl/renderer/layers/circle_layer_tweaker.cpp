@@ -21,11 +21,13 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-void CircleLayerTweaker::setPropertiesAsUniforms(std::vector<std::string> props) {
+void CircleLayerTweaker::setPropertiesAsUniforms([[maybe_unused]] std::vector<std::string> props) {
+#if MLN_RENDER_BACKEND_METAL
     if (props != propertiesAsUniforms) {
-        // clear buffer
         propertiesAsUniforms = std::move(props);
+        propertiesChanged = true;
     }
+#endif // MLN_RENDER_BACKEND_METAL
 }
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
@@ -54,6 +56,45 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     } else {
         paintParamsUniformBuffer->update(&paintParamsUBO, sizeof(CirclePaintParamsUBO));
     }
+
+#if MLN_RENDER_BACKEND_METAL
+    using ShaderClass = shaders::ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
+    if (propertiesChanged) {
+        const auto source = [&](const std::string_view& attrName) {
+            const auto hit = std::find_if(
+                propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
+                    return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
+                });
+            return (hit == propertiesAsUniforms.end()) ? AttributeSource::PerVertex : AttributeSource::Constant;
+        };
+
+        const CirclePermutationUBO permutationUBO = {
+            /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
+            /* .radius = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+            /* .blur = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[4].name), /*.expression=*/{}},
+            /* .stroke_color = */ {/*.source=*/source(ShaderClass::attributes[5].name), /*.expression=*/{}},
+            /* .stroke_width = */ {/*.source=*/source(ShaderClass::attributes[6].name), /*.expression=*/{}},
+            /* .stroke_opacity = */ {/*.source=*/source(ShaderClass::attributes[7].name), /*.expression=*/{}},
+            /* .overdrawInspector = */ false,
+            /* .pad = */ {0},
+        };
+
+        if (permutationUniformBuffer) {
+            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+        } else {
+            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+        }
+    }
+    if (!expressionUniformBuffer) {
+        const ExpressionInputsUBO expressionUBO = {
+            /* .zoom = */ 0,
+            /* .time = */ 0,
+            /* .frame = */ 0,
+        };
+        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
+    }
+#endif
 
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
 
@@ -97,41 +138,15 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         const CircleDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */
-            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits}} : parameters.pixelsToGLUnits,
+            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits,pixelsToTileUnits}} : parameters.pixelsToGLUnits,
             /* .padding = */ {0}};
 
         uniforms.createOrUpdate(MLN_STRINGIZE(CircleDrawableUBO), &drawableUBO, context);
-
-        const auto source = [&](const std::string_view& attrName) {
-            const auto hit = std::find_if(
-                propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
-                    return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
-                });
-            return (hit == propertiesAsUniforms.end()) ? AttributeSource::PerVertex : AttributeSource::Constant;
-        };
-
+        
 #if MLN_RENDER_BACKEND_METAL
-        using ShaderClass = shaders::ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
-        const CirclePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-            /* .radius = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[4].name), /*.expression=*/{}},
-            /* .stroke_color = */ {/*.source=*/source(ShaderClass::attributes[5].name), /*.expression=*/{}},
-            /* .stroke_width = */ {/*.source=*/source(ShaderClass::attributes[6].name), /*.expression=*/{}},
-            /* .stroke_opacity = */ {/*.source=*/source(ShaderClass::attributes[7].name), /*.expression=*/{}},
-            /* .overdrawInspector = */ false,
-            /* .pad = */ {0},
-        };
-        uniforms.createOrUpdate(MLN_STRINGIZE(CirclePermutationUBO), &permutationUBO, context);
-
-        const ExpressionInputsUBO expressionUBO = {
-            /* .zoom = */ 0,
-            /* .time = */ 0,
-            /* .frame = */ 0,
-        };
-        uniforms.createOrUpdate(MLN_STRINGIZE(ExpressionInputsUBO), &expressionUBO, context);
-#endif
+        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
+        uniforms.addOrReplace(MLN_STRINGIZE(CirclePermutationUBO), permutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 
