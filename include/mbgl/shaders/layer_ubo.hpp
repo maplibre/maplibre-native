@@ -33,9 +33,9 @@ struct Attribute {
 static_assert(sizeof(Attribute) == 8);
 
 struct alignas(16) ExpressionInputsUBO {
-    /*  0 */ uint64_t time;     /// Current scene time (nanoseconds)
-    /*  8 */ uint64_t frame;    /// Current frame count
-    /* 16 */ float zoom;        /// Current zoom level
+    /*  0 */ uint64_t time;  /// Current scene time (nanoseconds)
+    /*  8 */ uint64_t frame; /// Current frame count
+    /* 16 */ float zoom;     /// Current zoom level
     /* 20 */ float pad1, pad2, pad3;
     /* 32 */
 };

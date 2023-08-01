@@ -279,7 +279,7 @@ void RenderCircleLayer::updateLayerTweaker() {
         tweaker = std::make_shared<CircleLayerTweaker>(evaluatedProperties);
 #if MLN_RENDER_BACKEND_METAL
         tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-#endif //MLN_RENDER_BACKEND_METAL
+#endif // MLN_RENDER_BACKEND_METAL
         tweaker->enableOverdrawInspector(overdrawInspector);
         layerGroup->setLayerTweaker(tweaker);
     }

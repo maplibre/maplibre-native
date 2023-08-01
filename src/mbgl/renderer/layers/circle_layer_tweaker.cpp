@@ -29,10 +29,10 @@ void CircleLayerTweaker::setPropertiesAsUniforms([[maybe_unused]] std::vector<st
     }
 }
 bool CircleLayerTweaker::hasPropertyAsUniform(const std::string_view attrName) const {
-    return propertiesAsUniforms.end() != std::find_if(
-        propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
-            return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
-        });
+    return propertiesAsUniforms.end() !=
+           std::find_if(propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
+               return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
+           });
 }
 #endif // MLN_RENDER_BACKEND_METAL
 
@@ -62,8 +62,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     const CirclePaintParamsUBO paintParamsUBO = {
         /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
         /* .device_pixel_ratio = */ parameters.pixelRatio,
-        /* .padding = */ 0, 0
-    };
+        /* .padding = */ 0,
+        0};
 
     if (!paintParamsUniformBuffer) {
         paintParamsUniformBuffer = context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
@@ -99,12 +99,12 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
     }
     if (!expressionUniformBuffer) {
-        const ExpressionInputsUBO expressionUBO = {
-            /* .time = */ 0,
-            /* .frame = */ parameters.frameCount,
-            /* .zoom = */ static_cast<float>(zoom),
-            /* .pad = */ 0, 0, 0
-        };
+        const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
+                                                   /* .frame = */ parameters.frameCount,
+                                                   /* .zoom = */ static_cast<float>(zoom),
+                                                   /* .pad = */ 0,
+                                                   0,
+                                                   0};
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
 #endif
@@ -147,14 +147,13 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom));
-        const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits} : parameters.pixelsToGLUnits;
+        const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
+                                               : parameters.pixelsToGLUnits;
 
         // Updated for each drawable on each frame
-        const CircleDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(matrix),
-            /* .extrude_scale = */ extrudeScale,
-            /* .padding = */ 0
-        };
+        const CircleDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
+                                               /* .extrude_scale = */ extrudeScale,
+                                               /* .padding = */ 0};
         uniforms.createOrUpdate(MLN_STRINGIZE(CircleDrawableUBO), &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL

@@ -6,7 +6,7 @@ namespace mbgl {
 namespace shaders {
 
 struct alignas(16) CircleDrawableUBO {
-    /*  0 */ std::array<float, 4 * 4> matrix;        // composite model-view-projection matrix
+    /*  0 */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
     /* 64 */ std::array<float, 2> extrude_scale;
     /* 72 */ float pad;
     /* 80 */

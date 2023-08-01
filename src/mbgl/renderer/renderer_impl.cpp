@@ -478,7 +478,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         renderState = RenderState::Fully;
         observer->onDidFinishRenderingMap();
     }
-    
+
     frameCount += 1;
 }
 

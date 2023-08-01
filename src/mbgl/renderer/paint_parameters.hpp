@@ -131,7 +131,7 @@ public:
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
     const uint64_t frameCount;
-    
+
     static constexpr float depthEpsilon = 1.0f / (1 << 16);
     static constexpr int maxStencilValue = 255;
 };

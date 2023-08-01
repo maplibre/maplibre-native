@@ -47,7 +47,7 @@ private:
     };
 
     RenderState renderState = RenderState::Never;
-    
+
     uint64_t frameCount = 0;
 };
 

@@ -41,7 +41,6 @@ private:
                                 const mat4&,
                                 const FeatureState&) const override;
 
-
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
 #endif // MLN_LEGACY_RENDERER
