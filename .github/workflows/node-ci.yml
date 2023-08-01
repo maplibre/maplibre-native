@@ -174,7 +174,7 @@ jobs:
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
-          key: ${{ matrix.runs-on }}-cmake-node-module-deps
+          key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
 
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
