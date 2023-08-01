@@ -1,7 +1,5 @@
 set(NODE_MODULE_MINIMUM_ABI 83) # Minimum supported Node.js version: 14
-if (NOT NODE_MODULE_CACHE_DIR)
-    set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
-endif()
+set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
