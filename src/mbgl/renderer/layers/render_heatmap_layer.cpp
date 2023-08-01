@@ -339,8 +339,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
-        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf(
+        [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
@@ -370,7 +370,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
             /* .padding = */ {0}};
 
-        tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             drawable.mutableUniformBuffers().createOrUpdate(HeatmapInterpolateUBOName, &interpolateUBO, context);
         });
 

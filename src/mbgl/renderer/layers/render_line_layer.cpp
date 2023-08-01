@@ -456,10 +456,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses &
                                                           ~mbgl::underlying_type(RenderPass::Opaque));
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        return (drawable.getRenderPass() == renderPass &&
-                (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())));
+        const auto& tileID = drawable.getTileID();
+        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
+            return true;
+        }
+        return false;
     });
 
     auto createLineBuilder = [&](const std::string& name,
@@ -574,7 +577,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
 
         // update existing drawables
-        tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // simple line interpolation UBO
             if (drawable.getShader()->getUniformBlocks().get(std::string(LineInterpolationUBOName))) {
                 drawable.mutableUniformBuffers().createOrUpdate(

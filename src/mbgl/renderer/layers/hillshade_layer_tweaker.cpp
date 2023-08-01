@@ -65,7 +65,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                                              sizeof(evaluatedPropsUBO));
     }
 
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         drawable.mutableUniformBuffers().addOrReplace(HillshadeEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {

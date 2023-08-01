@@ -844,7 +844,7 @@ const LayerGroupBasePtr& RenderOrchestrator::getLayerGroup(const int32_t layerIn
     return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }
 
-void RenderOrchestrator::observeLayerGroups(std::function<void(LayerGroupBase&)> f) {
+void RenderOrchestrator::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
     for (auto& pair : layerGroupsByLayerIndex) {
         if (pair.second) {
             f(*pair.second);
@@ -852,7 +852,7 @@ void RenderOrchestrator::observeLayerGroups(std::function<void(LayerGroupBase&)>
     }
 }
 
-void RenderOrchestrator::observeLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
+void RenderOrchestrator::visitLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
     for (const auto& pair : layerGroupsByLayerIndex) {
         if (pair.second) {
             f(*pair.second);

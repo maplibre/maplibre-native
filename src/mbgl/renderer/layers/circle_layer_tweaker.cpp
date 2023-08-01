@@ -128,7 +128,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         evaluatedPropsUniformBuffer = context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
     }
 
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.addOrReplace(MLN_STRINGIZE(CirclePaintParamsUBO), paintParamsUniformBuffer);
         uniforms.addOrReplace(MLN_STRINGIZE(CircleEvaluatedPropsUBO), evaluatedPropsUniformBuffer);
