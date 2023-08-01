@@ -90,7 +90,9 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
+#if MLN_DRAWABLE_RENDERER
     updateLayerTweaker();
+#endif // MLN_DRAWABLE_RENDERER
 }
 
 bool RenderCircleLayer::hasTransition() const {
@@ -271,6 +273,7 @@ constexpr auto VertexAttribName = "a_pos";
 
 using namespace shaders;
 
+#if MLN_DRAWABLE_RENDERER
 void RenderCircleLayer::updateLayerTweaker() {
     if (layerGroup) {
         tweaker = std::make_shared<CircleLayerTweaker>(evaluatedProperties);
@@ -281,6 +284,7 @@ void RenderCircleLayer::updateLayerTweaker() {
         layerGroup->setLayerTweaker(tweaker);
     }
 }
+#endif // MLN_DRAWABLE_RENDERER
 
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,

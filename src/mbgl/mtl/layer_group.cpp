@@ -22,7 +22,7 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
+    visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled()) {
             return;
         }
@@ -42,7 +42,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
+    visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }

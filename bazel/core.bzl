@@ -51,7 +51,10 @@ MLN_GENERATED_STYLE_SOURCE = [
 
 MLN_GENERATED_SHADER_HEADERS = [
     "include/mbgl/shaders/shader_source.hpp",
-    "include/mbgl/shaders/shader_manifest.hpp",
+    "include/mbgl/shaders/shader_manifest.hpp"
+]
+
+MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/background.hpp",
     "include/mbgl/shaders/gl/background_pattern.hpp",
     "include/mbgl/shaders/gl/circle.hpp",

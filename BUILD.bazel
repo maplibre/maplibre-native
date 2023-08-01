@@ -4,9 +4,14 @@ load(
     "//bazel:core.bzl",
     "MLN_CORE_HEADERS",
     "MLN_CORE_SOURCE",
-    "MLN_DRAWABLES_SOURCE",
     "MLN_DRAWABLES_HEADERS",
+    "MLN_DRAWABLES_SOURCE",
+    "MLN_DRAWABLES_GL_HEADERS",
+    "MLN_DRAWABLES_GL_SOURCE",
+    "MLN_DRAWABLES_MTL_HEADERS",
+    "MLN_DRAWABLES_MTL_SOURCE",
     "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
@@ -55,7 +60,11 @@ cc_library(
     name = "mbgl-core-generated-public-artifacts",
     srcs = [],
     hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_SHADER_HEADERS,
+           MLN_GENERATED_SHADER_HEADERS +
+           select({
+               "//:metal_renderer": [],
+               "//conditions:default": MLN_GENERATED_OPENGL_SHADER_HEADERS,
+           }),
     visibility = ["//visibility:public"],
     deps = [
         ":generated_shaders",
@@ -79,16 +88,18 @@ cc_library(
 cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE +
-           MLN_GENERATED_STYLE_SOURCE +
-           MLN_OPENGL_SOURCE + select({
-            ":drawable_renderer": MLN_DRAWABLES_SOURCE,
-            ":split_renderer": MLN_DRAWABLES_SOURCE,
+           MLN_GENERATED_STYLE_SOURCE + select({
+            ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+            ":legacy_renderer": MLN_OPENGL_SOURCE,
+            ":split_renderer": MLN_DRAWABLES_SOURCE + MLN_OPENGL_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+            ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
             "//conditions:default": [],
         }),
-    hdrs = MLN_CORE_HEADERS +
-           MLN_OPENGL_HEADERS + select({
-            ":drawable_renderer": MLN_DRAWABLES_HEADERS,
-            ":split_renderer": MLN_DRAWABLES_HEADERS,
+    hdrs = MLN_CORE_HEADERS + select({
+            ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+            ":legacy_renderer": MLN_OPENGL_HEADERS,
+            ":split_renderer": MLN_DRAWABLES_HEADERS + MLN_OPENGL_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+            ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
             "//conditions:default": []
         }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,

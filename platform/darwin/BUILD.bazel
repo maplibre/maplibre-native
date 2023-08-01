@@ -290,16 +290,21 @@ objc_library(
         "src/async_task.cpp",
         "src/run_loop.cpp",
         "src/timer.cpp",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["src/gl_functions.cpp"],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = [
         "GLES_SILENCE_DEPRECATION=1",
         "GL_SILENCE_DEPRECATION=1",
     ],
     sdk_frameworks = [
-        "OpenGLES",
         "SystemConfiguration",
-    ],
+    ] + select({
+        "//:metal_renderer": ["Metal"],
+        "//conditions:default": ["OpenGLES"],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//:mbgl-core",

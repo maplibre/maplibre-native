@@ -339,22 +339,6 @@ public:
     /// Clear the collection
     void clear();
 
-    void visitAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
-        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
-            if (kv.second) {
-                f(kv.first, *kv.second);
-            }
-        });
-    }
-
-    void visitAttributes(const std::function<void(const std::string&, const VertexAttribute&)>& f) const {
-        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
-            if (kv.second) {
-                f(kv.first, *kv.second);
-            }
-        });
-    }
-
     /// Do something with each attribute
     void visitAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
