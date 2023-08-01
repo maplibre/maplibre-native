@@ -817,7 +817,8 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, [[maybe_unu
             break;
         }
     }
-    if (found) return replace;
+    if (found)
+        return replace;
     else {
         layerGroupsByLayerIndex.insert(std::make_pair(index, std::move(layerGroup)));
     }

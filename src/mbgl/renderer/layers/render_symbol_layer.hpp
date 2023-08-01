@@ -131,7 +131,7 @@ private:
     gfx::ShaderGroupPtr symbolSDFIconGroup;
     gfx::ShaderGroupPtr symbolSDFTextGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
-    
+
     gfx::ShaderGroupPtr collisionBoxGroup;
     gfx::ShaderGroupPtr collisionCircleGroup;
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;

@@ -186,7 +186,8 @@ public:
         CollisionVertexVector& vertices() { return *sharedVertices; }
         const CollisionVertexVector& vertices() const { return *sharedVertices; }
 
-        std::shared_ptr<CollisionDynamicVertexVector> sharedDynamicVertices = std::make_shared<CollisionDynamicVertexVector>();
+        std::shared_ptr<CollisionDynamicVertexVector> sharedDynamicVertices =
+            std::make_shared<CollisionDynamicVertexVector>();
         CollisionDynamicVertexVector& dynamicVertices() { return *sharedDynamicVertices; }
         const CollisionDynamicVertexVector& dynamicVertices() const { return *sharedDynamicVertices; }
 

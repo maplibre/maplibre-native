@@ -9,14 +9,13 @@ namespace mbgl {
 namespace gfx {
 
 struct CollisionDrawableData : public DrawableData {
-    CollisionDrawableData(const std::array<float, 2> translate_,
-                  const style::TranslateAnchorType translateAnchor_)
+    CollisionDrawableData(const std::array<float, 2> translate_, const style::TranslateAnchorType translateAnchor_)
         : translate(translate_),
           translateAnchor(translateAnchor_) {}
     ~CollisionDrawableData() override = default;
 
     std::array<float, 2> translate;
-    style::TranslateAnchorType translateAnchor;    
+    style::TranslateAnchorType translateAnchor;
 };
 
 using UniqueCollisionDrawableData = std::unique_ptr<CollisionDrawableData>;

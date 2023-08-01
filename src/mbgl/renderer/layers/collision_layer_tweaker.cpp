@@ -71,11 +71,10 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                     parameters.pixelsToGLUnits[1] / (pixelRatio * scale)}};
 
         const CollisionUBO drawableUBO = {
-            /*.matrix=*/ util::cast<float>(matrix),
+            /*.matrix=*/util::cast<float>(matrix),
             /*.extrude_scale*/ extrudeScale,
-            /*.camera_to_center_distance*/ parameters.state.getCameraToCenterDistance(), 
-            /*.overscale_factor*/ static_cast<float>(drawable.getTileID()->overscaleFactor())
-        };
+            /*.camera_to_center_distance*/ parameters.state.getCameraToCenterDistance(),
+            /*.overscale_factor*/ static_cast<float>(drawable.getTileID()->overscaleFactor())};
 
         const auto shader = drawable.getShader();
         const auto& shaderUniforms = shader->getUniformBlocks();
