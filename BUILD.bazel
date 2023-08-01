@@ -89,8 +89,6 @@ cc_library(
     includes = [
         "include",
         "src",
-        "vendor/harfbuzz/src",
-        "vendor/freetype/include",
     ],
     local_defines = [
         r"MLN_VERSION_REV=\"standalone\"",

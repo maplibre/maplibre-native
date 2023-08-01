@@ -249,6 +249,9 @@ cmake(
     cache_entries = select({
         "//conditions:default": {"CMAKE_BUILD_TYPE": "Release"},
     }),
+    postfix_script = """
+        cp -r $INSTALLDIR/include/freetype2/* $INSTALLDIR/include/  
+    """,
     working_directory = "freetype",
     out_include_dir = "include",
     out_static_libs = select({
@@ -263,9 +266,13 @@ cmake(
     generate_args = ["-DHB_HAVE_FREETYPE=1"],
     out_include_dir = "include",
     working_directory = "harfbuzz",
+    postfix_script = """
+        cp -r $INSTALLDIR/include/harfbuzz/* $INSTALLDIR/include/
+    """,
     # the name of the static library != <name>.a, put it explicitly
     out_static_libs = select({
         "//conditions:default": ["libharfbuzz.a", "libharfbuzz-subset.a"],
     }),
     visibility = ["//visibility:public"],
 )
+
