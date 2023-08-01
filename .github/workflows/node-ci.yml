@@ -179,6 +179,13 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
+      - name: Cache cmake-node-module deps
+        uses: actions/cache@v3
+        with:
+          # downloaded with platform/node/cmake/module.cmake
+          path: build/headers
+          key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
+
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
