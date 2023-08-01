@@ -6,6 +6,8 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 
+#include <vector>
+
 namespace mbgl {
 namespace gfx {
 
@@ -90,6 +92,7 @@ public:
 
 private:
     CommandEncoder& commandEncoder;
+    std::vector<gfx::DebugGroup<gfx::CommandEncoder>> debugGroups;
 };
 
 } // namespace mtl

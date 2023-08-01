@@ -7,6 +7,7 @@
 #include <Metal/MTLCommandEncoder.hpp>
 
 #include <memory>
+#include <optional>
 
 namespace mbgl {
 namespace mtl {
@@ -24,6 +25,8 @@ public:
 
     void endEncoding();
 
+    void addDebugSignpost(const char* name) override;
+
 private:
     void pushDebugGroup(const char* name) override;
     void popDebugGroup() override;
@@ -32,7 +35,7 @@ private:
     gfx::RenderPassDescriptor descriptor;
     mtl::CommandEncoder& commandEncoder;
     MTLRenderCommandEncoderPtr encoder;
-    // const gfx::DebugGroup<gfx::CommandEncoder> debugGroup;
+    std::vector<gfx::DebugGroup<gfx::RenderPass>> debugGroups;
 };
 
 } // namespace mtl

@@ -196,9 +196,16 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     return bindings;
 }
 
-void UploadPass::pushDebugGroup(const char* name) {}
+void UploadPass::pushDebugGroup(const char* name) {
+    debugGroups.emplace_back(gfx::DebugGroup<gfx::CommandEncoder>{ commandEncoder, name });
+}
 
-void UploadPass::popDebugGroup() {}
+void UploadPass::popDebugGroup() {
+    assert(!debugGroups.empty());
+    if (!debugGroups.empty()) {
+        debugGroups.pop_back();
+    }
+}
 
 gfx::Context& UploadPass::getContext() {
     return commandEncoder.context;

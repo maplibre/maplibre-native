@@ -32,9 +32,43 @@ void CommandEncoder::present(gfx::Renderable& renderable) {
     renderable.getResource<RenderableResource>().swap();
 }
 
-void CommandEncoder::pushDebugGroup(const char* /*name*/) {}
+void CommandEncoder::pushDebugGroup(const char* name) {
+    // Debug groups exist in MTLBuffer and MTLCommandEncoder, but these are associated with the
+    // renderable provided in the RenderPassDescriptor, and so may not have been created yet.
+    // Instead, maintain a stack of names and push them to each render pass as we create it.
+    debugGroupNames.push_back(std::make_pair(name ? name : std::string(), passes.size()));
 
-void CommandEncoder::popDebugGroup() {}
+    // Apply it to any groups that are already active
+    for (auto* pass : passes) {
+        debugGroups.emplace_back(gfx::DebugGroup<gfx::RenderPass>{ *pass, name });
+    }
+}
+
+void CommandEncoder::popDebugGroup() {
+    assert(!debugGroupNames.empty());
+    if (!debugGroupNames.empty()) {
+        // Pop the entries we added for each active encoder when this item was added
+        const auto popCount = debugGroupNames.back().second;
+        for (std::size_t i = 0; i < popCount; ++i) {
+            assert(!debugGroups.empty());
+            if (!debugGroups.empty()) {
+                debugGroups.pop_back();
+            }
+        }
+
+        debugGroupNames.pop_back();
+    }
+}
+
+void CommandEncoder::trackRenderPass(RenderPass* pass) {
+    if (pass) {
+        passes.insert(pass);
+    }
+}
+
+void CommandEncoder::forgetRenderPass(RenderPass* pass) {
+    passes.erase(pass);
+}
 
 } // namespace mtl
 } // namespace mbgl

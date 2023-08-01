@@ -76,16 +76,6 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
-    NS::UInteger attributeIndex = 0;
-    for (const auto& binding : attributeBindings) {
-        if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
-        } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
-            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
-        }
-        attributeIndex += 1;
-    }
-
     /*
      context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
                                     : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
@@ -103,6 +93,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
      */
 
+    bindAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
 
@@ -138,6 +129,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     unbindTextures(renderPass);
     unbindUniformBuffers(renderPass);
+    unbindAttributes(renderPass);
 }
 
 void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
@@ -185,6 +177,30 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
 
 void Drawable::setVertexAttrName(std::string value) {
     impl->vertexAttrName = std::move(value);
+}
+
+void Drawable::bindAttributes(const RenderPass& renderPass) const {
+    const auto& encoder = renderPass.getMetalEncoder();
+
+    NS::UInteger attributeIndex = 0;
+    for (const auto& binding : attributeBindings) {
+        if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
+            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
+        } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
+            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
+        }
+        attributeIndex += 1;
+    }
+}
+
+void Drawable::unbindAttributes(const RenderPass& renderPass) const {
+    const auto& encoder = renderPass.getMetalEncoder();
+
+    NS::UInteger attributeIndex = 0;
+    for (const auto& binding : attributeBindings) {
+        encoder->setVertexBuffer(nullptr, /*offset=*/0, attributeIndex);
+        attributeIndex += 1;
+    }
 }
 
 void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {

@@ -13,7 +13,6 @@ namespace mtl {
 RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor)
     : descriptor(descriptor),
       commandEncoder(commandEncoder_)
-//, debugGroup(commandEncoder.createDebugGroup(name))
 {
     auto& resource = descriptor.renderable.getResource<RenderableResource>();
 
@@ -34,26 +33,60 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         }
     }
 
-    // const auto clearDebugGroup(commandEncoder.createDebugGroup("clear"));
+    assert(encoder);
+
+    // Push the groups already accumulated by the encoder
+    commandEncoder.visitDebugGroups([this](const auto& group){
+        debugGroups.emplace_back(gfx::DebugGroup<gfx::RenderPass>{ *this, group.c_str() });
+    });
+
+    // Push the group for the name provided
+    debugGroups.emplace_back(gfx::DebugGroup<gfx::RenderPass>{ *this, name });
+
+    // Let the encoder pass along any groups pushed to it after this
+    commandEncoder.trackRenderPass(this);
 }
 
 RenderPass::~RenderPass() {
+    commandEncoder.forgetRenderPass(this);
     endEncoding();
 }
 
 void RenderPass::endEncoding() {
+    debugGroups.clear();
+
     if (encoder) {
         encoder->endEncoding();
         encoder.reset();
     }
 }
 
+namespace {
+constexpr auto missing = "<none>";
+NS::String* toNSString(const char* str) {
+    return NS::String::string(str ? str : missing, NS::UTF8StringEncoding);
+}
+}
+
 void RenderPass::pushDebugGroup(const char* name) {
-    // commandEncoder.pushDebugGroup(name);
+    assert(encoder);
+    if (encoder) {
+        encoder->pushDebugGroup(toNSString(name));
+    }
 }
 
 void RenderPass::popDebugGroup() {
-    // commandEncoder.popDebugGroup();
+    assert(encoder);
+    if (encoder) {
+        encoder->popDebugGroup();
+    }
+}
+
+void RenderPass::addDebugSignpost(const char* name) {
+    assert(encoder);
+    if (encoder) {
+        encoder->insertDebugSignpost(toNSString(name));
+    }
 }
 
 } // namespace mtl

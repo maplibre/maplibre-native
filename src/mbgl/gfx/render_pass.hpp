@@ -4,7 +4,6 @@
 #include <mbgl/util/color.hpp>
 
 #include <cstdint>
-#include <optional>
 
 namespace mbgl {
 namespace gfx {
@@ -27,6 +26,7 @@ protected:
     friend class DebugGroup<RenderPass>;
     virtual void pushDebugGroup(const char* name) = 0;
     virtual void popDebugGroup() = 0;
+    virtual void addDebugSignpost(const char* name) {}
 
 public:
     virtual ~RenderPass() = default;
