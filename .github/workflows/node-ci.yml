@@ -195,8 +195,6 @@ jobs:
             -DCMAKE_C_COMPILER=gcc-10 \
             -DCMAKE_CXX_COMPILER=g++-10 \
             -DMLN_WITH_NODE=ON
-          echo "Downloaded Node.js headers"
-          ls -R build/headers
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
         if: runner.os == 'Windows'
