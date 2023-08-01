@@ -178,18 +178,33 @@ public:
     Buffer icon;
     Buffer sdfIcon;
 
+    using CollisionVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>>;
+    using CollisionDynamicVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>>;
+
     struct CollisionBuffer {
-        gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>> vertices;
-        gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>> dynamicVertices;
+        std::shared_ptr<CollisionVertexVector> sharedVertices = std::make_shared<CollisionVertexVector>();
+        CollisionVertexVector& vertices() { return *sharedVertices; }
+        const CollisionVertexVector& vertices() const { return *sharedVertices; }
+
+        std::shared_ptr<CollisionDynamicVertexVector> sharedDynamicVertices = std::make_shared<CollisionDynamicVertexVector>();
+        CollisionDynamicVertexVector& dynamicVertices() { return *sharedDynamicVertices; }
+        const CollisionDynamicVertexVector& dynamicVertices() const { return *sharedDynamicVertices; }
+
         SegmentVector<CollisionBoxProgram::AttributeList> segments;
 
+#if MLN_LEGACY_RENDERER
         std::optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxLayoutAttributes>>> vertexBuffer;
         std::optional<gfx::VertexBuffer<gfx::Vertex<CollisionBoxDynamicAttributes>>> dynamicVertexBuffer;
+#endif // MLN_LEGACY_RENDERER
     };
 
     struct CollisionBoxBuffer : public CollisionBuffer {
-        gfx::IndexVector<gfx::Lines> lines;
+        using LineIndexVector = gfx::IndexVector<gfx::Lines>;
+        const std::shared_ptr<LineIndexVector> sharedLines = std::make_shared<LineIndexVector>();
+        LineIndexVector& lines = *sharedLines;
+#if MLN_LEGACY_RENDERER
         std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
     };
     std::unique_ptr<CollisionBoxBuffer> iconCollisionBox;
     std::unique_ptr<CollisionBoxBuffer> textCollisionBox;
@@ -205,8 +220,12 @@ public:
     }
 
     struct CollisionCircleBuffer : public CollisionBuffer {
-        gfx::IndexVector<gfx::Triangles> triangles;
+        using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+        const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+        TriangleIndexVector& triangles = *sharedTriangles;
+#if MLN_LEGACY_RENDERER
         std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
     };
     std::unique_ptr<CollisionCircleBuffer> iconCollisionCircle;
     std::unique_ptr<CollisionCircleBuffer> textCollisionCircle;

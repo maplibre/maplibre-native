@@ -803,34 +803,36 @@ void RenderOrchestrator::updateLayerGroupOrder() {
     layerGroupOrderDirty = false;
 }
 
-bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, const bool replace) {
+bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, [[maybe_unused]] const bool replace) {
     const auto index = layerGroup->getLayerIndex();
-    const auto result = layerGroupsByLayerIndex.insert(std::make_pair(index, LayerGroupBasePtr{}));
-    if (result.second) {
-        // added
-        result.first->second = std::move(layerGroup);
-        return true;
-    } else {
-        // not added
-        if (replace) {
-            onRemoveLayerGroup(*result.first->second);
-            result.first->second = std::move(layerGroup);
-            return true;
-        } else {
-            return false;
+    auto range = layerGroupsByLayerIndex.equal_range(index);
+    bool found = false;
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second == layerGroup) {
+            found = true;
+            if (replace) {
+                onRemoveLayerGroup(*it->second);
+                it->second = std::move(layerGroup);
+            }
+            break;
         }
     }
+    if (found) return replace;
+    else {
+        layerGroupsByLayerIndex.insert(std::make_pair(index, std::move(layerGroup)));
+    }
+    return true;
 }
 
 bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
-    const auto hit = layerGroupsByLayerIndex.find(layerIndex);
-    if (hit != layerGroupsByLayerIndex.end()) {
+    LayerGroupMap::const_iterator hit;
+    bool removed = false;
+    while ((hit = layerGroupsByLayerIndex.find(layerIndex)) != layerGroupsByLayerIndex.end()) {
         onRemoveLayerGroup(*hit->second);
         layerGroupsByLayerIndex.erase(hit);
-        return true;
-    } else {
-        return false;
+        removed = true;
     }
+    return removed;
 }
 
 size_t RenderOrchestrator::numLayerGroups() const noexcept {

@@ -1,3 +1,9 @@
+layout (std140) uniform CollisionBoxUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_extrude_scale;
+    highp float u_camera_to_center_distance;
+    highp float pad1;
+};
 
 in float v_placed;
 in float v_notUsed;
