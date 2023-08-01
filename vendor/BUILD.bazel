@@ -243,7 +243,7 @@ filegroup(
 )
 
 cmake(
-    name = "freetype",
+    name = "harfbuzzFreetype",
     lib_source = ":srcs",
     generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON"],
     cache_entries = select({
@@ -251,28 +251,12 @@ cmake(
     }),
     postfix_script = """
         cp -r $INSTALLDIR/include/freetype2/* $INSTALLDIR/include/  
-    """,
-    working_directory = "freetype",
-    out_include_dir = "include",
-    out_static_libs = select({
-        "//conditions:default": ["libfreetype.a"],
-    }),
-    visibility = ["//visibility:public"],
-)
-
-cmake(
-    name = "harfbuzz",
-    lib_source = ":srcs",
-    generate_args = ["-DHB_HAVE_FREETYPE=1"],
-    out_include_dir = "include",
-    working_directory = "harfbuzz",
-    postfix_script = """
         cp -r $INSTALLDIR/include/harfbuzz/* $INSTALLDIR/include/
     """,
-    # the name of the static library != <name>.a, put it explicitly
+    # working_directory = "freetype",
+    out_include_dir = "include",
     out_static_libs = select({
-        "//conditions:default": ["libharfbuzz.a", "libharfbuzz-subset.a"],
+        "//conditions:default": ["libfreetype.a", "libharfbuzz.a", "libharfbuzz-subset.a"],
     }),
     visibility = ["//visibility:public"],
 )
-
