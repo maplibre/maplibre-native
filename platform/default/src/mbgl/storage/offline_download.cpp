@@ -348,8 +348,8 @@ void OfflineDownload::activateDownload() {
                             Resource::fontGlyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Khmer)));
                         queueResource(
                             Resource::fontGlyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Myanmar)));
-                        queueResource(
-                            Resource::fontGlyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
+                        queueResource(Resource::fontGlyphs(
+                            parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
                     }
                 }
             }
