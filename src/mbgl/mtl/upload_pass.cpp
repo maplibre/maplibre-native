@@ -197,7 +197,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 }
 
 void UploadPass::pushDebugGroup(const char* name) {
-    debugGroups.emplace_back(gfx::DebugGroup<gfx::CommandEncoder>{ commandEncoder, name });
+    debugGroups.emplace_back(gfx::DebugGroup<gfx::CommandEncoder>{commandEncoder, name});
 }
 
 void UploadPass::popDebugGroup() {

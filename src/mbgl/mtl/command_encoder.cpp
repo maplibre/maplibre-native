@@ -40,7 +40,7 @@ void CommandEncoder::pushDebugGroup(const char* name) {
 
     // Apply it to any groups that are already active
     for (auto* pass : passes) {
-        debugGroups.emplace_back(gfx::DebugGroup<gfx::RenderPass>{ *pass, name });
+        debugGroups.emplace_back(gfx::DebugGroup<gfx::RenderPass>{*pass, name});
     }
 }
 

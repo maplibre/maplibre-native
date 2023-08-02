@@ -34,7 +34,7 @@ public:
 
 private:
     friend class RenderPass;
-    
+
     // Track a RenderPass, propagating debug groups to it
     void trackRenderPass(RenderPass*);
     // Stop tracking a RenderPass
@@ -45,7 +45,7 @@ private:
 
 public:
     mtl::Context& context;
-    std::vector<std::pair<std::string,std::size_t>> debugGroupNames;
+    std::vector<std::pair<std::string, std::size_t>> debugGroupNames;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> debugGroups;
     std::unordered_set<RenderPass*> passes;
 };

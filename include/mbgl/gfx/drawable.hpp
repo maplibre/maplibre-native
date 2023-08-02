@@ -165,7 +165,7 @@ public:
 
     /// Sets pre-multiplied alpha blending status for this drawable
     void setPreMultipledAlpha(bool value) { preMultipledAlpha = value; }
-    
+
     /// Get the ID of the tile that this drawable represents, if any
     const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
 
