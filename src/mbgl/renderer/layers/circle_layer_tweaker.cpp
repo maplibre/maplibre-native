@@ -21,28 +21,6 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-#if MLN_RENDER_BACKEND_METAL
-void CircleLayerTweaker::setPropertiesAsUniforms([[maybe_unused]] std::vector<std::string> props) {
-    if (props != propertiesAsUniforms) {
-        propertiesAsUniforms = std::move(props);
-        propertiesChanged = true;
-    }
-}
-bool CircleLayerTweaker::hasPropertyAsUniform(const std::string_view attrName) const {
-    return propertiesAsUniforms.end() !=
-           std::find_if(propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
-               return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
-           });
-}
-#endif // MLN_RENDER_BACKEND_METAL
-
-void CircleLayerTweaker::enableOverdrawInspector(bool value) {
-    if (overdrawInspector != value) {
-        overdrawInspector = value;
-        propertiesChanged = true;
-    }
-}
-
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
@@ -89,7 +67,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .stroke_width = */ {/*.source=*/source(ShaderClass::attributes[6].name), /*.expression=*/{}},
             /* .stroke_opacity = */ {/*.source=*/source(ShaderClass::attributes[7].name), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ {0},
+            /* .pad = */ 0, 0, 0, 0
         };
 
         if (permutationUniformBuffer) {
@@ -97,6 +75,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         } else {
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
+        
+        propertiesChanged = false;
     }
     if (!expressionUniformBuffer) {
         const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,

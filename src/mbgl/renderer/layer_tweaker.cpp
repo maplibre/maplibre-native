@@ -33,4 +33,26 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, state, inViewportPixelUnits);
 }
 
+#if MLN_RENDER_BACKEND_METAL
+void LayerTweaker::setPropertiesAsUniforms(std::vector<std::string> props) {
+    if (props != propertiesAsUniforms) {
+        propertiesAsUniforms = std::move(props);
+        propertiesChanged = true;
+    }
+}
+bool LayerTweaker::hasPropertyAsUniform(const std::string_view attrName) const {
+    return propertiesAsUniforms.end() !=
+           std::find_if(propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
+               return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
+           });
+}
+#endif // MLN_RENDER_BACKEND_METAL
+
+void LayerTweaker::enableOverdrawInspector(bool value) {
+    if (overdrawInspector != value) {
+        overdrawInspector = value;
+        propertiesChanged = true;
+    }
+}
+
 } // namespace mbgl

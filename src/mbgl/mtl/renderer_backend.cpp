@@ -14,6 +14,7 @@
 #include <mbgl/shaders/mtl/background.hpp>
 #include <mbgl/shaders/mtl/background_pattern.hpp>
 #include <mbgl/shaders/mtl/circle.hpp>
+#include <mbgl/shaders/mtl/line.hpp>
 
 #include <cassert>
 #include <string>
@@ -107,10 +108,10 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
-                  shaders::BuiltIn::CircleShader/*,
+                  shaders::BuiltIn::CircleShader,
+                  shaders::BuiltIn::LineShader/*,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
-                  shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineSDFShader,
                   shaders::BuiltIn::LinePatternShader,
                   shaders::BuiltIn::LineGradientShader,

@@ -18,7 +18,6 @@ class LineLayerTweaker : public LayerTweaker {
 public:
     LineLayerTweaker(Immutable<style::LayerProperties> properties)
         : LayerTweaker(properties){};
-
     ~LineLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
@@ -27,6 +26,11 @@ protected:
     gfx::UniformBufferPtr linePropertiesBuffer;
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
     gfx::UniformBufferPtr lineSDFPropertiesBuffer;
+
+#if MLN_RENDER_BACKEND_METAL
+    gfx::UniformBufferPtr permutationUniformBuffer;
+    gfx::UniformBufferPtr expressionUniformBuffer;
+#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

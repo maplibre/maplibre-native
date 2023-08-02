@@ -17,6 +17,8 @@
 #include <cstring>
 #include <utility>
 
+using namespace std::string_literals;
+
 namespace mbgl {
 namespace mtl {
 
@@ -89,7 +91,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
 
     if (!rps || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
-        const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
+        const auto errStr = (errPtr && errPtr[0]) ? ": "s + errPtr : std::string();
         Log::Error(Event::Shader, shaderName + " newRenderPipelineState failed" + errStr);
         assert(false);
     }

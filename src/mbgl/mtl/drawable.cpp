@@ -40,6 +40,18 @@ MTL::Buffer* getMetalBuffer(const gfx::VertexBufferResource* resource_) {
     }
     return nullptr;
 }
+
+#if !defined(NDEBUG)
+std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
+    if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
+        if (const auto& bufferResource = resource->get()) {
+            return bufferResource.getSizeInBytes();
+        }
+    }
+    return 0UL;
+}
+#endif // !defined(NDEBUG)
+
 MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
     switch (type) {
         default:
@@ -135,8 +147,9 @@ void Drawable::draw(PaintParameters& parameters) const {
 
                 const auto primitiveType = getPrimitiveType(mode.type);
                 constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
+                const auto indexOffset = 2 * mlSegment.indexOffset; // in bytes, not indexes
                 encoder->drawIndexedPrimitives(
-                    primitiveType, mlSegment.indexLength, indexType, indexBuffer, mlSegment.indexOffset);
+                    primitiveType, mlSegment.indexLength, indexType, indexBuffer, indexOffset);
             }
         }
     }
@@ -199,6 +212,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
+            assert(getBufferSize(binding->vertexBufferResource) == binding->vertexStride * impl->vertexCount);
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);

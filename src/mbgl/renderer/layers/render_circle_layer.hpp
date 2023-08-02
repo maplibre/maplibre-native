@@ -6,10 +6,14 @@
 
 namespace mbgl {
 
+#if MLN_LEGACY_RENDERER
 class CircleProgram;
-class CircleLayerTweaker;
+#endif // MLN_LEGACY_RENDERER
 
+#if MLN_DRAWABLE_RENDERER
+class CircleLayerTweaker;
 using CircleLayerTweakerPtr = std::shared_ptr<CircleLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
 
 class RenderCircleLayer final : public RenderLayer {
 public:

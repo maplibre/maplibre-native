@@ -1,5 +1,8 @@
 #pragma once
 
+#include <mbgl/util/color.hpp>
+
+#include <array>
 #include <cstdint>
 
 #define MLN_STRINGIZE(X) #X

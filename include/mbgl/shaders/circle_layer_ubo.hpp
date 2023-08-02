@@ -56,7 +56,8 @@ struct alignas(16) CirclePermutationUBO {
     /* 40 */ Attribute stroke_width;
     /* 48 */ Attribute stroke_opacity;
     /* 56 */ bool overdrawInspector;
-    /* 57 */ std::array<uint8_t, 7> pad;
+    /* 57 */ uint8_t pad1, pad2, pad3;
+    /* 60 */ float pad4;
     /* 64 */
 };
 static_assert(sizeof(CirclePermutationUBO) == 4 * 16);
