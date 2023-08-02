@@ -1,4 +1,4 @@
-### [Maplibre Native](https://github.com/maplibre/maplibre-gl-native/)
+### [Maplibre Native](https://github.com/maplibre/maplibre-native/)
 
 ```
 BSD 2-Clause License
