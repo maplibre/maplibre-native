@@ -203,7 +203,11 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     using namespace platform;
 
     assert(textureResource);
-    assert(!samplerStateDirty);
+    
+    // update sampler configuration if needed
+    if (samplerStateDirty) {
+        updateSamplerConfiguration();
+    }
 
     // Bind to TU 0 and upload
     context.activeTextureUnit = 0;
