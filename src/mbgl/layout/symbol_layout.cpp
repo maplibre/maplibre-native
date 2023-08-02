@@ -161,7 +161,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
 
                     auto u16String = applyArabicShaping(util::convertUTF8ToUTF16(u8string));
 
-                    const char16_t* u16Char = &u16String[0];
+                    const char16_t* u16Char = u16String.data();
                     std::u16string subString;
                     GlyphIDType subStringtype = charGlyphIDType(*u16Char, GlyphIDType::FontPBF);
 
@@ -260,8 +260,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
 }
 
 void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
-    for (auto it = features.begin(); it != features.end(); ++it) {
-        auto& feature = *it;
+    for (auto &feature : features) {
         if (feature.geometry.empty()) {
             continue;
         }
@@ -323,7 +322,7 @@ void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
             feature.formattedText = shapedString;
 
         } // feature.formattedText
-    }     // for (auto it = feature ..
+    }     // for (auto & feature : features ..
 
     needfinalizeSymbolsVal = false;
 } // SymbolLayout::finalizeSymbols
