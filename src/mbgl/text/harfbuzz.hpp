@@ -2,8 +2,11 @@
 
 #include "freetype.hpp"
 
-typedef struct hb_font_t hb_font_t;
-typedef struct hb_buffer_t hb_buffer_t;
+struct hb_font_t;
+struct hb_buffer_t;
+
+using hb_font_t = hb_font_t;
+using hb_buffer_t = hb_buffer_t;
 
 namespace mbgl {
 

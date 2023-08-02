@@ -2,8 +2,11 @@
 
 #include "glyph.hpp"
 
-typedef struct FT_FaceRec_ *FT_Face;
-typedef struct FT_LibraryRec_ *FT_Library;
+struct FT_FaceRec_;
+struct FT_LibraryRec_;
+
+using FT_Face = FT_FaceRec_*;
+using FT_Library = FT_LibraryRec_*;
 
 namespace mbgl {
 
