@@ -807,11 +807,11 @@ std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer
 }
 
 void updateTileDrawable(gfx::Drawable& drawable,
-                                         gfx::Context& context,
-                                         const SymbolBucket& bucket,
-                                         const SymbolBucket::PaintProperties& paintProps,
-                                         const SymbolPaintProperties::PossiblyEvaluated& evaluated,
-                                         const TransformState& state) {
+                        gfx::Context& context,
+                        const SymbolBucket& bucket,
+                        const SymbolBucket::PaintProperties& paintProps,
+                        const SymbolPaintProperties::PossiblyEvaluated& evaluated,
+                        const TransformState& state) {
     if (!drawable.getData()) {
         return;
     }
@@ -1085,8 +1085,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             // re-create collision drawables
             collisionTileLayerGroup->removeDrawables(passes, tileID);
-            addCollisionDrawables(false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
-            addCollisionDrawables(true /*isText*/, bucket.hasTextCollisionBoxData(), bucket.hasTextCollisionCircleData());
+            addCollisionDrawables(
+                false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
+            addCollisionDrawables(
+                true /*isText*/, bucket.hasTextCollisionBoxData(), bucket.hasTextCollisionCircleData());
 
             continue;
         }
