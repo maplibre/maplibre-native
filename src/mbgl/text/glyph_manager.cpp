@@ -92,7 +92,7 @@ void GlyphManager::requestRange(GlyphRequest& request,
     }
 
     request.req = fileSource.request(
-        res, [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
+        res, [this, fontStack, range](const Response& response) { processResponse(response, fontStack, range); });
 }
 
 void GlyphManager::processResponse(const Response& res, const FontStack& fontStack, const GlyphRange& range) {
