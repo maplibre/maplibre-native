@@ -225,7 +225,7 @@ target_link_libraries(
         mbgl-compiler-options
         mbgl-benchmark
         -WHOLEARCHIVE:mbgl-benchmark
-        uv_a
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
         shlwapi
 )
 
@@ -241,7 +241,10 @@ target_compile_definitions(
 
 target_link_libraries(
     mbgl-render-test-runner
-    PRIVATE mbgl-compiler-options mbgl-render-test uv_a
+    PRIVATE
+        mbgl-compiler-options
+        mbgl-render-test
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 # Disable benchmarks in CI as they run in VM environment
