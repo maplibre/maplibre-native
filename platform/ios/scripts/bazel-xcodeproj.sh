@@ -36,6 +36,7 @@ while [[ $# -gt 0 ]]; do
    --apikey)
       shift
       token="$1"
+      args+=("--token" "$1")
       shift
       ;;
    -*|--*)
