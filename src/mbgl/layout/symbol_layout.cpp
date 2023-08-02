@@ -260,7 +260,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
 }
 
 void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
-    for (auto &feature : features) {
+    for (auto& feature : features) {
         if (feature.geometry.empty()) {
             continue;
         }
