@@ -508,7 +508,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             /*gapwidth_t =*/std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
             /*offset_t =*/std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
             /*width_t =*/std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
-            0, 0, 0};
+            0,
+            0,
+            0};
         const LinePatternInterpolationUBO linePatternInterpolationUBO{
             /*blur_t =*/std::get<0>(paintPropertyBinders.get<LineBlur>()->interpolationFactor(zoom)),
             /*opacity_t =*/std::get<0>(paintPropertyBinders.get<LineOpacity>()->interpolationFactor(zoom)),
@@ -544,8 +546,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // simple line interpolation UBO
             if (shaderUniforms.get(MLN_STRINGIZE(LineInterpolationUBO))) {
-                drawableUniforms.createOrUpdate(
-                    MLN_STRINGIZE(LineInterpolationUBO), &lineInterpolationUBO, context);
+                drawableUniforms.createOrUpdate(MLN_STRINGIZE(LineInterpolationUBO), &lineInterpolationUBO, context);
             }
             // gradient line interpolation UBO
             else if (shaderUniforms.get(MLN_STRINGIZE(LineGradientInterpolationUBO))) {
@@ -581,8 +582,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                    LineGapWidth,
                                                                                    LineOffset,
                                                                                    LineWidth,
-                                                                                   LineFloorWidth>(
-                paintPropertyBinders, evaluated);
+                                                                                   LineFloorWidth>(paintPropertyBinders,
+                                                                                                   evaluated);
 
             if (!lineSDFShaderGroup) {
                 continue;
@@ -634,7 +635,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (!shader) {
                 continue;
             }
-            
+
 #if MLN_RENDER_BACKEND_METAL
             propertiesAsUniforms = std::move(propertiesAsUniforms_);
             if (tweaker) {
@@ -643,7 +644,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 #endif // MLN_RENDER_BACKEND_METAL
 
             auto builder = createLineBuilder("linePattern", std::move(shader));
-            
+
             // vertices and attributes
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
@@ -684,7 +685,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (!shader) {
                 continue;
             }
-            
+
 #if MLN_RENDER_BACKEND_METAL
             propertiesAsUniforms = std::move(propertiesAsUniforms_);
             if (tweaker) {
@@ -734,11 +735,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                          LineOpacity,
                                                                                          LineGapWidth,
                                                                                          LineOffset,
-                                                                                         LineWidth>(paintPropertyBinders,
-                                                                                                    evaluated);
+                                                                                         LineWidth>(
+                paintPropertyBinders, evaluated);
 
             assert(6 == propertiesAsUniforms_.size());
-            assert(vertexAttrs.size() == (size_t)std::count_if(propertiesAsUniforms_.begin(), propertiesAsUniforms_.end(), [](const auto& s){ return s.empty(); }));
+            assert(vertexAttrs.size() == (size_t)std::count_if(propertiesAsUniforms_.begin(),
+                                                               propertiesAsUniforms_.end(),
+                                                               [](const auto& s) { return s.empty(); }));
 
             if (!lineShaderGroup) {
                 continue;

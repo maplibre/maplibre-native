@@ -40,7 +40,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
                 /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
                 /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                0, 0, 0};
+                0,
+                0,
+                0};
             linePropertiesBuffer = context.createUniformBuffer(&linePropertiesUBO, sizeof(linePropertiesUBO));
         }
         return linePropertiesBuffer;
@@ -54,7 +56,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
                 /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
                 0,
-                0, 0};
+                0,
+                0};
             lineGradientPropertiesBuffer = context.createUniformBuffer(&lineGradientPropertiesUBO,
                                                                        sizeof(lineGradientPropertiesUBO));
         }
@@ -70,7 +73,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
                 /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
                 /*floorwidth =*/evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
-                0, 0};
+                0,
+                0};
             lineSDFPropertiesBuffer = context.createUniformBuffer(&lineSDFPropertiesUBO, sizeof(lineSDFPropertiesUBO));
         }
         return lineSDFPropertiesBuffer;
@@ -94,8 +98,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
             /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0, 0, 0, 0
-        };
+            /* .pad = */ 0,
+            0,
+            0,
+            0};
 
         if (permutationUniformBuffer) {
             permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
@@ -189,7 +195,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
                 /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
                 /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                0, 0, 0};
+                0,
+                0,
+                0};
             uniforms.createOrUpdate(MLN_STRINGIZE(LinePatternPropertiesUBO), &linePatternPropertiesUBO, context);
         }
         // SDF line
@@ -236,7 +244,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 uniforms.addOrReplace(MLN_STRINGIZE(LineSDFPropertiesUBO), getLineSDFPropsBuffer());
             }
         }
-        
+
 #if MLN_RENDER_BACKEND_METAL
         uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
         uniforms.addOrReplace(MLN_STRINGIZE(LinePermutationUBO), permutationUniformBuffer);

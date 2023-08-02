@@ -67,15 +67,17 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .stroke_width = */ {/*.source=*/source(ShaderClass::attributes[6].name), /*.expression=*/{}},
             /* .stroke_opacity = */ {/*.source=*/source(ShaderClass::attributes[7].name), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0, 0, 0, 0
-        };
+            /* .pad = */ 0,
+            0,
+            0,
+            0};
 
         if (permutationUniformBuffer) {
             permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
         } else {
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
-        
+
         propertiesChanged = false;
     }
     if (!expressionUniformBuffer) {

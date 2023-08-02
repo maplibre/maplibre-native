@@ -58,7 +58,7 @@ protected:
 
 protected:
     Immutable<style::LayerProperties> evaluatedProperties;
-    
+
 #if MLN_RENDER_BACKEND_METAL
     std::vector<std::string> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
