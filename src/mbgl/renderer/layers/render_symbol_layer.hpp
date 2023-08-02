@@ -96,6 +96,9 @@ public:
 
 protected:
 #if MLN_DRAWABLE_RENDERER
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&) override;
+
     /// Remove all the drawables for tiles
     void removeAllDrawables() override;
 #endif // MLN_DRAWABLE_RENDERER

@@ -40,7 +40,6 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     auto& context = parameters.context;
     const auto& state = parameters.state;
-    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
