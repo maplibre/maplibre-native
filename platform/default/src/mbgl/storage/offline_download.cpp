@@ -345,11 +345,11 @@ void OfflineDownload::activateDownload() {
 
                     if (!parser.fontURL.empty()) {
                         queueResource(
-                            Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Khmer)));
+                            Resource::fontGlyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Khmer)));
                         queueResource(
-                            Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Myanmar)));
+                            Resource::fontGlyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Myanmar)));
                         queueResource(
-                            Resource::glyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
+                            Resource::fontGlyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
                     }
                 }
             }

@@ -83,7 +83,7 @@ void GlyphManager::requestRange(GlyphRequest& request,
         case GlyphIDType::Khmer:
         case GlyphIDType::Myanmar:
         case GlyphIDType::Devanagari:
-            res = Resource::glyphs(fontURL, fontStack, getGlyphRangeName(range.type));
+            res = Resource::fontGlyphs(fontURL, fontStack, getGlyphRangeName(range.type));
             break;
         case GlyphIDType::FontPBF:
         default:

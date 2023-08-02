@@ -31,7 +31,7 @@ public:
 
     ~SymbolLayout() final = default;
 
-    virtual bool needfinalizeSymbols() override { return needfinalizeSymbolsVal; }
+    bool needfinalizeSymbols() override { return needfinalizeSymbolsVal; }
 
     void finalizeSymbols(HBShapeResults&) override;
 

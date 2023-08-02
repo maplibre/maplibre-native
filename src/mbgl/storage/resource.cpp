@@ -80,9 +80,9 @@ Resource Resource::glyphs(const std::string& urlTemplate,
                     })};
 }
 
-Resource Resource::glyphs(const std::string& urlTemplate,
-                          const FontStack& fontStack,
-                          const std::string& glyphlanguage) {
+Resource Resource::fontGlyphs(const std::string& urlTemplate,
+                              const FontStack& fontStack,
+                              const std::string& glyphlanguage) {
     return Resource{Resource::Kind::Glyphs,
                     util::replaceTokens(urlTemplate, [&](const std::string& token) -> std::optional<std::string> {
                         if (token == "fontstack") {
