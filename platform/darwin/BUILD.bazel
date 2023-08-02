@@ -1,4 +1,217 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
+load(
+    "bazel/files.bzl",
+    "MLN_DARWIN_OBJCPP_HEADERS",
+    "MLN_DARWIN_OBJC_HEADERS",
+    "MLN_DARWIN_PRIVATE_HEADERS",
+    "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
+    "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
+    "MLN_GENERATED_DARWIN_STYLE_HEADERS",
+    "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
+    "MLN_GENERATED_DARWIN_STYLE_SOURCE",
+    "MLN_GENERATED_DARWIN_TEST_CODE",
+)
+load(
+    "@build_bazel_rules_swift//swift:swift.bzl",
+    "swift_library",
+)
+
+filegroup(
+    name = "darwin_private_hdrs",
+    srcs = MLN_DARWIN_PRIVATE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "darwin_objc_hdrs",
+    srcs = MLN_DARWIN_OBJC_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "darwin_objcpp_hdrs",
+    srcs = MLN_DARWIN_OBJCPP_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "darwin_objcpp_srcs",
+    srcs = MLN_DARWIN_PUBLIC_OBJCPP_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "darwin_objc_srcs",
+    srcs = MLN_DARWIN_PUBLIC_OBJC_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "generated_style_srcs",
+    srcs = MLN_GENERATED_DARWIN_STYLE_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "generated_style_hdrs",
+    srcs = MLN_GENERATED_DARWIN_STYLE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "generated_style_public_hdrs",
+    srcs = MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "generated_test_srcs",
+    srcs = MLN_GENERATED_DARWIN_TEST_CODE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "test_ejs_templates",
+    srcs = [
+        "test/MLNDocumentationGuideTests.swift",
+        "test/MLNLightTest.mm.ejs",
+        "test/MLNStyleLayerTests.mm.ejs",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "docs_ejs_templates",
+    srcs = [
+        "docs/guides/For_Style_Authors.md.ejs",
+        "docs/guides/Migrating_to_Expressions.md.ejs",
+        "docs/guides/Tile_URL_Templates.md.ejs",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "generator_data",
+    srcs = [
+        "src/MLNLight.h.ejs",
+        "src/MLNLight.mm.ejs",
+        "src/MLNStyleLayer.h.ejs",
+        "src/MLNStyleLayer.mm.ejs",
+        "src/MLNStyleLayer_Private.h.ejs",
+    ],
+)
+
+genrule(
+    name = "generated_code",
+    srcs = [
+        ":generator_data",
+        ":test_ejs_templates",
+        ":docs_ejs_templates",
+    ],
+    outs = MLN_GENERATED_DARWIN_STYLE_SOURCE +
+           MLN_GENERATED_DARWIN_STYLE_HEADERS + MLN_GENERATED_DARWIN_TEST_CODE,
+    cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)/../../",
+    tools = ["scripts/generate-style-code.js"],
+    visibility = ["//visibility:public"],
+)
+
+objc_library(
+    name = "test_utility",
+    srcs = [
+        "test/MLNTestUtility.h",
+    ],
+    includes = ["test"],
+    visibility = [
+        "//platform/ios/test:__pkg__",
+    ],
+)
+
+objc_library(
+    name = "shared_tests_objc_srcs",
+    srcs = glob(
+        [
+            "test/*.m",
+            "test/*.h",
+        ],
+        allow_empty = False,
+    ),
+    copts = MAPLIBRE_FLAGS + WARNING_FLAGS,
+    data = glob(
+        [
+            "test/Media.xcassets/**",
+        ],
+        allow_empty = False,
+    ),
+    sdk_frameworks = [
+        "MapKit",
+    ],
+    visibility = [
+        "//platform/ios/test:__pkg__",
+    ],
+    deps = [
+        "test_utility",
+        "//platform:ios-sdk",
+    ],
+)
+
+objc_library(
+    name = "shared_tests_objcpp_srcs",
+    srcs = glob(
+        [
+            "test/*.h",
+            "test/*.mm",
+        ],
+        allow_empty = False,
+        exclude = [
+            "test/MLNOfflineStorageTests.mm",
+        ],
+    ),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS + ["-Wno-deprecated-declarations"],
+    visibility = [
+        "//platform/ios/test:__pkg__",
+    ],
+    deps = [
+        "//platform:ios-sdk",
+    ],
+)
+
+swift_library(
+    name = "shared_tests_swift_srcs",
+    testonly = True,
+    srcs = glob(
+        [
+            "test/*.swift",
+        ],
+        allow_empty = False,
+    ),
+    data = [
+        "test/amsterdam.geojson",
+        "test/one-liner.json",
+    ],
+    visibility = [
+        "//platform/ios/test:__pkg__",
+    ],
+    deps = [
+        "//platform:ios-sdk",
+    ],
+)
+
+cc_library(
+    name = "darwin-generated-style-artifacts",
+    srcs = [
+        ":darwin_objc_hdrs",
+        ":darwin_objcpp_hdrs",
+        ":darwin_private_hdrs",
+        ":generated_style_hdrs",
+    ],
+    hdrs = [
+        ":generated_style_hdrs",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":generated_code",
+    ],
+)
 
 # Objc files for the iOS source
 objc_library(
@@ -14,10 +227,14 @@ objc_library(
     copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
         "-fmodules",
     ],
+    defines = [
+        "GLES_SILENCE_DEPRECATION=1",
+        "GL_SILENCE_DEPRECATION=1",
+    ],
     includes = [
         "include",
     ],
-    visibility = ["//platform/ios:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//:mbgl-core",
         "//platform/default:mbgl-default",
@@ -57,7 +274,7 @@ objc_library(
         "CoreText",
         "ImageIO",
     ],
-    visibility = ["//platform/ios:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//:mbgl-core",
         "//platform/default:mbgl-default",
@@ -74,12 +291,32 @@ objc_library(
         "src/timer.cpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    defines = [
+        "GLES_SILENCE_DEPRECATION=1",
+        "GL_SILENCE_DEPRECATION=1",
+    ],
     sdk_frameworks = [
         "OpenGLES",
         "SystemConfiguration",
     ],
-    visibility = ["//platform/default:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//:mbgl-core",
     ],
+)
+
+exports_files(
+    [
+        "test/amsterdam.geojson",
+        "test/MLNSDKTestHelpers.swift",
+        "app/LimeGreenStyleLayer.h",
+        "app/LimeGreenStyleLayer.m",
+        "include/mbgl/util/image+MLNAdditions.hpp",
+        "scripts/check-public-symbols.js",
+        "scripts/check-public-symbols.sh",
+    ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
+    MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
+    MLN_DARWIN_PRIVATE_HEADERS +
+    MLN_DARWIN_OBJC_HEADERS +
+    MLN_DARWIN_OBJCPP_HEADERS,
 )

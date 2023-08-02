@@ -715,9 +715,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
 }
 
 // Test that requests for expired resources have lower priority than requests for new resources
+// Flaky https://github.com/maplibre/maplibre-native/issues/1071
 TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CachedResourceLowPriority)) {
-    GTEST_SKIP() << "Skipping MainResourceLoader.CachedResourceLowPriority. "
-                 << "See https://github.com/maplibre/maplibre-native/issues/1071";
     util::RunLoop loop;
     MainResourceLoader fs(ResourceOptions{}, ClientOptions{});
 
