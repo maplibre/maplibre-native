@@ -15,7 +15,9 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
       commandEncoder(commandEncoder_) {
     auto& resource = descriptor.renderable.getResource<RenderableResource>();
 
-    resource.bind();
+    if (!resource.getCommandBuffer()) {
+        resource.bind();
+    }
 
     if (const auto& buffer = resource.getCommandBuffer()) {
         if (auto rpd = resource.getRenderPassDescriptor()) {

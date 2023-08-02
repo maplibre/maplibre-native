@@ -5,6 +5,9 @@
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
+
+#include <Foundation/NSSharedPtr.hpp>
 
 #include <vector>
 
@@ -12,6 +15,7 @@ namespace mbgl {
 namespace gfx {
 
 class CommandEncoder;
+class Renderable;
 class VertexVectorBase;
 using VertexVectorBasePtr = std::shared_ptr<VertexVectorBase>;
 
@@ -36,17 +40,11 @@ public:
 
 class UploadPass final : public gfx::UploadPass {
 public:
-    UploadPass(CommandEncoder&, const char* name);
+    UploadPass(gfx::Renderable&, CommandEncoder&, const char* name);
+    ~UploadPass() override;
 
-private:
-    void pushDebugGroup(const char* name) override;
-    void popDebugGroup() override;
-
-public:
-#if MLN_DRAWABLE_RENDERER
     gfx::Context& getContext() override;
     const gfx::Context& getContext() const override;
-#endif
 
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
@@ -60,7 +58,6 @@ public:
 
     void updateResource(BufferResource&, const void* data, std::size_t size);
 
-#if MLN_DRAWABLE_RENDERER
     const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, gfx::BufferUsageType);
 
     gfx::AttributeBindingArray buildAttributeBindings(
@@ -72,9 +69,7 @@ public:
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
         /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
-#endif
 
-public:
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
                                                                 const void* data,
                                                                 gfx::TexturePixelType,
@@ -91,8 +86,16 @@ public:
                                   gfx::TextureChannelDataType) override;
 
 private:
+    void pushDebugGroup(const char* name) override;
+    void popDebugGroup() override;
+
+    void endEncoding();
+
+private:
     CommandEncoder& commandEncoder;
-    std::vector<gfx::DebugGroup<gfx::CommandEncoder>> debugGroups;
+    MTLCommandBufferPtr buffer;
+    MTLBlitCommandEncoderPtr encoder;
+    std::vector<gfx::DebugGroup<gfx::UploadPass>> debugGroups;
 };
 
 } // namespace mtl

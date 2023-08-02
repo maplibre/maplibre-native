@@ -66,6 +66,11 @@ public:
         return commandBufferPtr;
     }
 
+    virtual mbgl::mtl::MTLBlitPassDescriptorPtr getUploadPassDescriptor() const override {
+        // Create from render pass descriptor?
+        return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init());
+    }
+
     mbgl::mtl::MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
         return NS::RetainPtr((__bridge MTL::RenderPassDescriptor*)mtlView.currentRenderPassDescriptor);
     }
@@ -73,6 +78,8 @@ public:
     void swap() override {
         [commandBuffer presentDrawable:currentDrawable];
         [commandBuffer commit];
+        commandBuffer = nil;
+        commandBufferPtr.reset();
     }
 
     mbgl::Size framebufferSize() {
