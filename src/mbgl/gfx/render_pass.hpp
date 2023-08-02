@@ -16,7 +16,6 @@ public:
     std::optional<Color> clearColor;
     std::optional<float> clearDepth;
     std::optional<int32_t> clearStencil;
-    bool preMultipledAlpha = true;
 };
 
 class RenderPass {

@@ -28,7 +28,8 @@ ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFun
       fragmentFunction(std::move(frag)) {}
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::RenderPassDescriptor& renderPassDescriptor,
-                                                                const MTLVertexDescriptorPtr& vertexDescriptor) const {
+                                                                const MTLVertexDescriptorPtr& vertexDescriptor,
+                                                                bool preMultipledAlpha) const {
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     const auto& renderable = renderPassDescriptor.renderable;
@@ -62,8 +63,8 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     desc->setVertexDescriptor(vertexDescriptor.get());
 
     if (auto* colorTarget = desc->colorAttachments()->object(0)) {
-        const auto srcFactor = renderPassDescriptor.preMultipledAlpha ? MTL::BlendFactorOne
-                                                                      : MTL::BlendFactorSourceAlpha;
+        const auto srcFactor = preMultipledAlpha ? MTL::BlendFactorOne
+                                                 : MTL::BlendFactorSourceAlpha;
 
         colorTarget->setPixelFormat(colorFormat);
         colorTarget->setBlendingEnabled(true);
