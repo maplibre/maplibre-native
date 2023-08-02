@@ -195,7 +195,7 @@ private:
 #if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
-    using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
+    using LayerGroupMap = std::multimap<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
 

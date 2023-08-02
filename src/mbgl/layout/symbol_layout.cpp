@@ -1124,7 +1124,7 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 if (collisionBuffer.segments.empty() || collisionBuffer.segments.back().vertexLength + vertexLength >
                                                             std::numeric_limits<uint16_t>::max()) {
                     collisionBuffer.segments.emplace_back(
-                        collisionBuffer.vertices.elements(),
+                        collisionBuffer.vertices().elements(),
                         feature.alongLine ? (isText ? bucket.textCollisionCircle->triangles.elements()
                                                     : bucket.iconCollisionCircle->triangles.elements())
                                           : (isText ? bucket.textCollisionBox->lines.elements()
@@ -1134,23 +1134,23 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 auto& segment = collisionBuffer.segments.back();
                 auto index = static_cast<uint16_t>(segment.vertexLength);
 
-                collisionBuffer.vertices.emplace_back(
+                collisionBuffer.vertices().emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.anchor.point, tl));
-                collisionBuffer.vertices.emplace_back(
+                collisionBuffer.vertices().emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.anchor.point, tr));
-                collisionBuffer.vertices.emplace_back(
+                collisionBuffer.vertices().emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.anchor.point, br));
-                collisionBuffer.vertices.emplace_back(
+                collisionBuffer.vertices().emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.anchor.point, bl));
 
                 // Dynamic vertices are initialized so that the vertex count
                 // always agrees with the layout vertex buffer, but they will
                 // always be updated before rendering happens
                 auto dynamicVertex = CollisionBoxProgram::dynamicVertex(false, false, {});
-                collisionBuffer.dynamicVertices.emplace_back(dynamicVertex);
-                collisionBuffer.dynamicVertices.emplace_back(dynamicVertex);
-                collisionBuffer.dynamicVertices.emplace_back(dynamicVertex);
-                collisionBuffer.dynamicVertices.emplace_back(dynamicVertex);
+                collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
+                collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
+                collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
+                collisionBuffer.dynamicVertices().emplace_back(dynamicVertex);
 
                 if (feature.alongLine) {
                     auto& collisionCircle = (isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle);
