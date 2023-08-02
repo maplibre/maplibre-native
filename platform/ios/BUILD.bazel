@@ -5,6 +5,7 @@ load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
     "xcodeproj",
+    "xcode_schemes",
 )
 load("//platform/ios/bazel:macros.bzl", "info_plist")
 load("//platform/ios/bazel:config.bzl", "BUNDLE_ID_PREFIX")
@@ -165,7 +166,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["app/Info.plist"],
+    infoplists = ["build/Info-app.plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,

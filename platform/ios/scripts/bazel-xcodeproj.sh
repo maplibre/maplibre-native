@@ -1,28 +1,55 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
 echo "------ Determining Maplibre version and hash ------"
-
 sem_version=0.0.0
 hash=$(git log | head -1 | awk '{ print $2 }' | cut -c 1-10) && true
 
-# Move and configure the info plists with the semantic version and hash.
-temp_info_static_plist="platform/ios/build/Info-static.plist"
-temp_info_plist="platform/ios/build/Info.plist"
+echo "------ Configuring project ------"
 
-if [ ! -d platform/ios/build ]; then
-   mkdir platform/ios/build
-fi
+# Build parameters
+token_file=~/.maplibre
+token_file2=~/maplibre
+token="$(cat $token_file 2>/dev/null || cat $token_file2 2>/dev/null || echo $MLN_API_KEY)"
+flavor="legacy" # Renderer build flavor: legacy, drawable, split
 
-cp platform/ios/framework/Info-static.plist "$temp_info_static_plist"
-cp platform/ios/framework/Info.plist "$temp_info_plist"
+args=("--sem-ver" "$sem_version" "--hash" "$hash")
 
-plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
-plutil -replace MLNCommitHash -string "$hash" "$temp_info_static_plist"
-plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_plist"
-plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
+while [[ $# -gt 0 ]]; do
+   case $1 in
+   --flavor)
+      shift
+      flavor="$1"
+      shift
+      ;;
+   --teamid)
+      shift
+      args+=("--team-id" "$1")
+      shift
+      ;;
+   --bundleidprefix)
+      shift
+      args+=("--bundleidprefix" "$1")
+      shift
+      ;;
+   --apikey)
+      shift
+      token="$1"
+      shift
+      ;;
+   -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+   esac
+done
+
+bash "platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
-bazel run //platform/ios:xcodeproj
+# Generate the Xcode project
+# Example invocation: ./bazel-xcodeproj.sh flavor split teamid 1234567890
+# Find your team ID inside a .mobileprovision file or in your keychain (Apple development: your@email -> Get Info -> Organizational Unit)
+bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=$flavor --//:maplibre_platform=ios"

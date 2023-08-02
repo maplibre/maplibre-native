@@ -1,7 +1,7 @@
 #include <GLES3/gl3.h>
 #include <android/log.h>
 #include <jni.h>
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <sstream>
 
 // DEBUGGING

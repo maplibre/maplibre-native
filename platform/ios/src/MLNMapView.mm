@@ -12,7 +12,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/transition_options.hpp>
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/math/wrap.hpp>
 #include <mbgl/util/client_options.hpp>
@@ -1131,7 +1131,7 @@ public:
 - (CGSize)sizeForOrnament:(UIView *)view
               constraints:(NSMutableArray *)constraints {
     // avoid regenerating size constraints
-    CGSize size;
+    CGSize size = view.bounds.size;
     if(constraints && constraints.count > 0) {
         for (NSLayoutConstraint * constraint in constraints) {
             if([constraint.identifier isEqualToString:@"width"]) {
@@ -1142,10 +1142,7 @@ public:
             }
         }
     }
-    else {
-        size = view.bounds.size;
-    }
-    
+
     return size;
 }
 

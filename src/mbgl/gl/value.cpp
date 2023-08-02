@@ -483,7 +483,7 @@ GLint components(const gfx::AttributeDataType type) {
 #endif
 
 void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocation location) {
-    if (binding) {
+    if (binding && binding->vertexBufferResource) {
         context.vertexBuffer = reinterpret_cast<const gl::VertexBufferResource&>(*binding->vertexBufferResource).buffer;
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(location));
         MBGL_CHECK_ERROR(glVertexAttribPointer(

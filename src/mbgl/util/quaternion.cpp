@@ -1,4 +1,4 @@
-#include "quaternion.hpp"
+#include <mbgl/util/quaternion.hpp>
 #include <cassert>
 #include <cmath>
 

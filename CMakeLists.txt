@@ -11,6 +11,10 @@ option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
+option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
+option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
+option(MLN_RENDERER_SPLIT_VIEW "Enable a split view if both renderers are enabled" ON)
+option(MLN_RENDERER_QUAD_SPLIT_VIEW "When using split view, split opaque and translucent passes as well" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -22,7 +26,7 @@ if (MLN_WITH_CLANG_TIDY)
     # TODO: there are options which are only available on GCC(e.g. -Werror=maybe-uninitialized), 
     # that's why we need to disable this `unknown-warning-option` here. 
     # We could check if current compiler supports particular flag before enabling it.
-    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-error=unknown-warning-option")
+    set(CLANG_TIDY_COMMAND "${CLANG_TIDY_COMMAND};--extra-arg=-Wno-unknown-warning-option;--extra-arg=-Wno-pragmas")
 endif()
 
 if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -84,6 +88,8 @@ target_compile_options(
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=maybe-uninitialized>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=return-type>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=unknown-pragmas>
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-error=pragmas>
+        $<$<CXX_COMPILER_ID:AppleClang>:-Wno-unknown-warning-option>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=deprecated-declarations>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=unused-parameter>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=unused-property-ivar>
@@ -130,6 +136,94 @@ else()
     add_library(mbgl-core STATIC)
 endif()
 
+if(MLN_DRAWABLE_RENDERER)
+    list(APPEND INCLUDE_FILES
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_atlases_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_custom_layer_host_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/texture2d.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/change_request.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_group.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/render_target.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program_mtl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
+        
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/render_target_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
+    )
+    list(APPEND SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_target.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_target_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/change_request.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/tile_layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/background_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/circle_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_extrusion_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_prepare_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program_mtl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
+    )
+endif()
+
 list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor_ref.hpp
@@ -140,11 +234,14 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/scheduler.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_registry.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_extrusion_layer_factory.hpp
@@ -286,6 +383,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/compression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/constants.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/convert.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/default_style.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/enum.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/event.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/exception.hpp
@@ -309,7 +407,6 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/run_loop.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/util/default_style.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp
@@ -371,10 +468,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/types.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/upload_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_buffer.hpp
@@ -810,6 +907,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/dtoa.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/dtoa.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/event.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/filesystem.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/font_stack.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/geo.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/geojson_impl.cpp
@@ -877,13 +975,19 @@ if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
+        PRIVATE
+            MBGL_RENDER_BACKEND_OPENGL=1
+            "MLN_RENDERER_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_SPLIT_VIEW}>"
+            "MLN_RENDERER_QUAD_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_QUAD_SPLIT_VIEW}>"
+        PUBLIC
+            "MLN_LEGACY_RENDERER=$<BOOL:${MLN_LEGACY_RENDERER}>"
+            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"    
     )
     list(APPEND 
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/custom_layer_factory.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
@@ -891,8 +995,31 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_source.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_group_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/prelude.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_gradient.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line_sdf.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_extrusion_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_hillshade_prepare.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf_text.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_sdf_icon.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/clipping_mask.hpp
@@ -927,10 +1054,10 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer_factory.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer_impl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/custom_layer_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/defines.hpp
@@ -946,8 +1073,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/program.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_custom_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_custom_layer.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.hpp
@@ -977,6 +1104,26 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
+    )
+endif()
+
+if(MBGL_WITH_METAL)
+    message(STATUS "Configuring Metal renderer backend")
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MBGL_RENDER_BACKEND_METAL=1
+    )
+    list(APPEND 
+        INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_tweaker.hpp
+    )
+    list(APPEND 
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_tweaker.cpp
     )
 endif()
 
