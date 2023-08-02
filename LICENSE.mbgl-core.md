@@ -1,7 +1,13 @@
-### [Mapbox GL Native](https://github.com/mapbox/mapbox-gl-native) by Mapbox
+### [Maplibre Native](https://github.com/maplibre/maplibre-native/)
 
 ```
-mapbox-gl-native Copyright (c) 2014-2020 Mapbox.
+BSD 2-Clause License
+
+Copyright (c) 2021 MapLibre contributors
+
+Copyright (c) 2018-2021 MapTiler.com
+
+Copyright (c) 2014-2020 Mapbox
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
