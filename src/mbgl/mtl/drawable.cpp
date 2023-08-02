@@ -371,7 +371,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                               vertexBuffers);
         impl->attributeBuffers = std::move(vertexBuffers);
 
-        impl->vertexAttributes.visitAttributes([](const auto&, gfx::VertexAttribute& attrib){ attrib.setDirty(false); });
+        impl->vertexAttributes.visitAttributes(
+            [](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
         // Create a layout descriptor for each group of vertexes described by a segment
         for (const auto& iseg : impl->segments) {

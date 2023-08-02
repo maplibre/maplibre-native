@@ -17,7 +17,6 @@ namespace mtl {
 
 UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
-
     auto& resource = renderable.getResource<RenderableResource>();
 
     if (!resource.getCommandBuffer()) {

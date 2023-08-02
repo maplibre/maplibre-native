@@ -121,7 +121,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
     {
-        const auto uploadPass = parameters.encoder->createUploadPass("upload", parameters.backend.getDefaultRenderable());
+        const auto uploadPass = parameters.encoder->createUploadPass("upload",
+                                                                     parameters.backend.getDefaultRenderable());
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass->createDebugGroup("upload");
 #endif
@@ -155,7 +156,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Upload layer groups
     {
-        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload", parameters.backend.getDefaultRenderable());
+        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload",
+                                                                     parameters.backend.getDefaultRenderable());
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
 #endif

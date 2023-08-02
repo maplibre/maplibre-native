@@ -59,6 +59,7 @@ protected:
         std::size_t renderGroups;
         std::size_t uploadGroups;
     };
+
 protected:
     mtl::Context& context;
     std::vector<GroupEntry> debugGroupNames;
