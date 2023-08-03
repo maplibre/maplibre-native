@@ -31,7 +31,7 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(11, true, false, ExpressionInputsUBO),
     };
     static constexpr TextureInfo textures[] = {
-        {0, "u_image" },
+        {0, "u_image"},
     };
 
     static constexpr auto source = R"(
