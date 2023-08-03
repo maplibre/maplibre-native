@@ -1253,6 +1253,25 @@ MLN_EXPORT
  */
 - (void)flyToCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion;
 
+
+/**
+ Moves the viewpoint to a different location using a transition animation that
+ evokes powered flight and an optional transition duration and peak altitude.
+
+ The transition animation seamlessly incorporates zooming and panning to help
+ the user find his or her bearings even after traversing a great distance.
+
+ @param camera The new viewpoint.
+ @param duration The amount of time, measured in seconds, that the transition
+    animation should take. Specify `0` to jump to the new viewpoint
+    instantaneously. Specify a negative value to use the default duration, which
+    is based on the length of the flight path.
+ @param edgePadding The minimum padding (in screen points) that would be visible
+ around the returned camera object if it were set as the receiver’s camera.
+ @param completion The block to execute after the animation finishes.
+ */
+- (void)flyToCamera:(MLNMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion;
+
 /**
  Returns the camera that best fits the given coordinate bounds.
 

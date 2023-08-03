@@ -4200,6 +4200,14 @@ static void *windowScreenContext = &windowScreenContext;
     [self _flyToCamera:camera edgePadding:self.contentInset withDuration:duration peakAltitude:peakAltitude completionHandler:completion];
 }
 
+- (void)flyToCamera:(MLNMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion {
+    UIEdgeInsets finalEdgeInsets = UIEdgeInsetsMake(self.contentInset.top + insets.top,
+                                                    self.contentInset.left + insets.left,
+                                                    self.contentInset.bottom + insets.bottom,
+                                                    self.contentInset.right + insets.right);
+    [self _flyToCamera:camera edgePadding:finalEdgeInsets withDuration:duration peakAltitude:-1 completionHandler:completion];
+}
+
 - (void)_flyToCamera:(MLNMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion
 {
     if (!_mbglMap)
@@ -4240,15 +4248,6 @@ static void *windowScreenContext = &windowScreenContext;
         animationOptions.transitionFinishFn = [pendingCompletion]() {
             dispatch_async(dispatch_get_main_queue(), pendingCompletion);
         };
-    }
-    
-    if ([self.camera isEqualToMapCamera:camera] && UIEdgeInsetsEqualToEdgeInsets(_contentInset, insets))
-    {
-        if (pendingCompletion)
-        {
-            [self animateWithDelay:duration animations:pendingCompletion];
-        }
-        return;
     }
 
     [self willChangeValueForKey:@"camera"];
