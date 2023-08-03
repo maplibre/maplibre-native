@@ -93,6 +93,15 @@ else()
     )
 endif()
 
+if (DEFINED ENV{CI})
+    message("Building for CI")
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE
+            CI_BUILD=1
+    )
+endif()
+
 # FIXME: Should not be needed, but now needed by node because of the headless frontend.
 target_include_directories(
     mbgl-core
@@ -153,8 +162,18 @@ add_executable(
 
 target_compile_definitions(
     mbgl-test-runner
-    PRIVATE WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
+    PRIVATE
+        WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
 )
+
+if (DEFINED ENV{CI})
+    message("Building for CI")
+    target_compile_definitions(
+        mbgl-test-runner
+        PRIVATE
+            CI_BUILD=1
+    )
+endif()
 
 target_link_libraries(
     mbgl-test-runner

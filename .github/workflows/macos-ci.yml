@@ -71,52 +71,12 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Install macos dependencies
-        run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: /user/local/lib/node_modules
-          key: ${{ runner.macos }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.macos }}-build-${{ env.cache-name }}-
-            ${{ runner.macos }}-build-
-            ${{ runner.macos }}-
-
       - uses: actions/setup-node@v3
         with:
           node-version: 18
       
       - name: npm install
         run: npm ci --ignore-scripts
-
-      - name: Prepare ccache
-        run: ccache --clear
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
 
       - name: Run macOS Objective-C tests
         run: |
@@ -128,9 +88,9 @@ jobs:
 
       - name: Run macOS C++ unit tests
         run: |
-          cmake -S . -B $BUILD_DIR
-          cmake --build $BUILD_DIR --target mbgl-test-runner
-          ctest -VV --test-dir $BUILD_DIR -R mbgl-test-runner
+          cmake -S . -B "$BUILD_DIR"
+          cmake --build "$BUILD_DIR" --target mbgl-test-runner
+          ctest -VV --test-dir "$BUILD_DIR" -R mbgl-test-runner
         env:
           BUILD_DIR: ../../../maplibre-gl-native-macostestbuild
 
