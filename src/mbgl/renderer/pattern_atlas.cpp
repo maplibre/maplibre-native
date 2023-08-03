@@ -107,18 +107,14 @@ void PatternAtlas::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     dirty = false;
 }
 
+#if MLN_LEGACY_RENDERER
 // @note: Deprecated
 gfx::TextureBinding PatternAtlas::textureBinding() const {
-#if MLN_DRAWABLE_RENDERER
-    assert(atlasTexture2D);
-    assert(!dirty);
-    return {atlasTexture2D->getResource(), gfx::TextureFilterType::Linear};
-#else
     assert(atlasTexture);
     assert(!dirty);
     return {atlasTexture->getResource(), gfx::TextureFilterType::Linear};
-#endif
 }
+#endif
 
 #if MLN_DRAWABLE_RENDERER
 const std::shared_ptr<gfx::Texture2D>& PatternAtlas::texture() const {

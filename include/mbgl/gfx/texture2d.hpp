@@ -102,11 +102,6 @@ public:
     /// @see needsUpload
     virtual void upload() noexcept = 0;
 
-    /// @brief Get the underlying GL texture resource
-    /// @note: Compat with legacy textures, to be refactored
-    /// @return gfx::TextureResource
-    virtual gfx::TextureResource& getResource() const = 0;
-
     /// @brief Check whether the texture needs upload
     virtual bool needsUpload() const noexcept = 0;
 };
