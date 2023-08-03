@@ -9,7 +9,8 @@
 namespace mbgl {
 
 LayerTweaker::LayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-    : id(std::move(id)), evaluatedProperties(std::move(properties)) {}
+    : id(std::move(id)),
+      evaluatedProperties(std::move(properties)) {}
 
 mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  const RenderTree& renderTree,

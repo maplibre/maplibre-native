@@ -68,7 +68,8 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
 
 #if MLN_DRAWABLE_RENDERER
     if (renderTarget) {
-        renderTarget->getLayerGroup(0)->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
+        renderTarget->getLayerGroup(0)->setLayerTweaker(
+            std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
     }
     if (layerGroup) {
         layerGroup->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));

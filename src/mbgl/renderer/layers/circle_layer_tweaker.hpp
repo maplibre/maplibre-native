@@ -13,7 +13,7 @@ namespace mbgl {
 class CircleLayerTweaker : public LayerTweaker {
 public:
     CircleLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-        : LayerTweaker(std::move(id), properties){}
+        : LayerTweaker(std::move(id), properties) {}
     ~CircleLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;

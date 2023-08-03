@@ -141,7 +141,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
             const auto& mode = segment.getMode();
-            if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, preMultipledAlpha)) {
+            if (auto state = shaderMTL.getRenderPipelineState(
+                    renderPassDescriptor, impl->vertexDesc, preMultipledAlpha)) {
                 encoder->setRenderPipelineState(state.get());
             } else {
                 assert(!"Failed to create render pipeline state");
@@ -153,7 +154,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             constexpr auto indexSize = sizeof(std::uint16_t);
             constexpr NS::UInteger instanceCount = 1;
             constexpr NS::UInteger baseInstance = 0;
-            const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize * mlSegment.indexOffset); // in bytes, not indexes
+            const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize *
+                                                                       mlSegment.indexOffset); // in bytes, not indexes
             const NS::Integer baseVertex = static_cast<NS::Integer>(mlSegment.vertexOffset);
             encoder->drawIndexedPrimitives(primitiveType,
                                            mlSegment.indexLength,
@@ -368,7 +370,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& contextBase = uploadPass.getContext();
     auto& context = static_cast<Context&>(contextBase);
 
-    const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;;
+    const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;
+    ;
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
@@ -419,7 +422,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
             auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
             layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
-            layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex : MTL::VertexStepFunctionConstant);
+            layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
+                                                                      : MTL::VertexStepFunctionConstant);
             layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
 
             vertDesc->attributes()->setObject(attribDesc.get(), index);

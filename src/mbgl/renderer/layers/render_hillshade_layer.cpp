@@ -371,7 +371,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             if (!singleTileLayerGroup) {
                 return;
             }
-            singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties));
+            singleTileLayerGroup->setLayerTweaker(
+                std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties));
             renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
 
             gfx::VertexAttributeArray hillshadePrepareVertexAttrs;

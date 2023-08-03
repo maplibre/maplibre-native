@@ -10,7 +10,7 @@ namespace mbgl {
 class HeatmapLayerTweaker : public LayerTweaker {
 public:
     HeatmapLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-        : LayerTweaker(std::move(id), properties){}
+        : LayerTweaker(std::move(id), properties) {}
 
 public:
     ~HeatmapLayerTweaker() override = default;

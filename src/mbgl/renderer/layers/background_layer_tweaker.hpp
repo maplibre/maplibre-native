@@ -20,7 +20,7 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 class BackgroundLayerTweaker : public LayerTweaker {
 public:
     BackgroundLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-        : LayerTweaker(std::move(id), properties){}
+        : LayerTweaker(std::move(id), properties) {}
 
 public:
     ~BackgroundLayerTweaker() override = default;
