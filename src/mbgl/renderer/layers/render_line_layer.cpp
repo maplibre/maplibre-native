@@ -629,6 +629,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                    LinePattern>(paintPropertyBinders,
                                                                                                 evaluated);
 
+            if (!linePatternShaderGroup) {
+                continue;
+            }
             auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms_);
             if (!shader) {
                 continue;

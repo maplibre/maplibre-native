@@ -94,6 +94,81 @@ float4 colorFor(device const Attribute& attrib,
     }
 }
 
+// The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
+// in a byte (-128..127). We scale regular normals up to length 63, but there are also
+// "special" normals that have a bigger length (of up to 126 in this case).
+constant float LINE_NORMAL_SCALE = 1.0 / (127 / 2);
+
+// The attribute conveying progress along a line is scaled to [0, 2^15).
+constant float MAX_LINE_DISTANCE = 32767.0;
+
+struct alignas(16) LineUBO {
+    float4x4 matrix;
+    float2 units_to_pixels;
+    float ratio;
+    float device_pixel_ratio;
+};
+
+struct alignas(16) LineGradientUBO {
+    float4x4 matrix;
+    float2 units_to_pixels;
+    float ratio;
+    float device_pixel_ratio;
+};
+
+struct alignas(16) LinePropertiesUBO {
+    float4 color;
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float pad1, pad2, pad3;
+};
+
+struct alignas(16) LineGradientPropertiesUBO {
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float pad1, pad2, pad3;
+};
+
+struct alignas(16) LinePermutationUBO {
+    Attribute color;
+    Attribute blur;
+    Attribute opacity;
+    Attribute gapwidth;
+    Attribute offset;
+    Attribute width;
+    Attribute floorwidth;
+    Attribute pattern_from;
+    Attribute pattern_to;
+    bool overdrawInspector;
+    uint8_t pad1, pad2, pad3;
+    float pad4;
+};
+
+struct alignas(16) LineInterpolationUBO {
+    float color_t;
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float pad1, pad2;
+};
+
+struct alignas(16) LineGradientInterpolationUBO {
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float pad1, pad2, pad3;
+};
+
 )";
 
 }

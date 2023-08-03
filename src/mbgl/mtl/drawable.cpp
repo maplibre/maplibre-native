@@ -286,9 +286,29 @@ void Drawable::unbindUniformBuffers(const RenderPass& renderPass) const {
     }
 }
 
-void Drawable::bindTextures(const RenderPass& renderPass) const {}
+void Drawable::bindTextures(const RenderPass& renderPass) const {
+    const auto& encoder = renderPass.getMetalEncoder();
 
-void Drawable::unbindTextures(const RenderPass& renderPass) const {}
+    NS::UInteger index = 0;
+    for (const auto& pair : textures) {
+        MTL::Texture* metalTex = nullptr;
+        if (pair.second) {
+            const auto& tex = static_cast<Texture2D&>(*pair.second);
+            const auto& resource = static_cast<TextureResource&>(tex.getResource());
+            metalTex = resource.getMetalTexture();
+        }
+        encoder->setVertexTexture(metalTex, index);
+    }
+}
+
+void Drawable::unbindTextures(const RenderPass& renderPass) const {
+    const auto& encoder = renderPass.getMetalEncoder();
+
+    NS::UInteger index = 0;
+    for (const auto& pair : textures) {
+        encoder->setVertexTexture(nullptr, index);
+    }
+}
 
 namespace {
 MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {

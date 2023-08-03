@@ -21,6 +21,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(1, true, true, BackgroundLayerUBO),
         MLN_MTL_UNIFORM_BLOCK(2, true, false, BackgroundDrawableUBO),
     };
+    static constexpr TextureInfo textures[] = {};
 
     static constexpr auto source = R"(
 #include <metal_stdlib>

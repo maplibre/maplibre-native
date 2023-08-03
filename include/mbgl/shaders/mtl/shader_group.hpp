@@ -61,6 +61,9 @@ public:
             for (const auto& uniform : ShaderClass::uniforms) {
                 shader->initUniformBlock(uniform);
             }
+            for (const auto& texture : ShaderClass::textures) {
+                shader->initTexture(texture);
+            }
         }
         return shader;
     }

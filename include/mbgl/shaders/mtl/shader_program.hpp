@@ -10,6 +10,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace mbgl {
 namespace shaders {
@@ -24,6 +25,10 @@ struct UniformBlockInfo {
     bool vertex;
     bool fragment;
     std::size_t size;
+    std::string_view name;
+};
+struct TextureInfo {
+    std::size_t index;
     std::string_view name;
 };
 } // namespace shaders
@@ -58,6 +63,7 @@ public:
 
     void initAttribute(const shaders::AttributeInfo&);
     void initUniformBlock(const shaders::UniformBlockInfo&);
+    void initTexture(const shaders::TextureInfo&);
 
 protected:
     std::string shaderName;
@@ -66,6 +72,7 @@ protected:
     MTLFunctionPtr fragmentFunction;
     UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
+    std::vector<std::string> textureBindings;
 };
 
 } // namespace mtl

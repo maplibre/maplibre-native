@@ -100,6 +100,13 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
 }
 
 std::optional<uint32_t> ShaderProgram::getSamplerLocation(std::string_view name) const {
+    std::size_t index = 0;
+    for (const auto& bindingName : textureBindings) {
+        if (bindingName == name) {
+            return index;
+        }
+        index += 1;
+    }
     return std::nullopt;
 }
 
@@ -113,6 +120,11 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);
     }
+}
+
+void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
+    textureBindings.resize(std::max(textureBindings.size(), info.index + 1));
+    textureBindings[info.index] = info.name;
 }
 
 } // namespace mtl

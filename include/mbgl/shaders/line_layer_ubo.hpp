@@ -13,6 +13,8 @@ struct alignas(16) LineUBO {
 };
 static_assert(sizeof(LineUBO) % 16 == 0);
 
+using LineGradientUBO = LineUBO;
+
 struct alignas(16) LinePropertiesUBO {
     Color color;
     float blur;
@@ -23,14 +25,6 @@ struct alignas(16) LinePropertiesUBO {
     float pad1, pad2, pad3;
 };
 static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
-
-struct alignas(16) LineGradientUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 2> units_to_pixels;
-    float ratio;
-    float device_pixel_ratio;
-};
-static_assert(sizeof(LineGradientUBO) % 16 == 0);
 
 struct alignas(16) LineGradientPropertiesUBO {
     float blur;
