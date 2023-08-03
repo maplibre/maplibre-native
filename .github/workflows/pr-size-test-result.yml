@@ -12,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - run: echo "${{ toJSON(github.event.workflow_run) }}"
+
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: size-test-result
