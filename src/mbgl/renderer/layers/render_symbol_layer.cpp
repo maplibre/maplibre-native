@@ -374,7 +374,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -855,7 +855,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
+            layerGroup_->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties));
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }

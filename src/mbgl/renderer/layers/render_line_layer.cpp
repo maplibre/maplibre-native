@@ -80,7 +80,7 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup && layerGroup->getLayerTweaker()) {
-        layerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif
 }
@@ -362,7 +362,7 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 
 void RenderLineLayer::updateLayerTweaker() {
     if (layerGroup) {
-        tweaker = std::make_shared<LineLayerTweaker>(evaluatedProperties);
+        tweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
 #if MLN_RENDER_BACKEND_METAL
         tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
 #endif // MLN_RENDER_BACKEND_METAL
@@ -445,7 +445,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     auto addAttributes =
         [&](gfx::DrawableBuilder& builder, const LineBucket& bucket, gfx::VertexAttributeArray&& vertexAttrs) {
             const auto vertexCount = bucket.vertices.elements();
-            builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
+            builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
 
             if (const auto& attr = vertexAttrs.add(VertexAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,

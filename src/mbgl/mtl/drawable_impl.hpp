@@ -32,6 +32,8 @@ public:
 
     std::vector<UniqueDrawSegment> segments;
 
+    MTLVertexDescriptorPtr vertexDesc;
+
     /*
         std::vector<TextureID> textures;
     */
@@ -59,11 +61,7 @@ struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {
         : gfx::Drawable::DrawSegment(mode_, std::move(segment_)) {}
     ~DrawSegment() override = default;
 
-    const MTLVertexDescriptorPtr& getVertexDesc() const { return vertexDesc; }
-    void setVertexDesc(MTLVertexDescriptorPtr&& value) { vertexDesc = std::move(value); }
-
 protected:
-    MTLVertexDescriptorPtr vertexDesc;
 };
 
 } // namespace mtl

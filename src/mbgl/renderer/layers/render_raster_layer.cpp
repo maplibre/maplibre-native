@@ -53,7 +53,7 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup && layerGroup->getLayerTweaker()) {
-        layerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif
 }
@@ -458,7 +458,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             } else {
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-                imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+                imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties));
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
             }
 
@@ -485,7 +485,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         } else {
             // Set up a tile layer group
             if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-                layerGroup_->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
+                layerGroup_->setLayerTweaker(std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties));
                 setLayerGroup(std::move(layerGroup_), changes);
             }
         }

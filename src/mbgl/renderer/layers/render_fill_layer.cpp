@@ -93,7 +93,7 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif
 }
@@ -311,7 +311,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<FillLayerTweaker>(evaluatedProperties));
+            layerGroup_->setLayerTweaker(std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties));
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
