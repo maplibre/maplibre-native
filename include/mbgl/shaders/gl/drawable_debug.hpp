@@ -11,8 +11,14 @@ struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 out vec2 v_uv;
 
-uniform mat4 u_matrix;
-uniform float u_overlay_scale;
+layout (std140) uniform DebugUBO {
+    highp mat4 u_matrix;
+    highp vec4 u_color;
+    highp float u_overlay_scale;
+    highp float pad1;
+    highp float pad2;
+    highp float pad3;
+};
 
 void main() {
     // This vertex shader expects a EXTENT x EXTENT quad,
@@ -21,7 +27,15 @@ void main() {
     gl_Position = u_matrix * vec4(a_pos * u_overlay_scale, 0, 1);
 }
 )";
-    static constexpr const char* fragment = R"(uniform highp vec4 u_color;
+    static constexpr const char* fragment = R"(layout (std140) uniform DebugUBO {
+    highp mat4 u_matrix;
+    highp vec4 u_color;
+    highp float u_overlay_scale;
+    highp float pad1;
+    highp float pad2;
+    highp float pad3;
+};
+
 uniform sampler2D u_overlay;
 
 in vec2 v_uv;
