@@ -17,7 +17,7 @@ void TaggedString::addTextSection(const std::u16string &sectionText,
                                   bool lineSection,
                                   std::optional<Color> textColor) {
     styledText.first += sectionText;
-    sections.emplace_back(scale, fontStack, type, styledText.first.size(), std::move(textColor));
+    sections.emplace_back(scale, fontStack, type, static_cast<uint32_t>(styledText.first.size()), std::move(textColor));
     styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
     supportsVerticalWritingMode = std::nullopt;
     if (type != GlyphIDType::FontPBF) hasNeedShapeTextVal = true;
@@ -31,9 +31,9 @@ void TaggedString::addTextSection(const std::u16string &sectionText,
                                   std::shared_ptr<std::vector<HBShapeAdjust>> &adjusts,
                                   bool lineSection,
                                   std::optional<Color> textColor) {
-    sections.emplace_back(scale, fontStack, type, styledText.first.size(), std::move(textColor));
+    sections.emplace_back(scale, fontStack, type, static_cast<uint32_t>(styledText.first.size()), std::move(textColor));
     styledText.first += sectionText;
-    styledText.second.resize(styledText.first.size(), sections.size() - 1);
+    styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
     if (type != GlyphIDType::FontPBF) hasNeedShapeTextVal = true;
     if (adjusts) sections[sections.size() - 1].adjusts = adjusts;
     sections[sections.size() - 1].lineSection = lineSection;

@@ -32,7 +32,7 @@ FreeTypeFace::FreeTypeFace(const std::string &fontFileName, const FreeTypeLibrar
 FreeTypeFace::FreeTypeFace(const char *fontData, size_t fontDataSize, const FreeTypeLibrary &lib) {
     memoryFile.resize(fontDataSize);
     std::memcpy(&memoryFile[0], fontData, fontDataSize);
-    FT_Error error = FT_New_Memory_Face(lib.library, memoryFile.data(), fontDataSize, 0, &face);
+    FT_Error error = FT_New_Memory_Face(lib.library, memoryFile.data(), (FT_Long)fontDataSize, 0, &face);
     valid = (error == 0);
     if (!valid) return;
 

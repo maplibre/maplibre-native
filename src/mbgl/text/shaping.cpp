@@ -456,8 +456,8 @@ void shapeLines(Shaping& shaping,
 
                 if (adjust) advance = adjust->advance;
                 if (adjust) {
-                    xHBOffset = (float)adjust->x_offset * section.scale;
-                    yHBOffset = (float)adjust->y_offset * section.scale;
+                    xHBOffset = (float)(adjust->x_offset * section.scale);
+                    yHBOffset = (float)(adjust->y_offset * section.scale);
                 }
                 if (advance < 0.01f) {
                     // Advance is 0, this glyph should align to the preview glyph remove spacing
@@ -608,7 +608,7 @@ Shaping getShaping(const TaggedString& formattedString,
             auto processAline = [&](StyledText line) {
                 reorderedLines.emplace_back(line, formattedSections);
 
-                size_t cutLens = line.first.length();
+                auto cutLens = (int32_t)line.first.length();
 
                 for (auto& sec : formattedSections) {
                     sec.startIndex -= cutLens;
