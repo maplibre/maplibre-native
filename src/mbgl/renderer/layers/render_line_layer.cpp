@@ -79,9 +79,7 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup && layerGroup->getLayerTweaker()) {
-        layerGroup->setLayerTweaker(std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties));
-    }
+    updateLayerTweaker();
 #endif
 }
 
