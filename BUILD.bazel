@@ -1,59 +1,57 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-load("//bazel:core.bzl",
-    "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
-    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
-    "MLN_GENERATED_STYLE_SOURCE",
-    "MLN_GENERATED_SHADER_HEADERS",
-    "MLN_CORE_SOURCE",
+load(
+    "//bazel:core.bzl",
     "MLN_CORE_HEADERS",
-    "MLN_OPENGL_SOURCE",
-    "MLN_OPENGL_HEADERS",
-    "MLN_DRAWABLES_SOURCE",
+    "MLN_CORE_SOURCE",
     "MLN_DRAWABLES_HEADERS",
-    "MLN_DRAWABLES_GL_SOURCE",
+    "MLN_DRAWABLES_SOURCE",
     "MLN_DRAWABLES_GL_HEADERS",
+    "MLN_DRAWABLES_GL_SOURCE",
+    "MLN_DRAWABLES_MTL_HEADERS",
     "MLN_DRAWABLES_MTL_SOURCE",
-    "MLN_DRAWABLES_MTL_HEADERS"
+    "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_OPENGL_SHADER_HEADERS",
+    "MLN_GENERATED_STYLE_SOURCE",
+    "MLN_OPENGL_HEADERS",
+    "MLN_OPENGL_SOURCE",
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
+    "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
 )
-load("//bazel:macros.bzl", "appendList")
 
 # Generate code required by the core
-# All generated code is placed in the prefix location __generated__
-# by our generator scripts and genrules
-PREFIXED = {
-    "MLN_PUBLIC_GENERATED_STYLE_HEADERS": appendList(MLN_PUBLIC_GENERATED_STYLE_HEADERS, "__generated__/"),
-    "MLN_PRIVATE_GENERATED_STYLE_HEADERS": appendList(MLN_PRIVATE_GENERATED_STYLE_HEADERS, "__generated__/"),
-    "MLN_GENERATED_STYLE_SOURCE": appendList(MLN_GENERATED_STYLE_SOURCE, "__generated__/"),
-    "MLN_GENERATED_SHADER_HEADERS": appendList(MLN_GENERATED_SHADER_HEADERS, "__generated__/"),
-}
-
 filegroup(
     name = "style_data",
-    srcs = glob(["**/*.ejs"], allow_empty = False)
+    srcs = glob(
+        ["**/*.ejs"],
+        allow_empty = False,
+    ),
 )
 
 genrule(
     name = "generated_style_code",
+    srcs = ["style_data"],
+    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
+           MLN_PRIVATE_GENERATED_STYLE_HEADERS +
+           MLN_GENERATED_STYLE_SOURCE,
     cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
     tools = ["scripts/generate-style-code.js"],
-    srcs = ["style_data"],
-    outs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
-        + PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"]
-        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"],
 )
 
 filegroup(
     name = "shader_data",
-    srcs = ["shaders/manifest.json"] + glob(["shaders/*.glsl"], allow_empty = False)
+    srcs = ["shaders/manifest.json"] + glob(
+        ["shaders/*.glsl"],
+        allow_empty = False,
+    ),
 )
 
 genrule(
     name = "generated_shaders",
+    srcs = ["shader_data"],
+    outs = MLN_GENERATED_SHADER_HEADERS,
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
-    srcs = ["shader_data"],
-    outs = PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
 )
 
 # This header only target strips the __generated__ prefix for the compiler
@@ -61,13 +59,16 @@ genrule(
 cc_library(
     name = "mbgl-core-generated-public-artifacts",
     srcs = [],
-    hdrs = PREFIXED["MLN_PUBLIC_GENERATED_STYLE_HEADERS"]
-        + PREFIXED["MLN_GENERATED_SHADER_HEADERS"],
-    strip_include_prefix = "__generated__/include",
+    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
+           MLN_GENERATED_SHADER_HEADERS +
+           select({
+               "//:metal_renderer": [],
+               "//conditions:default": MLN_GENERATED_OPENGL_SHADER_HEADERS,
+           }),
     visibility = ["//visibility:public"],
     deps = [
-        ":generated_style_code",
         ":generated_shaders",
+        ":generated_style_code",
     ],
 )
 
@@ -75,8 +76,7 @@ cc_library(
 cc_library(
     name = "mbgl-core-generated-private-artifacts",
     srcs = [],
-    hdrs = PREFIXED["MLN_PRIVATE_GENERATED_STYLE_HEADERS"],
-    strip_include_prefix = "__generated__/src",
+    hdrs = MLN_PRIVATE_GENERATED_STYLE_HEADERS,
     visibility = ["//visibility:private"],
     deps = [
         ":generated_style_code",
@@ -87,20 +87,20 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE
-        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"]
-        + select({
-            ":legacy_renderer": MLN_OPENGL_SOURCE,
+    srcs = MLN_CORE_SOURCE +
+           MLN_GENERATED_STYLE_SOURCE + select({
             ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
-            ":split_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
-            ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE
+            ":legacy_renderer": MLN_OPENGL_SOURCE,
+            ":split_renderer": MLN_DRAWABLES_SOURCE + MLN_OPENGL_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+            ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+            "//conditions:default": [],
         }),
-    hdrs = MLN_CORE_HEADERS
-        + select({
-            ":legacy_renderer": MLN_OPENGL_HEADERS,
+    hdrs = MLN_CORE_HEADERS + select({
             ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
-            ":split_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
-            ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS
+            ":legacy_renderer": MLN_OPENGL_HEADERS,
+            ":split_renderer": MLN_DRAWABLES_HEADERS + MLN_OPENGL_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+            ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
+            "//conditions:default": []
         }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
@@ -127,7 +127,7 @@ cc_library(
         ],
     }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
-        "//conditions:default": []
+        "//conditions:default": [],
     }),
     includes = [
         "include",
@@ -143,8 +143,8 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":mbgl-core-generated-public-artifacts",
         ":mbgl-core-generated-private-artifacts",
+        ":mbgl-core-generated-public-artifacts",
         "//vendor:boost",
         "//vendor:csscolorparser",
         "//vendor:earcut.hpp",

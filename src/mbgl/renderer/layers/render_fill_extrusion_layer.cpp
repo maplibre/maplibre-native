@@ -276,6 +276,7 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
+                                      const std::shared_ptr<UpdateParameters>&,
                                       const RenderTree& /*renderTree*/,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -308,10 +309,13 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     // in the "3D pass".
     constexpr auto drawPass = RenderPass::Translucent;
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        return (drawable.getRenderPass() == drawPass &&
-                (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())));
+        const auto& tileID = drawable.getTileID();
+        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
+            return true;
+        }
+        return false;
     });
 
     const auto zoom = static_cast<float>(state.getZoom());
@@ -384,7 +388,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(drawPass, tileID) > 0) {
             // Just update the drawables we already created
-            tileLayerGroup->observeDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
+            tileLayerGroup->visitDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
                 auto& uniforms = drawable.mutableUniformBuffers();
                 uniforms.createOrUpdate(
                     FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);

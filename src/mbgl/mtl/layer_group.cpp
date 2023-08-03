@@ -22,18 +22,15 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.getEnabled()) {
-            return;
-        }
-
-        auto& drawableGL = static_cast<Drawable&>(drawable);
-
 #if !defined(NDEBUG)
-        const auto debugGroup = uploadPass.createDebugGroup(drawable.getName().c_str());
+    const auto debugGroup = uploadPass.createDebugGroup(getName() + "-upload");
 #endif
 
-        drawableGL.upload(uploadPass);
+    visitDrawables([&](gfx::Drawable& drawable) {
+        if (drawable.getEnabled()) {
+            auto& drawableGL = static_cast<Drawable&>(drawable);
+            drawableGL.upload(uploadPass);
+        }
     });
 }
 
@@ -42,14 +39,14 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
+#if !defined(NDEBUG)
+    const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
+#endif
+
+    visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
-
-#if !defined(NDEBUG)
-        const auto debugGroup = parameters.encoder->createDebugGroup(drawable.getName().c_str());
-#endif
 
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);

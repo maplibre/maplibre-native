@@ -56,7 +56,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                                              sizeof(evaluatedPropsUBO));
     }
 
-    layerGroup.observeDrawables([&](gfx::Drawable& drawable) {
+    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.addOrReplace(HeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 

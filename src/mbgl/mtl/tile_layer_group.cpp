@@ -18,32 +18,24 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity,
     : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
-    if (!enabled) {
+    if (!enabled || !getDrawableCount()) {
         return;
     }
 
-    observeDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.getEnabled()) {
-            return;
-        }
-
-        auto& drawableMTL = static_cast<Drawable&>(drawable);
-
 #if !defined(NDEBUG)
-        std::string label;
-        if (const auto& tileID = drawable.getTileID()) {
-            label = drawable.getName() + "/" + util::toString(*tileID);
-        }
-        const auto labelPtr = (label.empty() ? drawable.getName() : label).c_str();
-        const auto debugGroup = uploadPass.createDebugGroup(labelPtr);
+    const auto debugGroup = uploadPass.createDebugGroup(getName() + "-upload");
 #endif
 
-        drawableMTL.upload(uploadPass);
+    visitDrawables([&](gfx::Drawable& drawable) {
+        if (drawable.getEnabled()) {
+            auto& drawableMTL = static_cast<Drawable&>(drawable);
+            drawableMTL.upload(uploadPass);
+        }
     });
 }
 
 void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
-    if (!enabled) {
+    if (!enabled || !getDrawableCount()) {
         return;
     }
 
@@ -57,58 +49,51 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     bool stencil3d = false;
     gfx::StencilMode stencilMode3d;
 
-    if (getDrawableCount()) {
-#if !defined(NDEBUG)
-        const auto label_clip = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
-        const auto debugGroupClip = parameters.encoder->createDebugGroup(label_clip.c_str());
-#endif
-
-        // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
-        std::set<UnwrappedTileID> tileIDs;
-        observeDrawables([&](const gfx::Drawable& drawable) {
-            if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
-                return;
-            }
-            if (drawable.getIs3D()) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
-                }
-            }
-            if (!features3d && drawable.getEnableStencil() && drawable.getTileID()) {
-                tileIDs.emplace(drawable.getTileID()->toUnwrapped());
-            }
-        });
-
-        // If we're doing 3D stenciling and have any features
-        // to draw, set up the single-value stencil mask.
-        // If we're doing 2D stenciling and have any drawables with tile IDs,
-        // render each tile into the stencil buffer with a different value.
-        if (features3d) {
-            stencilMode3d = stencil3d ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
-        } else if (!tileIDs.empty()) {
-            parameters.renderTileClippingMasks(tileIDs);
-        }
-    }
-
-#if !defined(NDEBUG)
-    const auto label_render = getName() + (getName().empty() ? "" : "-") + "render";
-    const auto debugGroupRender = parameters.encoder->createDebugGroup(label_render.c_str());
-#endif
-
-    observeDrawables([&](gfx::Drawable& drawable) {
+    // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
+    std::set<UnwrappedTileID> tileIDs;
+    std::size_t numEnabled = 0;
+    visitDrawables([&](const gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
         }
+        numEnabled += 1;
+        if (drawable.getIs3D()) {
+            features3d = true;
+            if (drawable.getEnableStencil()) {
+                stencil3d = true;
+            }
+        }
+        if (!features3d && drawable.getEnableStencil() && drawable.getTileID()) {
+            tileIDs.emplace(drawable.getTileID()->toUnwrapped());
+        }
+    });
+
+    if (!numEnabled) {
+        return;
+    }
 
 #if !defined(NDEBUG)
-        std::string label_tile;
-        if (const auto& tileID = drawable.getTileID()) {
-            label_tile = drawable.getName() + "/" + util::toString(*tileID);
-        }
-        const auto labelPtr = (label_tile.empty() ? drawable.getName() : label_tile).c_str();
-        const auto debugGroupTile = parameters.encoder->createDebugGroup(labelPtr);
+    const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
+
+    // If we're doing 3D stenciling and have any features
+    // to draw, set up the single-value stencil mask.
+    // If we're doing 2D stenciling and have any drawables with tile IDs,
+    // render each tile into the stencil buffer with a different value.
+    if (features3d) {
+        stencilMode3d = stencil3d ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
+    } else if (!tileIDs.empty()) {
+#if !defined(NDEBUG)
+        const auto debugGroup = parameters.encoder->createDebugGroup("tile-clip-masks");
+#endif
+
+        parameters.renderTileClippingMasks(tileIDs);
+    }
+
+    visitDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
+            return;
+        }
 
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);

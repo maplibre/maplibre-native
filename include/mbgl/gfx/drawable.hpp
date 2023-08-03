@@ -45,11 +45,13 @@ protected:
     Drawable(std::string name);
 
 public:
+    /// Drawable constructor
     virtual ~Drawable();
 
     struct DrawSegment;
     using UniqueDrawSegment = std::unique_ptr<DrawSegment>;
 
+    /// Get drawable's ID
     const util::SimpleIdentity& getID() const { return uniqueID; }
 
     /// Draw the drawable
@@ -57,14 +59,20 @@ public:
 
     /// Drawable name is used for debugging and troubleshooting
     const std::string& getName() const { return name; }
+
+    /// Set drawable name
     void setName(std::string value) { name = std::move(value); }
 
     /// Which shader to use when rendering this drawable
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
+
+    /// Set the shader to be used
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// The pass on which we'll be rendered
     mbgl::RenderPass getRenderPass() const { return renderPass; }
+
+    /// Sets the render passes
     void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
 
     /// Test whether to draw this drawable in a given render pass.
@@ -81,6 +89,8 @@ public:
 
     /// Width for lines
     int32_t getLineWidth() const { return lineWidth; }
+
+    /// Set line width
     void setLineWidth(int32_t value) { lineWidth = value; }
 
     /// @brief Remove an attached texture from this drawable at the given sampler location
@@ -106,72 +116,117 @@ public:
 
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
+
+    /// Sets whether the drawble should be drawn
     void setEnabled(bool value) { enabled = value; }
 
     /// Whether to render to the color target
     bool getEnableColor() const { return enableColor; }
+
+    /// Set whether to render to the color target
     void setEnableColor(bool value) { enableColor = value; }
 
     /// Whether to do stenciling (based on the Tile ID or 3D)
     bool getEnableStencil() const { return enableStencil; }
+
+    /// Set stencil usage
     void setEnableStencil(bool value) { enableStencil = value; }
 
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
-    /// Determines depth range within the layer for 2D drawables
+    /// Get sub-layer index. Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
+
+    /// Set sub-layer index
     void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
+
+    /// Set depth type
     void setDepthType(DepthMaskType value) { depthType = value; }
 
     /// Uses 3D depth mode
     bool getIs3D() const { return is3D; }
+
+    /// Set 3D mode
     void setIs3D(bool value) { is3D = value; }
 
-    /// Is custom
+    /// True if this is a custom drawable
     bool getIsCustom() const { return isCustom; }
+
+    /// Sets custom status for this drawable
     void setIsCustom(bool value) { isCustom = value; }
 
-    /// The ID of the tile that this drawable represents, if any
+    /// True if this drawable should be rendered with pre-multiplied alpha blending
+    bool getPreMultipledAlpha() const { return preMultipledAlpha; }
+
+    /// Sets pre-multiplied alpha blending status for this drawable
+    void setPreMultipledAlpha(bool value) { preMultipledAlpha = value; }
+
+    /// Get the ID of the tile that this drawable represents, if any
     const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
+
+    /// Set the ID of the tile that this drawable represents
     void setTileID(const OverscaledTileID& value) { tileID = value; }
 
+    /// Get cull face mode
     const gfx::CullFaceMode& getCullFaceMode() const;
+
+    /// Set cull face mode
     void setCullFaceMode(const gfx::CullFaceMode&);
 
+    /// Get color mode
     const gfx::ColorMode& getColorMode() const;
+
+    /// Set color mode
     void setColorMode(const gfx::ColorMode&);
 
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
+
+    /// Get the mutable vertex attribute array
     virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
 
+    /// Set vertex attribute array
     virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
+
+    /// Set vertex attribute array
     virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
 
-    /// Provide raw data for vertices
-    /// Incompatible with adding primitives
+    /// Provide raw data for vertices. Incompatible with adding primitives
     virtual void setVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType) = 0;
 
     /// Provide raw indexes and segments
     void setIndexData(std::vector<std::uint16_t> indexes, std::vector<UniqueDrawSegment>);
+
+    /// Set shared indexes and segments
     virtual void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment>) = 0;
 
     /// Get the tweakers attached to this drawable
     const std::vector<DrawableTweakerPtr>& getTweakers() const { return tweakers; }
+
+    /// Add a tweaker to this drawable
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
+
+    /// Set the entire tweaker collection
     void setTweakers(std::vector<DrawableTweakerPtr> value) { tweakers = std::move(value); }
+
+    /// Clear the tweaker collection
     void clearTweakers() { tweakers.clear(); }
 
     /// Get the uniform buffers attached to this drawable
     virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
+
+    /// Get the mutable uniform buffer array
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
+    /// Get drawable data
     const UniqueDrawableData& getData() const { return drawableData; }
+
+    /// Set drawable data
     void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
 protected:
@@ -180,6 +235,7 @@ protected:
     bool enableStencil = false;
     bool is3D = false;
     bool isCustom = false;
+    bool preMultipledAlpha = true;
     std::string name;
     const util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;

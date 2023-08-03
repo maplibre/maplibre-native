@@ -6,10 +6,14 @@
 
 namespace mbgl {
 
+#if MLN_LEGACY_RENDERER
 class CircleProgram;
-class CircleLayerTweaker;
+#endif // MLN_LEGACY_RENDERER
 
+#if MLN_DRAWABLE_RENDERER
+class CircleLayerTweaker;
 using CircleLayerTweakerPtr = std::shared_ptr<CircleLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
 
 class RenderCircleLayer final : public RenderLayer {
 public:
@@ -21,6 +25,7 @@ public:
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif
@@ -32,10 +37,6 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
 
-#if MLN_LEGACY_RENDERER
-    void render(PaintParameters&) override;
-#endif
-
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
                                 float,
@@ -44,6 +45,15 @@ private:
                                 const mat4&,
                                 const FeatureState&) const override;
 
+#if MLN_LEGACY_RENDERER
+    void render(PaintParameters&) override;
+#endif // MLN_LEGACY_RENDERER
+
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
+#endif // MLN_DRAWABLE_RENDERER
+
+private:
     // Paint properties
     style::CirclePaintProperties::Unevaluated unevaluated;
 
@@ -51,11 +61,16 @@ private:
     // Programs
     std::shared_ptr<CircleProgram> circleProgram;
 #endif
+
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr circleShaderGroup;
 
     CircleLayerTweakerPtr tweaker;
+#if MLN_RENDER_BACKEND_METAL
     std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
+
+    bool overdrawInspector = false;
 #endif
 };
 

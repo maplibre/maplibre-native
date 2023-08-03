@@ -44,7 +44,7 @@ const LayerGroupBasePtr& RenderTarget::getLayerGroup(const int32_t layerIndex) c
     return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }
 
-void RenderTarget::observeLayerGroups(std::function<void(LayerGroupBase&)> f) {
+void RenderTarget::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
     for (auto& pair : layerGroupsByLayerIndex) {
         if (pair.second) {
             f(*pair.second);
@@ -52,7 +52,7 @@ void RenderTarget::observeLayerGroups(std::function<void(LayerGroupBase&)> f) {
     }
 }
 
-void RenderTarget::observeLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
+void RenderTarget::visitLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
     for (const auto& pair : layerGroupsByLayerIndex) {
         if (pair.second) {
             f(*pair.second);

@@ -287,6 +287,7 @@ constexpr auto TexturePosAttribName = "a_texture_pos";
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
+                                  const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -324,8 +325,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove(
-        [&](gfx::Drawable& drawable) { return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID())); });
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf(
+        [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     if (!staticDataSharedVertices) {
         staticDataSharedVertices = std::make_shared<HillshadeVertexVector>(RenderStaticData::rasterVertices());
@@ -454,7 +455,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadeBuilder = context.createDrawableBuilder("hillshade");
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
                 drawable.setVertexAttributes(std::move(hillshadeVertexAttrs));
                 drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
 

@@ -45,7 +45,8 @@ public:
     const std::string_view typeName() const noexcept override { return Name; }
 
     MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::RenderPassDescriptor&,
-                                                     const MTLVertexDescriptorPtr&) const;
+                                                     const MTLVertexDescriptorPtr&,
+                                                     bool preMultipledAlpha) const;
 
     std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
 

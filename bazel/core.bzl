@@ -51,7 +51,10 @@ MLN_GENERATED_STYLE_SOURCE = [
 
 MLN_GENERATED_SHADER_HEADERS = [
     "include/mbgl/shaders/shader_source.hpp",
-    "include/mbgl/shaders/shader_manifest.hpp",
+    "include/mbgl/shaders/shader_manifest.hpp"
+]
+
+MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/background.hpp",
     "include/mbgl/shaders/gl/background_pattern.hpp",
     "include/mbgl/shaders/gl/circle.hpp",
@@ -631,7 +634,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/utf.hpp",
     "src/mbgl/util/version.cpp",
     "src/mbgl/util/version.hpp",
-    "src/mbgl/util/work_request.cpp"
+    "src/mbgl/util/work_request.cpp",
 ]
 
 MLN_CORE_HEADERS = [
@@ -826,7 +829,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/vectors.hpp",
     "include/mbgl/util/work_request.hpp",
     "include/mbgl/util/work_task.hpp",
-    "include/mbgl/util/work_task_impl.hpp"
+    "include/mbgl/util/work_task_impl.hpp",
 ]
 
 MLN_OPENGL_SOURCE = [
@@ -946,9 +949,10 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/renderer/layer_group.hpp",
     "include/mbgl/renderer/layer_tweaker.hpp",
     "include/mbgl/renderer/render_target.hpp",
+    "include/mbgl/shaders/background_layer_ubo.hpp",
     "include/mbgl/shaders/circle_layer_ubo.hpp",
     "include/mbgl/shaders/layer_ubo.hpp",
-    "include/mbgl/shaders/background_layer_ubo.hpp",
+    "include/mbgl/shaders/line_layer_ubo.hpp",
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/util/identity.hpp",
     "include/mbgl/util/suppress_copies.hpp"
@@ -1023,6 +1027,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/background_pattern.hpp",
     "include/mbgl/shaders/mtl/circle.hpp",
     "include/mbgl/shaders/mtl/common.hpp",
+    "include/mbgl/shaders/mtl/line.hpp",
     "include/mbgl/shaders/mtl/shader_group.hpp",
     "include/mbgl/shaders/mtl/shader_program.hpp",
 ]

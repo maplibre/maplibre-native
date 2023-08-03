@@ -34,7 +34,7 @@ cc_library(
     deps = [
         "//expression-test:test_runner_common",
     ] + select({
-        "//:ios": ["//platform/ios:sdk"],
+        "//:ios": ["//platform:ios-sdk"],
         "//:linux": ["//platform/linux:impl"],
     }),
 )

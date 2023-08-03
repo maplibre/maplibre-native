@@ -41,12 +41,13 @@ public:
         }
 
         const std::string shaderName = std::string(name); // + "#" + std::to_string(key);
+        const auto shaderSource = std::string(shaders::prelude) + source;
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {
             auto& context = static_cast<Context&>(gfxContext);
             shader = context.createProgram(
-                shaderName, source, vertMain, fragMain, programParameters, additionalDefines);
+                shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);

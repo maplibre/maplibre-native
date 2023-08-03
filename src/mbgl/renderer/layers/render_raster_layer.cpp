@@ -236,6 +236,7 @@ constexpr auto Image1UniformName = "u_image1";
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
+                               const std::shared_ptr<UpdateParameters>&,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -415,7 +416,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             builder->setVertexAttributes(std::move(vertexAttrs));
         }
 
-        tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             for (auto& tex : drawable.getTextures()) {
                 builder->setTexture(tex.second, tex.first);
             }
@@ -480,9 +481,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     } else if (renderTiles) {
         if (layerGroup) {
-            stats.drawablesRemoved += layerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+            stats.drawablesRemoved += layerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
                 // Has this tile dropped out of the cover set?
-                return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
+                return drawable.getTileID() && !hasRenderTile(*drawable.getTileID());
             });
         } else {
             // Set up a tile layer group

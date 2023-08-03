@@ -17,6 +17,8 @@
 #include <cstring>
 #include <utility>
 
+using namespace std::string_literals;
+
 namespace mbgl {
 namespace mtl {
 
@@ -28,7 +30,8 @@ ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFun
       fragmentFunction(std::move(frag)) {}
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::RenderPassDescriptor& renderPassDescriptor,
-                                                                const MTLVertexDescriptorPtr& vertexDescriptor) const {
+                                                                const MTLVertexDescriptorPtr& vertexDescriptor,
+                                                                bool preMultipledAlpha) const {
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     const auto& renderable = renderPassDescriptor.renderable;
@@ -62,12 +65,14 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     desc->setVertexDescriptor(vertexDescriptor.get());
 
     if (auto* colorTarget = desc->colorAttachments()->object(0)) {
+        const auto srcFactor = preMultipledAlpha ? MTL::BlendFactorOne : MTL::BlendFactorSourceAlpha;
+
         colorTarget->setPixelFormat(colorFormat);
         colorTarget->setBlendingEnabled(true);
         colorTarget->setRgbBlendOperation(MTL::BlendOperationAdd);
         colorTarget->setAlphaBlendOperation(MTL::BlendOperationAdd);
-        colorTarget->setSourceRGBBlendFactor(MTL::BlendFactorSourceAlpha);
-        colorTarget->setSourceAlphaBlendFactor(MTL::BlendFactorSourceAlpha);
+        colorTarget->setSourceRGBBlendFactor(srcFactor);
+        colorTarget->setSourceAlphaBlendFactor(srcFactor);
         colorTarget->setDestinationRGBBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
         colorTarget->setDestinationAlphaBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
     }
@@ -86,7 +91,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
 
     if (!rps || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
-        const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
+        const auto errStr = (errPtr && errPtr[0]) ? ": "s + errPtr : std::string();
         Log::Error(Event::Shader, shaderName + " newRenderPipelineState failed" + errStr);
         assert(false);
     }

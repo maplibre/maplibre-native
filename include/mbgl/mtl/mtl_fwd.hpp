@@ -16,6 +16,8 @@ using UInteger = std::uintptr_t;
 } // namespace NS
 
 namespace MTL {
+class BlitCommandEncoder;
+class BlitPassDescriptor;
 class Buffer;
 class CommandBuffer;
 class CommandQueue;
@@ -33,6 +35,8 @@ namespace mbgl {
 namespace mtl {
 using CAMetalDrawablePtr = NS::SharedPtr<CA::MetalDrawable>;
 
+using MTLBlitCommandEncoderPtr = NS::SharedPtr<MTL::BlitCommandEncoder>;
+using MTLBlitPassDescriptorPtr = NS::SharedPtr<MTL::BlitPassDescriptor>;
 using MTLBufferPtr = NS::SharedPtr<MTL::Buffer>;
 using MTLCommandBufferPtr = NS::SharedPtr<MTL::CommandBuffer>;
 using MTLCommandQueuePtr = NS::SharedPtr<MTL::CommandQueue>;

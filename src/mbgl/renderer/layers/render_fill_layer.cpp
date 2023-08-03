@@ -298,6 +298,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
+                             const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -362,9 +363,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         builder.setEnableStencil(true);
     };
 
-    stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has dropped out of the cover set, remove it.
-        return drawable.getRenderPass() == renderPass && drawable.getTileID() && hasRenderTile(*drawable.getTileID());
+        const auto& tileID = drawable.getTileID();
+        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
+            return true;
+        }
+        return false;
     });
 
     for (const RenderTile& tile : *renderTiles) {
@@ -432,7 +437,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
             drawable.setVertexAttributes(vertexAttrs);
         };
-        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 

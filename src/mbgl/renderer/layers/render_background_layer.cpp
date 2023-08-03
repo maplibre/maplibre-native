@@ -216,6 +216,7 @@ static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatte
 void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
+                                   const std::shared_ptr<UpdateParameters>&,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -281,7 +282,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
-    tileLayerGroup->observeDrawables([&](gfx::Drawable& drawable) -> bool {
+    tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) -> bool {
         // Has this tile dropped out of the cover set?
         return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
     });

@@ -3,17 +3,60 @@
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/index_buffer_resource.hpp>
+#include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/util/logging.hpp>
+
+#include <Metal/Metal.hpp>
 
 #include <algorithm>
 
 namespace mbgl {
 namespace mtl {
 
-UploadPass::UploadPass(CommandEncoder& commandEncoder_, const char* name)
-    : commandEncoder(commandEncoder_) {}
+UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
+    : commandEncoder(commandEncoder_) {
+    auto& resource = renderable.getResource<RenderableResource>();
+
+    if (!resource.getCommandBuffer()) {
+        resource.bind();
+    }
+
+    if (const auto& buffer_ = resource.getCommandBuffer()) {
+        buffer = buffer_;
+        if (auto upd = resource.getUploadPassDescriptor()) {
+            encoder = NS::RetainPtr(buffer->blitCommandEncoder(upd.get()));
+        }
+    }
+
+    assert(encoder);
+
+    // Push the groups already accumulated by the encoder
+    commandEncoder.visitDebugGroups([this](const auto& group) {
+        debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, group.c_str()});
+    });
+
+    // Push the group for the name provided
+    debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, name});
+
+    // Let the encoder pass along any groups pushed to it after this
+    commandEncoder.trackUploadPass(this);
+}
+
+UploadPass::~UploadPass() {
+    commandEncoder.forgetUploadPass(this);
+    endEncoding();
+}
+
+void UploadPass::endEncoding() {
+    debugGroups.clear();
+
+    if (encoder) {
+        encoder->endEncoding();
+        encoder.reset();
+    }
+}
 
 std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(const void* data,
                                                                                   const std::size_t size,
@@ -196,9 +239,26 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     return bindings;
 }
 
-void UploadPass::pushDebugGroup(const char* name) {}
+namespace {
+constexpr auto missing = "<none>";
+NS::String* toNSString(const char* str) {
+    return NS::String::string(str ? str : missing, NS::UTF8StringEncoding);
+}
+} // namespace
 
-void UploadPass::popDebugGroup() {}
+void UploadPass::pushDebugGroup(const char* name) {
+    assert(encoder);
+    if (encoder) {
+        encoder->pushDebugGroup(toNSString(name));
+    }
+}
+
+void UploadPass::popDebugGroup() {
+    assert(encoder);
+    if (encoder) {
+        encoder->popDebugGroup();
+    }
+}
 
 gfx::Context& UploadPass::getContext() {
     return commandEncoder.context;

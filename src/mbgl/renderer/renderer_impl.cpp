@@ -55,7 +55,7 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
-    : orchestrator(false /*!backend_.contextIsShared()*/, localFontFamily_),
+    : orchestrator(!backend_.contextIsShared(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
@@ -110,7 +110,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                renderTreeParameters.transformParams,
                                *staticData,
                                renderTree.getLineAtlas(),
-                               renderTree.getPatternAtlas()};
+                               renderTree.getPatternAtlas(),
+                               frameCount};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -120,7 +121,11 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
     {
-        const auto uploadPass = parameters.encoder->createUploadPass("upload");
+        const auto uploadPass = parameters.encoder->createUploadPass("upload",
+                                                                     parameters.backend.getDefaultRenderable());
+#if !defined(NDEBUG)
+        const auto debugGroup = uploadPass->createDebugGroup("upload");
+#endif
 
         // Update all clipping IDs + upload buckets.
         for (const RenderItem& item : sourceRenderItems) {
@@ -145,23 +150,28 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // Run changes
     orchestrator.processChanges();
 
-    // Run layer tweakers to update any dynamic elements
-    orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
-        if (layerGroup.getLayerTweaker()) {
-            layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
-        }
-    });
-
     // Give the layers a chance to do setup
-    // orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
+    // orchestrator.visitLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
     // });
 
     // Upload layer groups
     {
-        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload");
+        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload",
+                                                                     parameters.backend.getDefaultRenderable());
+#if !defined(NDEBUG)
+        const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
+#endif
+
+        // Run layer tweakers to update any dynamic elements.
+        // Tweakers are run in the upload pass so they can set up uniforms.
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            if (layerGroup.getLayerTweaker()) {
+                layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
+            }
+        });
 
         // Give the layers a chance to upload
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
 
         // Give the render targets a chance to upload
         orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
@@ -196,7 +206,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         parameters.currentLayer = 0;
 
         // draw layer groups, opaque pass
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             parameters.currentLayer++;
         });
@@ -254,7 +264,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             parameters.currentLayer++;
         });
@@ -268,7 +278,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
-        orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
             if (parameters.currentLayer != 0) {
                 parameters.currentLayer--;
@@ -453,8 +463,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
 #if MLN_DRAWABLE_RENDERER
     //     Give the layers a chance to do cleanup
-    orchestrator.observeLayerGroups(
-        [&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+    orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 #endif
 
     // Ends the RenderPass
@@ -478,6 +487,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         renderState = RenderState::Fully;
         observer->onDidFinishRenderingMap();
     }
+
+    frameCount += 1;
 }
 
 void Renderer::Impl::reduceMemoryUse() {
