@@ -351,6 +351,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layer_properties.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/background_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/circle_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/debug_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/fill_extrusion_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/fill_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/heatmap_layer.hpp
@@ -602,6 +603,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_background_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_circle_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_circle_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_debug_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_debug_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_fill_extrusion_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_fill_extrusion_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_fill_layer.cpp
@@ -764,6 +767,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer_properties.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer_properties.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/debug_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/debug_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/debug_layer_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/debug_layer_properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/debug_layer_properties.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer_impl.hpp
@@ -1004,6 +1012,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_box.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line.hpp

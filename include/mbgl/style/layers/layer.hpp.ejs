@@ -34,7 +34,7 @@ class TransitionOptions;
 
 class <%- camelize(type) %>Layer final : public Layer {
 public:
-<% if ((type === 'background') || (type === 'location-indicator')) { -%>
+<% if ((type === 'background') || (type === 'location-indicator') || (type === 'debug')) { -%>
     <%- camelize(type) %>Layer(const std::string& layerID);
 <% } else { -%>
     <%- camelize(type) %>Layer(const std::string& layerID, const std::string& sourceID);

@@ -1,5 +1,18 @@
 const referenceSpec = require('../scripts/style-spec-reference/v8');
 
+referenceSpec.layer.type.values["debug"] = {
+};
+referenceSpec["layout_debug"] = {
+};
+referenceSpec["paint_debug"] = {
+    "border-color": {
+        "type": "color",
+        "default": "#FF0000",
+        "doc": "The color with which the border will be drawn.",
+        "property-type": "data-constant"
+    }
+};
+
 referenceSpec.layer.type.values["location-indicator"] = {};
 referenceSpec["layout_location-indicator"] = {
     "top-image": {

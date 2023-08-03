@@ -84,6 +84,7 @@ layerCapabilities['heatmap']        = defaults.require('Source')
                                               .finalize();
 layerCapabilities['raster']         = defaults.require('Source').set('TileKind', 'Raster').finalize();
 layerCapabilities['location-indicator']     = defaults.finalize();
+layerCapabilities['debug']     = defaults.finalize();
 
 // Splits lines that are over 120 characters at the firts occurance of '='.
 const split120Line = line => {
@@ -103,7 +104,7 @@ const LayerTypeInfo* <%- camelize(type) %>Layer::Impl::staticTypeInfo() noexcept
 }
 
 
-<% if ((type === 'background') || (type === 'location-indicator')) { -%>
+<% if ((type === 'background') || (type === 'location-indicator') || (type === 'debug')) { -%>
 <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(const std::string& layerID)
     : Layer(makeMutable<Impl>(layerID, std::string())) {
 }
