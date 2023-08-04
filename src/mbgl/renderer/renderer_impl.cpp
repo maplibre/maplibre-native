@@ -155,13 +155,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Update the debug layer group
     if (!debugTileLayerGroup) {
-        debugTileLayerGroup = context.createTileLayerGroup(std::numeric_limits<int32_t>::max(), /*initialCapacity=*/64, "debug");
+        debugTileLayerGroup = context.createTileLayerGroup(
+            std::numeric_limits<int32_t>::max(), /*initialCapacity=*/64, "debug");
     }
 
     for (const RenderItem& item : sourceRenderItems) {
         item.updateDebugDrawables(debugTileLayerGroup, parameters);
     }
-    
+
     // Give the layers a chance to do setup
     // orchestrator.observeLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
     // });
@@ -175,9 +176,9 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
         // Give the render targets a chance to upload
         orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
-        
+
         // Upload the Debug layer group
-        if(debugTileLayerGroup) {
+        if (debugTileLayerGroup) {
             debugTileLayerGroup->upload(*uploadPass);
         }
     }
@@ -336,20 +337,18 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
             if (debugTileLayerGroup) {
-                debugTileLayerGroup->observeDrawables([&](gfx::Drawable& drawable) {
-                    drawable.draw(parameters);
-                });
+                debugTileLayerGroup->observeDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
             }
         }
     };
 #endif // MLN_DRAWABLE_RENDERER
-    
+
 #if MLN_LEGACY_RENDERER
     const auto renderDebugOverlays = [&] {
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            
+
             // Finalize the rendering, e.g. by calling debug render calls per tile.
             // This guarantees that we have at least one function per tile called.
             // When only rendering layers via the stylesheet, it's possible that we
@@ -358,7 +357,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                 renderItem.render(parameters);
             }
         }
-        
+
 #if !defined(NDEBUG)
         if (parameters.debugOptions & MapDebugOptions::StencilClip) {
             // Render tile clip boundaries, using stencil buffer to calculate fill color.
@@ -370,7 +369,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif
     };
 #endif // MLN_LEGACY_RENDERER
-    
+
 #if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     if (parameters.staticData.has3D) {
         common3DPass();
@@ -471,7 +470,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     drawableOpaquePass();
     drawableTranslucentPass();
-    
+
     renderDebugOverlays();
     drawableDebugOverlays();
 #endif // MLN_RENDERER_SPLIT_VIEW

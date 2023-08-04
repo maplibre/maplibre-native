@@ -25,7 +25,7 @@ private:
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
     std::string name;
-    void updateDebugDrawables(LayerGroupBasePtr layerGroup) const { };
+    void updateDebugDrawables(LayerGroupBasePtr layerGroup) const {};
 
     mutable std::optional<gfx::Texture> debugTexture;
 };

@@ -38,7 +38,7 @@ void TileSourceRenderItem::render(PaintParameters& parameters) const {
 
 #if MLN_DRAWABLE_RENDERER
 void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, PaintParameters& parameters) const {
-    TileLayerGroup *tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+    TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
     auto& context = parameters.context;
     auto& shaders = *parameters.staticData.shaders;
     constexpr auto DebugShaderName = "DebugShader";
@@ -46,7 +46,8 @@ void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, Pa
     const auto& shaderUniforms = debugShader->getUniformBlocks();
     const auto renderPass = RenderPass::None;
 
-    auto createBuilder = [&context](const std::string& name, gfx::ShaderProgramBasePtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
+    auto createBuilder = [&context](const std::string& name,
+                                    gfx::ShaderProgramBasePtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
         constexpr auto VertexAttribName = "a_pos";
 
         std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
@@ -60,7 +61,7 @@ void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, Pa
 
         return builder;
     };
-    
+
     struct alignas(16) DebugUBO {
         std::array<float, 4 * 4> matrix;
         Color color;
@@ -69,7 +70,7 @@ void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, Pa
     };
     static_assert(sizeof(DebugUBO) % 16 == 0);
     constexpr auto DebugUBOName = "DebugUBO";
-    
+
     // create texture. to be reused for all the tiles of the layer
     std::array<uint8_t, 4> data{{0, 0, 0, 0}};
     auto emptyImage = std::make_shared<PremultipliedImage>(Size(1, 1), data.data(), data.size());
@@ -79,7 +80,7 @@ void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, Pa
         {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
     constexpr auto DebugOverlayUniformName = "u_overlay";
     const auto samplerLocation = debugShader->getSamplerLocation(DebugOverlayUniformName);
-    
+
     // erase drawables that are not in the current tile set
     std::unordered_set<OverscaledTileID> newTiles;
     for (auto& tile : *renderTiles) {
@@ -88,23 +89,24 @@ void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, Pa
     tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         return (drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
     });
-    
+
     // add new drawables and update existing ones
     auto builder = createBuilder("debug", debugShader);
     for (auto& tile : *renderTiles) {
         const auto tileID = tile.getOverscaledTileID();
         auto& debugBucket = tile.debugBucket;
-        const DebugUBO debugUBO{
-            /*matrix = */ util::cast<float>(tile.matrix),
-            /*color = */ Color::red(),
-            /*overlay_scale = */ 1.0f,
-            0, 0, 0};
+        const DebugUBO debugUBO{/*matrix = */ util::cast<float>(tile.matrix),
+                                /*color = */ Color::red(),
+                                /*overlay_scale = */ 1.0f,
+                                0,
+                                0,
+                                0};
         auto updatedCount = tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // update existing drawable
             auto& uniforms = drawable.mutableUniformBuffers();
             uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
         });
-        
+
         if (0 == updatedCount) {
             // create new drawable
             if (debugBucket && samplerLocation.has_value()) {
@@ -113,19 +115,17 @@ void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, Pa
                 auto segments = RenderStaticData::tileBorderSegments();
 
                 std::vector<std::array<int16_t, 2>> verts(vertices.size());
-                std::transform(vertices.begin(),
-                               vertices.end(),
-                               verts.begin(),
-                               [](const auto& v) -> std::array<int16_t, 2> { return v.a1; });
-                
+                std::transform(
+                    vertices.begin(), vertices.end(), verts.begin(), [](const auto& v) -> std::array<int16_t, 2> {
+                        return v.a1;
+                    });
+
                 builder->addVertices(verts, 0, verts.size());
-                builder->setSegments(gfx::LineStrip(4.0f * parameters.pixelRatio),
-                                       indexes,
-                                       segments.data(),
-                                       segments.size());
+                builder->setSegments(
+                    gfx::LineStrip(4.0f * parameters.pixelRatio), indexes, segments.data(), segments.size());
                 // texture
                 builder->setTexture(texture, samplerLocation.value());
-                
+
                 // finish
                 builder->flush();
                 for (auto& drawable : builder->clearDrawables()) {

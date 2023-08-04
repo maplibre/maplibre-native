@@ -106,7 +106,7 @@ private:
 #if MLN_DRAWABLE_RENDERER
     std::shared_ptr<TileLayerGroup> tileLayerGroup;
 #endif
-    
+
     Immutable<std::vector<RenderTile>> renderTiles;
     std::string name;
 };
