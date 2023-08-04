@@ -32,6 +32,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(12, true, true, CirclePermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(13, true, false, ExpressionInputsUBO),
     };
+    static constexpr TextureInfo textures[] = {};
 
     static constexpr auto source = R"(
 

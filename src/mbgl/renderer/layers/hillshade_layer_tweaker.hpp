@@ -9,8 +9,8 @@ namespace mbgl {
  */
 class HillshadeLayerTweaker : public LayerTweaker {
 public:
-    HillshadeLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    HillshadeLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id), properties) {}
 
 public:
     ~HillshadeLayerTweaker() override = default;

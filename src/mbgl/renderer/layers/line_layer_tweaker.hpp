@@ -16,8 +16,8 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
  */
 class LineLayerTweaker : public LayerTweaker {
 public:
-    LineLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    LineLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id), properties) {}
     ~LineLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;

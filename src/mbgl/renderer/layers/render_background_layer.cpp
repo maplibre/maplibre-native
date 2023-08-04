@@ -67,7 +67,7 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif
 }
@@ -250,7 +250,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(evaluatedProperties));
+            layerGroup_->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties));
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }

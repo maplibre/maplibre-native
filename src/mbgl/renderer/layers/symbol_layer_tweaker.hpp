@@ -11,8 +11,8 @@ namespace mbgl {
  */
 class SymbolLayerTweaker : public LayerTweaker {
 public:
-    SymbolLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    SymbolLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id), properties) {}
 
 public:
     ~SymbolLayerTweaker() override = default;

@@ -28,11 +28,13 @@ using mat4 = std::array<double, 16>;
  */
 class LayerTweaker {
 protected:
-    LayerTweaker(Immutable<style::LayerProperties> properties);
+    LayerTweaker(std::string id, Immutable<style::LayerProperties> properties);
 
 public:
     LayerTweaker() = delete;
     virtual ~LayerTweaker() = default;
+
+    const std::string& getID() const { return id; }
 
 #if MLN_RENDER_BACKEND_METAL
     void setPropertiesAsUniforms(std::vector<std::string>);
@@ -57,6 +59,7 @@ protected:
                               bool aligned = false);
 
 protected:
+    std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;
 
 #if MLN_RENDER_BACKEND_METAL

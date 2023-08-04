@@ -276,7 +276,7 @@ using namespace shaders;
 #if MLN_DRAWABLE_RENDERER
 void RenderCircleLayer::updateLayerTweaker() {
     if (layerGroup) {
-        tweaker = std::make_shared<CircleLayerTweaker>(evaluatedProperties);
+        tweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
 #if MLN_RENDER_BACKEND_METAL
         tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
 #endif // MLN_RENDER_BACKEND_METAL

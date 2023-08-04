@@ -76,7 +76,7 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -287,7 +287,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(evaluatedProperties));
+            layerGroup_->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties));
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }

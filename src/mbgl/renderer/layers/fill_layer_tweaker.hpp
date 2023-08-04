@@ -11,8 +11,8 @@ namespace mbgl {
  */
 class FillLayerTweaker : public LayerTweaker {
 public:
-    FillLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    FillLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id), properties) {}
 
 public:
     ~FillLayerTweaker() override = default;

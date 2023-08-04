@@ -1028,6 +1028,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/circle.hpp",
     "include/mbgl/shaders/mtl/common.hpp",
     "include/mbgl/shaders/mtl/line.hpp",
+    "include/mbgl/shaders/mtl/line_gradient.hpp",
     "include/mbgl/shaders/mtl/shader_group.hpp",
     "include/mbgl/shaders/mtl/shader_program.hpp",
 ]

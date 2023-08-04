@@ -32,6 +32,8 @@ class Texture2D;
 class TextureResource : public gfx::TextureResource {
 public:
     TextureResource() = default;
+
+    MTL::Texture* getMetalTexture() const { return nullptr; }
 };
 class RenderbufferResource : public gfx::RenderbufferResource {
 public:

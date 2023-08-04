@@ -14,8 +14,8 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
  */
 class RasterLayerTweaker : public LayerTweaker {
 public:
-    RasterLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    RasterLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id), properties) {}
 
 public:
     ~RasterLayerTweaker() override = default;
