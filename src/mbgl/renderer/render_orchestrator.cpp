@@ -58,6 +58,7 @@ private:
     void upload(gfx::UploadPass& pass) const override { layer.get().upload(pass); }
     void render(PaintParameters& parameters) const override { layer.get().render(parameters); }
     const std::string& getName() const override { return layer.get().getID(); }
+    void updateDebugDrawables(LayerGroupBasePtr layerGroup) const override { };
 };
 
 class RenderTreeImpl final : public RenderTree {

@@ -17,7 +17,11 @@ class PatternAtlas;
 
 namespace gfx {
 class UploadPass;
+class Context;
 } // namespace gfx
+
+class LayerGroupBase;
+using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 
 class RenderItem {
 public:
@@ -26,6 +30,7 @@ public:
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
     virtual const std::string& getName() const = 0;
+    virtual void updateDebugDrawables(LayerGroupBasePtr layerGroup, PaintParameters&) const = 0;
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;

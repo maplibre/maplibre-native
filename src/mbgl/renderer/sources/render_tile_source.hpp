@@ -4,6 +4,11 @@
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/style/sources/vector_source_impl.hpp>
+#include <mbgl/renderer/render_tree.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/context.hpp>
+#endif
 
 namespace mbgl {
 
@@ -82,6 +87,28 @@ private:
                 const TileParameters&) final;
 
     std::optional<Tileset> cachedTileset;
+};
+
+class TileSourceRenderItem : public RenderItem {
+public:
+    TileSourceRenderItem(Immutable<std::vector<RenderTile>> renderTiles_, std::string name_)
+        : renderTiles(std::move(renderTiles_)),
+          name(std::move(name_)) {}
+
+private:
+    void upload(gfx::UploadPass&) const override;
+    void render(PaintParameters&) const override;
+    bool hasRenderPass(RenderPass) const override { return false; }
+    const std::string& getName() const override { return name; }
+
+    void updateDebugDrawables(LayerGroupBasePtr, PaintParameters&) const override;
+
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<TileLayerGroup> tileLayerGroup;
+#endif
+    
+    Immutable<std::vector<RenderTile>> renderTiles;
+    std::string name;
 };
 
 } // namespace mbgl
