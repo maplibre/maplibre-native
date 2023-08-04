@@ -11,11 +11,6 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/expression-test/main.cpp
 )
 
-target_compile_definitions(
-    mbgl-expression-test
-    PRIVATE TEST_RUNNER_ROOT_PATH="${PROJECT_SOURCE_DIR}"
-)
-
 # FIXME: Should not use core private interface
 target_include_directories(
     mbgl-expression-test
@@ -27,7 +22,6 @@ target_link_libraries(
     PRIVATE
         Mapbox::Base
         Mapbox::Base::Extras::args
-        Mapbox::Base::Extras::filesystem
         mbgl-core
         mbgl-compiler-options
 )
