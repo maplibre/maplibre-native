@@ -18,3 +18,21 @@ cc_library(
         "//:mbgl-core",
     ],
 )
+
+cc_test(
+    name = "test",
+    srcs = glob(
+        [
+            "*.cpp",
+            "*.hpp",
+        ],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = [
+        "//metrics:expression-test-files",
+    ],
+    deps = [
+        "//platform/linux:impl",
+    ],
+)

@@ -53,7 +53,7 @@ void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const V
 
 using ErrorMessage = std::string;
 using JSONReply = variant<JSDocument, ErrorMessage>;
-JSONReply readJson(const filesystem::path& jsonPath) {
+JSONReply readJson(const std::filesystem::path& jsonPath) {
     auto maybeJSON = util::readFile(jsonPath);
     if (!maybeJSON) {
         return {"Unable to open file "s + jsonPath.string()};
@@ -309,8 +309,9 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
 
 } // namespace
 
-std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> parseArguments(int argc, char** argv) {
-    args::ArgumentParser argumentParser("Mapbox GL Expression Test Runner");
+std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint32_t> parseArguments(int argc,
+                                                                                                     char** argv) {
+    args::ArgumentParser argumentParser("MapLibre Native Expression Test Runner");
 
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
     args::Flag shuffleFlag(argumentParser, "shuffle", "Toggle shuffling the tests order", {'s', "shuffle"});
@@ -339,13 +340,13 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
         exit(2);
     }
 
-    filesystem::path rootPath{std::string(TEST_RUNNER_ROOT_PATH).append("/metrics/integration/expression-tests")};
-    if (!filesystem::exists(rootPath)) {
+    const auto rootPath = std::filesystem::current_path().append("metrics/integration/expression-tests");
+    if (!std::filesystem::exists(rootPath)) {
         Log::Error(Event::General, "Test path '" + rootPath.string() + "' does not exist.");
         exit(3);
     }
 
-    std::vector<filesystem::path> paths;
+    std::vector<std::filesystem::path> paths;
     for (const auto& testName : args::get(testNameValues)) {
         paths.emplace_back(rootPath.string() + "/" + testName);
     }
@@ -356,15 +357,15 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
 
     auto testFilter = testFilterValue ? args::get(testFilterValue) : std::string{};
     // Recursively traverse through the test paths and collect test directories containing "test.json".
-    std::vector<filesystem::path> testPaths;
+    std::vector<std::filesystem::path> testPaths;
     testPaths.reserve(paths.size());
     for (const auto& path : paths) {
-        if (!filesystem::exists(path)) {
+        if (!std::filesystem::exists(path)) {
             Log::Warning(Event::General, "Provided test folder '" + path.string() + "' does not exist.");
             continue;
         }
 
-        for (auto& testPath : filesystem::recursive_directory_iterator(path)) {
+        for (auto& testPath : std::filesystem::recursive_directory_iterator(path)) {
             if (!testFilter.empty() && !std::regex_search(testPath.path().string(), std::regex(testFilter))) {
                 continue;
             }
@@ -382,7 +383,7 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
 
 Ignores parseExpressionIgnores() {
     Ignores ignores;
-    const auto mainIgnoresPath = filesystem::path(TEST_RUNNER_ROOT_PATH).append("metrics/ignores/platform-all.json");
+    const auto mainIgnoresPath = std::filesystem::current_path().append("metrics/ignores/platform-all.json");
     auto maybeIgnores = readJson(mainIgnoresPath);
     if (!maybeIgnores.is<JSDocument>()) { // NOLINT
         return {};
@@ -401,7 +402,7 @@ Ignores parseExpressionIgnores() {
     return ignores;
 }
 
-std::optional<TestData> parseTestData(const filesystem::path& path) {
+std::optional<TestData> parseTestData(const std::filesystem::path& path) {
     try {
         TestData data;
         auto maybeJson = readJson(path.string());
