@@ -23,7 +23,7 @@ class RenderDebugLayer final : public RenderLayer {
 public:
     explicit RenderDebugLayer(Immutable<style::DebugLayer::Impl>);
     ~RenderDebugLayer() override;
-
+    
 #if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
@@ -32,16 +32,16 @@ public:
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif
-
+    
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-
+    
     // Paint properties
     style::DebugPaintProperties::Unevaluated unevaluated;
-
+    
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr debugShaderGroup;
 #endif

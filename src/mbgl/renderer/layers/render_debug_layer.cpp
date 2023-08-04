@@ -70,10 +70,10 @@ bool RenderDebugLayer::hasCrossfade() const {
 static constexpr std::string_view DebugShaderName = "DebugShader";
 
 void RenderDebugLayer::update(gfx::ShaderRegistry& shaders,
-                              gfx::Context& context,
-                              const TransformState& state,
-                              [[maybe_unused]] const RenderTree& renderTree,
-                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                                   gfx::Context& context,
+                                   const TransformState& state,
+                                   [[maybe_unused]] const RenderTree& renderTree,
+                                   [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 }
 #endif
