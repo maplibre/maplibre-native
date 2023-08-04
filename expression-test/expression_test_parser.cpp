@@ -54,7 +54,7 @@ void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const V
 using ErrorMessage = std::string;
 using JSONReply = variant<JSDocument, ErrorMessage>;
 JSONReply readJson(const std::filesystem::path& jsonPath) {
-    auto maybeJSON = util::readFile(jsonPath);
+    auto maybeJSON = util::readFile(jsonPath.string());
     if (!maybeJSON) {
         return {"Unable to open file "s + jsonPath.string()};
     }
