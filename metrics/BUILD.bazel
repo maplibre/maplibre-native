@@ -32,7 +32,9 @@ filegroup(
             "integration/expression-tests/**",
         ],
         allow_empty = False,
-    ),
+    ) + [
+        "ignores/platform-all.json",
+    ],
     visibility = [
         "//expression-test:__pkg__",
     ],
