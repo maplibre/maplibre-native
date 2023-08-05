@@ -43,14 +43,13 @@ void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, Pa
     auto& shaders = *parameters.staticData.shaders;
     constexpr auto DebugShaderName = "DebugShader";
     gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(shaders, std::string(DebugShaderName));
-    const auto& shaderUniforms = debugShader->getUniformBlocks();
     const auto renderPass = RenderPass::None;
 
-    auto createBuilder = [&context](const std::string& name,
+    auto createBuilder = [&context](const std::string& builderName,
                                     gfx::ShaderProgramBasePtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
         constexpr auto VertexAttribName = "a_pos";
 
-        std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
+        std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(builderName);
         builder->setShader(shader);
         builder->setRenderPass(renderPass);
         builder->setEnableDepth(false);
