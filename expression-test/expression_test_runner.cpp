@@ -1,7 +1,6 @@
 #include "expression_test_runner.hpp"
 #include "expression_test_logger.hpp"
 #include "expression_test_parser.hpp"
-#include "filesystem.hpp"
 #include "test_runner_common.hpp"
 
 #include <mbgl/util/io.hpp>
@@ -12,6 +11,7 @@
 
 #include <sstream>
 #include <regex>
+#include <filesystem>
 
 using namespace std::literals;
 
@@ -87,7 +87,7 @@ void writeTestData(const JSDocument& document, const std::string& rootPath, cons
     writer.SetIndent(' ', 2);
     document.Accept(writer);
     buffer.Put('\n');
-    filesystem::path path = filesystem::path(rootPath) / id / "test.json"s;
+    std::filesystem::path path = std::filesystem::path(rootPath) / id / "test.json"s;
     try {
         util::write_file(path.string(), {buffer.GetString(), buffer.GetSize()});
     } catch (std::exception&) {
