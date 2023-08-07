@@ -25,12 +25,19 @@ using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 
 class RenderItem {
 public:
+    enum class DebugType {
+        TextOutline,
+        Text,
+        Border
+    };
+    using DebugLayerGroupMap = std::map<DebugType, LayerGroupBasePtr>;
+
     virtual ~RenderItem() = default;
     virtual void upload(gfx::UploadPass&) const = 0;
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
     virtual const std::string& getName() const = 0;
-    virtual void updateDebugDrawables(LayerGroupBasePtr layerGroup, PaintParameters&) const = 0;
+    virtual void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const = 0;
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;

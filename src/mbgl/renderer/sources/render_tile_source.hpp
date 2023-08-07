@@ -101,7 +101,7 @@ private:
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
 
-    void updateDebugDrawables(LayerGroupBasePtr, PaintParameters&) const override;
+    void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override;
 
     Immutable<std::vector<RenderTile>> renderTiles;
     std::string name;

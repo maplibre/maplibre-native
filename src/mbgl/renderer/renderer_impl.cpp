@@ -154,13 +154,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     });
 
     // Update the debug layer group
-    if (!debugTileLayerGroup) {
-        debugTileLayerGroup = context.createTileLayerGroup(
-            std::numeric_limits<int32_t>::max(), /*initialCapacity=*/64, "debug");
-    }
-
     for (const RenderItem& item : sourceRenderItems) {
-        item.updateDebugDrawables(debugTileLayerGroup, parameters);
+        item.updateDebugDrawables(debugLayerGroups, parameters);
     }
 
     // Give the layers a chance to do setup
@@ -178,8 +173,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
 
         // Upload the Debug layer group
-        if (debugTileLayerGroup) {
-            debugTileLayerGroup->upload(*uploadPass);
+        for (const auto& [debugType, layerGroup]: debugLayerGroups) {
+            layerGroup->upload(*uploadPass);
         }
     }
 #endif
@@ -336,8 +331,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            if (debugTileLayerGroup) {
-                debugTileLayerGroup->observeDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
+            for (const auto& [debugType, layerGroup] : debugLayerGroups) {
+                layerGroup->observeDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
             }
         }
     };

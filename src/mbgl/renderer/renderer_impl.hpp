@@ -49,7 +49,7 @@ private:
     RenderState renderState = RenderState::Never;
 
 #if MLN_DRAWABLE_RENDERER
-    std::shared_ptr<TileLayerGroup> debugTileLayerGroup;
+    RenderItem::DebugLayerGroupMap debugLayerGroups;
 #endif
 };
 

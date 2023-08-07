@@ -37,113 +37,223 @@ void TileSourceRenderItem::render(PaintParameters& parameters) const {
 }
 
 #if MLN_DRAWABLE_RENDERER
-void TileSourceRenderItem::updateDebugDrawables(LayerGroupBasePtr layerGroup, PaintParameters& parameters) const {
-    TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-    if (parameters.debugOptions & (MapDebugOptions::TileBorders)) {
-        auto& context = parameters.context;
-        auto& shaders = *parameters.staticData.shaders;
-        constexpr auto DebugShaderName = "DebugShader";
-        gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(shaders, std::string(DebugShaderName));
-        const auto renderPass = RenderPass::None;
+void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGroups,
+                                                PaintParameters& parameters) const {
+    if (!(parameters.debugOptions &
+          (MapDebugOptions::Timestamps | MapDebugOptions::ParseStatus | MapDebugOptions::TileBorders))) {
+        debugLayerGroups.clear();
+        return;
+    }
 
-        auto createBuilder = [&context](const std::string& builderName,
-                                        gfx::ShaderProgramBasePtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
-            constexpr auto VertexAttribName = "a_pos";
+    // Debug UBO definition
+    struct alignas(16) DebugUBO {
+        std::array<float, 4 * 4> matrix;
+        Color color;
+        float overlay_scale;
+        float pad1, pad2, pad3;
+    };
+    static_assert(sizeof(DebugUBO) % 16 == 0);
+    constexpr auto DebugUBOName = "DebugUBO";
 
-            std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(builderName);
-            builder->setShader(shader);
-            builder->setRenderPass(renderPass);
-            builder->setEnableDepth(false);
-            builder->setColorMode(gfx::ColorMode::unblended());
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setEnableStencil(false);
-            builder->setVertexAttrName(VertexAttribName);
+    // initialize
+    auto& context = parameters.context;
+    const auto renderPass = RenderPass::None;
+    auto& shaders = *parameters.staticData.shaders;
+    constexpr auto DebugShaderName = "DebugShader";
+    gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(shaders, std::string(DebugShaderName));
 
-            return builder;
-        };
+    // create a builder
+    constexpr auto VertexAttribName = "a_pos";
+    std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder("debug-builder");
+    builder->setShader(debugShader);
+    builder->setRenderPass(renderPass);
+    builder->setEnableDepth(false);
+    builder->setColorMode(gfx::ColorMode::unblended());
+    builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+    builder->setEnableStencil(false);
+    builder->setVertexAttrName(VertexAttribName);
 
-        struct alignas(16) DebugUBO {
-            std::array<float, 4 * 4> matrix;
-            Color color;
-            float overlay_scale;
-            float pad1, pad2, pad3;
-        };
-        static_assert(sizeof(DebugUBO) % 16 == 0);
-        constexpr auto DebugUBOName = "DebugUBO";
+    // add or get the layer group for a debug type
+    const auto addOrGetLayerGroupForType =
+        [&debugLayerGroups, &context](DebugType type, const std::string&& name) -> DebugLayerGroupMap::const_iterator {
+        auto it = debugLayerGroups.find(type);
+        if (it == debugLayerGroups.end()) {
+            auto inserted = debugLayerGroups.insert(std::make_pair(
+                type, context.createTileLayerGroup(static_cast<int32_t>(type), /*initialCapacity=*/64, name)));
+            assert(inserted.second);
+            it = inserted.first;
+        }
+        return it;
+    };
 
-        // create texture. to be reused for all the tiles of the layer
+    // build a set of tiles to cover
+    std::unordered_set<OverscaledTileID> newTiles;
+    for (auto& tile : *renderTiles) {
+        if (tile.getNeedsRendering()) {
+            newTiles.insert(tile.getOverscaledTileID());
+        }
+    }
+
+    // create texture. to be reused for all the tiles of the debug layers
+    auto texture = context.createTexture2D();
+    std::optional<uint32_t> samplerLocation;
+    {
         std::array<uint8_t, 4> data{{0, 0, 0, 0}};
         auto emptyImage = std::make_shared<PremultipliedImage>(Size(1, 1), data.data(), data.size());
-        auto texture = context.createTexture2D();
         texture->setImage(emptyImage);
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         constexpr auto DebugOverlayUniformName = "u_overlay";
-        const auto samplerLocation = debugShader->getSamplerLocation(DebugOverlayUniformName);
+        samplerLocation = debugShader->getSamplerLocation(DebugOverlayUniformName);
+    }
+    assert(samplerLocation.has_value());
+    if (!samplerLocation.has_value()) return;
+
+    // function to update existing tile drawables with UBO value. return number of updated drawables
+    const auto updateDrawables =
+        [&](TileLayerGroup* tileLayerGroup, const OverscaledTileID& tileID, const DebugUBO& debugUBO) -> size_t {
+        auto updatedCount = tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            // update existing drawable
+            auto& uniforms = drawable.mutableUniformBuffers();
+            uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
+        });
+        return updatedCount;
+    };
+
+    // function to add drawable
+    const auto addDrawable = [&](TileLayerGroup* tileLayerGroup,
+                                 const OverscaledTileID& tileID,
+                                 const DebugUBO& debugUBO,
+                                 const std::unique_ptr<DebugBucket>& debugBucket,
+                                 const gfx::DrawMode mode,
+                                 const auto& vertices,
+                                 const auto& indexes,
+                                 const auto& segments) {
+        // create new drawable
+        std::vector<std::array<int16_t, 2>> verts(vertices.size());
+        std::transform(vertices.begin(), vertices.end(), verts.begin(), [](const auto& v) -> std::array<int16_t, 2> {
+            return v.a1;
+        });
+
+        builder->addVertices(verts, 0, verts.size());
+        builder->setSegments(mode, indexes, segments.data(), segments.size());
+        // texture
+        builder->setTexture(texture, samplerLocation.value());
+
+        // finish
+        builder->flush();
+        for (auto& drawable : builder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            auto& uniforms = drawable->mutableUniformBuffers();
+            uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
+
+            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+        }
+    };
+
+    // Timestamps or Parse Status
+    if (parameters.debugOptions & (MapDebugOptions::Timestamps | MapDebugOptions::ParseStatus)) {
+        TileLayerGroup* outlineLayerGroup = static_cast<TileLayerGroup*>(
+            addOrGetLayerGroupForType(DebugType::TextOutline, "debug-text-outline")->second.get());
+        TileLayerGroup* textLayerGroup = static_cast<TileLayerGroup*>(
+            addOrGetLayerGroupForType(DebugType::Text, "debug-text")->second.get());
 
         // erase drawables that are not in the current tile set
-        std::unordered_set<OverscaledTileID> newTiles;
+        for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
+            lg->observeDrawablesRemove([&](gfx::Drawable& drawable) {
+                return (drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+            });
+        }
+
+        // add new drawables and update existing ones
         for (auto& tile : *renderTiles) {
             if (tile.getNeedsRendering()) {
-                newTiles.insert(tile.getOverscaledTileID());
+                const auto tileID = tile.getOverscaledTileID();
+                const auto& debugBucket = tile.debugBucket;
+                if (!debugBucket) continue;
+
+                const DebugUBO outlineUBO{/*matrix = */ util::cast<float>(tile.matrix),
+                                          /*color = */ Color::white(),
+                                          /*overlay_scale = */ 1.0f,
+                                          0,
+                                          0,
+                                          0};
+                if (0 == updateDrawables(outlineLayerGroup, tileID, outlineUBO)) {
+                    addDrawable(outlineLayerGroup,
+                                tileID,
+                                outlineUBO,
+                                debugBucket,
+                                gfx::Lines(4.0f * parameters.pixelRatio),
+                                debugBucket->vertices.vector(),
+                                debugBucket->indices.vector(),
+                                debugBucket->segments);
+                }
+
+                const DebugUBO textUBO{/*matrix = */ util::cast<float>(tile.matrix),
+                                       /*color = */ Color::black(),
+                                       /*overlay_scale = */ 1.0f,
+                                       0,
+                                       0,
+                                       0};
+                if (0 == updateDrawables(textLayerGroup, tileID, textUBO)) {
+                    addDrawable(textLayerGroup,
+                                tileID,
+                                textUBO,
+                                debugBucket,
+                                gfx::Lines(2.0f * parameters.pixelRatio),
+                                debugBucket->vertices.vector(),
+                                debugBucket->indices.vector(),
+                                debugBucket->segments);
+                }
             }
         }
+    } else {
+        // tile texts are not required, erase layer groups
+        debugLayerGroups.erase(DebugType::TextOutline);
+        debugLayerGroups.erase(DebugType::Text);
+    }
+
+    // Tile Borders
+    if (parameters.debugOptions & (MapDebugOptions::TileBorders)) {
+        TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(
+            addOrGetLayerGroupForType(DebugType::Border, "debug-border")->second.get());
+
+        // erase drawables that are not in the current tile set
         tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
             return (drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
         });
 
         // add new drawables and update existing ones
-        auto builder = createBuilder("debug", debugShader);
+        auto vertices = RenderStaticData::tileVertices().vector();
+        auto indexes = RenderStaticData::tileLineStripIndices().vector();
+        auto segments = RenderStaticData::tileBorderSegments();
         for (auto& tile : *renderTiles) {
             if (tile.getNeedsRendering()) {
                 const auto tileID = tile.getOverscaledTileID();
-                auto& debugBucket = tile.debugBucket;
+                const auto& debugBucket = tile.debugBucket;
+                if (!debugBucket) continue;
+
                 const DebugUBO debugUBO{/*matrix = */ util::cast<float>(tile.matrix),
                                         /*color = */ Color::red(),
                                         /*overlay_scale = */ 1.0f,
                                         0,
                                         0,
                                         0};
-                auto updatedCount = tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                    // update existing drawable
-                    auto& uniforms = drawable.mutableUniformBuffers();
-                    uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
-                });
-
-                if (0 == updatedCount) {
-                    // create new drawable
-                    if (debugBucket && samplerLocation.has_value()) {
-                        auto vertices = RenderStaticData::tileVertices().vector();
-                        auto indexes = RenderStaticData::tileLineStripIndices().vector();
-                        auto segments = RenderStaticData::tileBorderSegments();
-
-                        std::vector<std::array<int16_t, 2>> verts(vertices.size());
-                        std::transform(vertices.begin(),
-                                       vertices.end(),
-                                       verts.begin(),
-                                       [](const auto& v) -> std::array<int16_t, 2> { return v.a1; });
-
-                        builder->addVertices(verts, 0, verts.size());
-                        builder->setSegments(
-                            gfx::LineStrip(4.0f * parameters.pixelRatio), indexes, segments.data(), segments.size());
-                        // texture
-                        builder->setTexture(texture, samplerLocation.value());
-
-                        // finish
-                        builder->flush();
-                        for (auto& drawable : builder->clearDrawables()) {
-                            drawable->setTileID(tileID);
-                            auto& uniforms = drawable->mutableUniformBuffers();
-                            uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
-
-                            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        }
-                    }
+                if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO)) {
+                    addDrawable(tileLayerGroup,
+                                tileID,
+                                debugUBO,
+                                debugBucket,
+                                gfx::LineStrip(4.0f * parameters.pixelRatio),
+                                vertices,
+                                indexes,
+                                segments);
                 }
             }
         }
     } else {
-        tileLayerGroup->clearDrawables();
+        // if tile borders are not required, erase layer group
+        debugLayerGroups.erase(DebugType::Border);
     }
 }
 #endif
