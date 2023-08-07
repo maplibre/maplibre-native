@@ -173,7 +173,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
 
         // Upload the Debug layer group
-        for (const auto& [debugType, layerGroup]: debugLayerGroups) {
+        for (const auto& [debugType, layerGroup] : debugLayerGroups) {
             layerGroup->upload(*uploadPass);
         }
     }
