@@ -3,7 +3,7 @@
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/master/CONTRIBUTING.md) to get started.
 
 ## main
-
+* Add `MLNMapView.setLatLngBounds` and `MLNMapView.clearLatLnBounds`
 * 💥 Breaking: Changed the prefix of files, classes, methods, variables and everything from `MGL` to `MLN`. ([#919](https://github.com/maplibre/maplibre-native/pull/919)).
 
   > To migrate:  
