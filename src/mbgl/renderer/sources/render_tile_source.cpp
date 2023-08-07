@@ -74,12 +74,13 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     builder->setVertexAttrName(VertexAttribName);
 
     // add or get the layer group for a debug type
-    const auto addOrGetLayerGroupForType =
-        [&debugLayerGroups, &context](DebugType type, const std::string&& name) -> DebugLayerGroupMap::const_iterator {
+    const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](
+                                               DebugType type,
+                                               const std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
         auto it = debugLayerGroups.find(type);
         if (it == debugLayerGroups.end()) {
             auto inserted = debugLayerGroups.insert(std::make_pair(
-                type, context.createTileLayerGroup(static_cast<int32_t>(type), /*initialCapacity=*/64, name)));
+                type, context.createTileLayerGroup(static_cast<int32_t>(type), /*initialCapacity=*/64, layerName)));
             assert(inserted.second);
             it = inserted.first;
         }
@@ -124,7 +125,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     const auto addDrawable = [&](TileLayerGroup* tileLayerGroup,
                                  const OverscaledTileID& tileID,
                                  const DebugUBO& debugUBO,
-                                 const std::unique_ptr<DebugBucket>& debugBucket,
                                  const gfx::DrawMode mode,
                                  const auto& vertices,
                                  const auto& indexes,
@@ -182,7 +182,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     addDrawable(outlineLayerGroup,
                                 tileID,
                                 outlineUBO,
-                                debugBucket,
                                 gfx::Lines(4.0f * parameters.pixelRatio),
                                 debugBucket->vertices.vector(),
                                 debugBucket->indices.vector(),
@@ -199,7 +198,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     addDrawable(textLayerGroup,
                                 tileID,
                                 textUBO,
-                                debugBucket,
                                 gfx::Lines(2.0f * parameters.pixelRatio),
                                 debugBucket->vertices.vector(),
                                 debugBucket->indices.vector(),
@@ -243,7 +241,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     addDrawable(tileLayerGroup,
                                 tileID,
                                 debugUBO,
-                                debugBucket,
                                 gfx::LineStrip(4.0f * parameters.pixelRatio),
                                 vertices,
                                 indexes,
