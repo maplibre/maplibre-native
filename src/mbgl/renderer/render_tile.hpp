@@ -72,6 +72,8 @@ public:
     gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
 
     const std::shared_ptr<TileAtlasTextures>& getAtlasTextures() const;
+
+    bool getNeedsRendering() const { return needsRendering; };
 #else
     gfx::TextureBinding getGlyphAtlasTextureBinding(gfx::TextureFilterType) const;
     gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
