@@ -329,11 +329,12 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
-            if (auto& attr = vertexAttrs.getOrAdd(TexturePosAttribName)) {
-                std::size_t index{0};
-                for (auto& v : vertices->vector()) {
-                    attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
-                }
+            if (auto& attr = vertexAttrs.add(TexturePosAttribName)) {
+                attr->setSharedRawData(vertices,
+                                       offsetof(RasterLayoutVertex, a2),
+                                       /*vertexOffset=*/0,
+                                       sizeof(RasterLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
             }
             builder->setVertexAttributes(std::move(vertexAttrs));
         }
