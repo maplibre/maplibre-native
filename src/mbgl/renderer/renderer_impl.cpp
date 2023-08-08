@@ -251,7 +251,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         parameters.pass = RenderPass::Opaque;
         parameters.currentLayer = 0;
         parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 1 + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
+                                    (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
         orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
@@ -265,7 +265,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Translucent;
         parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 1 + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
+                                    (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
         orchestrator.observeLayerGroups([&](LayerGroupBase& layerGroup) {
