@@ -121,9 +121,7 @@ public:
     void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
 #endif
 
-    const ZoomHistory& getZoomHistory() const {
-        return zoomHistory;
-    }
+    const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
 private:
     bool isLoaded() const;
