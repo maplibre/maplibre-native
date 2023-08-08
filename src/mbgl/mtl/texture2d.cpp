@@ -149,7 +149,6 @@ void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
 
     encoder->setFragmentTexture(metalTexture.get(), location);
     encoder->setFragmentSamplerState(metalSamplerState.get(), location);
-    boundLocation = location;
 }
 
 void Texture2D::unbind(const RenderPass& renderPass, int32_t location) noexcept {

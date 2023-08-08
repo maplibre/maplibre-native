@@ -76,9 +76,6 @@ private:
     std::shared_ptr<PremultipliedImage> image{nullptr};
     bool samplerStateDirty{false};
     bool storageDirty{false};
-
-    // int32_t boundTextureUnit{-1};
-    int32_t boundLocation{-1};
 };
 
 } // namespace mtl
