@@ -32,9 +32,10 @@ public:
     std::optional<ImagePosition> addPattern(const style::Image::Impl&);
     void removePattern(const std::string&);
 
-    gfx::TextureBinding textureBinding() const; // @TODO: Migrate
 #if MLN_DRAWABLE_RENDERER
     const std::shared_ptr<gfx::Texture2D>& texture() const;
+#else
+    gfx::TextureBinding textureBinding() const; // @TODO: Migrate
 #endif
 
     void upload(gfx::UploadPass&);

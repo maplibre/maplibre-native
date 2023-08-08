@@ -34,6 +34,7 @@ public:
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
+    gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const override { return stats; }
 
     BufferResource createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const;
@@ -44,6 +45,9 @@ public:
                                       std::string_view fragmentName,
                                       const ProgramParameters& programParameters,
                                       const std::unordered_map<std::string, std::string>& additionalDefines);
+    
+    MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
+    MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 
     /*
     void verifyProgramLinkage(ProgramID);
@@ -100,7 +104,6 @@ public:
         void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
     */
 
-#if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
 
@@ -117,7 +120,6 @@ public:
     // UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
 
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
-#endif
 
     void setDirtyState() override;
 

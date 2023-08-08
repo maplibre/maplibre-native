@@ -16,6 +16,7 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
 #include <mbgl/shaders/mtl/line_gradient.hpp>
+#include <mbgl/shaders/mtl/raster.hpp>
 
 #include <cassert>
 #include <string>
@@ -111,7 +112,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::BackgroundPatternShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::LineShader,
-                  shaders::BuiltIn::LineGradientShader/*,
+                  shaders::BuiltIn::LineGradientShader,
+                  shaders::BuiltIn::RasterShader/*,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
                   shaders::BuiltIn::LineSDFShader,
@@ -124,7 +126,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadePrepareShader,
                   shaders::BuiltIn::HillshadeShader,
-                  shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFTextShader,
                   shaders::BuiltIn::SymbolSDFIconShader,

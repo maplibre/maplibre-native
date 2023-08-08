@@ -123,11 +123,18 @@ UniqueShaderProgram Context::createProgram(std::string name,
         std::move(name), backend, std::move(vertexFunction), std::move(fragmentFunction));
 }
 
+MTLTexturePtr Context::createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const {
+    return NS::TransferPtr(backend.getDevice()->newTexture(textureDescriptor.get()));
+}
+
+MTLSamplerStatePtr Context::createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const {
+    return NS::TransferPtr(backend.getDevice()->newSamplerState(samplerDescriptor.get()));
+}
+
 void Context::performCleanup() {}
 
 void Context::reduceMemoryUsage() {}
 
-#if MLN_DRAWABLE_RENDERER
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
@@ -163,8 +170,6 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
 }
 
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
-
-#endif // MLN_DRAWABLE_RENDERER
 
 void Context::setDirtyState() {}
 

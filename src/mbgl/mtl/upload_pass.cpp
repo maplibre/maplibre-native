@@ -82,27 +82,17 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
                                                                         const void* data,
                                                                         gfx::TexturePixelType format,
                                                                         gfx::TextureChannelDataType type) {
-    //    auto obj = commandEncoder.context.createUniqueTexture();
-    //    const int textureByteSize = gl::TextureResource::getStorageSize(size, format, type);
-    //    commandEncoder.context.renderingStats().memTextures += textureByteSize;
-    //    auto resource = std::make_unique<gl::TextureResource>(std::move(obj), textureByteSize);
-    //    commandEncoder.context.pixelStoreUnpack = {1};
-    //    updateTextureResource(*resource, size, data, format, type);
-    //    // We are using clamp to edge here since OpenGL ES doesn't allow GL_REPEAT
-    //    // on NPOT textures. We use those when the pixelRatio isn't a power of two,
-    //    // e.g. on iPhone 6 Plus.
-    //    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    //    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    //    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    //    MBGL_CHECK_ERROR(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-    return std::make_unique<TextureResource>();
+    assert(false);
+    return nullptr;
 }
 
 void UploadPass::updateTextureResource(gfx::TextureResource& resource,
                                        const Size size,
                                        const void* data,
                                        gfx::TexturePixelType format,
-                                       gfx::TextureChannelDataType type) {}
+                                       gfx::TextureChannelDataType type) {
+    assert(false);
+}
 
 void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                           const uint16_t xOffset,
@@ -110,7 +100,9 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                           const Size size,
                                           const void* data,
                                           gfx::TexturePixelType format,
-                                          gfx::TextureChannelDataType type) {}
+                                          gfx::TextureChannelDataType type) {
+    assert(false);
+}
 
 struct VertexBuffer : public gfx::VertexBufferBase {
     ~VertexBuffer() override = default;
