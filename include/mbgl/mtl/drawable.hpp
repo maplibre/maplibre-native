@@ -65,7 +65,7 @@ protected:
 
     void bindTextures(const RenderPass& renderPass) const;
     void unbindTextures(const RenderPass& renderPass) const;
-    
+
     void uploadTextures() const;
 
     class Impl;

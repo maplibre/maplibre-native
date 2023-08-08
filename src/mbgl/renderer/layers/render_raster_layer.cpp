@@ -332,7 +332,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        sizeof(RasterLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
-            
+
             if (auto& attr = vertexAttrs.add(TexturePosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a2),

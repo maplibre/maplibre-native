@@ -45,7 +45,7 @@ public:
                                       std::string_view fragmentName,
                                       const ProgramParameters& programParameters,
                                       const std::unordered_map<std::string, std::string>& additionalDefines);
-    
+
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 

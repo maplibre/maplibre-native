@@ -54,7 +54,7 @@ private:
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr rasterShader;
     LayerGroupPtr imageLayerGroup;
-    
+
     using RasterVertexVector = gfx::VertexVector<RasterLayoutVertex>;
     using RasterVertexVectorPtr = std::shared_ptr<RasterVertexVector>;
     RasterVertexVectorPtr staticDataVertices;

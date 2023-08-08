@@ -96,16 +96,16 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
 void Texture2D::createObject() noexcept {
     // Create a new texture object
     assert(!metalTexture.get());
-    auto textureDescriptor = NS::RetainPtr(MTL::TextureDescriptor::texture2DDescriptor(getMetalPixelFormat(),
-                                                                                       size.width, size.height, false));
+    auto textureDescriptor = NS::RetainPtr(
+        MTL::TextureDescriptor::texture2DDescriptor(getMetalPixelFormat(), size.width, size.height, false));
     metalTexture = context.createMetalTexture(textureDescriptor);
-    
+
     context.renderingStats().memTextures += getDataSize();
 }
 
 void Texture2D::createStorage(const void* data) noexcept {
     assert(metalTexture.get());
-    
+
     MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);
     NS::UInteger bytesPerRow = size.width * getPixelStride();
     metalTexture->replaceRegion(region, 0, data, bytesPerRow);
@@ -124,24 +124,24 @@ void Texture2D::create() noexcept {
 
 void Texture2D::updateSamplerConfiguration() noexcept {
     auto samplerDescriptor = NS::RetainPtr(MTL::SamplerDescriptor::alloc()->init());
-    samplerDescriptor->setMinFilter(samplerState.filter == gfx::TextureFilterType::Nearest ?
-                                    MTL::SamplerMinMagFilterNearest :
-                                    MTL::SamplerMinMagFilterLinear);
-    samplerDescriptor->setMagFilter(samplerState.filter == gfx::TextureFilterType::Nearest ?
-                                    MTL::SamplerMinMagFilterNearest :
-                                    MTL::SamplerMinMagFilterLinear);
-    samplerDescriptor->setSAddressMode(samplerState.wrapU == gfx::TextureWrapType::Clamp ?
-                                       MTL::SamplerAddressModeClampToEdge :
-                                       MTL::SamplerAddressModeRepeat);
-    samplerDescriptor->setTAddressMode(samplerState.wrapV == gfx::TextureWrapType::Clamp ?
-                                       MTL::SamplerAddressModeClampToEdge :
-                                       MTL::SamplerAddressModeRepeat);
+    samplerDescriptor->setMinFilter(samplerState.filter == gfx::TextureFilterType::Nearest
+                                        ? MTL::SamplerMinMagFilterNearest
+                                        : MTL::SamplerMinMagFilterLinear);
+    samplerDescriptor->setMagFilter(samplerState.filter == gfx::TextureFilterType::Nearest
+                                        ? MTL::SamplerMinMagFilterNearest
+                                        : MTL::SamplerMinMagFilterLinear);
+    samplerDescriptor->setSAddressMode(samplerState.wrapU == gfx::TextureWrapType::Clamp
+                                           ? MTL::SamplerAddressModeClampToEdge
+                                           : MTL::SamplerAddressModeRepeat);
+    samplerDescriptor->setTAddressMode(samplerState.wrapV == gfx::TextureWrapType::Clamp
+                                           ? MTL::SamplerAddressModeClampToEdge
+                                           : MTL::SamplerAddressModeRepeat);
     metalSamplerState = context.createMetalSamplerState(samplerDescriptor);
 }
 
 void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
     const auto& encoder = renderPass.getMetalEncoder();
-    
+
     // Update the sampler state if it was changed after resource creation
     if (samplerStateDirty) {
         updateSamplerConfiguration();
@@ -162,7 +162,7 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     if (size_ == Size{0, 0}) {
         return;
     }
-    
+
     if (!metalTexture.get() || storageDirty || size_ != size) {
         size = size_;
 
@@ -184,7 +184,7 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
     assert(metalTexture.get());
     assert(!samplerStateDirty);
-    
+
     MTL::Region region = MTL::Region::Make2D(xOffset, yOffset, size_.width, size_.height);
     NS::UInteger bytesPerRow = size_.width * getPixelStride();
     metalTexture->replaceRegion(region, 0, pixelData, bytesPerRow);

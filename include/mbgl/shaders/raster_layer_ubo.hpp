@@ -25,4 +25,3 @@ static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
 
 } // namespace shaders
 } // namespace mbgl
-

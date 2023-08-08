@@ -67,7 +67,7 @@ private:
     Context& context;
     MTLTexturePtr metalTexture;
     MTLSamplerStatePtr metalSamplerState;
-    
+
     Size size{0, 0};
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
     gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
@@ -77,7 +77,7 @@ private:
     bool samplerStateDirty{false};
     bool storageDirty{false};
 
-    //int32_t boundTextureUnit{-1};
+    // int32_t boundTextureUnit{-1};
     int32_t boundLocation{-1};
 };
 
