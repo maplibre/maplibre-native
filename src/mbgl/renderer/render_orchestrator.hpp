@@ -100,7 +100,6 @@ public:
 #if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
-    size_t numLayerGroups() const noexcept;
     int32_t maxLayerIndex() const;
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
     void observeLayerGroups(std::function<void(LayerGroupBase&)>);
@@ -122,7 +121,9 @@ public:
     void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
 #endif
 
-    const ZoomHistory& getZoomHistory() const { return zoomHistory; }
+    const ZoomHistory& getZoomHistory() const {
+        return zoomHistory;
+    }
 
 private:
     bool isLoaded() const;
