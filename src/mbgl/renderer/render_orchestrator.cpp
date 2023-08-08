@@ -840,6 +840,13 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
     return layerGroupsByLayerIndex.size();
 }
 
+int32_t RenderOrchestrator::maxLayerIndex() const {
+    if (!layerGroupsByLayerIndex.empty()) {
+        return layerGroupsByLayerIndex.crbegin()->second->getLayerIndex();
+    }
+    return -1;
+}
+
 static const LayerGroupBasePtr no_group;
 
 const LayerGroupBasePtr& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
