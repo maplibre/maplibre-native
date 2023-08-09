@@ -53,9 +53,9 @@ if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
 fi
 
-cp platform/ios/platform/ios/framework/Info-static.plist "$temp_info_static_plist"
-cp platform/ios/platform/ios/framework/Info.plist "$temp_info_plist"
-cp platform/ios/platform/ios/app/Info.plist "$temp_app_info_plist"
+cp platform/ios/framework/Info-static.plist "$temp_info_static_plist"
+cp platform/ios/framework/Info.plist "$temp_info_plist"
+cp platform/ios/app/Info.plist "$temp_app_info_plist"
 
 # Replace semver and hash
 plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
