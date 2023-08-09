@@ -443,10 +443,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
             // Outline always occurs in translucent pass, defaults to fill color
-            const auto fillRenderPass = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
-                                         evaluated.get<FillOpacity>().constantOr(0) >= 1.0f)
-                                            ? RenderPass::Opaque
-                                            : RenderPass::Translucent;
             const auto doOutline = evaluated.get<FillAntialias>();
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
@@ -458,12 +454,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                     commonInit(*builder);
-                    builder->setDepthType((fillRenderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                    builder->setDepthType((renderPasses == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                                  : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(fillRenderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                    builder->setColorMode(renderPasses == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                                     : gfx::ColorMode::unblended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(fillRenderPass);
+                    builder->setRenderPass(renderPasses);
                     fillBuilder = std::move(builder);
                 }
             }
@@ -565,6 +561,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder) {
                 patternBuilder->setShader(fillShader);
+                patternBuilder->setRenderPass(renderPasses);
                 if (outlinePatternBuilder) {
                     patternBuilder->setVertexAttributes(vertexAttrs);
                 } else {
@@ -580,6 +577,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
             if (outlinePatternBuilder) {
                 outlinePatternBuilder->setShader(outlineShader);
+                outlinePatternBuilder->setRenderPass(renderPasses);
                 outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(
