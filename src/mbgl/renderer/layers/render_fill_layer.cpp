@@ -339,7 +339,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
+    const auto renderPasses = static_cast<RenderPass>(evaluatedProperties->renderPasses);
 
     const auto finish = [&](gfx::DrawableBuilder& builder,
                             const OverscaledTileID& tileID,
@@ -352,7 +352,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable->mutableUniformBuffers();
             uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpUBO, context);
             uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileUBO, context);
-            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            tileLayerGroup->addDrawable(renderPasses, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
     };
@@ -364,15 +364,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     stats.drawablesRemoved += tileLayerGroup->observeDrawablesRemove([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has dropped out of the cover set, remove it.
-        return drawable.getRenderPass() == renderPass && drawable.getTileID() && hasRenderTile(*drawable.getTileID());
+        return drawable.getTileID() && hasRenderTile(*drawable.getTileID());
     });
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPasses);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-            removeTile(renderPass, tileID);
+            removeTile(renderPasses, tileID);
             continue;
         }
 
@@ -382,7 +382,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
             // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(renderPass, tileID);
+            removeTile(renderPasses, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
@@ -432,7 +432,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
             drawable.setVertexAttributes(vertexAttrs);
         };
-        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (0 < tileLayerGroup->observeDrawables(renderPasses, tileID, std::move(updateExisting))) {
             continue;
         }
 
@@ -443,6 +443,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
             // Outline always occurs in translucent pass, defaults to fill color
+            const auto fillRenderPass = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
+                                         evaluated.get<FillOpacity>().constantOr(0) >= 1.0f)
+                                            ? RenderPass::Opaque
+                                            : RenderPass::Translucent;
             const auto doOutline = evaluated.get<FillAntialias>();
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
@@ -454,12 +458,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                     commonInit(*builder);
-                    builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                    builder->setDepthType((fillRenderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                              : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                    builder->setColorMode(fillRenderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                                 : gfx::ColorMode::unblended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(renderPass);
+                    builder->setRenderPass(fillRenderPass);
                     fillBuilder = std::move(builder);
                 }
             }
@@ -498,7 +502,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
             }
         } else { // FillPattern is defined
-            if ((renderPass & RenderPass::Translucent) == 0) {
+            if ((renderPasses & RenderPass::Translucent) == 0) {
                 continue;
             }
 
@@ -561,7 +565,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder) {
                 patternBuilder->setShader(fillShader);
-                patternBuilder->setRenderPass(renderPass);
                 if (outlinePatternBuilder) {
                     patternBuilder->setVertexAttributes(vertexAttrs);
                 } else {
@@ -577,7 +580,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
             if (outlinePatternBuilder) {
                 outlinePatternBuilder->setShader(outlineShader);
-                outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(
