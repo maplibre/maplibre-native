@@ -16,6 +16,8 @@ public:
     virtual ~RenderableResource() = default;
     RenderableResource(const RenderableResource&) = delete;
     RenderableResource& operator=(const RenderableResource&) = delete;
+
+    virtual void bind() = 0;
 };
 
 class Renderable {

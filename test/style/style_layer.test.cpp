@@ -1,5 +1,5 @@
-#include <mbgl/gl/custom_layer.hpp>
-#include <mbgl/gl/custom_layer_impl.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer_impl.hpp>
 #include <mbgl/style/conversion/filter.hpp>
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/expression/dsl.hpp>

@@ -2,8 +2,8 @@
 
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/gl/custom_layer.hpp>
-#include <mbgl/gl/render_custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
+#include <mbgl/renderer/layers/render_custom_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
@@ -86,22 +86,40 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
 
     assert(atlasTextures);
 
-    if (layoutResult->glyphAtlasImage) {
+    if (layoutResult->glyphAtlasImage && layoutResult->glyphAtlasImage->valid()) {
+#if MLN_DRAWABLE_RENDERER
+        atlasTextures->glyph = uploadPass.getContext().createTexture2D();
+        atlasTextures->glyph->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
+#else
         atlasTextures->glyph = uploadPass.createTexture(*layoutResult->glyphAtlasImage);
+#endif
         layoutResult->glyphAtlasImage = {};
     }
 
     if (layoutResult->iconAtlas.image.valid()) {
+#if MLN_DRAWABLE_RENDERER
+        atlasTextures->icon = uploadPass.getContext().createTexture2D();
+        atlasTextures->icon->upload(layoutResult->iconAtlas.image);
+#else
         atlasTextures->icon = uploadPass.createTexture(layoutResult->iconAtlas.image);
+#endif
         layoutResult->iconAtlas.image = {};
     }
 
     if (atlasTextures->icon && !imagePatches.empty()) {
         for (const auto& imagePatch : imagePatches) { // patch updated images.
+#if MLN_DRAWABLE_RENDERER
+            atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
+                                                 imagePatch.paddedRect.x + ImagePosition::padding,
+                                                 imagePatch.paddedRect.y + ImagePosition::padding);
+#else
             uploadPass.updateTextureSub(*atlasTextures->icon,
                                         imagePatch.image->image,
                                         imagePatch.paddedRect.x + ImagePosition::padding,
                                         imagePatch.paddedRect.y + ImagePosition::padding);
+#endif
         }
         imagePatches.clear();
     }

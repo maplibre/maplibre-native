@@ -5,7 +5,7 @@
 
 namespace mbgl {
 
-static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices() {
+gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> RenderStaticData::tileVertices() {
     gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> result;
     result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{0, 0}}}));
     result.emplace_back(gfx::Vertex<PositionOnlyLayoutAttributes>({{{util::EXTENT, 0}}}));
@@ -14,14 +14,14 @@ static gfx::VertexVector<gfx::Vertex<PositionOnlyLayoutAttributes>> tileVertices
     return result;
 }
 
-static gfx::IndexVector<gfx::Triangles> quadTriangleIndices() {
+gfx::IndexVector<gfx::Triangles> RenderStaticData::quadTriangleIndices() {
     gfx::IndexVector<gfx::Triangles> result;
     result.emplace_back(0, 1, 2);
     result.emplace_back(1, 2, 3);
     return result;
 }
 
-static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices() {
+gfx::IndexVector<gfx::LineStrip> RenderStaticData::tileLineStripIndices() {
     gfx::IndexVector<gfx::LineStrip> result;
     result.emplace_back(0);
     result.emplace_back(1);
@@ -31,7 +31,7 @@ static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices() {
     return result;
 }
 
-static gfx::VertexVector<RasterLayoutVertex> rasterVertices() {
+gfx::VertexVector<RasterLayoutVertex> RenderStaticData::rasterVertices() {
     gfx::VertexVector<RasterLayoutVertex> result;
     result.emplace_back(RasterProgram::layoutVertex({0, 0}, {0, 0}));
     result.emplace_back(RasterProgram::layoutVertex({util::EXTENT, 0}, {util::EXTENT, 0}));
@@ -40,7 +40,7 @@ static gfx::VertexVector<RasterLayoutVertex> rasterVertices() {
     return result;
 }
 
-static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices() {
+gfx::VertexVector<HeatmapTextureLayoutVertex> RenderStaticData::heatmapTextureVertices() {
     gfx::VertexVector<HeatmapTextureLayoutVertex> result;
     result.emplace_back(HeatmapTextureProgram::layoutVertex({0, 0}));
     result.emplace_back(HeatmapTextureProgram::layoutVertex({1, 0}));
@@ -86,11 +86,14 @@ SegmentVector<HeatmapTextureAttributes> RenderStaticData::heatmapTextureSegments
 
 void RenderStaticData::upload(gfx::UploadPass& uploadPass) {
     if (!uploaded) {
+        // these are still used by stencil buffer rendering
         tileVertexBuffer = uploadPass.createVertexBuffer(tileVertices());
+        quadTriangleIndexBuffer = uploadPass.createIndexBuffer(quadTriangleIndices());
+#if MLN_LEGACY_RENDERER
         rasterVertexBuffer = uploadPass.createVertexBuffer(rasterVertices());
         heatmapTextureVertexBuffer = uploadPass.createVertexBuffer(heatmapTextureVertices());
-        quadTriangleIndexBuffer = uploadPass.createIndexBuffer(quadTriangleIndices());
         tileBorderIndexBuffer = uploadPass.createIndexBuffer(tileLineStripIndices());
+#endif // MLN_LEGACY_RENDERER
         uploaded = true;
     }
 }
