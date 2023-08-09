@@ -247,6 +247,13 @@ xcodeproj(
                 "device",
             ],
         ),
+        top_level_target(
+            "//platform/ios/test/core:CppUnitTestsApp",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
     ],
     xcode_configurations = {
         "Debug": {"//command_line_option:compilation_mode": "dbg"},

@@ -8,16 +8,12 @@
   <string>${PRODUCT_NAME}</string>
   <key>CFBundleExecutable</key>
   <string>UnitTestsApp</string>
-  <key>CFBundleIdentifier</key>
-  <string>com.mapbox.UnitTestsApp</string>
   <key>CFBundleGetInfoString</key>
   <string>com.mapbox.UnitTestsApp</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>1.0</string>
   <key>CFBundleLongVersionString</key>
   <string>1.0</string>
-  <key>CFBundleName</key>
-  <string>com.mapbox.UnitTestsApp</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

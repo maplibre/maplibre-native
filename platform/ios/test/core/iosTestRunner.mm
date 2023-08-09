@@ -29,7 +29,16 @@
         NSArray *bundleContents = [fileManager contentsOfDirectoryAtPath: bundleRoot error: &error];
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsDir = [paths objectAtIndex: 0];
-        
+
+        NSString *dataDir = @"test-data";
+        NSString *baseDir = [documentsDir stringByAppendingPathComponent: dataDir];
+
+        BOOL isDir;
+        if(![fileManager fileExistsAtPath:baseDir isDirectory:&isDir])
+        if(![fileManager createDirectoryAtPath:baseDir withIntermediateDirectories:YES attributes:nil error:NULL]) {
+            NSAssert1(0, @"Error: Create directory failed %@", baseDir);
+        }
+
         for (uint32_t i = 0; i < bundleContents.count; i++) {
             NSString *dirName = [bundleContents objectAtIndex: i];
             if ([dirName isEqualToString: dataDir]) {
@@ -57,10 +66,10 @@
                 break;
             }
         }
-        NSString *baseDir = [documentsDir stringByAppendingPathComponent: dataDir];
+        NSLog(@"Starting test");
         std::string basePath = std::string([baseDir UTF8String]);
         self.testStatus = self.runner->startTest(basePath) ? YES : NO;
-        self.resultPath = [baseDir stringByAppendingPathComponent: resultFilePath];
+        self.resultPath = [baseDir stringByAppendingPathComponent: @"test/results.xml"];
 
         BOOL fileFound = [fileManager fileExistsAtPath: self.resultPath];
         if (fileFound == NO) {
