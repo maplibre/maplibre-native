@@ -40,15 +40,26 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
-    gfx::VertexVector<FillLayoutVertex> vertices;
-    gfx::IndexVector<gfx::Lines> lines;
-    gfx::IndexVector<gfx::Triangles> triangles;
+    using VertexVector = gfx::VertexVector<FillLayoutVertex>;
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
+    using LineIndexVector = gfx::IndexVector<gfx::Lines>;
+    const std::shared_ptr<LineIndexVector> sharedLines = std::make_shared<LineIndexVector>();
+    LineIndexVector& lines = *sharedLines;
+
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+    TriangleIndexVector& triangles = *sharedTriangles;
+
     SegmentVector<FillAttributes> lineSegments;
     SegmentVector<FillAttributes> triangleSegments;
 
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<FillLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> lineIndexBuffer;
     std::optional<gfx::IndexBuffer> triangleIndexBuffer;
+#endif // MLN_LEGACY_RENDERER
 
     std::map<std::string, FillProgram::Binders> paintPropertyBinders;
 };
