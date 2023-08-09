@@ -45,7 +45,7 @@ while [[ $# -gt 0 ]]; do
    esac
 done
 
-bash "platform/ios/platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
+bash "platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
@@ -53,5 +53,3 @@ echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 # Example invocation: ./bazel-xcodeproj.sh flavor split teamid 1234567890
 # Find your team ID inside a .mobileprovision file or in your keychain (Apple development: your@email -> Get Info -> Organizational Unit)
 bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=$flavor --//:maplibre_platform=ios"
-
-popd

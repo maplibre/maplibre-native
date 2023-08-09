@@ -53,9 +53,7 @@ class LayerProperties;
 
 using ImmutableLayer = Immutable<style::Layer::Impl>;
 
-class RenderOrchestrator final : public GlyphManagerObserver,
-                                 public ImageManagerObserver,
-                                 public RenderSourceObserver {
+class RenderOrchestrator final : public GlyphManagerObserver, public ImageManagerObserver, public RenderSourceObserver {
 public:
     RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;

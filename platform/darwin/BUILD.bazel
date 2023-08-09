@@ -135,7 +135,7 @@ objc_library(
         ],
         allow_empty = False,
     ),
-    copts = MAPLIBRE_FLAGS + WARNING_FLAGS,
+    copts = MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
     data = glob(
         [
             "test/Media.xcassets/**",
@@ -166,7 +166,7 @@ objc_library(
             "test/MLNOfflineStorageTests.mm",
         ],
     ),
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS + ["-Wno-deprecated-declarations"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + ["-Wno-deprecated-declarations"],
     visibility = [
         "//platform/ios/test:__pkg__",
     ],
