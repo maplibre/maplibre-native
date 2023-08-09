@@ -23,7 +23,7 @@ The documentation of MapLibre Native is a work in progress. To get an architectu
 ## Platforms
 
 - [⭐️ Android](platform/android/README.md) 
-- [⭐️ iOS](platform/ios/platform/ios/README.md)
+- [⭐️ iOS](platform/ios/README.md)
 - [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
 - [Node.js](platform/node/README.md)

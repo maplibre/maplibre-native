@@ -13,7 +13,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "Mapbox",
-            url: "MAPBOX_PACKAGE_URL",
-            checksum: "MAPBOX_PACKAGE_CHECKSUM")
+            url: "MAPLIBRE_PACKAGE_URL",
+            checksum: "MAPLIBRE_PACKAGE_CHECKSUM")
     ]
 )

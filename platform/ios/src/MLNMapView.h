@@ -1364,6 +1364,18 @@ MLN_EXPORT
  */
 - (CGPoint)anchorPointForGesture:(UIGestureRecognizer *)gesture;
 
+
+/**
+ * Sets a LatLngBounds that constraints map transformations to this bounds.
+ * @param latLngBounds the bounds to constrain the map with
+ */
+- (void)setLatLngBounds:(MLNCoordinateBounds)latLngBounds;
+
+/**
+ * Clears the bounds that were set via `setLatLngBounds`
+ */
+- (void)clearLatLnBounds;
+
 /**
  The distance from the edges of the map view’s frame to the edges of the map
  view’s logical viewport.
