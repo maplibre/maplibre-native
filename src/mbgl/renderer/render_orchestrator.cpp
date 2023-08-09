@@ -931,9 +931,13 @@ void RenderOrchestrator::observeRenderTargets(std::function<void(const RenderTar
 }
 #endif // MLN_DRAWABLE_RENDERER
 
-void RenderOrchestrator::onGlyphsError(const FontStack& fontStack, const GlyphRange& glyphRange, std::exception_ptr error) {
-    Log::Error(Event::Style, "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" + std::to_string(glyphRange.second) +
-               " for font stack " + fontStackToString(fontStack) + ": " + util::toString(error));
+void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
+                                       const GlyphRange& glyphRange,
+                                       std::exception_ptr error) {
+    Log::Error(Event::Style,
+               "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" +
+                   std::to_string(glyphRange.second) + " for font stack " + fontStackToString(fontStack) + ": " +
+                   util::toString(error));
     observer->onResourceError(error);
 }
 

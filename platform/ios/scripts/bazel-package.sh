@@ -2,8 +2,6 @@
 
 set -eo pipefail
 
-pushd ../../../../../
-
 # "static" or "dynamic"
 build_type="static"
 
@@ -18,9 +16,6 @@ sem_version=$(git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v/
 hash=$(git log | head -1 | awk '{ print $2 }' | cut -c 1-10) && true
 
 args=("--sem-ver" "$sem_version" "--hash" "$hash")
-
-# Provisioning profile name/UUID
-uuid="iOS Team Provisioning Profile: *"
 
 while [[ $# -gt 0 ]]; do
    case $1 in
@@ -85,7 +80,7 @@ if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
 fi
 
-bash "platform/ios/platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
+bash "platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
 
 echo "------ Building Maplibre version: $sem_version hash: $hash ------"
 
