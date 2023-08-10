@@ -14,86 +14,33 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 
 /**
  * The symbol manager allows to add symbols to a map.
+ *
+ * @param maplibreMap    the map object to add symbols to
+ * @param style          a valid a fully loaded style object
+ * @param belowLayerId   the id of the layer above the symbol layer
+ * @param aboveLayerId   the id of the layer below the symbol layer
+ * @param geoJsonOptions options for the internal source
  */
-class SymbolManager @UiThread internal constructor(
+class SymbolManager
+@UiThread
+@JvmOverloads
+constructor(
     mapView: MapView,
     maplibreMap: MapLibreMap,
     style: Style,
-    coreElementProvider: CoreElementProvider<SymbolLayer>,
-    belowLayerId: String?,
-    aboveLayerId: String?,
-    geoJsonOptions: GeoJsonOptions?,
-    draggableAnnotationController: DraggableAnnotationController
+    belowLayerId: String? = null,
+    aboveLayerId: String? = null,
+    geoJsonOptions: GeoJsonOptions? = null
 ) : AnnotationManager<SymbolLayer, Symbol, SymbolOptions, OnSymbolDragListener, OnSymbolClickListener, OnSymbolLongClickListener>(
     mapView,
     maplibreMap,
     style,
-    coreElementProvider,
-    draggableAnnotationController,
+    SymbolElementProvider(),
+    DraggableAnnotationController.getInstance(mapView, maplibreMap),
     belowLayerId,
     aboveLayerId,
     geoJsonOptions
 ) {
-    /**
-     * Create a symbol manager, used to manage symbols.
-     *
-     * @param maplibreMap the map object to add symbols to
-     * @param style     a valid a fully loaded style object
-     */
-    @UiThread
-    constructor(mapView: MapView, maplibreMap: MapLibreMap, style: Style) : this(
-        mapView,
-        maplibreMap,
-        style,
-        null,
-        null,
-        null as GeoJsonOptions?
-    )
-
-    /**
-     * Create a symbol manager, used to manage symbols.
-     *
-     * @param maplibreMap    the map object to add symbols to
-     * @param style        a valid a fully loaded style object
-     * @param belowLayerId the id of the layer above the symbol layer
-     * @param aboveLayerId the id of the layer below the symbol layer
-     */
-    @UiThread
-    constructor(
-        mapView: MapView,
-        maplibreMap: MapLibreMap,
-        style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?
-    ) : this(mapView, maplibreMap, style, belowLayerId, aboveLayerId, null as GeoJsonOptions?)
-
-    /**
-     * Create a symbol manager, used to manage symbols.
-     *
-     * @param maplibreMap      the map object to add symbols to
-     * @param style          a valid a fully loaded style object
-     * @param belowLayerId   the id of the layer above the symbol layer
-     * @param aboveLayerId   the id of the layer below the symbol layer
-     * @param geoJsonOptions options for the internal source
-     */
-    @UiThread
-    constructor(
-        mapView: MapView,
-        maplibreMap: MapLibreMap,
-        style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?,
-        geoJsonOptions: GeoJsonOptions?
-    ) : this(
-        mapView,
-        maplibreMap,
-        style,
-        SymbolElementProvider(),
-        belowLayerId,
-        aboveLayerId,
-        geoJsonOptions,
-        DraggableAnnotationController.getInstance(mapView, maplibreMap)
-    )
 
     /**
      * Create a symbol manager, used to manage symbols.
@@ -116,45 +63,44 @@ class SymbolManager @UiThread internal constructor(
         mapView,
         maplibreMap,
         style,
-        SymbolElementProvider(),
         belowLayerId,
         aboveLayerId,
         GeoJsonOptions().withCluster(true).withClusterRadius(clusterOptions.clusterRadius)
-            .withClusterMaxZoom(clusterOptions.clusterMaxZoom),
-        DraggableAnnotationController.getInstance(mapView, maplibreMap)
+            .withClusterMaxZoom(clusterOptions.clusterMaxZoom)
     ) {
         clusterOptions.apply(style, coreElementProvider.sourceId)
     }
 
-    override fun initializeDataDrivenPropertyMap() {
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_SYMBOL_SORT_KEY] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_SIZE] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_IMAGE] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_ROTATE] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_OFFSET] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_ANCHOR] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_FIELD] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_FONT] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_SIZE] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_MAX_WIDTH] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_LETTER_SPACING] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_JUSTIFY] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_ANCHOR] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_ROTATE] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_TRANSFORM] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_OFFSET] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_OPACITY] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_COLOR] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_HALO_COLOR] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_HALO_WIDTH] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_ICON_HALO_BLUR] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_OPACITY] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_COLOR] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_HALO_COLOR] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_HALO_WIDTH] = false
-        dataDrivenPropertyUsageMap[SymbolOptions.PROPERTY_TEXT_HALO_BLUR] = false
-    }
+    override fun initializeDataDrivenPropertyMap() =
+        listOf(
+            SymbolOptions.PROPERTY_SYMBOL_SORT_KEY,
+            SymbolOptions.PROPERTY_ICON_SIZE,
+            SymbolOptions.PROPERTY_ICON_IMAGE,
+            SymbolOptions.PROPERTY_ICON_ROTATE,
+            SymbolOptions.PROPERTY_ICON_OFFSET,
+            SymbolOptions.PROPERTY_ICON_ANCHOR,
+            SymbolOptions.PROPERTY_TEXT_FIELD,
+            SymbolOptions.PROPERTY_TEXT_FONT,
+            SymbolOptions.PROPERTY_TEXT_SIZE,
+            SymbolOptions.PROPERTY_TEXT_MAX_WIDTH,
+            SymbolOptions.PROPERTY_TEXT_LETTER_SPACING,
+            SymbolOptions.PROPERTY_TEXT_JUSTIFY,
+            SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET,
+            SymbolOptions.PROPERTY_TEXT_ANCHOR,
+            SymbolOptions.PROPERTY_TEXT_ROTATE,
+            SymbolOptions.PROPERTY_TEXT_TRANSFORM,
+            SymbolOptions.PROPERTY_TEXT_OFFSET,
+            SymbolOptions.PROPERTY_ICON_OPACITY,
+            SymbolOptions.PROPERTY_ICON_COLOR,
+            SymbolOptions.PROPERTY_ICON_HALO_COLOR,
+            SymbolOptions.PROPERTY_ICON_HALO_WIDTH,
+            SymbolOptions.PROPERTY_ICON_HALO_BLUR,
+            SymbolOptions.PROPERTY_TEXT_OPACITY,
+            SymbolOptions.PROPERTY_TEXT_COLOR,
+            SymbolOptions.PROPERTY_TEXT_HALO_COLOR,
+            SymbolOptions.PROPERTY_TEXT_HALO_WIDTH,
+            SymbolOptions.PROPERTY_TEXT_HALO_BLUR
+        ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
 
     override fun setDataDrivenPropertyIsUsed(property: String) {
         when (property) {
@@ -758,31 +704,31 @@ class SymbolManager @UiThread internal constructor(
         }
 
     companion object {
-        private val PROPERTY_SYMBOL_PLACEMENT: String = "symbol-placement"
-        private val PROPERTY_SYMBOL_SPACING: String = "symbol-spacing"
-        private val PROPERTY_SYMBOL_AVOID_EDGES: String = "symbol-avoid-edges"
-        private val PROPERTY_ICON_ALLOW_OVERLAP: String = "icon-allow-overlap"
-        private val PROPERTY_ICON_IGNORE_PLACEMENT: String = "icon-ignore-placement"
-        private val PROPERTY_ICON_OPTIONAL: String = "icon-optional"
-        private val PROPERTY_ICON_ROTATION_ALIGNMENT: String = "icon-rotation-alignment"
-        private val PROPERTY_ICON_TEXT_FIT: String = "icon-text-fit"
-        private val PROPERTY_ICON_TEXT_FIT_PADDING: String = "icon-text-fit-padding"
-        private val PROPERTY_ICON_PADDING: String = "icon-padding"
-        private val PROPERTY_ICON_KEEP_UPRIGHT: String = "icon-keep-upright"
-        private val PROPERTY_ICON_PITCH_ALIGNMENT: String = "icon-pitch-alignment"
-        private val PROPERTY_TEXT_PITCH_ALIGNMENT: String = "text-pitch-alignment"
-        private val PROPERTY_TEXT_ROTATION_ALIGNMENT: String = "text-rotation-alignment"
-        private val PROPERTY_TEXT_LINE_HEIGHT: String = "text-line-height"
-        private val PROPERTY_TEXT_VARIABLE_ANCHOR: String = "text-variable-anchor"
-        private val PROPERTY_TEXT_MAX_ANGLE: String = "text-max-angle"
-        private val PROPERTY_TEXT_PADDING: String = "text-padding"
-        private val PROPERTY_TEXT_KEEP_UPRIGHT: String = "text-keep-upright"
-        private val PROPERTY_TEXT_ALLOW_OVERLAP: String = "text-allow-overlap"
-        private val PROPERTY_TEXT_IGNORE_PLACEMENT: String = "text-ignore-placement"
-        private val PROPERTY_TEXT_OPTIONAL: String = "text-optional"
-        private val PROPERTY_ICON_TRANSLATE: String = "icon-translate"
-        private val PROPERTY_ICON_TRANSLATE_ANCHOR: String = "icon-translate-anchor"
-        private val PROPERTY_TEXT_TRANSLATE: String = "text-translate"
-        private val PROPERTY_TEXT_TRANSLATE_ANCHOR: String = "text-translate-anchor"
+        private const val PROPERTY_SYMBOL_PLACEMENT: String = "symbol-placement"
+        private const val PROPERTY_SYMBOL_SPACING: String = "symbol-spacing"
+        private const val PROPERTY_SYMBOL_AVOID_EDGES: String = "symbol-avoid-edges"
+        private const val PROPERTY_ICON_ALLOW_OVERLAP: String = "icon-allow-overlap"
+        private const val PROPERTY_ICON_IGNORE_PLACEMENT: String = "icon-ignore-placement"
+        private const val PROPERTY_ICON_OPTIONAL: String = "icon-optional"
+        private const val PROPERTY_ICON_ROTATION_ALIGNMENT: String = "icon-rotation-alignment"
+        private const val PROPERTY_ICON_TEXT_FIT: String = "icon-text-fit"
+        private const val PROPERTY_ICON_TEXT_FIT_PADDING: String = "icon-text-fit-padding"
+        private const val PROPERTY_ICON_PADDING: String = "icon-padding"
+        private const val PROPERTY_ICON_KEEP_UPRIGHT: String = "icon-keep-upright"
+        private const val PROPERTY_ICON_PITCH_ALIGNMENT: String = "icon-pitch-alignment"
+        private const val PROPERTY_TEXT_PITCH_ALIGNMENT: String = "text-pitch-alignment"
+        private const val PROPERTY_TEXT_ROTATION_ALIGNMENT: String = "text-rotation-alignment"
+        private const val PROPERTY_TEXT_LINE_HEIGHT: String = "text-line-height"
+        private const val PROPERTY_TEXT_VARIABLE_ANCHOR: String = "text-variable-anchor"
+        private const val PROPERTY_TEXT_MAX_ANGLE: String = "text-max-angle"
+        private const val PROPERTY_TEXT_PADDING: String = "text-padding"
+        private const val PROPERTY_TEXT_KEEP_UPRIGHT: String = "text-keep-upright"
+        private const val PROPERTY_TEXT_ALLOW_OVERLAP: String = "text-allow-overlap"
+        private const val PROPERTY_TEXT_IGNORE_PLACEMENT: String = "text-ignore-placement"
+        private const val PROPERTY_TEXT_OPTIONAL: String = "text-optional"
+        private const val PROPERTY_ICON_TRANSLATE: String = "icon-translate"
+        private const val PROPERTY_ICON_TRANSLATE_ANCHOR: String = "icon-translate-anchor"
+        private const val PROPERTY_TEXT_TRANSLATE: String = "text-translate"
+        private const val PROPERTY_TEXT_TRANSLATE_ANCHOR: String = "text-translate-anchor"
     }
 }

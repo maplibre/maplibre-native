@@ -1,7 +1,6 @@
 package org.maplibre.android.annotations
 
 import androidx.annotation.UiThread
-import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
@@ -14,97 +13,41 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 
 /**
  * The line manager allows to add lines to a map.
+ *
+ * @param maplibreMap      the map object to add lines to
+ * @param style          a valid a fully loaded style object
+ * @param belowLayerId   the id of the layer above the line layer
+ * @param aboveLayerId   the id of the layer below the line layer
+ * @param geoJsonOptions options for the internal source
  */
-class LineManager @UiThread internal constructor(
+class LineManager @UiThread @JvmOverloads constructor(
     mapView: MapView,
     maplibreMap: MapLibreMap,
     style: Style,
-    coreElementProvider: CoreElementProvider<LineLayer>,
-    belowLayerId: String?,
-    aboveLayerId: String?,
-    geoJsonOptions: GeoJsonOptions?,
-    draggableAnnotationController: DraggableAnnotationController
+    belowLayerId: String? = null,
+    aboveLayerId: String? = null,
+    geoJsonOptions: GeoJsonOptions? = null
 ) : AnnotationManager<LineLayer, Line, LineOptions, OnLineDragListener, OnLineClickListener, OnLineLongClickListener>(
     mapView,
     maplibreMap,
     style,
-    coreElementProvider,
-    draggableAnnotationController,
+    LineElementProvider(),
+    DraggableAnnotationController.getInstance(mapView, maplibreMap),
     belowLayerId,
     aboveLayerId,
     geoJsonOptions
 ) {
-    /**
-     * Create a line manager, used to manage lines.
-     *
-     * @param maplibreMap the map object to add lines to
-     * @param style     a valid a fully loaded style object
-     */
-    @UiThread
-    constructor(mapView: MapView, maplibreMap: MapLibreMap, style: Style) : this(
-        mapView,
-        maplibreMap,
-        style,
-        null,
-        null,
-        null as GeoJsonOptions?
-    )
-
-    /**
-     * Create a line manager, used to manage lines.
-     *
-     * @param maplibreMap    the map object to add lines to
-     * @param style        a valid a fully loaded style object
-     * @param belowLayerId the id of the layer above the line layer
-     * @param aboveLayerId the id of the layer below the line layer
-     */
-    @UiThread
-    constructor(
-        mapView: MapView,
-        maplibreMap: MapLibreMap,
-        style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?
-    ) : this(mapView, maplibreMap, style, belowLayerId, aboveLayerId, null as GeoJsonOptions?)
-
-    /**
-     * Create a line manager, used to manage lines.
-     *
-     * @param maplibreMap      the map object to add lines to
-     * @param style          a valid a fully loaded style object
-     * @param belowLayerId   the id of the layer above the line layer
-     * @param aboveLayerId   the id of the layer below the line layer
-     * @param geoJsonOptions options for the internal source
-     */
-    @UiThread
-    constructor(
-        mapView: MapView,
-        maplibreMap: MapLibreMap,
-        style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?,
-        geoJsonOptions: GeoJsonOptions?
-    ) : this(
-        mapView,
-        maplibreMap,
-        style,
-        LineElementProvider(),
-        belowLayerId,
-        aboveLayerId,
-        geoJsonOptions,
-        DraggableAnnotationController.getInstance(mapView, maplibreMap)
-    )
-
-    public override fun initializeDataDrivenPropertyMap() {
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_JOIN] = false
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_OPACITY] = false
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_COLOR] = false
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_WIDTH] = false
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_GAP_WIDTH] = false
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_OFFSET] = false
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_BLUR] = false
-        dataDrivenPropertyUsageMap[LineOptions.PROPERTY_LINE_PATTERN] = false
-    }
+    override fun initializeDataDrivenPropertyMap() =
+        listOf(
+            LineOptions.PROPERTY_LINE_JOIN,
+            LineOptions.PROPERTY_LINE_OPACITY,
+            LineOptions.PROPERTY_LINE_COLOR,
+            LineOptions.PROPERTY_LINE_WIDTH,
+            LineOptions.PROPERTY_LINE_GAP_WIDTH,
+            LineOptions.PROPERTY_LINE_OFFSET,
+            LineOptions.PROPERTY_LINE_BLUR,
+            LineOptions.PROPERTY_LINE_PATTERN
+        ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
 
     override fun setDataDrivenPropertyIsUsed(property: String) {
         when (property) {
@@ -184,9 +127,7 @@ class LineManager @UiThread internal constructor(
      * @return the list of built lines
      */
     @UiThread
-    fun create(json: String): List<Line?>? {
-        return create(FeatureCollection.fromJson(json))
-    }
+    fun create(json: String): List<Line> = create(FeatureCollection.fromJson(json))
 
     /**
      * Create a list of lines on the map.
@@ -214,7 +155,7 @@ class LineManager @UiThread internal constructor(
      * @return the list of built lines
      */
     @UiThread
-    fun create(featureCollection: FeatureCollection): List<Line?> =
+    fun create(featureCollection: FeatureCollection): List<Line> =
         featureCollection.features()?.mapNotNull { LineOptions.fromFeature(it) }
             .let { create(it ?: emptyList()) }
 
@@ -312,11 +253,11 @@ class LineManager @UiThread internal constructor(
         get() = layer.filter
 
     companion object {
-        private val PROPERTY_LINE_CAP: String = "line-cap"
-        private val PROPERTY_LINE_MITER_LIMIT: String = "line-miter-limit"
-        private val PROPERTY_LINE_ROUND_LIMIT: String = "line-round-limit"
-        private val PROPERTY_LINE_TRANSLATE: String = "line-translate"
-        private val PROPERTY_LINE_TRANSLATE_ANCHOR: String = "line-translate-anchor"
-        private val PROPERTY_LINE_DASHARRAY: String = "line-dasharray"
+        private const val PROPERTY_LINE_CAP: String = "line-cap"
+        private const val PROPERTY_LINE_MITER_LIMIT: String = "line-miter-limit"
+        private const val PROPERTY_LINE_ROUND_LIMIT: String = "line-round-limit"
+        private const val PROPERTY_LINE_TRANSLATE: String = "line-translate"
+        private const val PROPERTY_LINE_TRANSLATE_ANCHOR: String = "line-translate-anchor"
+        private const val PROPERTY_LINE_DASHARRAY: String = "line-dasharray"
     }
 }

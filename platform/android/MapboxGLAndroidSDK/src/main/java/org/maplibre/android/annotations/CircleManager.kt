@@ -13,96 +13,40 @@ import org.maplibre.android.style.sources.GeoJsonOptions
 
 /**
  * The circle manager allows to add circles to a map.
+ *
+ * @param maplibreMap    the map object to add circles to
+ * @param style          a valid a fully loaded style object
+ * @param belowLayerId   the id of the layer above the circle layer
+ * @param aboveLayerId   the id of the layer below the circle layer
+ * @param geoJsonOptions options for the internal source
  */
-class CircleManager @UiThread internal constructor(
+class CircleManager @UiThread @JvmOverloads constructor(
     mapView: MapView,
     maplibreMap: MapLibreMap,
     style: Style,
-    coreElementProvider: CoreElementProvider<CircleLayer>,
-    belowLayerId: String?,
-    aboveLayerId: String?,
-    geoJsonOptions: GeoJsonOptions?,
-    draggableAnnotationController: DraggableAnnotationController
+    belowLayerId: String? = null,
+    aboveLayerId: String? = null,
+    geoJsonOptions: GeoJsonOptions? = null
 ) : AnnotationManager<CircleLayer, Circle, CircleOptions, OnCircleDragListener, OnCircleClickListener, OnCircleLongClickListener>(
     mapView,
     maplibreMap,
     style,
-    coreElementProvider,
-    draggableAnnotationController,
+    CircleElementProvider(),
+    DraggableAnnotationController.getInstance(mapView, maplibreMap),
     belowLayerId,
     aboveLayerId,
     geoJsonOptions
 ) {
-    /**
-     * Create a circle manager, used to manage circles.
-     *
-     * @param maplibreMap the map object to add circles to
-     * @param style     a valid a fully loaded style object
-     */
-    @UiThread
-    constructor(mapView: MapView, maplibreMap: MapLibreMap, style: Style) : this(
-        mapView,
-        maplibreMap,
-        style,
-        null,
-        null,
-        null as GeoJsonOptions?
-    )
-
-    /**
-     * Create a circle manager, used to manage circles.
-     *
-     * @param maplibreMap    the map object to add circles to
-     * @param style        a valid a fully loaded style object
-     * @param belowLayerId the id of the layer above the circle layer
-     * @param aboveLayerId the id of the layer below the circle layer
-     */
-    @UiThread
-    constructor(
-        mapView: MapView,
-        maplibreMap: MapLibreMap,
-        style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?
-    ) : this(mapView, maplibreMap, style, belowLayerId, aboveLayerId, null as GeoJsonOptions?)
-
-    /**
-     * Create a circle manager, used to manage circles.
-     *
-     * @param maplibreMap      the map object to add circles to
-     * @param style          a valid a fully loaded style object
-     * @param belowLayerId   the id of the layer above the circle layer
-     * @param aboveLayerId   the id of the layer below the circle layer
-     * @param geoJsonOptions options for the internal source
-     */
-    @UiThread
-    constructor(
-        mapView: MapView,
-        maplibreMap: MapLibreMap,
-        style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?,
-        geoJsonOptions: GeoJsonOptions?
-    ) : this(
-        mapView,
-        maplibreMap,
-        style,
-        CircleElementProvider(),
-        belowLayerId,
-        aboveLayerId,
-        geoJsonOptions,
-        DraggableAnnotationController.getInstance(mapView, maplibreMap)
-    )
-
-    public override fun initializeDataDrivenPropertyMap() {
-        dataDrivenPropertyUsageMap[CircleOptions.PROPERTY_CIRCLE_RADIUS] = false
-        dataDrivenPropertyUsageMap[CircleOptions.PROPERTY_CIRCLE_COLOR] = false
-        dataDrivenPropertyUsageMap[CircleOptions.PROPERTY_CIRCLE_BLUR] = false
-        dataDrivenPropertyUsageMap[CircleOptions.PROPERTY_CIRCLE_OPACITY] = false
-        dataDrivenPropertyUsageMap[CircleOptions.PROPERTY_CIRCLE_STROKE_WIDTH] = false
-        dataDrivenPropertyUsageMap[CircleOptions.PROPERTY_CIRCLE_STROKE_COLOR] = false
-        dataDrivenPropertyUsageMap[CircleOptions.PROPERTY_CIRCLE_STROKE_OPACITY] = false
-    }
+    override fun initializeDataDrivenPropertyMap() =
+        listOf(
+            CircleOptions.PROPERTY_CIRCLE_RADIUS,
+            CircleOptions.PROPERTY_CIRCLE_COLOR,
+            CircleOptions.PROPERTY_CIRCLE_BLUR,
+            CircleOptions.PROPERTY_CIRCLE_OPACITY,
+            CircleOptions.PROPERTY_CIRCLE_STROKE_WIDTH,
+            CircleOptions.PROPERTY_CIRCLE_STROKE_COLOR,
+            CircleOptions.PROPERTY_CIRCLE_STROKE_OPACITY
+        ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
 
     override fun setDataDrivenPropertyIsUsed(property: String) {
         when (property) {
@@ -175,8 +119,7 @@ class CircleManager @UiThread internal constructor(
      * @return the list of built circles
      */
     @UiThread
-    fun create(json: String): List<Circle?> =
-        create(FeatureCollection.fromJson(json))
+    fun create(json: String): List<Circle> = create(FeatureCollection.fromJson(json))
 
     /**
      * Create a list of circles on the map.
