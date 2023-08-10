@@ -23,7 +23,7 @@ jobs:
       - run: chmod +x platform/ios/scripts/deploy-swift-package.sh
 
       - name: Build, package, and upload iOS release
-        run: platform/ios/scripts/deploy-swift-package.sh
+        run: scripts/deploy-swift-package.sh
         env:
           DIST_GITHUB_TOKEN: ${{ secrets.DIST_GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
