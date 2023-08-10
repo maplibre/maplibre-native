@@ -20,7 +20,6 @@ struct alignas(16) RasterDrawableUBO {
     bool overdrawInspector;
     uint8_t pad1, pad2, pad3;
     float pad4;
-
 };
 static_assert(sizeof(RasterDrawableUBO) == 128);
 static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
