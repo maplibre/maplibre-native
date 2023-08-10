@@ -83,7 +83,7 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
                                                                         gfx::TexturePixelType format,
                                                                         gfx::TextureChannelDataType type) {
     assert(false);
-    return nullptr;
+    throw std::runtime_error("UploadPass::createTextureResource not implemented on Metal!");
 }
 
 void UploadPass::updateTextureResource(gfx::TextureResource& resource,
@@ -92,6 +92,7 @@ void UploadPass::updateTextureResource(gfx::TextureResource& resource,
                                        gfx::TexturePixelType format,
                                        gfx::TextureChannelDataType type) {
     assert(false);
+    throw std::runtime_error("UploadPass::updateTextureResource not implemented on Metal!");
 }
 
 void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
@@ -102,6 +103,7 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                           gfx::TexturePixelType format,
                                           gfx::TextureChannelDataType type) {
     assert(false);
+    throw std::runtime_error("UploadPass::updateTextureResourceSub not implemented on Metal!");
 }
 
 struct VertexBuffer : public gfx::VertexBufferBase {
