@@ -18,7 +18,7 @@ Texture2D::~Texture2D() {}
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
     samplerState = samplerState_;
-    samplerStateDirty = metalTexture.get() != nullptr;
+    samplerStateDirty = true;
     return *this;
 }
 
@@ -27,17 +27,18 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     if (pixelFormat_ == pixelFormat && channelType_ == channelType) {
         return *this;
     }
-
-    assert(!metalTexture.get());
     pixelFormat = pixelFormat_;
     channelType = channelType_;
-    storageDirty = true;
+    textureDirty = true;
     return *this;
 }
 
 gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
+    if (size_ == size) {
+        return *this;
+    }
     size = size_;
-    storageDirty = true;
+    textureDirty = true;
     return *this;
 }
 
@@ -80,6 +81,7 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
                     return MTL::PixelFormat::PixelFormatA8Unorm;
                 default:
                     assert(false);
+                    throw std::runtime_error("Pixel format not supported on Metal!");
             }
         case gfx::TextureChannelDataType::HalfFloat:
             switch (pixelFormat) {
@@ -89,36 +91,30 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
                     return MTL::PixelFormat::PixelFormatR16Float;
                 default:
                     assert(false);
+                    throw std::runtime_error("Pixel format not supported on Metal!");
             }
     }
 }
 
-void Texture2D::createObject() noexcept {
+void Texture2D::createMetalTexture() noexcept {
+    if (size == Size{0, 0}) {
+        return;
+    }
+    metalTexture.reset();
     // Create a new texture object
-    assert(!metalTexture.get());
     auto textureDescriptor = NS::RetainPtr(
         MTL::TextureDescriptor::texture2DDescriptor(getMetalPixelFormat(), size.width, size.height, false));
     metalTexture = context.createMetalTexture(textureDescriptor);
-
+    textureDirty = false;
     context.renderingStats().memTextures += getDataSize();
 }
 
-void Texture2D::createStorage(const void* data) noexcept {
-    assert(metalTexture.get());
-
-    MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);
-    NS::UInteger bytesPerRow = size.width * getPixelStride();
-    metalTexture->replaceRegion(region, 0, data, bytesPerRow);
-    storageDirty = false;
-    updateSamplerConfiguration();
-}
-
 void Texture2D::create() noexcept {
-    if (!metalTexture.get()) {
-        createObject();
+    if (textureDirty) {
+        createMetalTexture();
     }
-    if (storageDirty) {
-        createStorage();
+    if (samplerStateDirty) {
+        updateSamplerConfiguration();
     }
 }
 
@@ -140,6 +136,7 @@ void Texture2D::updateSamplerConfiguration() noexcept {
 }
 
 void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
+    assert(!textureDirty);
     const auto& encoder = renderPass.getMetalEncoder();
 
     // Update the sampler state if it was changed after resource creation
@@ -149,7 +146,6 @@ void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
 
     encoder->setFragmentTexture(metalTexture.get(), location);
     encoder->setFragmentSamplerState(metalSamplerState.get(), location);
-    boundLocation = location;
 }
 
 void Texture2D::unbind(const RenderPass& renderPass, int32_t location) noexcept {
@@ -159,31 +155,21 @@ void Texture2D::unbind(const RenderPass& renderPass, int32_t location) noexcept 
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
-    if (size_ == Size{0, 0}) {
-        return;
+    setSize(size_);
+    if (textureDirty) {
+        createMetalTexture();
     }
-
-    if (!metalTexture.get() || storageDirty || size_ != size) {
-        size = size_;
-
-        // Create the texture object if we don't already have one
-        if (!metalTexture.get()) {
-            createObject();
-        }
-
-        createStorage(pixelData);
-
-    } else {
-        if (pixelData) {
-            // Upload to existing memory
-            uploadSubRegion(pixelData, size, 0, 0);
-        }
+    if (samplerStateDirty) {
+        updateSamplerConfiguration();
+    }
+    if (pixelData) {
+        uploadSubRegion(pixelData, size, 0, 0);
     }
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
     assert(metalTexture.get());
-    assert(!samplerStateDirty);
+    assert(!textureDirty);
 
     MTL::Region region = MTL::Region::Make2D(xOffset, yOffset, size_.width, size_.height);
     NS::UInteger bytesPerRow = size_.width * getPixelStride();

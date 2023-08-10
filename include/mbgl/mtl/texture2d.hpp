@@ -60,8 +60,7 @@ public:
 
 private:
     MTL::PixelFormat getMetalPixelFormat() const noexcept;
-    void createObject() noexcept;
-    void createStorage(const void* data = nullptr) noexcept;
+    void createMetalTexture() noexcept;
 
 private:
     Context& context;
@@ -74,11 +73,8 @@ private:
     SamplerState samplerState{};
 
     std::shared_ptr<PremultipliedImage> image{nullptr};
-    bool samplerStateDirty{false};
-    bool storageDirty{false};
-
-    // int32_t boundTextureUnit{-1};
-    int32_t boundLocation{-1};
+    bool textureDirty{true};
+    bool samplerStateDirty{true};
 };
 
 } // namespace mtl

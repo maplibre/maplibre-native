@@ -18,6 +18,8 @@
 #include <mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/shaders/heatmap_layer_ubo.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/shader_group.hpp>
@@ -67,13 +69,7 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (renderTarget) {
-        renderTarget->getLayerGroup(0)->setLayerTweaker(
-            std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
-    }
-    if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
-    }
+    updateLayerTweaker();
 #endif
 }
 
@@ -85,13 +81,13 @@ bool RenderHeatmapLayer::hasCrossfade() const {
     return false;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderHeatmapLayer::upload(gfx::UploadPass& uploadPass) {
     if (!colorRampTexture) {
         colorRampTexture = uploadPass.createTexture(*colorRamp, gfx::TextureChannelDataType::UnsignedByte);
     }
 }
 
-#if MLN_LEGACY_RENDERER
 void RenderHeatmapLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass == RenderPass::Opaque) {
@@ -239,57 +235,67 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
 
 #if MLN_DRAWABLE_RENDERER
 namespace {
-void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
-    if (renderTarget_) {
-        if (activate) {
-            // The RenderTree has determined this render target should be included in the renderable set for a frame
-            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
-        } else {
-            // The RenderTree is informing us we should not render anything
-            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
-        }
-    }
-}
+//void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
+//    if (renderTarget_) {
+//        if (activate) {
+//            // The RenderTree has determined this render target should be included in the renderable set for a frame
+//            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
+//        } else {
+//            // The RenderTree is informing us we should not render anything
+//            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
+//        }
+//    }
+//}
 } // namespace
 
-void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
-    RenderLayer::markLayerRenderable(willRender, changes);
-    activateRenderTarget(renderTarget, willRender, changes);
-}
-
-void RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get());
-    stats.drawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
-}
-
-void RenderHeatmapLayer::removeAllDrawables() {
-    RenderLayer::removeAllDrawables();
-    if (renderTarget) {
-        stats.drawablesRemoved += renderTarget->getLayerGroup(0)->getDrawableCount();
-        renderTarget->getLayerGroup(0)->clearDrawables();
-    }
-}
+//void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+//    RenderLayer::markLayerRenderable(willRender, changes);
+//    activateRenderTarget(renderTarget, willRender, changes);
+//}
+//
+//void RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+//    auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get());
+//    stats.drawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
+//}
+//
+//void RenderHeatmapLayer::removeAllDrawables() {
+//    RenderLayer::removeAllDrawables();
+//    if (renderTarget) {
+//        stats.drawablesRemoved += renderTarget->getLayerGroup(0)->getDrawableCount();
+//        renderTarget->getLayerGroup(0)->clearDrawables();
+//    }
+//}
 
 namespace {
 
-struct alignas(16) HeatmapInterpolateUBO {
-    float weight_t;
-    float radius_t;
-    std::array<float, 2> padding;
-};
-static_assert(sizeof(HeatmapInterpolateUBO) % 16 == 0);
-
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-constexpr auto HeatmapInterpolateUBOName = "HeatmapInterpolateUBO";
 constexpr auto VertexAttribName = "a_pos";
 
 } // namespace
 
+using namespace shaders;
+
+#if MLN_DRAWABLE_RENDERER
+void RenderHeatmapLayer::updateLayerTweaker() {
+    if (renderTarget) {
+        tweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+#endif // MLN_RENDER_BACKEND_METAL
+        tweaker->enableOverdrawInspector(overdrawInspector);
+        renderTarget->getLayerGroup(0)->setLayerTweaker(tweaker);
+    }
+//    if (layerGroup) {
+//        layerGroup->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
+//    }
+}
+#endif // MLN_DRAWABLE_RENDERER
+
 void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
                                 const TransformState& state,
-                                const std::shared_ptr<UpdateParameters>&,
+                                const std::shared_ptr<UpdateParameters>& updateParameters,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -308,15 +314,15 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (!renderTarget) {
             return;
         }
-        activateRenderTarget(renderTarget, isRenderable, changes);
+        //activateRenderTarget(renderTarget, isRenderable, changes);
 
         // Set up tile layer group
         auto tileLayerGroup = context.createTileLayerGroup(0, /*initialCapacity=*/64, getID());
         if (!tileLayerGroup) {
             return;
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
         renderTarget->addLayerGroup(tileLayerGroup, /*replace=*/true);
+        updateLayerTweaker();
     }
 
     if (renderTarget->getTexture()->getSize() != size) {
@@ -331,6 +337,14 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     if (!heatmapShaderGroup) {
         removeAllDrawables();
         return;
+    }
+    
+    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
+    if (overdrawInspector != overdraw) {
+        overdrawInspector = overdraw;
+        if (tweaker) {
+            tweaker->enableOverdrawInspector(overdrawInspector);
+        }
     }
 
     std::unique_ptr<gfx::DrawableBuilder> heatmapBuilder;
@@ -372,7 +386,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             /* .padding = */ {0}};
 
         tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            drawable.mutableUniformBuffers().createOrUpdate(HeatmapInterpolateUBOName, &interpolateUBO, context);
+            drawable.mutableUniformBuffers().createOrUpdate(MLN_STRINGIZE(HeatmapInterpolateUBO), &interpolateUBO, context);
         });
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
@@ -381,18 +395,25 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray heatmapVertexAttrs;
 
-        const auto propertiesAsUniforms =
+        const auto propertiesAsUniforms_ =
             heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(paintPropertyBinders,
                                                                                            evaluated);
 
         if (!heatmapShaderGroup) {
             continue;
         }
-        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms_);
         if (!heatmapShader) {
             continue;
         }
 
+#if MLN_RENDER_BACKEND_METAL
+        propertiesAsUniforms = std::move(propertiesAsUniforms_);
+        if (tweaker) {
+            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+        }
+#endif // MLN_RENDER_BACKEND_METAL
+        
         if (const auto& attr = heatmapVertexAttrs.add(VertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
@@ -417,7 +438,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : heatmapBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->mutableUniformBuffers().createOrUpdate(HeatmapInterpolateUBOName, &interpolateUBO, context);
+            drawable->mutableUniformBuffers().createOrUpdate(MLN_STRINGIZE(HeatmapInterpolateUBO), &interpolateUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
@@ -426,75 +447,76 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up texture layer group
     if (!layerGroup) {
-        auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID());
-        if (!layerGroup_) {
-            return;
-        }
-        layerGroup_->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
-        setLayerGroup(std::move(layerGroup_), changes);
+//        auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID());
+//        if (!layerGroup_) {
+//            return;
+//        }
+//        layerGroup_->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
+//        setLayerGroup(std::move(layerGroup_), changes);
+        setLayerGroup(renderTarget->getLayerGroup(0), changes);
     }
 
-    if (!heatmapTextureShader) {
-        heatmapTextureShader = context.getGenericShader(shaders, HeatmapTextureShaderGroupName);
-    }
-    if (!heatmapTextureShader) {
-        removeAllDrawables();
-        return;
-    }
-
-    auto* textureLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
-    textureLayerGroup->clearDrawables();
-
-    std::unique_ptr<gfx::DrawableBuilder> heatmapTextureBuilder;
-
-    if (!sharedTextureVertices) {
-        sharedTextureVertices = std::make_shared<TextureVertexVector>(RenderStaticData::heatmapTextureVertices());
-    }
-    const auto textureVertexCount = sharedTextureVertices->elements();
-
-    gfx::VertexAttributeArray textureVertexAttrs;
-    if (const auto& attr = textureVertexAttrs.add(VertexAttribName)) {
-        attr->setSharedRawData(sharedTextureVertices,
-                               offsetof(HeatmapLayoutVertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(HeatmapLayoutVertex),
-                               gfx::AttributeDataType::Short2);
-    }
-
-    heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
-    heatmapTextureBuilder->setShader(heatmapTextureShader);
-    heatmapTextureBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                           : gfx::DepthMaskType::ReadOnly);
-    heatmapTextureBuilder->setColorMode(gfx::ColorMode::alphaBlended());
-    heatmapTextureBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-    heatmapTextureBuilder->setRenderPass(renderPass);
-    heatmapTextureBuilder->setVertexAttributes(std::move(textureVertexAttrs));
-    heatmapTextureBuilder->setRawVertices({}, textureVertexCount, gfx::AttributeDataType::Short2);
-    if (segments.empty()) {
-        segments = RenderStaticData::heatmapTextureSegments();
-    }
-    heatmapTextureBuilder->setSegments(
-        gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
-
-    auto imageLocation = heatmapTextureShader->getSamplerLocation("u_image");
-    if (imageLocation.has_value()) {
-        heatmapTextureBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
-    }
-    auto colorRampLocation = heatmapTextureShader->getSamplerLocation("u_color_ramp");
-    if (colorRampLocation.has_value()) {
-        std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
-        texture->setImage(colorRamp);
-        texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        heatmapTextureBuilder->setTexture(std::move(texture), colorRampLocation.value());
-    }
-
-    heatmapTextureBuilder->flush();
-
-    for (auto& drawable : heatmapTextureBuilder->clearDrawables()) {
-        textureLayerGroup->addDrawable(std::move(drawable));
-        ++stats.drawablesAdded;
-    }
+//    if (!heatmapTextureShader) {
+//        heatmapTextureShader = context.getGenericShader(shaders, HeatmapTextureShaderGroupName);
+//    }
+//    if (!heatmapTextureShader) {
+//        removeAllDrawables();
+//        return;
+//    }
+//
+//    auto* textureLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
+//    textureLayerGroup->clearDrawables();
+//
+//    std::unique_ptr<gfx::DrawableBuilder> heatmapTextureBuilder;
+//
+//    if (!sharedTextureVertices) {
+//        sharedTextureVertices = std::make_shared<TextureVertexVector>(RenderStaticData::heatmapTextureVertices());
+//    }
+//    const auto textureVertexCount = sharedTextureVertices->elements();
+//
+//    gfx::VertexAttributeArray textureVertexAttrs;
+//    if (const auto& attr = textureVertexAttrs.add(VertexAttribName)) {
+//        attr->setSharedRawData(sharedTextureVertices,
+//                               offsetof(HeatmapLayoutVertex, a1),
+//                               /*vertexOffset=*/0,
+//                               sizeof(HeatmapLayoutVertex),
+//                               gfx::AttributeDataType::Short2);
+//    }
+//
+//    heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
+//    heatmapTextureBuilder->setShader(heatmapTextureShader);
+//    heatmapTextureBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+//                                                                           : gfx::DepthMaskType::ReadOnly);
+//    heatmapTextureBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+//    heatmapTextureBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+//    heatmapTextureBuilder->setRenderPass(renderPass);
+//    heatmapTextureBuilder->setVertexAttributes(std::move(textureVertexAttrs));
+//    heatmapTextureBuilder->setRawVertices({}, textureVertexCount, gfx::AttributeDataType::Short2);
+//    if (segments.empty()) {
+//        segments = RenderStaticData::heatmapTextureSegments();
+//    }
+//    heatmapTextureBuilder->setSegments(
+//        gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
+//
+//    auto imageLocation = heatmapTextureShader->getSamplerLocation("u_image");
+//    if (imageLocation.has_value()) {
+//        heatmapTextureBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
+//    }
+//    auto colorRampLocation = heatmapTextureShader->getSamplerLocation("u_color_ramp");
+//    if (colorRampLocation.has_value()) {
+//        std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+//        texture->setImage(colorRamp);
+//        texture->setSamplerConfiguration(
+//            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+//        heatmapTextureBuilder->setTexture(std::move(texture), colorRampLocation.value());
+//    }
+//
+//    heatmapTextureBuilder->flush();
+//
+//    for (auto& drawable : heatmapTextureBuilder->clearDrawables()) {
+//        textureLayerGroup->addDrawable(std::move(drawable));
+//        ++stats.drawablesAdded;
+//    }
 }
 #endif // MLN_DRAWABLE_RENDERER
 

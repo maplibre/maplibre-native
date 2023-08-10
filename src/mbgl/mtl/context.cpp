@@ -4,6 +4,7 @@
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/drawable_builder.hpp>
 #include <mbgl/mtl/layer_group.hpp>
+#include <mbgl/mtl/render_target.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/texture2d.hpp>
@@ -165,8 +166,7 @@ gfx::Texture2DPtr Context::createTexture2D() {
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    assert(false);
-    return nullptr;
+    return std::make_shared<RenderTarget>(*this, size, type);
 }
 
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}

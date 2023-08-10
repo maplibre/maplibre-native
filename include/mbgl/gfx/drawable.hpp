@@ -160,12 +160,6 @@ public:
     /// Sets custom status for this drawable
     void setIsCustom(bool value) { isCustom = value; }
 
-    /// True if this drawable should be rendered with pre-multiplied alpha blending
-    bool getPreMultipledAlpha() const { return preMultipledAlpha; }
-
-    /// Sets pre-multiplied alpha blending status for this drawable
-    void setPreMultipledAlpha(bool value) { preMultipledAlpha = value; }
-
     /// Get the ID of the tile that this drawable represents, if any
     const std::optional<OverscaledTileID>& getTileID() const { return tileID; }
 
@@ -235,7 +229,6 @@ protected:
     bool enableStencil = false;
     bool is3D = false;
     bool isCustom = false;
-    bool preMultipledAlpha = true;
     std::string name;
     const util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;

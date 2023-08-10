@@ -11,13 +11,18 @@
 
 namespace mbgl {
 
+#if MLN_DRAWABLE_RENDERER
+class HeatmapLayerTweaker;
+using HeatmapLayerTweakerPtr = std::shared_ptr<HeatmapLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class RenderHeatmapLayer final : public RenderLayer {
 public:
     explicit RenderHeatmapLayer(Immutable<style::HeatmapLayer::Impl>);
     ~RenderHeatmapLayer() override;
 
 #if MLN_DRAWABLE_RENDERER
-    void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
+    //void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
 
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
@@ -34,11 +39,15 @@ private:
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-    void upload(gfx::UploadPass&) override;
 
 #if MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass&) override;
     void render(PaintParameters&) override;
 #endif
+    
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
+#endif // MLN_DRAWABLE_RENDERER
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -51,10 +60,10 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&) override;
+    //void removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
-    void removeAllDrawables() override;
+    //void removeAllDrawables() override;
 #endif
 
     // Paint properties
@@ -77,6 +86,13 @@ private:
 
     using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
     std::shared_ptr<TextureVertexVector> sharedTextureVertices;
+    
+    HeatmapLayerTweakerPtr tweaker;
+#if MLN_RENDER_BACKEND_METAL
+    std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
+
+    bool overdrawInspector = false;
 #endif
 };
 

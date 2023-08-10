@@ -6,30 +6,18 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/heatmap_layer_ubo.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/mtl/heatmap.hpp>
+#endif
 
 namespace mbgl {
 
 using namespace style;
-
-struct alignas(16) HeatmapDrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    float extrude_scale;
-    std::array<float, 3> padding;
-};
-static_assert(sizeof(HeatmapDrawableUBO) % 16 == 0);
-
-struct alignas(16) HeatmapEvaluatedPropsUBO {
-    float weight;
-    float radius;
-    float intensity;
-    float padding;
-};
-static_assert(sizeof(HeatmapEvaluatedPropsUBO) % 16 == 0);
-
-static constexpr std::string_view HeatmapDrawableUBOName = "HeatmapDrawableUBO";
-static constexpr std::string_view HeatmapEvaluatedPropsUBOName = "HeatmapEvaluatedPropsUBO";
+using namespace shaders;
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                   const RenderTree& renderTree,
@@ -46,6 +34,41 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
+    const auto zoom = parameters.state.getZoom();
+
+#if MLN_RENDER_BACKEND_METAL
+    using ShaderClass = shaders::ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
+    if (propertiesChanged) {
+        const auto source = [this](const std::string_view& attrName) {
+            return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+        };
+
+        const HeatmapPermutationUBO permutationUBO = {
+            /* .weight = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
+            /* .radius = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+            /* .overdrawInspector = */ overdrawInspector,
+            /* .pad1/2/3 = */ 0, 0, 0,
+            /* .pad4/5/6 = */ 0, 0, 0};
+
+        if (permutationUniformBuffer) {
+            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+        } else {
+            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+        }
+
+        propertiesChanged = false;
+    }
+    if (!expressionUniformBuffer) {
+        const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
+                                                   /* .frame = */ parameters.frameCount,
+                                                   /* .zoom = */ static_cast<float>(zoom),
+                                                   /* .pad = */ 0,
+                                                   0,
+                                                   0};
+        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
+    }
+#endif
+    
     if (!evaluatedPropsUniformBuffer) {
         const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
             /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
@@ -58,7 +81,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(HeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        uniforms.addOrReplace(MLN_STRINGIZE(HeatmapEvaluatedPropsUBO), evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -75,10 +98,15 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                           inViewportPixelUnits);
         const HeatmapDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
-            /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
+            /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(HeatmapDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(MLN_STRINGIZE(HeatmapDrawableUBO), &drawableUBO, context);
+        
+#if MLN_RENDER_BACKEND_METAL
+        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
+        uniforms.addOrReplace(MLN_STRINGIZE(HeatmapPermutationUBO), permutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 
