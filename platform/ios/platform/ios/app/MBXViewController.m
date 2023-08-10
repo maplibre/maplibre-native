@@ -116,6 +116,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
     MBXSettingsMiscellaneousSetContentInsets,
     MBXSettingsMiscellaneousShowCustomLocationManager,
     MBXSettingsMiscellaneousOrnamentsPlacement,
+    MBXSettingsMiscellaneousLatLngBoundsWithPadding,
     MBXSettingsMiscellaneousPrintLogFile,
     MBXSettingsMiscellaneousDeleteLogFile
 };
@@ -445,6 +446,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 [NSString stringWithFormat:@"Turn %@ Content Insets", (_contentInsetsEnabled ? @"Off" : @"On")],
                 @"View Route Simulation",
                 @"Ornaments Placement",
+                @"Lat Long bounds with padding"
             ]];
 
             break;
@@ -759,6 +761,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     [self.navigationController pushViewController:ornamentsViewController animated:YES];
                     break;
                 }
+                case MBXSettingsMiscellaneousLatLngBoundsWithPadding:
+                    [self flyToWithLatLngBoundsAndPadding];
+                    break;
                 default:
                     NSAssert(NO, @"All miscellaneous setting rows should be implemented");
                     break;
@@ -1739,7 +1744,33 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return backupImage;
 }
 
+- (void)flyToWithLatLngBoundsAndPadding
+{
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    CLLocationCoordinate2D sw = CLLocationCoordinate2DMake(48, 11);
+    CLLocationCoordinate2D ne = CLLocationCoordinate2DMake(50, 12);
+
+    UIEdgeInsets padding = UIEdgeInsetsMake(200, 200, 0, 0);
+    MLNMapCamera *cameraWithoutPadding = [self.mapView cameraThatFitsCoordinateBounds:MLNCoordinateBoundsMake(sw, ne)
+                                                                          edgePadding:padding];
+
+
+    MLNPointAnnotation *annotation = [MLNPointAnnotation new];
+    annotation.coordinate = cameraWithoutPadding.centerCoordinate;
+    annotation.title = @"Bounds center";
+    [self.mapView addAnnotation: annotation];
+
+    __weak MBXViewController *weakSelf = self;
+    [self.mapView flyToCamera:cameraWithoutPadding edgePadding:padding withDuration:5 completionHandler:^{
+        [weakSelf.mapView flyToCamera:cameraWithoutPadding edgePadding:UIEdgeInsetsZero withDuration:5 completionHandler:^{
+
+        }];
+    }];
+}
+
 #pragma mark - Random World Tour
+
+// MARK: - Random World Tour
 
 - (void)addAnnotations:(NSInteger)numAnnotations aroundCoordinate:(CLLocationCoordinate2D)coordinate radius:(CLLocationDistance)radius {
     NSMutableArray *annotations = [[NSMutableArray alloc] initWithCapacity:numAnnotations];
