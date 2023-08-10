@@ -12,6 +12,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
   > Change all your `MGL` prefixes to `MLN`. If you are using `NSKeyedArchiver` or similar mechanishm to save the state, the app may crash after this change when trying to unarchive the state using old names of the classes. You need to clean the saved state of the app and save it using new classes.
 * 💥 Breaking: The OpenGL ES renderer now uses OpenGL ES 3.0. This means that only iOS Devices with an Apple A7 GPU or later are supported. https://developer.apple.com/library/archive/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/BestPracticesforAppleA7GPUsandLater/BestPracticesforAppleA7GPUsandLater.html
 * Add `MLNMapView.setLatLngBounds` and `MLNMapView.clearLatLnBounds`
+* Add `flyToCamera` with `edgePadding` for `MLNMapView`
 
 ## 5.13.0 - January 05, 2023
 
