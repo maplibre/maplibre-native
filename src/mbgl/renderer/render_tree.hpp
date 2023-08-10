@@ -37,7 +37,9 @@ public:
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
     virtual const std::string& getName() const = 0;
+#if MLN_DRAWABLE_RENDERER
     virtual void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const = 0;
+#endif
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;
