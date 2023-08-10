@@ -104,7 +104,7 @@ private:
 #if MLN_DRAWABLE_RENDERER
     void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override;
 #endif
-    
+
     Immutable<std::vector<RenderTile>> renderTiles;
     std::string name;
 };
