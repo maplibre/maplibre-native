@@ -51,9 +51,10 @@ public:
     void upload(gfx::UploadPass&);
 
     // Binds the atlas texture to the GPU, and uploads data if it is out of date.
-    gfx::TextureBinding textureBinding() const;
 #if MLN_DRAWABLE_RENDERER
     const std::shared_ptr<gfx::Texture2D>& getTexture() const;
+#else
+    gfx::TextureBinding textureBinding() const;
 #endif
 
     // Returns the size of the texture image.
