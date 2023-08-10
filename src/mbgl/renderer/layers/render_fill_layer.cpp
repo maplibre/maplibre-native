@@ -339,7 +339,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    const auto renderPasses = static_cast<RenderPass>(evaluatedProperties->renderPasses);
+    const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
 
     const auto finish = [&](gfx::DrawableBuilder& builder,
                             const OverscaledTileID& tileID,
@@ -352,7 +352,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable->mutableUniformBuffers();
             uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpUBO, context);
             uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileUBO, context);
-            tileLayerGroup->addDrawable(renderPasses, tileID, std::move(drawable));
+            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
     };
@@ -370,9 +370,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
-        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPasses);
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-            removeTile(renderPasses, tileID);
+            removeTile(renderPass, tileID);
             continue;
         }
 
@@ -382,7 +382,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
             // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(renderPasses, tileID);
+            removeTile(renderPass, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
@@ -432,7 +432,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
             drawable.setVertexAttributes(vertexAttrs);
         };
-        if (0 < tileLayerGroup->observeDrawables(renderPasses, tileID, std::move(updateExisting))) {
+        if (0 < tileLayerGroup->observeDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
@@ -454,12 +454,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                     commonInit(*builder);
-                    builder->setDepthType((renderPasses == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
+                    builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
                                                                                : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(renderPasses == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                    builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                                   : gfx::ColorMode::unblended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(renderPasses);
+                    builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
                 }
             }
@@ -498,7 +498,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*outlineBuilder, tileID, interpolateUBO, tileProps);
             }
         } else { // FillPattern is defined
-            if ((renderPasses & RenderPass::Translucent) == 0) {
+            if ((renderPass & RenderPass::Translucent) == 0) {
                 continue;
             }
 
@@ -561,7 +561,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder) {
                 patternBuilder->setShader(fillShader);
-                patternBuilder->setRenderPass(renderPasses);
+                patternBuilder->setRenderPass(renderPass);
                 if (outlinePatternBuilder) {
                     patternBuilder->setVertexAttributes(vertexAttrs);
                 } else {
@@ -577,7 +577,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
             if (outlinePatternBuilder) {
                 outlinePatternBuilder->setShader(outlineShader);
-                outlinePatternBuilder->setRenderPass(renderPasses);
+                outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(
