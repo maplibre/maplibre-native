@@ -8,6 +8,11 @@
 
 namespace mbgl {
 
+#if MLN_DRAWABLE_RENDERER
+class RasterLayerTweaker;
+using RasterLayerTweakerPtr = std::shared_ptr<RasterLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class ImageSourceRenderData;
 class RasterProgram;
 
@@ -41,6 +46,10 @@ private:
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
 #endif
+    
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
+#endif // MLN_DRAWABLE_RENDERER
 
     // Paint properties
     style::RasterPaintProperties::Unevaluated unevaluated;
@@ -66,6 +75,9 @@ private:
     using RasterSegmentVector = SegmentVector<RasterAttributes>;
     using RasterSegmentVectorPtr = std::shared_ptr<RasterSegmentVector>;
     std::shared_ptr<RasterSegmentVector> staticDataSegments;
+    
+    RasterLayerTweakerPtr tweaker;
+    bool overdrawInspector = false;
 #endif
 };
 
