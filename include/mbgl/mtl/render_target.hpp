@@ -8,7 +8,7 @@ namespace mbgl {
 namespace mtl {
 
 class Context;
-//using UniqueFramebufferPtr = std::shared_ptr<UniqueFramebuffer>;
+// using UniqueFramebufferPtr = std::shared_ptr<UniqueFramebuffer>;
 
 class RenderTarget final : public mbgl::RenderTarget {
 public:
@@ -20,7 +20,7 @@ public:
 
 private:
     Context& context;
-    //UniqueFramebufferPtr framebuffer;
+    // UniqueFramebufferPtr framebuffer;
 };
 
 } // namespace mtl

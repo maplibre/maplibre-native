@@ -27,7 +27,7 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
     };
     static constexpr TextureInfo textures[] = {};
-    
+
     static constexpr auto source = R"(
 
 struct VertexStage {

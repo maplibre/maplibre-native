@@ -142,8 +142,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
             const auto& mode = segment.getMode();
-            if (auto state = shaderMTL.getRenderPipelineState(
-                    renderPassDescriptor, impl->vertexDesc, getColorMode())) {
+            if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode())) {
                 encoder->setRenderPipelineState(state.get());
             } else {
                 assert(!"Failed to create render pipeline state");

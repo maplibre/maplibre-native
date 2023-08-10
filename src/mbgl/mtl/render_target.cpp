@@ -1,7 +1,7 @@
 #include <mbgl/mtl/render_target.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/texture2d.hpp>
-//#include <mbgl/gl/framebuffer.hpp>
+// #include <mbgl/gl/framebuffer.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -38,9 +38,7 @@ void RenderTarget::upload(gfx::UploadPass& uploadPass) {
     visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
 
-void RenderTarget::render(RenderOrchestrator& orchestrator,
-                          const RenderTree& renderTree,
-                          PaintParameters& parameters) {
+void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
     texture->create();
     /*if (!framebuffer) {
         framebuffer = std::make_shared<UniqueFramebuffer>(context.createFramebuffer(*texture));

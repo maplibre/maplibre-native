@@ -117,7 +117,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         auto blendOperation = MTL::BlendOperationAdd;
         auto srcFactor = MTL::BlendFactorOne;
         auto destFactor = MTL::BlendFactorOne;
-        
+
         if (blendEnabled) {
             apply_visitor(
                 [&](const auto& blendFunction) {
@@ -127,7 +127,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
                 },
                 colorMode.blendFunction);
         }
-        
+
         colorTarget->setPixelFormat(colorFormat);
         colorTarget->setBlendingEnabled(blendEnabled);
         colorTarget->setRgbBlendOperation(blendOperation);

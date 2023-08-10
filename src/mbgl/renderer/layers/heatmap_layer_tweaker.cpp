@@ -47,8 +47,12 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .weight = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
             /* .radius = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
-            /* .pad1/2/3 = */ 0, 0, 0,
-            /* .pad4/5/6 = */ 0, 0, 0};
+            /* .pad1/2/3 = */ 0,
+            0,
+            0,
+            /* .pad4/5/6 = */ 0,
+            0,
+            0};
 
         if (permutationUniformBuffer) {
             permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
@@ -68,7 +72,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
 #endif
-    
+
     if (!evaluatedPropsUniformBuffer) {
         const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
             /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
@@ -102,7 +106,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .padding = */ {0}};
 
         uniforms.createOrUpdate(MLN_STRINGIZE(HeatmapDrawableUBO), &drawableUBO, context);
-        
+
 #if MLN_RENDER_BACKEND_METAL
         uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
         uniforms.addOrReplace(MLN_STRINGIZE(HeatmapPermutationUBO), permutationUniformBuffer);
