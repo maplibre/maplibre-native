@@ -18,6 +18,7 @@
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
 
@@ -52,9 +53,7 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup && layerGroup->getLayerTweaker()) {
-        layerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties));
-    }
+    updateLayerTweaker();
 #endif
 }
 
@@ -233,10 +232,18 @@ constexpr auto TexturePosAttribName = "a_texture_pos";
 constexpr auto Image0UniformName = "u_image0";
 constexpr auto Image1UniformName = "u_image1";
 
+void RenderRasterLayer::updateLayerTweaker() {
+    if (layerGroup) {
+        tweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+        tweaker->enableOverdrawInspector(overdrawInspector);
+        layerGroup->setLayerTweaker(tweaker);
+    }
+}
+
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& updateParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -257,6 +264,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         rasterShader = context.getGenericShader(shaders, "RasterShader");
         if (!rasterShader) {
             return;
+        }
+    }
+
+    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
+    if (overdrawInspector != overdraw) {
+        overdrawInspector = overdraw;
+        if (tweaker) {
+            tweaker->enableOverdrawInspector(overdrawInspector);
         }
     }
 
@@ -376,8 +391,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             } else {
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-                imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties));
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
+                updateLayerTweaker();
             }
 
             auto builder = createBuilder();
@@ -403,8 +418,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         } else {
             // Set up a tile layer group
             if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-                layerGroup_->setLayerTweaker(std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties));
                 setLayerGroup(std::move(layerGroup_), changes);
+                updateLayerTweaker();
             }
         }
 

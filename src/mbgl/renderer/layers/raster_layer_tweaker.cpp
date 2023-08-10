@@ -74,6 +74,9 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
             /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
             /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
+            /* .overdrawInspector = */ overdrawInspector,
+            0,
+            0,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();

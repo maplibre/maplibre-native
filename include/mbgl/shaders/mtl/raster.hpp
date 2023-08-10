@@ -50,8 +50,9 @@ struct alignas(16) RasterDrawableUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    float pad1;
-    float pad2;
+    bool overdrawInspector;
+    uint8_t pad1, pad2, pad3;
+    float pad4;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -81,9 +82,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             sampler image0Sampler [[sampler(0)]],
                             sampler image1Sampler [[sampler(1)]]) {
 
-    /*if (permutation.overdrawInspector) {
+    if (drawable.overdrawInspector) {
         return half4(1.0);
-    }*/
+    }
 
     // read and cross-fade colors from the main and parent tiles
     float4 color0 = image0.sample(image0Sampler, in.pos0);

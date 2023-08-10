@@ -17,8 +17,10 @@ struct alignas(16) RasterDrawableUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    float pad1;
-    float pad2;
+    bool overdrawInspector;
+    uint8_t pad1, pad2, pad3;
+    float pad4;
+
 };
 static_assert(sizeof(RasterDrawableUBO) == 128);
 static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
