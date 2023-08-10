@@ -4,6 +4,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+* Add `MLNMapView.setLatLngBounds` and `MLNMapView.clearLatLnBounds`
+
 ## 5.13.0 - January 05, 2023
 
 * Fix missing attribution [#236](https://github.com/maplibre/maplibre-gl-native/pull/236)
