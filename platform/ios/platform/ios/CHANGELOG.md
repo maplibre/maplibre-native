@@ -4,7 +4,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-* Add `MLNMapView.setLatLngBounds` and `MLNMapView.clearLatLnBounds`
+* Add `flyToCamera` with `edgePadding` for `MGLMapView`
+* Add `MGLMapView.setLatLngBounds` and `MGLMapView.clearLatLnBounds`
 
 ## 5.13.0 - January 05, 2023
 

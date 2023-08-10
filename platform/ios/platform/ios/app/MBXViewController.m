@@ -1770,8 +1770,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 #pragma mark - Random World Tour
 
-// MARK: - Random World Tour
-
 - (void)addAnnotations:(NSInteger)numAnnotations aroundCoordinate:(CLLocationCoordinate2D)coordinate radius:(CLLocationDistance)radius {
     NSMutableArray *annotations = [[NSMutableArray alloc] initWithCapacity:numAnnotations];
     for (NSInteger i = 0; i<numAnnotations; i++) {
