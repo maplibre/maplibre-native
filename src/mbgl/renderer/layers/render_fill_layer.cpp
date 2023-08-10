@@ -458,7 +458,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                                              : gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                                 : gfx::ColorMode::unblended());
-                    builder->setSubLayerIndex(0);
+                    builder->setSubLayerIndex(1);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
                 }

@@ -100,7 +100,7 @@ public:
 #if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
-    size_t numLayerGroups() const noexcept;
+    int32_t maxLayerIndex() const;
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
     void observeLayerGroups(std::function<void(LayerGroupBase&)>);
     void observeLayerGroups(std::function<void(const LayerGroupBase&)>) const;

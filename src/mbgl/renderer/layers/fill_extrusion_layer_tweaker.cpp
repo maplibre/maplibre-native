@@ -34,7 +34,7 @@ static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) FillExtrusionDrawablePropsUBO {
-    /*  0 */ std::array<float, 4> color;
+    /*  0 */ Color color;
     /* 16 */ std::array<float, 3> light_color;
     /* 28 */ float pad1;
     /* 32 */ std::array<float, 3> light_position;
@@ -82,7 +82,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
     const FillExtrusionDrawablePropsUBO paramsUBO = {
-        /* .color = */ gfx::VertexAttribute::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
+        /* .color = */ constOrDefault<FillExtrusionColor>(evaluated),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
         /* .pad = */ 0,
         /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
