@@ -1256,7 +1256,7 @@ MLN_EXPORT
 
 /**
  Moves the viewpoint to a different location using a transition animation that
- evokes powered flight and an optional transition duration and peak altitude.
+ evokes powered flight.
 
  The transition animation seamlessly incorporates zooming and panning to help
  the user find his or her bearings even after traversing a great distance.
