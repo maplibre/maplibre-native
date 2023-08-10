@@ -2,13 +2,18 @@
 #include "expression_test_runner.hpp"
 #include "expression_test_logger.hpp"
 
+#include <mbgl/util/logging.hpp>
+
 #include <random>
 #include <iostream>
+#include <filesystem>
 
 int main(int argc, char** argv) try {
+    Log::useLogThread(false);
+
     // Parse args
-    std::vector<mbgl::filesystem::path> testPaths;
-    mbgl::filesystem::path rootPath;
+    std::vector<std::filesystem::path> testPaths;
+    std::filesystem::path rootPath;
     bool shuffle;
     uint32_t seed;
     std::tie(rootPath, testPaths, shuffle, seed) = parseArguments(argc, argv);
