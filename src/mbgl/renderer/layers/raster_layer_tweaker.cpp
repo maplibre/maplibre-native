@@ -75,7 +75,9 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
             /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
             /* .overdrawInspector = */ overdrawInspector,
-            0, 0, 0,
+            0,
+            0,
+            0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(MLN_STRINGIZE(RasterDrawableUBO), &drawableUBO, parameters.context);

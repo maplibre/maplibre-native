@@ -266,7 +266,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             return;
         }
     }
-    
+
     const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
     if (overdrawInspector != overdraw) {
         overdrawInspector = overdraw;
