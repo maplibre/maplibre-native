@@ -4249,6 +4249,14 @@ static void *windowScreenContext = &windowScreenContext;
             dispatch_async(dispatch_get_main_queue(), pendingCompletion);
         };
     }
+    if ([self.camera isEqualToMapCamera:camera] && UIEdgeInsetsEqualToEdgeInsets(_contentInset, insets))
+    {
+        if (pendingCompletion)
+        {
+            [self animateWithDelay:duration animations:pendingCompletion];
+        }
+        return;
+    }
 
     [self willChangeValueForKey:@"camera"];
     [self cancelTransitions];
