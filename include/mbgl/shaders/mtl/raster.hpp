@@ -79,16 +79,16 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const RasterDrawableUBO& drawable [[buffer(2)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             texture2d<float, access::sample> image1 [[texture(1)]],
-                            sampler image0Sampler [[sampler(0)]],
-                            sampler image1Sampler [[sampler(1)]]) {
+                            sampler image0_sampler [[sampler(0)]],
+                            sampler image1_sampler [[sampler(1)]]) {
 
     if (drawable.overdrawInspector) {
         return half4(1.0);
     }
 
     // read and cross-fade colors from the main and parent tiles
-    float4 color0 = image0.sample(image0Sampler, in.pos0);
-    float4 color1 = image1.sample(image1Sampler, in.pos1);
+    float4 color0 = image0.sample(image0_sampler, in.pos0);
+    float4 color1 = image1.sample(image1_sampler, in.pos1);
     if (color0.a > 0.0) {
         color0.rgb = color0.rgb / color0.a;
     }
