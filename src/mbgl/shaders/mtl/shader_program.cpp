@@ -37,7 +37,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     const auto& renderable = renderPassDescriptor.renderable;
     const auto& renderableResource = renderable.getResource<RenderableResource>();
 
-    auto colorFormat = MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB;
+    auto colorFormat = MTL::PixelFormat::PixelFormatBGRA8Unorm;
     std::optional<MTL::PixelFormat> depthFormat = std::nullopt;
     std::optional<MTL::PixelFormat> stencilFormat = std::nullopt;
     if (const auto& rpd = renderableResource.getRenderPassDescriptor()) {
