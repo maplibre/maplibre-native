@@ -20,6 +20,8 @@ jobs:
       - name: npm install
         run: npm ci --ignore-scripts
 
+      - run: chmod +x platform/ios/scripts/deploy-swift-package.sh
+
       - name: Build, package, and upload iOS release
         run: platform/ios/scripts/deploy-swift-package.sh
         env:
