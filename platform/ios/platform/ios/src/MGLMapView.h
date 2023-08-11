@@ -1253,6 +1253,25 @@ MGL_EXPORT
  */
 - (void)flyToCamera:(MGLMapCamera *)camera withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion;
 
+
+/**
+ Moves the viewpoint to a different location using a transition animation that
+ evokes powered flight.
+
+ The transition animation seamlessly incorporates zooming and panning to help
+ the user find his or her bearings even after traversing a great distance.
+
+ @param camera The new viewpoint.
+ @param duration The amount of time, measured in seconds, that the transition
+    animation should take. Specify `0` to jump to the new viewpoint
+    instantaneously. Specify a negative value to use the default duration, which
+    is based on the length of the flight path.
+ @param insets The minimum padding (in screen points) that would be visible
+ around the returned camera object if it were set as the receiver’s camera.
+ @param completion The block to execute after the animation finishes.
+ */
+- (void)flyToCamera:(MGLMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion;
+
 /**
  Returns the camera that best fits the given coordinate bounds.
 
@@ -1363,6 +1382,18 @@ MGL_EXPORT
  @return The point on which to anchor in response to the gesture.
  */
 - (CGPoint)anchorPointForGesture:(UIGestureRecognizer *)gesture;
+
+
+/**
+ * Sets a LatLngBounds that constraints map transformations to this bounds.
+ * @param latLngBounds the bounds to constrain the map with
+ */
+- (void)setLatLngBounds:(MGLCoordinateBounds)latLngBounds;
+
+/**
+ * Clears the bounds that were set via `setLatLngBounds`
+ */
+- (void)clearLatLnBounds;
 
 /**
  The distance from the edges of the map view’s frame to the edges of the map

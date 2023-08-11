@@ -4,6 +4,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 5.14.0 - January 05, 2023
+
+* Add `flyToCamera` with `edgePadding` for `MGLMapView`
+* Add `MGLMapView.setLatLngBounds` and `MGLMapView.clearLatLnBounds`
+
 ## 5.13.0 - January 05, 2023
 
 * Fix missing attribution [#236](https://github.com/maplibre/maplibre-gl-native/pull/236)

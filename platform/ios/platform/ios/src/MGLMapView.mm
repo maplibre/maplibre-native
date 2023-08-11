@@ -597,7 +597,7 @@ public:
     //
     
     self.anchorRotateOrZoomGesturesToCenterCoordinate = NO;
-    
+
     _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
     _pan.delegate = self;
     _pan.maximumNumberOfTouches = 1;
@@ -785,7 +785,7 @@ public:
     {
         _rendererFrontend->reduceMemoryUse();
     }
-    
+
     self.lastSnapshotImage = nil;
 }
 
@@ -1095,7 +1095,7 @@ public:
     if (@available(iOS 11.0, *))
     {
         adjustedContentInsets = self.safeAreaInsets;
-        
+
     } else {
         adjustedContentInsets.top = viewController.topLayoutGuide.length;
         CGFloat bottomPoint = CGRectGetMaxY(viewController.view.bounds) -
@@ -1760,7 +1760,7 @@ public:
     // Note: We do not remove the snapshot view (if there is one) until we have become
     // active.
     [self validateLocationServices];
-    
+
 }
 
 - (void)didBecomeActive:(NSNotification *)notification
@@ -2581,6 +2581,7 @@ public:
     currentCameraOptions.zoom = mbgl::util::clamp(zoom, self.minimumZoomLevel, self.maximumZoomLevel);
     currentCameraOptions.anchor = anchor;
     MGLCoordinateBounds bounds = MGLCoordinateBoundsFromLatLngBounds(self.mbglMap.latLngBoundsForCamera(currentCameraOptions));
+    
     
     return [self cameraThatFitsCoordinateBounds:bounds];
 }
@@ -3717,6 +3718,23 @@ static void *windowScreenContext = &windowScreenContext;
     self.mbglMap.setBounds(mbgl::BoundOptions().withMinZoom(minimumZoomLevel));
 }
 
+
+
+- (void)clearLatLnBounds
+{
+    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds());
+    self.mbglMap.setBounds(newBounds);
+}
+
+- (void)setLatLngBounds:(MGLCoordinateBounds)latLngBounds
+{
+    mbgl::LatLng sw = {latLngBounds.sw.latitude, latLngBounds.sw.longitude};
+    mbgl::LatLng ne = {latLngBounds.ne.latitude, latLngBounds.ne.longitude};
+    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds::hull(sw, ne));
+    
+    self.mbglMap.setBounds(newBounds);
+}
+
 - (double)minimumZoomLevel
 {
     return *self.mbglMap.getBounds().minZoom;
@@ -4081,6 +4099,14 @@ static void *windowScreenContext = &windowScreenContext;
     [self _flyToCamera:camera edgePadding:self.contentInset withDuration:duration peakAltitude:peakAltitude completionHandler:completion];
 }
 
+- (void)flyToCamera:(MGLMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion {
+    UIEdgeInsets finalEdgeInsets = UIEdgeInsetsMake(self.contentInset.top + insets.top,
+                                                    self.contentInset.left + insets.left,
+                                                    self.contentInset.bottom + insets.bottom,
+                                                    self.contentInset.right + insets.right);
+    [self _flyToCamera:camera edgePadding:finalEdgeInsets withDuration:duration peakAltitude:-1 completionHandler:completion];
+}
+
 - (void)_flyToCamera:(MGLMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion
 {
     if (!_mbglMap)
@@ -4122,7 +4148,6 @@ static void *windowScreenContext = &windowScreenContext;
             dispatch_async(dispatch_get_main_queue(), pendingCompletion);
         };
     }
-    
     if ([self.camera isEqualToMapCamera:camera] && UIEdgeInsetsEqualToEdgeInsets(_contentInset, insets))
     {
         if (pendingCompletion)
