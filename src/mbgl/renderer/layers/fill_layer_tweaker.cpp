@@ -8,38 +8,21 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/mtl/fill.hpp>
+#endif
+
 namespace mbgl {
 
 using namespace style;
-
-struct alignas(16) FillDrawableUBO {
-    /*   0 */ std::array<float, 4 * 4> matrix;
-    /*  64 */ std::array<float, 4> scale;
-    /*  80 */ std::array<float, 2> world;
-    /*  88 */ std::array<float, 2> pixel_coord_upper;
-    /*  96 */ std::array<float, 2> pixel_coord_lower;
-    /* 104 */ std::array<float, 2> texsize;
-    /* 112 */
-};
-static_assert(sizeof(FillDrawableUBO) == 112);
-
-/// Evaluated properties that do not depend on the tile
-struct alignas(16) FillDrawablePropsUBO {
-    /*  0 */ Color color;
-    /* 16 */ Color outline_color;
-    /* 32 */ float opacity;
-    /* 36 */ float pad1, pad2, pad3;
-    /* 48 */
-};
-static_assert(sizeof(FillDrawablePropsUBO) == 48);
-
-static constexpr std::string_view FillDrawableUBOName = "FillDrawableUBO";
-static constexpr std::string_view FillDrawablePropsUBOName = "FillDrawablePropsUBO";
+using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
@@ -57,29 +40,178 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
+    
+#if MLN_RENDER_BACKEND_METAL
+    const auto zoom = parameters.state.getZoom();
+    
+    bool fillUniformBufferUpdated = false;
+    bool fillOutlineUniformBufferUpdated = false;
+    bool fillPatternUniformBufferUpdated = false;
+    bool fillOutlinePatternUniformBufferUpdated = false;
+    
+    auto UpdateFillUniformBuffers = [&]() {
+        if (fillUniformBufferUpdated)
+            return;
+        
+        using ShaderClass = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
+        if (propertiesChanged || !fillPermutationUniformBuffer) {
+            const auto source = [this](const std::string_view& attrName) {
+                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+            };
 
-    if (!propsBuffer) {
-        const FillDrawablePropsUBO paramsUBO = {
-            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
-            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-            /* .padding = */ 0,
-            0,
-            0};
-        propsBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+            const FillPermutationUBO permutationUBO = {
+                /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+                /* .overdrawInspector = */ overdrawInspector,
+                };
+
+            if (fillPermutationUniformBuffer) {
+                fillPermutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+            } else {
+                fillPermutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+            }
+            fillUniformBufferUpdated = true;
+        }
+        
+        if (!fillPropsUniformBuffer) {
+            const FillEvaluatedPropsUBO paramsUBO = {
+                /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
+                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+            };
+            fillPropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+        }
+    };
+    
+    auto UpdateFillOutlineUniformBuffers = [&]() {
+        if (fillOutlineUniformBufferUpdated)
+            return;
+        
+        using ShaderClass = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>;
+        if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
+            const auto source = [this](const std::string_view& attrName) {
+                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+            };
+
+            const FillOutlinePermutationUBO permutationUBO = {
+                /* .outline_color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+                /* .overdrawInspector = */ overdrawInspector,
+                };
+
+            if (fillOutlinePermutationUniformBuffer) {
+                fillOutlinePermutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+            } else {
+                fillOutlinePermutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+            }
+        }
+        
+        if (!fillOutlinePropsUniformBuffer) {
+            const FillOutlineEvaluatedPropsUBO paramsUBO = {
+                /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+            };
+            fillOutlinePropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+        }
+        
+        fillOutlineUniformBufferUpdated = true;
+    };
+    
+    auto UpdateFillPatternUniformBuffers = [&]() {
+        if (fillPatternUniformBufferUpdated)
+            return;
+        
+        using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
+        if (propertiesChanged || !fillPatternPermutationUniformBuffer) {
+            const auto source = [this](const std::string_view& attrName) {
+                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+            };
+
+            const FillPatternPermutationUBO permutationUBO = {
+                /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
+                /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
+                /* .overdrawInspector = */ overdrawInspector,
+                };
+
+            if (fillPatternPermutationUniformBuffer) {
+                fillPatternPermutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+            } else {
+                fillPatternPermutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+            }
+        }
+        
+        if (!fillPatternPropsUniformBuffer) {
+            const FillPatternEvaluatedPropsUBO paramsUBO = {
+                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+                /* .fade = */ crossfade.t
+            };
+            fillPatternPropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+        }
+        
+        fillPatternUniformBufferUpdated = true;
+    };
+    
+    auto UpdateFillOutlinePatternUniformBuffers = [&]() {
+        if (fillOutlinePatternUniformBufferUpdated)
+            return;
+        
+        using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
+        if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
+            const auto source = [this](const std::string_view& attrName) {
+                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+            };
+
+            const FillOutlinePatternPermutationUBO permutationUBO = {
+                /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
+                /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
+                /* .overdrawInspector = */ overdrawInspector,
+                };
+
+            if (fillOutlinePatternPermutationUniformBuffer) {
+                fillOutlinePatternPermutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+            } else {
+                fillOutlinePatternPermutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+            }
+        }
+        
+        if (!fillOutlinePatternPropsUniformBuffer) {
+            const FillOutlinePatternEvaluatedPropsUBO paramsUBO = {
+                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+                /* .fade = */ crossfade.t
+            };
+            fillOutlinePatternPropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
+        }
+        
+        fillOutlinePatternUniformBufferUpdated = true;
+    };
+    
+    
+    if (!expressionUniformBuffer) {
+        const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
+                                                   /* .frame = */ parameters.frameCount,
+                                                   /* .zoom = */ static_cast<float>(zoom),
+                                                   /* .pad = */ 0,
+                                                   0,
+                                                   0};
+        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
+#endif
+
+    
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(FillDrawablePropsUBOName, propsBuffer);
-
-        if (!drawable.getTileID()) {
-            return;
-        }
+        auto &uniforms = drawable.mutableUniformBuffers();
+        auto &drawableType = drawable.getShader()->typeName();
+        
+        
+        
+        
+        
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        const auto& translation = evaluated.get<FillTranslate>();
+        const auto &translation = evaluated.get<FillTranslate>();
         const auto anchor = evaluated.get<FillTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
@@ -106,18 +238,81 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                 }
             }
         }
+        if (!drawable.getTileID()) {
+            return;
+        }
 
-        const FillDrawableUBO drawableUBO = {
-            /*.matrix=*/util::cast<float>(matrix),
-            /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-            /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
-            /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-            /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-            /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-        };
+        if (uniforms.get(MLN_STRINGIZE(FillInterpolateUBO))) {
+            UpdateFillUniformBuffers();
+            
+            uniforms.addOrReplace(MLN_STRINGIZE(FillEvaluatedPropsUBO), fillPropsUniformBuffer);
+            const FillDrawableUBO drawableUBO = {
+                /*.matrix=*/util::cast<float>(matrix)
+            };
 
-        uniforms.createOrUpdate(FillDrawableUBOName, &drawableUBO, context);
+            uniforms.createOrUpdate(MLN_STRINGIZE(FillDrawableUBO), &drawableUBO, context);
+            
+#if MLN_RENDER_BACKEND_METAL
+            uniforms.addOrReplace(MLN_STRINGIZE(FillPermutationUBO), fillPermutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
+        } else if (uniforms.get(MLN_STRINGIZE(FillOutlineInterpolateUBO))) {
+            UpdateFillOutlineUniformBuffers();
+            
+            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlineEvaluatedPropsUBO), fillOutlinePropsUniformBuffer);
+            const FillOutlineDrawableUBO drawableUBO = {
+                /*.matrix=*/util::cast<float>(matrix),
+                /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
+            };
+
+            uniforms.createOrUpdate(MLN_STRINGIZE(FillOutlineDrawableUBO), &drawableUBO, context);
+            
+#if MLN_RENDER_BACKEND_METAL
+            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlinePermutationUBO), fillOutlinePermutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
+        } else if (uniforms.get(MLN_STRINGIZE(FillPatternInterpolateUBO))) {
+            UpdateFillPatternUniformBuffers();
+            
+            uniforms.addOrReplace(MLN_STRINGIZE(FillPatternEvaluatedPropsUBO), fillPatternPropsUniformBuffer);
+            const FillPatternDrawableUBO drawableUBO = {
+                /*.matrix=*/util::cast<float>(matrix),
+                /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
+                /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+            };
+
+            uniforms.createOrUpdate(MLN_STRINGIZE(FillPatternDrawableUBO), &drawableUBO, context);
+            
+#if MLN_RENDER_BACKEND_METAL
+            uniforms.addOrReplace(MLN_STRINGIZE(FillPatternPermutationUBO), fillPatternPermutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
+        } else if (uniforms.get(MLN_STRINGIZE(FillOutlinePatternInterpolateUBO))) {
+            UpdateFillOutlinePatternUniformBuffers();
+            
+            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlinePatternEvaluatedPropsUBO), fillOutlinePatternPropsUniformBuffer);
+            const FillOutlinePatternDrawableUBO drawableUBO = {
+                /*.matrix=*/util::cast<float>(matrix),
+                /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
+                /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
+                /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+            };
+
+            uniforms.createOrUpdate(MLN_STRINGIZE(FillOutlinePatternDrawableUBO), &drawableUBO, context);
+            
+#if MLN_RENDER_BACKEND_METAL
+            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlinePatternPermutationUBO), fillOutlinePatternPermutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
+        }
+       
+#if MLN_RENDER_BACKEND_METAL
+        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
+        
     });
+    
+    propertiesChanged = false;
 }
 
 } // namespace mbgl

@@ -10,6 +10,11 @@ constexpr auto prelude = R"(
 #include <metal_stdlib>
 using namespace metal;
 
+template <typename T1, typename T2>
+inline auto mod(T1 x, T2 y) -> decltype(x - y * floor(x/y)) {
+    return x - y * metal::floor(x/y);
+}
+
 enum class AttributeSource : int32_t {
     Constant,
     PerVertex,
@@ -168,6 +173,28 @@ struct alignas(16) LineGradientInterpolationUBO {
     float width_t;
     float pad1, pad2, pad3;
 };
+
+// interpolated packed pattern
+float4 patternFor(device const Attribute& attrib,
+                device const float4& constValue,
+                thread const ushort4& vertexValue,
+                device const float& ,
+                device const ExpressionInputsUBO&) {
+    switch (attrib.source) {
+        case AttributeSource::PerVertex: return float4(vertexValue);
+        case AttributeSource::Computed:  // TODO
+        default:
+        case AttributeSource::Constant: return constValue;
+    }
+}
+
+// unpack pattern position
+inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,
+                     const float2 pattern_size, const float tile_units_to_pixels, const float2 pos) {
+    
+    float2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
+    return (tile_units_to_pixels * pos + offset) / pattern_size;
+}
 
 )";
 
