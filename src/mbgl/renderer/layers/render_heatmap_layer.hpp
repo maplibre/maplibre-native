@@ -13,7 +13,9 @@ namespace mbgl {
 
 #if MLN_DRAWABLE_RENDERER
 class HeatmapLayerTweaker;
+class HeatmapTextureLayerTweaker;
 using HeatmapLayerTweakerPtr = std::shared_ptr<HeatmapLayerTweaker>;
+using HeatmapTextureLayerTweakerPtr = std::shared_ptr<HeatmapTextureLayerTweaker>;
 #endif // MLN_DRAWABLE_RENDERER
 
 class RenderHeatmapLayer final : public RenderLayer {
@@ -22,7 +24,7 @@ public:
     ~RenderHeatmapLayer() override;
 
 #if MLN_DRAWABLE_RENDERER
-    // void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
 
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
@@ -47,6 +49,7 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     void updateLayerTweaker();
+    void updateLayerTextureTweaker();
 #endif // MLN_DRAWABLE_RENDERER
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
@@ -60,10 +63,10 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     /// Remove all drawables for the tile from the layer group
-    // void removeTile(RenderPass, const OverscaledTileID&) override;
+    void removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
-    // void removeAllDrawables() override;
+    void removeAllDrawables() override;
 #endif
 
     // Paint properties
@@ -88,6 +91,7 @@ private:
     std::shared_ptr<TextureVertexVector> sharedTextureVertices;
 
     HeatmapLayerTweakerPtr tweaker;
+    HeatmapTextureLayerTweakerPtr textureTweaker;
 #if MLN_RENDER_BACKEND_METAL
     std::vector<std::string> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL

@@ -51,7 +51,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     context.clear(Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {});*/
 
     // Run layer tweakers to update any dynamic elements
-    /*visitLayerGroups([&](LayerGroupBase& layerGroup) {
+    visitLayerGroups([&](LayerGroupBase& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
             layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
@@ -77,7 +77,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
         if (parameters.currentLayer != 0) {
             parameters.currentLayer--;
         }
-    });*/
+    });
 }
 
 } // namespace mtl
