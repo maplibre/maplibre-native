@@ -236,36 +236,36 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
 
 #if MLN_DRAWABLE_RENDERER
 namespace {
- void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
-     if (renderTarget_) {
-         if (activate) {
-             // The RenderTree has determined this render target should be included in the renderable set for a frame
-             changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
-         } else {
-             // The RenderTree is informing us we should not render anything
-             changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
-         }
-     }
- }
+void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
+    if (renderTarget_) {
+        if (activate) {
+            // The RenderTree has determined this render target should be included in the renderable set for a frame
+            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
+        } else {
+            // The RenderTree is informing us we should not render anything
+            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
+        }
+    }
+}
 } // namespace
 
- void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
-     RenderLayer::markLayerRenderable(willRender, changes);
-     activateRenderTarget(renderTarget, willRender, changes);
- }
+void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    RenderLayer::markLayerRenderable(willRender, changes);
+    activateRenderTarget(renderTarget, willRender, changes);
+}
 
- void RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-     auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get());
-     stats.drawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
- }
+void RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get());
+    stats.drawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
+}
 
- void RenderHeatmapLayer::removeAllDrawables() {
-     RenderLayer::removeAllDrawables();
-     if (renderTarget) {
-         stats.drawablesRemoved += renderTarget->getLayerGroup(0)->getDrawableCount();
-         renderTarget->getLayerGroup(0)->clearDrawables();
-     }
- }
+void RenderHeatmapLayer::removeAllDrawables() {
+    RenderLayer::removeAllDrawables();
+    if (renderTarget) {
+        stats.drawablesRemoved += renderTarget->getLayerGroup(0)->getDrawableCount();
+        renderTarget->getLayerGroup(0)->clearDrawables();
+    }
+}
 
 namespace {
 

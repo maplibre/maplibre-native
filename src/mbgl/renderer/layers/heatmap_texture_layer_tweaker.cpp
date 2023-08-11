@@ -42,7 +42,8 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .pad2 = */ 0,
             /* .pad3 = */ 0};
 
-        drawable.mutableUniformBuffers().createOrUpdate(MLN_STRINGIZE(HeatmapTextureDrawableUBO), &drawableUBO, parameters.context);
+        drawable.mutableUniformBuffers().createOrUpdate(
+            MLN_STRINGIZE(HeatmapTextureDrawableUBO), &drawableUBO, parameters.context);
     });
 }
 
