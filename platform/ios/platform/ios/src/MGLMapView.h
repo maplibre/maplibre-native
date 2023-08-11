@@ -1266,11 +1266,11 @@ MGL_EXPORT
     animation should take. Specify `0` to jump to the new viewpoint
     instantaneously. Specify a negative value to use the default duration, which
     is based on the length of the flight path.
- @param edgePadding The minimum padding (in screen points) that would be visible
+ @param insets The minimum padding (in screen points) that would be visible
  around the returned camera object if it were set as the receiver’s camera.
  @param completion The block to execute after the animation finishes.
  */
-- (void)flyToCamera:(MLNMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion;
+- (void)flyToCamera:(MGLMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion;
 
 /**
  Returns the camera that best fits the given coordinate bounds.
@@ -1388,7 +1388,7 @@ MGL_EXPORT
  * Sets a LatLngBounds that constraints map transformations to this bounds.
  * @param latLngBounds the bounds to constrain the map with
  */
-- (void)setLatLngBounds:(MLNCoordinateBounds)latLngBounds;
+- (void)setLatLngBounds:(MGLCoordinateBounds)latLngBounds;
 
 /**
  * Clears the bounds that were set via `setLatLngBounds`

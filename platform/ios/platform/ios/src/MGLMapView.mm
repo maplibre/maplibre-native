@@ -3726,7 +3726,7 @@ static void *windowScreenContext = &windowScreenContext;
     self.mbglMap.setBounds(newBounds);
 }
 
-- (void)setLatLngBounds:(MLNCoordinateBounds)latLngBounds
+- (void)setLatLngBounds:(MGLCoordinateBounds)latLngBounds
 {
     mbgl::LatLng sw = {latLngBounds.sw.latitude, latLngBounds.sw.longitude};
     mbgl::LatLng ne = {latLngBounds.ne.latitude, latLngBounds.ne.longitude};

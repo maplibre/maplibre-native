@@ -31,7 +31,7 @@ static const MGLCoordinateBounds colorado = {
     .ne = { .latitude = 40.989329, .longitude = -102.062592},
 };
 
-static const MLNCoordinateBounds areaAroundBelgium = {
+static const MGLCoordinateBounds areaAroundBelgium = {
     .sw = { .latitude = 52.2782, .longitude = 8.289179999999988},
     .ne = { .latitude = 48.5584, .longitude = 1.0162300000000073},
 };
@@ -1473,7 +1473,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         [self.mapView clearLatLnBounds];
         [self.mapView resetPosition];
     } else {
-        MLNMapCamera *newCamera = [self.mapView cameraThatFitsCoordinateBounds: areaAroundBelgium];
+        MGLMapCamera *newCamera = [self.mapView cameraThatFitsCoordinateBounds: areaAroundBelgium];
         [self.mapView setCamera: newCamera];
         [self.mapView setLatLngBounds: areaAroundBelgium];
     }
@@ -1751,11 +1751,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     CLLocationCoordinate2D ne = CLLocationCoordinate2DMake(50, 12);
 
     UIEdgeInsets padding = UIEdgeInsetsMake(200, 200, 0, 0);
-    MLNMapCamera *cameraWithoutPadding = [self.mapView cameraThatFitsCoordinateBounds:MLNCoordinateBoundsMake(sw, ne)
+    MGLMapCamera *cameraWithoutPadding = [self.mapView cameraThatFitsCoordinateBounds:MGLCoordinateBoundsMake(sw, ne)
                                                                           edgePadding:padding];
 
 
-    MLNPointAnnotation *annotation = [MLNPointAnnotation new];
+    MGLPointAnnotation *annotation = [MGLPointAnnotation new];
     annotation.coordinate = cameraWithoutPadding.centerCoordinate;
     annotation.title = @"Bounds center";
     [self.mapView addAnnotation: annotation];
