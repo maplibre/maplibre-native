@@ -24,7 +24,7 @@ private:
     gfx::UniformBufferPtr fillOutlinePropsUniformBuffer;
     gfx::UniformBufferPtr fillPatternPropsUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePatternPropsUniformBuffer;
-    
+
 #if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr fillPermutationUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePermutationUniformBuffer;

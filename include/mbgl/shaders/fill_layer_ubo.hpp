@@ -139,7 +139,5 @@ struct alignas(16) FillOutlinePatternPermutationUBO {
 };
 static_assert(sizeof(FillOutlinePatternPermutationUBO) == 2 * 16);
 
-
-
 } // namespace shaders
 } // namespace mbgl
