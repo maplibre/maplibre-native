@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
     s.summary = 'Open source vector map solution for iOS with full styling capabilities.'
     s.platform = :ios
     s.source = { 
-        :http => "https://github.com/maplibre/maplibre-native/releases/download/ios-v#{version.to_s}/MapLibre-#{version.to_s}.zip",\,
+        :http => "https://github.com/maplibre/maplibre-native/releases/download/ios-v#{version.to_s}/MapLibre-#{version.to_s}.zip",
         :flatten => false
     }
     m.social_media_url  = 'https://mastodon.social/@maplibre'
