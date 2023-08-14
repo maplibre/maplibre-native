@@ -22,7 +22,7 @@ jobs:
 
       - run: chmod +x scripts/deploy-swift-package.sh
 
-      - run: bazel/example_config.bzl bazel/config.bzl
+      - run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Build, package, and upload iOS release
         run: scripts/deploy-swift-package.sh
