@@ -1,7 +1,11 @@
 #pragma once
 
 #include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/image.hpp>
+
+#include <Foundation/NSSharedPtr.hpp>
+#include <Metal/MTLPixelFormat.hpp>
 
 #include <memory>
 
@@ -9,6 +13,7 @@ namespace mbgl {
 namespace mtl {
 
 class Context;
+class RenderPass;
 
 class Texture2D : public gfx::Texture2D {
 public:
@@ -38,52 +43,38 @@ public:
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
     void upload() noexcept override;
 
-    gfx::TextureResource& getResource() const override {
-        assert(textureResource);
-        return *textureResource;
-    }
-
-    bool needsUpload() const noexcept override { return false /*!!image*/; };
+    bool needsUpload() const noexcept override { return !!image; };
 
 public:
-    /// @brief Get the OpenGL handle ID for the underlying resource
-    /// @return GLuint
-    // platform::GLuint getTextureID() const noexcept;
+    void updateSamplerConfiguration() noexcept;
 
-    // void updateSamplerConfiguration() noexcept;
-
-    /// @brief Bind this texture to the specified texture unit
+    /// @brief Bind this texture to the specified location
+    /// @param renderPass Render pass on which the texture will be assign
     /// @param location Location index of texture sampler in a shader
-    /// @param textureUnit Unit to bind to. A maximum of gl::MaxActiveTextureUnits
-    /// texture units are available for binding.
-    // void bind(int32_t location, int32_t textureUnit) noexcept;
+    void bind(const RenderPass& renderPass, int32_t location) noexcept;
 
     /// @brief Unbind the texture, if it was bound
-    // void unbind() noexcept;
+    /// @param renderPass Render pass from which the texture will be removed
+    /// @param location Location index of texture sampler in a shader
+    void unbind(const RenderPass& renderPass, int32_t location) noexcept;
 
 private:
-    // void createObject() noexcept;
-    // void createStorage(const void* data = nullptr) noexcept;
+    MTL::PixelFormat getMetalPixelFormat() const noexcept;
+    void createMetalTexture() noexcept;
 
 private:
     Context& context;
+    MTLTexturePtr metalTexture;
+    MTLSamplerStatePtr metalSamplerState;
 
     Size size{0, 0};
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
     gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
+    SamplerState samplerState{};
 
-    std::unique_ptr<gfx::TextureResource> textureResource{nullptr};
-    /*
-
-        SamplerState samplerState{};
-
-        std::shared_ptr<PremultipliedImage> image{nullptr};
-        bool samplerStateDirty{false};
-        bool storageDirty{false};
-
-        int32_t boundTextureUnit{-1};
-        int32_t boundLocation{-1};
-    */
+    std::shared_ptr<PremultipliedImage> image{nullptr};
+    bool textureDirty{true};
+    bool samplerStateDirty{true};
 };
 
 } // namespace mtl

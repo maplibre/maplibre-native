@@ -287,26 +287,28 @@ void Drawable::unbindUniformBuffers(const RenderPass& renderPass) const {
 }
 
 void Drawable::bindTextures(const RenderPass& renderPass) const {
-    const auto& encoder = renderPass.getMetalEncoder();
-
-    NS::UInteger index = 0;
     for (const auto& pair : textures) {
-        MTL::Texture* metalTex = nullptr;
-        if (pair.second) {
-            const auto& tex = static_cast<Texture2D&>(*pair.second);
-            const auto& resource = static_cast<TextureResource&>(tex.getResource());
-            metalTex = resource.getMetalTexture();
+        if (const auto& tex = pair.second) {
+            const auto& location = pair.first;
+            std::static_pointer_cast<mtl::Texture2D>(tex)->bind(renderPass, location);
         }
-        encoder->setVertexTexture(metalTex, index);
     }
 }
 
 void Drawable::unbindTextures(const RenderPass& renderPass) const {
-    const auto& encoder = renderPass.getMetalEncoder();
-
-    NS::UInteger index = 0;
     for (const auto& pair : textures) {
-        encoder->setVertexTexture(nullptr, index);
+        if (const auto& tex = pair.second) {
+            const auto& location = pair.first;
+            std::static_pointer_cast<mtl::Texture2D>(tex)->unbind(renderPass, location);
+        }
+    }
+}
+
+void Drawable::uploadTextures() const {
+    for (const auto& pair : textures) {
+        if (const auto& tex = pair.second) {
+            std::static_pointer_cast<mtl::Texture2D>(tex)->upload();
+        }
     }
 }
 
@@ -455,14 +457,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->vertexDesc = std::move(vertDesc);
     }
 
-    /*
     const bool texturesNeedUpload = std::any_of(
         textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
 
     if (texturesNeedUpload) {
         uploadTextures();
     }
-     */
 }
 /*
 gfx::ColorMode Drawable::makeColorMode(PaintParameters& parameters) const {
@@ -478,32 +478,6 @@ gfx::StencilMode Drawable::makeStencilMode(PaintParameters& parameters) const {
     }
     return gfx::StencilMode::disabled();
 }
-
-void Drawable::uploadTextures() const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            std::static_pointer_cast<gl::Texture2D>(tex)->upload();
-        }
-    }
-}
-
-void Drawable::bindTextures() const {
-    int32_t unit = 0;
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            const auto& location = pair.first;
-            std::static_pointer_cast<gl::Texture2D>(tex)->bind(location, unit++);
-        }
-    }
-}
-
-void Drawable::unbindTextures() const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            std::static_pointer_cast<gl::Texture2D>(tex)->unbind();
-        }
-    }
-}
- */
+*/
 } // namespace mtl
 } // namespace mbgl
