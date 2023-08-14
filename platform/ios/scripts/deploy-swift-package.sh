@@ -85,7 +85,7 @@ step "Building XCFramework"
 bazel build //platform/ios:MapLibre.dynamic
 
 step "Copying Bazel output"
-BUILT_XCFRAMEWORK="$(bazel cquery --output=files //platform/ios:MapLibre.dynamic)"
+BUILT_XCFRAMEWORK="$(bazel info execution_root)/$(bazel cquery --output=files //platform/ios:MapLibre.dynamic)"
 MAPLIBRE_ZIP_FILE="MapLibre-${PUBLISH_VERSION}.zip"
 cp "$BUILT_XCFRAMEWORK" "$MAPLIBRE_ZIP_FILE"
 
