@@ -377,7 +377,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if ((drawable.getRenderPass() | passes) == RenderPass::None || (tileID && !hasRenderTile(*tileID))) {
+        if ((drawable.getRenderPass() & passes) || (tileID && !hasRenderTile(*tileID))) {
             return true;
         }
         return false;
