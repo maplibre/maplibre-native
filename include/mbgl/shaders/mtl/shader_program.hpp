@@ -51,7 +51,7 @@ public:
 
     MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::RenderPassDescriptor&,
                                                      const MTLVertexDescriptorPtr&,
-                                                     bool preMultipledAlpha) const;
+                                                     const gfx::ColorMode& colorMode) const;
 
     std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
 

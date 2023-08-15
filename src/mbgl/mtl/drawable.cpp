@@ -1,5 +1,6 @@
 #include <mbgl/mtl/drawable.hpp>
 
+#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable_impl.hpp>
@@ -142,7 +143,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         if (mlSegment.indexLength > 0) {
             const auto& mode = segment.getMode();
             if (auto state = shaderMTL.getRenderPipelineState(
-                    renderPassDescriptor, impl->vertexDesc, preMultipledAlpha)) {
+                    renderPassDescriptor, impl->vertexDesc, getColorMode())) {
                 encoder->setRenderPipelineState(state.get());
             } else {
                 assert(!"Failed to create render pipeline state");
