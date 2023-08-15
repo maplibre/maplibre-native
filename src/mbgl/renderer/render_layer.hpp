@@ -212,13 +212,15 @@ protected:
     bool hasRenderTile(const OverscaledTileID&) const;
 
     /// Get the bucket ID from which a given tile was built
-    /// @details When a new style is loaded and contains a layer with the same ID, `layerChanged` will be called during style
-    ///          parsing, but the `Bucket` in a tile's `RenderData` will only be replaced when the asynchronous load for the tile
-    ///          is complete, at which point the drawable for the tile may need to be updated or replaced.
+    /// @details When a new style is loaded and contains a layer with the same ID, `layerChanged` will be called during
+    /// style
+    ///          parsing, but the `Bucket` in a tile's `RenderData` will only be replaced when the asynchronous load for
+    ///          the tile is complete, at which point the drawable for the tile may need to be updated or replaced.
     util::SimpleIdentity getRenderTileBucketID(const OverscaledTileID&) const;
 
     /// Set the bucket ID from which a given tile was built
-    /// @return true if updated, false if the tile ID is not present in the set of tiles to be rendered or the ID is unchanged
+    /// @return true if updated, false if the tile ID is not present in the set of tiles to be rendered or the ID is
+    /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 #endif // MLN_DRAWABLE_RENDERER
 
