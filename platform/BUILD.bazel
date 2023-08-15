@@ -147,8 +147,8 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//:objc-sdk",
-        "//:objcpp-sdk",
+        ":objc-sdk",
+        ":objcpp-sdk",
     ],
 )
 

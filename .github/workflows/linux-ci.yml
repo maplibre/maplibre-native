@@ -52,6 +52,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+
       - uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Get latest CMake and Ninja
@@ -78,6 +83,11 @@ jobs:
           cmake --version
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:cpp"
 
       - name: Archive mbgl-test-runner
         uses: actions/upload-artifact@v3
@@ -213,8 +223,8 @@ jobs:
           xvfb-run -a \
             bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
             --test_output=errors --local_test_jobs=1 \
-            --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1 \
-            //test:core
+            --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
+            //test:core //expression-test:test
 
       - name: Upload coverage report
         if: '!cancelled()'
