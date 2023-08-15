@@ -22,6 +22,54 @@ using namespace std::string_literals;
 namespace mbgl {
 namespace mtl {
 
+namespace {
+MTL::BlendOperation metalBlendOperation(const gfx::ColorBlendEquationType& colorBlend) {
+    switch (colorBlend) {
+        case gfx::ColorBlendEquationType::Add:
+            return MTL::BlendOperationAdd;
+        case gfx::ColorBlendEquationType::Subtract:
+            return MTL::BlendOperationSubtract;
+        case gfx::ColorBlendEquationType::ReverseSubtract:
+            return MTL::BlendOperationReverseSubtract;
+    }
+}
+
+MTL::BlendFactor metalBlendFactor(const gfx::ColorBlendFactorType& colorFactor) {
+    switch (colorFactor) {
+        case gfx::ColorBlendFactorType::Zero:
+            return MTL::BlendFactorZero;
+        case gfx::ColorBlendFactorType::One:
+            return MTL::BlendFactorOne;
+        case gfx::ColorBlendFactorType::SrcColor:
+            return MTL::BlendFactorSourceColor;
+        case gfx::ColorBlendFactorType::OneMinusSrcColor:
+            return MTL::BlendFactorOneMinusSourceColor;
+        case gfx::ColorBlendFactorType::SrcAlpha:
+            return MTL::BlendFactorSourceAlpha;
+        case gfx::ColorBlendFactorType::OneMinusSrcAlpha:
+            return MTL::BlendFactorOneMinusSourceAlpha;
+        case gfx::ColorBlendFactorType::DstAlpha:
+            return MTL::BlendFactorDestinationAlpha;
+        case gfx::ColorBlendFactorType::OneMinusDstAlpha:
+            return MTL::BlendFactorOneMinusDestinationAlpha;
+        case gfx::ColorBlendFactorType::DstColor:
+            return MTL::BlendFactorDestinationColor;
+        case gfx::ColorBlendFactorType::OneMinusDstColor:
+            return MTL::BlendFactorOneMinusDestinationColor;
+        case gfx::ColorBlendFactorType::SrcAlphaSaturate:
+            return MTL::BlendFactorSourceAlphaSaturated;
+        case gfx::ColorBlendFactorType::ConstantColor:
+            return MTL::BlendFactorBlendColor;
+        case gfx::ColorBlendFactorType::OneMinusConstantColor:
+            return MTL::BlendFactorOneMinusBlendColor;
+        case gfx::ColorBlendFactorType::ConstantAlpha:
+            return MTL::BlendFactorBlendAlpha;
+        case gfx::ColorBlendFactorType::OneMinusConstantAlpha:
+            return MTL::BlendFactorOneMinusBlendAlpha;
+    }
+}
+} // namespace
+
 ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFunctionPtr vert, MTLFunctionPtr frag)
     : ShaderProgramBase(),
       shaderName(std::move(name)),
@@ -31,7 +79,7 @@ ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFun
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::RenderPassDescriptor& renderPassDescriptor,
                                                                 const MTLVertexDescriptorPtr& vertexDescriptor,
-                                                                bool preMultipledAlpha) const {
+                                                                const gfx::ColorMode& colorMode) const {
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     const auto& renderable = renderPassDescriptor.renderable;
@@ -65,16 +113,29 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     desc->setVertexDescriptor(vertexDescriptor.get());
 
     if (auto* colorTarget = desc->colorAttachments()->object(0)) {
-        const auto srcFactor = preMultipledAlpha ? MTL::BlendFactorOne : MTL::BlendFactorSourceAlpha;
+        const auto blendEnabled = !colorMode.blendFunction.is<gfx::ColorMode::Replace>();
+        auto blendOperation = MTL::BlendOperationAdd;
+        auto srcFactor = MTL::BlendFactorOne;
+        auto destFactor = MTL::BlendFactorOne;
+
+        if (blendEnabled) {
+            apply_visitor(
+                [&](const auto& blendFunction) {
+                    blendOperation = metalBlendOperation(gfx::ColorBlendEquationType(blendFunction.equation));
+                    srcFactor = metalBlendFactor(blendFunction.srcFactor);
+                    destFactor = metalBlendFactor(blendFunction.dstFactor);
+                },
+                colorMode.blendFunction);
+        }
 
         colorTarget->setPixelFormat(colorFormat);
-        colorTarget->setBlendingEnabled(true);
-        colorTarget->setRgbBlendOperation(MTL::BlendOperationAdd);
-        colorTarget->setAlphaBlendOperation(MTL::BlendOperationAdd);
+        colorTarget->setBlendingEnabled(blendEnabled);
+        colorTarget->setRgbBlendOperation(blendOperation);
+        colorTarget->setAlphaBlendOperation(blendOperation);
         colorTarget->setSourceRGBBlendFactor(srcFactor);
         colorTarget->setSourceAlphaBlendFactor(srcFactor);
-        colorTarget->setDestinationRGBBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
-        colorTarget->setDestinationAlphaBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
+        colorTarget->setDestinationRGBBlendFactor(destFactor);
+        colorTarget->setDestinationAlphaBlendFactor(destFactor);
     }
 
     if (depthFormat) {
