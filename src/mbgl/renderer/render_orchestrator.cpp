@@ -775,6 +775,14 @@ void RenderOrchestrator::clearData() {
     if (!layerImpls->empty()) layerImpls = makeMutable<std::vector<Immutable<style::Layer::Impl>>>();
     if (!imageImpls->empty()) imageImpls = makeMutable<std::vector<Immutable<style::Image::Impl>>>();
 
+#if MLN_DRAWABLE_RENDERER
+    UniqueChangeRequestVec changes;
+    for (const auto& entry : renderLayers) {
+        entry.second->layerRemoved(changes);
+    }
+    addChanges(changes);
+#endif
+
     renderSources.clear();
     renderLayers.clear();
 
