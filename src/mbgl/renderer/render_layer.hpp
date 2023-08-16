@@ -51,6 +51,10 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 #endif
 } // namespace gfx
 
+namespace style {
+class ColorRampPropertyValue;
+} // namespace style
+
 class LayerRenderData {
 public:
     std::shared_ptr<Bucket> bucket;
@@ -223,6 +227,8 @@ protected:
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 #endif // MLN_DRAWABLE_RENDERER
+
+    static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
 protected:
     // Stores current set of tiles to be rendered for this layer.

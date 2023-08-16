@@ -306,24 +306,12 @@ bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 }
 
 void RenderLineLayer::updateColorRamp() {
-    auto colorValue = unevaluated.get<LineGradient>().getValue();
-    if (colorValue.isUndefined()) {
+    const style::ColorRampPropertyValue colorValue = unevaluated.get<LineGradient>().getValue();
+    if (!colorRamp || !applyColorRamp(colorValue, *colorRamp)) {
         return;
     }
 
-    const auto length = colorRamp->bytes();
-
-    for (uint32_t i = 0; i < length; i += 4) {
-        const auto color = colorValue.evaluate(static_cast<double>(i) / length);
-        colorRamp->data[i] = static_cast<uint8_t>(std::floor(color.r * 255.f));
-        colorRamp->data[i + 1] = static_cast<uint8_t>(std::floor(color.g * 255.f));
-        colorRamp->data[i + 2] = static_cast<uint8_t>(std::floor(color.b * 255.f));
-        colorRamp->data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
-    }
-
-    if (colorRampTexture) {
-        colorRampTexture = std::nullopt;
-    }
+    colorRampTexture = std::nullopt;
 
 #if MLN_DRAWABLE_RENDERER
     if (colorRampTexture2D) {

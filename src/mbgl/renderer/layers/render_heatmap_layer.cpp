@@ -202,23 +202,15 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
 #endif // MLN_LEGACY_RENDERER
 
 void RenderHeatmapLayer::updateColorRamp() {
-    auto colorValue = unevaluated.get<HeatmapColor>().getValue();
-    if (colorValue.isUndefined()) {
-        colorValue = HeatmapLayer::getDefaultHeatmapColor();
-    }
-
-    const auto length = (*colorRamp).bytes();
-
-    for (uint32_t i = 0; i < length; i += 4) {
-        const auto color = colorValue.evaluate(static_cast<double>(i) / length);
-        (*colorRamp).data[i + 0] = static_cast<uint8_t>(std::floor(color.r * 255.f));
-        (*colorRamp).data[i + 1] = static_cast<uint8_t>(std::floor(color.g * 255.f));
-        (*colorRamp).data[i + 2] = static_cast<uint8_t>(std::floor(color.b * 255.f));
-        (*colorRamp).data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
-    }
-
-    if (colorRampTexture) {
-        colorRampTexture = std::nullopt;
+    if (colorRamp) {
+        auto colorValue = unevaluated.get<HeatmapColor>().getValue();
+        if (colorValue.isUndefined()) {
+            colorValue = HeatmapLayer::getDefaultHeatmapColor();
+        }
+        
+        if (applyColorRamp(colorValue, *colorRamp)) {
+            colorRampTexture = std::nullopt;
+        }
     }
 }
 
