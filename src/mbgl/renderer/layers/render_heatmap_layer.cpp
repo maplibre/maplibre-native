@@ -207,7 +207,7 @@ void RenderHeatmapLayer::updateColorRamp() {
         if (colorValue.isUndefined()) {
             colorValue = HeatmapLayer::getDefaultHeatmapColor();
         }
-        
+
         if (applyColorRamp(colorValue, *colorRamp)) {
             colorRampTexture = std::nullopt;
         }
