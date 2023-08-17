@@ -23,7 +23,7 @@ layout (std140) uniform CollisionCircleUBO {
 out float v_placed;
 out float v_notUsed;
 out float v_radius;
-out vec2 v_extrude;
+out highp vec2 v_extrude;
 out vec2 v_extrude_scale;
 
 void main() {
@@ -57,7 +57,7 @@ void main() {
 in float v_placed;
 in float v_notUsed;
 in float v_radius;
-in vec2 v_extrude;
+in highp vec2 v_extrude;
 in vec2 v_extrude_scale;
 
 void main() {
