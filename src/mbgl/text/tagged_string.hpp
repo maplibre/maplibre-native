@@ -35,7 +35,8 @@ struct SectionOptions {
 
     explicit SectionOptions(std::string imageID_)
         : scale(1.0),
-          imageID(std::move(imageID_)) {}
+          imageID(std::move(imageID_)),
+          type(GlyphIDType::FontPBF) {}
 
     double scale;
     FontStack fontStack;
@@ -46,7 +47,7 @@ struct SectionOptions {
     std::shared_ptr<std::vector<HBShapeAdjust>> adjusts;
 
     int32_t startIndex;
-    bool lineSection = true;
+    bool keySection = true;
 
     std::optional<std::string> imageID;
 
@@ -98,7 +99,7 @@ struct TaggedString {
                         double scale,
                         const FontStack& fontStack,
                         GlyphIDType type,
-                        bool lineSection = true,
+                        bool keySection = true,
                         std::optional<Color> textColor_ = std::nullopt);
 
     void addTextSection(const std::u16string& text,
@@ -106,7 +107,7 @@ struct TaggedString {
                         const FontStack& fontStack,
                         GlyphIDType type,
                         std::shared_ptr<std::vector<HBShapeAdjust>>& adjusts,
-                        bool lineSection = true,
+                        bool keySection = true,
                         std::optional<Color> textColor_ = std::nullopt);
 
     void addImageSection(const std::string& imageID);

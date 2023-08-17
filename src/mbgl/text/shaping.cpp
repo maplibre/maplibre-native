@@ -407,7 +407,7 @@ void shapeLines(Shaping& shaping,
             const HBShapeAdjust* adjust = nullptr;
             if (section.adjusts) {
                 assert(section.startIndex >= 0);
-                adjust = &(*section.adjusts)[i - section.startIndex];
+                adjust = &((*section.adjusts)[i - section.startIndex]);
             }
             GlyphID codePoint(line.getCharCodeAt(i), section.type);
             double baselineOffset = 0.0;
@@ -598,12 +598,15 @@ Shaping getShaping(const TaggedString& formattedString,
         } else {
             StyledText subString;
             auto sectionIndex = formattedString.getSectionIndex(0);
+            GlyphIDType sectionType = GlyphIDType::FontPBF;
             auto strLen = formattedString.getStyledText().first.length();
             const auto& sections = formattedString.getSections();
-
+            
             std::vector<SectionOptions> formattedSections = formattedString.getSections();
+            if (formattedSections.size() > 0)
+                sectionType = formattedSections[0].type;
 
-            std::vector<StyledText> pendLines;
+            std::vector<StyledText> pendStrings;
 
             auto processAline = [&](StyledText line) {
                 reorderedLines.emplace_back(line, formattedSections);
@@ -615,16 +618,16 @@ Shaping getShaping(const TaggedString& formattedString,
                 }
             };
 
-            auto applyLines = [&](StyledText line) {
-                if (pendLines.empty()) {
+            auto applyLineAndPendingStrings = [&](StyledText line) {
+                if (pendStrings.empty()) {
                     processAline(line);
                 } else {
                     StyledText combine;
-                    for (auto& pendLine : pendLines) {
-                        combine.first.append(pendLine.first);
-                        combine.second.insert(combine.second.end(), pendLine.second.begin(), pendLine.second.end());
+                    for (auto& pendString : pendStrings) {
+                        combine.first.append(pendString.first);
+                        combine.second.insert(combine.second.end(), pendString.second.begin(), pendString.second.end());
                     }
-                    pendLines.clear();
+                    pendStrings.clear();
                     combine.first.append(line.first);
                     combine.second.insert(combine.second.end(), line.second.begin(), line.second.end());
                     processAline(combine);
@@ -633,8 +636,7 @@ Shaping getShaping(const TaggedString& formattedString,
 
             auto applySubString = [&]() {
                 if (subString.first.length()) {
-                    auto& section = sections[sectionIndex];
-                    if (GlyphIDType::FontPBF == section.type) {
+                    if (GlyphIDType::FontPBF == sectionType) {
                         auto processedLines = bidi.processStyledText(
                             subString,
                             determineLineBreaks({subString, formattedString.getSections()},
@@ -647,28 +649,24 @@ Shaping getShaping(const TaggedString& formattedString,
                         auto lastChar = u'x';
                         if (!subString.first.empty()) lastChar = subString.first[subString.first.length() - 1];
 
-                        if (section.lineSection || u'\n' == lastChar) {
+                        if (u'\n' == lastChar) {
                             for (const auto& line : processedLines) {
-                                applyLines(line);
+                                applyLineAndPendingStrings(line);
                             }
                         } else {
                             auto lineCount = processedLines.size();
                             if (lineCount > 1) {
                                 for (size_t lineIndex = 0; lineIndex < lineCount - 1; ++lineIndex) {
-                                    applyLines(processedLines[lineIndex]);
+                                    applyLineAndPendingStrings(processedLines[lineIndex]);
                                 }
                             }
                             if (lineCount) {
-                                pendLines.push_back(processedLines[lineCount - 1]);
+                                pendStrings.push_back(processedLines[lineCount - 1]);
                             }
                         }
 
                     } else {
-                        if (section.lineSection) {
-                            applyLines(subString);
-                        } else {
-                            pendLines.push_back(subString);
-                        }
+                        pendStrings.push_back(subString);
                     }
                 }
             };
@@ -676,13 +674,15 @@ Shaping getShaping(const TaggedString& formattedString,
             for (size_t charIndex = 0; charIndex < strLen; ++charIndex) {
                 auto& ch = formattedString.getStyledText().first[charIndex];
                 auto& sec = formattedString.getStyledText().second[charIndex];
+                auto& secType = formattedSections[sec].type;
 
-                if (sectionIndex != sec) {
+                if (sectionType != secType) {
                     applySubString();
 
                     subString.first.clear();
                     subString.second.clear();
-                    sectionIndex = sec;
+                    
+                    sectionType = secType;
                 }
 
                 subString.first += ch;
@@ -690,6 +690,16 @@ Shaping getShaping(const TaggedString& formattedString,
             }
 
             applySubString();
+            
+            if (!pendStrings.empty()) {
+                StyledText combine;
+                for (auto& pendString : pendStrings) {
+                    combine.first.append(pendString.first);
+                    combine.second.insert(combine.second.end(), pendString.second.begin(), pendString.second.end());
+                }
+                pendStrings.clear();
+                processAline(combine);
+            }
         }
     }
 

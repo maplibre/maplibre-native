@@ -51,6 +51,7 @@
         }
     },
     "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+    "fonts": "local://glyphs/{fontstack}/{language}.pbf",
     "layers": [
         {
             "id": "symbol",

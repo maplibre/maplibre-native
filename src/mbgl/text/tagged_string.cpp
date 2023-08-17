@@ -14,14 +14,15 @@ void TaggedString::addTextSection(const std::u16string &sectionText,
                                   double scale,
                                   const FontStack &fontStack,
                                   GlyphIDType type,
-                                  bool lineSection,
+                                  bool keySection,
                                   std::optional<Color> textColor) {
+    auto startIndex = static_cast<uint32_t>(styledText.first.size());
     styledText.first += sectionText;
-    sections.emplace_back(scale, fontStack, type, static_cast<uint32_t>(styledText.first.size()), std::move(textColor));
+    sections.emplace_back(scale, fontStack, type, startIndex, std::move(textColor));
     styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
     supportsVerticalWritingMode = std::nullopt;
     if (type != GlyphIDType::FontPBF) hasNeedShapeTextVal = true;
-    sections[sections.size() - 1].lineSection = lineSection;
+    sections[sections.size() - 1].keySection = keySection;
 }
 
 void TaggedString::addTextSection(const std::u16string &sectionText,
@@ -29,14 +30,14 @@ void TaggedString::addTextSection(const std::u16string &sectionText,
                                   const FontStack &fontStack,
                                   GlyphIDType type,
                                   std::shared_ptr<std::vector<HBShapeAdjust>> &adjusts,
-                                  bool lineSection,
+                                  bool keySection,
                                   std::optional<Color> textColor) {
     sections.emplace_back(scale, fontStack, type, static_cast<uint32_t>(styledText.first.size()), std::move(textColor));
     styledText.first += sectionText;
     styledText.second.resize(styledText.first.size(), static_cast<uint8_t>(sections.size() - 1));
     if (type != GlyphIDType::FontPBF) hasNeedShapeTextVal = true;
     if (adjusts) sections[sections.size() - 1].adjusts = adjusts;
-    sections[sections.size() - 1].lineSection = lineSection;
+    sections[sections.size() - 1].keySection = keySection;
 }
 
 void TaggedString::addImageSection(const std::string &imageID) {
