@@ -208,7 +208,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(8, true, true, FillPatternPermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
     };
-    
+
     static constexpr TextureInfo textures[] = {
         {0, "u_image0"},
     };
@@ -346,7 +346,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
         MLN_MTL_UNIFORM_BLOCK(8, true, true, FillOutlinePatternPermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
     };
-    
+
     static constexpr TextureInfo textures[] = {
         {0, "u_image0"},
     };
