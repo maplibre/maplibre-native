@@ -148,7 +148,6 @@ public:
 
     /// Add a triangle
     void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
-
     /// Add another triangle based on the previous two points
     void appendTriangle(int16_t x0, int16_t y0);
 
