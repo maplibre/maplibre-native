@@ -278,10 +278,26 @@ struct alignas(16) HeatmapInterpolateUBO {
 };
 static_assert(sizeof(HeatmapInterpolateUBO) % 16 == 0);
 
+struct alignas(16) HeatmapEvaluatedPropsUBO {
+    float weight;
+    float radius;
+    float intensity;
+    float padding;
+};
+static_assert(sizeof(HeatmapEvaluatedPropsUBO) % 16 == 0);
+
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 constexpr auto HeatmapInterpolateUBOName = "HeatmapInterpolateUBO";
+constexpr auto HeatmapEvaluatedPropsUBOName = "HeatmapEvaluatedPropsUBO";
 constexpr auto VertexAttribName = "a_pos";
+
+// See PaintPropertyBinders<>::uniformValues<>
+template <typename TProp, typename TBinders, typename TEvaluated>
+typename TProp::Type uniformValue(const TBinders& binders, const TEvaluated& evaluated) {
+    const auto currentValue = evaluated.template get<TProp>();
+    return std::get<0>(binders.template get<TProp>()->uniformValue(currentValue));
+}
 
 } // namespace
 
@@ -368,9 +384,27 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
             /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
             /* .padding = */ {0}};
+        if (interpolationUniformBuffer) {
+            interpolationUniformBuffer->update(&interpolateUBO, sizeof(interpolateUBO));
+        } else {
+            interpolationUniformBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+        }
+
+        const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
+            /* .weight = */ uniformValue<style::HeatmapWeight>(paintPropertyBinders, evaluated),
+            /* .radius = */ uniformValue<style::HeatmapRadius>(paintPropertyBinders, evaluated),
+            /* .intensity = */ evaluated.get<HeatmapIntensity>(),
+            /* .padding = */ 0};
+        if (evaluatedPropsUniformBuffer) {
+            evaluatedPropsUniformBuffer->update(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
+        } else {
+            evaluatedPropsUniformBuffer = context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
+        }
 
         tileLayerGroup->observeDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            drawable.mutableUniformBuffers().createOrUpdate(HeatmapInterpolateUBOName, &interpolateUBO, context);
+            auto& uniforms = drawable.mutableUniformBuffers();
+            uniforms.createOrUpdate(HeatmapInterpolateUBOName, &interpolateUBO, context);
+            uniforms.addOrReplace(HeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
         });
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
@@ -412,7 +446,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : heatmapBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            drawable->mutableUniformBuffers().createOrUpdate(HeatmapInterpolateUBOName, &interpolateUBO, context);
+
+            auto& uniforms = drawable->mutableUniformBuffers();
+            uniforms.createOrUpdate(HeatmapInterpolateUBOName, &interpolateUBO, context);
+            uniforms.addOrReplace(HeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

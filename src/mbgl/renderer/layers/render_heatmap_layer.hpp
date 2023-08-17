@@ -74,6 +74,9 @@ private:
     gfx::ShaderProgramBasePtr heatmapTextureShader;
     RenderTargetPtr renderTarget;
 
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
+    gfx::UniformBufferPtr interpolationUniformBuffer;
+
     using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
     std::shared_ptr<TextureVertexVector> sharedTextureVertices;
 #endif
