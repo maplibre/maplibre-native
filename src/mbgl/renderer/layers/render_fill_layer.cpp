@@ -339,7 +339,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
+    const auto renderPass = RenderPass::Translucent;
 
     const auto finish = [&](gfx::DrawableBuilder& builder,
                             const OverscaledTileID& tileID,
