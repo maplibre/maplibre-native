@@ -40,11 +40,6 @@ public: // gfx::Texture2D
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
     void upload() noexcept override;
 
-    gfx::TextureResource& getResource() const override {
-        assert(textureResource);
-        return *textureResource;
-    }
-
     bool needsUpload() const noexcept override { return !!image; };
 
 public:

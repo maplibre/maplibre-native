@@ -954,6 +954,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/fill_layer_ubo.hpp",
     "include/mbgl/shaders/layer_ubo.hpp",
     "include/mbgl/shaders/line_layer_ubo.hpp",
+    "include/mbgl/shaders/raster_layer_ubo.hpp",
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/util/identity.hpp",
     "include/mbgl/util/suppress_copies.hpp"
@@ -1031,6 +1032,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/line.hpp",
     "include/mbgl/shaders/mtl/fill.hpp",
     "include/mbgl/shaders/mtl/line_gradient.hpp",
+    "include/mbgl/shaders/mtl/raster.hpp",
     "include/mbgl/shaders/mtl/shader_group.hpp",
     "include/mbgl/shaders/mtl/shader_program.hpp",
 ]

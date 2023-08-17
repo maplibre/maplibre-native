@@ -163,7 +163,7 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     resource.mtlView.contentScaleFactor = contentScaleFactor();
     resource.mtlView.contentMode = UIViewContentModeCenter;
-    resource.mtlView.colorPixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
+    resource.mtlView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     resource.mtlView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     resource.mtlView.opaque = mapView.opaque;
     resource.mtlView.layer.opaque = mapView.opaque;

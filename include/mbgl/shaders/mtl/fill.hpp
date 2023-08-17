@@ -26,6 +26,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(6, true, true, FillPermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
     };
+    static constexpr TextureInfo textures[] = {};
 
     static constexpr auto source = R"(
 
@@ -110,6 +111,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(6, true, true, FillOutlinePermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
     };
+    static constexpr TextureInfo textures[] = {};
 
     static constexpr auto source = R"(
 
@@ -206,6 +208,10 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(8, true, true, FillPatternPermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
     };
+    
+    static constexpr TextureInfo textures[] = {
+        {0, "u_image0"},
+    };
 
     static constexpr auto source = R"(
 
@@ -293,10 +299,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            texture2d<float> colorMap [[texture(0)]],
                             device const FillPatternDrawableUBO& drawable [[buffer(4)]],
                             device const FillPatternEvaluatedPropsUBO& props [[buffer(6)]],
-                            device const FillPatternPermutationUBO& permutation [[buffer(8)]]) {
+                            device const FillPatternPermutationUBO& permutation [[buffer(8)]],
+                            texture2d<float, access::sample> image0 [[texture(0)]],
+                            sampler image0_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {
         return half4(1.0);
     }
@@ -306,17 +313,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float2 pattern_tl_b = in.pattern_to.xy;
     float2 pattern_br_b = in.pattern_to.zw;
 
-    constexpr sampler colorSampler(mip_filter::linear,
-                                   mag_filter::linear,
-                                   min_filter::linear);
-
     float2 imagecoord = mod(in.v_pos_a, 1.0);
     float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
-    float4 color1 = colorMap.sample(colorSampler, pos);
+    float4 color1 = image0.sample(image0_sampler, pos);
         
     float2 imagecoord_b = mod(in.v_pos_b, 1.0);
     float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
-    float4 color2 = colorMap.sample(colorSampler, pos2);
+    float4 color2 = image0.sample(image0_sampler, pos2);
 
     return half4(mix(color1, color2, props.fade) * in.opacity);
 }
@@ -342,6 +345,10 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
         MLN_MTL_UNIFORM_BLOCK(7, true, false, FillOutlinePatternInterpolateUBO),
         MLN_MTL_UNIFORM_BLOCK(8, true, true, FillOutlinePatternPermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
+    };
+    
+    static constexpr TextureInfo textures[] = {
+        {0, "u_image0"},
     };
 
     static constexpr auto source = R"(
@@ -437,7 +444,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             texture2d<float> colorMap [[texture(0)]],
                             device const FillOutlinePatternDrawableUBO& drawable [[buffer(4)]],
                             device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(6)]],
-                            device const FillOutlinePatternPermutationUBO& permutation [[buffer(8)]]) {
+                            device const FillOutlinePatternPermutationUBO& permutation [[buffer(8)]],
+                            texture2d<float, access::sample> image0 [[texture(0)]],
+                            sampler image0_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {
         return half4(1.0);
     }
@@ -447,17 +456,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float2 pattern_tl_b = in.pattern_to.xy;
     float2 pattern_br_b = in.pattern_to.zw;
 
-    constexpr sampler colorSampler(mip_filter::linear,
-                                   mag_filter::linear,
-                                   min_filter::linear);
-
     float2 imagecoord = mod(in.v_pos_a, 1.0);
     float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
-    float4 color1 = colorMap.sample(colorSampler, pos);
+    float4 color1 = image0.sample(image0_sampler, pos);
         
     float2 imagecoord_b = mod(in.v_pos_b, 1.0);
     float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
-    float4 color2 = colorMap.sample(colorSampler, pos2);
+    float4 color2 = image0.sample(image0_sampler, pos2);
 
     // TODO: Should triangate the lines into triangles to support thick line and edge antialiased.
     //float dist = length(in.v_pos - in.position.xy);
