@@ -1,6 +1,16 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-load("//bazel:core.bzl",
+load(
+    "//bazel:core.bzl",
+    "MLN_CORE_HEADERS",
+    "MLN_CORE_SOURCE",
+    "MLN_DRAWABLES_SOURCE",
+    "MLN_DRAWABLES_HEADERS",
+    "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_STYLE_SOURCE",
+    "MLN_OPENGL_HEADERS",
+    "MLN_OPENGL_SOURCE",
+    "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
     "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
     "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
     "MLN_GENERATED_STYLE_SOURCE",
@@ -83,17 +93,15 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE
-        + PREFIXED["MLN_GENERATED_STYLE_SOURCE"]
-        + MLN_OPENGL_SOURCE
-        + select({
+    srcs = MLN_CORE_SOURCE +
+           MLN_GENERATED_STYLE_SOURCE +
+           MLN_OPENGL_SOURCE + select({
             ":drawable_renderer": MLN_DRAWABLES_SOURCE,
             ":split_renderer": MLN_DRAWABLES_SOURCE,
-            "//conditions:default": []
+            "//conditions:default": [],
         }),
-    hdrs = MLN_CORE_HEADERS
-        + MLN_OPENGL_HEADERS
-        + select({
+    hdrs = MLN_CORE_HEADERS +
+           MLN_OPENGL_HEADERS + select({
             ":drawable_renderer": MLN_DRAWABLES_HEADERS,
             ":split_renderer": MLN_DRAWABLES_HEADERS,
             "//conditions:default": []
