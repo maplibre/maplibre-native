@@ -1,13 +1,14 @@
 #include <mbgl/renderer/render_layer.hpp>
 
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/style/types.hpp>
+#include <mbgl/style/color_ramp_property_value.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layer_properties.hpp>
+#include <mbgl/style/types.hpp>
 #include <mbgl/tile/tile.hpp>
-#include <mbgl/gfx/context.hpp>
 #include <mbgl/util/logging.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -222,5 +223,22 @@ void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
     }
 }
 #endif
+
+bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue, PremultipliedImage& image) {
+    if (colorValue.isUndefined()) {
+        return false;
+    }
+
+    const auto length = image.bytes();
+
+    for (uint32_t i = 0; i < length; i += 4) {
+        const auto color = colorValue.evaluate(static_cast<double>(i) / length);
+        image.data[i + 0] = static_cast<uint8_t>(std::floor(color.r * 255.f));
+        image.data[i + 1] = static_cast<uint8_t>(std::floor(color.g * 255.f));
+        image.data[i + 2] = static_cast<uint8_t>(std::floor(color.b * 255.f));
+        image.data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
+    }
+    return true;
+}
 
 } // namespace mbgl

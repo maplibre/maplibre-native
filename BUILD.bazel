@@ -4,6 +4,8 @@ load(
     "//bazel:core.bzl",
     "MLN_CORE_HEADERS",
     "MLN_CORE_SOURCE",
+    "MLN_DRAWABLES_SOURCE",
+    "MLN_DRAWABLES_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
@@ -78,11 +80,33 @@ cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE +
            MLN_GENERATED_STYLE_SOURCE +
-           MLN_OPENGL_SOURCE,
+           MLN_OPENGL_SOURCE + select({
+            ":drawable_renderer": MLN_DRAWABLES_SOURCE,
+            ":split_renderer": MLN_DRAWABLES_SOURCE,
+            "//conditions:default": [],
+        }),
     hdrs = MLN_CORE_HEADERS +
-           MLN_OPENGL_HEADERS,
+           MLN_OPENGL_HEADERS + select({
+            ":drawable_renderer": MLN_DRAWABLES_HEADERS,
+            ":split_renderer": MLN_DRAWABLES_HEADERS,
+            "//conditions:default": []
+        }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
+        ":legacy_renderer": [
+            "MLN_LEGACY_RENDERER=1",
+            "MLN_DRAWABLE_RENDERER=0"
+        ],
+        ":drawable_renderer": [
+            "MLN_LEGACY_RENDERER=0",
+            "MLN_DRAWABLE_RENDERER=1"
+        ],
+        ":split_renderer": [
+            "MLN_LEGACY_RENDERER=1",
+            "MLN_DRAWABLE_RENDERER=1",
+            "MLN_RENDERER_SPLIT_VIEW=1"
+        ],
+    }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
         "//conditions:default": [],
     }),
@@ -156,6 +180,35 @@ config_setting(
     flag_values = {
         ":maplibre_platform": "windows",
     },
+)
+
+# Selects the rendering implementation to utilize in the core
+
+string_flag(
+    name = "renderer",
+    build_setting_default = "legacy",
+    values=["legacy", "drawable", "split"]
+)
+
+config_setting(
+    name = "legacy_renderer",
+    flag_values = {
+        ":renderer": "legacy"
+    }
+)
+
+config_setting(
+    name = "drawable_renderer",
+        flag_values = {
+        ":renderer": "drawable"
+    }
+)
+
+config_setting(
+    name = "split_renderer",
+    flag_values = {
+        ":renderer": "split"
+    }
 )
 
 exports_files(
