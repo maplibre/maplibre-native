@@ -220,8 +220,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
             for (std::size_t j = 0; j < ft.formattedText->length(); j++) {
                 uint8_t sectionIndex = ft.formattedText->getSectionIndex(j);
                 auto& section = ft.formattedText->getSections()[sectionIndex];
-                if (section.imageID)
-                    continue;
+                if (section.imageID) continue;
                 const auto& sectionFontStack = formatted.sections[sectionTable[sectionIndex]].fontStack;
                 GlyphIDs& dependencies =
                     layoutParameters.glyphDependencies.glyphs[sectionFontStack ? *sectionFontStack : baseFontStack];

@@ -601,10 +601,9 @@ Shaping getShaping(const TaggedString& formattedString,
             GlyphIDType sectionType = GlyphIDType::FontPBF;
             auto strLen = formattedString.getStyledText().first.length();
             const auto& sections = formattedString.getSections();
-            
+
             std::vector<SectionOptions> formattedSections = formattedString.getSections();
-            if (formattedSections.size() > 0)
-                sectionType = formattedSections[0].type;
+            if (formattedSections.size() > 0) sectionType = formattedSections[0].type;
 
             std::vector<StyledText> pendStrings;
 
@@ -681,7 +680,7 @@ Shaping getShaping(const TaggedString& formattedString,
 
                     subString.first.clear();
                     subString.second.clear();
-                    
+
                     sectionType = secType;
                 }
 
@@ -690,7 +689,7 @@ Shaping getShaping(const TaggedString& formattedString,
             }
 
             applySubString();
-            
+
             if (!pendStrings.empty()) {
                 StyledText combine;
                 for (auto& pendString : pendStrings) {
