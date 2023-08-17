@@ -52,6 +52,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+
       - uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Get latest CMake and Ninja
@@ -78,6 +83,11 @@ jobs:
           cmake --version
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:cpp"
 
       - name: Archive mbgl-test-runner
         uses: actions/upload-artifact@v3
