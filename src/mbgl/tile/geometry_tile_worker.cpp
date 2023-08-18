@@ -352,7 +352,7 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
     }
     for (auto& fontDependencies : glyphDependencies.shapes) {
         auto& fontStack = fontDependencies.first;
-        for (const auto &typeDependencies : fontDependencies.second) {
+        for (const auto& typeDependencies : fontDependencies.second) {
             auto& type = typeDependencies.first;
             auto& strs = typeDependencies.second;
             for (auto& str : strs) {
