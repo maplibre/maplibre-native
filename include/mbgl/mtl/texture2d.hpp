@@ -48,9 +48,9 @@ public:
 
 public:
     gfx::Texture2D& setUsage(MTL::TextureUsage usage_) noexcept;
-    
+
     MTL::Texture* getMetalTexture() const noexcept;
-    
+
     void updateSamplerConfiguration() noexcept;
 
     /// @brief Bind this texture to the specified location

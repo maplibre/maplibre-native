@@ -19,8 +19,10 @@ public:
         texture = context.createTexture2D();
         texture->setSize(size);
         texture->setFormat(gfx::TexturePixelType::RGBA, type);
-        texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        static_cast<Texture2D*>(texture.get())->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
+        texture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        static_cast<Texture2D*>(texture.get())
+            ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
     }
 
     ~OffscreenTextureResource() noexcept override = default;
@@ -30,14 +32,14 @@ public:
         commandBuffer = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
         texture->create();
     }
-    
+
     void swap() override {
         assert(commandBuffer);
         commandBuffer->commit();
         commandBuffer->waitUntilCompleted();
         commandBuffer.reset();
     }
-    
+
     PremultipliedImage readStillImage() {
         assert(false);
         return PremultipliedImage();
@@ -47,20 +49,16 @@ public:
         assert(texture);
         return texture;
     }
-    
-    const RendererBackend& getBackend() const override {
-        return context.getBackend();
-    }
-    
-    const MTLCommandBufferPtr& getCommandBuffer() const override {
-        return commandBuffer;
-    }
-    
+
+    const RendererBackend& getBackend() const override { return context.getBackend(); }
+
+    const MTLCommandBufferPtr& getCommandBuffer() const override { return commandBuffer; }
+
     MTLBlitPassDescriptorPtr getUploadPassDescriptor() const override {
         assert(false);
         return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init());
     }
-    
+
     MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
         auto renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
         if (auto* colorTarget = renderPassDescriptor->colorAttachments()->object(0)) {
@@ -93,5 +91,5 @@ const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
     return getResource<OffscreenTextureResource>().getTexture();
 }
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl

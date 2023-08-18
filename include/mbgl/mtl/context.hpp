@@ -33,7 +33,7 @@ public:
     Context& operator=(const Context& other) = delete;
 
     const RendererBackend& getBackend() const { return backend; }
-    
+
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
     gfx::RenderingStats& renderingStats() { return stats; }

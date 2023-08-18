@@ -24,16 +24,16 @@ RenderTarget::RenderTarget(Context& context_, const Size size, const gfx::Textur
     offscreenTexture = context.createOffscreenTexture(size, type);
 }
 
-RenderTarget::~RenderTarget() {
-}
+RenderTarget::~RenderTarget() {}
 
 void RenderTarget::upload(gfx::UploadPass& uploadPass) {
     visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
 
 void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
-    parameters.renderPass = parameters.encoder->createRenderPass("render target", {*offscreenTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
-    
+    parameters.renderPass = parameters.encoder->createRenderPass(
+        "render target", {*offscreenTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
+
     // Run layer tweakers to update any dynamic elements
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
         if (layerGroup.getLayerTweaker()) {
@@ -62,7 +62,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
             parameters.currentLayer--;
         }
     });
-    
+
     parameters.renderPass.reset();
     parameters.encoder->present(*offscreenTexture);
 }

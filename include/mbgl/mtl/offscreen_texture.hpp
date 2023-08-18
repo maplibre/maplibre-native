@@ -11,9 +11,7 @@ class Texture2D;
 
 class OffscreenTexture final : public gfx::OffscreenTexture {
 public:
-    OffscreenTexture(Context&,
-                     Size size,
-                     gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
+    OffscreenTexture(Context&, Size size, gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
 
     bool isRenderable() override;
 
@@ -21,5 +19,5 @@ public:
     const gfx::Texture2DPtr& getTexture() override;
 };
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl
