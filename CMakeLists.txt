@@ -1043,6 +1043,9 @@ include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 
 set(FT_DISABLE_BROTLI ON CACHE BOOL "freetype option")
 set(FT_REQUIRE_BROTLI OFF CACHE BOOL "freetype option")
+if (MLN_WITH_WERROR)
+    string(REPLACE " -Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endif()
 add_subdirectory(vendor/freetype)
 
 set_target_properties(
@@ -1067,10 +1070,10 @@ set_target_properties(
 
 set_property(TARGET harfbuzz PROPERTY FOLDER Core)
 set_property(TARGET freetype PROPERTY FOLDER Core)
+if (MLN_WITH_WERROR)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+endif()
 
-# set_target_properties(harfbuzz freetype PROPERTIES
-#     XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_BINARY_DIR}/\$(CONFIGURATION)\$(EFFECTIVE_PLATFORM_NAME)"
-# )
 
 target_link_libraries(
     mbgl-core

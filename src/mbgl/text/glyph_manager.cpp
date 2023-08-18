@@ -217,7 +217,7 @@ Immutable<Glyph> GlyphManager::getGlyph(const FontStack& fontStack, GlyphID glyp
             auto glyph = shaper->rasterizeGlyph(glyphID);
 
             glyph.bitmap = util::transformRasterToSDF(glyph.bitmap, 8, .25);
-            entry.glyphs.emplace(glyph.id, makeMutable<Glyph>(std::move(glyph)));
+            entry.glyphs.emplace(glyphID, makeMutable<Glyph>(std::move(glyph)));
             return entry.glyphs.at(glyphID);
         }
     }

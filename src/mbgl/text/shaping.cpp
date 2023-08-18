@@ -597,10 +597,8 @@ Shaping getShaping(const TaggedString& formattedString,
             }
         } else {
             StyledText subString;
-            auto sectionIndex = formattedString.getSectionIndex(0);
             GlyphIDType sectionType = GlyphIDType::FontPBF;
             auto strLen = formattedString.getStyledText().first.length();
-            const auto& sections = formattedString.getSections();
 
             std::vector<SectionOptions> formattedSections = formattedString.getSections();
             if (formattedSections.size() > 0) sectionType = formattedSections[0].type;

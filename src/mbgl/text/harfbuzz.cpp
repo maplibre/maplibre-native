@@ -75,9 +75,9 @@ void HBShaper::CreateComplexGlyphIDs(const std::string &text,
     for (uint32_t i = 0; i < glyphCount; ++i) {
         glyphIDs.emplace_back(glyphInfo[i].codepoint, type);
 
-        float x_advance = static_cast<float>(glyphPos[i].x_advance / 64);
-        float x_offset = static_cast<float>(glyphPos[i].x_offset / 64);
-        float y_offset = static_cast<float>(glyphPos[i].y_offset / 64);
+        float x_advance = static_cast<float>(glyphPos[i].x_advance / 64.0f);
+        float x_offset = static_cast<float>(glyphPos[i].x_offset / 64.0f);
+        float y_offset = static_cast<float>(glyphPos[i].y_offset / 64.0f);
 
         adjusts.emplace_back(x_offset, y_offset, x_advance);
     }
@@ -110,8 +110,8 @@ void HBShaper::CreateComplexGlyphIDs(const std::u16string &text,
     for (uint32_t i = 0; i < glyphCount; ++i) {
         glyphIDs.emplace_back(glyphInfo[i].codepoint, type);
 
-        float x_advance = static_cast<float>(glyphPos[i].x_advance / 64.0);
-        float x_offset = static_cast<float>(glyphPos[i].x_offset / 64.0);
+        float x_advance = static_cast<float>(glyphPos[i].x_advance / 64.0f);
+        float x_offset = static_cast<float>(glyphPos[i].x_offset / 64.0f);
         float y_offset = static_cast<float>(-glyphPos[i].y_offset / 64.0f);
 
         adjusts.emplace_back(x_offset, y_offset, x_advance);

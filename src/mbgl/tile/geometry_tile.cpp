@@ -271,9 +271,7 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphMap, HBShapeRequests requests
                 std::u16string shapedstr;
 
                 shapedstr.reserve(shapedGlyphIDs.size());
-                for (size_t iGlyphIndex = 0; iGlyphIndex < shapedGlyphIDs.size(); ++iGlyphIndex) {
-                    auto& glyphID = shapedGlyphIDs[iGlyphIndex];
-
+                for (auto &glyphID : shapedGlyphIDs) {
                     shapedstr += glyphID.complex.code;
 
                     auto fontStackHash = FontStackHasher()(fontStack);

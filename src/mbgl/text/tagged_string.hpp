@@ -35,8 +35,8 @@ struct SectionOptions {
 
     explicit SectionOptions(std::string imageID_)
         : scale(1.0),
-          imageID(std::move(imageID_)),
-          type(GlyphIDType::FontPBF) {}
+          type(GlyphIDType::FontPBF),
+          imageID(std::move(imageID_)) {}
 
     double scale;
     FontStack fontStack;
