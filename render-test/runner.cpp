@@ -815,9 +815,9 @@ void TestRunner::run(TestMetadata& metadata) {
                         return a.isIcon == isIcon && a.location.min == box.min && a.location.max == box.max;
                     });
 
-// TODO: remove usage of std::codecvt_utf8
-// https://github.com/maplibre/maplibre-native/issues/1269
-// NOLINTNEXTLINE
+                    // TODO: remove usage of std::codecvt_utf8
+                    // https://github.com/maplibre/maplibre-native/issues/1269
+                    // NOLINTNEXTLINE
                     static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cv;
 
                     if (it == symbols.end()) {
