@@ -44,7 +44,3 @@ node_modules
 /bazel-*
 CMakeLists.txt.user
 CMakeFiles
-
-diff.png
-actual.png
-actual.json
