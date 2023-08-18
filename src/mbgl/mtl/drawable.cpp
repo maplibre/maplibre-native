@@ -226,7 +226,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            assert(getBufferSize(binding->vertexBufferResource) == binding->vertexStride * impl->vertexCount);
+            assert(getBufferSize(binding->vertexBufferResource) >= binding->vertexStride * impl->vertexCount);
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);

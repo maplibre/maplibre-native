@@ -46,9 +46,8 @@ struct alignas(16) HeatmapTextureDrawableUBO {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const HeatmapTextureDrawableUBO& drawable [[buffer(1)]]) {
 
-    const float4 position = drawable.matrix * float4(float2(vertx.pos) * drawable.world, 0, 1);
-
-    const float2 pos = float2(vertx.pos.x, 1.0 - vertx.pos.y);
+    const float2 pos = float2(vertx.pos);
+    const float4 position = drawable.matrix * float4(pos * drawable.world, 0, 1);
 
     return {
         .position    = position,
