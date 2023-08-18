@@ -32,7 +32,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         const auto& size = parameters.staticData.backendSize;
         mat4 viewportMat;
-        matrix::ortho(viewportMat, 0, size.width, size.height, 0, 0, 1);
+        matrix::ortho(viewportMat, 0, size.width, size.height, 0, 1, 0);
         const HeatmapTextureDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(viewportMat),
             /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},

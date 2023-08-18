@@ -6,6 +6,7 @@
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLPixelFormat.hpp>
+#include <Metal/MTLTexture.hpp>
 
 #include <memory>
 
@@ -46,6 +47,10 @@ public:
     bool needsUpload() const noexcept override { return !!image; };
 
 public:
+    gfx::Texture2D& setUsage(MTL::TextureUsage usage_) noexcept;
+    
+    MTL::Texture* getMetalTexture() const noexcept;
+    
     void updateSamplerConfiguration() noexcept;
 
     /// @brief Bind this texture to the specified location
@@ -70,6 +75,7 @@ private:
     Size size{0, 0};
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
     gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
+    MTL::TextureUsage usage{MTL::TextureUsageShaderRead};
     SamplerState samplerState{};
 
     std::shared_ptr<PremultipliedImage> image{nullptr};
