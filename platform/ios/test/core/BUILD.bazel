@@ -1,6 +1,7 @@
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_unit_test")
 load("//platform/ios/bazel:config.bzl", "BUNDLE_ID_PREFIX")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
 
 cc_library(
     name = "test_cpp_srcs",
@@ -16,6 +17,16 @@ cc_library(
     ],
 )
 
+apple_resource_bundle(
+    name = "TestData",
+    infoplists = [
+        "//render-test/ios:Empty.plist",
+    ],
+    structured_resources = [
+        "//test:fixtures",
+    ],
+)
+
 objc_library(
     name = "test_objc_srcs",
     srcs = [
@@ -24,6 +35,7 @@ objc_library(
         "iosTestRunner.mm",
     ],
     deps = [
+        "TestData",
         "test_cpp_srcs",
         "//platform/ios/test/common:ios_test_runner_lib",
     ],

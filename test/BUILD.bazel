@@ -13,21 +13,26 @@ cc_library(
 
 cc_library(
     name = "testlib",
-    srcs = glob(
-        [
-            "src/mbgl/test/*.cpp",
-        ],
-        allow_empty = False,
-        exclude = [
-            "src/mbgl/test/http_server.cpp",
-        ],
-    ) + [
+    srcs = select({
+        "//:ios": glob(
+            ["src/mbgl/test/*.cpp"],
+            allow_empty = False,
+        ),
+        "//conditions:default": glob(
+            ["src/mbgl/test/*.cpp"],
+            allow_empty = False,
+            exclude = ["src/mbgl/test/http_server.cpp"],
+        ),
+    }) + [
         "include/mbgl/test.hpp",
     ],
     hdrs = glob([
         "src/mbgl/test/*.hpp",
     ]),
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + select({
+        "//:ios": ["-DUSE_CPP_TEST_SERVER"],
+        "//conditions:default": [],
+    }),
     includes = [
         "include",
     ],
@@ -38,7 +43,10 @@ cc_library(
     deps = [
         "testutils",
         "//:mbgl-core",
-    ],
+    ] + select({
+        "//:ios": ["//vendor:httplib"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -58,6 +66,18 @@ cc_library(
         "//:mbgl-core",
         "//platform/default:mbgl-default",
         "//vendor/googletest:gtest_main",
+    ],
+    alwayslink = True,
+)
+
+filegroup(
+    name = "fixtures",
+    srcs = glob(
+        ["fixtures/**/*"],
+        allow_empty = False,
+    ),
+    visibility = [
+        "//platform/ios/test/core:__pkg__",
     ],
 )
 

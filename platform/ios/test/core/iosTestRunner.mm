@@ -22,54 +22,32 @@
     if (self) {
         self.testStatus = NO;
         self.runner = new TestRunner();
+        BOOL success;
+
         NSError *error;
         NSFileManager *fileManager = [NSFileManager defaultManager];
-        NSString *bundleRoot = [[NSBundle mainBundle] bundlePath];
 
-        NSArray *bundleContents = [fileManager contentsOfDirectoryAtPath: bundleRoot error: &error];
+        NSString *xcTestBundleRoot = [[NSBundle bundleForClass:[self class]] resourcePath];
+        NSString *testDataDir = [xcTestBundleRoot stringByAppendingString:@"/TestData.bundle"];
+
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsDir = [paths objectAtIndex: 0];
 
-        NSString *dataDir = @"test-data";
-        NSString *baseDir = [documentsDir stringByAppendingPathComponent: dataDir];
+        NSString *destinationPath = [documentsDir stringByAppendingPathComponent: @"test"];
 
-        BOOL isDir;
-        if(![fileManager fileExistsAtPath:baseDir isDirectory:&isDir])
-        if(![fileManager createDirectoryAtPath:baseDir withIntermediateDirectories:YES attributes:nil error:NULL]) {
-            NSAssert1(0, @"Error: Create directory failed %@", baseDir);
+        success = [fileManager copyItemAtPath: testDataDir toPath: destinationPath error: &error];
+        if (!success){
+            NSAssert1(0, @"Failed to copy file '%@'.", [error localizedDescription]);
+            NSLog(@"Failed to copy %@ file, error %@", testDataDir, [error localizedDescription]);
+        }
+        else {
+            NSLog(@"File copied %@ OK", testDataDir);
         }
 
-        for (uint32_t i = 0; i < bundleContents.count; i++) {
-            NSString *dirName = [bundleContents objectAtIndex: i];
-            if ([dirName isEqualToString: dataDir]) {
-                NSString *destinationPath = [documentsDir stringByAppendingPathComponent: dirName];
-                BOOL success = [fileManager fileExistsAtPath: destinationPath];
-                if (success) {
-                    [fileManager removeItemAtPath:destinationPath error:NULL];
-                }
-
-                success = [fileManager fileExistsAtPath: destinationPath];
-                if (!success) {
-                    NSString *copyDirPath  = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: dirName];
-                    success = [fileManager copyItemAtPath: copyDirPath toPath: destinationPath error: &error];
-              
-                    if (!success) {
-                        NSLog(@"Failed to copy file '%@'", dirName);
-                        NSAssert1(0, @"Failed to copy file, error '%@'", [error localizedDescription]);
-                    } else {
-                        NSLog(@"File '%@' copied OK", dirName);
-                    }
-                } else {
-                    NSLog(@"Failed to remove file '%@'", dirName);
-                    NSAssert1(0, @"Failed to remove file, error '%@'", [error localizedDescription]);
-                }
-                break;
-            }
-        }
         NSLog(@"Starting test");
-        std::string basePath = std::string([baseDir UTF8String]);
+        std::string basePath = std::string([documentsDir UTF8String]);
         self.testStatus = self.runner->startTest(basePath) ? YES : NO;
-        self.resultPath = [baseDir stringByAppendingPathComponent: @"test/results.xml"];
+        self.resultPath = [destinationPath stringByAppendingPathComponent: @"results.xml"];
 
         BOOL fileFound = [fileManager fileExistsAtPath: self.resultPath];
         if (fileFound == NO) {
