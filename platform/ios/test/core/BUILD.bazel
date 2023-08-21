@@ -24,6 +24,7 @@ apple_resource_bundle(
     ],
     structured_resources = [
         "//test:fixtures",
+        "//:scripts/style-spec-reference/v8.json",
     ],
 )
 
@@ -50,18 +51,17 @@ ios_application(
     ],
     minimum_os_version = "12.0",
     provisioning_profile = "//platform/ios:xcode_profile",
-    visibility = [
-        "//visibility:public",
-    ],
     deps = [
         "//platform/ios/test/common:test_app_srcs",
     ],
 )
 
 ios_unit_test(
-    name = "cpp_unit_tests",
+    name = "CppUnitTests",
     minimum_os_version = "12.0",
+    provisioning_profile = "//platform/ios:xcode_profile",
     test_host = "CppUnitTestsApp",
+    visibility = ["@rules_xcodeproj//xcodeproj:generated"],
     deps = [
         "test_objc_srcs",
     ],

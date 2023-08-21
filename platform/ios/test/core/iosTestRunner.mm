@@ -22,7 +22,6 @@
     if (self) {
         self.testStatus = NO;
         self.runner = new TestRunner();
-        BOOL success;
 
         NSError *error;
         NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -34,15 +33,9 @@
         NSString *documentsDir = [paths objectAtIndex: 0];
 
         NSString *destinationPath = [documentsDir stringByAppendingPathComponent: @"test"];
-
-        success = [fileManager copyItemAtPath: testDataDir toPath: destinationPath error: &error];
-        if (!success){
-            NSAssert1(0, @"Failed to copy file '%@'.", [error localizedDescription]);
-            NSLog(@"Failed to copy %@ file, error %@", testDataDir, [error localizedDescription]);
-        }
-        else {
-            NSLog(@"File copied %@ OK", testDataDir);
-        }
+        
+        [self copyFileAtPath:testDataDir toPath:destinationPath];
+        [self copyFileAtPath:[testDataDir stringByAppendingPathComponent: @"scripts"] toPath:[documentsDir stringByAppendingPathComponent: @"scripts"]];
 
         NSLog(@"Starting test");
         std::string basePath = std::string([documentsDir UTF8String]);
@@ -59,6 +52,34 @@
         self.runner = nullptr;
     }
     return self;
+}
+
+/**
+ Copies a file from the source path to the destination path.
+ 
+ @param sourcePath The path of the source file to be copied.
+ @param destinationPath The destination path where the file should be copied.
+ */
+- (void)copyFileAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+    BOOL success;
+
+    // delete destinationPath if it exists
+    if ([fileManager fileExistsAtPath:destinationPath]) {
+        success = [fileManager removeItemAtPath: destinationPath error: &error];
+        if (!success) {
+            NSAssert1(0, @"Failed to delete '%@'.", destinationPath);
+        }
+    }
+    
+    success = [fileManager copyItemAtPath:sourcePath toPath:destinationPath error:&error];
+    if (!success) {
+        NSAssert1(0, @"Failed to copy file '%@'.", [error localizedDescription]);
+        NSLog(@"Failed to copy %@ file, error %@", sourcePath, [error localizedDescription]);
+    } else {
+        NSLog(@"File copied %@ OK", sourcePath);
+    }
 }
 
 - (NSString*) getResultPath {

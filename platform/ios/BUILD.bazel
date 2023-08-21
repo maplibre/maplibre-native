@@ -248,7 +248,7 @@ xcodeproj(
             ],
         ),
         top_level_target(
-            "//platform/ios/test/core:CppUnitTestsApp",
+            "//platform/ios/test/core:CppUnitTests",
             target_environments = [
                 "simulator",
                 "device",
