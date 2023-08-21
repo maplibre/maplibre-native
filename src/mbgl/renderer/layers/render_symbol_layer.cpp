@@ -29,6 +29,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/shaders/symbol_layer_ubo.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <cmath>

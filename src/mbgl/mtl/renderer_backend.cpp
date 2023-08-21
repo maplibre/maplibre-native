@@ -19,6 +19,10 @@
 #include <mbgl/shaders/mtl/line.hpp>
 #include <mbgl/shaders/mtl/line_gradient.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
+#include <mbgl/shaders/mtl/symbol_icon.hpp>
+#include <mbgl/shaders/mtl/symbol_sdf_icon.hpp>
+#include <mbgl/shaders/mtl/symbol_sdf_text.hpp>
+#include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
 
 #include <cassert>
 #include <string>
@@ -117,7 +121,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
-                  shaders::BuiltIn::RasterShader/*,
+                  shaders::BuiltIn::RasterShader,/*
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
                   shaders::BuiltIn::LineSDFShader,
@@ -127,11 +131,11 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::HillshadePrepareShader,
-                  shaders::BuiltIn::HillshadeShader,
+                  shaders::BuiltIn::HillshadeShader,*/
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFTextShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
-                  shaders::BuiltIn::SymbolTextAndIconShader*/>(shaders, programParameters);
+                  shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
 }
 
 } // namespace mtl
