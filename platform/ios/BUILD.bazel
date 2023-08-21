@@ -213,7 +213,7 @@ genrule(
 xcodeproj(
     name = "xcodeproj",
     bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
-    build_mode = "xcode",
+    build_mode = "bazel",
     default_xcode_configuration = "Debug",
     minimum_xcode_version = "14",
     project_name = "MapLibre",

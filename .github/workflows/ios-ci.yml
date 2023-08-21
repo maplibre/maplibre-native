@@ -159,7 +159,7 @@ jobs:
           set -e
           bazel run //platform/ios:xcodeproj
           build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir" | xcpretty
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
           cd "$render_test_app_dir"
           mkdir Payload
@@ -185,7 +185,7 @@ jobs:
           set -e
           bazel run //platform/ios:xcodeproj
           build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir" | xcpretty
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
           cd "$ios_cpp_test_app_dir"
           mkdir Payload
