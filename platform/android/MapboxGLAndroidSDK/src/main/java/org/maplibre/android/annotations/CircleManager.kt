@@ -20,23 +20,43 @@ import org.maplibre.android.style.sources.GeoJsonOptions
  * @param aboveLayerId   the id of the layer below the circle layer
  * @param geoJsonOptions options for the internal source
  */
-class CircleManager @UiThread @JvmOverloads constructor(
+class CircleManager @UiThread internal constructor(
     mapView: MapView,
     maplibreMap: MapLibreMap,
     style: Style,
+    coreElementProvider: CoreElementProvider<CircleLayer> = CircleElementProvider(),
     belowLayerId: String? = null,
     aboveLayerId: String? = null,
-    geoJsonOptions: GeoJsonOptions? = null
+    geoJsonOptions: GeoJsonOptions? = null,
+    draggableAnnotationController: DraggableAnnotationController =
+        DraggableAnnotationController.getInstance(mapView, maplibreMap)
 ) : AnnotationManager<CircleLayer, Circle, CircleOptions, OnCircleDragListener, OnCircleClickListener, OnCircleLongClickListener>(
     mapView,
     maplibreMap,
     style,
-    CircleElementProvider(),
-    DraggableAnnotationController.getInstance(mapView, maplibreMap),
+    coreElementProvider,
+    draggableAnnotationController,
     belowLayerId,
     aboveLayerId,
     geoJsonOptions
 ) {
+    @JvmOverloads @UiThread constructor(
+        mapView: MapView,
+        maplibreMap: MapLibreMap,
+        style: Style,
+        belowLayerId: String? = null,
+        aboveLayerId: String? = null,
+        geoJsonOptions: GeoJsonOptions? = null
+    ) : this(
+        mapView = mapView,
+        maplibreMap = maplibreMap,
+        style = style,
+        coreElementProvider = CircleElementProvider(),
+        belowLayerId = belowLayerId,
+        aboveLayerId = aboveLayerId,
+        geoJsonOptions = geoJsonOptions
+    )
+
     override fun initializeDataDrivenPropertyMap() =
         listOf(
             CircleOptions.PROPERTY_CIRCLE_RADIUS,

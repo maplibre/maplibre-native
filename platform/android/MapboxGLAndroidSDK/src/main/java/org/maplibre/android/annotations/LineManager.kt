@@ -20,23 +20,44 @@ import org.maplibre.android.style.sources.GeoJsonOptions
  * @param aboveLayerId   the id of the layer below the line layer
  * @param geoJsonOptions options for the internal source
  */
-class LineManager @UiThread @JvmOverloads constructor(
+class LineManager @UiThread internal constructor(
     mapView: MapView,
     maplibreMap: MapLibreMap,
     style: Style,
+    coreElementProvider: CoreElementProvider<LineLayer> = LineElementProvider(),
     belowLayerId: String? = null,
     aboveLayerId: String? = null,
-    geoJsonOptions: GeoJsonOptions? = null
+    geoJsonOptions: GeoJsonOptions? = null,
+    draggableAnnotationController: DraggableAnnotationController =
+        DraggableAnnotationController.getInstance(mapView, maplibreMap)
 ) : AnnotationManager<LineLayer, Line, LineOptions, OnLineDragListener, OnLineClickListener, OnLineLongClickListener>(
     mapView,
     maplibreMap,
     style,
-    LineElementProvider(),
-    DraggableAnnotationController.getInstance(mapView, maplibreMap),
+    coreElementProvider,
+    draggableAnnotationController,
     belowLayerId,
     aboveLayerId,
     geoJsonOptions
 ) {
+
+    constructor(
+        mapView: MapView,
+        maplibreMap: MapLibreMap,
+        style: Style,
+        belowLayerId: String? = null,
+        aboveLayerId: String? = null,
+        geoJsonOptions: GeoJsonOptions? = null
+    ) : this(
+        mapView,
+        maplibreMap,
+        style,
+        LineElementProvider(),
+        belowLayerId,
+        aboveLayerId,
+        geoJsonOptions
+    )
+
     override fun initializeDataDrivenPropertyMap() =
         listOf(
             LineOptions.PROPERTY_LINE_JOIN,

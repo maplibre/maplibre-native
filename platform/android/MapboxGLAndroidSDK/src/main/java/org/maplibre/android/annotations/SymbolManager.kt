@@ -21,26 +21,54 @@ import org.maplibre.android.style.sources.GeoJsonOptions
  * @param aboveLayerId   the id of the layer below the symbol layer
  * @param geoJsonOptions options for the internal source
  */
-class SymbolManager
-@UiThread
-@JvmOverloads
-constructor(
+class SymbolManager @UiThread internal constructor(
     mapView: MapView,
     maplibreMap: MapLibreMap,
     style: Style,
+    coreElementProvider: CoreElementProvider<SymbolLayer> = SymbolElementProvider(),
     belowLayerId: String? = null,
     aboveLayerId: String? = null,
-    geoJsonOptions: GeoJsonOptions? = null
+    geoJsonOptions: GeoJsonOptions? = null,
+    draggableAnnotationController: DraggableAnnotationController =
+        DraggableAnnotationController.getInstance(mapView, maplibreMap)
 ) : AnnotationManager<SymbolLayer, Symbol, SymbolOptions, OnSymbolDragListener, OnSymbolClickListener, OnSymbolLongClickListener>(
     mapView,
     maplibreMap,
     style,
-    SymbolElementProvider(),
-    DraggableAnnotationController.getInstance(mapView, maplibreMap),
+    coreElementProvider,
+    draggableAnnotationController,
     belowLayerId,
     aboveLayerId,
     geoJsonOptions
 ) {
+
+    /**
+     * Create a symbol manager, used to manage symbols.
+     *
+     * @param maplibreMap      the map object to add symbols to
+     * @param style          a valid a fully loaded style object
+     * @param belowLayerId   the id of the layer above the symbol layer
+     * @param aboveLayerId   the id of the layer below the symbol layer
+     * @param clusterOptions options for the clustering configuration
+     */
+    @UiThread
+    @JvmOverloads
+    constructor(
+        mapView: MapView,
+        maplibreMap: MapLibreMap,
+        style: Style,
+        belowLayerId: String? = null,
+        aboveLayerId: String? = null,
+        geoJsonOptions: GeoJsonOptions? = null
+    ) : this(
+        mapView,
+        maplibreMap,
+        style,
+        SymbolElementProvider(),
+        belowLayerId,
+        aboveLayerId,
+        geoJsonOptions
+    )
 
     /**
      * Create a symbol manager, used to manage symbols.
@@ -362,7 +390,7 @@ constructor(
      * @return the list of built symbols
      */
     @UiThread
-    fun create(featureCollection: FeatureCollection): List<Symbol?> =
+    fun create(featureCollection: FeatureCollection): List<Symbol> =
         featureCollection.features()?.mapNotNull { SymbolOptions.fromFeature(it) }
             .let { create(it ?: emptyList()) }
 

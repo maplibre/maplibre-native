@@ -46,7 +46,7 @@ abstract class AnnotationManager<L : Layer, T : AbstractAnnotation<*>, S : Optio
      */
     @get:UiThread
     val annotations = LongSparseArray<T>()
-    val dataDrivenPropertyUsageMap: MutableMap<String, Boolean> = HashMap()
+    internal val dataDrivenPropertyUsageMap: MutableMap<String, Boolean> = HashMap()
     val constantPropertyUsageMap: MutableMap<String, PropertyValue<*>> = HashMap()
     var layerFilter: Expression? = null
     private val dragListeners: MutableList<D> = ArrayList()
