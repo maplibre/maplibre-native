@@ -443,7 +443,7 @@ objc_library(
 
 objc_library(
     name = "benchapp",
-    defines = ["GLES_SILENCE_DEPRECATION"],
+    copts = MAPLIBRE_FLAGS,
     srcs = [
         "platform/ios/benchmark/main.m",
         "platform/ios/benchmark/MBXBenchAppDelegate.m",
@@ -517,12 +517,12 @@ ios_application(
     ],
 )
 
-_IOS_BENCHMARK_RESOURCES = [
-    "platform/ios/benchmark/assets/tiles/**",
-    "platform/ios/benchmark/assets/styles/**",
-    "platform/ios/benchmark/assets/sprites/**",
-    "platform/ios/benchmark/assets/glyphs/**",
-] + glob([
+_IOS_BENCHMARK_RESOURCES = glob([
+    "platform/ios/benchmark/assets/download.sh",
+    "platform/ios/benchmark/assets/tiles",
+    "platform/ios/benchmark/assets/styles",
+    "platform/ios/benchmark/assets/sprites",
+    "platform/ios/benchmark/assets/glyphs",
     "platform/ios/benchmark/*.lproj/**",
 ])
 
