@@ -441,6 +441,28 @@ objc_library(
     ],
 )
 
+objc_library(
+    name = "benchapp",
+    defines = ["GLES_SILENCE_DEPRECATION"],
+    srcs = [
+        "platform/ios/benchmark/main.m",
+        "platform/ios/benchmark/MBXBenchAppDelegate.m",
+        "platform/ios/benchmark/MBXBenchViewController.mm",
+        "platform/ios/benchmark/locations.cpp",
+    ],
+    hdrs = [
+        "platform/ios/benchmark/MBXBenchAppDelegate.h",
+        "platform/ios/benchmark/MBXBenchViewController.h",
+        "platform/ios/benchmark/locations.hpp",
+    ],
+    data = glob([
+        "platform/ios/benchmark/Assets.xcassets/**",
+    ]),
+    deps = [
+        "sdk-headers",
+    ],
+)
+
 _IOS_APPLICATION_RESOURCES = [
     "platform/ios/app/numeric_filter_style.json",
     "platform/ios/app/missing_icon.json",
@@ -495,6 +517,33 @@ ios_application(
     ],
 )
 
+_IOS_BENCHMARK_RESOURCES = [
+    "platform/ios/benchmark/assets/tiles/**",
+    "platform/ios/benchmark/assets/styles/**",
+    "platform/ios/benchmark/assets/sprites/**",
+    "platform/ios/benchmark/assets/glyphs/**",
+] + glob([
+    "platform/ios/benchmark/*.lproj/**",
+])
+
+ios_application(
+    name = "BenchmarkApp",
+    bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    infoplists = ["build/Info-app.plist"],
+    minimum_os_version = "12.0",
+    provisioning_profile = "xcode_profile",
+    resources = _IOS_BENCHMARK_RESOURCES,
+    visibility = ["//visibility:public"],
+    deps = [
+        "benchapp",
+        "sdk-dynamic",
+    ],
+)
+
 # Outputs a file with the size of MapLibre as a dynamic library in bytes
 genrule(
     name = "size",
@@ -545,6 +594,13 @@ xcodeproj(
         ),
         top_level_target(
             "//render-test/ios:RenderTest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "BenchmarkApp",
             target_environments = [
                 "simulator",
                 "device",
