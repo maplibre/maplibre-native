@@ -47,10 +47,6 @@ private:
     };
 
     RenderState renderState = RenderState::Never;
-
-#if MLN_DRAWABLE_RENDERER
-    RenderItem::DebugLayerGroupMap debugLayerGroups;
-#endif
 };
 
 } // namespace mbgl
