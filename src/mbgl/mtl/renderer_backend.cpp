@@ -20,8 +20,7 @@
 #include <mbgl/shaders/mtl/line_gradient.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol_icon.hpp>
-#include <mbgl/shaders/mtl/symbol_sdf_icon.hpp>
-#include <mbgl/shaders/mtl/symbol_sdf_text.hpp>
+#include <mbgl/shaders/mtl/symbol_sdf.hpp>
 #include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
 
 #include <cassert>
@@ -133,7 +132,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::HillshadePrepareShader,
                   shaders::BuiltIn::HillshadeShader,*/
                   shaders::BuiltIn::SymbolIconShader,
-                  shaders::BuiltIn::SymbolSDFTextShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
 }

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <mbgl/shaders/layer_ubo.hpp>
+
 namespace mbgl {
+namespace shaders {
 
 /// Evaluated properties that depend on the tile
 struct alignas(16) SymbolDrawableTilePropsUBO {
@@ -32,13 +35,13 @@ struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
     /* 128 */ std::array<float, 4 * 4> coord_matrix;
-
+    
     /* 192 */ std::array<float, 2> texsize;
     /* 200 */ std::array<float, 2> texsize_icon;
-
+    
     /* 208 */ float gamma_scale;
     /* 212 */ float device_pixel_ratio;
-
+    
     /* 216 */ float camera_to_center_distance;
     /* 220 */ float pitch;
     /* 224 */ /*bool*/ int rotate_symbol;
@@ -61,4 +64,18 @@ struct alignas(16) SymbolDrawablePaintUBO {
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
+struct alignas(16) SymbolPermutationUBO {
+    /*  0 */ Attribute fill_color;
+    /*  8 */ Attribute halo_color;
+    /* 16 */ Attribute opacity;
+    /* 24 */ Attribute halo_width;
+    /* 40 */ Attribute halo_blur;
+    /* 48 */ Attribute padding;
+    /* 56 */ int32_t /*bool*/ overdrawInspector;
+    /* 60 */ float pad;
+    /* 64 */
+};
+static_assert(sizeof(SymbolPermutationUBO) == 4 * 16);
+
+} // namespace shaders
 } // namespace mbgl

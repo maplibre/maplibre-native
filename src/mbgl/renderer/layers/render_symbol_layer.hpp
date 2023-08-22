@@ -123,8 +123,7 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr symbolIconGroup;
-    gfx::ShaderGroupPtr symbolSDFIconGroup;
-    gfx::ShaderGroupPtr symbolSDFTextGroup;
+    gfx::ShaderGroupPtr symbolSDFGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
 #endif // MLN_DRAWABLE_RENDERER
 };
