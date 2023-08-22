@@ -390,10 +390,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         heatmapBuilder = context.createDrawableBuilder("heatmap");
         heatmapBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(heatmapShader));
-        heatmapBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                        : gfx::DepthMaskType::ReadOnly);
+        heatmapBuilder->setEnableDepth(false);
         heatmapBuilder->setColorMode(gfx::ColorMode::additive());
         heatmapBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+        heatmapBuilder->setEnableStencil(false);
         heatmapBuilder->setRenderPass(renderPass);
         heatmapBuilder->setVertexAttributes(std::move(heatmapVertexAttrs));
         heatmapBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
@@ -450,10 +450,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
     heatmapTextureBuilder->setShader(heatmapTextureShader);
-    heatmapTextureBuilder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                           : gfx::DepthMaskType::ReadOnly);
+    heatmapTextureBuilder->setEnableDepth(false);
     heatmapTextureBuilder->setColorMode(gfx::ColorMode::alphaBlended());
     heatmapTextureBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
+    heatmapTextureBuilder->setEnableStencil(false);
     heatmapTextureBuilder->setRenderPass(renderPass);
     heatmapTextureBuilder->setVertexAttributes(std::move(textureVertexAttrs));
     heatmapTextureBuilder->setRawVertices({}, textureVertexCount, gfx::AttributeDataType::Short2);

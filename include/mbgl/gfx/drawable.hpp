@@ -136,7 +136,11 @@ public:
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
-    /// Get sub-layer index. Determines depth range within the layer for 2D drawables
+    /// Whether to enable depth testing
+    bool getEnableDepth() { return enableDepth; }
+    void setEnableDepth(bool value) { enableDepth = value; }
+
+    /// Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
 
     /// Set sub-layer index
@@ -227,6 +231,7 @@ protected:
     bool enabled = true;
     bool enableColor = true;
     bool enableStencil = false;
+    bool enableDepth = true;
     bool is3D = false;
     bool isCustom = false;
     std::string name;

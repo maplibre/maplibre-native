@@ -65,13 +65,13 @@ public:
 #if MLN_DRAWABLE_RENDERER
     bool hasGlyphAtlasTexture() const;
     const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
-    gfx::TextureBinding getGlyphAtlasTextureBinding(gfx::TextureFilterType) const;
 
     bool hasIconAtlasTexture() const;
     const gfx::Texture2DPtr& getIconAtlasTexture() const;
-    gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
 
     const std::shared_ptr<TileAtlasTextures>& getAtlasTextures() const;
+
+    bool getNeedsRendering() const { return needsRendering; };
 #else
     gfx::TextureBinding getGlyphAtlasTextureBinding(gfx::TextureFilterType) const;
     gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;

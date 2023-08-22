@@ -45,8 +45,8 @@ static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) SymbolDrawablePaintUBO {
-    /*  0 */ std::array<float, 4> fill_color;
-    /* 16 */ std::array<float, 4> halo_color;
+    /*  0 */ Color fill_color;
+    /* 16 */ Color halo_color;
     /* 32 */ float opacity;
     /* 36 */ float halo_width;
     /* 40 */ float halo_blur;
@@ -80,11 +80,11 @@ auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evalua
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
-        /*.fill_color=*/gfx::VertexAttribute::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated)
-                                                                   : constOrDefault<IconColor>(evaluated)),
+        /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated)
+                               : constOrDefault<IconColor>(evaluated),
         /*.halo_color=*/
-        gfx::VertexAttribute::colorAttrRGBA(isText ? constOrDefault<TextHaloColor>(evaluated)
-                                                   : constOrDefault<IconHaloColor>(evaluated)),
+        isText ? constOrDefault<TextHaloColor>(evaluated)
+               : constOrDefault<IconHaloColor>(evaluated),
         /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
         /*.halo_width=*/
         isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),

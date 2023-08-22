@@ -25,6 +25,9 @@ private:
     bool hasRenderPass(RenderPass) const override { return false; }
     const std::string& getName() const override { return name; }
     std::string name;
+#if MLN_DRAWABLE_RENDERER
+    void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override{};
+#endif
     mutable std::optional<gfx::Texture> debugTexture;
 };
 

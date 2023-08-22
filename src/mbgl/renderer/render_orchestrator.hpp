@@ -100,7 +100,7 @@ public:
 #if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
-    size_t numLayerGroups() const noexcept;
+    int32_t maxLayerIndex() const;
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
     void visitLayerGroups(std::function<void(LayerGroupBase&)>);
     void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
@@ -195,7 +195,7 @@ private:
 #if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
-    using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
+    using LayerGroupMap = std::multimap<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
 

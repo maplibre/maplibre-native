@@ -952,10 +952,10 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     if (bucket.hasTextData()) bucket.text.sharedOpacityVertices->clear();
     if (bucket.hasIconData()) bucket.icon.sharedOpacityVertices->clear();
     if (bucket.hasSdfIconData()) bucket.sdfIcon.sharedOpacityVertices->clear();
-    if (bucket.hasIconCollisionBoxData()) bucket.iconCollisionBox->dynamicVertices.clear();
-    if (bucket.hasIconCollisionCircleData()) bucket.iconCollisionCircle->dynamicVertices.clear();
-    if (bucket.hasTextCollisionBoxData()) bucket.textCollisionBox->dynamicVertices.clear();
-    if (bucket.hasTextCollisionCircleData()) bucket.textCollisionCircle->dynamicVertices.clear();
+    if (bucket.hasIconCollisionBoxData()) bucket.iconCollisionBox->dynamicVertices().clear();
+    if (bucket.hasIconCollisionCircleData()) bucket.iconCollisionCircle->dynamicVertices().clear();
+    if (bucket.hasTextCollisionBoxData()) bucket.textCollisionBox->dynamicVertices().clear();
+    if (bucket.hasTextCollisionCircleData()) bucket.textCollisionCircle->dynamicVertices().clear();
 
     const JointOpacityState duplicateOpacityState(false, false, true);
 
@@ -1056,7 +1056,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                 return;
             }
             const auto& dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, false, shift);
-            bucket.iconCollisionBox->dynamicVertices.extend(feature.boxes.size() * 4, dynamicVertex);
+            bucket.iconCollisionBox->dynamicVertices().extend(feature.boxes.size() * 4, dynamicVertex);
         };
 
         auto updateTextCollisionBox =
@@ -1092,7 +1092,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                     }
                 }
                 const auto& dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, !used, shift);
-                bucket.textCollisionBox->dynamicVertices.extend(feature.boxes.size() * 4, dynamicVertex);
+                bucket.textCollisionBox->dynamicVertices().extend(feature.boxes.size() * 4, dynamicVertex);
                 return shift;
             };
 
@@ -1104,15 +1104,15 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
             if (circles != collisionCircles.end()) {
                 for (const auto& circle : circles->second) {
                     const auto& dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, !circle.isCircle(), {});
-                    isText ? bucket.textCollisionCircle->dynamicVertices.extend(4, dynamicVertex)
-                           : bucket.iconCollisionCircle->dynamicVertices.extend(4, dynamicVertex);
+                    isText ? bucket.textCollisionCircle->dynamicVertices().extend(4, dynamicVertex)
+                           : bucket.iconCollisionCircle->dynamicVertices().extend(4, dynamicVertex);
                 }
             } else {
                 // This feature was not placed, because it was not loaded or
                 // from a fading tile. Apply default values.
                 static const auto dynamicVertex = CollisionBoxProgram::dynamicVertex(placed, false /*not used*/, {});
-                isText ? bucket.textCollisionCircle->dynamicVertices.extend(4 * feature.boxes.size(), dynamicVertex)
-                       : bucket.iconCollisionCircle->dynamicVertices.extend(4 * feature.boxes.size(), dynamicVertex);
+                isText ? bucket.textCollisionCircle->dynamicVertices().extend(4 * feature.boxes.size(), dynamicVertex)
+                       : bucket.iconCollisionCircle->dynamicVertices().extend(4 * feature.boxes.size(), dynamicVertex);
             }
         };
         Point<float> textShift{0.0f, 0.0f};

@@ -6,16 +6,19 @@ namespace mbgl {
 namespace shaders {
 
 template <>
-struct ShaderSource<BuiltIn::CollisionCircleProgram, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "CollisionCircleProgram";
+struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "CollisionCircleShader";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_anchor_pos;
 layout (location = 2) in vec2 a_extrude;
 layout (location = 3) in vec2 a_placed;
 
-uniform mat4 u_matrix;
-uniform vec2 u_extrude_scale;
-uniform float u_camera_to_center_distance;
+layout (std140) uniform CollisionCircleUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_extrude_scale;
+    highp float u_camera_to_center_distance;
+    highp float u_overscale_factor;
+};
 
 out float v_placed;
 out float v_notUsed;
@@ -44,7 +47,12 @@ void main() {
     v_extrude_scale = u_extrude_scale * u_camera_to_center_distance * collision_perspective_ratio;
 }
 )";
-    static constexpr const char* fragment = R"(uniform float u_overscale_factor;
+    static constexpr const char* fragment = R"(layout (std140) uniform CollisionCircleUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_extrude_scale;
+    highp float u_camera_to_center_distance;
+    highp float u_overscale_factor;
+};
 
 in float v_placed;
 in float v_notUsed;
