@@ -455,9 +455,13 @@ objc_library(
         "platform/ios/benchmark/MBXBenchViewController.h",
         "platform/ios/benchmark/locations.hpp",
     ],
-    data = glob([
-        "platform/ios/benchmark/Assets.xcassets/**",
-    ]),
+    includes = [
+        "platform/darwin/app",
+        "platform/darwin/src",
+        "platform/ios/src",
+        "platform/ios/src",
+        "../../include",
+    ],
     deps = [
         "sdk-headers",
     ],
@@ -517,15 +521,6 @@ ios_application(
     ],
 )
 
-_IOS_BENCHMARK_RESOURCES = glob([
-    "platform/ios/benchmark/assets/download.sh",
-    "platform/ios/benchmark/assets/tiles",
-    "platform/ios/benchmark/assets/styles",
-    "platform/ios/benchmark/assets/sprites",
-    "platform/ios/benchmark/assets/glyphs",
-    "platform/ios/benchmark/*.lproj/**",
-])
-
 ios_application(
     name = "BenchmarkApp",
     bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
@@ -533,14 +528,14 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["build/Info-app.plist"],
+    infoplists = ["build/Info-benchmark.plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
-    resources = _IOS_BENCHMARK_RESOURCES,
+    resources = ["@BenchmarkRepository//:BenchmarkResources"] + glob(["platform/ios/benchmark/*.lproj/**", "platform/ios/benchmark/Assets.xcassets/**"]),
     visibility = ["//visibility:public"],
     deps = [
         "benchapp",
-        "sdk-dynamic",
+        "sdk",
     ],
 )
 
