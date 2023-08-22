@@ -14,7 +14,6 @@ jobs:
           {artifactName: ios-render-test, xcTestFile: RenderTest.xctest.zip, ipaFile: RenderTestApp.ipa, name: "iOS Render Tests"},
           {artifactName: ios-cpp-unit-tests, xcTestFile: CppUnitTests.xctest.zip, ipaFile: CppUnitTestsApp.ipa, name: "iOS C++ Unit Tests"},
         ]
-      max-parallel: 1
       fail-fast: true
     runs-on: ubuntu-22.04
     if: github.repository_owner == 'maplibre'
