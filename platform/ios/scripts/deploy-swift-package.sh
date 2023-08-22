@@ -82,15 +82,15 @@ npm install --ignore-scripts
 mkdir -p ${BINARY_DIRECTORY}
 
 step "Building XCFramework"
-bazel build //platform/ios:Mapbox.dynamic
+bazel build //platform/ios:MapLibre.dynamic
 
 step "Copying Bazel output"
-BUILT_XCFRAMEWORK="$(bazel cquery --output=files //platform/ios:Mapbox.dynamic)"
+BUILT_XCFRAMEWORK="$(bazel info execution_root)/$(bazel cquery --output=files //platform/ios:MapLibre.dynamic)"
 MAPLIBRE_ZIP_FILE="MapLibre-${PUBLISH_VERSION}.zip"
 cp "$BUILT_XCFRAMEWORK" "$MAPLIBRE_ZIP_FILE"
 
 step "Create GitHub release…"
-RELEASE_NOTES=$( ./platform/ios/scripts/release-notes.js github )
+RELEASE_NOTES=$( ./scripts/release-notes.js github )
 
 if [[ -z "${RELEASE_NOTES}" ]]; then
     echo "Release notes cannot be empty."
@@ -109,7 +109,7 @@ MAPLIBRE_ZIP_FILE_URL=$EXT_TARGET_GITHUB_URL
 step "Creating Swift package…"
 
 rm -f Package.swift
-cp platform/ios/scripts/swift_package_template.swift Package.swift
+cp scripts/swift_package_template.swift Package.swift
 
 setTarget() {
     local token=$1
@@ -152,3 +152,5 @@ curl -v -X POST \
     -d "{\"tag_name\":\"${PUBLISH_VERSION}\"}"
 
 step "Finished deploying ${PUBLISH_VERSION} in $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
+
+pod trunk push MapLibre.podspec
