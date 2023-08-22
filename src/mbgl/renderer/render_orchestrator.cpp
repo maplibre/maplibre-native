@@ -781,7 +781,7 @@ void RenderOrchestrator::clearData() {
         entry.second->layerRemoved(changes);
     }
     addChanges(changes);
-    
+
     debugLayerGroups.clear();
 #endif
 

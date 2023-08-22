@@ -119,7 +119,7 @@ public:
     bool removeRenderTarget(const RenderTargetPtr&);
     void observeRenderTargets(std::function<void(RenderTarget&)> f);
     void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
-    
+
     void updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters);
     void observeDebugLayerGroups(std::function<void(LayerGroupBase&)>);
     void observeDebugLayerGroups(std::function<void(const LayerGroupBase&)>) const;

@@ -80,11 +80,9 @@ auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evalua
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
-        /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated)
-                               : constOrDefault<IconColor>(evaluated),
+        /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated),
         /*.halo_color=*/
-        isText ? constOrDefault<TextHaloColor>(evaluated)
-               : constOrDefault<IconHaloColor>(evaluated),
+        isText ? constOrDefault<TextHaloColor>(evaluated) : constOrDefault<IconHaloColor>(evaluated),
         /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
         /*.halo_width=*/
         isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
