@@ -93,9 +93,9 @@ info_plist(
 )
 
 apple_xcframework(
-    name = "Mapbox.dynamic",
+    name = "MapLibre.dynamic",
     bundle_id = "com.maplibre.mapbox",
-    bundle_name = "Mapbox",
+    bundle_name = "MapLibre",
     data = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
