@@ -937,13 +937,13 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
     }
 }
 
-void RenderOrchestrator::observeRenderTargets(std::function<void(RenderTarget&)> f) {
+void RenderOrchestrator::visitRenderTargets(std::function<void(RenderTarget&)> f) {
     for (auto& renderTarget : renderTargets) {
         f(*renderTarget);
     }
 }
 
-void RenderOrchestrator::observeRenderTargets(std::function<void(const RenderTarget&)> f) const {
+void RenderOrchestrator::visitRenderTargets(std::function<void(const RenderTarget&)> f) const {
     for (const auto& renderTarget : renderTargets) {
         f(*renderTarget);
     }
@@ -955,7 +955,7 @@ void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, Pa
     }
 }
 
-void RenderOrchestrator::observeDebugLayerGroups(std::function<void(LayerGroupBase&)> f) {
+void RenderOrchestrator::visitDebugLayerGroups(std::function<void(LayerGroupBase&)> f) {
     for (auto& pair : debugLayerGroups) {
         if (pair.second) {
             f(*pair.second);
@@ -963,7 +963,7 @@ void RenderOrchestrator::observeDebugLayerGroups(std::function<void(LayerGroupBa
     }
 }
 
-void RenderOrchestrator::observeDebugLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
+void RenderOrchestrator::visitDebugLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
     for (const auto& pair : debugLayerGroups) {
         if (pair.second) {
             f(*pair.second);

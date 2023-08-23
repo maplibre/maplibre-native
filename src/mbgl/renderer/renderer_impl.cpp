@@ -168,10 +168,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
 
         // Give the render targets a chance to upload
-        orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
 
         // Upload the Debug layer group
-        orchestrator.observeDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+        orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 #endif
 
@@ -228,7 +228,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_DRAWABLE_RENDERER
     const auto drawableTargetsPass = [&] {
         // draw render targets
-        orchestrator.observeRenderTargets(
+        orchestrator.visitRenderTargets(
             [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
     };
 #endif
@@ -324,7 +324,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            orchestrator.observeDebugLayerGroups([&](LayerGroupBase& layerGroup) {
+            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
                 layerGroup.visitDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
             });
         }

@@ -117,12 +117,12 @@ public:
 
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
-    void observeRenderTargets(std::function<void(RenderTarget&)> f);
-    void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
+    void visitRenderTargets(std::function<void(RenderTarget&)> f);
+    void visitRenderTargets(std::function<void(const RenderTarget&)> f) const;
 
     void updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters);
-    void observeDebugLayerGroups(std::function<void(LayerGroupBase&)>);
-    void observeDebugLayerGroups(std::function<void(const LayerGroupBase&)>) const;
+    void visitDebugLayerGroups(std::function<void(LayerGroupBase&)>);
+    void visitDebugLayerGroups(std::function<void(const LayerGroupBase&)>) const;
 #endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
