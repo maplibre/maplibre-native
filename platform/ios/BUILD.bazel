@@ -460,10 +460,10 @@ objc_library(
         "platform/darwin/src",
         "platform/ios/src",
         "platform/ios/src",
-        "../../include",
     ],
     deps = [
         "sdk-headers",
+        "//:mbgl-core",
     ],
 )
 
