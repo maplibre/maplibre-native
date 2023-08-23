@@ -194,13 +194,12 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                 }
             }
 
-            auto vertexArray = glContext.createVertexArray();
-
-            vertexArray.bind(glContext, impl->indexBuffer, bindings);
-
-            assert(vertexArray.isValid());
-
-            glSeg.setVertexArray(std::move(vertexArray));
+            if (!glSeg.getVertexArray().isValid()) {
+                auto vertexArray = glContext.createVertexArray();
+                vertexArray.bind(glContext, impl->indexBuffer, bindings);
+                assert(vertexArray.isValid());
+                glSeg.setVertexArray(std::move(vertexArray));
+            }
         };
     }
 
