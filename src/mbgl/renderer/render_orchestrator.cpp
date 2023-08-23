@@ -781,6 +781,8 @@ void RenderOrchestrator::clearData() {
         entry.second->layerRemoved(changes);
     }
     addChanges(changes);
+
+    debugLayerGroups.clear();
 #endif
 
     renderSources.clear();
@@ -946,6 +948,29 @@ void RenderOrchestrator::observeRenderTargets(std::function<void(const RenderTar
         f(*renderTarget);
     }
 }
+
+void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {
+    for (const RenderItem& item : renderTree.getSourceRenderItems()) {
+        item.updateDebugDrawables(debugLayerGroups, parameters);
+    }
+}
+
+void RenderOrchestrator::observeDebugLayerGroups(std::function<void(LayerGroupBase&)> f) {
+    for (auto& pair : debugLayerGroups) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
+void RenderOrchestrator::observeDebugLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
+    for (const auto& pair : debugLayerGroups) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
 #endif // MLN_DRAWABLE_RENDERER
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,

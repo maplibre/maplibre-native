@@ -119,6 +119,10 @@ public:
     bool removeRenderTarget(const RenderTargetPtr&);
     void observeRenderTargets(std::function<void(RenderTarget&)> f);
     void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
+
+    void updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters);
+    void observeDebugLayerGroups(std::function<void(LayerGroupBase&)>);
+    void observeDebugLayerGroups(std::function<void(const LayerGroupBase&)>) const;
 #endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
@@ -200,6 +204,7 @@ private:
     bool layerGroupOrderDirty = false;
 
     std::vector<RenderTargetPtr> renderTargets;
+    RenderItem::DebugLayerGroupMap debugLayerGroups;
 #endif
 };
 
