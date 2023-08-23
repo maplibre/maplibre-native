@@ -31,7 +31,7 @@ on:
   
   pull_request:
     branches:
-      - main
+      - '*'
     paths:
       - CMakeLists.txt
       - 'platform/ios/**'
