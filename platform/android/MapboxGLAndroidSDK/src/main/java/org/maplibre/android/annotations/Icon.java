@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
  *
  * @deprecated As of 7.0.0,
  * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
- *   MapLibre Annotation Plugin</a> instead
+ * MapLibre Annotation Plugin</a> instead
  */
 @Deprecated
 public class Icon {

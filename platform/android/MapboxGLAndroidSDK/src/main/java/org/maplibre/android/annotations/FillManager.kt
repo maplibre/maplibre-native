@@ -41,7 +41,8 @@ class FillManager @UiThread internal constructor(
     geoJsonOptions
 ) {
 
-    @JvmOverloads constructor(
+    @JvmOverloads
+    constructor(
         mapView: MapView,
         maplibreMap: MapLibreMap,
         style: Style,
@@ -161,7 +162,6 @@ class FillManager @UiThread internal constructor(
      */
     var fillAntialias: Boolean?
         get() = layer.fillAntialias.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.fillAntialias(value)
             constantPropertyUsageMap[PROPERTY_FILL_ANTIALIAS] = propertyValue
@@ -184,7 +184,6 @@ class FillManager @UiThread internal constructor(
      */
     var fillTranslateAnchor: String?
         get() = layer.fillTranslateAnchor.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.fillTranslateAnchor(value)
             constantPropertyUsageMap[PROPERTY_FILL_TRANSLATE_ANCHOR] = propertyValue

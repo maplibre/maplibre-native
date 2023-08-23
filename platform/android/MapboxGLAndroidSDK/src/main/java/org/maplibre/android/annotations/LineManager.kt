@@ -192,7 +192,6 @@ class LineManager @UiThread internal constructor(
      */
     var lineCap: String?
         get() = layer.lineCap.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineCap(value)
             constantPropertyUsageMap[PROPERTY_LINE_CAP] = propertyValue
@@ -204,7 +203,6 @@ class LineManager @UiThread internal constructor(
      */
     var lineMiterLimit: Float?
         get() = layer.lineMiterLimit.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineMiterLimit(value)
             constantPropertyUsageMap[PROPERTY_LINE_MITER_LIMIT] = propertyValue
@@ -216,7 +214,6 @@ class LineManager @UiThread internal constructor(
      */
     var lineRoundLimit: Float?
         get() = layer.lineRoundLimit.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineRoundLimit(value)
             constantPropertyUsageMap[PROPERTY_LINE_ROUND_LIMIT] = propertyValue
@@ -228,7 +225,6 @@ class LineManager @UiThread internal constructor(
      */
     var lineTranslate: Array<Float?>?
         get() = layer.lineTranslate.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineTranslate(value)
             constantPropertyUsageMap[PROPERTY_LINE_TRANSLATE] = propertyValue
@@ -240,7 +236,6 @@ class LineManager @UiThread internal constructor(
      */
     var lineTranslateAnchor: String?
         get() = layer.lineTranslateAnchor.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineTranslateAnchor(value)
             constantPropertyUsageMap[PROPERTY_LINE_TRANSLATE_ANCHOR] = propertyValue
@@ -252,7 +247,6 @@ class LineManager @UiThread internal constructor(
      */
     var lineDasharray: Array<Float?>?
         get() = layer.lineDasharray.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineDasharray(value)
             constantPropertyUsageMap[PROPERTY_LINE_DASHARRAY] = propertyValue

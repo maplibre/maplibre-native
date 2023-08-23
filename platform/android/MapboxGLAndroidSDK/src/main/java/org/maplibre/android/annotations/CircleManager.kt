@@ -40,7 +40,8 @@ class CircleManager @UiThread internal constructor(
     aboveLayerId,
     geoJsonOptions
 ) {
-    @JvmOverloads @UiThread
+    @JvmOverloads
+    @UiThread
     constructor(
         mapView: MapView,
         maplibreMap: MapLibreMap,
@@ -205,7 +206,6 @@ class CircleManager @UiThread internal constructor(
      */
     var circlePitchScale: String?
         get() = layer.circlePitchScale.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.circlePitchScale(value)
             constantPropertyUsageMap[PROPERTY_CIRCLE_PITCH_SCALE] = propertyValue
@@ -217,7 +217,6 @@ class CircleManager @UiThread internal constructor(
      */
     var circlePitchAlignment: String
         get() = layer.circlePitchAlignment.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.circlePitchAlignment(value)
             constantPropertyUsageMap[PROPERTY_CIRCLE_PITCH_ALIGNMENT] = propertyValue

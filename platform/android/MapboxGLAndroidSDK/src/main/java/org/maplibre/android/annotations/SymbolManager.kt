@@ -406,7 +406,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var symbolPlacement: String?
         get() = layer.symbolPlacement.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.symbolPlacement(value)
             constantPropertyUsageMap[PROPERTY_SYMBOL_PLACEMENT] = propertyValue
@@ -418,7 +417,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var symbolSpacing: Float?
         get() = layer.symbolSpacing.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.symbolSpacing(value)
             constantPropertyUsageMap[PROPERTY_SYMBOL_SPACING] = propertyValue
@@ -430,7 +428,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var symbolAvoidEdges: Boolean?
         get() = layer.symbolAvoidEdges.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.symbolAvoidEdges(value)
             constantPropertyUsageMap[PROPERTY_SYMBOL_AVOID_EDGES] = propertyValue
@@ -442,7 +439,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconAllowOverlap: Boolean?
         get() = layer.iconAllowOverlap.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconAllowOverlap(value)
             constantPropertyUsageMap[PROPERTY_ICON_ALLOW_OVERLAP] = propertyValue
@@ -454,7 +450,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconIgnorePlacement: Boolean?
         get() = layer.iconIgnorePlacement.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconIgnorePlacement(value)
             constantPropertyUsageMap[PROPERTY_ICON_IGNORE_PLACEMENT] = propertyValue
@@ -466,7 +461,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconOptional: Boolean?
         get() = layer.iconOptional.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconOptional(value)
             constantPropertyUsageMap[PROPERTY_ICON_OPTIONAL] = propertyValue
@@ -478,7 +472,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconRotationAlignment: String?
         get() = layer.iconRotationAlignment.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconRotationAlignment(value)
             constantPropertyUsageMap[PROPERTY_ICON_ROTATION_ALIGNMENT] = propertyValue
@@ -490,7 +483,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconTextFit: String?
         get() = layer.iconTextFit.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconTextFit(value)
             constantPropertyUsageMap[PROPERTY_ICON_TEXT_FIT] = propertyValue
@@ -502,7 +494,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconTextFitPadding: Array<Float?>?
         get() = layer.iconTextFitPadding.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconTextFitPadding(value)
             constantPropertyUsageMap[PROPERTY_ICON_TEXT_FIT_PADDING] = propertyValue
@@ -514,7 +505,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconPadding: Float?
         get() = layer.iconPadding.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconPadding(value)
             constantPropertyUsageMap[PROPERTY_ICON_PADDING] = propertyValue
@@ -526,7 +516,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconKeepUpright: Boolean?
         get() = layer.iconKeepUpright.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconKeepUpright(value)
             constantPropertyUsageMap[PROPERTY_ICON_KEEP_UPRIGHT] = propertyValue
@@ -538,7 +527,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconPitchAlignment: String?
         get() = layer.iconPitchAlignment.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconPitchAlignment(value)
             constantPropertyUsageMap[PROPERTY_ICON_PITCH_ALIGNMENT] = propertyValue
@@ -550,7 +538,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textPitchAlignment: String?
         get() = layer.textPitchAlignment.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textPitchAlignment(value)
             constantPropertyUsageMap[PROPERTY_TEXT_PITCH_ALIGNMENT] = propertyValue
@@ -562,7 +549,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textRotationAlignment: String?
         get() = layer.textRotationAlignment.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textRotationAlignment(value)
             constantPropertyUsageMap[PROPERTY_TEXT_ROTATION_ALIGNMENT] = propertyValue
@@ -574,7 +560,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textLineHeight: Float?
         get() = layer.textLineHeight.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textLineHeight(value)
             constantPropertyUsageMap[PROPERTY_TEXT_LINE_HEIGHT] = propertyValue
@@ -586,7 +571,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textVariableAnchor: Array<String?>?
         get() = layer.textVariableAnchor.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textVariableAnchor(value)
             constantPropertyUsageMap.put(PROPERTY_TEXT_VARIABLE_ANCHOR, propertyValue)
@@ -598,7 +582,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textMaxAngle: Float?
         get() = layer.textMaxAngle.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textMaxAngle(value)
             constantPropertyUsageMap[PROPERTY_TEXT_MAX_ANGLE] = propertyValue
@@ -610,7 +593,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textPadding: Float?
         get() = layer.textPadding.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textPadding(value)
             constantPropertyUsageMap[PROPERTY_TEXT_PADDING] = propertyValue
@@ -622,7 +604,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textKeepUpright: Boolean?
         get() = layer.textKeepUpright.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textKeepUpright(value)
             constantPropertyUsageMap[PROPERTY_TEXT_KEEP_UPRIGHT] = propertyValue
@@ -634,7 +615,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textAllowOverlap: Boolean?
         get() = layer.textAllowOverlap.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textAllowOverlap(value)
             constantPropertyUsageMap[PROPERTY_TEXT_ALLOW_OVERLAP] = propertyValue
@@ -646,7 +626,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textIgnorePlacement: Boolean?
         get() = layer.textIgnorePlacement.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textIgnorePlacement(value)
             constantPropertyUsageMap[PROPERTY_TEXT_IGNORE_PLACEMENT] = propertyValue
@@ -658,7 +637,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textOptional: Boolean?
         get() = layer.textOptional.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textOptional(value)
             constantPropertyUsageMap[PROPERTY_TEXT_OPTIONAL] = propertyValue
@@ -670,7 +648,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var iconTranslate: Array<Float?>?
         get() = layer.iconTranslate.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconTranslate(value)
             constantPropertyUsageMap.put(PROPERTY_ICON_TRANSLATE, propertyValue)
@@ -684,7 +661,6 @@ class SymbolManager @UiThread internal constructor(
         get() {
             return layer.iconTranslateAnchor.value
         }
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconTranslateAnchor(value)
             constantPropertyUsageMap[PROPERTY_ICON_TRANSLATE_ANCHOR] = propertyValue
@@ -696,7 +672,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textTranslate: Array<Float?>?
         get() = layer.textTranslate.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textTranslate(value)
             constantPropertyUsageMap.put(PROPERTY_TEXT_TRANSLATE, propertyValue)
@@ -708,7 +683,6 @@ class SymbolManager @UiThread internal constructor(
      */
     var textTranslateAnchor: String?
         get() = layer.textTranslateAnchor.value
-
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textTranslateAnchor(value)
             constantPropertyUsageMap[PROPERTY_TEXT_TRANSLATE_ANCHOR] = propertyValue

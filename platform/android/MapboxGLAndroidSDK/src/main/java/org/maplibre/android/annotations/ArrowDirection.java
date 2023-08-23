@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 
 @Deprecated
 class ArrowDirection {
-  @IntDef( {LEFT, RIGHT, TOP, BOTTOM})
+  @IntDef({LEFT, RIGHT, TOP, BOTTOM})
   @Retention(RetentionPolicy.SOURCE)
   @interface Value {
   }

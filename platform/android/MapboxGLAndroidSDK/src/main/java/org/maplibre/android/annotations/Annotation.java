@@ -15,9 +15,10 @@ import org.maplibre.android.maps.MapLibreMap;
  * This class manages attachment to a map and identification, but does not require
  * content to be placed at a geographical point.
  * </p>
+ *
  * @deprecated As of 7.0.0,
  * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
- *   MapLibre Annotation Plugin</a> instead
+ * MapLibre Annotation Plugin</a> instead
  */
 @Deprecated
 public abstract class Annotation implements Comparable<Annotation> {
