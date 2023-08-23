@@ -34,7 +34,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
         MLN_MTL_UNIFORM_BLOCK(13, true, false, ExpressionInputsUBO),
     };
     static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
+        {0, "u_texture"},
     };
 
     static constexpr auto source = R"(

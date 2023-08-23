@@ -27,6 +27,11 @@ public:
 private:
     gfx::UniformBufferPtr textPaintBuffer;
     gfx::UniformBufferPtr iconPaintBuffer;
+
+#if MLN_RENDER_BACKEND_METAL
+    gfx::UniformBufferPtr permutationUniformBuffer;
+    gfx::UniformBufferPtr expressionUniformBuffer;
+#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

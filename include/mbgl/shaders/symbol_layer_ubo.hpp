@@ -70,9 +70,8 @@ struct alignas(16) SymbolPermutationUBO {
     /* 16 */ Attribute opacity;
     /* 24 */ Attribute halo_width;
     /* 40 */ Attribute halo_blur;
-    /* 48 */ Attribute padding;
-    /* 56 */ int32_t /*bool*/ overdrawInspector;
-    /* 60 */ float pad;
+    /* 48 */ int32_t /*bool*/ overdrawInspector;
+    /* 52 */ float pad1, pad2, pad3;
     /* 64 */
 };
 static_assert(sizeof(SymbolPermutationUBO) == 4 * 16);

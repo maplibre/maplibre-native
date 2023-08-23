@@ -183,6 +183,7 @@ struct alignas(16) SymbolDrawableTilePropsUBO {
     float size;
     float padding;
 };
+static_assert(sizeof(SymbolDrawableTilePropsUBO) == 2 * 16, "unexpected padding");
 
 struct alignas(16) SymbolDrawableInterpolateUBO {
     float fill_color_t;
@@ -192,11 +193,12 @@ struct alignas(16) SymbolDrawableInterpolateUBO {
     float halo_blur_t;
     float pad1, pad2, pad3;
 };
+static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32, "unexpected padding");
 
 struct alignas(16) SymbolDrawableUBO {
-    float4 matrix;
-    float4 label_plane_matrix;
-    float4 coord_matrix;
+    float4x4 matrix;
+    float4x4 label_plane_matrix;
+    float4x4 coord_matrix;
 
     float2 texsize;
     float2 texsize_icon;
@@ -211,6 +213,7 @@ struct alignas(16) SymbolDrawableUBO {
     float fade_change;
     float pad;
 };
+static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
 
 struct alignas(16) SymbolDrawablePaintUBO {
     float4 fill_color;
@@ -220,6 +223,7 @@ struct alignas(16) SymbolDrawablePaintUBO {
     float halo_blur;
     float padding;
 };
+static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16, "unexpected padding");
 
 struct alignas(16) SymbolPermutationUBO {
     Attribute fill_color;
@@ -227,10 +231,10 @@ struct alignas(16) SymbolPermutationUBO {
     Attribute opacity;
     Attribute halo_width;
     Attribute halo_blur;
-    Attribute padding;
     int32_t /*bool*/ overdrawInspector;
-    float pad;
+    float pad1, pad2, pad3;
 };
+static_assert(sizeof(SymbolPermutationUBO) == 4 * 16, "unexpected padding");
 
 )";
 

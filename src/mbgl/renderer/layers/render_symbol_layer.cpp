@@ -369,7 +369,11 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties));
+        tweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+#endif // MLN_RENDER_BACKEND_METAL
+        layerGroup->setLayerTweaker(tweaker);
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -850,7 +854,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties));
+            tweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+#endif // MLN_RENDER_BACKEND_METAL
+            layerGroup_->setLayerTweaker(tweaker);
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
@@ -977,6 +985,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray attribs;
         const auto uniformProps = updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs);
+
+#if MLN_RENDER_BACKEND_METAL
+        propertiesAsUniforms = uniformProps;
+        if (tweaker) {
+            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+        }
+#endif // MLN_RENDER_BACKEND_METAL
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);

@@ -21,25 +21,24 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
         {2, gfx::AttributeDataType::Short4, 1, "a_pixeloffset"},
         {3, gfx::AttributeDataType::Float3, 1, "a_projected_pos"},
         {4, gfx::AttributeDataType::Float, 1, "a_fade_opacity"},
-        {5, gfx::AttributeDataType::Float, 1, "a_opacity"},
 
         // sometimes uniforms
-        {6, gfx::AttributeDataType::Float4, 1, "a_fill_color"},
-        {7, gfx::AttributeDataType::Float4, 1, "a_halo_color"},
-        {8, gfx::AttributeDataType::Float, 1, "a_opacity"},
-        {9, gfx::AttributeDataType::Float, 1, "a_halo_width"},
-        {10, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
+        {5, gfx::AttributeDataType::Float4, 1, "a_fill_color"},
+        {6, gfx::AttributeDataType::Float4, 1, "a_halo_color"},
+        {7, gfx::AttributeDataType::Float, 1, "a_opacity"},
+        {8, gfx::AttributeDataType::Float, 1, "a_halo_width"},
+        {9, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
     };
     static constexpr UniformBlockInfo uniforms[] = {
         MLN_MTL_UNIFORM_BLOCK(8, true, true, SymbolDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, true, SymbolDrawablePaintUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, false, SymbolDrawableTilePropsUBO),
+        MLN_MTL_UNIFORM_BLOCK(9, true, false, SymbolDrawablePaintUBO),
+        MLN_MTL_UNIFORM_BLOCK(10, true, true, SymbolDrawableTilePropsUBO),
         MLN_MTL_UNIFORM_BLOCK(11, true, false, SymbolDrawableInterpolateUBO),
         MLN_MTL_UNIFORM_BLOCK(12, true, true, SymbolPermutationUBO),
         MLN_MTL_UNIFORM_BLOCK(13, true, false, ExpressionInputsUBO),
     };
     static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
+        {0, "u_texture"},
     };
 
     static constexpr auto source = R"(
@@ -112,7 +111,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // them. We counteract part of that effect by dividing by the perspective ratio.
     const float distance_ratio = props.pitch_with_map ?
         camera_to_anchor_distance / drawable.camera_to_center_distance :
-    drawable.camera_to_center_distance / camera_to_anchor_distance;
+        drawable.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
         0.5 + 0.5 * distance_ratio,
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles

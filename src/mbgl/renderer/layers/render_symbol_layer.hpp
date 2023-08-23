@@ -65,6 +65,11 @@ class SymbolTextAndIconProgram;
 class CollisionBoxProgram;
 class CollisionCircleProgram;
 
+#if MLN_DRAWABLE_RENDERER
+class SymbolLayerTweaker;
+using SymbolLayerTweakerPtr = std::shared_ptr<SymbolLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class RenderSymbolLayer final : public RenderLayer {
 public:
     struct Programs {
@@ -122,10 +127,16 @@ private:
 #endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
+    SymbolLayerTweakerPtr tweaker;
+
     gfx::ShaderGroupPtr symbolIconGroup;
     gfx::ShaderGroupPtr symbolSDFGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
 #endif // MLN_DRAWABLE_RENDERER
+    
+#if MLN_RENDER_BACKEND_METAL
+    std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

@@ -11,6 +11,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/shaders/mtl/symbol_icon.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
@@ -75,6 +76,40 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
+    const auto zoom = parameters.state.getZoom();
+
+#if MLN_RENDER_BACKEND_METAL
+    if (propertiesChanged) {
+        const SymbolPermutationUBO permutationUBO = {
+            /* .fill_color = */ {/*.source=*/getAttributeSource("a_fill_color"), /*.expression=*/{}},
+            /* .halo_color = */ {/*.source=*/getAttributeSource("a_halo_color"), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/getAttributeSource("a_opacity"), /*.expression=*/{}},
+            /* .halo_width = */ {/*.source=*/getAttributeSource("a_halo_width"), /*.expression=*/{}},
+            /* .halo_blur = */ {/*.source=*/getAttributeSource("a_halo_blur"), /*.expression=*/{}},
+            /* .overdrawInspector = */ overdrawInspector,
+            /* .pad = */ 0,
+            0,
+            0};
+
+        if (permutationUniformBuffer) {
+            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+        } else {
+            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+        }
+
+        propertiesChanged = false;
+    }
+    if (!expressionUniformBuffer) {
+        const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
+                                                   /* .frame = */ parameters.frameCount,
+                                                   /* .zoom = */ static_cast<float>(zoom),
+                                                   /* .pad = */ 0,
+                                                   0,
+                                                   0};
+        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
+    }
+#endif
+
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -103,7 +138,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             tileID, renderTree, state, translate, anchor, nearClipped, inViewportPixelUnits);
 
         // from symbol_program, makeValues
-        const auto currentZoom = static_cast<float>(state.getZoom());
+        const auto currentZoom = static_cast<float>(zoom);
         const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
         const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
@@ -149,6 +184,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(SymbolDrawableUBOName, &drawableUBO, context);
         uniforms.addOrReplace(SymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
+        
+#if MLN_RENDER_BACKEND_METAL
+        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
+        uniforms.addOrReplace(MLN_STRINGIZE(SymbolPermutationUBO), permutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 
