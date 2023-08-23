@@ -40,7 +40,8 @@ class CircleManager @UiThread internal constructor(
     aboveLayerId,
     geoJsonOptions
 ) {
-    @JvmOverloads @UiThread constructor(
+    @JvmOverloads @UiThread
+    constructor(
         mapView: MapView,
         maplibreMap: MapLibreMap,
         style: Style,
