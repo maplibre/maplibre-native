@@ -153,6 +153,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             if (rawBufSize <= resource.byteSize) {
                 if (vec->getDirty()) {
                     updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                    vec->setDirty(false);
                 }
                 return rawData->resource;
             }
@@ -162,6 +163,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             auto buffer = std::make_unique<VertexBufferGL>();
             buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage);
             vec->setBuffer(std::move(buffer));
+            vec->setDirty(false);
             return static_cast<VertexBufferGL*>(vec->getBuffer())->resource;
         }
     }
