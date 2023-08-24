@@ -138,6 +138,14 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+cc_library(
+    name = "httplib",
+    hdrs = ["cpp-httplib/httplib.h"],
+    copts = CPP_FLAGS,
+    includes = ["cpp-httplib"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/protozero-files.json
 cc_library(
     name = "protozero",

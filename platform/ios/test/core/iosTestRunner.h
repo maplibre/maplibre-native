@@ -1,7 +1,6 @@
-#import <Foundation/Foundation.h>
+#pragma once
 
-NSString *dataDir = @"test-data";
-NSString *resultFilePath = @"test/results.xml";
+#import <Foundation/Foundation.h>
 
 __attribute__((visibility ("default")))
 @interface IosTestRunner : NSObject
