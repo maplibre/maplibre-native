@@ -52,7 +52,7 @@ public:
         assert(n < v.size());
         return v.at(n);
     }
-    
+
     std::size_t elements() const { return v.size(); }
 
     std::size_t bytes() const { return v.size() * sizeof(uint16_t); }
@@ -71,11 +71,11 @@ public:
         }
         released = true;
     }
-    
+
     const uint16_t* data() const { return v.data(); }
 
     const std::vector<uint16_t>& vector() const { return v; }
-    
+
 protected:
     std::unique_ptr<IndexBufferBase> buffer;
     bool dirty = true;

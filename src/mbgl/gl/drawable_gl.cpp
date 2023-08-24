@@ -182,10 +182,12 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         impl->attributeBuffers = std::move(vertexBuffers);
 
         if (impl->indexes->getDirty()) {
-            auto indexBufferResource{uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
-            auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(), std::move(indexBufferResource));
+            auto indexBufferResource{
+                uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
+            auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
+                                                                  std::move(indexBufferResource));
             auto buffer = std::make_unique<IndexBufferGL>(std::move(indexBuffer));
-            
+
             impl->indexes->setBuffer(std::move(buffer));
             impl->indexes->setDirty(false);
         }
