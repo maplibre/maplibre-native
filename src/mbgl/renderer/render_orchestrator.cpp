@@ -816,7 +816,7 @@ void RenderOrchestrator::updateLayerGroupOrder() {
     layerGroupOrderDirty = false;
 }
 
-bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, [[maybe_unused]] const bool replace) {
+bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, const bool replace) {
     const auto index = layerGroup->getLayerIndex();
     auto range = layerGroupsByLayerIndex.equal_range(index);
     bool found = false;
