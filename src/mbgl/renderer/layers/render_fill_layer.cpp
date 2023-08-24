@@ -646,7 +646,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
                     if (const auto& atlases = tile.getAtlasTextures()) {
-                        if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image"))  {
+                        if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
                             builder->setTexture(atlases->icon, samplerLocation.value());
                         }
                     }
@@ -663,7 +663,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setSubLayerIndex(2);
                     builder->setRenderPass(RenderPass::Translucent);
                     if (const auto& atlases = tile.getAtlasTextures()) {
-                        if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image"))  {
+                        if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
                             builder->setTexture(atlases->icon, samplerLocation.value());
                         }
                     }
