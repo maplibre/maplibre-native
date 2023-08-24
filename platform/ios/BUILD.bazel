@@ -290,7 +290,7 @@ sh_binary(
         "bench_UITests/Info.plist",       
         "framework/Info.plist",
         "framework/Info-static.plist",
-        "//platform/ios/benchmark:benchmark/Info.plist",
+        "//platform/ios/benchmark:Info.plist",
         "//platform/ios/iosapp-UITests:Info.plist",
         "//platform/ios/test:Info.plist",
     ],
