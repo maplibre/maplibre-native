@@ -331,7 +331,7 @@ class SymbolManager @UiThread internal constructor(
      * SymbolOptions.PROPERTY_TEXT_HALO_COLOR - String<br></br>
      * SymbolOptions.PROPERTY_TEXT_HALO_WIDTH - Float<br></br>
      * SymbolOptions.PROPERTY_TEXT_HALO_BLUR - Float<br></br>
-     * Learn more about above properties in the [Style specification](https://www.mapbox.com/mapbox-gl-js/style-spec/).
+     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
      *
      *
      * Out of spec properties:<br></br>
@@ -380,7 +380,7 @@ class SymbolManager @UiThread internal constructor(
      * SymbolOptions.PROPERTY_TEXT_HALO_COLOR - String<br></br>
      * SymbolOptions.PROPERTY_TEXT_HALO_WIDTH - Float<br></br>
      * SymbolOptions.PROPERTY_TEXT_HALO_BLUR - Float<br></br>
-     * Learn more about above properties in the [Style specification](https://www.mapbox.com/mapbox-gl-js/style-spec/).
+     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
      *
      *
      * Out of spec properties:<br></br>

@@ -132,7 +132,7 @@ class CircleManager @UiThread internal constructor(
      * CircleOptions.PROPERTY_CIRCLE_STROKE_WIDTH - Float<br></br>
      * CircleOptions.PROPERTY_CIRCLE_STROKE_COLOR - String<br></br>
      * CircleOptions.PROPERTY_CIRCLE_STROKE_OPACITY - Float<br></br>
-     * Learn more about above properties in the [Style specification](https://www.mapbox.com/mapbox-gl-js/style-spec/).
+     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
      *
      *
      * Out of spec properties:<br></br>
@@ -159,7 +159,7 @@ class CircleManager @UiThread internal constructor(
      * CircleOptions.PROPERTY_CIRCLE_STROKE_WIDTH - Float<br></br>
      * CircleOptions.PROPERTY_CIRCLE_STROKE_COLOR - String<br></br>
      * CircleOptions.PROPERTY_CIRCLE_STROKE_OPACITY - Float<br></br>
-     * Learn more about above properties in the [Style specification](https://www.mapbox.com/mapbox-gl-js/style-spec/).
+     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
      *
      *
      * Out of spec properties:<br></br>

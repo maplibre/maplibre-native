@@ -26,9 +26,9 @@ final class DraggableAnnotationController {
 
   private static DraggableAnnotationController INSTANCE = null;
 
-  public static DraggableAnnotationController getInstance(MapView mapView, MapLibreMap mapboxMap) {
-    if (INSTANCE == null || INSTANCE.mapView != mapView || INSTANCE.maplibreMap != mapboxMap) {
-      INSTANCE = new DraggableAnnotationController(mapView, mapboxMap);
+  public static DraggableAnnotationController getInstance(MapView mapView, MapLibreMap maplibreMap) {
+    if (INSTANCE == null || INSTANCE.mapView != mapView || INSTANCE.maplibreMap != maplibreMap) {
+      INSTANCE = new DraggableAnnotationController(mapView, maplibreMap);
     }
     return INSTANCE;
   }

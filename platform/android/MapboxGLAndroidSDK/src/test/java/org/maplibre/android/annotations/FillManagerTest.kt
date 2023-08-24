@@ -22,7 +22,6 @@ import org.maplibre.android.style.layers.PropertyFactory.fillOutlineColor
 import org.maplibre.android.style.layers.PropertyFactory.fillPattern
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.testUtils.Assert.assertEquals
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
@@ -32,7 +31,7 @@ class FillManagerTest {
         DraggableAnnotationController::class.java
     )
     private val mapView: MapView = Mockito.mock(MapView::class.java)
-    private val mapboxMap: MapLibreMap = Mockito.mock(MapLibreMap::class.java)
+    private val maplibreMap: MapLibreMap = Mockito.mock(MapLibreMap::class.java)
     private val style: Style = Mockito.mock(Style::class.java)
     private val geoJsonSource: GeoJsonSource = Mockito.mock(GeoJsonSource::class.java)
     private val optionedGeoJsonSource: GeoJsonSource = Mockito.mock(GeoJsonSource::class.java)
@@ -58,7 +57,7 @@ class FillManagerTest {
     fun testInitialization() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -86,7 +85,7 @@ class FillManagerTest {
     fun testInitializationOnStyleReload() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -115,7 +114,7 @@ class FillManagerTest {
             ArgumentCaptor.forClass(
                 Style.OnStyleLoaded::class.java
             )
-        Mockito.verify(mapboxMap).getStyle(styleLoadedArgumentCaptor.capture())
+        Mockito.verify(maplibreMap).getStyle(styleLoadedArgumentCaptor.capture())
         val newStyle: Style = Mockito.mock(Style::class.java)
         Mockito.`when`(newStyle.isFullyLoaded).thenReturn(true)
 
@@ -142,7 +141,7 @@ class FillManagerTest {
     fun testLayerBelowInitialization() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             "test_layer",
@@ -165,7 +164,7 @@ class FillManagerTest {
     fun testGeoJsonOptionsInitialization() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -193,7 +192,7 @@ class FillManagerTest {
     fun testLayerId() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -208,7 +207,7 @@ class FillManagerTest {
     fun testAddFill() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -231,7 +230,7 @@ class FillManagerTest {
     fun addFillFromFeatureCollection() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -271,7 +270,7 @@ class FillManagerTest {
     fun addFills() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -318,7 +317,7 @@ class FillManagerTest {
     fun testDeleteFill() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -341,7 +340,7 @@ class FillManagerTest {
     fun testGeometryFill() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -389,7 +388,7 @@ class FillManagerTest {
     fun testFeatureIdFill() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -413,7 +412,7 @@ class FillManagerTest {
     fun testFillDraggableFlag() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -439,7 +438,7 @@ class FillManagerTest {
     fun testFillOpacityLayerProperty() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -472,7 +471,7 @@ class FillManagerTest {
     fun testFillColorLayerProperty() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -505,7 +504,7 @@ class FillManagerTest {
     fun testFillOutlineColorLayerProperty() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -544,7 +543,7 @@ class FillManagerTest {
     fun testFillPatternLayerProperty() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -577,7 +576,7 @@ class FillManagerTest {
     fun testFillLayerFilter() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -601,7 +600,7 @@ class FillManagerTest {
         )
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -623,7 +622,7 @@ class FillManagerTest {
         )
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -645,7 +644,7 @@ class FillManagerTest {
         )
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -664,7 +663,7 @@ class FillManagerTest {
     fun testCustomData() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -688,7 +687,7 @@ class FillManagerTest {
     fun testClearAll() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,
@@ -713,7 +712,7 @@ class FillManagerTest {
     fun testIgnoreClearedAnnotations() {
         fillManager = FillManager(
             mapView,
-            mapboxMap,
+            maplibreMap,
             style,
             coreElementProvider,
             null,

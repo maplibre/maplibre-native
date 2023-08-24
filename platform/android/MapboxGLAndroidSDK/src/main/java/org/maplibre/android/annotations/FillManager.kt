@@ -108,7 +108,7 @@ class FillManager @UiThread internal constructor(
      * FillOptions.PROPERTY_FILL_COLOR - String<br></br>
      * FillOptions.PROPERTY_FILL_OUTLINE_COLOR - String<br></br>
      * FillOptions.PROPERTY_FILL_PATTERN - String<br></br>
-     * Learn more about above properties in the [Style specification](https://www.mapbox.com/mapbox-gl-js/style-spec/).
+     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
      *
      *
      * Out of spec properties:<br></br>
@@ -132,7 +132,7 @@ class FillManager @UiThread internal constructor(
      * FillOptions.PROPERTY_FILL_COLOR - String<br></br>
      * FillOptions.PROPERTY_FILL_OUTLINE_COLOR - String<br></br>
      * FillOptions.PROPERTY_FILL_PATTERN - String<br></br>
-     * Learn more about above properties in the [Style specification](https://www.mapbox.com/mapbox-gl-js/style-spec/).
+     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
      *
      *
      * Out of spec properties:<br></br>
