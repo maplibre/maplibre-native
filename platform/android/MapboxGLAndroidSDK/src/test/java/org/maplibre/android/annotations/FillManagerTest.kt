@@ -109,8 +109,7 @@ class FillManagerTest {
             ArgumentCaptor.forClass(
                 MapView.OnDidFinishLoadingStyleListener::class.java
             )
-        Mockito.verify(mapView)
-            .addOnDidFinishLoadingStyleListener(loadingArgumentCaptor.capture())
+        Mockito.verify(mapView).addOnDidFinishLoadingStyleListener(loadingArgumentCaptor.capture())
         loadingArgumentCaptor.value.onDidFinishLoadingStyle()
         val styleLoadedArgumentCaptor: ArgumentCaptor<Style.OnStyleLoaded> =
             ArgumentCaptor.forClass(
@@ -448,10 +447,9 @@ class FillManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(fillLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillOpacity(get("fill-opacity"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillOpacity(get("fill-opacity"))))
+        )
         val innerLatLngs: List<LatLng> = listOf(
             LatLng(),
             LatLng(1.0, 1.0),
@@ -461,15 +459,13 @@ class FillManagerTest {
         val options = FillOptions().withLatLngs(latLngs).withFillOpacity(2.0f)
         fillManager.create(options)
         fillManager.updateSourceNow()
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillOpacity(get("fill-opacity"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillOpacity(get("fill-opacity"))))
+        )
         fillManager.create(options)
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillOpacity(get("fill-opacity"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillOpacity(get("fill-opacity"))))
+        )
     }
 
     @Test
@@ -484,10 +480,9 @@ class FillManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(fillLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillColor(get("fill-color"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillColor(get("fill-color"))))
+        )
         val innerLatLngs: List<LatLng> = listOf(
             LatLng(),
             LatLng(1.0, 1.0),
@@ -497,15 +492,13 @@ class FillManagerTest {
         val options = FillOptions().withLatLngs(latLngs).withFillColor("rgba(0, 0, 0, 1)")
         fillManager.create(options)
         fillManager.updateSourceNow()
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillColor(get("fill-color"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillColor(get("fill-color"))))
+        )
         fillManager.create(options)
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillColor(get("fill-color"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillColor(get("fill-color"))))
+        )
     }
 
     @Test
@@ -520,12 +513,11 @@ class FillManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(fillLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(fillOutlineColor(get("fill-outline-color")))
-                )
+        Mockito.verify(fillLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(fillOutlineColor(get("fill-outline-color")))
             )
+        )
         val innerLatLngs: List<LatLng> = listOf(
             LatLng(),
             LatLng(1.0, 1.0),
@@ -535,19 +527,17 @@ class FillManagerTest {
         val options = FillOptions().withLatLngs(latLngs).withFillOutlineColor("rgba(0, 0, 0, 1)")
         fillManager.create(options)
         fillManager.updateSourceNow()
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(fillOutlineColor(get("fill-outline-color")))
-                )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(fillOutlineColor(get("fill-outline-color")))
             )
+        )
         fillManager.create(options)
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(fillOutlineColor(get("fill-outline-color")))
-                )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(fillOutlineColor(get("fill-outline-color")))
             )
+        )
     }
 
     @Test
@@ -562,10 +552,9 @@ class FillManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(fillLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillPattern(get("fill-pattern"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillPattern(get("fill-pattern"))))
+        )
         val innerLatLngs: List<LatLng> = listOf(
             LatLng(),
             LatLng(1.0, 1.0),
@@ -575,15 +564,13 @@ class FillManagerTest {
         val options = FillOptions().withLatLngs(latLngs).withFillPattern("pedestrian-polygon")
         fillManager.create(options)
         fillManager.updateSourceNow()
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillPattern(get("fill-pattern"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillPattern(get("fill-pattern"))))
+        )
         fillManager.create(options)
-        Mockito.verify(fillLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(fillPattern(get("fill-pattern"))))
-            )
+        Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillPattern(get("fill-pattern"))))
+        )
     }
 
     @Test

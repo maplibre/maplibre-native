@@ -29,8 +29,10 @@ class SymbolManager @UiThread internal constructor(
     belowLayerId: String? = null,
     aboveLayerId: String? = null,
     geoJsonOptions: GeoJsonOptions? = null,
-    draggableAnnotationController: DraggableAnnotationController =
-        DraggableAnnotationController.getInstance(mapView, maplibreMap)
+    draggableAnnotationController: DraggableAnnotationController = DraggableAnnotationController.getInstance(
+        mapView,
+        maplibreMap
+    )
 ) : AnnotationManager<SymbolLayer, Symbol, SymbolOptions, OnSymbolDragListener, OnSymbolClickListener, OnSymbolLongClickListener>(
     mapView,
     maplibreMap,
@@ -45,11 +47,10 @@ class SymbolManager @UiThread internal constructor(
     /**
      * Create a symbol manager, used to manage symbols.
      *
-     * @param maplibreMap      the map object to add symbols to
-     * @param style          a valid a fully loaded style object
-     * @param belowLayerId   the id of the layer above the symbol layer
-     * @param aboveLayerId   the id of the layer below the symbol layer
-     * @param clusterOptions options for the clustering configuration
+     * @param maplibreMap  the map object to add symbols to
+     * @param style        a valid a fully loaded style object
+     * @param belowLayerId the id of the layer above the symbol layer
+     * @param aboveLayerId the id of the layer below the symbol layer
      */
     @UiThread
     @JvmOverloads
@@ -99,36 +100,35 @@ class SymbolManager @UiThread internal constructor(
         clusterOptions.apply(style, coreElementProvider.sourceId)
     }
 
-    override fun initializeDataDrivenPropertyMap() =
-        listOf(
-            SymbolOptions.PROPERTY_SYMBOL_SORT_KEY,
-            SymbolOptions.PROPERTY_ICON_SIZE,
-            SymbolOptions.PROPERTY_ICON_IMAGE,
-            SymbolOptions.PROPERTY_ICON_ROTATE,
-            SymbolOptions.PROPERTY_ICON_OFFSET,
-            SymbolOptions.PROPERTY_ICON_ANCHOR,
-            SymbolOptions.PROPERTY_TEXT_FIELD,
-            SymbolOptions.PROPERTY_TEXT_FONT,
-            SymbolOptions.PROPERTY_TEXT_SIZE,
-            SymbolOptions.PROPERTY_TEXT_MAX_WIDTH,
-            SymbolOptions.PROPERTY_TEXT_LETTER_SPACING,
-            SymbolOptions.PROPERTY_TEXT_JUSTIFY,
-            SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET,
-            SymbolOptions.PROPERTY_TEXT_ANCHOR,
-            SymbolOptions.PROPERTY_TEXT_ROTATE,
-            SymbolOptions.PROPERTY_TEXT_TRANSFORM,
-            SymbolOptions.PROPERTY_TEXT_OFFSET,
-            SymbolOptions.PROPERTY_ICON_OPACITY,
-            SymbolOptions.PROPERTY_ICON_COLOR,
-            SymbolOptions.PROPERTY_ICON_HALO_COLOR,
-            SymbolOptions.PROPERTY_ICON_HALO_WIDTH,
-            SymbolOptions.PROPERTY_ICON_HALO_BLUR,
-            SymbolOptions.PROPERTY_TEXT_OPACITY,
-            SymbolOptions.PROPERTY_TEXT_COLOR,
-            SymbolOptions.PROPERTY_TEXT_HALO_COLOR,
-            SymbolOptions.PROPERTY_TEXT_HALO_WIDTH,
-            SymbolOptions.PROPERTY_TEXT_HALO_BLUR
-        ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
+    override fun initializeDataDrivenPropertyMap() = listOf(
+        SymbolOptions.PROPERTY_SYMBOL_SORT_KEY,
+        SymbolOptions.PROPERTY_ICON_SIZE,
+        SymbolOptions.PROPERTY_ICON_IMAGE,
+        SymbolOptions.PROPERTY_ICON_ROTATE,
+        SymbolOptions.PROPERTY_ICON_OFFSET,
+        SymbolOptions.PROPERTY_ICON_ANCHOR,
+        SymbolOptions.PROPERTY_TEXT_FIELD,
+        SymbolOptions.PROPERTY_TEXT_FONT,
+        SymbolOptions.PROPERTY_TEXT_SIZE,
+        SymbolOptions.PROPERTY_TEXT_MAX_WIDTH,
+        SymbolOptions.PROPERTY_TEXT_LETTER_SPACING,
+        SymbolOptions.PROPERTY_TEXT_JUSTIFY,
+        SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET,
+        SymbolOptions.PROPERTY_TEXT_ANCHOR,
+        SymbolOptions.PROPERTY_TEXT_ROTATE,
+        SymbolOptions.PROPERTY_TEXT_TRANSFORM,
+        SymbolOptions.PROPERTY_TEXT_OFFSET,
+        SymbolOptions.PROPERTY_ICON_OPACITY,
+        SymbolOptions.PROPERTY_ICON_COLOR,
+        SymbolOptions.PROPERTY_ICON_HALO_COLOR,
+        SymbolOptions.PROPERTY_ICON_HALO_WIDTH,
+        SymbolOptions.PROPERTY_ICON_HALO_BLUR,
+        SymbolOptions.PROPERTY_TEXT_OPACITY,
+        SymbolOptions.PROPERTY_TEXT_COLOR,
+        SymbolOptions.PROPERTY_TEXT_HALO_COLOR,
+        SymbolOptions.PROPERTY_TEXT_HALO_WIDTH,
+        SymbolOptions.PROPERTY_TEXT_HALO_BLUR
+    ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
 
     override fun setDataDrivenPropertyIsUsed(property: String) {
         when (property) {
@@ -390,9 +390,9 @@ class SymbolManager @UiThread internal constructor(
      * @return the list of built symbols
      */
     @UiThread
-    fun create(featureCollection: FeatureCollection): List<Symbol> =
-        featureCollection.features()?.mapNotNull { SymbolOptions.fromFeature(it) }
-            .let { create(it ?: emptyList()) }
+    fun create(featureCollection: FeatureCollection): List<Symbol> = featureCollection.features()?.mapNotNull {
+        SymbolOptions.fromFeature(it)
+    }.let { create(it ?: emptyList()) }
 
     /**
      * Key of the id of the annotation.

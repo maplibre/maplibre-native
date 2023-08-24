@@ -105,7 +105,8 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Get the FillOpacity property
    * <p>
-   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also affect the 1px stroke around the fill, if the stroke is used.
+   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also
+   * affect the 1px stroke around the fill, if the stroke is used.
    * </p>
    *
    * @return property wrapper value around Float
@@ -117,7 +118,8 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Set the FillOpacity property
    * <p>
-   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also affect the 1px stroke around the fill, if the stroke is used.
+   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also
+   * affect the 1px stroke around the fill, if the stroke is used.
    * </p>
    * <p>
    * To update the fill on the map use {@link FillManager#update(AbstractAnnotation)}.
@@ -132,7 +134,8 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Get the FillColor property
    * <p>
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the
+   * color's opacity will not affect the opacity of the 1px stroke, if it is used.
    * </p>
    *
    * @return color value for String
@@ -145,7 +148,8 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Get the FillColor property
    * <p>
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the
+   * color's opacity will not affect the opacity of the 1px stroke, if it is used.
    * </p>
    *
    * @return color value for String
@@ -157,7 +161,8 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Set the FillColor property
    * <p>
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the
+   * color's opacity will not affect the opacity of the 1px stroke, if it is used.
    * </p>
    * <p>
    * To update the fill on the map use {@link FillManager#update(AbstractAnnotation)}.
@@ -172,7 +177,8 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Set the FillColor property
    * <p>
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the
+   * color's opacity will not affect the opacity of the 1px stroke, if it is used.
    * </p>
    * <p>
    * To update the fill on the map use {@link FillManager#update(AbstractAnnotation)}.
@@ -242,7 +248,9 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Get the FillPattern property
    * <p>
-   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a
+   * factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom
+   * levels.
    * </p>
    *
    * @return property wrapper value around String
@@ -254,7 +262,9 @@ public class Fill extends AbstractAnnotation<Polygon> {
   /**
    * Set the FillPattern property
    * <p>
-   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a
+   * factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom
+   * levels.
    * </p>
    * <p>
    * To update the fill on the map use {@link FillManager#update(AbstractAnnotation)}.

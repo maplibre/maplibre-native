@@ -29,8 +29,8 @@ import org.maplibre.android.style.layers.SymbolLayer;
 /**
  * Options to show and configure symbol clustering with using SymbolManager.
  * <p>
- * It exposes a minimal of configuration options, a more advanced setup can be created manually with
- * using CircleLayer and SymbolLayers directly.
+ * It exposes a minimal of configuration options, a more advanced setup can be created manually with using CircleLayer
+ * and SymbolLayers directly.
  * </p>
  */
 public class ClusterOptions {

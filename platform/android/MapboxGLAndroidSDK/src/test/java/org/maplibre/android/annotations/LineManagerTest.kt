@@ -125,8 +125,7 @@ class LineManagerTest {
             ArgumentCaptor.forClass(
                 MapView.OnDidFinishLoadingStyleListener::class.java
             )
-        Mockito.verify(mapView)
-            .addOnDidFinishLoadingStyleListener(loadingArgumentCaptor.capture())
+        Mockito.verify(mapView).addOnDidFinishLoadingStyleListener(loadingArgumentCaptor.capture())
         loadingArgumentCaptor.value.onDidFinishLoadingStyle()
         val styleLoadedArgumentCaptor: ArgumentCaptor<OnStyleLoaded> = ArgumentCaptor.forClass(
             OnStyleLoaded::class.java
@@ -423,10 +422,9 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineJoin(get("line-join"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineJoin(get("line-join"))))
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -434,15 +432,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLineJoin(LINE_JOIN_BEVEL)
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineJoin(get("line-join"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineJoin(get("line-join"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineJoin(get("line-join"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineJoin(get("line-join"))))
+        )
     }
 
     @Test
@@ -457,10 +453,9 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineOpacity(get("line-opacity"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineOpacity(get("line-opacity"))))
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -468,15 +463,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLineOpacity(2.0f)
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineOpacity(get("line-opacity"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineOpacity(get("line-opacity"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineOpacity(get("line-opacity"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineOpacity(get("line-opacity"))))
+        )
     }
 
     @Test
@@ -491,10 +484,9 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineColor(get("line-color"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineColor(get("line-color"))))
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -502,15 +494,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLineColor("rgba(0, 0, 0, 1)")
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineColor(get("line-color"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineColor(get("line-color"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineColor(get("line-color"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineColor(get("line-color"))))
+        )
     }
 
     @Test
@@ -525,10 +515,9 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineWidth(get("line-width"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineWidth(get("line-width"))))
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -536,15 +525,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLineWidth(2.0f)
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineWidth(get("line-width"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineWidth(get("line-width"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineWidth(get("line-width"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineWidth(get("line-width"))))
+        )
     }
 
     @Test
@@ -559,10 +546,9 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineGapWidth(get("line-gap-width"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineGapWidth(get("line-gap-width"))))
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -570,15 +556,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLineGapWidth(2.0f)
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineGapWidth(get("line-gap-width"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineGapWidth(get("line-gap-width"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineGapWidth(get("line-gap-width"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineGapWidth(get("line-gap-width"))))
+        )
     }
 
     @Test
@@ -593,10 +577,9 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineOffset(get("line-offset"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineOffset(get("line-offset"))))
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -604,15 +587,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLineOffset(2.0f)
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineOffset(get("line-offset"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineOffset(get("line-offset"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineOffset(get("line-offset"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineOffset(get("line-offset"))))
+        )
     }
 
     @Test
@@ -627,12 +608,11 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(PropertyFactory.lineBlur(get("line-blur")))
-                )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(PropertyFactory.lineBlur(get("line-blur")))
             )
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -640,15 +620,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLineBlur(2.0f)
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineBlur(get("line-blur"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineBlur(get("line-blur"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(lineBlur(get("line-blur"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineBlur(get("line-blur"))))
+        )
     }
 
     @Test
@@ -663,10 +641,9 @@ class LineManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(lineLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(linePattern(get("line-pattern"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(linePattern(get("line-pattern"))))
+        )
         val latLngs = listOf(
             LatLng(),
             LatLng(1.0, 1.0)
@@ -674,15 +651,13 @@ class LineManagerTest {
         val options = LineOptions().withLatLngs(latLngs).withLinePattern("pedestrian-polygon")
         lineManager.create(options)
         lineManager.updateSourceNow()
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(linePattern(get("line-pattern"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(linePattern(get("line-pattern"))))
+        )
         lineManager.create(options)
-        Mockito.verify(lineLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(linePattern(get("line-pattern"))))
-            )
+        Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(linePattern(get("line-pattern"))))
+        )
     }
 
     @Test

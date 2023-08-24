@@ -137,8 +137,7 @@ class SymbolManagerTest {
             ArgumentCaptor.forClass(
                 MapView.OnDidFinishLoadingStyleListener::class.java
             )
-        Mockito.verify(mapView)
-            .addOnDidFinishLoadingStyleListener(loadingArgumentCaptor.capture())
+        Mockito.verify(mapView).addOnDidFinishLoadingStyleListener(loadingArgumentCaptor.capture())
         loadingArgumentCaptor.value.onDidFinishLoadingStyle()
         val styleLoadedArgumentCaptor: ArgumentCaptor<Style.OnStyleLoaded> =
             ArgumentCaptor.forClass(
@@ -444,28 +443,25 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(symbolSortKey(get("symbol-sort-key")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(symbolSortKey(get("symbol-sort-key")))
             )
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withSymbolSortKey(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(symbolSortKey(get("symbol-sort-key")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(symbolSortKey(get("symbol-sort-key")))
             )
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(symbolSortKey(get("symbol-sort-key")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(symbolSortKey(get("symbol-sort-key")))
             )
+        )
     }
 
     @Test
@@ -480,22 +476,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconSize(get("icon-size"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconSize(get("icon-size"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconSize(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconSize(get("icon-size"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconSize(get("icon-size"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconSize(get("icon-size"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconSize(get("icon-size"))))
+        )
     }
 
     @Test
@@ -510,22 +503,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconImage(get("icon-image"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconImage(get("icon-image"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconImage("undefined")
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconImage(get("icon-image"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconImage(get("icon-image"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconImage(get("icon-image"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconImage(get("icon-image"))))
+        )
     }
 
     @Test
@@ -540,22 +530,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconRotate(get("icon-rotate"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconRotate(get("icon-rotate"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconRotate(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconRotate(get("icon-rotate"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconRotate(get("icon-rotate"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconRotate(get("icon-rotate"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconRotate(get("icon-rotate"))))
+        )
     }
 
     @Test
@@ -570,22 +557,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconOffset(get("icon-offset"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconOffset(get("icon-offset"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconOffset(arrayOf(0f, 0f))
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconOffset(get("icon-offset"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconOffset(get("icon-offset"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconOffset(get("icon-offset"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconOffset(get("icon-offset"))))
+        )
     }
 
     @Test
@@ -600,22 +584,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconAnchor(get("icon-anchor"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconAnchor(get("icon-anchor"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconAnchor(ICON_ANCHOR_CENTER)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconAnchor(get("icon-anchor"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconAnchor(get("icon-anchor"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconAnchor(get("icon-anchor"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconAnchor(get("icon-anchor"))))
+        )
     }
 
     @Test
@@ -630,22 +611,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textField(get("text-field"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textField(get("text-field"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextField("")
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textField(get("text-field"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textField(get("text-field"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textField(get("text-field"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textField(get("text-field"))))
+        )
     }
 
     @Test
@@ -660,23 +638,20 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textFont(get("text-font"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textFont(get("text-font"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng())
             .withTextFont(arrayOf<String>("Open Sans Regular", "Arial Unicode MS Regular"))
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textFont(get("text-font"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textFont(get("text-font"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textFont(get("text-font"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textFont(get("text-font"))))
+        )
     }
 
     @Test
@@ -691,22 +666,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textSize(get("text-size"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textSize(get("text-size"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextSize(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textSize(get("text-size"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textSize(get("text-size"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textSize(get("text-size"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textSize(get("text-size"))))
+        )
     }
 
     @Test
@@ -721,22 +693,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textMaxWidth(get("text-max-width"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textMaxWidth(get("text-max-width"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextMaxWidth(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textMaxWidth(get("text-max-width"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textMaxWidth(get("text-max-width"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textMaxWidth(get("text-max-width"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textMaxWidth(get("text-max-width"))))
+        )
     }
 
     @Test
@@ -751,28 +720,25 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textLetterSpacing(get("text-letter-spacing")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textLetterSpacing(get("text-letter-spacing")))
             )
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextLetterSpacing(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textLetterSpacing(get("text-letter-spacing")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textLetterSpacing(get("text-letter-spacing")))
             )
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textLetterSpacing(get("text-letter-spacing")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textLetterSpacing(get("text-letter-spacing")))
             )
+        )
     }
 
     @Test
@@ -787,22 +753,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textJustify(get("text-justify"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textJustify(get("text-justify"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextJustify(TEXT_JUSTIFY_AUTO)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textJustify(get("text-justify"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textJustify(get("text-justify"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textJustify(get("text-justify"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textJustify(get("text-justify"))))
+        )
     }
 
     @Test
@@ -817,28 +780,25 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textRadialOffset(get("text-radial-offset")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textRadialOffset(get("text-radial-offset")))
             )
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextRadialOffset(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textRadialOffset(get("text-radial-offset")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textRadialOffset(get("text-radial-offset")))
             )
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textRadialOffset(get("text-radial-offset")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textRadialOffset(get("text-radial-offset")))
             )
+        )
     }
 
     @Test
@@ -853,22 +813,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textAnchor(get("text-anchor"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textAnchor(get("text-anchor"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextAnchor(TEXT_ANCHOR_CENTER)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textAnchor(get("text-anchor"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textAnchor(get("text-anchor"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textAnchor(get("text-anchor"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textAnchor(get("text-anchor"))))
+        )
     }
 
     @Test
@@ -883,22 +840,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textRotate(get("text-rotate"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textRotate(get("text-rotate"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextRotate(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textRotate(get("text-rotate"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textRotate(get("text-rotate"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textRotate(get("text-rotate"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textRotate(get("text-rotate"))))
+        )
     }
 
     @Test
@@ -913,22 +867,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textTransform(get("text-transform"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textTransform(get("text-transform"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextTransform(TEXT_TRANSFORM_NONE)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textTransform(get("text-transform"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textTransform(get("text-transform"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textTransform(get("text-transform"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textTransform(get("text-transform"))))
+        )
     }
 
     @Test
@@ -943,22 +894,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textOffset(get("text-offset"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textOffset(get("text-offset"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextOffset(arrayOf(0f, 0f))
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textOffset(get("text-offset"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textOffset(get("text-offset"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textOffset(get("text-offset"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textOffset(get("text-offset"))))
+        )
     }
 
     @Test
@@ -973,22 +921,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconOpacity(get("icon-opacity"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconOpacity(get("icon-opacity"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconOpacity(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconOpacity(get("icon-opacity"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconOpacity(get("icon-opacity"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconOpacity(get("icon-opacity"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconOpacity(get("icon-opacity"))))
+        )
     }
 
     @Test
@@ -1003,22 +948,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconColor(get("icon-color"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconColor(get("icon-color"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconColor("rgba(0, 0, 0, 1)")
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconColor(get("icon-color"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconColor(get("icon-color"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconColor(get("icon-color"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconColor(get("icon-color"))))
+        )
     }
 
     @Test
@@ -1033,28 +975,25 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(iconHaloColor(get("icon-halo-color")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(iconHaloColor(get("icon-halo-color")))
             )
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconHaloColor("rgba(0, 0, 0, 1)")
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(iconHaloColor(get("icon-halo-color")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(iconHaloColor(get("icon-halo-color")))
             )
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(iconHaloColor(get("icon-halo-color")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(iconHaloColor(get("icon-halo-color")))
             )
+        )
     }
 
     @Test
@@ -1069,28 +1008,25 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(iconHaloWidth(get("icon-halo-width")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(iconHaloWidth(get("icon-halo-width")))
             )
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconHaloWidth(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(iconHaloWidth(get("icon-halo-width")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(iconHaloWidth(get("icon-halo-width")))
             )
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(iconHaloWidth(get("icon-halo-width")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(iconHaloWidth(get("icon-halo-width")))
             )
+        )
     }
 
     @Test
@@ -1105,22 +1041,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconHaloBlur(get("icon-halo-blur"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconHaloBlur(get("icon-halo-blur"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withIconHaloBlur(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconHaloBlur(get("icon-halo-blur"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconHaloBlur(get("icon-halo-blur"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(iconHaloBlur(get("icon-halo-blur"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(iconHaloBlur(get("icon-halo-blur"))))
+        )
     }
 
     @Test
@@ -1135,22 +1068,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textOpacity(get("text-opacity"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textOpacity(get("text-opacity"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextOpacity(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textOpacity(get("text-opacity"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textOpacity(get("text-opacity"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textOpacity(get("text-opacity"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textOpacity(get("text-opacity"))))
+        )
     }
 
     @Test
@@ -1165,22 +1095,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textColor(get("text-color"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textColor(get("text-color"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextColor("rgba(0, 0, 0, 1)")
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textColor(get("text-color"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textColor(get("text-color"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textColor(get("text-color"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textColor(get("text-color"))))
+        )
     }
 
     @Test
@@ -1195,28 +1122,25 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textHaloColor(get("text-halo-color")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textHaloColor(get("text-halo-color")))
             )
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextHaloColor("rgba(0, 0, 0, 1)")
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textHaloColor(get("text-halo-color")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textHaloColor(get("text-halo-color")))
             )
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textHaloColor(get("text-halo-color")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textHaloColor(get("text-halo-color")))
             )
+        )
     }
 
     @Test
@@ -1231,28 +1155,25 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textHaloWidth(get("text-halo-width")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textHaloWidth(get("text-halo-width")))
             )
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextHaloWidth(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textHaloWidth(get("text-halo-width")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textHaloWidth(get("text-halo-width")))
             )
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(
-                    PropertyValueMatcher(textHaloWidth(get("text-halo-width")))
-                )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(textHaloWidth(get("text-halo-width")))
             )
+        )
     }
 
     @Test
@@ -1267,22 +1188,19 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        Mockito.verify(symbolLayer, Mockito.times(0))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textHaloBlur(get("text-halo-blur"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textHaloBlur(get("text-halo-blur"))))
+        )
         val options = SymbolOptions().withLatLng(LatLng()).withTextHaloBlur(2.0f)
         symbolManager.create(options)
         symbolManager.updateSourceNow()
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textHaloBlur(get("text-halo-blur"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textHaloBlur(get("text-halo-blur"))))
+        )
         symbolManager.create(options)
-        Mockito.verify(symbolLayer, Mockito.times(1))
-            .setProperties(
-                ArgumentMatchers.argThat(PropertyValueMatcher(textHaloBlur(get("text-halo-blur"))))
-            )
+        Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(textHaloBlur(get("text-halo-blur"))))
+        )
     }
 
     @Test

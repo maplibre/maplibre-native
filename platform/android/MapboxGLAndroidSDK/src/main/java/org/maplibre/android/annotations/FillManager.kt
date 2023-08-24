@@ -28,8 +28,10 @@ class FillManager @UiThread internal constructor(
     belowLayerId: String? = null,
     aboveLayerId: String? = null,
     geoJsonOptions: GeoJsonOptions? = null,
-    draggableAnnotationController: DraggableAnnotationController =
-        DraggableAnnotationController.getInstance(mapView, maplibreMap)
+    draggableAnnotationController: DraggableAnnotationController = DraggableAnnotationController.getInstance(
+        mapView,
+        maplibreMap
+    )
 ) : AnnotationManager<FillLayer, Fill, FillOptions, OnFillDragListener, OnFillClickListener, OnFillLongClickListener>(
     mapView,
     maplibreMap,
@@ -59,13 +61,12 @@ class FillManager @UiThread internal constructor(
         geoJsonOptions
     )
 
-    override fun initializeDataDrivenPropertyMap() =
-        listOf(
-            FillOptions.PROPERTY_FILL_OPACITY,
-            FillOptions.PROPERTY_FILL_COLOR,
-            FillOptions.PROPERTY_FILL_OUTLINE_COLOR,
-            FillOptions.PROPERTY_FILL_PATTERN
-        ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
+    override fun initializeDataDrivenPropertyMap() = listOf(
+        FillOptions.PROPERTY_FILL_OPACITY,
+        FillOptions.PROPERTY_FILL_COLOR,
+        FillOptions.PROPERTY_FILL_OUTLINE_COLOR,
+        FillOptions.PROPERTY_FILL_PATTERN
+    ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
 
     override fun setDataDrivenPropertyIsUsed(property: String) {
         when (property) {

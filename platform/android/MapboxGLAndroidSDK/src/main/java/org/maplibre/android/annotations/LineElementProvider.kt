@@ -21,8 +21,10 @@ internal class LineElementProvider : CoreElementProvider<LineLayer> {
     override val layer: LineLayer
         get() = LineLayer(layerId, sourceId)
 
-    override fun getSource(geoJsonOptions: GeoJsonOptions?): GeoJsonSource =
-        GeoJsonSource(sourceId, geoJsonOptions)
+    override fun getSource(geoJsonOptions: GeoJsonOptions?): GeoJsonSource = GeoJsonSource(
+        sourceId,
+        geoJsonOptions
+    )
 
     companion object {
         private val ID_GENERATOR = AtomicLong(0)

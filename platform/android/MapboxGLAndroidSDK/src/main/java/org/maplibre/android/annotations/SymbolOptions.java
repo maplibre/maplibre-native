@@ -84,7 +84,9 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Set symbol-sort-key to initialise the symbol with.
    * <p>
-   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement.
+   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features
+   * with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when
+   * doing placement.
    * </p>
    *
    * @param symbolSortKey the symbol-sort-key value
@@ -98,7 +100,9 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Get the current configured  symbol-sort-key for the symbol
    * <p>
-   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement.
+   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features
+   * with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when
+   * doing placement.
    * </p>
    *
    * @return symbolSortKey value
@@ -110,7 +114,9 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Set icon-size to initialise the symbol with.
    * <p>
-   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the image.
+   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original
+   * pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the
+   * image.
    * </p>
    *
    * @param iconSize the icon-size value
@@ -124,7 +130,9 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Get the current configured  icon-size for the symbol
    * <p>
-   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the image.
+   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original
+   * pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the
+   * image.
    * </p>
    *
    * @return iconSize value
@@ -188,7 +196,10 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Set icon-offset to initialise the symbol with.
    * <p>
-   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as if the rotated direction was up.
+   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final
+   * offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as
+   * if the rotated direction was up.
    * </p>
    *
    * @param iconOffset the icon-offset value
@@ -202,7 +213,10 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Get the current configured  icon-offset for the symbol
    * <p>
-   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as if the rotated direction was up.
+   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final
+   * offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as
+   * if the rotated direction was up.
    * </p>
    *
    * @return iconOffset value
@@ -240,7 +254,8 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Set text-field to initialise the symbol with.
    * <p>
-   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with default/inherited formatting options.
+   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with
+   * default/inherited formatting options.
    * </p>
    *
    * @param textField the text-field value
@@ -254,7 +269,8 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Get the current configured  text-field for the symbol
    * <p>
-   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with default/inherited formatting options.
+   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with
+   * default/inherited formatting options.
    * </p>
    *
    * @return textField value
@@ -396,7 +412,9 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Set text-radial-offset to initialise the symbol with.
    * <p>
-   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional {@link PropertyFactory#textOffset}.
+   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with
+   * {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional
+   * {@link PropertyFactory#textOffset}.
    * </p>
    *
    * @param textRadialOffset the text-radial-offset value
@@ -410,7 +428,9 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Get the current configured  text-radial-offset for the symbol
    * <p>
-   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional {@link PropertyFactory#textOffset}.
+   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with
+   * {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional
+   * {@link PropertyFactory#textOffset}.
    * </p>
    *
    * @return textRadialOffset value
@@ -500,7 +520,8 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Set text-offset to initialise the symbol with.
    * <p>
-   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate left and up.
+   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up.
    * </p>
    *
    * @param textOffset the text-offset value
@@ -514,7 +535,8 @@ public class SymbolOptions extends Options<Symbol> {
   /**
    * Get the current configured  text-offset for the symbol
    * <p>
-   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate left and up.
+   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up.
    * </p>
    *
    * @return textOffset value
@@ -836,8 +858,7 @@ public class SymbolOptions extends Options<Symbol> {
   }
 
   /**
-   * Set whether this symbol should be draggable,
-   * meaning it can be dragged across the screen when touched and moved.
+   * Set whether this symbol should be draggable, meaning it can be dragged across the screen when touched and moved.
    *
    * @param draggable should be draggable
    */

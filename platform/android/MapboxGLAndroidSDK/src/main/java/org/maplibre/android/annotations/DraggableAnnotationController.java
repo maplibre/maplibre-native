@@ -146,7 +146,9 @@ final class DraggableAnnotationController {
           shiftedGeometry
         );
         draggedAnnotationManager.updateSource();
-        for (OnAnnotationDragListener d : (List<OnAnnotationDragListener>) draggedAnnotationManager.getDragListeners()) {
+        for (
+          OnAnnotationDragListener d : (List<OnAnnotationDragListener>) draggedAnnotationManager.getDragListeners()
+        ) {
           d.onAnnotationDrag(draggedAnnotation);
         }
         return true;

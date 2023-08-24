@@ -37,7 +37,8 @@ public class FillOptions extends Options<Fill> {
   /**
    * Set fill-opacity to initialise the fill with.
    * <p>
-   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also affect the 1px stroke around the fill, if the stroke is used.
+   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also
+   * affect the 1px stroke around the fill, if the stroke is used.
    * </p>
    *
    * @param fillOpacity the fill-opacity value
@@ -51,7 +52,8 @@ public class FillOptions extends Options<Fill> {
   /**
    * Get the current configured  fill-opacity for the fill
    * <p>
-   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also affect the 1px stroke around the fill, if the stroke is used.
+   * The opacity of the entire fill layer. In contrast to the {@link PropertyFactory#fillColor}, this value will also
+   * affect the 1px stroke around the fill, if the stroke is used.
    * </p>
    *
    * @return fillOpacity value
@@ -63,7 +65,8 @@ public class FillOptions extends Options<Fill> {
   /**
    * Set fill-color to initialise the fill with.
    * <p>
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the
+   * color's opacity will not affect the opacity of the 1px stroke, if it is used.
    * </p>
    *
    * @param fillColor the fill-color value
@@ -77,7 +80,8 @@ public class FillOptions extends Options<Fill> {
   /**
    * Get the current configured  fill-color for the fill
    * <p>
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the
+   * color's opacity will not affect the opacity of the 1px stroke, if it is used.
    * </p>
    *
    * @return fillColor value
@@ -115,7 +119,9 @@ public class FillOptions extends Options<Fill> {
   /**
    * Set fill-pattern to initialise the fill with.
    * <p>
-   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a
+   * factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom
+   * levels.
    * </p>
    *
    * @param fillPattern the fill-pattern value
@@ -129,7 +135,9 @@ public class FillOptions extends Options<Fill> {
   /**
    * Get the current configured  fill-pattern for the fill
    * <p>
-   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Name of image in sprite to use for drawing image fills. For seamless patterns, image width and height must be a
+   * factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom
+   * levels.
    * </p>
    *
    * @return fillPattern value
@@ -206,8 +214,7 @@ public class FillOptions extends Options<Fill> {
   }
 
   /**
-   * Set whether this fill should be draggable,
-   * meaning it can be dragged across the screen when touched and moved.
+   * Set whether this fill should be draggable, meaning it can be dragged across the screen when touched and moved.
    *
    * @param draggable should be draggable
    */

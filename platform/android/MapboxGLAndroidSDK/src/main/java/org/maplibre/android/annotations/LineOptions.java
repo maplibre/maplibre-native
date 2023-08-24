@@ -175,7 +175,9 @@ public class LineOptions extends Options<Line> {
   /**
    * Set line-offset to initialise the line with.
    * <p>
-   * The line's offset. For linear features, a positive value offsets the line to the right, relative to the direction of the line, and a negative value to the left. For polygon features, a positive value results in an inset, and a negative value results in an outset.
+   * The line's offset. For linear features, a positive value offsets the line to the right, relative to the direction
+   * of the line, and a negative value to the left. For polygon features, a positive value results in an inset, and a
+   * negative value results in an outset.
    * </p>
    *
    * @param lineOffset the line-offset value
@@ -189,7 +191,9 @@ public class LineOptions extends Options<Line> {
   /**
    * Get the current configured  line-offset for the line
    * <p>
-   * The line's offset. For linear features, a positive value offsets the line to the right, relative to the direction of the line, and a negative value to the left. For polygon features, a positive value results in an inset, and a negative value results in an outset.
+   * The line's offset. For linear features, a positive value offsets the line to the right, relative to the direction
+   * of the line, and a negative value to the left. For polygon features, a positive value results in an inset, and a
+   * negative value results in an outset.
    * </p>
    *
    * @return lineOffset value
@@ -227,7 +231,8 @@ public class LineOptions extends Options<Line> {
   /**
    * Set line-pattern to initialise the line with.
    * <p>
-   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two
+   * (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
    * </p>
    *
    * @param linePattern the line-pattern value
@@ -241,7 +246,8 @@ public class LineOptions extends Options<Line> {
   /**
    * Get the current configured  line-pattern for the line
    * <p>
-   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two
+   * (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
    * </p>
    *
    * @return linePattern value
@@ -310,8 +316,7 @@ public class LineOptions extends Options<Line> {
   }
 
   /**
-   * Set whether this line should be draggable,
-   * meaning it can be dragged across the screen when touched and moved.
+   * Set whether this line should be draggable, meaning it can be dragged across the screen when touched and moved.
    *
    * @param draggable should be draggable
    */

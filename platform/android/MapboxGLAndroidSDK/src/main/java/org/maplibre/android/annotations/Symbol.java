@@ -152,7 +152,9 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Get the SymbolSortKey property
    * <p>
-   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement.
+   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features
+   * with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when
+   * doing placement.
    * </p>
    *
    * @return property wrapper value around Float
@@ -164,7 +166,9 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Set the SymbolSortKey property
    * <p>
-   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when doing placement.
+   * Sorts features in ascending order based on this value. Features with a higher sort key will appear above features
+   * with a lower sort key when they overlap. Features with a lower sort key will have priority over other features when
+   * doing placement.
    * </p>
    * <p>
    * To update the symbol on the map use {@link SymbolManager#update(AbstractAnnotation)}.
@@ -179,7 +183,9 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Get the IconSize property
    * <p>
-   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the image.
+   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original
+   * pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the
+   * image.
    * </p>
    *
    * @return property wrapper value around Float
@@ -191,7 +197,9 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Set the IconSize property
    * <p>
-   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the image.
+   * Scales the original size of the icon by the provided factor. The new pixel size of the image will be the original
+   * pixel size multiplied by {@link PropertyFactory#iconSize}. 1 is the original size; 3 triples the size of the
+   * image.
    * </p>
    * <p>
    * To update the symbol on the map use {@link SymbolManager#update(AbstractAnnotation)}.
@@ -260,7 +268,10 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Get the IconOffset property
    * <p>
-   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as if the rotated direction was up.
+   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final
+   * offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as
+   * if the rotated direction was up.
    * </p>
    *
    * @return PointF value for Float[]
@@ -273,7 +284,10 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Set the IconOffset property.
    * <p>
-   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as if the rotated direction was up.
+   * Offset distance of icon from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up. Each component is multiplied by the value of {@link PropertyFactory#iconSize} to obtain the final
+   * offset in density-independent pixels. When combined with {@link PropertyFactory#iconRotate} the offset will be as
+   * if the rotated direction was up.
    * </p>
    * <p>
    * To update the symbol on the map use {@link SymbolManager#update(AbstractAnnotation)}.
@@ -318,7 +332,8 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Get the TextField property
    * <p>
-   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with default/inherited formatting options.
+   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with
+   * default/inherited formatting options.
    * </p>
    *
    * @return property wrapper value around String
@@ -330,7 +345,8 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Set the TextField property
    * <p>
-   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with default/inherited formatting options.
+   * Value to use for a text label. If a plain `string` is provided, it will be treated as a `formatted` with
+   * default/inherited formatting options.
    * </p>
    * <p>
    * To update the symbol on the map use {@link SymbolManager#update(AbstractAnnotation)}.
@@ -489,7 +505,9 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Get the TextRadialOffset property
    * <p>
-   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional {@link PropertyFactory#textOffset}.
+   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with
+   * {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional
+   * {@link PropertyFactory#textOffset}.
    * </p>
    *
    * @return property wrapper value around Float
@@ -501,7 +519,9 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Set the TextRadialOffset property
    * <p>
-   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional {@link PropertyFactory#textOffset}.
+   * Radial offset of text, in the direction of the symbol's anchor. Useful in combination with
+   * {@link PropertyFactory#textVariableAnchor}, which doesn't support the two-dimensional
+   * {@link PropertyFactory#textOffset}.
    * </p>
    * <p>
    * To update the symbol on the map use {@link SymbolManager#update(AbstractAnnotation)}.
@@ -597,7 +617,8 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Get the TextOffset property
    * <p>
-   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate left and up.
+   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up.
    * </p>
    *
    * @return PointF value for Float[]
@@ -610,7 +631,8 @@ public class Symbol extends AbstractAnnotation<Point> {
   /**
    * Set the TextOffset property.
    * <p>
-   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate left and up.
+   * Offset distance of text from its anchor. Positive values indicate right and down, while negative values indicate
+   * left and up.
    * </p>
    * <p>
    * To update the symbol on the map use {@link SymbolManager#update(AbstractAnnotation)}.

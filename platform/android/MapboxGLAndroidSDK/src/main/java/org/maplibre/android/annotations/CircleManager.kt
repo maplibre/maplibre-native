@@ -28,8 +28,10 @@ class CircleManager @UiThread internal constructor(
     belowLayerId: String? = null,
     aboveLayerId: String? = null,
     geoJsonOptions: GeoJsonOptions? = null,
-    draggableAnnotationController: DraggableAnnotationController =
-        DraggableAnnotationController.getInstance(mapView, maplibreMap)
+    draggableAnnotationController: DraggableAnnotationController = DraggableAnnotationController.getInstance(
+        mapView,
+        maplibreMap
+    )
 ) : AnnotationManager<CircleLayer, Circle, CircleOptions, OnCircleDragListener, OnCircleClickListener, OnCircleLongClickListener>(
     mapView,
     maplibreMap,
@@ -59,16 +61,15 @@ class CircleManager @UiThread internal constructor(
         geoJsonOptions = geoJsonOptions
     )
 
-    override fun initializeDataDrivenPropertyMap() =
-        listOf(
-            CircleOptions.PROPERTY_CIRCLE_RADIUS,
-            CircleOptions.PROPERTY_CIRCLE_COLOR,
-            CircleOptions.PROPERTY_CIRCLE_BLUR,
-            CircleOptions.PROPERTY_CIRCLE_OPACITY,
-            CircleOptions.PROPERTY_CIRCLE_STROKE_WIDTH,
-            CircleOptions.PROPERTY_CIRCLE_STROKE_COLOR,
-            CircleOptions.PROPERTY_CIRCLE_STROKE_OPACITY
-        ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
+    override fun initializeDataDrivenPropertyMap() = listOf(
+        CircleOptions.PROPERTY_CIRCLE_RADIUS,
+        CircleOptions.PROPERTY_CIRCLE_COLOR,
+        CircleOptions.PROPERTY_CIRCLE_BLUR,
+        CircleOptions.PROPERTY_CIRCLE_OPACITY,
+        CircleOptions.PROPERTY_CIRCLE_STROKE_WIDTH,
+        CircleOptions.PROPERTY_CIRCLE_STROKE_COLOR,
+        CircleOptions.PROPERTY_CIRCLE_STROKE_OPACITY
+    ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
 
     override fun setDataDrivenPropertyIsUsed(property: String) {
         when (property) {
@@ -169,8 +170,9 @@ class CircleManager @UiThread internal constructor(
      */
     @UiThread
     fun create(featureCollection: FeatureCollection): List<Circle> =
-        featureCollection.features()?.mapNotNull { CircleOptions.fromFeature(it) }
-            .let { create(it ?: emptyList()) }
+        featureCollection.features()?.mapNotNull {
+            CircleOptions.fromFeature(it)
+        }.let { create(it ?: emptyList()) }
 
     /**
      * Key of the id of the annotation

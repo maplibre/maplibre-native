@@ -271,8 +271,7 @@ public class CircleOptions extends Options<Circle> {
   }
 
   /**
-   * Set whether this circle should be draggable,
-   * meaning it can be dragged across the screen when touched and moved.
+   * Set whether this circle should be draggable, meaning it can be dragged across the screen when touched and moved.
    *
    * @param draggable should be draggable
    */

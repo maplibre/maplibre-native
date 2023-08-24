@@ -347,34 +347,31 @@ abstract class AnnotationManager<L : Layer, T : AbstractAnnotation<*>, S : Optio
      */
     private inner class MapClickResolver : OnMapClickListener, OnMapLongClickListener {
 
-        override fun onMapClick(point: LatLng): Boolean =
-            if (clickListeners.isNotEmpty()) {
-                queryMapForFeatures(point)?.let { annotation ->
-                    clickListeners.any { it.onAnnotationClick(annotation) }
-                } ?: false
-            } else {
-                false
-            }
+        override fun onMapClick(point: LatLng): Boolean = if (clickListeners.isNotEmpty()) {
+            queryMapForFeatures(point)?.let { annotation ->
+                clickListeners.any { it.onAnnotationClick(annotation) }
+            } ?: false
+        } else {
+            false
+        }
 
-        override fun onMapLongClick(point: LatLng): Boolean =
-            if (longClickListeners.isNotEmpty()) {
-                queryMapForFeatures(point)?.let { annotation ->
-                    longClickListeners.any { it.onAnnotationLongClick(annotation) }
-                } ?: false
-            } else {
-                false
-            }
+        override fun onMapLongClick(point: LatLng): Boolean = if (longClickListeners.isNotEmpty()) {
+            queryMapForFeatures(point)?.let { annotation ->
+                longClickListeners.any { it.onAnnotationLongClick(annotation) }
+            } ?: false
+        } else {
+            false
+        }
     }
 
     private fun queryMapForFeatures(point: LatLng): T? =
         queryMapForFeatures(maplibreMap.projection.toScreenLocation(point))
 
     fun queryMapForFeatures(point: PointF): T? =
-        maplibreMap.queryRenderedFeatures(point, coreElementProvider.layerId).firstOrNull()
-            ?.let { feature ->
-                val id = feature.getProperty(annotationIdKey).asLong
-                annotations[id]
-            }
+        maplibreMap.queryRenderedFeatures(point, coreElementProvider.layerId).firstOrNull()?.let { feature ->
+            val id = feature.getProperty(annotationIdKey).asLong
+            annotations[id]
+        }
 
     companion object {
         private const val TAG = "AnnotationManager"

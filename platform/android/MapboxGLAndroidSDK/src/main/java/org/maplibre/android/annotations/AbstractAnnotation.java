@@ -69,8 +69,8 @@ public abstract class AbstractAnnotation<T extends Geometry> {
   }
 
   /**
-   * Set whether this annotation should be draggable,
-   * meaning it can be dragged across the screen when touched and moved.
+   * Set whether this annotation should be draggable, meaning it can be dragged across the screen when touched and
+   * moved.
    *
    * @param draggable should be draggable
    */
@@ -135,10 +135,6 @@ public abstract class AbstractAnnotation<T extends Geometry> {
 
   @Override
   public String toString() {
-    return getName()
-      + "{geometry=" + geometry
-      + ", properties=" + jsonObject
-      + ", isDraggable=" + isDraggable
-      + '}';
+    return getName() + "{geometry=" + geometry + ", properties=" + jsonObject + ", isDraggable=" + isDraggable + '}';
   }
 }
