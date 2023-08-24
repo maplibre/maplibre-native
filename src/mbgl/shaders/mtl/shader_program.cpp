@@ -175,12 +175,9 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes([&](const std::string&, const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
-    uniformBlocks.visit([&](const std::string&, const gfx::UniformBlock& block){
-        assert(block.getIndex() != index);
-    });
+    vertexAttributes.visitAttributes(
+        [&](const std::string&, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    uniformBlocks.visit([&](const std::string&, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     vertexAttributes.add(std::string(info.name), index, info.dataType, info.count);
 }
@@ -189,12 +186,9 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes([&](const std::string&, const gfx::VertexAttribute& attrib) {
-        assert(attrib.getIndex() != index);
-    });
-    uniformBlocks.visit([&](const std::string&, const gfx::UniformBlock& block){
-        assert(block.getIndex() != index);
-    });
+    vertexAttributes.visitAttributes(
+        [&](const std::string&, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    uniformBlocks.visit([&](const std::string&, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     if (const auto& block_ = uniformBlocks.add(info.name.data(), index, info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);

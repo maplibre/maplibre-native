@@ -163,9 +163,9 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto* indexes = static_cast<const std::uint16_t*>(indexBuffer->contents());
             const auto maxIndex = *std::max_element(indexes + mlSegment.indexOffset,
                                                     indexes + mlSegment.indexOffset + mlSegment.indexLength);
-            
+
             // Uncomment for a detailed accounting of each draw call
-            //Log::Warning(Event::General,
+            // Log::Warning(Event::General,
             //             util::toString(getID()) + "/" + getName() +
             //             " => " + util::toString(mlSegment.indexLength) +
             //             " idxs @ " + util::toString(mlSegment.indexOffset) +
