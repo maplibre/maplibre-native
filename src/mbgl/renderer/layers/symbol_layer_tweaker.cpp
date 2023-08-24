@@ -11,12 +11,15 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/shaders/mtl/symbol_icon.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
+
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/mtl/symbol_icon.hpp>
+#endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
 

@@ -22,8 +22,7 @@
 #include <mbgl/shaders/gl/drawable_hillshade.hpp>
 #include <mbgl/shaders/gl/drawable_raster.hpp>
 #include <mbgl/shaders/gl/drawable_symbol_icon.hpp>
-#include <mbgl/shaders/gl/drawable_symbol_sdf_text.hpp>
-#include <mbgl/shaders/gl/drawable_symbol_sdf_icon.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_sdf.hpp>
 #include <mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
