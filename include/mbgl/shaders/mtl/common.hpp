@@ -13,12 +13,12 @@ using namespace metal;
 // The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
 // in a byte (-128..127). We scale regular normals up to length 63, but there are also
 // "special" normals that have a bigger length (of up to 126 in this case).
-constant float LINE_NORMAL_SCALE = 1.0 / (127 / 2);
+#define LINE_NORMAL_SCALE (1.0 / (127 / 2))
 
 // The attribute conveying progress along a line is scaled to [0, 2^15).
-constant float MAX_LINE_DISTANCE = 32767.0;
+#define MAX_LINE_DISTANCE 32767.0
 
-constant float SDF_PX = 8.0;
+#define SDF_PX 8.0
 
 enum class AttributeSource : int32_t {
     Constant,

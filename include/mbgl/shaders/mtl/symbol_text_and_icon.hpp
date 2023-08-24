@@ -29,12 +29,12 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
         {8, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
     };
     static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(8, true, true, SymbolDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, SymbolDrawablePaintUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, true, SymbolDrawableTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, false, SymbolDrawableInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(12, true, true, SymbolPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(13, true, false, ExpressionInputsUBO),
+        MLN_MTL_UNIFORM_BLOCK(9, true, true, SymbolDrawableUBO),
+        MLN_MTL_UNIFORM_BLOCK(10, true, false, SymbolDrawablePaintUBO),
+        MLN_MTL_UNIFORM_BLOCK(11, true, true, SymbolDrawableTilePropsUBO),
+        MLN_MTL_UNIFORM_BLOCK(12, true, false, SymbolDrawableInterpolateUBO),
+        MLN_MTL_UNIFORM_BLOCK(13, true, true, SymbolPermutationUBO),
+        MLN_MTL_UNIFORM_BLOCK(14, true, false, ExpressionInputsUBO),
     };
     static constexpr TextureInfo textures[] = {
         {0, "u_texture"},
@@ -48,15 +48,14 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 struct VertexStage {
     float4 pos_offset [[attribute(0)]];
     float4 data [[attribute(1)]];
-    float4 pixeloffset [[attribute(2)]];
-    float3 projected_pos [[attribute(3)]];
-    float fade_opacity [[attribute(4)]];
+    float3 projected_pos [[attribute(2)]];
+    float fade_opacity [[attribute(3)]];
 
-    float4 fill_color [[attribute(5)]];
-    float4 halo_color [[attribute(6)]];
-    float opacity [[attribute(7)]];
-    float halo_width [[attribute(8)]];
-    float halo_blur [[attribute(9)]];
+    float4 fill_color [[attribute(4)]];
+    float4 halo_color [[attribute(5)]];
+    float opacity [[attribute(6)]];
+    float halo_width [[attribute(7)]];
+    float halo_blur [[attribute(8)]];
 };
 
 struct FragmentStage {
@@ -71,12 +70,12 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(9)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(10)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(11)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(12)]],
-                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
+                                device const SymbolDrawableUBO& drawable [[buffer(9)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]],
+                                device const SymbolPermutationUBO& permutation [[buffer(13)]],
+                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
 
     const auto fill_color = colorFor(permutation.fill_color, paint.fill_color, vertx.fill_color, interp.fill_color_t, expr);
     const auto halo_color = colorFor(permutation.halo_color, paint.halo_color, vertx.halo_color, interp.halo_color_t, expr);
@@ -164,9 +163,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                            device const SymbolDrawableTilePropsUBO& props [[buffer(10)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(12)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(9)]],
+                            device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
+                            device const SymbolPermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> glyph_image [[texture(0)]],
                             texture2d<float, access::sample> icon_image [[texture(1)]],
                             sampler glyph_sampler [[sampler(0)]],

@@ -157,6 +157,41 @@ void Drawable::draw(PaintParameters& parameters) const {
             const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize *
                                                                        mlSegment.indexOffset); // in bytes, not indexes
             const NS::Integer baseVertex = static_cast<NS::Integer>(mlSegment.vertexOffset);
+
+#if !defined(NDEBUG)
+            const auto indexBufferLength = indexBuffer->length() / indexSize;
+            const auto* indexes = static_cast<const std::uint16_t*>(indexBuffer->contents());
+            const auto maxIndex = *std::max_element(indexes + mlSegment.indexOffset,
+                                                    indexes + mlSegment.indexOffset + mlSegment.indexLength);
+            
+            // Uncomment for a detailed accounting of each draw call
+            //Log::Warning(Event::General,
+            //             util::toString(getID()) + "/" + getName() +
+            //             " => " + util::toString(mlSegment.indexLength) +
+            //             " idxs @ " + util::toString(mlSegment.indexOffset) +
+            //             " (=" + util::toString(mlSegment.indexLength + mlSegment.indexOffset) +
+            //             " of " + util::toString(indexBufferLength) +
+            //             ") max index " + util::toString(maxIndex) +
+            //             " on base vertex " + util::toString(baseVertex) +
+            //             " (" + util::toString(baseVertex + maxIndex) +
+            //             " of " + util::toString(impl->vertexCount) +
+            //             ") indexBuf=" + util::toString((uint64_t)indexBuffer) +
+            //             "/" + util::toString(indexBuffer->gpuAddress()));
+
+            assert(mlSegment.indexOffset + mlSegment.indexLength <= indexBufferLength);
+            assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
+
+            for (const auto& binding : attributeBindings) {
+                if (binding) {
+                    if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
+                        assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
+                    } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
+                        assert(binding->vertexStride <= buffer->length());
+                    }
+                }
+            }
+#endif
+
             encoder->drawIndexedPrimitives(primitiveType,
                                            mlSegment.indexLength,
                                            indexType,
@@ -393,7 +428,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& context = static_cast<Context&>(contextBase);
 
     const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;
-    ;
 
     if (buildAttribs) {
 #if !defined(NDEBUG)

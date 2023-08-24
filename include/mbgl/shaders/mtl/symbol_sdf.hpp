@@ -30,12 +30,12 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
         {9, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
     };
     static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(8, true, true, SymbolDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, SymbolDrawablePaintUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, true, SymbolDrawableTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, false, SymbolDrawableInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(12, true, true, SymbolPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(13, true, false, ExpressionInputsUBO),
+        MLN_MTL_UNIFORM_BLOCK(10, true, true, SymbolDrawableUBO),
+        MLN_MTL_UNIFORM_BLOCK(11, true, false, SymbolDrawablePaintUBO),
+        MLN_MTL_UNIFORM_BLOCK(12, true, true, SymbolDrawableTilePropsUBO),
+        MLN_MTL_UNIFORM_BLOCK(13, true, false, SymbolDrawableInterpolateUBO),
+        MLN_MTL_UNIFORM_BLOCK(14, true, true, SymbolPermutationUBO),
+        MLN_MTL_UNIFORM_BLOCK(15, true, false, ExpressionInputsUBO),
     };
     static constexpr TextureInfo textures[] = {
         {0, "u_texture"},
@@ -68,12 +68,12 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(9)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(10)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(11)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(12)]],
-                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
+                                device const SymbolDrawableUBO& drawable [[buffer(10)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]],
+                                device const SymbolPermutationUBO& permutation [[buffer(14)]],
+                                device const ExpressionInputsUBO& expr [[buffer(15)]]) {
 
     const auto fill_color = colorFor(permutation.fill_color, paint.fill_color, vertx.fill_color, interp.fill_color_t, expr);
     const auto halo_color = colorFor(permutation.halo_color, paint.halo_color, vertx.halo_color, interp.halo_color_t, expr);
@@ -161,9 +161,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                            device const SymbolDrawableTilePropsUBO& props [[buffer(10)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(12)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(10)]],
+                            device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
+                            device const SymbolPermutationUBO& permutation [[buffer(14)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {

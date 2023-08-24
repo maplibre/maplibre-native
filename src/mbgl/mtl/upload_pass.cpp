@@ -177,6 +177,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         bindings.resize(std::max(bindings.size(), index + 1));
 
         if (!override_) {
+            // No attribute was provided, this value will be used from a uniform, but we have to set
+            // up a valid binding or the validation will complain when the shader code references the
+            // attribute at compile time, regardless of whether it's ever used at runtime.
             bindings[index] = {
                 /*.attribute = */ {defaultAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(VertexAttribute::getStrideOf(defaultAttr.getDataType())),
@@ -188,6 +191,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         // If the attribute references data shared with a bucket, get the corresponding buffer.
         if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
+            assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
+                   effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
+
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
