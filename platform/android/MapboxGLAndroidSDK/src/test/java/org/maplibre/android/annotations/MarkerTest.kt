@@ -1,11 +1,11 @@
 package org.maplibre.android.annotations
 
 import android.graphics.Bitmap
+import org.junit.Assert
+import org.junit.Test
 import org.maplibre.android.exceptions.InvalidMarkerPositionException
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.utils.MockParcel
-import org.junit.Assert
-import org.junit.Test
 import org.mockito.Mockito
 
 class MarkerTest {

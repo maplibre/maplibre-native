@@ -1,12 +1,12 @@
 package org.maplibre.android.annotations
 
 import android.graphics.PointF
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Projection
 import org.junit.Assert
 import org.junit.Test
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Projection
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 

@@ -1,9 +1,9 @@
 package org.maplibre.android.annotations
 
-import org.maplibre.android.maps.MapLibreMap
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.maps.MapLibreMap
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 
