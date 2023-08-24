@@ -531,7 +531,13 @@ ios_application(
     infoplists = ["build/Info-benchmark.plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
-    resources = ["@BenchmarkRepository//:BenchmarkResources"] + glob(["platform/ios/benchmark/*.lproj/**", "platform/ios/benchmark/Assets.xcassets/**"]),
+    resources = glob([
+        "platform/ios/benchmark/*.lproj/**",
+        "platform/ios/benchmark/Assets.xcassets/**",
+        "platform/ios/benchmark/assets/**/*.pbf",
+        "platform/ios/benchmark/assets/**/*.json",
+        "platform/ios/benchmark/assets/**/*.png",
+    ]),
     visibility = ["//visibility:public"],
     deps = [
         "benchapp",

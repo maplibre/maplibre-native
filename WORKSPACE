@@ -57,8 +57,3 @@ load(
 provisioning_profile_repository(
     name = "local_provisioning_profiles"
 )
-
-local_repository(
-    name = "BenchmarkRepository",
-    path = "platform/ios/platform/ios/benchmark/assets",
-)
