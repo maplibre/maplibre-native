@@ -48,6 +48,8 @@ temp_info_static_plist="platform/ios/build/Info-static.plist"
 temp_info_plist="platform/ios/build/Info.plist"
 # Move and configure the app plist
 temp_app_info_plist="platform/ios/build/Info-app.plist"
+# Move and configure the BenchmarkApp plist
+temp_benchmark_info_plist="platform/ios/build/Info-benchmark.plist"
 
 if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
@@ -56,6 +58,7 @@ fi
 cp platform/ios/platform/ios/framework/Info-static.plist "$temp_info_static_plist"
 cp platform/ios/platform/ios/framework/Info.plist "$temp_info_plist"
 cp platform/ios/platform/ios/app/Info.plist "$temp_app_info_plist"
+cp platform/ios/platform/ios/benchmark/Info.plist "$temp_benchmark_info_plist"
 
 # Replace semver and hash
 plutil -replace MLNSemanticVersionString -string "$sem_version" "$temp_info_static_plist"
@@ -67,6 +70,7 @@ plutil -replace MLNCommitHash -string "$hash" "$temp_info_plist"
 echo "Inserting MapLibre API key..."
 if [ "$token" ]; then
     plutil -replace MLNApiKey -string $token "$temp_app_info_plist"
+    plutil -replace MLNApiKey -string $token "$temp_benchmark_info_plist"
     echo "API key insertion successful"
 else
     echo "Warning: Missing API key."
