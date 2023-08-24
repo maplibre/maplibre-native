@@ -1,0 +1,9 @@
+# build file for benchmark assets
+
+load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_group")
+
+apple_resource_group(
+    name = "BenchmarkResources",
+    structured_resources = glob(["**/*"]),
+    visibility = ["//visibility:public"],
+)
