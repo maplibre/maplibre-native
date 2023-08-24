@@ -35,13 +35,13 @@ struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
     /* 128 */ std::array<float, 4 * 4> coord_matrix;
-    
+
     /* 192 */ std::array<float, 2> texsize;
     /* 200 */ std::array<float, 2> texsize_icon;
-    
+
     /* 208 */ float gamma_scale;
     /* 212 */ float device_pixel_ratio;
-    
+
     /* 216 */ float camera_to_center_distance;
     /* 220 */ float pitch;
     /* 224 */ /*bool*/ int rotate_symbol;

@@ -120,17 +120,17 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
-                  shaders::BuiltIn::RasterShader,/*
-                  shaders::BuiltIn::FillShader,
-                  shaders::BuiltIn::FillOutlineShader,
-                  shaders::BuiltIn::LineSDFShader,
-                  shaders::BuiltIn::LinePatternShader,
-                  shaders::BuiltIn::FillOutlinePatternShader,
-                  shaders::BuiltIn::FillPatternShader,
-                  shaders::BuiltIn::FillExtrusionShader,
-                  shaders::BuiltIn::FillExtrusionPatternShader,
-                  shaders::BuiltIn::HillshadePrepareShader,
-                  shaders::BuiltIn::HillshadeShader,*/
+                  shaders::BuiltIn::RasterShader, /*
+                   shaders::BuiltIn::FillShader,
+                   shaders::BuiltIn::FillOutlineShader,
+                   shaders::BuiltIn::LineSDFShader,
+                   shaders::BuiltIn::LinePatternShader,
+                   shaders::BuiltIn::FillOutlinePatternShader,
+                   shaders::BuiltIn::FillPatternShader,
+                   shaders::BuiltIn::FillExtrusionShader,
+                   shaders::BuiltIn::FillExtrusionPatternShader,
+                   shaders::BuiltIn::HillshadePrepareShader,
+                   shaders::BuiltIn::HillshadeShader,*/
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);

@@ -21,7 +21,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
         {2, gfx::AttributeDataType::Short4, 1, "a_pixeloffset"},
         {3, gfx::AttributeDataType::Float3, 1, "a_projected_pos"},
         {4, gfx::AttributeDataType::Float, 1, "a_fade_opacity"},
-        
+
         // sometimes uniforms
         {5, gfx::AttributeDataType::Float, 1, "a_opacity"},
     };

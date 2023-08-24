@@ -184,7 +184,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(SymbolDrawableUBOName, &drawableUBO, context);
         uniforms.addOrReplace(SymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
-        
+
 #if MLN_RENDER_BACKEND_METAL
         uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
         uniforms.addOrReplace(MLN_STRINGIZE(SymbolPermutationUBO), permutationUniformBuffer);

@@ -133,7 +133,7 @@ private:
     gfx::ShaderGroupPtr symbolSDFGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
 #endif // MLN_DRAWABLE_RENDERER
-    
+
 #if MLN_RENDER_BACKEND_METAL
     std::vector<std::string> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
