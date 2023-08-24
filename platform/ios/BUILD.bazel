@@ -441,6 +441,32 @@ objc_library(
     ],
 )
 
+objc_library(
+    name = "benchapp",
+    copts = MAPLIBRE_FLAGS,
+    srcs = [
+        "platform/ios/benchmark/main.m",
+        "platform/ios/benchmark/MBXBenchAppDelegate.m",
+        "platform/ios/benchmark/MBXBenchViewController.mm",
+        "platform/ios/benchmark/locations.cpp",
+    ],
+    hdrs = [
+        "platform/ios/benchmark/MBXBenchAppDelegate.h",
+        "platform/ios/benchmark/MBXBenchViewController.h",
+        "platform/ios/benchmark/locations.hpp",
+    ],
+    includes = [
+        "platform/darwin/app",
+        "platform/darwin/src",
+        "platform/ios/src",
+        "platform/ios/src",
+    ],
+    deps = [
+        "sdk-headers",
+        "//:mbgl-core",
+    ],
+)
+
 _IOS_APPLICATION_RESOURCES = [
     "platform/ios/app/numeric_filter_style.json",
     "platform/ios/app/missing_icon.json",
@@ -495,6 +521,30 @@ ios_application(
     ],
 )
 
+ios_application(
+    name = "BenchmarkApp",
+    bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    infoplists = ["build/Info-benchmark.plist"],
+    minimum_os_version = "12.0",
+    provisioning_profile = "xcode_profile",
+    resources = glob([
+        "platform/ios/benchmark/*.lproj/**",
+        "platform/ios/benchmark/Assets.xcassets/**",
+        "platform/ios/benchmark/assets/**/*.pbf",
+        "platform/ios/benchmark/assets/**/*.json",
+        "platform/ios/benchmark/assets/**/*.png",
+    ]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "benchapp",
+        "sdk",
+    ],
+)
+
 # Outputs a file with the size of MapLibre as a dynamic library in bytes
 genrule(
     name = "size",
@@ -545,6 +595,13 @@ xcodeproj(
         ),
         top_level_target(
             "//render-test/ios:RenderTest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "BenchmarkApp",
             target_environments = [
                 "simulator",
                 "device",
