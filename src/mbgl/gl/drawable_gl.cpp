@@ -17,7 +17,6 @@ DrawableGL::DrawableGL(std::string name_)
       impl(std::make_unique<Impl>()) {}
 
 DrawableGL::~DrawableGL() {
-    impl->indexBuffer = {0, nullptr};
     impl->attributeBuffers.clear();
 }
 
@@ -140,6 +139,14 @@ void DrawableGL::unbindUniformBuffers() const {
     }
 }
 
+struct IndexBufferGL : public gfx::IndexBufferBase {
+    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
+        : buffer(std::move(buffer_)) {}
+    ~IndexBufferGL() override = default;
+
+    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+};
+
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     if (!shader) {
         return;
@@ -154,10 +161,6 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         auto& context = uploadPass.getContext();
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
-
-        const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
-        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
-        auto indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
 
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
@@ -177,7 +180,15 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                           vertexBuffers);
 
         impl->attributeBuffers = std::move(vertexBuffers);
-        impl->indexBuffer = std::move(indexBuffer);
+
+        if (impl->indexes->getDirty()) {
+            auto indexBufferResource{uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
+            auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(), std::move(indexBufferResource));
+            auto buffer = std::make_unique<IndexBufferGL>(std::move(indexBuffer));
+            
+            impl->indexes->setBuffer(std::move(buffer));
+            impl->indexes->setDirty(false);
+        }
 
         // Create a VAO for each group of vertexes described by a segment
         for (const auto& seg : impl->segments) {
@@ -196,7 +207,8 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
             if (!glSeg.getVertexArray().isValid()) {
                 auto vertexArray = glContext.createVertexArray();
-                vertexArray.bind(glContext, impl->indexBuffer, bindings);
+                IndexBufferGL& indexBuffer = *static_cast<IndexBufferGL*>(impl->indexes->getBuffer());
+                vertexArray.bind(glContext, *indexBuffer.buffer, bindings);
                 assert(vertexArray.isValid());
                 glSeg.setVertexArray(std::move(vertexArray));
             }
