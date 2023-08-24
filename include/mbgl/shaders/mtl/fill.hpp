@@ -210,7 +210,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     };
 
     static constexpr TextureInfo textures[] = {
-        {0, "u_image0"},
+        {0, "u_image"},
     };
 
     static constexpr auto source = R"(
@@ -348,7 +348,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     };
 
     static constexpr TextureInfo textures[] = {
-        {0, "u_image0"},
+        {0, "u_image"},
     };
 
     static constexpr auto source = R"(
@@ -366,6 +366,7 @@ struct FragmentStage {
     float2 v_pos_b;
     float4 pattern_from;
     float4 pattern_to;
+    float2 v_pos;
     half opacity;
 };
 
@@ -426,22 +427,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
     float2 pos2 = float2(vertx.position);
-
-    float4 postion = drawable.matrix * float4(postion, 0, 1)
+    float4 position = drawable.matrix * float4(pos2, 0, 1);
 
     return {
-        .position       = postion,
+        .position       = position,
         .pattern_from   = pattern_from,
         .pattern_to     = pattern_to,
-        .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
-        .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
+        .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos2),
+        .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos2),
         .v_pos          =  (position.xy / position.w + 1.0) / 2.0 * drawable.world,
         .opacity        = half(opacity),
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            texture2d<float> colorMap [[texture(0)]],
                             device const FillOutlinePatternDrawableUBO& drawable [[buffer(4)]],
                             device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(6)]],
                             device const FillOutlinePatternPermutationUBO& permutation [[buffer(8)]],
