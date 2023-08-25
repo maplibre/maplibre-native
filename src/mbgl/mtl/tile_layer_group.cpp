@@ -83,10 +83,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     if (features3d) {
         stencilMode3d = stencil3d ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
     } else if (!tileIDs.empty()) {
-#if !defined(NDEBUG)
-        const auto debugGroup = parameters.encoder->createDebugGroup("tile-clip-masks");
-#endif
-
         parameters.renderTileClippingMasks(tileIDs);
     }
 

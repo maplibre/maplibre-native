@@ -1161,6 +1161,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_sdf.hpp

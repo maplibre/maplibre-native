@@ -14,6 +14,7 @@
 #include <mbgl/shaders/mtl/background.hpp>
 #include <mbgl/shaders/mtl/background_pattern.hpp>
 #include <mbgl/shaders/mtl/circle.hpp>
+#include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/heatmap.hpp>
 #include <mbgl/shaders/mtl/heatmap_texture.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
@@ -116,6 +117,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
                   shaders::BuiltIn::CircleShader,
+                  shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::LineShader,

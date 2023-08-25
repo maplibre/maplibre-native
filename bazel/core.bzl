@@ -1033,6 +1033,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/background.hpp",
     "include/mbgl/shaders/mtl/background_pattern.hpp",
     "include/mbgl/shaders/mtl/circle.hpp",
+    "include/mbgl/shaders/mtl/clipping_mask.hpp",
     "include/mbgl/shaders/mtl/common.hpp",
     "include/mbgl/shaders/mtl/heatmap.hpp",
     "include/mbgl/shaders/mtl/heatmap_texture.hpp",
