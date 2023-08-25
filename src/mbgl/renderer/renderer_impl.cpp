@@ -27,18 +27,6 @@
 #include <limits>
 #endif
 
-#if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)
-// DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
-// Drawables will be on the left, vanilla rendering on the right
-// #define MLN_RENDERER_SPLIT_VIEW 1
-// If using SPLIT_VIEW, MLN_RENDERER_QUAD_SPLIT_VIEW will split each half, showing just the opaque
-// pass on top and then a composited opaque+translucent pass on the bottom
-// #define QUAD_SPLIT_VIEW
-#if MLN_RENDERER_SPLIT_VIEW
-#include <mbgl/gl/context.hpp>
-#endif
-#endif
-
 namespace mbgl {
 
 using namespace style;
@@ -377,91 +365,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
     renderDebugOverlays();
-#elif (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
-#if MLN_RENDERER_SPLIT_VIEW
-    [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
-    [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
-    [[maybe_unused]] const auto halfW = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().width *
-                                                                       0.5f);
-    [[maybe_unused]] const auto halfH = static_cast<platform::GLsizei>(backend.getDefaultRenderable().getSize().height *
-                                                                       0.5f);
-    platform::glEnable(GL_SCISSOR_TEST);
-#if MLN_RENDERER_QUAD_SPLIT_VIEW
-    if (parameters.staticData.has3D) {
-        common3DPass();
-        drawable3DPass();
-        renderLayer3DPass();
-        parameters.clearStencil();
-    }
-
-    // Drawable LayerGroups on the left
-    // Opaque only on top
-    platform::glScissor(0, 0, halfW, H);
-    drawableTargetsPass();
-    commonClearPass();
-    drawableOpaquePass();
-
-    // Composite (Opaque+Translucent) on bottom
-    platform::glScissor(0, 0, halfW, halfH);
-    drawableTranslucentPass();
-
-    // RenderLayers on the right
-    // Opaque only on top
-    platform::glScissor(halfW, 0, halfW, H);
-    commonClearPass();
-    // Clipping masks were drawn only on the other side
-    parameters.clearTileClippingMasks();
-    renderLayerOpaquePass();
-
-    // Composite (Opaque+Translucent) on bottom
-    platform::glScissor(halfW, 0, halfW, halfH);
-    renderLayerTranslucentPass();
-#else  // MLN_RENDERER_QUAD_SPLIT_VIEW
-    if (parameters.staticData.has3D) {
-        common3DPass();
-        drawable3DPass();
-        renderLayer3DPass();
-        parameters.clearStencil();
-    }
-
-    // Drawable LayerGroups on the left
-    platform::glScissor(0, 0, halfW, H);
-    drawableTargetsPass();
-    commonClearPass();
-    parameters.clearTileClippingMasks();
-    drawableOpaquePass();
-    drawableTranslucentPass();
-    drawableDebugOverlays();
-
-    // RenderLayers on the right
-    platform::glScissor(halfW, 0, W, H);
-    commonClearPass();
-    parameters.clearTileClippingMasks();
-    renderLayerOpaquePass();
-    renderLayerTranslucentPass();
-    renderDebugOverlays();
-#endif // MLN_RENDERER_QUAD_SPLIT_VIEW
-    // Reset viewport
-    platform::glScissor(0, 0, W, H);
-    platform::glDisable(GL_SCISSOR_TEST);
-#else  // if MLN_RENDERER_SPLIT_VIEW
-    if (parameters.staticData.has3D) {
-        common3DPass();
-        renderLayer3DPass();
-        drawable3DPass();
-        parameters.clearStencil();
-    }
-    commonClearPass();
-    // Do RenderLayers first, drawables last
-    renderLayerOpaquePass();
-    renderLayerTranslucentPass();
-
-    drawableOpaquePass();
-    drawableTranslucentPass();
-
-    renderDebugOverlays();
-    drawableDebugOverlays();
-#endif // MLN_RENDERER_SPLIT_VIEW
 #else
     static_assert(0, "Must define one of (MLN_DRAWABLE_RENDERER, MLN_LEGACY_RENDERER)");
 #endif
