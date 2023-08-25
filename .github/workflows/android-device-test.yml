@@ -15,6 +15,13 @@ jobs:
         ]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: ${{ matrix.test.artifactName }}
+          expect-files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
+
       - name: Generate token
         id: generate_token
         uses: tibdex/github-app-token@v1
@@ -36,6 +43,7 @@ jobs:
           name: ${{ matrix.test.name }}
           appType: ANDROID_APP
           appFile: ${{ matrix.test.appFile }}
+          testFile: ${{ matrix.test.appFile }}
           testPackageType: INSTRUMENTATION_TEST_PACKAGE
           testType: INSTRUMENTATION
 
