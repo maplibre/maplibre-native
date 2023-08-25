@@ -43,6 +43,8 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    namespace 'android.app'
 }
 
 dependencies {
