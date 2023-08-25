@@ -23,6 +23,8 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
+
+#include <limits>
 #endif
 
 #if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)
@@ -91,6 +93,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
+    staticData->backendSize = backend.getDefaultRenderable().getSize();
 
     if (renderState == RenderState::Never) {
         observer->onWillStartRenderingMap();
@@ -140,7 +143,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
     }
 
-    // Run changes
+    // Process changes
     orchestrator.processChanges();
 
     // Run layer tweakers to update any dynamic elements
@@ -149,6 +152,9 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
         }
     });
+
+    // Update the debug layer groups
+    orchestrator.updateDebugLayerGroups(renderTree, parameters);
 
     // Give the layers a chance to do setup
     // orchestrator.visitLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
@@ -162,7 +168,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
 
         // Give the render targets a chance to upload
-        orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
+
+        // Upload the Debug layer group
+        orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 #endif
 
@@ -219,7 +228,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_DRAWABLE_RENDERER
     const auto drawableTargetsPass = [&] {
         // draw render targets
-        orchestrator.observeRenderTargets(
+        orchestrator.visitRenderTargets(
             [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
     };
 #endif
@@ -246,31 +255,28 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // Drawables
     const auto drawableOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
+        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Opaque;
         parameters.currentLayer = 0;
-        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * parameters.numSublayers *
-                                            PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            parameters.currentLayer = layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer++;
         });
     };
 
     const auto drawableTranslucentPass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
+        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Translucent;
-        parameters.currentLayer = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
-        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * parameters.numSublayers *
-                                            PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
-            if (parameters.currentLayer != 0) {
-                parameters.currentLayer--;
-            }
         });
     };
 #endif
@@ -313,6 +319,45 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     };
 #endif // MLN_LEGACY_RENDERER
 
+#if MLN_DRAWABLE_RENDERER
+    const auto drawableDebugOverlays = [&] {
+        // Renders debug overlays.
+        {
+            const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
+            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
+                layerGroup.visitDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
+            });
+        }
+    };
+#endif // MLN_DRAWABLE_RENDERER
+
+#if MLN_LEGACY_RENDERER
+    const auto renderDebugOverlays = [&] {
+        // Renders debug overlays.
+        {
+            const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
+
+            // Finalize the rendering, e.g. by calling debug render calls per tile.
+            // This guarantees that we have at least one function per tile called.
+            // When only rendering layers via the stylesheet, it's possible that we
+            // don't ever visit a tile during rendering.
+            for (const RenderItem& renderItem : sourceRenderItems) {
+                renderItem.render(parameters);
+            }
+        }
+
+#if !defined(NDEBUG)
+        if (parameters.debugOptions & MapDebugOptions::StencilClip) {
+            // Render tile clip boundaries, using stencil buffer to calculate fill color.
+            parameters.context.visualizeStencilBuffer();
+        } else if (parameters.debugOptions & MapDebugOptions::DepthBuffer) {
+            // Render the depth buffer.
+            parameters.context.visualizeDepthBuffer(parameters.depthRangeSize);
+        }
+#endif
+    };
+#endif // MLN_LEGACY_RENDERER
+
 #if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     if (parameters.staticData.has3D) {
         common3DPass();
@@ -322,6 +367,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     commonClearPass();
     drawableOpaquePass();
     drawableTranslucentPass();
+    drawableDebugOverlays();
 #elif (MLN_LEGACY_RENDERER && !MLN_DRAWABLE_RENDERER)
     if (parameters.staticData.has3D) {
         common3DPass();
@@ -330,6 +376,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     commonClearPass();
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
+    renderDebugOverlays();
 #elif (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
 #if MLN_RENDERER_SPLIT_VIEW
     [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
@@ -384,6 +431,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.clearTileClippingMasks();
     drawableOpaquePass();
     drawableTranslucentPass();
+    drawableDebugOverlays();
 
     // RenderLayers on the right
     platform::glScissor(halfW, 0, W, H);
@@ -391,6 +439,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.clearTileClippingMasks();
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
+    renderDebugOverlays();
 #endif // MLN_RENDERER_QUAD_SPLIT_VIEW
     // Reset viewport
     platform::glScissor(0, 0, W, H);
@@ -409,37 +458,13 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     drawableOpaquePass();
     drawableTranslucentPass();
+
+    renderDebugOverlays();
+    drawableDebugOverlays();
 #endif // MLN_RENDERER_SPLIT_VIEW
 #else
     static_assert(0, "Must define one of (MLN_DRAWABLE_RENDERER, MLN_LEGACY_RENDERER)");
 #endif
-
-#if MLN_LEGACY_RENDERER
-    // - DEBUG PASS
-    // --------------------------------------------------------------------------------
-    // Renders debug overlays.
-    {
-        const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-
-        // Finalize the rendering, e.g. by calling debug render calls per tile.
-        // This guarantees that we have at least one function per tile called.
-        // When only rendering layers via the stylesheet, it's possible that we
-        // don't ever visit a tile during rendering.
-        for (const RenderItem& renderItem : sourceRenderItems) {
-            renderItem.render(parameters);
-        }
-    }
-
-#if !defined(NDEBUG)
-    if (parameters.debugOptions & MapDebugOptions::StencilClip) {
-        // Render tile clip boundaries, using stencil buffer to calculate fill color.
-        parameters.context.visualizeStencilBuffer();
-    } else if (parameters.debugOptions & MapDebugOptions::DepthBuffer) {
-        // Render the depth buffer.
-        parameters.context.visualizeDepthBuffer(parameters.depthRangeSize);
-    }
-#endif
-#endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
     //     Give the layers a chance to do cleanup

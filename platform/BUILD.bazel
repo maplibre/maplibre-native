@@ -176,6 +176,23 @@ objc_library(
     ],
 )
 
+objc_library(
+    name = "ios-benchapp",
+    copts = MAPLIBRE_FLAGS,
+    srcs = ["//platform/ios/benchmark:ios_benchmark_srcs"],
+    hdrs = ["//platform/ios/benchmark:ios_benchmark_hdrs"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+        "ios/src",
+    ],
+    visibility = ["//platform/ios:__pkg__"],
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
+    ],
+)
+
 sh_binary(
     name = "check-public-symbols",
     srcs = ["//platform/darwin:scripts/check-public-symbols.sh"],

@@ -448,7 +448,11 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                         std::string(),
                                                                         std::string(IconTextureName),
-                                                                        /*isText=*/false);
+                                                                        /*isText=*/false,
+                                                                        false,
+                                                                        style::AlignmentType::Auto,
+                                                                        false,
+                                                                        false);
                 if (depthBuilder) {
                     depthBuilder->addTweaker(tweaker);
                 }

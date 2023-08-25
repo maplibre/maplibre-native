@@ -431,6 +431,24 @@ ios_application(
     ],
 )
 
+ios_application(
+    name = "BenchmarkApp",
+    bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    infoplists = ["build/Info-benchmark.plist"],
+    minimum_os_version = "12.0",
+    provisioning_profile = "xcode_profile",
+    resources = ["//platform/ios/benchmark:bundle_resources"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//platform:ios-benchapp",
+        "//platform:ios-sdk",
+    ],
+)
+
 # Outputs a file with the size of MapLibre as a dynamic library in bytes
 genrule(
     name = "size",
@@ -462,8 +480,39 @@ xcodeproj(
     },
     top_level_targets = [
         top_level_target(
-            ":App",
-            target_environments = ["device", "simulator"],
+            "App",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "BenchmarkApp",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//render-test/ios:RenderTest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/iosapp-UITests:uitest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/test:ios_test",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
         ),
     ],
     xcode_configurations = {
@@ -480,9 +529,9 @@ sh_binary(
         "Integration_Tests/Info.plist",
         "app/Info.plist",
         "bench_UITests/Info.plist",
-        "benchmark/Info.plist",
         "framework/Info.plist",
         "framework/Info-static.plist",
+        "//platform/ios/benchmark:Info.plist",
         "//platform/ios/iosapp-UITests:Info.plist",
         "//platform/ios/test:Info.plist",
     ],
