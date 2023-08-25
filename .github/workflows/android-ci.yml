@@ -220,14 +220,14 @@ jobs:
     needs: build
 
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.repository_owner == 'maplibre' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/download-artifact@v3
         with:
           name: uploadsEnv
 
       - name: Read uploads.env
-        run: cat uploads.env >> $GITHUB_ENV
+        run: cat uploads.env >> "$GITHUB_ENV"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2

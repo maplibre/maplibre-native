@@ -1,0 +1,36 @@
+load(
+    "@build_bazel_rules_swift//swift:swift.bzl",
+    "swift_library",
+)
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_ui_test")
+load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
+
+configure_device_profiles()
+
+swift_library(
+    name = "uitest_srcs",
+    testonly = True,
+    srcs = glob(
+        [
+            "*.swift",
+        ],
+        allow_empty = False,
+    ),
+)
+
+ios_ui_test(
+    name = "uitest",
+    minimum_os_version = "12.0",
+    provisioning_profile = "xcode_profile",
+    test_host = "//platform/ios:App",
+    visibility = [
+        "@rules_xcodeproj//xcodeproj:generated",
+    ],
+    deps = [
+        "uitest_srcs",
+    ],
+)
+
+exports_files([
+    "Info.plist",
+])

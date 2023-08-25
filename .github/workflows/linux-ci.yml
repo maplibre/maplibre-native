@@ -52,6 +52,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+
       - uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Get latest CMake and Ninja
@@ -72,10 +77,17 @@ jobs:
             libwebp-dev
 
       - name: Build MapLibre Native Core
+        env:
+          CI: 1
         run: |
           cmake --version
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:cpp"
 
       - name: Archive mbgl-test-runner
         uses: actions/upload-artifact@v3
@@ -163,21 +175,13 @@ jobs:
         id: render_test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
-      - name: Save PR number
-        if: always() && steps.render_test.outcome != 'failure'
-        env:
-          PR_NUMBER: ${{ github.event.number }}
-        run: |
-          echo $PR_NUMBER > ./pr_number
-
       - name: Upload render test result
-        if: always() && steps.render_test.outcome != 'failure'
+        if: always() && steps.render_test.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with:
           name: render-test-result
           path: |
             metrics/linux-gcc8-release-style.html
-            ./pr_number
 
   coverage:
     runs-on: ubuntu-22.04
@@ -190,7 +194,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
             libcurl4-openssl-dev \
             libuv1-dev \
             libjpeg-dev \
@@ -198,8 +202,8 @@ jobs:
             libwebp-dev \
             libglfw3-dev \
             libsqlite3-dev \
-            xserver-xorg-video-dummy \
-            xinit
+            xvfb \
+            x11-xserver-utils
 
       - name: Cache Bazel
         uses: actions/cache@v3
@@ -216,10 +220,14 @@ jobs:
 
       - name: Generate coverage report
         run: |
-          bazel coverage --test_output=all --combined_report=lcov --nobuild_runfile_links --local_test_jobs=1 --instrumentation_filter="//:mbgl-core" //test:core //render-test:render-test --//:maplibre_platform=linux --run_under=//platform/linux:startxwrapper
-          echo coverage_report=$(bazel info output_path)/_coverage/_coverage_report.dat >> $GITHUB_ENV
+          xvfb-run -a \
+            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
+            --test_output=errors --local_test_jobs=1 \
+            --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
+            //test:core //expression-test:test
 
       - name: Upload coverage report
+        if: '!cancelled()'
         uses: codecov/codecov-action@v3
         with:
           files: ${{ env.coverage_report }}

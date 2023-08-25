@@ -1,0 +1,38 @@
+load(
+    "bazel/files.bzl",
+    "MLN_MACOS_PRIVATE_HEADERS",
+    "MLN_MACOS_PUBLIC_HEADERS",
+    "MLN_MACOS_PUBLIC_OBJCPP_SOURCE",
+    "MLN_MACOS_PUBLIC_OBJC_SOURCE",
+)
+
+filegroup(
+    name = "macos_private_hdrs",
+    srcs = MLN_MACOS_PRIVATE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "macos_public_hdrs",
+    srcs = MLN_MACOS_PUBLIC_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "macos_objcpp_srcs",
+    srcs = MLN_MACOS_PUBLIC_OBJCPP_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "macos_objc_srcs",
+    srcs = MLN_MACOS_PUBLIC_OBJC_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+exports_files(
+    MLN_MACOS_PRIVATE_HEADERS +
+    MLN_MACOS_PUBLIC_HEADERS +
+    MLN_MACOS_PUBLIC_OBJCPP_SOURCE +
+    MLN_MACOS_PUBLIC_OBJC_SOURCE,
+)

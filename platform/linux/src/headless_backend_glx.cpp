@@ -4,6 +4,12 @@
 
 #include <cassert>
 
+#ifdef CI_BUILD
+#include <chrono>
+#include <thread>
+#include <iostream>
+#endif
+
 #include <GL/glx.h>
 
 namespace mbgl {
@@ -24,7 +30,21 @@ public:
             throw std::runtime_error("Failed to XInitThreads.");
         }
 
-        xDisplay = XOpenDisplay(nullptr);
+#ifdef CI_BUILD
+        // XOpenDisplay has proven very unreliable on CI, perform some retries if it fails
+        constexpr auto CI_RETRIES = 20;
+        for (int i = 0; i < CI_RETRIES; i++) {
+#endif
+            xDisplay = XOpenDisplay(nullptr);
+#ifdef CI_BUILD
+            if (xDisplay != nullptr) {
+                break;
+            }
+            // std::cerr is used because the tests expect logging to be deterministic
+            std::cerr << "[CI] Failed to open X display, retrying..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+#endif
         if (xDisplay == nullptr) {
             throw std::runtime_error("Failed to open X display.");
         }
