@@ -339,7 +339,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
+    const auto renderPass = RenderPass::Translucent;
 
     const auto finish = [&](gfx::DrawableBuilder& builder,
                             const OverscaledTileID& tileID,
@@ -462,7 +462,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                                              : gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                                 : gfx::ColorMode::unblended());
-                    builder->setSubLayerIndex(0);
+                    builder->setSubLayerIndex(1);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
                 }
@@ -549,7 +549,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     auto tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                                  /*glyphName=*/std::string(),
                                                                                  std::string(IconTextureName),
-                                                                                 /*isText=*/false);
+                                                                                 /*isText=*/false,
+                                                                                 false,
+                                                                                 style::AlignmentType::Auto,
+                                                                                 false,
+                                                                                 false);
                     if (patternBuilder) {
                         patternBuilder->addTweaker(tweaker);
                     }
