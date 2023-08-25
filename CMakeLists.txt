@@ -13,8 +13,6 @@ option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
-option(MLN_RENDERER_SPLIT_VIEW "Enable a split view if both renderers are enabled" ON)
-option(MLN_RENDERER_QUAD_SPLIT_VIEW "When using split view, split opaque and translucent passes as well" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -982,8 +980,6 @@ if(MLN_WITH_OPENGL)
         mbgl-core
         PRIVATE
             MBGL_RENDER_BACKEND_OPENGL=1
-            "MLN_RENDERER_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_SPLIT_VIEW}>"
-            "MLN_RENDERER_QUAD_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_QUAD_SPLIT_VIEW}>"
         PUBLIC
             "MLN_LEGACY_RENDERER=$<BOOL:${MLN_LEGACY_RENDERER}>"
             "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"    
