@@ -31,7 +31,7 @@ on:
   
   pull_request:
     branches:
-      - main
+      - '*'
     paths:
       - CMakeLists.txt
       - 'platform/ios/**'
@@ -169,7 +169,7 @@ jobs:
           cd Payload/RenderTestApp.app/PlugIns
           zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
-      
+
       - uses: actions/upload-artifact@v3
         with:
           name: ios-render-test
@@ -177,3 +177,29 @@ jobs:
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
+
+      # C++ unit tests
+      
+      - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
+        run: |
+          set -e
+          bazel run //platform/ios:xcodeproj
+          build_dir="$(mktemp -d)"
+          xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
+          cd "$ios_cpp_test_app_dir"
+          mkdir Payload
+          mv CppUnitTestsApp.app Payload
+          zip -r CppUnitTestsApp.zip Payload
+          mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
+          cd Payload/CppUnitTestsApp.app/PlugIns
+          zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
+          echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ios-cpp-unit-tests
+          retention-days: 3
+          path: |
+            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
+            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
