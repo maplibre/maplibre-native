@@ -52,6 +52,7 @@ void DrawableBuilder::flush() {
         draw->setRenderPass(renderPass);
         draw->setDrawPriority(drawPriority);
         draw->setSubLayerIndex(subLayerIndex);
+        draw->setEnableDepth(enableDepth);
         draw->setDepthType(depthType);
         draw->setIs3D(is3D);
         draw->setColorMode(impl->colorMode);

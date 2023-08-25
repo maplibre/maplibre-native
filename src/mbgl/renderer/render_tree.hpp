@@ -17,15 +17,29 @@ class PatternAtlas;
 
 namespace gfx {
 class UploadPass;
+class Context;
 } // namespace gfx
+
+class LayerGroupBase;
+using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 
 class RenderItem {
 public:
+    enum class DebugType {
+        TextOutline,
+        Text,
+        Border
+    };
+    using DebugLayerGroupMap = std::map<DebugType, LayerGroupBasePtr>;
+
     virtual ~RenderItem() = default;
     virtual void upload(gfx::UploadPass&) const = 0;
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
     virtual const std::string& getName() const = 0;
+#if MLN_DRAWABLE_RENDERER
+    virtual void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const = 0;
+#endif
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;

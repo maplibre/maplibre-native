@@ -127,28 +127,6 @@ public:
         updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
     }
 
-#if MLN_DRAWABLE_RENDERER
-    template <typename Image>
-    void updateTexture(Texture2D& texture,
-                       const Image& image,
-                       TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
-        updateTexture2D(texture, image.size, image.data.get(), format, type);
-    }
-
-    template <typename Image>
-    void updateTextureSub(Texture2D& texture,
-                          const Image& image,
-                          const uint16_t offsetX,
-                          const uint16_t offsetY,
-                          TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
-        assert(image.size.width + offsetX <= texture.getSize().width);
-        assert(image.size.height + offsetY <= texture.getSize().height);
-        const auto format = image.channels == 4 ? TexturePixelType::RGBA : TexturePixelType::Alpha;
-        updateTextureResourceSub(texture.getResource(), offsetX, offsetY, image.size, image.data.get(), format, type);
-    }
-#endif
-
 public:
     virtual std::unique_ptr<TextureResource> createTextureResource(Size,
                                                                    const void* data,

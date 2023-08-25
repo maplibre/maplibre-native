@@ -71,6 +71,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         paintParamsUniformBuffer->update(&paintParamsUBO, sizeof(CirclePaintParamsUBO));
     }
 
+    const bool scaleWithMap = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
 
     // Updated only with evaluated properties
@@ -84,7 +85,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .stroke_width = */ evaluated.get<CircleStrokeWidth>().constantOr(CircleStrokeWidth::defaultValue()),
             /* .stroke_opacity = */
             evaluated.get<CircleStrokeOpacity>().constantOr(CircleStrokeOpacity::defaultValue()),
-            /* .scale_with_map = */ evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map,
+            /* .scale_with_map = */ scaleWithMap,
             /* .pitch_with_map = */ pitchWithMap,
             /* .padding = */ 0};
         evaluatedPropsUniformBuffer = context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
@@ -113,7 +114,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         const CircleDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */
-            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits}} : parameters.pixelsToGLUnits,
+            pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits, pixelsToTileUnits}} : parameters.pixelsToGLUnits,
             /* .padding = */ {0}};
 
         uniforms.createOrUpdate(CircleDrawableUBOName, &drawableUBO, context);
