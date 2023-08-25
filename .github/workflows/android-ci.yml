@@ -26,8 +26,7 @@ on:
       - "!**/*.md"
   pull_request:
     branches:
-      - main
-      - topic/drawable
+      - '*'
     paths:
       - CMakeLists.txt
       - 'platform/android/**'
@@ -148,7 +147,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main'
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -211,7 +210,7 @@ jobs:
     needs: build
 
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'maplibre' && github.ref == 'refs/heads/main'
+    if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -221,7 +220,7 @@ jobs:
         run: cat uploads.env >> "$GITHUB_ENV"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

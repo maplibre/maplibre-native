@@ -43,7 +43,7 @@ public:
 
     virtual void setClientOptions(ClientOptions) override {}
 
-    virtual ClientOptions getClientOptions() { return ClientOptions{}; }
+    virtual ClientOptions getClientOptions() override { return ClientOptions{}; }
 
 private:
     std::unordered_map<std::string, std::shared_ptr<std::string>> assets;
