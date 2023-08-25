@@ -6,6 +6,9 @@
 #include <mbgl/shaders/gl/drawable_background.hpp>
 #include <mbgl/shaders/gl/drawable_background_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_circle.hpp>
+#include <mbgl/shaders/gl/drawable_collision_box.hpp>
+#include <mbgl/shaders/gl/drawable_collision_circle.hpp>
+#include <mbgl/shaders/gl/drawable_debug.hpp>
 #include <mbgl/shaders/gl/drawable_fill.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline.hpp>
 #include <mbgl/shaders/gl/drawable_line_gradient.hpp>

@@ -222,24 +222,17 @@ void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
 #endif
 }
 
+#if MLN_LEGACY_RENDERER
 gfx::TextureBinding DashPatternTexture::textureBinding() const {
     // The texture needs to have been uploaded already.
-#if MLN_DRAWABLE_RENDERER
-    assert(std::holds_alternative<gfx::Texture2DPtr>(texture));
-    return {std::get<gfx::Texture2DPtr>(texture)->getResource(),
-            gfx::TextureFilterType::Linear,
-            gfx::TextureMipMapType::No,
-            gfx::TextureWrapType::Repeat,
-            gfx::TextureWrapType::Clamp};
-#else
     assert(texture.is<gfx::Texture>());
     return {texture.get<gfx::Texture>().getResource(),
             gfx::TextureFilterType::Linear,
             gfx::TextureMipMapType::No,
             gfx::TextureWrapType::Repeat,
             gfx::TextureWrapType::Clamp};
-#endif
 }
+#endif
 
 #if MLN_DRAWABLE_RENDERER
 static const gfx::Texture2DPtr noTexture;

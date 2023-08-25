@@ -12,6 +12,9 @@ enum class BuiltIn {
     BackgroundShader,
     BackgroundPatternShader,
     CircleShader,
+    CollisionBoxShader,
+    CollisionCircleShader,
+    DebugShader,
     FillShader,
     FillOutlineShader,
     LineGradientShader,
@@ -31,7 +34,6 @@ enum class BuiltIn {
     SymbolSDFTextShader,
     SymbolSDFIconShader,
     SymbolTextAndIconShader,
-
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,

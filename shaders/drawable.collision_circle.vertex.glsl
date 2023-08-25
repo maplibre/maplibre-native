@@ -3,9 +3,12 @@ layout (location = 1) in vec2 a_anchor_pos;
 layout (location = 2) in vec2 a_extrude;
 layout (location = 3) in vec2 a_placed;
 
-uniform mat4 u_matrix;
-uniform vec2 u_extrude_scale;
-uniform float u_camera_to_center_distance;
+layout (std140) uniform CollisionCircleUBO {
+    highp mat4 u_matrix;
+    highp vec2 u_extrude_scale;
+    highp float u_camera_to_center_distance;
+    highp float u_overscale_factor;
+};
 
 out float v_placed;
 out float v_notUsed;

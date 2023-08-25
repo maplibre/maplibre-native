@@ -3,6 +3,7 @@
 #include <mbgl/util/ignore.hpp>
 
 #include <vector>
+#include <memory>
 
 namespace mbgl {
 namespace gfx {
