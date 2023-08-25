@@ -80,63 +80,90 @@ std::string debugLabel(const gfx::Drawable& drawable) {
 }
 #endif // !defined(NDEBUG)
 
-
-
 MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) {
     switch (mode) {
-        case gfx::CullFaceSideType::Front: return MTL::CullModeFront;
-        case gfx::CullFaceSideType::Back: return MTL::CullModeBack;
+        case gfx::CullFaceSideType::Front:
+            return MTL::CullModeFront;
+        case gfx::CullFaceSideType::Back:
+            return MTL::CullModeBack;
         default:
-        case gfx::CullFaceSideType::FrontAndBack: return MTL::CullModeNone;
+        case gfx::CullFaceSideType::FrontAndBack:
+            return MTL::CullModeNone;
     }
 }
 
 MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
     switch (mode) {
-        case gfx::CullFaceWindingType::Clockwise: return MTL::Winding::WindingClockwise;
+        case gfx::CullFaceWindingType::Clockwise:
+            return MTL::Winding::WindingClockwise;
         default:
-        case gfx::CullFaceWindingType::CounterClockwise: return MTL::Winding::WindingCounterClockwise;
+        case gfx::CullFaceWindingType::CounterClockwise:
+            return MTL::Winding::WindingCounterClockwise;
     }
 }
 
 MTL::CompareFunction mapFunc(const gfx::DepthFunctionType func) {
     switch (func) {
         default:
-        case gfx::DepthFunctionType::Never: return MTL::CompareFunction::CompareFunctionNever;
-        case gfx::DepthFunctionType::Less: return MTL::CompareFunction::CompareFunctionLess;
-        case gfx::DepthFunctionType::Equal: return MTL::CompareFunction::CompareFunctionEqual;
-        case gfx::DepthFunctionType::LessEqual: return MTL::CompareFunction::CompareFunctionLessEqual;
-        case gfx::DepthFunctionType::Greater: return MTL::CompareFunction::CompareFunctionGreater;
-        case gfx::DepthFunctionType::NotEqual: return MTL::CompareFunction::CompareFunctionNotEqual;
-        case gfx::DepthFunctionType::GreaterEqual: return MTL::CompareFunction::CompareFunctionGreaterEqual;
-        case gfx::DepthFunctionType::Always: return MTL::CompareFunction::CompareFunctionAlways;
+        case gfx::DepthFunctionType::Never:
+            return MTL::CompareFunction::CompareFunctionNever;
+        case gfx::DepthFunctionType::Less:
+            return MTL::CompareFunction::CompareFunctionLess;
+        case gfx::DepthFunctionType::Equal:
+            return MTL::CompareFunction::CompareFunctionEqual;
+        case gfx::DepthFunctionType::LessEqual:
+            return MTL::CompareFunction::CompareFunctionLessEqual;
+        case gfx::DepthFunctionType::Greater:
+            return MTL::CompareFunction::CompareFunctionGreater;
+        case gfx::DepthFunctionType::NotEqual:
+            return MTL::CompareFunction::CompareFunctionNotEqual;
+        case gfx::DepthFunctionType::GreaterEqual:
+            return MTL::CompareFunction::CompareFunctionGreaterEqual;
+        case gfx::DepthFunctionType::Always:
+            return MTL::CompareFunction::CompareFunctionAlways;
     };
 }
 MTL::CompareFunction mapFunc(const gfx::StencilFunctionType func) {
     switch (func) {
         default:
-        case gfx::StencilFunctionType::Never: return MTL::CompareFunction::CompareFunctionNever;
-        case gfx::StencilFunctionType::Less: return MTL::CompareFunction::CompareFunctionLess;
-        case gfx::StencilFunctionType::Equal: return MTL::CompareFunction::CompareFunctionEqual;
-        case gfx::StencilFunctionType::LessEqual: return MTL::CompareFunction::CompareFunctionLessEqual;
-        case gfx::StencilFunctionType::Greater: return MTL::CompareFunction::CompareFunctionGreater;
-        case gfx::StencilFunctionType::NotEqual: return MTL::CompareFunction::CompareFunctionNotEqual;
-        case gfx::StencilFunctionType::GreaterEqual: return MTL::CompareFunction::CompareFunctionGreaterEqual;
-        case gfx::StencilFunctionType::Always: return MTL::CompareFunction::CompareFunctionAlways;
+        case gfx::StencilFunctionType::Never:
+            return MTL::CompareFunction::CompareFunctionNever;
+        case gfx::StencilFunctionType::Less:
+            return MTL::CompareFunction::CompareFunctionLess;
+        case gfx::StencilFunctionType::Equal:
+            return MTL::CompareFunction::CompareFunctionEqual;
+        case gfx::StencilFunctionType::LessEqual:
+            return MTL::CompareFunction::CompareFunctionLessEqual;
+        case gfx::StencilFunctionType::Greater:
+            return MTL::CompareFunction::CompareFunctionGreater;
+        case gfx::StencilFunctionType::NotEqual:
+            return MTL::CompareFunction::CompareFunctionNotEqual;
+        case gfx::StencilFunctionType::GreaterEqual:
+            return MTL::CompareFunction::CompareFunctionGreaterEqual;
+        case gfx::StencilFunctionType::Always:
+            return MTL::CompareFunction::CompareFunctionAlways;
     };
 }
 
 MTL::StencilOperation mapOperation(const gfx::StencilOpType op) {
     switch (op) {
-        case gfx::StencilOpType::Zero: return MTL::StencilOperation::StencilOperationZero;
+        case gfx::StencilOpType::Zero:
+            return MTL::StencilOperation::StencilOperationZero;
         default:
-        case gfx::StencilOpType::Keep: return MTL::StencilOperation::StencilOperationKeep;
-        case gfx::StencilOpType::Replace: return MTL::StencilOperation::StencilOperationReplace;
-        case gfx::StencilOpType::Increment: return MTL::StencilOperation::StencilOperationIncrementClamp;
-        case gfx::StencilOpType::Decrement: return MTL::StencilOperation::StencilOperationDecrementClamp;
-        case gfx::StencilOpType::Invert: return MTL::StencilOperation::StencilOperationInvert;
-        case gfx::StencilOpType::IncrementWrap: return MTL::StencilOperation::StencilOperationIncrementWrap;
-        case gfx::StencilOpType::DecrementWrap: return MTL::StencilOperation::StencilOperationDecrementWrap;
+        case gfx::StencilOpType::Keep:
+            return MTL::StencilOperation::StencilOperationKeep;
+        case gfx::StencilOpType::Replace:
+            return MTL::StencilOperation::StencilOperationReplace;
+        case gfx::StencilOpType::Increment:
+            return MTL::StencilOperation::StencilOperationIncrementClamp;
+        case gfx::StencilOpType::Decrement:
+            return MTL::StencilOperation::StencilOperationDecrementClamp;
+        case gfx::StencilOpType::Invert:
+            return MTL::StencilOperation::StencilOperationInvert;
+        case gfx::StencilOpType::IncrementWrap:
+            return MTL::StencilOperation::StencilOperationIncrementWrap;
+        case gfx::StencilOpType::DecrementWrap:
+            return MTL::StencilOperation::StencilOperationDecrementWrap;
     }
 }
 
@@ -150,9 +177,13 @@ struct StencilModeVisitor {
     MTL::StencilDescriptor* desc;
 
     template <gfx::StencilFunctionType F>
-    void operator()(const gfx::StencilMode::SimpleTest<F>& mode) { apply(mode.func, mode.mask); }
+    void operator()(const gfx::StencilMode::SimpleTest<F>& mode) {
+        apply(mode.func, mode.mask);
+    }
     template <gfx::StencilFunctionType F>
-    void operator()(const gfx::StencilMode::MaskedTest<F>& mode) { apply(mode.func, mode.mask); }
+    void operator()(const gfx::StencilMode::MaskedTest<F>& mode) {
+        apply(mode.func, mode.mask);
+    }
 
     void apply(gfx::StencilFunctionType func, uint32_t mask) {
         desc->setStencilCompareFunction(mapFunc(func));
@@ -196,7 +227,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
-    
+
     bindAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
@@ -213,7 +244,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (!impl->vertexDesc) {
         assert(!"Vertex descriptor missing");
     }
-    
+
     const auto& cullMode = getCullFaceMode();
     encoder->setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
     encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
@@ -237,7 +268,8 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& renderableResource = renderable.getResource<RenderableResource>();
         if (const auto& rpd = renderableResource.getRenderPassDescriptor()) {
             // Setting depth/stencil properties when the corresponding target textures aren't set causes, e.g.:
-            // `Draw Errors Validation MTLDepthStencilDescriptor sets depth test but MTLRenderPassDescriptor has a nil depthAttachment texture`
+            // `Draw Errors Validation MTLDepthStencilDescriptor sets depth test but MTLRenderPassDescriptor has a nil
+            // depthAttachment texture`
             if (auto* depthTarget = rpd->depthAttachment()) {
                 if (auto* tex = depthTarget->texture()) {
                     const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
@@ -246,15 +278,14 @@ void Drawable::draw(PaintParameters& parameters) const {
             }
             if (auto* stencilTarget = rpd->stencilAttachment()) {
                 if (auto* tex = stencilTarget->texture()) {
-                    const auto stencilMode = enableStencil ?
-                           parameters.stencilModeForClipping(tileID->toUnwrapped()) :
-                            gfx::StencilMode::disabled();
+                    const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
+                                                           : gfx::StencilMode::disabled();
 
                     auto stencilDescriptor = NS::TransferPtr(MTL::StencilDescriptor::alloc()->init());
                     if (!stencilDescriptor) {
                         return;
                     }
-                    
+
                     applyStencilMode(stencilMode, stencilDescriptor.get());
 
                     depthStencilDescriptor->setFrontFaceStencil(stencilDescriptor.get());
