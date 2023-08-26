@@ -128,6 +128,7 @@ public class RuntimeStyleTests extends EspressoTest {
     });
   }
 
+  @Test
   public void testAddLayerAt() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new BaseViewAction() {

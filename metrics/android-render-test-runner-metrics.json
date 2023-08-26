@@ -15,6 +15,5 @@
         "probeGFX",
         "probeMemory",
         "probeNetwork"
-    ],
-    "result_path": "/sdcard"
+    ]
 }

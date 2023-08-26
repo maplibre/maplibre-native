@@ -2,7 +2,7 @@
 
 # MapLibre Native
 
-[![codecov](https://codecov.io/github/maplibre/maplibre-native/branch/main/graph/badge.svg?token=8ZQRRY56ZA)](https://codecov.io/github/maplibre/maplibre-native)
+[![codecov](https://codecov.io/github/maplibre/maplibre-native/branch/main/graph/badge.svg?token=8ZQRRY56ZA)](https://codecov.io/github/maplibre/maplibre-native) [![](https://img.shields.io/badge/Slack-%23maplibre--native-2EB67D?logo=slack)](https://slack.openstreetmap.us/)
 
 MapLibre Native is a free and open-source library for publishing maps in your apps and desktop applications on various platforms. Fast displaying of maps is possible thanks to GPU-accelerated vector tile rendering.
 
@@ -23,7 +23,7 @@ The documentation of MapLibre Native is a work in progress. To get an architectu
 ## Platforms
 
 - [⭐️ Android](platform/android/README.md) 
-- [⭐️ iOS](platform/ios/platform/ios/README.md)
+- [⭐️ iOS](platform/ios/README.md)
 - [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
 - [Node.js](platform/node/README.md)
@@ -56,8 +56,6 @@ Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://sla
 
 Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/roadmap/step-by-step-bounties-guide/).
 
-## Sponsors
-
 We thank everyone who supported us financially in the past and special thanks to the people and organizations who support us with recurring donations!
 
 Read more about the MapLibre Sponsorship Program at [https://maplibre.org/sponsors/](https://maplibre.org/sponsors/).
@@ -75,6 +73,8 @@ Silver:
 <a href="https://komoot.com/"><img src="https://maplibre.org/img/komoot-logo.svg" alt="Logo komoot" width="25%"/></a>
 
 <a href="https://www.jawg.io/"><img src="https://maplibre.org/img/jawgmaps-logo.svg" alt="Logo JawgMaps" width="25%"/></a>
+
+<a href="https://www.radar.com/"><img src="https://maplibre.org/img/radar-logo.svg" alt="Logo Radar" width="25%"/></a>
 
 Backers and Supporters:
 

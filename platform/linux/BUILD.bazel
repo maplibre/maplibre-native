@@ -10,19 +10,20 @@ cc_library(
     name = "impl",
     srcs = [
         "src/gl_functions.cpp",
-        "src/headless_backend_egl.cpp",
+        "src/headless_backend_glx.cpp",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     linkopts = [
         "-lGL",
         "-lglfw",
-        "-lEGL",
+        "-lX11",
         "-lsqlite3",
         "-luv",
         "-lz",
         "-lcurl",
         "-lpng",
         "-ljpeg",
+        "-lwebp",
     ] + ICU_FLAGS,
     visibility = ["//visibility:public"],
     deps = [

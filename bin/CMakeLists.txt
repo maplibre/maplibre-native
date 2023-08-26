@@ -36,15 +36,15 @@ if(WIN32)
     find_package(libuv REQUIRED)
 
     target_link_libraries(
-        mbgl-cache PRIVATE uv_a
+        mbgl-cache PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 
     target_link_libraries(
-        mbgl-offline PRIVATE uv_a
+        mbgl-offline PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 
     target_link_libraries(
-        mbgl-render PRIVATE uv_a
+        mbgl-render PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 endif()
 

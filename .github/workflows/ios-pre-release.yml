@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     #runs-on: macos-12
-    runs-on: [self-hosted, petr]
+    runs-on: [self-hosted]
     env:
       BUILDTYPE: Release
       HOMEBREW_NO_AUTO_UPDATE: 1

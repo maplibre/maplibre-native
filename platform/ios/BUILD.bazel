@@ -1,93 +1,61 @@
 load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
-load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
     "xcodeproj",
 )
-load("bazel/macros.bzl", "info_plist")
+load("//platform/ios/bazel:macros.bzl", "info_plist")
+load("//platform/ios/bazel:config.bzl", "BUILD_MODE", "BUNDLE_ID_PREFIX")
+load(
+    "//platform/ios/bazel:files.bzl",
+    "MLN_IOS_PRIVATE_HEADERS",
+    "MLN_IOS_PUBLIC_HEADERS",
+    "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
+    "MLN_IOS_PUBLIC_OBJC_SOURCE",
+    "MLN_IOS_SDK_HEADERS",
+    "MLN_PUBLIC_IOS_APP_SOPURCE",
+)
+load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
-# This list of public headers is from what Mapbox vendors with their dynamic framework
-# If we forget one the build will fail, and if we add too many there will be a warning
-# (which also causes a build failure) so we don't need to worry too much about getting
-# this wrong
-# A combination of Mapbox.h and all its headers' imports as recursively
-_PUBLIC_HEADERS = [
-    "platform/darwin/src/MLNAnnotation.h",
-    "platform/darwin/src/MLNAttributedExpression.h",
-    "platform/darwin/src/MLNAttributionInfo.h",
-    "platform/darwin/src/MLNBackgroundStyleLayer.h",
-    "platform/darwin/src/MLNCircleStyleLayer.h",
-    "platform/darwin/src/MLNClockDirectionFormatter.h",
-    "platform/darwin/src/MLNCluster.h",
-    "platform/darwin/src/MLNCompassDirectionFormatter.h",
-    "platform/darwin/src/MLNComputedShapeSource.h",
-    "platform/darwin/src/MLNCoordinateFormatter.h",
-    "platform/darwin/src/MLNDefaultStyle.h",
-    "platform/darwin/src/MLNDistanceFormatter.h",
-    "platform/darwin/src/MLNFeature.h",
-    "platform/darwin/src/MLNFillExtrusionStyleLayer.h",
-    "platform/darwin/src/MLNFillStyleLayer.h",
-    "platform/darwin/src/MLNForegroundStyleLayer.h",
-    "platform/darwin/src/MLNFoundation.h",
-    "platform/darwin/src/MLNGeometry.h",
-    "platform/darwin/src/MLNHeatmapStyleLayer.h",
-    "platform/darwin/src/MLNHillshadeStyleLayer.h",
-    "platform/darwin/src/MLNImageSource.h",
-    "platform/darwin/src/MLNLight.h",
-    "platform/darwin/src/MLNLineStyleLayer.h",
-    "platform/darwin/src/MLNLocationManager.h",
-    "platform/darwin/src/MLNLoggingConfiguration.h",
-    "platform/darwin/src/MLNMapCamera.h",
-    "platform/darwin/src/MLNMapSnapshotter.h",
-    "platform/darwin/src/MLNMultiPoint.h",
-    "platform/darwin/src/MLNNetworkConfiguration.h",
-    "platform/darwin/src/MLNOfflinePack.h",
-    "platform/darwin/src/MLNOfflineRegion.h",
-    "platform/darwin/src/MLNOfflineStorage.h",
-    "platform/darwin/src/MLNOpenGLStyleLayer.h",
-    "platform/darwin/src/MLNOverlay.h",
-    "platform/darwin/src/MLNPointAnnotation.h",
-    "platform/darwin/src/MLNPointCollection.h",
-    "platform/darwin/src/MLNPolygon.h",
-    "platform/darwin/src/MLNPolyline.h",
-    "platform/darwin/src/MLNRasterDEMSource.h",
-    "platform/darwin/src/MLNRasterStyleLayer.h",
-    "platform/darwin/src/MLNRasterTileSource.h",
-    "platform/darwin/src/MLNSettings.h",
-    "platform/darwin/src/MLNShape.h",
-    "platform/darwin/src/MLNShapeCollection.h",
-    "platform/darwin/src/MLNShapeOfflineRegion.h",
-    "platform/darwin/src/MLNShapeSource.h",
-    "platform/darwin/src/MLNSource.h",
-    "platform/darwin/src/MLNStyle.h",
-    "platform/darwin/src/MLNStyleLayer.h",
-    "platform/darwin/src/MLNStyleValue.h",
-    "platform/darwin/src/MLNSymbolStyleLayer.h",
-    "platform/darwin/src/MLNTilePyramidOfflineRegion.h",
-    "platform/darwin/src/MLNTileServerOptions.h",
-    "platform/darwin/src/MLNTileSource.h",
-    "platform/darwin/src/MLNTypes.h",
-    "platform/darwin/src/MLNVectorStyleLayer.h",
-    "platform/darwin/src/MLNVectorTileSource.h",
-    "platform/darwin/src/NSExpression+MLNAdditions.h",
-    "platform/darwin/src/NSPredicate+MLNAdditions.h",
-    "platform/darwin/src/NSValue+MLNAdditions.h",
-    "platform/ios/src/MLNAnnotationImage.h",
-    "platform/ios/src/MLNAnnotationView.h",
-    "platform/ios/src/MLNCalloutView.h",
-    "platform/ios/src/MLNCameraChangeReason.h",
-    "platform/ios/src/MLNCompassButton.h",
-    "platform/ios/src/MLNMapProjection.h",
-    "platform/ios/src/MLNMapView+IBAdditions.h",
-    "platform/ios/src/MLNMapView.h",
-    "platform/ios/src/MLNMapViewDelegate.h",
-    "platform/ios/src/MLNUserLocation.h",
-    "platform/ios/src/MLNUserLocationAnnotationView.h",
-    "platform/ios/src/MLNUserLocationAnnotationViewStyle.h",
-]
+configure_device_profiles()
+
+filegroup(
+    name = "ios_sdk_hdrs",
+    srcs = MLN_IOS_SDK_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ios_public_hdrs",
+    srcs = MLN_IOS_PUBLIC_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ios_private_hdrs",
+    srcs = MLN_IOS_PRIVATE_HEADERS,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ios_objcpp_srcs",
+    srcs = MLN_IOS_PUBLIC_OBJCPP_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ios_objc_srcs",
+    srcs = MLN_IOS_PUBLIC_OBJC_SOURCE,
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ios_app_srcs",
+    srcs = MLN_PUBLIC_IOS_APP_SOPURCE,
+    visibility = ["//visibility:public"],
+)
 
 apple_static_xcframework(
     name = "Mapbox.static",
@@ -100,31 +68,36 @@ apple_static_xcframework(
         "device": ["arm64"],
     },
     minimum_os_versions = {"ios": "12.0"},
-    public_hdrs = _PUBLIC_HEADERS,
-    umbrella_header = "platform/ios/src/Mapbox.h",
+    public_hdrs = [
+        ":ios_public_hdrs",
+        ":ios_sdk_hdrs",
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objcpp_hdrs",
+    ],
+    umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
-    deps = ["sdk"],
+    deps = ["//platform:ios-sdk"],
 )
 
 info_plist(
     name = "info_plist",
     out = "Info.plist",
-    base_info_plist = "platform/ios/framework/Info.plist",
+    base_info_plist = "framework/Info.plist",
 )
 
 info_plist(
     name = "info_static_plist",
     out = "Info-static.plist",
-    base_info_plist = "platform/ios/framework/Info-static.plist",
+    base_info_plist = "framework/Info-static.plist",
 )
 
 apple_xcframework(
-    name = "Mapbox.dynamic",
+    name = "MapLibre.dynamic",
     bundle_id = "com.maplibre.mapbox",
-    bundle_name = "Mapbox",
+    bundle_name = "MapLibre",
     data = glob([
-        "platform/ios/resources/*.lproj/**",
-        "platform/ios/resources/*.xcassets/**",
+        "resources/*.lproj/**",
+        "resources/*.xcassets/**",
     ]),
     infoplists = ["info_plist"],
     ios = {
@@ -135,10 +108,15 @@ apple_xcframework(
         "device": ["arm64"],
     },
     minimum_os_versions = {"ios": "12.0"},
-    public_hdrs = _PUBLIC_HEADERS,
-    umbrella_header = "platform/ios/src/Mapbox.h",
+    public_hdrs = [
+        ":ios_public_hdrs",
+        ":ios_sdk_hdrs",
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objcpp_hdrs",
+    ],
+    umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
-    deps = ["sdk-dynamic"],
+    deps = ["//platform:ios-sdk-dynamic"],
 )
 
 ios_framework(
@@ -148,50 +126,7 @@ ios_framework(
     infoplists = ["info_plist"],
     linkopts = [""],
     minimum_os_version = "12.0",
-    deps = ["sdk"],
-)
-
-# sdk for the static target which includes the resources.
-objc_library(
-    name = "sdk",
-    hdrs = _PUBLIC_HEADERS,
-    data = ["resources"],
-    sdk_dylibs = [
-        "libz",
-        "libsqlite3",
-        "libc++",
-    ],
-    sdk_frameworks = [
-        "MobileCoreServices",
-        "Security",
-        "WebKit",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "objc-sdk",
-        "objcpp-sdk",
-    ],
-)
-
-# sdk for the dynamic target. Lacking the resources bundle since for dynamic
-# they are in the main package.
-objc_library(
-    name = "sdk-dynamic",
-    sdk_dylibs = [
-        "libz",
-        "libsqlite3",
-        "libc++",
-    ],
-    sdk_frameworks = [
-        "MobileCoreServices",
-        "Security",
-        "WebKit",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "objc-sdk",
-        "objcpp-sdk",
-    ],
+    deps = ["//platform:ios-sdk"],
 )
 
 apple_resource_bundle(
@@ -200,277 +135,49 @@ apple_resource_bundle(
     bundle_name = "Mapbox",
     infoplists = ["info_static_plist"],
     resources = glob([
-        "platform/ios/resources/*.lproj/**",
-        "platform/ios/resources/*.xcassets/**",
+        "resources/*.lproj/**",
+        "resources/*.xcassets/**",
     ]),
-)
-
-# Objcpp files for the iOS source
-objc_library(
-    name = "objcpp-sdk",
-    srcs = [
-        "platform/darwin/src/MLNAttributionInfo.mm",
-        "platform/darwin/src/MLNBackgroundStyleLayer.mm",
-        "platform/darwin/src/MLNCircleStyleLayer.mm",
-        "platform/darwin/src/MLNComputedShapeSource.mm",
-        "platform/darwin/src/MLNDefaultStyle.mm",
-        "platform/darwin/src/MLNFeature.mm",
-        "platform/darwin/src/MLNFillExtrusionStyleLayer.mm",
-        "platform/darwin/src/MLNFillStyleLayer.mm",
-        "platform/darwin/src/MLNForegroundStyleLayer.mm",
-        "platform/darwin/src/MLNFoundation.mm",
-        "platform/darwin/src/MLNGeometry.mm",
-        "platform/darwin/src/MLNHeatmapStyleLayer.mm",
-        "platform/darwin/src/MLNHillshadeStyleLayer.mm",
-        "platform/darwin/src/MLNImageSource.mm",
-        "platform/darwin/src/MLNLight.mm",
-        "platform/darwin/src/MLNLineStyleLayer.mm",
-        "platform/darwin/src/MLNLoggingConfiguration.mm",
-        "platform/darwin/src/MLNMapCamera.mm",
-        "platform/darwin/src/MLNMapSnapshotter.mm",
-        "platform/darwin/src/MLNMultiPoint.mm",
-        "platform/darwin/src/MLNNetworkConfiguration.mm",
-        "platform/darwin/src/MLNOfflinePack.mm",
-        "platform/darwin/src/MLNOfflineStorage.mm",
-        "platform/darwin/src/MLNOpenGLStyleLayer.mm",
-        "platform/darwin/src/MLNPointAnnotation.mm",
-        "platform/darwin/src/MLNPointCollection.mm",
-        "platform/darwin/src/MLNPolygon.mm",
-        "platform/darwin/src/MLNPolyline.mm",
-        "platform/darwin/src/MLNRasterDEMSource.mm",
-        "platform/darwin/src/MLNRasterStyleLayer.mm",
-        "platform/darwin/src/MLNRasterTileSource.mm",
-        "platform/darwin/src/MLNSettings.mm",
-        "platform/darwin/src/MLNShape.mm",
-        "platform/darwin/src/MLNShapeCollection.mm",
-        "platform/darwin/src/MLNShapeOfflineRegion.mm",
-        "platform/darwin/src/MLNShapeSource.mm",
-        "platform/darwin/src/MLNSource.mm",
-        "platform/darwin/src/MLNStyle.mm",
-        "platform/darwin/src/MLNStyleLayer.mm",
-        "platform/darwin/src/MLNStyleLayerManager.mm",
-        "platform/darwin/src/MLNStyleValue.mm",
-        "platform/darwin/src/MLNSymbolStyleLayer.mm",
-        "platform/darwin/src/MLNTilePyramidOfflineRegion.mm",
-        "platform/darwin/src/MLNTileServerOptions.mm",
-        "platform/darwin/src/MLNTileSource.mm",
-        "platform/darwin/src/MLNVectorStyleLayer.mm",
-        "platform/darwin/src/MLNVectorTileSource.mm",
-        "platform/darwin/src/NSArray+MLNAdditions.mm",
-        "platform/darwin/src/NSBundle+MLNAdditions.mm",
-        "platform/darwin/src/NSCoder+MLNAdditions.mm",
-        "platform/darwin/src/NSComparisonPredicate+MLNAdditions.mm",
-        "platform/darwin/src/NSCompoundPredicate+MLNAdditions.mm",
-        "platform/darwin/src/NSDate+MLNAdditions.mm",
-        "platform/darwin/src/NSDictionary+MLNAdditions.mm",
-        "platform/darwin/src/NSExpression+MLNAdditions.mm",
-        "platform/darwin/src/NSPredicate+MLNAdditions.mm",
-        "platform/darwin/src/NSValue+MLNStyleAttributeAdditions.mm",
-        "platform/ios/src/MLNAnnotationView.mm",
-        "platform/ios/src/MLNCompassButton.mm",
-        "platform/ios/src/MLNFaux3DUserLocationAnnotationView.mm",
-        "platform/ios/src/MLNMapAccessibilityElement.mm",
-        "platform/ios/src/MLNMapProjection.mm",
-        "platform/ios/src/MLNMapView.mm",
-        "platform/ios/src/MLNMapView+Impl.mm",
-        "platform/ios/src/MLNMapView+OpenGL.mm",
-        "platform/ios/src/MLNScaleBar.mm",
-        "platform/ios/src/UIColor+MLNAdditions.mm",
-        "platform/ios/src/UIImage+MLNAdditions.mm",
-    ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
-        "-fcxx-modules",
-        "-fmodules",
-        "-Wno-c99-extensions",
-        "-Wno-gnu-zero-variadic-macro-arguments",
-        "-Wno-gnu-conditional-omitted-operand",
-        "-Wno-gnu-statement-expression",
-    ],
-    includes = [
-        "platform/darwin/include",
-    ],
-    sdk_frameworks = [
-        "CoreImage",
-        "CoreLocation",
-        "GLKit",
-        "OpenGLES",
-        "QuartzCore",
-    ],
-    deps = [
-        "objc-headers",
-        "//:mbgl-core",
-        "//platform/darwin:darwin-objcpp",
-        "//platform/default:mbgl-default",
-        "//platform/ios/platform/ios/vendor:SMCalloutView",
-    ],
-)
-
-# platform/ios/sdk-files.json
-# Objc files for the iOS source
-objc_library(
-    name = "objc-sdk",
-    srcs = [
-        "platform/darwin/src/MLNAttributedExpression.m",
-        "platform/darwin/src/MLNClockDirectionFormatter.m",
-        "platform/darwin/src/MLNCompassDirectionFormatter.m",
-        "platform/darwin/src/MLNCoordinateFormatter.m",
-        "platform/darwin/src/MLNDistanceFormatter.m",
-        "platform/darwin/src/MLNLocationManager.m",
-        "platform/darwin/src/MLNReachability.m",
-        "platform/darwin/src/MLNRendererConfiguration.m",
-        "platform/darwin/src/MLNTypes.m",
-        "platform/darwin/src/NSString+MLNAdditions.m",
-        "platform/darwin/src/NSURL+MLNAdditions.m",
-        "platform/darwin/src/NSValue+MLNAdditions.m",
-        "platform/ios/src/MLNAnnotationContainerView.m",
-        "platform/ios/src/MLNAnnotationImage.m",
-        "platform/ios/src/MLNCompactCalloutView.m",
-        "platform/ios/src/MLNUserLocation.m",
-        "platform/ios/src/MLNUserLocationAnnotationView.m",
-        "platform/ios/src/MLNUserLocationAnnotationViewStyle.m",
-        "platform/ios/src/MLNUserLocationHeadingArrowLayer.m",
-        "platform/ios/src/MLNUserLocationHeadingBeamLayer.m",
-        "platform/ios/src/NSOrthography+MLNAdditions.m",
-        "platform/ios/src/UIDevice+MLNAdditions.m",
-        "platform/ios/src/UIView+MLNAdditions.m",
-        "platform/ios/src/UIViewController+MLNAdditions.m",
-    ],
-    hdrs = [
-        "platform/darwin/include/mbgl/util/image+MLNAdditions.hpp",
-    ],
-    copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
-        "-fmodules",
-        "-Wno-gnu-zero-variadic-macro-arguments",
-        "-Wno-variadic-macros",
-        "-Wno-gnu-conditional-omitted-operand",
-    ],
-    includes = [
-        "platform/darwin/include",
-    ],
-    deps = [
-        "objc-headers",
-        "//:mbgl-core",
-        "//platform/darwin:darwin-objc",
-        "//platform/default:mbgl-default",
-        "//platform/ios/platform/ios/vendor:SMCalloutView",
-    ],
-)
-
-# Common headers between objc and objcpp libraries.
-objc_library(
-    name = "objc-headers",
-    srcs = glob([
-        "platform/darwin/src/*.h",
-        "platform/ios/src/*.h",
-    ]),
-    includes = [
-        "platform/darwin/src",
-        "platform/ios/src",
-    ],
-    sdk_frameworks = [
-        "CoreGraphics",
-        "CoreLocation",
-        "QuartzCore",
-    ],
-    deps = [
-        "//platform/darwin:darwin-objc",
-        "//platform/darwin:darwin-objcpp",
-    ],
-)
-
-objc_library(
-    name = "sdk-headers",
-    hdrs = ["platform/ios/src/Mapbox.h"] + _PUBLIC_HEADERS,
-)
-
-objc_library(
-    name = "iosapp",
-    srcs = [
-        "platform/darwin/app/LimeGreenStyleLayer.h",
-        "platform/darwin/app/LimeGreenStyleLayer.m",
-        "platform/ios/app/MBXAnnotationView.m",
-        "platform/ios/app/MBXAppDelegate.m",
-        "platform/ios/app/MBXCustomCalloutView.h",
-        "platform/ios/app/MBXCustomCalloutView.m",
-        "platform/ios/app/MBXCustomLocationViewController.m",
-        "platform/ios/app/MBXEmbeddedMapViewController.m",
-        "platform/ios/app/MBXFrameTimeGraphView.m",
-        "platform/ios/app/MBXOfflinePacksTableViewController.m",
-        "platform/ios/app/MBXOrnamentsViewController.m",
-        "platform/ios/app/MBXSnapshotsViewController.m",
-        "platform/ios/app/MBXState.m",
-        "platform/ios/app/MBXStateManager.m",
-        "platform/ios/app/MBXUserLocationAnnotationView.m",
-        "platform/ios/app/MBXViewController.m",
-        "platform/ios/app/main.m",
-    ],
-    hdrs = [
-        "platform/ios/app/MBXAnnotationView.h",
-        "platform/ios/app/MBXAppDelegate.h",
-        "platform/ios/app/MBXCustomLocationViewController.h",
-        "platform/ios/app/MBXEmbeddedMapViewController.h",
-        "platform/ios/app/MBXFrameTimeGraphView.h",
-        "platform/ios/app/MBXOfflinePacksTableViewController.h",
-        "platform/ios/app/MBXOrnamentsViewController.h",
-        "platform/ios/app/MBXSnapshotsViewController.h",
-        "platform/ios/app/MBXState.h",
-        "platform/ios/app/MBXStateManager.h",
-        "platform/ios/app/MBXUserLocationAnnotationView.h",
-        "platform/ios/app/MBXViewController.h",
-        "platform/ios/app/MLNMapView_Experimental.h",
-    ],
-    data = glob([
-        "platform/ios/app/Assets.xcassets/**",
-    ]),
-    includes = [
-        "platform/darwin/app",
-        "platform/darwin/src",
-        "platform/ios/src",
-    ],
-    sdk_frameworks = [
-        "GLKit",  # needed for LimeGreenStyleLayer
-    ],
-    deps = [
-        "sdk-headers",
-    ],
+    visibility = ["//visibility:public"],
 )
 
 _IOS_APPLICATION_RESOURCES = [
-    "platform/ios/app/numeric_filter_style.json",
-    "platform/ios/app/missing_icon.json",
-    "platform/ios/app/points.geojson",
-    "platform/ios/app/polyline.geojson",
-    "platform/ios/app/Settings.bundle",
-    "platform/ios/app/Main.storyboard",
-    "platform/ios/app/threestates.geojson",
-    "platform/ios/app/LaunchScreen.storyboard",
-    "platform/ios/app/simple_route.json",
-    "platform/ios/app/fill_filter_style.json",
-    "platform/darwin/test/amsterdam.geojson",
+    "app/numeric_filter_style.json",
+    "app/missing_icon.json",
+    "app/points.geojson",
+    "app/polyline.geojson",
+    "app/Settings.bundle",
+    "app/Main.storyboard",
+    "app/threestates.geojson",
+    "app/LaunchScreen.storyboard",
+    "app/simple_route.json",
+    "app/fill_filter_style.json",
+    "//platform/darwin:test/amsterdam.geojson",
 ] + glob([
-    "platform/ios/app/*.lproj/**",
+    "app/*.lproj/**",
+    "app/Assets.xcassets/**",
 ])
 
 ios_application(
     name = "App",
-    bundle_id = "com.maplibre.app",
+    bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
     families = [
         "iphone",
         "ipad",
     ],
-    infoplists = ["platform/ios/app/Info.plist"],
+    infoplists = ["app/Info.plist"],
     minimum_os_version = "12.0",
+    provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
-        "iosapp",
-        "sdk",
+        "//platform:iosapp",
     ],
 )
 
 ios_application(
     name = "AppDynamicLib",
-    bundle_id = "com.maplibre.app",
+    bundle_id = "org.maplibre.app",
     families = [
         "iphone",
         "ipad",
@@ -478,12 +185,13 @@ ios_application(
     frameworks = [
         "MapLibre.link",
     ],
-    infoplists = ["platform/ios/app/Info.plist"],
+    infoplists = ["app/Info.plist"],
     minimum_os_version = "12.0",
+    provisioning_profile = ":xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
-        "iosapp",
+        "//platform:iosapp",
     ],
 )
 
@@ -504,13 +212,75 @@ genrule(
 
 xcodeproj(
     name = "xcodeproj",
+    bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
+    build_mode = BUILD_MODE,
+    default_xcode_configuration = "Debug",
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
     top_level_targets = [
         top_level_target(
             "App",
-            target_environments = ["simulator"],
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//render-test/ios:RenderTest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/iosapp-UITests:uitest",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/test:ios_test",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/test/core:CppUnitTests",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
         ),
     ],
+    xcode_configurations = {
+        "Debug": {"//command_line_option:compilation_mode": "dbg"},
+        "Release": {"//command_line_option:compilation_mode": "opt"},
+    },
+)
+
+sh_binary(
+    name = "lint-plists",
+    srcs = ["//platform/ios:scripts/lint-plists.sh"],
+    data = [
+        "Integration_Test_Harness/Info.plist",
+        "Integration_Tests/Info.plist",
+        "app/Info.plist",
+        "bench_UITests/Info.plist",
+        "benchmark/Info.plist",
+        "framework/Info.plist",
+        "framework/Info-static.plist",
+        "//platform/ios/iosapp-UITests:Info.plist",
+        "//platform/ios/test:Info.plist",
+    ],
+)
+
+exports_files(
+    MLN_IOS_PUBLIC_HEADERS +
+    MLN_IOS_PRIVATE_HEADERS +
+    MLN_IOS_PUBLIC_OBJCPP_SOURCE +
+    MLN_IOS_PUBLIC_OBJC_SOURCE +
+    MLN_PUBLIC_IOS_APP_SOPURCE,
 )

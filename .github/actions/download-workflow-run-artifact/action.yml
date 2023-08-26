@@ -1,0 +1,45 @@
+name: 'Download workflow_run artifact'
+description: 'Downloads and unzips artifact from workflow that triggered workflow_run'
+inputs:
+  artifact-name:
+    description: 'Name of artifact'
+    required: true
+  expect-files:
+    description: 'Check for existence of expected files'
+    required: false
+runs:
+  using: "composite"
+  steps:
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
+    - name: Download ${{ inputs.artifact-name }} artifact
+      uses: actions/github-script@v6
+      with:
+        script: |
+          let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+          });
+          let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+            return artifact.name == "${{ inputs.artifact-name }}"
+          })[0];
+          if (!matchArtifact) throw new Error("Could not find artifact ${{ inputs.artifact-name }}");
+          let download = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: matchArtifact.id,
+              archive_format: 'zip',
+          });
+          let fs = require('fs');
+          fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${{ inputs.artifact-name }}.zip`, Buffer.from(download.data));
+
+    - name: Unzip artifact
+      shell: bash
+      run: unzip ${{ inputs.artifact-name }}.zip
+
+    - name: "Check file existence"
+      uses: andstor/file-existence-action@v2.0.0
+      if: ${{ inputs.expect-files }}
+      with:
+        fail: true
+        files: ${{ inputs.expect-files }}

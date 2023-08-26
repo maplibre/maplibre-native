@@ -23,6 +23,7 @@ find_package(ICU OPTIONAL_COMPONENTS i18n uc)
 find_package(JPEG REQUIRED)
 find_package(libuv REQUIRED)
 find_package(PNG REQUIRED)
+find_package(WebP REQUIRED)
 find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
 find_path(LIBUV_INCLUDE_DIRS uv.h)
 
@@ -54,8 +55,10 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
@@ -72,6 +75,7 @@ target_compile_definitions(
     mbgl-core
     PRIVATE
         CURL_STATICLIB
+        USE_STD_FILESYSTEM
 )
 
 if(MLN_WITH_EGL)
@@ -145,6 +149,7 @@ target_include_directories(
 		${DLFCN_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
+        ${WEBP_INCLUDE_DIRS}
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
@@ -170,6 +175,7 @@ target_link_libraries(
         ${CURL_LIBRARIES}
         ${JPEG_LIBRARIES}
         ${LIBUV_LIBRARIES}
+        ${WEBP_LIBRARIES}
 		dlfcn-win32::dl
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::data>
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::i18n>
@@ -223,7 +229,7 @@ target_link_libraries(
         mbgl-compiler-options
         mbgl-benchmark
         -WHOLEARCHIVE:mbgl-benchmark
-        uv_a
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
         shlwapi
 )
 
@@ -239,7 +245,10 @@ target_compile_definitions(
 
 target_link_libraries(
     mbgl-render-test-runner
-    PRIVATE mbgl-compiler-options mbgl-render-test uv_a
+    PRIVATE
+        mbgl-compiler-options
+        mbgl-render-test
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 # Disable benchmarks in CI as they run in VM environment

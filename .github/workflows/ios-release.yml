@@ -6,10 +6,6 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, macOS, ARM64]
-    env:
-      BUILDTYPE: Release
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      HOMEBREW_NO_INSTALL_CLEANUP: 1
     defaults:
       run:
         working-directory: platform/ios
@@ -20,58 +16,16 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-      
-      - name: Install macos dependencies
-        run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
 
       - name: npm install
-        run: npm ci --ignore-scripts          
+        run: npm ci --ignore-scripts
 
-      - name: Prepare ccache
-        run: ccache --clear       
+      - run: chmod +x scripts/deploy-swift-package.sh
 
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1     
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats            
-
-      - name: Install iOS packaging dependencies
-        run: |
-          ./platform/ios/scripts/install-packaging-dependencies.sh
-        env:
-          CILAUNCH: true
+      - run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Build, package, and upload iOS release
-        run: platform/ios/scripts/deploy-swift-package.sh
+        run: scripts/deploy-swift-package.sh
         env:
           DIST_GITHUB_TOKEN: ${{ secrets.DIST_GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

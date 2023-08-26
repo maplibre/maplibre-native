@@ -28,7 +28,7 @@ on:
 
   pull_request:
     branches:
-      - main
+      - '*'
     paths:
       - CMakeLists.txt
       - ".github/actions/qt5-build/**"
@@ -175,7 +175,7 @@ jobs:
           # version is pinned due to issues with caching MSVC in 4.8
           choco.exe install ccache --version=4.7.5 --no-progress
           ccache.exe --version
-          echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> $GITHUB_ENV
+          echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> "$GITHUB_ENV"
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1
@@ -238,7 +238,7 @@ jobs:
           QT_VERSION: ${{ matrix.qt_version }}
         run: |
           pushd install
-          tar cjvf ../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2 *
+          tar cjvf ../maplibre-native_"${QT_ARCH}"_Qt"${QT_VERSION}".tar.bz2 ./*
           popd
 
       - name: Upload artifacts
@@ -294,9 +294,9 @@ jobs:
       - name: Build test app
         run: |
           mkdir install && cd install
-          tar xf ../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2
+          tar xf ../maplibre-native_"${QT_ARCH}"_Qt"${QT_VERSION}".tar.bz2
           cd ..
-          export CMAKE_PREFIX_PATH=$PWD/install
+          export CMAKE_PREFIX_PATH="$PWD"/install
           mkdir build && cd build
           cmake ../source/platform/qt/app/
           make
@@ -326,7 +326,7 @@ jobs:
         TAG_PLATFORM: ${{ matrix.name }}
         QT_VERSION: ${{ matrix.qt_version }}
       run: |
-        mv maplibre-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2 QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2
+        mv maplibre-native_"${TAG_PLATFORM}"_Qt"${QT_VERSION}".tar.bz2 QMapLibreGL_"${TAG_NAME//qt-/}"_Qt"${QT_VERSION}"_"${TAG_PLATFORM}".tar.bz2
 
     - name: Release
       uses: ncipollo/release-action@v1

@@ -180,7 +180,7 @@ public class BitmapUtils {
   @Nullable
   public static Drawable getDrawableFromRes(@NonNull Context context, @DrawableRes int drawableRes,
                                             @Nullable @ColorInt Integer tintColor) {
-    Drawable drawable = context.getResources().getDrawable(drawableRes);
+    Drawable drawable = context.getDrawable(drawableRes);
     if (drawable == null) {
       return null;
     }
