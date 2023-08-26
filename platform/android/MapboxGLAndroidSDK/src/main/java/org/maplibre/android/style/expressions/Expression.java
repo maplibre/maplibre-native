@@ -1565,13 +1565,12 @@ public class Expression {
   }
 
   /**
-   * Returns items from an array or a substring from a string from a specified start index. 
-   * The return value is inclusive of the start index.
+   * Returns the first position at which a `needle` can be found in a `haystack`.
    *
    * @param needle   the item expression
    * @param haystack the array or string expression
    * @param fromIndex the index to start searching from
-   * @return array or string
+   * @return position in the array or string or -1 if not found.
    * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#index-of">Style specification</a>
    */
   public static Expression indexOf(@NonNull Expression keyword, @NonNull Expression input, @NonNull Expression fromIndex) {
