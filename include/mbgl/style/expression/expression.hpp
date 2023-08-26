@@ -174,7 +174,8 @@ enum class Kind : int32_t {
     In,
     Within,
     Distance,
-    IndexOf
+    IndexOf,
+    Slice
 };
 
 class Expression {
