@@ -240,6 +240,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/match.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/number_format.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/parsing_context.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/slice.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/step.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/type.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/value.hpp
@@ -641,6 +642,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/match.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/number_format.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/parsing_context.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/slice.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/step.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.hpp
