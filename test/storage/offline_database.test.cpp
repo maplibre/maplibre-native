@@ -12,11 +12,6 @@
 #include <thread>
 #include <random>
 
-#if defined(__GNUC__)
-#define MBGL_UNUSED __attribute__((unused))
-#else
-#define MBGL_UNUSED
-#endif
 
 using namespace std::literals::string_literals;
 using namespace mbgl;
@@ -50,7 +45,7 @@ static FixtureLog::Message error(ResultCode code, const char* message) {
     return {EventSeverity::Error, Event::Database, static_cast<int64_t>(code), message};
 }
 
-static MBGL_UNUSED FixtureLog::Message warning(ResultCode code, const char* message) {
+static FixtureLog::Message warning(ResultCode code, const char* message) {
     return {EventSeverity::Warning, Event::Database, static_cast<int64_t>(code), message};
 }
 
