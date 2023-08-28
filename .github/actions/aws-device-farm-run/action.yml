@@ -89,6 +89,9 @@ runs:
 
             if [[ "$status_app" == "SUCCEEDED" && "$status_test_package" == "SUCCEEDED" ]]; then
               exit 0
+            elif ((max_checks == 0)); then
+              echo "App or test package failed to upload"
+              exit 1
             fi
 
             sleep $sleep_time

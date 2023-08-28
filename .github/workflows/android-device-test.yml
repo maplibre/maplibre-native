@@ -43,7 +43,7 @@ jobs:
           name: ${{ matrix.test.name }}
           appType: ANDROID_APP
           appFile: ${{ matrix.test.appFile }}
-          testFile: ${{ matrix.test.appFile }}
+          testFile: ${{ matrix.test.testFile }}
           testPackageType: INSTRUMENTATION_TEST_PACKAGE
           testType: INSTRUMENTATION
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
