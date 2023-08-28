@@ -19,22 +19,38 @@ inputs:
   testType:
     description: 'e.g. INSTRUMENTATION, XCTEST'
     required: true
+  AWS_ACCESS_KEY_ID:
+    description: "AWS_ACCESS_KEY_ID"
+    required: true
+  AWS_SECRET_ACCESS_KEY:
+    description: "AWS_SECRET_ACCESS_KEY"
+    required: true
+  AWS_ROLE_TO_ASSUME:
+    description: "AWS_ROLE_TO_ASSUME"
+    required: true
+  AWS_DEVICE_FARM_PROJECT_ARN:
+    description: "AWS_DEVICE_FARM_PROJECT_ARN"
+    required: true
+  AWS_DEVICE_FARM_DEVICE_POOL_ARN:
+    description: "AWS_DEVICE_FARM_DEVICE_POOL_ARN"
+    required: true
 runs:
   using: "composite"
   steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ inputs.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 3600
           role-session-name: MySessionName
 
       - name: Create upload app
+        shell: bash
         run: |
-          response=$(aws devicefarm create-upload --type ${{ inputs.appType }} --name ${{ inputs.appFile }} --project-arn ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }})
+          response=$(aws devicefarm create-upload --type ${{ inputs.appType }} --name ${{ inputs.appFile }} --project-arn ${{ inputs.AWS_DEVICE_FARM_PROJECT_ARN }})
           echo "$response"
           arn="$(jq -r '.upload.arn' <<< "$response")"
           url="$(jq -r '.upload.url' <<< "$response")"
@@ -42,8 +58,9 @@ runs:
           echo "app_url=$url" >> "$GITHUB_ENV"
 
       - name: Create upload test package
+        shell: bash
         run: |
-          response=$(aws devicefarm create-upload --type ${{ inputs.testPackageType }} --name ${{ inputs.testFile }} --project-arn ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }})
+          response=$(aws devicefarm create-upload --type ${{ inputs.testPackageType }} --name ${{ inputs.testFile }} --project-arn ${{ inputs.AWS_DEVICE_FARM_PROJECT_ARN }})
           echo "$response"
           arn="$(jq -r '.upload.arn' <<< "$response")"
           url="$(jq -r '.upload.url' <<< "$response")"
@@ -51,6 +68,7 @@ runs:
           echo "test_package_url=$url" >> "$GITHUB_ENV"
 
       - name: Upload ${{ inputs.appFile }}, ${{ inputs.testFile }}
+        shell: bash
         run: |
           curl -T ${{ inputs.appFile }} "${{ env.app_url }}"
           curl -T ${{ inputs.testFile }} "${{ env.test_package_url }}"
@@ -80,8 +98,8 @@ runs:
         uses: realm/aws-devicefarm/test-application@master
         with:
           name: MapLibre Native ${{ matrix.test.name }}
-          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          device_pool_arn: ${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}
+          project_arn: ${{ inputs.AWS_DEVICE_FARM_PROJECT_ARN }}
+          device_pool_arn: ${{ inputs.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
           app_arn: ${{ env.app_arn }}
           app_type: ${{ inputs.appType }}
           test_type: ${{ inputs.testType }}
