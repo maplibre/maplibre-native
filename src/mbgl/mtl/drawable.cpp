@@ -25,6 +25,14 @@
 namespace mbgl {
 namespace mtl {
 
+struct IndexBuffer : public gfx::IndexBufferBase {
+    IndexBuffer(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
+        : buffer(std::move(buffer_)) {}
+    ~IndexBuffer() override = default;
+
+    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+};
+
 Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
@@ -76,6 +84,17 @@ std::string debugLabel(const gfx::Drawable& drawable) {
     return result;
 }
 #endif // !defined(NDEBUG)
+
+MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) {
+    if (const auto* buf0 = indexes->getBuffer()) {
+        if (const auto* buf1 = static_cast<const IndexBuffer*>(buf0)->buffer.get()) {
+            const auto& buf2 = buf1->getResource<IndexBufferResource>().get();
+            return buf2.getMetalBuffer().get();
+        }
+    }
+    return nullptr;
+}
+
 } // namespace
 
 void Drawable::draw(PaintParameters& parameters) const {
@@ -126,10 +145,14 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     const auto& renderPassDescriptor = renderPass.getDescriptor();
 
-    const auto& indexResource = impl->indexBuffer.getResource<IndexBufferResource>().get();
-    const auto& indexBuffer = indexResource.getMetalBuffer().get();
-    if (!indexBuffer) {
-        assert(!"Index buffer missing");
+    if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
+        assert(!"Index buffer not uploaded");
+        return;
+    }
+
+    const auto* indexBuffer = getMetalBuffer(impl->indexes);
+    if (!indexBuffer || impl->indexes->getDirty()) {
+        assert(!"Index buffer not uploaded");
         return;
     }
 
@@ -391,20 +414,25 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
     auto& contextBase = uploadPass.getContext();
     auto& context = static_cast<Context&>(contextBase);
+    constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
+    if (impl->indexes->getDirty()) {
+        auto indexBufferResource{
+            uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
+        auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
+                                                              std::move(indexBufferResource));
+        auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
+
+        impl->indexes->setBuffer(std::move(buffer));
+        impl->indexes->setDirty(false);
+    }
+    
     const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;
-    ;
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
 #endif
-
-        constexpr auto usage = gfx::BufferUsageType::StaticDraw;
-
-        const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
-        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
-        impl->indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
 
         // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
