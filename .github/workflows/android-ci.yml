@@ -152,7 +152,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 36000
           role-session-name: MySessionName
 
       - name: Create upload
@@ -191,7 +191,6 @@ jobs:
         with:
           name: uploadsEnv
           path: uploads.env
-
 
       # render test
       - name: Build Render Test App

@@ -46,6 +46,11 @@ jobs:
           testFile: ${{ matrix.test.appFile }}
           testPackageType: INSTRUMENTATION_TEST_PACKAGE
           testType: INSTRUMENTATION
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
 
       - uses: LouisBrunner/checks-action@v1.6.2
         if: always()
