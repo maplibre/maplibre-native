@@ -261,10 +261,10 @@ cmake(
         cp -r $INSTALLDIR/include/freetype2/* $INSTALLDIR/include/  
         cp -r $INSTALLDIR/include/harfbuzz/* $INSTALLDIR/include/
     """,
-    # working_directory = "freetype",
+    working_directory = "harfbuzzFreetype",
     out_include_dir = "include",
     out_static_libs = select({
-        "//conditions:default": ["libfreetype.a", "libharfbuzz.a", "libharfbuzz-subset.a"],
+        "//conditions:default": ["libfreetype.a", "libharfbuzz.a", "libharfbuzz-subset.a", "libharfbuzzFreetype.a"],
     }),
     visibility = ["//visibility:public"],
 )

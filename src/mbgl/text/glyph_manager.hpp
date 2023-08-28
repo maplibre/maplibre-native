@@ -10,7 +10,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "freetype.hpp"
 #include "harfbuzz.hpp"
 
 namespace mbgl {

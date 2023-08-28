@@ -499,8 +499,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/text/tagged_string.hpp",
     "src/mbgl/text/harfbuzz.cpp",
     "src/mbgl/text/harfbuzz.hpp",
-    "src/mbgl/text/freetype.cpp",
-    "src/mbgl/text/freetype.hpp",
     "src/mbgl/tile/custom_geometry_tile.cpp",
     "src/mbgl/tile/custom_geometry_tile.hpp",
     "src/mbgl/tile/geojson_tile.cpp",

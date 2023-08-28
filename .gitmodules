@@ -49,9 +49,9 @@
 [submodule "platform/windows/vendor/vcpkg"]
 	path = platform/windows/vendor/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
-[submodule "vendor/harfbuzz"]
-	path = vendor/harfbuzz
+[submodule "vendor/harfbuzzFreetype/freetype"]
+	path = vendor/harfbuzzFreetype/freetype
+url=https://github.com/freetype/freetype.git
+[submodule "vendor/harfbuzzFreetype/harfbuzz"]
+	path = vendor/harfbuzzFreetype/harfbuzz
 	url = https://github.com/harfbuzz/harfbuzz.git
-[submodule "vendor/freetype"]
-	path = vendor/freetype
-	url = https://github.com/freetype/freetype.git

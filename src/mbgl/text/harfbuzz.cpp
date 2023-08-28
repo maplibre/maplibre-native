@@ -1,121 +1,67 @@
-#include <mbgl/text/harfbuzz.hpp>
+#include "harfbuzz.hpp"
 
-#include <hb-ft.h>
 
 namespace mbgl {
 
-struct InternalHBLangInfo {
-    std::string fontFileName;
-    std::string language;
-    hb_script_t script;
-    hb_direction_t direction;
-};
+#define SDF_FONT_SIZE 24
 
-std::map<GlyphIDType, InternalHBLangInfo> HBShaper::internalInfos = {
-    {GlyphIDType::Khmer, {"khmer.ttf", "kh", HB_SCRIPT_KHMER, HB_DIRECTION_LTR}},
-    {GlyphIDType::Myanmar, {"Myanmar.ttf", "my", HB_SCRIPT_MYANMAR, HB_DIRECTION_LTR}},
-    {GlyphIDType::Devanagari, {"Devanagari.ttf", "hi", HB_SCRIPT_DEVANAGARI, HB_DIRECTION_LTR}},
-};
-
-HBShaper::HBShaper(GlyphIDType _type, const FreeTypeLibrary &lib)
-    : face(internalInfos[_type].fontFileName, lib),
-      type(_type) {
-    if (!face.Valid()) return;
-    hbInfo = &internalInfos[_type];
-
-    font = hb_ft_font_create(face.face, NULL);
-    buffer = hb_buffer_create();
-
-    hb_buffer_allocation_successful(buffer);
-}
-
-HBShaper::HBShaper(GlyphIDType _type, const std::string &fontFileData, const FreeTypeLibrary &lib)
-    : face(fontFileData.data(), fontFileData.size(), lib),
-      type(_type) {
-    if (!face.Valid()) return;
-
-    hbInfo = &internalInfos[_type];
-
-    font = hb_ft_font_create(face.face, NULL);
-    buffer = hb_buffer_create();
-
-    hb_buffer_allocation_successful(buffer);
+HBShaper::HBShaper(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib) : type(type_) {
+    shaper = std::make_unique<HBShaperWrap>((GlyphTypeWrap)type_, fontFileData, lib);
+    
+    if (!shaper || !shaper->Valid()) return;
 }
 
 HBShaper::~HBShaper() {
-    if (!face.valid) return;
-    hb_buffer_destroy(buffer);
-    hb_font_destroy(font);
+    shaper.reset();
 }
 
 void HBShaper::CreateComplexGlyphIDs(const std::string &text,
                                      std::vector<GlyphID> &glyphIDs,
                                      std::vector<HBShapeAdjust> &adjusts) {
-    // Setup harfbuzz
-    hb_buffer_reset(buffer);
-
-    hb_buffer_set_direction(buffer, hbInfo->direction);
-    hb_buffer_set_script(buffer, hbInfo->script);
-    hb_buffer_set_language(buffer, hb_language_from_string(hbInfo->language.c_str(), (int)hbInfo->language.size()));
-    size_t length = text.size();
-
-    hb_buffer_add_utf8(buffer, text.c_str(), (int)length, 0, (int)length);
-
-    // harfbuzz shaping
-    hb_shape(font, buffer, NULL, 0);
-
-    // Get Harfbuzz adjustion
-    uint32_t glyphCount;
-    hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos(buffer, &glyphCount);
-    hb_glyph_position_t *glyphPos = hb_buffer_get_glyph_positions(buffer, &glyphCount);
-
-    glyphIDs.reserve(glyphCount);
-    adjusts.reserve(glyphCount);
-
-    for (uint32_t i = 0; i < glyphCount; ++i) {
-        glyphIDs.emplace_back(glyphInfo[i].codepoint, type);
-
-        float x_advance = static_cast<float>(glyphPos[i].x_advance / 64.0f);
-        float x_offset = static_cast<float>(glyphPos[i].x_offset / 64.0f);
-        float y_offset = static_cast<float>(glyphPos[i].y_offset / 64.0f);
-
-        adjusts.emplace_back(x_offset, y_offset, x_advance);
+    std::vector<uint32_t> indexs;
+    shaper->CreateComplexGlyphIDs(text, indexs, adjusts);
+    for (auto index : indexs) {
+        glyphIDs.emplace_back((char16_t)index, type);
     }
 }
 
 void HBShaper::CreateComplexGlyphIDs(const std::u16string &text,
                                      std::vector<GlyphID> &glyphIDs,
                                      std::vector<HBShapeAdjust> &adjusts) {
-    // Setup harfbuzz
-    hb_buffer_reset(buffer);
-
-    hb_buffer_set_direction(buffer, hbInfo->direction);
-    hb_buffer_set_script(buffer, hbInfo->script);
-    hb_buffer_set_language(buffer, hb_language_from_string(hbInfo->language.c_str(), (int)hbInfo->language.size()));
-    size_t length = text.size();
-
-    hb_buffer_add_utf16(buffer, (const uint16_t *)text.c_str(), (int)length, 0, (int)length);
-
-    // harfbuzz shaping
-    hb_shape(font, buffer, NULL, 0);
-
-    // Get Harfbuzz adjustion
-    uint32_t glyphCount;
-    hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos(buffer, &glyphCount);
-    hb_glyph_position_t *glyphPos = hb_buffer_get_glyph_positions(buffer, &glyphCount);
-
-    glyphIDs.reserve(glyphCount);
-    adjusts.reserve(glyphCount);
-
-    for (uint32_t i = 0; i < glyphCount; ++i) {
-        glyphIDs.emplace_back(glyphInfo[i].codepoint, type);
-
-        float x_advance = static_cast<float>(glyphPos[i].x_advance / 64.0f);
-        float x_offset = static_cast<float>(glyphPos[i].x_offset / 64.0f);
-        float y_offset = static_cast<float>(-glyphPos[i].y_offset / 64.0f);
-
-        adjusts.emplace_back(x_offset, y_offset, x_advance);
+    std::vector<uint32_t> indexs;
+    shaper->CreateComplexGlyphIDs(text, indexs, adjusts);
+    for (auto index : indexs) {
+        glyphIDs.emplace_back((char16_t)index, type);
     }
+}
+
+Glyph HBShaper::rasterizeGlyph(GlyphID glyphID) {
+    Glyph fixedMetrics;
+
+    auto setGlyph = [&] (uint32_t width, uint32_t height, int left, int top, uint32_t advance, unsigned char*buffer) {
+        
+        fixedMetrics.id = glyphID;
+        
+        Size size(width + Glyph::borderSize * 2, height + Glyph::borderSize * 2);
+        
+        fixedMetrics.metrics.width = size.width;
+        fixedMetrics.metrics.height = size.height;
+        fixedMetrics.metrics.left = left;
+        fixedMetrics.metrics.top = top - SDF_FONT_SIZE - Glyph::borderSize;
+        fixedMetrics.metrics.advance = advance;
+        
+        // Copy alpha values from RGBA bitmap into the AlphaImage output
+        fixedMetrics.bitmap = AlphaImage(size);
+        
+        for (uint32_t h = 0; h < height; ++h) {
+            std::memcpy(&fixedMetrics.bitmap.data[size.width * (h + Glyph::borderSize) + Glyph::borderSize], &buffer[width * h], width);
+        }
+    };
+    
+    shaper->rasterizeGlyph(glyphID.complex.code, setGlyph);
+
+
+    return fixedMetrics;
 }
 
 } // namespace mbgl
