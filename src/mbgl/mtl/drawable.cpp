@@ -426,7 +426,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setBuffer(std::move(buffer));
         impl->indexes->setDirty(false);
     }
-    
+
     const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;
 
     if (buildAttribs) {
