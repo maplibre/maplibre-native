@@ -195,8 +195,8 @@ jobs:
       # render test
       - name: Build Render Test App
         run: |
-          ./gradlew assembleDebug assembleAndroidTest
-          cp app/build/outputs/apk/debug/app-debug.apk RenderTestsApp.apk
+          ./gradlew assemble assembleAndroidTest
+          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
           cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
         working-directory: ./render-test/android
 
