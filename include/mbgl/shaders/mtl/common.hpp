@@ -20,6 +20,10 @@ using namespace metal;
 
 #define SDF_PX 8.0
 
+// OpenGL `mod` is `x-y*floor(x/y)` where `floot` rounds down.
+// Metal `fmod` is `x-y*trunc(x/y)` where `trunc` rounds toward zero.
+function glMod(float x, float y) { return x - y * floor(x / y); }
+
 enum class AttributeSource : int32_t {
     Constant,
     PerVertex,

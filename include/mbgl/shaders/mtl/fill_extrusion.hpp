@@ -100,12 +100,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const ExpressionInputsUBO& expr [[buffer(9)]]) {
 
     const float u_base = props.light_position_base.w;
-    const auto color0 =     colorFor(permutation.color,  props.color,  vertx.color,  interp.color_t,  expr);
     const auto base   = max(valueFor(permutation.base,   u_base,       vertx.base,   interp.base_t,   expr), 0.0);
     const auto height = max(valueFor(permutation.height, props.height, vertx.height, interp.height_t, expr), 0.0);
 
     const float3 normal = float3(vertx.normal_ed.xyz);
-    const float t = fmod(normal.x, 2.0);
+    const float t = glMod(normal.x, 2.0);
     const float z = (t > 0.0) ? height : base;
     const float4 position = fill.matrix * float4(float2(vertx.pos), z, 1);
 
@@ -116,20 +115,24 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         };
     }
 
+    auto color = colorFor(permutation.color, props.color, vertx.color, interp.color_t, expr);
+
     // Relative luminance (how dark/bright is the surface color?)
-    const float colorvalue = color0.r * 0.2126 + color0.g * 0.7152 + color0.b * 0.0722;
+    const float luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+
+    float4 vcolor = float4(0.0, 0.0, 0.0, 1.0);
 
     // Add slight ambient lighting so no extrusions are totally black
-    const float4 ambientlight = float4(0.03, 0.03, 0.03, 1.0);
-
-    float4 color = float4(0.0, 0.0, 0.0, 1.0) + ambientlight;
+    color += min(float4(0.03, 0.03, 0.03, 1.0), float4(1.0));
 
     // Calculate cos(theta), where theta is the angle between surface normal and diffuse light ray
-    float directional = clamp(dot(normal / 16384.0, props.light_position_base.xyz), 0.0, 1.0);
+    const float directionalFraction = clamp(dot(normal / 16384.0, props.light_position_base.xyz), 0.0, 1.0);
 
     // Adjust directional so that the range of values for highlight/shading is
     // narrower with lower light intensity and with lighter/brighter surface colors
-    directional = mix((1.0 - props.light_intensity), max((1.0 - colorvalue + props.light_intensity), 1.0), directional);
+    const float minDirectional = 1.0 - props.light_intensity;
+    const float maxDirectional = max(1.0 - luminance + props.light_intensity, 1.0);
+    float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
     if (normal.y != 0.0) {
@@ -145,15 +148,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // Assign final color based on surface + ambient light color, diffuse light directional,
     // and light color with lower bounds adjusted to hue of light so that shading is tinted
     // with the complementary (opposite) color to the light color
-    // TODO: rewrite with vector operations
     const float3 light_color = props.light_color_pad.rgb;
-    color.r += clamp(color.r * directional * light_color.r, mix(0.0, 0.3, 1.0 - light_color.r), 1.0);
-    color.g += clamp(color.g * directional * light_color.g, mix(0.0, 0.3, 1.0 - light_color.g), 1.0);
-    color.b += clamp(color.b * directional * light_color.b, mix(0.0, 0.3, 1.0 - light_color.b), 1.0);
+    const float3 minLight = mix(0.0, 0.3, 1.0 - light_color.rgb);
+    vcolor += float4(clamp(color.rgb * directional * light_color.rgb, minLight, 1.0), 0.0);
 
     return {
         .position = position,
-        .color    = half4(color * props.opacity),
+        .color    = half4(vcolor * props.opacity),
     };
 }
 

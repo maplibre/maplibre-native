@@ -102,105 +102,6 @@ MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
     }
 }
 
-MTL::CompareFunction mapFunc(const gfx::DepthFunctionType func) {
-    switch (func) {
-        default:
-        case gfx::DepthFunctionType::Never:
-            return MTL::CompareFunction::CompareFunctionNever;
-        case gfx::DepthFunctionType::Less:
-            return MTL::CompareFunction::CompareFunctionLess;
-        case gfx::DepthFunctionType::Equal:
-            return MTL::CompareFunction::CompareFunctionEqual;
-        case gfx::DepthFunctionType::LessEqual:
-            return MTL::CompareFunction::CompareFunctionLessEqual;
-        case gfx::DepthFunctionType::Greater:
-            return MTL::CompareFunction::CompareFunctionGreater;
-        case gfx::DepthFunctionType::NotEqual:
-            return MTL::CompareFunction::CompareFunctionNotEqual;
-        case gfx::DepthFunctionType::GreaterEqual:
-            return MTL::CompareFunction::CompareFunctionGreaterEqual;
-        case gfx::DepthFunctionType::Always:
-            return MTL::CompareFunction::CompareFunctionAlways;
-    };
-}
-MTL::CompareFunction mapFunc(const gfx::StencilFunctionType func) {
-    switch (func) {
-        default:
-        case gfx::StencilFunctionType::Never:
-            return MTL::CompareFunction::CompareFunctionNever;
-        case gfx::StencilFunctionType::Less:
-            return MTL::CompareFunction::CompareFunctionLess;
-        case gfx::StencilFunctionType::Equal:
-            return MTL::CompareFunction::CompareFunctionEqual;
-        case gfx::StencilFunctionType::LessEqual:
-            return MTL::CompareFunction::CompareFunctionLessEqual;
-        case gfx::StencilFunctionType::Greater:
-            return MTL::CompareFunction::CompareFunctionGreater;
-        case gfx::StencilFunctionType::NotEqual:
-            return MTL::CompareFunction::CompareFunctionNotEqual;
-        case gfx::StencilFunctionType::GreaterEqual:
-            return MTL::CompareFunction::CompareFunctionGreaterEqual;
-        case gfx::StencilFunctionType::Always:
-            return MTL::CompareFunction::CompareFunctionAlways;
-    };
-}
-
-MTL::StencilOperation mapOperation(const gfx::StencilOpType op) {
-    switch (op) {
-        case gfx::StencilOpType::Zero:
-            return MTL::StencilOperation::StencilOperationZero;
-        default:
-        case gfx::StencilOpType::Keep:
-            return MTL::StencilOperation::StencilOperationKeep;
-        case gfx::StencilOpType::Replace:
-            return MTL::StencilOperation::StencilOperationReplace;
-        case gfx::StencilOpType::Increment:
-            return MTL::StencilOperation::StencilOperationIncrementClamp;
-        case gfx::StencilOpType::Decrement:
-            return MTL::StencilOperation::StencilOperationDecrementClamp;
-        case gfx::StencilOpType::Invert:
-            return MTL::StencilOperation::StencilOperationInvert;
-        case gfx::StencilOpType::IncrementWrap:
-            return MTL::StencilOperation::StencilOperationIncrementWrap;
-        case gfx::StencilOpType::DecrementWrap:
-            return MTL::StencilOperation::StencilOperationDecrementWrap;
-    }
-}
-
-void applyDepthMode(const gfx::DepthMode& depthMode, MTL::DepthStencilDescriptor* desc) {
-    desc->setDepthCompareFunction(mapFunc(depthMode.func));
-    desc->setDepthWriteEnabled(depthMode.mask == gfx::DepthMaskType::ReadWrite);
-    // depthMode.range ?
-}
-
-struct StencilModeVisitor {
-    MTL::StencilDescriptor* desc;
-
-    template <gfx::StencilFunctionType F>
-    void operator()(const gfx::StencilMode::SimpleTest<F>& mode) {
-        apply(mode.func, mode.mask);
-    }
-    template <gfx::StencilFunctionType F>
-    void operator()(const gfx::StencilMode::MaskedTest<F>& mode) {
-        apply(mode.func, mode.mask);
-    }
-
-    void apply(gfx::StencilFunctionType func, uint32_t mask) {
-        desc->setStencilCompareFunction(mapFunc(func));
-        desc->setReadMask(mask);
-        desc->setWriteMask(mask);
-    }
-};
-
-// helper type for the visitor #4
-void applyStencilMode(const gfx::StencilMode& stencilMode, MTL::StencilDescriptor* desc) {
-    mapbox::util::apply_visitor(StencilModeVisitor{desc}, stencilMode.test);
-
-    desc->setStencilFailureOperation(mapOperation(stencilMode.fail));
-    desc->setDepthFailureOperation(mapOperation(stencilMode.depthFail));
-    desc->setDepthStencilPassOperation(mapOperation(stencilMode.pass));
-}
-
 } // namespace
 
 void Drawable::draw(PaintParameters& parameters) const {
@@ -258,45 +159,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // For 3D mode, stenciling is handled by the layer group
     if (!is3D) {
-        auto depthStencilDescriptor = NS::TransferPtr(MTL::DepthStencilDescriptor::alloc()->init());
-        if (!depthStencilDescriptor) {
-            return;
-        }
-
-        auto& device = context.getBackend().getDevice();
-        const auto& renderable = renderPassDescriptor.renderable;
-        const auto& renderableResource = renderable.getResource<RenderableResource>();
-        if (const auto& rpd = renderableResource.getRenderPassDescriptor()) {
-            // Setting depth/stencil properties when the corresponding target textures aren't set causes, e.g.:
-            // `Draw Errors Validation MTLDepthStencilDescriptor sets depth test but MTLRenderPassDescriptor has a nil
-            // depthAttachment texture`
-            if (auto* depthTarget = rpd->depthAttachment()) {
-                if (auto* tex = depthTarget->texture()) {
-                    const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
-                    applyDepthMode(depthMode, depthStencilDescriptor.get());
-                }
-            }
-            if (auto* stencilTarget = rpd->stencilAttachment()) {
-                if (auto* tex = stencilTarget->texture()) {
-                    const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
-                                                           : gfx::StencilMode::disabled();
-
-                    auto stencilDescriptor = NS::TransferPtr(MTL::StencilDescriptor::alloc()->init());
-                    if (!stencilDescriptor) {
-                        return;
-                    }
-
-                    applyStencilMode(stencilMode, stencilDescriptor.get());
-
-                    depthStencilDescriptor->setFrontFaceStencil(stencilDescriptor.get());
-                    depthStencilDescriptor->setBackFaceStencil(stencilDescriptor.get());
-
-                    encoder->setStencilReferenceValue(stencilMode.ref);
-                }
-            }
-        }
-
-        if (auto depthStencilState = NS::TransferPtr(device->newDepthStencilState(depthStencilDescriptor.get()))) {
+        const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+        const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
+                                               : gfx::StencilMode::disabled();
+        if (auto depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderPass)) {
             encoder->setDepthStencilState(depthStencilState.get());
         }
     }

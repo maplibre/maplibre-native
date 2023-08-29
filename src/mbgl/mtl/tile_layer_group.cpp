@@ -7,9 +7,12 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/convert.hpp>
+
+#include <Metal/Metal.hpp>
 
 namespace mbgl {
 namespace mtl {
@@ -82,6 +85,13 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     // render each tile into the stencil buffer with a different value.
     if (features3d) {
         stencilMode3d = stencil3d ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
+
+        const auto& renderPass = static_cast<const mtl::RenderPass&>(*parameters.renderPass);
+        const auto& encoder = renderPass.getMetalEncoder();
+        const auto depthMode = parameters.depthModeFor3D();
+        if (auto depthStencilState = context.makeDepthStencilState(depthMode, stencilMode3d, renderPass)) {
+            encoder->setDepthStencilState(depthStencilState.get());
+        }
     } else if (!tileIDs.empty()) {
         parameters.renderTileClippingMasks(tileIDs);
     }

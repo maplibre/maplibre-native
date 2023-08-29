@@ -11,6 +11,8 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
+#include <mbgl/mtl/mtl_fwd.hpp>
+
 #include <memory>
 #include <unordered_map>
 
@@ -20,6 +22,7 @@ class ProgramParameters;
 
 namespace mtl {
 
+class RenderPass;
 class RendererBackend;
 class ShaderProgram;
 
@@ -147,6 +150,10 @@ public:
 #endif
 
     void clearStencilBuffer(int32_t) override;
+
+    MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode& depthMode,
+                                                                const gfx::StencilMode& stencilMode,
+                                                                const mtl::RenderPass& renderPass) const;
 
 private:
     RendererBackend& backend;
