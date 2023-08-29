@@ -67,9 +67,9 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
 }
 
 float valueFor(device const Attribute& attrib,
-               device const float& constValue,
+               const float constValue,
                thread const float2& vertexValue,
-               device const float& t,
+               const float t,
                device const ExpressionInputsUBO&) {
     switch (attrib.source) {
         case AttributeSource::PerVertex: return unpack_mix_float(vertexValue, t);
@@ -93,8 +93,8 @@ float4 colorFor(device const Attribute& attrib,
 // interpolated packed colors
 float4 colorFor(device const Attribute& attrib,
                 device const float4& constValue,
-                thread const float4& vertexValue,
-                device const float& t,
+                const float4 vertexValue,
+                const float t,
                 device const ExpressionInputsUBO&) {
     switch (attrib.source) {
         case AttributeSource::PerVertex: return unpack_mix_color(vertexValue, t);
