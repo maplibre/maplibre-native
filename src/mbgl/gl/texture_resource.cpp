@@ -7,9 +7,6 @@ namespace gl {
 static int channelCount(gfx::TexturePixelType format) {
     switch (format) {
         case gfx::TexturePixelType::Alpha:
-        case gfx::TexturePixelType::Depth:
-        case gfx::TexturePixelType::Luminance:
-        case gfx::TexturePixelType::Stencil:
             return 1;
         case gfx::TexturePixelType::RGBA:
             return 4;

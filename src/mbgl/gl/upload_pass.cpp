@@ -84,16 +84,20 @@ void UploadPass::updateTextureResource(gfx::TextureResource& resource,
                                        const void* data,
                                        gfx::TexturePixelType format,
                                        gfx::TextureChannelDataType type) {
+    auto const glFormat = Enum<gfx::TexturePixelType>::to(format);
+    auto glInternalFormat = glFormat;
+    if (glFormat == GL_RED) glInternalFormat = GL_R8;
+
     // Always use texture unit 0 for manipulating it.
     commandEncoder.context.activeTextureUnit = 0;
     commandEncoder.context.texture[0] = static_cast<gl::TextureResource&>(resource).texture;
     MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
                                   0,
-                                  Enum<gfx::TexturePixelType>::to(format),
+                                  glInternalFormat,
                                   size.width,
                                   size.height,
                                   0,
-                                  Enum<gfx::TexturePixelType>::to(format),
+                                  glFormat,
                                   Enum<gfx::TextureChannelDataType>::to(type),
                                   data));
 }

@@ -235,7 +235,7 @@ Program::Type Program::Get() {
 const constexpr LineWidth::Type LineWidth::Default;
 
 void LineWidth::Set(const Type& value) {
-    MBGL_CHECK_ERROR(glLineWidth(value));
+    MBGL_CHECK_ERROR(glLineWidth(value > 1 ? 1 : value));
 }
 
 LineWidth::Type LineWidth::Get() {
