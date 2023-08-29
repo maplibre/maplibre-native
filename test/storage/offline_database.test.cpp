@@ -12,7 +12,6 @@
 #include <thread>
 #include <random>
 
-
 using namespace std::literals::string_literals;
 using namespace mbgl;
 using mapbox::sqlite::ResultCode;
