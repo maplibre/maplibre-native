@@ -82,10 +82,10 @@ jobs:
             libwebp-dev
 
       - if: ${{ matrix.renderer }} == "drawable"
-        run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> $GITHUB_ENV
+        run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
 
       - if: ${{ matrix.renderer }} == "legacy"
-        run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> $GITHUB_ENV
+        run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
 
       - name: Build MapLibre Native Core
         env:
