@@ -105,7 +105,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float3 normal = float3(vertx.normal_ed.xyz);
     const float t = glMod(normal.x, 2.0);
-    const float z = (t > 0.0) ? height : base;
+    const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float4 position = fill.matrix * float4(float2(vertx.pos), z, 1);
 
     if (permutation.overdrawInspector) {
