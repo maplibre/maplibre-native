@@ -154,6 +154,21 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
         return lineGradientPropertiesBuffer;
     };
+const auto getLinePatternPropsBuffer = [&]() {
+        if (!linePatternPropertiesBuffer) {
+            const LinePatternPropertiesUBO linePatternPropertiesUBO{
+                /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
+                /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
+                /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
+                /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
+                /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
+                0,
+                {0, 0}};
+            linePatternPropertiesBuffer = context.createUniformBuffer(&linePatternPropertiesUBO,
+                                                                       sizeof(linePatternPropertiesUBO));
+        }
+        return linePatternPropertiesBuffer;
+    };
     const auto getLineSDFPropsBuffer = [&]() {
         if (!lineSDFPropertiesBuffer) {
             const LineSDFPropertiesUBO lineSDFPropertiesUBO{
@@ -238,15 +253,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
             uniforms.createOrUpdate(LinePatternUBOName, &linePatternUBO, context);
 
             // properties UBO
-            const LinePatternPropertiesUBO linePatternPropertiesUBO{
-                /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-                /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-                /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-                /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-                /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                0,
-                {0, 0}};
-            uniforms.createOrUpdate(LinePatternPropertiesUBOName, &linePatternPropertiesUBO, context);
+            uniforms.addOrReplace(LinePatternPropertiesUBOName, getLinePatternPropsBuffer());
         }
         // SDF line
         else if (shaderUniforms.get(std::string(LineSDFUBOName))) {
