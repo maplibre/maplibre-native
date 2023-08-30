@@ -164,6 +164,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                : gfx::StencilMode::disabled();
         if (auto depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderPass)) {
             encoder->setDepthStencilState(depthStencilState.get());
+            encoder->setStencilReferenceValue(stencilMode.ref);
         }
     }
 

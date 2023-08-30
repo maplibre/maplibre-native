@@ -284,7 +284,7 @@ struct StencilModeVisitor {
 
     template <gfx::StencilFunctionType F>
     void operator()(const gfx::StencilMode::SimpleTest<F>& mode) {
-        apply(mode.func, mode.mask);
+        apply(mode.func, std::numeric_limits<uint32_t>::max());
     }
     template <gfx::StencilFunctionType F>
     void operator()(const gfx::StencilMode::MaskedTest<F>& mode) {
@@ -312,11 +312,6 @@ void applyStencilMode(const gfx::StencilMode& stencilMode, MTL::StencilDescripto
 MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& depthMode,
                                                        const gfx::StencilMode& stencilMode,
                                                        const mtl::RenderPass& renderPass) const {
-    const auto& encoder = renderPass.getMetalEncoder();
-    if (!encoder) {
-        return {};
-    }
-
     auto depthStencilDescriptor = NS::TransferPtr(MTL::DepthStencilDescriptor::alloc()->init());
     if (!depthStencilDescriptor) {
         return {};
@@ -346,8 +341,6 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
 
                 depthStencilDescriptor->setFrontFaceStencil(stencilDescriptor.get());
                 depthStencilDescriptor->setBackFaceStencil(stencilDescriptor.get());
-
-                encoder->setStencilReferenceValue(stencilMode.ref);
             }
         }
     }

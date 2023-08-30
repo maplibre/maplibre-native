@@ -194,6 +194,7 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
     gfx::IndexVector<gfx::Triangles> indexes;
     std::optional<mtl::BufferResource> indexRes;
 
+    // TODO: refactor to use `Context::makeDepthStencilState`
     const auto init = [&]() {
         // TODO: a lot of this can be cached
         // Create a vertex buffer from the fixed tile coordinates
@@ -227,9 +228,6 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         if (!indexRes || !*indexRes) {
             return;
         }
-
-        // gfx::DepthMode::disabled();
-        // encoder->setDepthStoreAction(MTL::StoreAction::StoreActionDontCare);
 
         // gfx::CullFaceMode::disabled();
         encoder->setCullMode(MTL::CullModeNone);

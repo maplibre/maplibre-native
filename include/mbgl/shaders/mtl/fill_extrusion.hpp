@@ -92,6 +92,11 @@ struct FragmentStage {
     half4 color;
 };
 
+struct FragmentOutput {
+    half4 color [[color(0)]];
+    //float depth [[depth(less)]]; // Write depth value if it's less than what's already there
+};
+
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionDrawableUBO& fill [[buffer(5)]],
                                 device const FillExtrusionDrawablePropsUBO& props [[buffer(6)]],
@@ -158,8 +163,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
-    return in.color;
+fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]]) {
+    return { in.color/*, in.position.z*/ };
 }
 )";
 };

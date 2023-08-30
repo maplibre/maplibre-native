@@ -11,6 +11,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <Metal/Metal.hpp>
 
@@ -43,6 +44,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     }
 
     auto& context = static_cast<Context&>(parameters.context);
+    const auto& renderPass = static_cast<const mtl::RenderPass&>(*parameters.renderPass);
+    const auto& encoder = renderPass.getMetalEncoder();
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
     // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
@@ -83,15 +86,15 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     // to draw, set up the single-value stencil mask.
     // If we're doing 2D stenciling and have any drawables with tile IDs,
     // render each tile into the stencil buffer with a different value.
+    MTLDepthStencilStatePtr stateWithStencil, stateWithoutStencil;
     if (features3d) {
-        stencilMode3d = stencil3d ? parameters.stencilModeFor3D() : gfx::StencilMode::disabled();
-
-        const auto& renderPass = static_cast<const mtl::RenderPass&>(*parameters.renderPass);
-        const auto& encoder = renderPass.getMetalEncoder();
         const auto depthMode = parameters.depthModeFor3D();
-        if (auto depthStencilState = context.makeDepthStencilState(depthMode, stencilMode3d, renderPass)) {
-            encoder->setDepthStencilState(depthStencilState.get());
+        if (stencil3d) {
+            stencilMode3d = parameters.stencilModeFor3D();
+            stateWithStencil = context.makeDepthStencilState(depthMode, stencilMode3d, renderPass);
+            encoder->setStencilReferenceValue(stencilMode3d.ref);
         }
+        stateWithoutStencil = context.makeDepthStencilState(depthMode, gfx::StencilMode::disabled(), renderPass);
     } else if (!tileIDs.empty()) {
         parameters.renderTileClippingMasks(tileIDs);
     }
@@ -108,9 +111,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // For layer groups with 3D features, enable either the single-value
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
-        // if (features3d) {
-        //    context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
-        //}
+         if (features3d) {
+             const auto& state = drawable.getEnableStencil() ? stateWithStencil : stateWithoutStencil;
+             if (state) {
+                 encoder->setDepthStencilState(state.get());
+             }
+        }
 
         drawable.draw(parameters);
     });
