@@ -26,6 +26,7 @@ public:
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
+    gfx::UniformBufferPtr linePatternPropertiesBuffer;
     gfx::UniformBufferPtr lineSDFPropertiesBuffer;
 };
 
