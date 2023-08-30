@@ -146,13 +146,13 @@ jobs:
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main'
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 21600
           role-session-name: MySessionName
 
       - name: Create upload
@@ -192,6 +192,22 @@ jobs:
           name: uploadsEnv
           path: uploads.env
 
+      # render test
+      - name: Build Render Test App
+        run: |
+          ./gradlew assemble assembleAndroidTest
+          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
+          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
+        working-directory: ./render-test/android
+
+      - name: Store Render Test .apk files
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-render-tests
+          path: |
+            ./render-test/android/RenderTestsApp.apk
+            ./render-test/android/RenderTests.apk
+
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -219,7 +235,7 @@ jobs:
         run: cat uploads.env >> "$GITHUB_ENV"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
