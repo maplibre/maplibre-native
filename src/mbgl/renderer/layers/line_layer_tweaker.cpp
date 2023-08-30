@@ -154,7 +154,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
         return lineGradientPropertiesBuffer;
     };
-const auto getLinePatternPropsBuffer = [&]() {
+    const auto getLinePatternPropsBuffer = [&]() {
         if (!linePatternPropertiesBuffer) {
             const LinePatternPropertiesUBO linePatternPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -165,7 +165,7 @@ const auto getLinePatternPropsBuffer = [&]() {
                 0,
                 {0, 0}};
             linePatternPropertiesBuffer = context.createUniformBuffer(&linePatternPropertiesUBO,
-                                                                       sizeof(linePatternPropertiesUBO));
+                                                                      sizeof(linePatternPropertiesUBO));
         }
         return linePatternPropertiesBuffer;
     };
