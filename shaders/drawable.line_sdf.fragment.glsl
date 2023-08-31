@@ -32,7 +32,6 @@ layout (std140) uniform LineSDFInterpolationUBO {
     lowp float u_offset_t;
     lowp float u_width_t;
     lowp float u_floorwidth_t;
-
     highp float pad2;
 };
 
