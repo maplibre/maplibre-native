@@ -423,6 +423,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/style/expression/match.cpp",
     "src/mbgl/style/expression/number_format.cpp",
     "src/mbgl/style/expression/parsing_context.cpp",
+    "src/mbgl/style/expression/slice.cpp",
     "src/mbgl/style/expression/step.cpp",
     "src/mbgl/style/expression/util.cpp",
     "src/mbgl/style/expression/util.hpp",
@@ -627,7 +628,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/utf.hpp",
     "src/mbgl/util/version.cpp",
     "src/mbgl/util/version.hpp",
-    "src/mbgl/util/work_request.cpp"
+    "src/mbgl/util/work_request.cpp",
 ]
 
 MLN_CORE_HEADERS = [
@@ -747,6 +748,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/style/expression/match.hpp",
     "include/mbgl/style/expression/number_format.hpp",
     "include/mbgl/style/expression/parsing_context.hpp",
+    "include/mbgl/style/expression/slice.hpp",
     "include/mbgl/style/expression/step.hpp",
     "include/mbgl/style/expression/type.hpp",
     "include/mbgl/style/expression/value.hpp",
@@ -820,7 +822,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/vectors.hpp",
     "include/mbgl/util/work_request.hpp",
     "include/mbgl/util/work_task.hpp",
-    "include/mbgl/util/work_task_impl.hpp"
+    "include/mbgl/util/work_task_impl.hpp",
 ]
 
 MLN_OPENGL_SOURCE = [

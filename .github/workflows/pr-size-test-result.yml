@@ -12,10 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # for debugging
-      - run: echo ${{ github.event }}
-
-      - uses: .github/actions/download-workflow-run-artifact
+      - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: size-test-result
           expect-files: "./size"
