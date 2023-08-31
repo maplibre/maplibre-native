@@ -20,6 +20,7 @@ public:
 
 protected:
     BufferID id = 0;
+    uint32_t hash;
 };
 
 /// Stores a collection of uniform buffers by name
@@ -42,8 +43,7 @@ public:
 
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {
-        return std::unique_ptr<gfx::UniformBuffer>(
-            new UniformBufferGL(static_cast<const UniformBufferGL&>(uniformBuffers)));
+        return std::make_unique<UniformBufferGL>(static_cast<const UniformBufferGL&>(uniformBuffers));
     }
 };
 
