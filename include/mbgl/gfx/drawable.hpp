@@ -7,7 +7,6 @@
 #include <mbgl/util/traits.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/drawable_data.hpp>
-#include <mbgl/gfx/index_vector.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -33,6 +32,7 @@ class VertexAttributeArray;
 
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 
