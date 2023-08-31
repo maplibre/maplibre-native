@@ -15,6 +15,17 @@ http_archive(
 )
 
 load(
+    "@rules_xcodeproj//xcodeproj:repositories.bzl",
+    "xcodeproj_rules_dependencies",
+)
+
+xcodeproj_rules_dependencies()
+
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
+
+load(
     "@build_bazel_rules_apple//apple:repositories.bzl",
     "apple_rules_dependencies",
 )
@@ -41,13 +52,6 @@ load(
 )
 
 apple_support_dependencies()
-
-load(
-    "@rules_xcodeproj//xcodeproj:repositories.bzl",
-    "xcodeproj_rules_dependencies",
-)
-
-xcodeproj_rules_dependencies()
 
 load(
     "@build_bazel_rules_apple//apple:apple.bzl",
