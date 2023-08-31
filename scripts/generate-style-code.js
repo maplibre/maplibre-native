@@ -22,35 +22,6 @@ const args = (() => {
   return parser.parse_args();
 })();
 
-let writeGenerated;
-if (args.root) {
-  const targetRoot = path.join(args.root, "__generated__");
-  if (args.root) {
-    if (!fs.existsSync(targetRoot)) {
-      fs.mkdirSync();
-    }
-  }
-
-  writeGenerated = (pathString, contents) => {
-    const location = path.parse(
-      path.relative(__dirname + "/../", path.normalize(pathString))
-    );
-
-    pathString = path.join(targetRoot, location.dir);
-    if (!fs.existsSync(pathString)) {
-      fs.mkdirSync(pathString, {recursive: true});
-    }
-
-    writeIfModified(
-      path.join(pathString, location.name + location.ext), contents);
-  }
-} else {
-  writeGenerated = (pathString, contents) => {
-    writeIfModified(pathString, contents);
-  };
-}
-
-
 function parseCSSColor(str) {
   const color = colorParser.parseCSSColor(str);
   return [
@@ -302,16 +273,16 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
 for (const layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
-  writeGenerated(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer));
-  writeGenerated(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer));
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), args.root);
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer), args.root);
 
   // Remove our fake property for the external interace.
   if (layer.type === 'line') {
     layer.paintProperties = layer.paintProperties.filter(property => property.name !== 'line-floor-width');
   }
 
-  writeGenerated(`${__dirname}/../include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer));
-  writeGenerated(`${__dirname}/../src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer));
+  writeIfModified(`include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer), args.root);
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), args.root);
 }
 
 // Light
@@ -327,7 +298,7 @@ const lightProperties = Object.keys(spec[`light`]).reduce((memo, name) => {
 // to get a deterministic order.
 lightProperties.sort((a, b) => collator.compare(a.name, b.name));
 
-const lightHpp = ejs.compile(fs.readFileSync(`${__dirname}/../include/mbgl/style/light.hpp.ejs`, 'utf8'), {strict: true});
-const lightCpp = ejs.compile(fs.readFileSync(`${__dirname}/../src/mbgl/style/light.cpp.ejs`, 'utf8'), {strict: true});
-writeGenerated(`${__dirname}/../include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}));
-writeGenerated(`${__dirname}/../src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}));
+const lightHpp = ejs.compile(fs.readFileSync(`include/mbgl/style/light.hpp.ejs`, 'utf8'), {strict: true});
+const lightCpp = ejs.compile(fs.readFileSync(`src/mbgl/style/light.cpp.ejs`, 'utf8'), {strict: true});
+writeIfModified(`include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}), args.root);
+writeIfModified(`src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}), args.root);
