@@ -13,8 +13,7 @@ using namespace platform;
 
 UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_)
     : UniformBuffer(size_),
-      hash(util::crc32(data_, size_))
-{
+      hash(util::crc32(data_, size_)) {
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, id));
     MBGL_CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data_, GL_DYNAMIC_DRAW));
@@ -31,7 +30,7 @@ UniformBufferGL::~UniformBufferGL() {
 }
 
 void UniformBufferGL::update(const void* data_, std::size_t size_) {
-    assert(size == size_);// && size == data.size());
+    assert(size == size_); // && size == data.size());
     if (size != size_) {
         Log::Error(
             Event::General,
