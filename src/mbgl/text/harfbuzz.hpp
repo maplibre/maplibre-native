@@ -22,7 +22,7 @@ public:
 
 private:
     GlyphIDType type;
-    std::unique_ptr<HBShaperWrap>shaper = nullptr;
+    std::unique_ptr<HBShaperWrap> shaper = nullptr;
 };
 
 } // namespace mbgl
