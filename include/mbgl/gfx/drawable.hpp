@@ -9,6 +9,7 @@
 #include <mbgl/gfx/drawable_data.hpp>
 
 #include <cstdint>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -226,6 +227,12 @@ public:
 
     /// Set drawable data
     void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
+    
+    /// Set drawable user-defined type
+    void setType(std::size_t type_) { type = type_; }
+    
+    /// Get drawable user-defined type
+    size_t getType() const { return type; }
 
 protected:
     bool enabled = true;
@@ -250,6 +257,8 @@ protected:
 
     Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
+    
+    std::size_t type = 0;
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;

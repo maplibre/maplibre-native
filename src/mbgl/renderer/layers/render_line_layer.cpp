@@ -568,6 +568,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         // update existing drawables
         tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            // TODO: use line type
             // simple line interpolation UBO
             if (drawable.getShader()->getUniformBlocks().get(std::string(LineInterpolationUBOName))) {
                 drawable.mutableUniformBuffers().createOrUpdate(
@@ -619,6 +620,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
                                                                                           : LinePatternCap::Square;
             for (auto& drawable : builder->clearDrawables()) {
+                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::SDF));
                 drawable->setTileID(tileID);
                 drawable->setData(std::make_unique<gfx::LineDrawableData>(cap));
                 drawable->mutableUniformBuffers().createOrUpdate(
@@ -666,6 +668,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 // finish
                 builder->flush();
                 for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
                     drawable->setTileID(tileID);
                     drawable->mutableUniformBuffers().createOrUpdate(
                         LinePatternInterpolationUBOName, &linePatternInterpolationUBO, context);
@@ -709,6 +712,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     // finish
                     builder->flush();
                     for (auto& drawable : builder->clearDrawables()) {
+                        drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
                         drawable->setTileID(tileID);
                         drawable->mutableUniformBuffers().createOrUpdate(
                             LineGradientInterpolationUBOName, &lineGradientInterpolationUBO, context);
@@ -738,6 +742,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // finish
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {
+                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Simple));
                 drawable->setTileID(tileID);
                 drawable->mutableUniformBuffers().createOrUpdate(
                     LineInterpolationUBOName, &lineInterpolationUBO, context);
