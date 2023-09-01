@@ -17,11 +17,11 @@ The maintainers of MapLibre Native are committed to a fast and efficient resolut
     git branch -b android-fix
     ```
 
-4. `[Comitter]` Once a fix has been implemented for a platform, a branch on `maplibre/maplibre-native` will be created in preparation of a release. For example, `ios-v5.13.0` (tag) -> `ios-5.13.1` (new branch).
+4. `[Committer]` Once a fix has been implemented for a platform, a branch on `maplibre/maplibre-native` will be created in preparation of a release. For example, `ios-v5.13.0` (tag) -> `ios-5.13.1` (new branch).
 
 5. `[Reporter, Collaborator or Maintainer]` A PR is created from the fork that targets the new branch on `maplibre/maplibre-native`. It is reviewed and merged.
 
-6. `[Comitter]` A new release is pushed out from the branch that now contains the fix. The release process is automated and documented and can be done by anyone with write access.
+6. `[Committer]` A new release is pushed out from the branch that now contains the fix. The release process is automated and documented and can be done by anyone with write access.
 
     - Android: [platform/android/RELEASE.md](https://github.com/maplibre/maplibre-native/blob/main/platform/android/RELEASE.md)
     - iOS: TODO, please see this issue: https://github.com/maplibre/maplibre-native/issues/1581
