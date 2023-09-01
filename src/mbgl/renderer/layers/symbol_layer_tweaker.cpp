@@ -51,7 +51,6 @@ struct alignas(16) SymbolDynamicUBO {
 };
 static_assert(sizeof(SymbolDynamicUBO) == 16);
 
-
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) SymbolDrawablePaintUBO {
     /*  0 */ Color fill_color;
@@ -170,30 +169,26 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-        const SymbolDrawableUBO drawableUBO = {
-            /*.matrix=*/util::cast<float>(matrix),
-            /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
-            /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
+        const SymbolDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix),
+                                               /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
+                                               /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
-            /*.texsize=*/toArray(getTexSize(drawable, texUniformName)),
-            /*.texsize_icon=*/toArray(getTexSize(drawable, texIconUniformName)),
+                                               /*.texsize=*/toArray(getTexSize(drawable, texUniformName)),
+                                               /*.texsize_icon=*/toArray(getTexSize(drawable, texIconUniformName)),
 
-            /*.gamma_scale=*/gammaScale,
-            /*.device_pixel_ratio=*/parameters.pixelRatio,
+                                               /*.gamma_scale=*/gammaScale,
+                                               /*.device_pixel_ratio=*/parameters.pixelRatio,
 
-            /*.camera_to_center_distance=*/camDist,
-            /*.pitch=*/static_cast<float>(state.getPitch()),
-            /*.rotate_symbol=*/rotateInShader,
-            /*.aspect_ratio=*/state.getSize().aspectRatio(),
-            /*.pad=*/ {0, 0}
-        };
+                                               /*.camera_to_center_distance=*/camDist,
+                                               /*.pitch=*/static_cast<float>(state.getPitch()),
+                                               /*.rotate_symbol=*/rotateInShader,
+                                               /*.aspect_ratio=*/state.getSize().aspectRatio(),
+                                               /*.pad=*/{0, 0}};
 
-        const SymbolDynamicUBO dynamicUBO = {
-            /*.fade_change=*/ parameters.symbolFadeChange,
-            /*.pad1=*/ 0,
-            /*.pad2=*/ {0, 0}
-        };
-        
+        const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
+                                             /*.pad1=*/0,
+                                             /*.pad2=*/{0, 0}};
+
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(SymbolDrawableUBOName, &drawableUBO, context);
         uniforms.createOrUpdate(SymbolDynamicUBOName, &dynamicUBO, context);
