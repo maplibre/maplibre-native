@@ -1188,6 +1188,8 @@ include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 
+#TODO add harfbuzz freetype
+
 target_link_libraries(
     mbgl-core
     PRIVATE
