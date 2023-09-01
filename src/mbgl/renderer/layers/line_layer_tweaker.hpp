@@ -22,6 +22,7 @@ public:
         Gradient,
         SDF
     };
+
 public:
     LineLayerTweaker(Immutable<style::LayerProperties> properties)
         : LayerTweaker(properties){};

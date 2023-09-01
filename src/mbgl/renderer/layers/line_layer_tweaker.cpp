@@ -201,12 +201,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         const auto matrix = getTileMatrix(
             tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
-        
+
         LineType type = static_cast<LineType>(drawable.getType());
 
         switch (type) {
-            case LineType::Simple:
-            {
+            case LineType::Simple: {
                 // main UBO
                 const LineUBO lineUBO{
                     /*matrix = */ util::cast<float>(matrix),
@@ -217,11 +216,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
 
                 // properties UBO
                 uniforms.addOrReplace(LinePropertiesUBOName, getLinePropsBuffer());
-            }
-                break;
-                
-            case LineType::Gradient:
-            {
+            } break;
+
+            case LineType::Gradient: {
                 // main UBO
                 const LineGradientUBO lineGradientUBO{
                     /*matrix = */ util::cast<float>(matrix),
@@ -232,11 +229,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
 
                 // properties UBO
                 uniforms.addOrReplace(LineGradientPropertiesUBOName, getLineGradientPropsBuffer());
-            }
-                break;
-                
-            case LineType::Pattern:
-            {
+            } break;
+
+            case LineType::Pattern: {
                 // main UBO
                 Size textureSize{0, 0};
                 if (const auto index = shader->getSamplerLocation("u_image")) {
@@ -261,15 +256,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
 
                 // properties UBO
                 uniforms.addOrReplace(LinePatternPropertiesUBOName, getLinePatternPropsBuffer());
-            }
-                break;
-                
-            case LineType::SDF:
-            {
+            } break;
+
+            case LineType::SDF: {
                 if (const auto& data = drawable.getData()) {
                     const gfx::LineDrawableData& lineData = static_cast<const gfx::LineDrawableData&>(*data);
                     const auto& dashPatternTexture = parameters.lineAtlas.getDashPatternTexture(
-                        evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, lineData.linePatternCap);
+                        evaluated.get<LineDasharray>().from,
+                        evaluated.get<LineDasharray>().to,
+                        lineData.linePatternCap);
 
                     // texture
                     if (const auto index = shader->getSamplerLocation("u_image")) {
@@ -292,10 +287,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                         /* units_to_pixels = */
                         {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                         /* patternscale_a = */
-                        {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()), -posA.height / 2.0f},
+                        {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
+                         -posA.height / 2.0f},
                         /* patternscale_b = */
-                        {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()), -posB.height / 2.0f},
-                        /* ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
+                        {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()),
+                         -posB.height / 2.0f},
+                        /* ratio = */ 1.0f /
+                            tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
                         /* device_pixel_ratio = */ parameters.pixelRatio,
                         /* tex_y_a = */ posA.y,
                         /* tex_y_b = */ posB.y,
@@ -307,15 +305,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     // properties UBO
                     uniforms.addOrReplace(LineSDFPropertiesUBOName, getLineSDFPropsBuffer());
                 }
-            }
-                break;
-                
-            default:
-            {
+            } break;
+
+            default: {
                 using namespace std::string_literals;
-                Log::Error(Event::General, "LineLayerTweaker: unknown line type: "s + std::to_string(mbgl::underlying_type(type)));
-            }
-                break;
+                Log::Error(Event::General,
+                           "LineLayerTweaker: unknown line type: "s + std::to_string(mbgl::underlying_type(type)));
+            } break;
         }
     });
 }
