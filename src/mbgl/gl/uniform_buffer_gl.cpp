@@ -18,8 +18,6 @@ UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_)
     MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, id));
     MBGL_CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data_, GL_DYNAMIC_DRAW));
     MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
-
-    ;
 }
 
 UniformBufferGL::~UniformBufferGL() {
