@@ -10,9 +10,20 @@ http_archive(
 
 http_archive(
     name = "rules_xcodeproj",
-    sha256 = "5baccdd6a2734a0adeb9cb6175691d0609f8bdbd7c5f516e828d0df744ee9f6c",
-    url = "https://github.com/MobileNativeFoundation/rules_xcodeproj/releases/download/1.9.1/release.tar.gz",
+    sha256 = "4ce9621a7aab35f82f6278e93eda82eed5113885c6c4b105e32cb68f231bb9bf",
+    url = "https://github.com/MobileNativeFoundation/rules_xcodeproj/releases/download/1.10.0/release.tar.gz",
 )
+
+load(
+    "@rules_xcodeproj//xcodeproj:repositories.bzl",
+    "xcodeproj_rules_dependencies",
+)
+
+xcodeproj_rules_dependencies()
+
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
 
 load(
     "@build_bazel_rules_apple//apple:repositories.bzl",
@@ -41,13 +52,6 @@ load(
 )
 
 apple_support_dependencies()
-
-load(
-    "@rules_xcodeproj//xcodeproj:repositories.bzl",
-    "xcodeproj_rules_dependencies",
-)
-
-xcodeproj_rules_dependencies()
 
 load(
     "@build_bazel_rules_apple//apple:apple.bzl",
