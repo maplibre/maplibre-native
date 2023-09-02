@@ -82,5 +82,4 @@ cat > platform/ios/bazel/config.bzl <<EOF
 APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "$teamid"
 APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "iOS Team Provisioning Profile: *"
 BUNDLE_ID_PREFIX = "$bundleidprefix"
-BUILD_MODE = "xcode"
 EOF
