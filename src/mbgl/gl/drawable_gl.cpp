@@ -80,10 +80,10 @@ void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<Uniqu
     impl->segments = std::move(segments);
 }
 
-void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
+void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type_) {
     impl->vertexData = std::move(data);
     impl->vertexCount = count;
-    impl->vertexType = type;
+    impl->vertexType = type_;
 }
 
 const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
