@@ -20,6 +20,7 @@ public:
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
     static constexpr std::string_view SymbolDrawableUBOName = "SymbolDrawableUBO";
+    static constexpr std::string_view SymbolDynamicUBOName = "SymbolDynamicUBO";
     static constexpr std::string_view SymbolDrawablePaintUBOName = "SymbolDrawablePaintUBO";
     static constexpr std::string_view SymbolDrawableTilePropsUBOName = "SymbolDrawableTilePropsUBO";
     static constexpr std::string_view SymbolDrawableInterpolateUBOName = "SymbolDrawableInterpolateUBO";
