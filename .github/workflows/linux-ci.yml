@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - topic/drawable
     paths:
       - "src/**"
       - "test/**"
@@ -24,20 +23,6 @@ on:
   pull_request:
     branches:
       - '*'
-    paths:
-      - "src/**"
-      - "test/**"
-      - "render-test/**"
-      - "expression-test/**"
-      - "include/**"
-      - ".github/workflows/linux-ci.yml"
-      - "vendor/**"
-      - "CMakeLists.txt"
-      - metrics/linux-gcc8-release-style.json
-      - WORKSPACE
-      - BUILD.bazel
-      - .bazelrc
-      - .bazelversion
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,7 +30,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
+  linux-build:
     strategy:
       fail-fast: false
       matrix:
@@ -121,8 +106,8 @@ jobs:
           path: build/expression-test/mbgl-expression-test
           retention-days: 1
 
-  test:
-    needs: build
+  linux-test:
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -148,8 +133,8 @@ jobs:
       - name: Run C++ tests
         run: xvfb-run -a ./mbgl-test-runner
 
-  expression-test:
-    needs: build
+  linux-expression-test:
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -163,8 +148,8 @@ jobs:
       - name: Run expression test
         run: ./mbgl-expression-test
 
-  render-test:
-    needs: build
+  linux-render-test:
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
       - name: Install dependencies
@@ -194,7 +179,7 @@ jobs:
           path: |
             metrics/linux-gcc8-release-style.html
 
-  coverage:
+  linux-coverage:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
