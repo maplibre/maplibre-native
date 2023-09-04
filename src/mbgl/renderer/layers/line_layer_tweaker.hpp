@@ -16,6 +16,14 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
  */
 class LineLayerTweaker : public LayerTweaker {
 public:
+    enum class LineType {
+        Simple,
+        Pattern,
+        Gradient,
+        SDF
+    };
+
+public:
     LineLayerTweaker(Immutable<style::LayerProperties> properties)
         : LayerTweaker(properties){};
 
@@ -26,6 +34,7 @@ public:
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
+    gfx::UniformBufferPtr linePatternPropertiesBuffer;
     gfx::UniformBufferPtr lineSDFPropertiesBuffer;
 };
 
