@@ -24,25 +24,10 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+
   pull_request:
     branches:
       - '*'
-    paths:
-      - CMakeLists.txt
-      - 'platform/android/**'
-      - ".github/workflows/android-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
 
 concurrency:
   # cancel jobs on PRs only
@@ -50,7 +35,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
+  android-build:
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -61,7 +46,6 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
-
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -117,7 +101,7 @@ jobs:
         env:
           cache-name: gradle-v1
         with:
-          path: ~/.gradle'
+          path: ~/.gradle
           key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
           restore-keys: |
             - ${{ env.cache-name }}
@@ -222,7 +206,7 @@ jobs:
             MapboxGLAndroidSDKTestApp/lint-baseline.xml
             MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
 
-  instrumentation-test:
+  android-instrumentation-test:
     needs: build
 
     runs-on: ubuntu-latest
