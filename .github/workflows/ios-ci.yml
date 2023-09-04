@@ -43,7 +43,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.renderer }}
       cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILDTYPE: Debug
