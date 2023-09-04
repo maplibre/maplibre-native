@@ -107,7 +107,7 @@ jobs:
           retention-days: 1
 
   linux-test:
-    needs: build
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -134,7 +134,7 @@ jobs:
         run: xvfb-run -a ./mbgl-test-runner
 
   linux-expression-test:
-    needs: build
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -149,7 +149,7 @@ jobs:
         run: ./mbgl-expression-test
 
   linux-render-test:
-    needs: build
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
       - name: Install dependencies

@@ -207,7 +207,7 @@ jobs:
             MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
 
   android-instrumentation-test:
-    needs: build
+    needs: android-build
 
     runs-on: ubuntu-latest
     if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
