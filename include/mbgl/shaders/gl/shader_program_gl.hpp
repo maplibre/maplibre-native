@@ -16,9 +16,12 @@ namespace gl {
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
     using SamplerLocationMap = std::unordered_map<std::string, int>;
-    
+
     ShaderProgramGL(UniqueProgram&& glProgram_);
-    ShaderProgramGL(UniqueProgram&&, UniformBlockArrayGL&& uniformBlocks, VertexAttributeArrayGL&& attributes, SamplerLocationMap&& samplerLocations);
+    ShaderProgramGL(UniqueProgram&&,
+                    UniformBlockArrayGL&& uniformBlocks,
+                    VertexAttributeArrayGL&& attributes,
+                    SamplerLocationMap&& samplerLocations);
     ShaderProgramGL(ShaderProgramGL&& other);
     ~ShaderProgramGL() noexcept override = default;
 
