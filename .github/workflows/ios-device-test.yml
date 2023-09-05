@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.repository_owner == 'maplibre'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
