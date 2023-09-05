@@ -389,13 +389,13 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                        offsetof(HillshadeLayoutVertex, a2),
                                        0,
                                        sizeof(HillshadeLayoutVertex),
-                                       gfx::AttributeDataType::Short4);
+                                       gfx::AttributeDataType::Short2);
             }
 
             hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
             hillshadePrepareBuilder->setShader(hillshadePrepareShader);
             hillshadePrepareBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
-            hillshadePrepareBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+            hillshadePrepareBuilder->setColorMode(gfx::ColorMode::unblended());
             hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
 
             hillshadePrepareBuilder->setRenderPass(renderPass);
@@ -450,7 +450,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                    offsetof(HillshadeLayoutVertex, a2),
                                    0,
                                    sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short4);
+                                   gfx::AttributeDataType::Short2);
         }
 
         hillshadeBuilder = context.createDrawableBuilder("hillshade");

@@ -19,25 +19,16 @@
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
+#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
+
+#include <limits>
 #endif
 
 #if !MLN_RENDER_BACKEND_METAL
 #include <mbgl/gl/defines.hpp>
 #endif // !MLN_RENDER_BACKEND_METAL
-
-#if (MLN_LEGACY_RENDERER && MLN_DRAWABLE_RENDERER)
-// DEBUG: Enable a debugging split view to compare drawables and vanilla rendering pathways
-// Drawables will be on the left, vanilla rendering on the right
-// #define MLN_RENDERER_SPLIT_VIEW 1
-// If using SPLIT_VIEW, MLN_RENDERER_QUAD_SPLIT_VIEW will split each half, showing just the opaque
-// pass on top and then a composited opaque+translucent pass on the bottom
-// #define QUAD_SPLIT_VIEW
-#if MLN_RENDERER_SPLIT_VIEW
-#include <mbgl/gl/context.hpp>
-#endif
-#endif
 
 namespace mbgl {
 
@@ -93,6 +84,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
+    staticData->backendSize = backend.getDefaultRenderable().getSize();
 
     if (renderState == RenderState::Never) {
         observer->onWillStartRenderingMap();
@@ -147,7 +139,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
     }
 
-    // Run changes
     orchestrator.processChanges();
 
     // Give the layers a chance to do setup
@@ -162,7 +153,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
 #endif
 
-        // Run layer tweakers to update any dynamic elements.
         // Tweakers are run in the upload pass so they can set up uniforms.
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             if (layerGroup.getLayerTweaker()) {
@@ -170,11 +160,25 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             }
         });
 
+    // Update the debug layer groups
+    orchestrator.updateDebugLayerGroups(renderTree, parameters);
+
+    // Give the layers a chance to do setup
+    // orchestrator.visitLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
+    // });
+
+    // Upload layer groups
+    {
+        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload");
+
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
 
         // Give the render targets a chance to upload
-        orchestrator.observeRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
+
+        // Upload the Debug layer group
+        orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 #endif
 
@@ -231,7 +235,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_DRAWABLE_RENDERER
     const auto drawableTargetsPass = [&] {
         // draw render targets
-        orchestrator.observeRenderTargets(
+        orchestrator.visitRenderTargets(
             [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
     };
 #endif
@@ -258,31 +262,28 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // Drawables
     const auto drawableOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
+        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Opaque;
         parameters.currentLayer = 0;
-        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * parameters.numSublayers *
-                                            PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            parameters.currentLayer = layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer++;
         });
     };
 
     const auto drawableTranslucentPass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
+        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Translucent;
-        parameters.currentLayer = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
-        parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * parameters.numSublayers *
-                                            PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 - (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
-            if (parameters.currentLayer != 0) {
-                parameters.currentLayer--;
-            }
         });
     };
 #endif
@@ -325,15 +326,44 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     };
 #endif // MLN_LEGACY_RENDERER
 
-#if (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
-    const auto enableScissorTest = [](bool enable) {
-        using namespace platform;
-        enable ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
+#if MLN_DRAWABLE_RENDERER
+    const auto drawableDebugOverlays = [&] {
+        // Renders debug overlays.
+        {
+            const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
+            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
+                layerGroup.visitDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
+            });
+        }
     };
-    const auto setScissor = [](int x, int y, int w, int h) {
-        platform::glScissor(x, y, w, h);
+#endif // MLN_DRAWABLE_RENDERER
+
+#if MLN_LEGACY_RENDERER
+    const auto renderDebugOverlays = [&] {
+        // Renders debug overlays.
+        {
+            const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
+
+            // Finalize the rendering, e.g. by calling debug render calls per tile.
+            // This guarantees that we have at least one function per tile called.
+            // When only rendering layers via the stylesheet, it's possible that we
+            // don't ever visit a tile during rendering.
+            for (const RenderItem& renderItem : sourceRenderItems) {
+                renderItem.render(parameters);
+            }
+        }
+
+#if !defined(NDEBUG)
+        if (parameters.debugOptions & MapDebugOptions::StencilClip) {
+            // Render tile clip boundaries, using stencil buffer to calculate fill color.
+            parameters.context.visualizeStencilBuffer();
+        } else if (parameters.debugOptions & MapDebugOptions::DepthBuffer) {
+            // Render the depth buffer.
+            parameters.context.visualizeDepthBuffer(parameters.depthRangeSize);
+        }
+#endif
     };
-#endif // MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER
+#endif // MLN_LEGACY_RENDERER
 
 #if (MLN_DRAWABLE_RENDERER && !MLN_LEGACY_RENDERER)
     if (parameters.staticData.has3D) {
@@ -344,6 +374,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     commonClearPass();
     drawableOpaquePass();
     drawableTranslucentPass();
+    drawableDebugOverlays();
 #elif (MLN_LEGACY_RENDERER && !MLN_DRAWABLE_RENDERER)
     if (parameters.staticData.has3D) {
         common3DPass();
@@ -352,113 +383,9 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     commonClearPass();
     renderLayerOpaquePass();
     renderLayerTranslucentPass();
-#elif (MLN_DRAWABLE_RENDERER && MLN_LEGACY_RENDERER)
-#if MLN_RENDERER_SPLIT_VIEW
-    [[maybe_unused]] const auto W = backend.getDefaultRenderable().getSize().width;
-    [[maybe_unused]] const auto H = backend.getDefaultRenderable().getSize().height;
-    [[maybe_unused]] const auto halfW = static_cast<int>(backend.getDefaultRenderable().getSize().width * 0.5f);
-    [[maybe_unused]] const auto halfH = static_cast<int>(backend.getDefaultRenderable().getSize().height * 0.5f);
-    enableScissorTest(true);
-#if MLN_RENDERER_QUAD_SPLIT_VIEW
-    if (parameters.staticData.has3D) {
-        common3DPass();
-        drawable3DPass();
-        renderLayer3DPass();
-        parameters.clearStencil();
-    }
-
-    // Drawable LayerGroups on the left
-    // Opaque only on top
-    setScissor(0, 0, halfW, H);
-    drawableTargetsPass();
-    commonClearPass();
-    drawableOpaquePass();
-
-    // Composite (Opaque+Translucent) on bottom
-    setScissor(0, 0, halfW, halfH);
-    drawableTranslucentPass();
-
-    // RenderLayers on the right
-    // Opaque only on top
-    setScissor(halfW, 0, halfW, H);
-    commonClearPass();
-    // Clipping masks were drawn only on the other side
-    parameters.clearTileClippingMasks();
-    renderLayerOpaquePass();
-
-    // Composite (Opaque+Translucent) on bottom
-    setScissor(halfW, 0, halfW, halfH);
-    renderLayerTranslucentPass();
-#else  // MLN_RENDERER_QUAD_SPLIT_VIEW
-    if (parameters.staticData.has3D) {
-        common3DPass();
-        drawable3DPass();
-        renderLayer3DPass();
-        parameters.clearStencil();
-    }
-
-    // Drawable LayerGroups on the left
-    setScissor(0, 0, halfW, H);
-    drawableTargetsPass();
-    commonClearPass();
-    parameters.clearTileClippingMasks();
-    drawableOpaquePass();
-    drawableTranslucentPass();
-
-    // RenderLayers on the right
-    setScissor(halfW, 0, W, H);
-    commonClearPass();
-    parameters.clearTileClippingMasks();
-    renderLayerOpaquePass();
-    renderLayerTranslucentPass();
-#endif // MLN_RENDERER_QUAD_SPLIT_VIEW
-    // Reset viewport
-    setScissor(0, 0, W, H);
-    enableScissorTest(false);
-#else  // if MLN_RENDERER_SPLIT_VIEW
-    if (parameters.staticData.has3D) {
-        common3DPass();
-        renderLayer3DPass();
-        drawable3DPass();
-        parameters.clearStencil();
-    }
-    commonClearPass();
-    // Do RenderLayers first, drawables last
-    renderLayerOpaquePass();
-    renderLayerTranslucentPass();
-
-    drawableOpaquePass();
-    drawableTranslucentPass();
-#endif // MLN_RENDERER_SPLIT_VIEW
+    renderDebugOverlays();
 #else
     static_assert(0, "Must define one of (MLN_DRAWABLE_RENDERER, MLN_LEGACY_RENDERER)");
-#endif
-
-#if MLN_LEGACY_RENDERER
-    // - DEBUG PASS
-    // --------------------------------------------------------------------------------
-    // Renders debug overlays.
-    {
-        const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-
-        // Finalize the rendering, e.g. by calling debug render calls per tile.
-        // This guarantees that we have at least one function per tile called.
-        // When only rendering layers via the stylesheet, it's possible that we
-        // don't ever visit a tile during rendering.
-        for (const RenderItem& renderItem : sourceRenderItems) {
-            renderItem.render(parameters);
-        }
-    }
-
-#if !defined(NDEBUG)
-    if (parameters.debugOptions & MapDebugOptions::StencilClip) {
-        // Render tile clip boundaries, using stencil buffer to calculate fill color.
-        parameters.context.visualizeStencilBuffer();
-    } else if (parameters.debugOptions & MapDebugOptions::DepthBuffer) {
-        // Render the depth buffer.
-        parameters.context.visualizeDepthBuffer(parameters.depthRangeSize);
-    }
-#endif
 #endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER

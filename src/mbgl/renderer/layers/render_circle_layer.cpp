@@ -266,7 +266,20 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 #if MLN_DRAWABLE_RENDERER
 namespace {
 
+struct alignas(16) CircleInterpolateUBO {
+    float color_t;
+    float radius_t;
+    float blur_t;
+    float opacity_t;
+    float stroke_color_t;
+    float stroke_width_t;
+    float stroke_opacity_t;
+    float padding;
+};
+static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
+
 constexpr auto CircleShaderGroupName = "CircleShader";
+constexpr auto CircleInterpolateUBOName = "CircleInterpolateUBO";
 constexpr auto VertexAttribName = "a_pos";
 
 } // namespace
@@ -298,6 +311,15 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
+
+    // Set up a layer group
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<CircleLayerTweaker>(evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
+        }
+    }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!circleShaderGroup) {
         circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);

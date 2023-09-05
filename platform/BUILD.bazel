@@ -152,8 +152,8 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//:objc-sdk",
-        "//:objcpp-sdk",
+        ":objc-sdk",
+        ":objcpp-sdk",
     ],
 )
 
@@ -188,6 +188,23 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":ios-sdk",
+    ],
+)
+
+objc_library(
+    name = "ios-benchapp",
+    copts = MAPLIBRE_FLAGS,
+    srcs = ["//platform/ios/benchmark:ios_benchmark_srcs"],
+    hdrs = ["//platform/ios/benchmark:ios_benchmark_hdrs"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+        "ios/src",
+    ],
+    visibility = ["//platform/ios:__pkg__"],
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
     ],
 )
 

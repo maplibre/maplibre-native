@@ -340,7 +340,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    const auto renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses);
+    const auto renderPass = RenderPass::Translucent;
 
     const auto finish = [&](gfx::DrawableBuilder& builder,
                             const OverscaledTileID& tileID,
@@ -366,7 +366,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
+        if (tileID && !hasRenderTile(*tileID)) {
             return true;
         }
         return false;
@@ -466,7 +466,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                                              : gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                                 : gfx::ColorMode::unblended());
-                    builder->setSubLayerIndex(0);
+                    builder->setSubLayerIndex(1);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
                 }

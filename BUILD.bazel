@@ -1,4 +1,3 @@
-load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load(
     "//bazel:core.bzl",
@@ -18,6 +17,7 @@ load(
     "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
     "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
 )
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 # Generate code required by the core
 filegroup(
@@ -91,14 +91,12 @@ cc_library(
            MLN_GENERATED_STYLE_SOURCE + select({
             ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
             ":legacy_renderer": MLN_OPENGL_SOURCE,
-            ":split_renderer": MLN_DRAWABLES_SOURCE + MLN_OPENGL_SOURCE + MLN_DRAWABLES_GL_SOURCE,
             ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
             "//conditions:default": [],
         }),
     hdrs = MLN_CORE_HEADERS + select({
             ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
             ":legacy_renderer": MLN_OPENGL_HEADERS,
-            ":split_renderer": MLN_DRAWABLES_HEADERS + MLN_OPENGL_HEADERS + MLN_DRAWABLES_GL_HEADERS,
             ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
             "//conditions:default": []
         }),
@@ -113,12 +111,6 @@ cc_library(
             "MLN_RENDER_BACKEND_OPENGL=1",
             "MLN_LEGACY_RENDERER=0",
             "MLN_DRAWABLE_RENDERER=1"
-        ],
-        ":split_renderer": [
-            "MLN_RENDER_BACKEND_OPENGL=1",
-            "MLN_LEGACY_RENDERER=1",
-            "MLN_DRAWABLE_RENDERER=1",
-            "MLN_RENDERER_SPLIT_VIEW=1"
         ],
         ":metal_renderer": [
             "MLN_RENDER_BACKEND_METAL=1",
@@ -211,28 +203,21 @@ config_setting(
 string_flag(
     name = "renderer",
     build_setting_default = "legacy",
-    values=["legacy", "drawable", "split", "metal"]
+    values=["legacy", "drawable", "metal"]
 )
 
 config_setting(
     name = "legacy_renderer",
     flag_values = {
-        ":renderer": "legacy"
-    }
+        ":renderer": "legacy",
+    },
 )
 
 config_setting(
     name = "drawable_renderer",
         flag_values = {
-        ":renderer": "drawable"
-    }
-)
-
-config_setting(
-    name = "split_renderer",
-    flag_values = {
-        ":renderer": "split"
-    }
+        ":renderer": "drawable",
+    },
 )
 
 config_setting(

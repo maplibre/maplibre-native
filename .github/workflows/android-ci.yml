@@ -24,26 +24,10 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+
   pull_request:
     branches:
-      - main
-      - topic/drawable
-    paths:
-      - CMakeLists.txt
-      - 'platform/android/**'
-      - ".github/workflows/android-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
+      - '*'
 
 concurrency:
   # cancel jobs on PRs only
@@ -51,7 +35,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
+  android-build:
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -62,8 +46,18 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -118,7 +112,7 @@ jobs:
         env:
           cache-name: gradle-v1
         with:
-          path: ~/.gradle'
+          path: ~/.gradle
           key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
           restore-keys: |
             - ${{ env.cache-name }}
@@ -143,18 +137,17 @@ jobs:
           fi
     
       - name: Build UI tests
-        if: github.ref == 'refs/heads/main'
         run: make android-ui-test-arm-v8
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main'
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 21600
           role-session-name: MySessionName
 
       - name: Create upload
@@ -194,6 +187,22 @@ jobs:
           name: uploadsEnv
           path: uploads.env
 
+      # render test
+      - name: Build Render Test App
+        run: |
+          ./gradlew assemble assembleAndroidTest
+          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
+          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
+        working-directory: ./render-test/android
+
+      - name: Store Render Test .apk files
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-render-tests
+          path: |
+            ./render-test/android/RenderTestsApp.apk
+            ./render-test/android/RenderTests.apk
+
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -207,11 +216,11 @@ jobs:
             MapboxGLAndroidSDKTestApp/lint-baseline.xml
             MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
 
-  instrumentation-test:
-    needs: build
+  android-instrumentation-test:
+    needs: android-build
 
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'maplibre' && github.ref == 'refs/heads/main'
+    if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -221,7 +230,7 @@ jobs:
         run: cat uploads.env >> "$GITHUB_ENV"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

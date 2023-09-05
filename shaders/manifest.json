@@ -21,6 +21,27 @@
         "uses_ubos": true 
     },
     {
+        "name": "CollisionBoxShader",
+        "header": "drawable_collision_box",
+        "glsl_vert": "drawable.collision_box.vertex.glsl",
+        "glsl_frag": "drawable.collision_box.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "CollisionCircleShader",
+        "header": "drawable_collision_circle",
+        "glsl_vert": "drawable.collision_circle.vertex.glsl",
+        "glsl_frag": "drawable.collision_circle.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "DebugShader",
+        "header": "drawable_debug",
+        "glsl_vert": "drawable.debug.vertex.glsl",
+        "glsl_frag": "drawable.debug.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "FillShader",
         "header": "drawable_fill",
         "glsl_vert": "drawable.fill.vertex.glsl",

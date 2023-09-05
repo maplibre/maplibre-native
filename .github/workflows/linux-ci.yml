@@ -23,22 +23,7 @@ on:
 
   pull_request:
     branches:
-      - main
-      - topic/drawable
-    paths:
-      - "src/**"
-      - "test/**"
-      - "render-test/**"
-      - "expression-test/**"
-      - "include/**"
-      - ".github/workflows/linux-ci.yml"
-      - "vendor/**"
-      - "CMakeLists.txt"
-      - metrics/linux-gcc8-release-style.json
-      - WORKSPACE
-      - BUILD.bazel
-      - .bazelrc
-      - .bazelversion
+      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,17 +31,22 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
+  linux-build:
     strategy:
       fail-fast: false
       matrix:
         renderer: [legacy, drawable]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
 
       - uses: hendrikmuhs/ccache-action@v1.2
 
@@ -78,10 +68,10 @@ jobs:
             libwebp-dev
 
       - if: ${{ matrix.renderer }} == "drawable"
-        run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> $GITHUB_ENV
+        run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
 
       - if: ${{ matrix.renderer }} == "legacy"
-        run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> $GITHUB_ENV
+        run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
 
       - name: Build MapLibre Native Core
         env:
@@ -90,6 +80,11 @@ jobs:
           cmake --version
           cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:cpp"
 
       - name: Archive mbgl-test-runner
         uses: actions/upload-artifact@v3
@@ -112,11 +107,11 @@ jobs:
           path: build/expression-test/mbgl-expression-test
           retention-days: 1
 
-  test:
-    needs: build
+  linux-test:
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -139,11 +134,11 @@ jobs:
       - name: Run C++ tests
         run: xvfb-run -a ./mbgl-test-runner
 
-  expression-test:
-    needs: build
+  linux-expression-test:
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download mbgl-expression-test
         uses: actions/download-artifact@v3
         with:
@@ -154,8 +149,8 @@ jobs:
       - name: Run expression test
         run: ./mbgl-expression-test
 
-  render-test:
-    needs: build
+  linux-render-test:
+    needs: linux-build
     runs-on: ubuntu-22.04
     steps:
       - name: Install dependencies
@@ -164,7 +159,7 @@ jobs:
           sudo apt-get install -y \
             libopengl0
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download mbgl-render-test-runner
         uses: actions/download-artifact@v3
@@ -185,10 +180,10 @@ jobs:
           path: |
             metrics/linux-gcc8-release-style.html
 
-  coverage:
+  linux-coverage:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -225,8 +220,8 @@ jobs:
           xvfb-run -a \
             bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
             --test_output=errors --local_test_jobs=1 \
-            --test_env=DISPLAY --test_env=XAUTHORITY  --define=CI_BUILD=1 \
-            //test:core
+            --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
+            //test:core //expression-test:test
 
       - name: Upload coverage report
         if: '!cancelled()'

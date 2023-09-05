@@ -10,6 +10,7 @@
 #include <mbgl/gfx/index_vector.hpp>
 
 #include <cstdint>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -33,6 +34,7 @@ class VertexAttributeArray;
 
 using DrawPriority = int64_t;
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
+using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 
@@ -136,7 +138,10 @@ public:
     DrawPriority getDrawPriority() const { return drawPriority; }
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
-    /// Get sub-layer index. Determines depth range within the layer for 2D drawables
+    /// Whether to enable depth testing
+    bool getEnableDepth() { return enableDepth; }
+    void setEnableDepth(bool value) { enableDepth = value; }
+
     int32_t getSubLayerIndex() const { return subLayerIndex; }
 
     /// Set sub-layer index
@@ -223,10 +228,17 @@ public:
     /// Set drawable data
     void setData(UniqueDrawableData&& value) { drawableData = std::move(value); }
 
+    /// Set drawable user-defined type
+    void setType(std::size_t type_) { type = type_; }
+
+    /// Get drawable user-defined type
+    size_t getType() const { return type; }
+
 protected:
     bool enabled = true;
     bool enableColor = true;
     bool enableStencil = false;
+    bool enableDepth = true;
     bool is3D = false;
     bool isCustom = false;
     std::string name;
@@ -245,6 +257,8 @@ protected:
 
     Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
+
+    std::size_t type = 0;
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;

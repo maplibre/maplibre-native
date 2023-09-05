@@ -1,0 +1,68 @@
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_unit_test")
+load("//platform/ios/bazel:config.bzl", "BUNDLE_ID_PREFIX")
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
+
+cc_library(
+    name = "test_cpp_srcs",
+    srcs = [
+        "ios_test_runner.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    deps = [
+        "//platform:ios-sdk",
+        "//platform/ios/test/common:ios_test_runner_lib",
+        "//test:testlib",
+        "//test:tests",
+    ],
+)
+
+apple_resource_bundle(
+    name = "TestData",
+    infoplists = [
+        "//render-test/ios:Empty.plist",
+    ],
+    structured_resources = [
+        "//test:fixtures",
+        "//:scripts/style-spec-reference/v8.json",
+    ],
+)
+
+objc_library(
+    name = "test_objc_srcs",
+    srcs = [
+        "Tests.m",
+        "iosTestRunner.h",
+        "iosTestRunner.mm",
+    ],
+    deps = [
+        "TestData",
+        "test_cpp_srcs",
+        "//platform/ios/test/common:ios_test_runner_lib",
+    ],
+)
+
+ios_application(
+    name = "CppUnitTestsApp",
+    bundle_id = "{}.maplibre.UnitTestsApp".format(BUNDLE_ID_PREFIX),
+    families = ["iphone"],
+    infoplists = [
+        "Info.plist",
+    ],
+    minimum_os_version = "12.0",
+    provisioning_profile = "//platform/ios:xcode_profile",
+    deps = [
+        "//platform/ios/test/common:test_app_srcs",
+    ],
+)
+
+ios_unit_test(
+    name = "CppUnitTests",
+    minimum_os_version = "12.0",
+    provisioning_profile = "//platform/ios:xcode_profile",
+    test_host = "CppUnitTestsApp",
+    visibility = ["@rules_xcodeproj//xcodeproj:generated"],
+    deps = [
+        "test_objc_srcs",
+    ],
+)

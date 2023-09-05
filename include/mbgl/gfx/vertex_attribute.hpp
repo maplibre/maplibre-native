@@ -426,7 +426,7 @@ public:
     }
 
 protected:
-    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&& attr);
+    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);
@@ -438,6 +438,7 @@ protected:
 
 protected:
     AttributeMap attrs;
+    static std::unique_ptr<VertexAttribute> nullref;
 };
 
 } // namespace gfx
