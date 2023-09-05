@@ -106,7 +106,7 @@ ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
 
 std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string& name) {
     std::optional<uint32_t> result{};
-    if(auto it = samplerLocations.find(name); it != samplerLocations.end()) {
+    if (auto it = samplerLocations.find(name); it != samplerLocations.end()) {
         result = it->second;
     }
     return result;
@@ -159,11 +159,11 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
         uniformBlocks.add(name.data(), index, size);
     }
-    
+
     SamplerLocationMap samplerLocations;
     GLint numActiveUniforms = 0;
     glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms);
-    
+
     for (GLint index = 0; index < numActiveUniforms; ++index) {
         GLsizei actualLength = 0;
         GLint size = 0;
@@ -172,8 +172,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
 
         glGetActiveUniform(program, index, sizeof(uniformName), &actualLength, &size, &type, uniformName);
 
-        if (type == GL_SAMPLER_2D)
-        {
+        if (type == GL_SAMPLER_2D) {
             // This uniform is a texture sampler
             GLint location = glGetUniformLocation(program, uniformName);
             samplerLocations[uniformName] = location;
@@ -198,7 +197,8 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         addAttr(attrs, name.data(), location, length, size, glType);
     }
 
-    return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
+    return std::make_shared<ShaderProgramGL>(
+        std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
 }
 
 } // namespace gl
