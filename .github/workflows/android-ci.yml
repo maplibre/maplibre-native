@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - topic/drawable
     tags:
       - 'android-*'
     paths:
@@ -24,25 +23,10 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+
   pull_request:
     branches:
       - '*'
-    paths:
-      - CMakeLists.txt
-      - 'platform/android/**'
-      - ".github/workflows/android-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
 
 concurrency:
   # cancel jobs on PRs only
@@ -50,7 +34,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
+  android-build:
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -61,8 +45,18 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -117,7 +111,7 @@ jobs:
         env:
           cache-name: gradle-v1
         with:
-          path: ~/.gradle'
+          path: ~/.gradle
           key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
           restore-keys: |
             - ${{ env.cache-name }}
@@ -142,7 +136,6 @@ jobs:
           fi
     
       - name: Build UI tests
-        if: github.ref == 'refs/heads/main'
         run: make android-ui-test-arm-v8
 
       - name: Configure AWS Credentials
@@ -222,8 +215,8 @@ jobs:
             MapboxGLAndroidSDKTestApp/lint-baseline.xml
             MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
 
-  instrumentation-test:
-    needs: build
+  android-instrumentation-test:
+    needs: android-build
 
     runs-on: ubuntu-latest
     if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')

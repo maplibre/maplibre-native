@@ -33,30 +33,9 @@ on:
   pull_request:
     branches:
       - '*'
-    paths:
-      - CMakeLists.txt
-      - 'platform/ios/**'
-      - 'platform/darwin/**'
-      - ".github/workflows/ios-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
-      - WORKSPACE
-      - BUILD.bazel
-      - .bazelrc
-      - .bazelversion
 
 jobs:
-  build:
+  ios-build:
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +43,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.renderer }}
       cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILDTYPE: Debug
@@ -75,7 +54,7 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
