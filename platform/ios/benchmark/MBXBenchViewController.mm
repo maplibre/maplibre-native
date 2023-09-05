@@ -38,11 +38,9 @@
     NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"openmaptiles" withExtension:@"json" subdirectory:@"tiles"];
     const std::vector<std::string> styles = {
         "maptiler://maps/streets",
-        "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
-        "https://zelonewolf.github.io/openstreetmap-americana/style.json"
     };
-    
-    NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json" : [NSString stringWithCString:styles[2].c_str() encoding:NSUTF8StringEncoding]];
+    constexpr auto styleIndex = 1;
+    NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json" : [NSString stringWithCString:styles[styleIndex].c_str() encoding:NSUTF8StringEncoding]];
     NSLog(@"Using style URL: \"%@\"", [url absoluteString]);
     
     self.mapView = [[MLNMapView alloc] initWithFrame:self.view.bounds styleURL:url];
