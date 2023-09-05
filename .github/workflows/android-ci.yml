@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - topic/drawable
     tags:
       - 'android-*'
     paths:
@@ -46,6 +45,17 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -126,7 +136,6 @@ jobs:
           fi
     
       - name: Build UI tests
-        if: github.ref == 'refs/heads/main'
         run: make android-ui-test-arm-v8
 
       - name: Configure AWS Credentials
