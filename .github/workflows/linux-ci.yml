@@ -77,7 +77,7 @@ jobs:
           CI: 1
         run: |
           cmake --version
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
+          CI=1 cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
 
       - name: Perform CodeQL Analysis
@@ -124,11 +124,6 @@ jobs:
           name: mbgl-test-runner
 
       - run: chmod +x ./mbgl-test-runner
-
-      - name: Install npm packages and run test server in background
-        run: |
-          npm install
-          node test/storage/server.js &
 
       - name: Run C++ tests
         run: xvfb-run -a ./mbgl-test-runner
