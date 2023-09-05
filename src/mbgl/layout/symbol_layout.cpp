@@ -230,7 +230,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                 } else {
                     char16_t codePoint = ft.formattedText->getCharCodeAt(j);
                     dependencies.insert(codePoint);
-                    if (canVerticalizeText || (allowVerticalPlacement && ft.formattedText->allowsVerticalWritingMode())) {
+                    if (canVerticalizeText ||
+                        (allowVerticalPlacement && ft.formattedText->allowsVerticalWritingMode())) {
                         if (char16_t verticalChr = util::i18n::verticalizePunctuation(codePoint)) {
                             dependencies.insert(verticalChr);
                         }
