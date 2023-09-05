@@ -41,8 +41,8 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     }
 
     if (enableDepth) {
-    context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
-                                   : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+        context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
+                                       : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
     } else {
         context.setDepthMode(gfx::DepthMode::disabled());
     }
@@ -217,9 +217,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                 IndexBufferGL& indexBuffer = *static_cast<IndexBufferGL*>(impl->indexes->getBuffer());
                 vertexArray.bind(glContext, *indexBuffer.buffer, bindings);
 
-            	assert(vertexArray.isValid());
+                assert(vertexArray.isValid());
 
-            	glSeg.setVertexArray(std::move(vertexArray));
+                glSeg.setVertexArray(std::move(vertexArray));
             }
         };
     }

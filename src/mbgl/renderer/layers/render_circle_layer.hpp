@@ -37,7 +37,6 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
 
-
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
                                 float,

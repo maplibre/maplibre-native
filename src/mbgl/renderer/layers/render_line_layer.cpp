@@ -359,7 +359,6 @@ void RenderLineLayer::updateLayerTweaker() {
     }
 }
 
-
 static constexpr auto LineImageUniformName = "u_image";
 
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
@@ -663,7 +662,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
                 builder->flush();
                 for (auto& drawable : builder->clearDrawables()) {
-                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
+                    drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
                     drawable->setTileID(tileID);
                     drawable->mutableUniformBuffers().createOrUpdate(
                         MLN_STRINGIZE(LinePatternInterpolationUBO), &linePatternInterpolationUBO, context);

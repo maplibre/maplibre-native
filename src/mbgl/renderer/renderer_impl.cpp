@@ -152,7 +152,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
 #endif
-        
+
         // Tweakers are run in the upload pass so they can set up uniforms.
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             if (layerGroup.getLayerTweaker()) {

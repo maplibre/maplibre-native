@@ -57,6 +57,7 @@ public:
     /// already present with a conflicting name.
     [[nodiscard]] virtual bool registerShaderGroup(ShaderGroupPtr&& shaderGroup,
                                                    const std::string& shaderGroupName) noexcept;
+
 private:
     gfx::ShaderGroup legacyGroup;
     std::unordered_map<std::string, ShaderGroupPtr> shaderGroups;
