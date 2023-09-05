@@ -5,6 +5,8 @@
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 
+#include <unordered_map>
+
 namespace mbgl {
 
 class ProgramParameters;
@@ -13,8 +15,10 @@ namespace gl {
 
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
+    using SamplerLocationMap = std::unordered_map<std::string, int>;
+    
     ShaderProgramGL(UniqueProgram&& glProgram_);
-    ShaderProgramGL(UniqueProgram&&, UniformBlockArrayGL&& uniformBlocks, VertexAttributeArrayGL&& attributes);
+    ShaderProgramGL(UniqueProgram&&, UniformBlockArrayGL&& uniformBlocks, VertexAttributeArrayGL&& attributes, SamplerLocationMap&& samplerLocations);
     ShaderProgramGL(ShaderProgramGL&& other);
     ~ShaderProgramGL() noexcept override = default;
 
@@ -29,7 +33,7 @@ public:
                                                    const std::string& fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);
 
-    std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
+    std::optional<uint32_t> getSamplerLocation(const std::string& name) override;
 
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
 
@@ -47,6 +51,7 @@ protected:
 
     UniformBlockArrayGL uniformBlocks;
     VertexAttributeArrayGL vertexAttributes;
+    SamplerLocationMap samplerLocations;
 };
 
 } // namespace gl
