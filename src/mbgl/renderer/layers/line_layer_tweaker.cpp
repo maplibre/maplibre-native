@@ -75,7 +75,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
                 /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
                 0,
-                {0, 0}};
+                0,
+                0};
             linePatternPropertiesBuffer = context.createUniformBuffer(&linePatternPropertiesUBO,
                                                                       sizeof(linePatternPropertiesUBO));
         }

@@ -79,7 +79,13 @@ apple_static_xcframework(
         ":ios_sdk_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:darwin_objcpp_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_hdrs"
+        ],
+    }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
@@ -119,7 +125,13 @@ apple_xcframework(
         ":ios_sdk_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:darwin_objcpp_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_hdrs"
+        ],
+    }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],

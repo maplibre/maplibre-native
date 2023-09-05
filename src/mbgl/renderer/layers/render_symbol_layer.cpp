@@ -973,7 +973,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     if (!collisionTileLayerGroup) {
         if ((collisionTileLayerGroup = context.createTileLayerGroup(
                  layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
-            collisionTileLayerGroup->setLayerTweaker(std::make_shared<CollisionLayerTweaker>(evaluatedProperties));
+            collisionTileLayerGroup->setLayerTweaker(std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties));
             activateLayerGroup(collisionTileLayerGroup, true, changes);
         }
     }

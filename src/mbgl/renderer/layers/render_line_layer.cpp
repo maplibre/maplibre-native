@@ -28,6 +28,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/line_layer_tweaker.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
 
@@ -326,17 +327,6 @@ void RenderLineLayer::updateColorRamp() {
             layerGroup->clearDrawables();
         }
     }
-
-#if MLN_DRAWABLE_RENDERER
-    if (colorRampTexture2D) {
-        colorRampTexture2D.reset();
-
-        // delete all gradient drawables
-        if (layerGroup) {
-            stats.drawablesRemoved += layerGroup->getDrawableCount();
-            layerGroup->clearDrawables();
-        }
-    }
 #endif
 }
 
@@ -375,6 +365,7 @@ static constexpr auto LineImageUniformName = "u_image";
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
+                             const std::shared_ptr<UpdateParameters>& updateParameters,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -668,23 +659,21 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
                 builder->addTweaker(iconTweaker);
 
-                    setSegments(builder, bucket);
+                setSegments(builder, bucket);
 
-                    builder->flush();
-                    for (auto& drawable : builder->clearDrawables()) {
-                    drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
-                        drawable->setTileID(tileID);
-                        drawable->mutableUniformBuffers().createOrUpdate(
-                            MLN_STRINGIZE(LinePatternInterpolationUBO), &linePatternInterpolationUBO, context);
-                        drawable->mutableUniformBuffers().createOrUpdate(
-                            MLN_STRINGIZE(LinePatternTilePropertiesUBO), &linePatternTilePropertiesUBO, context);
+                builder->flush();
+                for (auto& drawable : builder->clearDrawables()) {
+                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
+                    drawable->setTileID(tileID);
+                    drawable->mutableUniformBuffers().createOrUpdate(
+                        MLN_STRINGIZE(LinePatternInterpolationUBO), &linePatternInterpolationUBO, context);
+                    drawable->mutableUniformBuffers().createOrUpdate(
+                        MLN_STRINGIZE(LinePatternTilePropertiesUBO), &linePatternTilePropertiesUBO, context);
 
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.drawablesAdded;
-                    }
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
                 }
             }
-
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             // gradient line
             gfx::VertexAttributeArray vertexAttrs;

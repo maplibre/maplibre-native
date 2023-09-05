@@ -844,10 +844,6 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/command_encoder.hpp",
     "src/mbgl/gl/context.cpp",
     "src/mbgl/gl/context.hpp",
-    "src/mbgl/style/layers/custom_layer.cpp",
-    "src/mbgl/layermanager/custom_layer_factory.cpp",
-    "src/mbgl/style/layers/custom_layer_impl.cpp",
-    "src/mbgl/style/layers/custom_layer_impl.hpp",
     "src/mbgl/gl/debugging_extension.cpp",
     "src/mbgl/gl/debugging_extension.hpp",
     "src/mbgl/gl/defines.hpp",
@@ -863,8 +859,6 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/offscreen_texture.cpp",
     "src/mbgl/gl/offscreen_texture.hpp",
     "src/mbgl/gl/program.hpp",
-    "src/mbgl/renderer/layers/render_custom_layer.cpp",
-    "src/mbgl/renderer/layers/render_custom_layer.hpp",
     "src/mbgl/gl/render_pass.cpp",
     "src/mbgl/gl/render_pass.hpp",
     "src/mbgl/gl/renderbuffer_resource.hpp",
@@ -895,8 +889,6 @@ MLN_OPENGL_SOURCE = [
 
 MLN_OPENGL_HEADERS = [
     "include/mbgl/gfx/backend.hpp",
-    "include/mbgl/style/layers/custom_layer.hpp",
-    "include/mbgl/layermanager/custom_layer_factory.hpp",
     "include/mbgl/gl/renderable_resource.hpp",
     "include/mbgl/gl/renderer_backend.hpp",
     "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
@@ -948,17 +940,7 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/renderer/layers/collision_layer_tweaker.hpp",
     "src/mbgl/shaders/shader_program_base.cpp",
     "src/mbgl/shaders/mtl/shader_program_mtl.cpp",
-    "src/mbgl/shaders/gl/shader_program_gl.cpp",
     "src/mbgl/util/identity.cpp",
-    "src/mbgl/gl/drawable_gl.cpp",
-    "src/mbgl/gl/drawable_gl_builder.cpp",
-    "src/mbgl/gl/drawable_gl_impl.hpp",
-    "src/mbgl/gl/layer_group_gl.cpp",
-    "src/mbgl/gl/render_target_gl.cpp",
-    "src/mbgl/gl/texture2d.cpp",
-    "src/mbgl/gl/uniform_block_gl.cpp",
-    "src/mbgl/gl/uniform_buffer_gl.cpp",
-    "src/mbgl/gl/vertex_attribute_gl.cpp"
 ]
 
 MLN_DRAWABLES_HEADERS = [
@@ -990,12 +972,14 @@ MLN_DRAWABLES_HEADERS = [
 MLN_DRAWABLES_GL_SOURCE = [
     "src/mbgl/gl/drawable_gl.cpp",
     "src/mbgl/gl/drawable_gl_builder.cpp",
+    "src/mbgl/gl/drawable_gl_impl.hpp",
     "src/mbgl/gl/layer_group_gl.cpp",
     "src/mbgl/gl/render_target_gl.cpp",
     "src/mbgl/gl/texture2d.cpp",
     "src/mbgl/gl/uniform_block_gl.cpp",
     "src/mbgl/gl/uniform_buffer_gl.cpp",
     "src/mbgl/gl/vertex_attribute_gl.cpp",
+    "src/mbgl/shaders/gl/shader_program_gl.cpp",
 ]
 
 MLN_DRAWABLES_GL_HEADERS = [

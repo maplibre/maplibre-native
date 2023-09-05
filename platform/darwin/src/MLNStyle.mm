@@ -12,7 +12,6 @@
 #import "MLNHillshadeStyleLayer.h"
 #import "MLNRasterStyleLayer.h"
 #import "MLNBackgroundStyleLayer.h"
-#import "MLNOpenGLStyleLayer.h"
 #import "MLNStyleLayerManager.h"
 
 #import "MLNSource.h"
@@ -39,6 +38,10 @@
 #include <mbgl/style/sources/image_source.hpp>
 
 #import "NSDate+MLNAdditions.h"
+
+#if !MLN_RENDER_BACKEND_METAL
+    #import "MLNOpenGLStyleLayer.h"
+#endif
 
 #if TARGET_OS_IPHONE
     #import "UIImage+MLNAdditions.h"

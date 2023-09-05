@@ -55,7 +55,8 @@ public:
     /// @param shaderGroupName Unique name to register the shader group under.
     /// @return True if the shader group was registered, false if another shader group is
     /// already present with a conflicting name.
-    [[nodiscard]] virtual bool registerShader(std::shared_ptr<Shader>&& shader, const std::string& shaderName) noexcept;
+    [[nodiscard]] virtual bool registerShaderGroup(ShaderGroupPtr&& shaderGroup,
+                                                   const std::string& shaderGroupName) noexcept;
 private:
     gfx::ShaderGroup legacyGroup;
     std::unordered_map<std::string, ShaderGroupPtr> shaderGroups;

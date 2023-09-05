@@ -10,7 +10,12 @@ objc_library(
         "//platform/ios:ios_private_hdrs",
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_opengl_srcs",
+        ],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
         "-fmodules",
@@ -116,7 +121,12 @@ objc_library(
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+        ],
+    }),
     data = ["//platform/ios:resources"],
     module_name = "MapLibre",
     sdk_dylibs = [
@@ -229,7 +239,14 @@ sh_binary(
         "//platform/macos:macos_objcpp_srcs",
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_private_opengl_hdrs",
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_srcs",
+        ],
+    }),
     deps = [
         "//platform/darwin:generated_code",
     ],

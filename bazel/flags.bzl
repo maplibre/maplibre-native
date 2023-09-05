@@ -112,8 +112,8 @@ MAPLIBRE_FLAGS = select({
         "/D_USE_MATH_DEFINES",
     ],
     "//conditions:default": [
-        "/DMBGL_USE_GLES2=1",
-        "/DMBGL_RENDER_BACKEND_OPENGL=1",
+        "-DMBGL_USE_GLES2=1",
+        "-DMBGL_RENDER_BACKEND_OPENGL=1",
         "-DGLES_SILENCE_DEPRECATION",
     ]
 })

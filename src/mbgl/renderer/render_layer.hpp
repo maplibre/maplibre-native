@@ -52,7 +52,9 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 #endif
 } // namespace gfx
 
-} // namespace gfx
+namespace style {
+class ColorRampPropertyValue;
+} // namespace style
 
 class LayerRenderData {
 public:

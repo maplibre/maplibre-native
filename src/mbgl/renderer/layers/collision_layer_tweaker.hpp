@@ -11,8 +11,8 @@ namespace mbgl {
  */
 class CollisionLayerTweaker : public LayerTweaker {
 public:
-    CollisionLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    CollisionLayerTweaker(std::string name, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(name), properties){}
 
 public:
     ~CollisionLayerTweaker() override = default;

@@ -53,6 +53,8 @@ static_assert(sizeof(SymbolDynamicUBO) == 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) SymbolDrawablePaintUBO {
+    /*  0 */ Color fill_color;
+    /* 16 */ Color halo_color;
     /* 32 */ float opacity;
     /* 36 */ float halo_width;
     /* 40 */ float halo_blur;
@@ -79,16 +81,11 @@ std::array<float, 2> toArray(const Size& s) {
 constexpr auto texUniformName = "u_texture";
 constexpr auto texIconUniformName = "u_texture_icon";
 
-template <typename T, class... Is, class... Ts>
-auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
-    return evaluated.template get<T>().constantOr(T::defaultValue());
-}
-
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
-                                                                   : constOrDefault<IconColor>(evaluated)),
+        /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated),
         /*.halo_color=*/
-                                                   : constOrDefault<IconHaloColor>(evaluated)),
+        isText ? constOrDefault<TextHaloColor>(evaluated) : constOrDefault<IconHaloColor>(evaluated),
         /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
         /*.halo_width=*/
         isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
@@ -167,6 +164,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
+        const SymbolDrawableUBO drawableUBO = {
             /*.matrix=*/util::cast<float>(matrix),
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
@@ -181,7 +179,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
             /*.aspect_ratio=*/state.getSize().aspectRatio(),
-                                               /*.pad=*/{0, 0}};
+            /*.pad=*/0,
+        };
 
         const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
                                              /*.pad1=*/0,

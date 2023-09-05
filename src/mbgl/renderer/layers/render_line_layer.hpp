@@ -97,6 +97,7 @@ private:
     gfx::ShaderGroupPtr linePatternShaderGroup;
 
     gfx::DrawableTweakerPtr iconTweaker;
+    LineLayerTweakerPtr tweaker;
 
 #if MLN_RENDER_BACKEND_METAL
     std::vector<std::string> propertiesAsUniforms;
