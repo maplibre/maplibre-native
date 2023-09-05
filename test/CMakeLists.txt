@@ -229,3 +229,10 @@ set_property(TARGET mbgl-test PROPERTY FOLDER Core)
 if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE USE_CPP_TEST_SERVER
+    )
+endif()
