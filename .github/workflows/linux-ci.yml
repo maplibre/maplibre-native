@@ -221,7 +221,7 @@ jobs:
             bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
             --test_output=errors --local_test_jobs=1 \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
-            //test:core //expression-test:test
+            //test:core //render-test:render-test //expression-test:test
 
       - name: Upload coverage report
         if: '!cancelled()'
