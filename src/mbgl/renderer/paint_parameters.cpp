@@ -191,7 +191,7 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
     const auto& encoder = mtlRenderPass.getMetalEncoder();
     const auto colorMode = gfx::ColorMode::disabled();
 
-    gfx::IndexVector<gfx::Triangles> indexes;
+    constexpr std::size_t indexCount = 6;
     std::optional<mtl::BufferResource> indexRes;
 
     // TODO: refactor to use `Context::makeDepthStencilState`
@@ -223,7 +223,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         vertDesc->layouts()->setObject(layoutDesc.get(), 0);
 
         // Create a buffer from the fixed tile indexes
-        indexes = RenderStaticData::quadTriangleIndices();
+        const auto indexes = RenderStaticData::quadTriangleIndices();
+        assert(indexes.elements() == indexCount);
         indexRes.emplace(mtlContext.createBuffer(indexes.data(), indexes.bytes(), gfx::BufferUsageType::StaticDraw));
         if (!indexRes || !*indexRes) {
             return;
@@ -299,7 +300,7 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         }
 
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
-                                       indexes.elements(),
+                                       static_cast<NS::UInteger>(indexCount),
                                        MTL::IndexType::IndexTypeUInt16,
                                        indexRes->getMetalBuffer().get(),
                                        /*indexOffset=*/0,

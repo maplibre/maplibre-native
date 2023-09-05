@@ -207,7 +207,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
 #if !defined(NDEBUG)
             const auto indexBufferLength = indexBuffer->length() / indexSize;
-            const auto* indexes = static_cast<const std::uint16_t*>(indexBuffer->contents());
+            const auto* indexes = static_cast<const std::uint16_t*>(const_cast<MTL::Buffer*>(indexBuffer)->contents());
             const auto maxIndex = *std::max_element(indexes + mlSegment.indexOffset,
                                                     indexes + mlSegment.indexOffset + mlSegment.indexLength);
 
