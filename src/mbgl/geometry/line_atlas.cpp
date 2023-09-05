@@ -1,6 +1,7 @@
 #include <cmath>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/math/minmax.hpp>
 #include <mbgl/util/hash.hpp>
@@ -206,11 +207,22 @@ DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
 }
 
 void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
+#if MLN_DRAWABLE_RENDERER
+    if (std::holds_alternative<AlphaImage>(texture)) {
+        auto tempTexture = uploadPass.getContext().createTexture2D();
+        tempTexture->upload(std::get<AlphaImage>(texture));
+        tempTexture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Repeat, gfx::TextureWrapType::Clamp});
+        texture = std::move(tempTexture);
+    }
+#else
     if (texture.is<AlphaImage>()) {
         texture = uploadPass.createTexture(texture.get<AlphaImage>());
     }
+#endif
 }
 
+#if MLN_LEGACY_RENDERER
 gfx::TextureBinding DashPatternTexture::textureBinding() const {
     // The texture needs to have been uploaded already.
     assert(texture.is<gfx::Texture>());
@@ -220,9 +232,24 @@ gfx::TextureBinding DashPatternTexture::textureBinding() const {
             gfx::TextureWrapType::Repeat,
             gfx::TextureWrapType::Clamp};
 }
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+static const gfx::Texture2DPtr noTexture;
+const std::shared_ptr<gfx::Texture2D>& DashPatternTexture::getTexture() const {
+    return (std::holds_alternative<gfx::Texture2DPtr>(texture)) ? std::get<gfx::Texture2DPtr>(texture) : noTexture;
+}
+#endif
 
 Size DashPatternTexture::getSize() const {
+#if MLN_DRAWABLE_RENDERER
+    if (std::holds_alternative<AlphaImage>(texture)) {
+        return std::get<AlphaImage>(texture).size;
+    }
+    return std::get<gfx::Texture2DPtr>(texture)->getSize();
+#else
     return texture.match([](const auto& obj) { return obj.size; });
+#endif
 }
 
 LineAtlas::LineAtlas() = default;

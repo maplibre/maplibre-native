@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/util/size.hpp>
-#include "quaternion.hpp"
+#include <mbgl/util/quaternion.hpp>
 
 #include <optional>
 

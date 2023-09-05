@@ -1,5 +1,10 @@
 #pragma once
 
+#include <mbgl/gfx/texture.hpp>
+#include <mbgl/gfx/draw_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
+#include <mbgl/gfx/stencil_mode.hpp>
+#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gl/object.hpp>
 #include <mbgl/gl/state.hpp>
@@ -7,19 +12,16 @@
 #include <mbgl/gl/framebuffer.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/gfx/texture.hpp>
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/gfx/depth_mode.hpp>
-#include <mbgl/gfx/stencil_mode.hpp>
-#include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
-#include <functional>
-#include <memory>
-#include <vector>
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/texture2d.hpp>
+#endif
+
 #include <array>
-#include <string>
+#include <functional>
+#include <vector>
 
 namespace mbgl {
 namespace gl {
@@ -98,11 +100,30 @@ public:
                abandonedFramebuffers.empty();
     }
 
-    void setDirtyState();
-
     extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
 
     void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
+
+#if MLN_DRAWABLE_RENDERER
+    gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
+
+    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
+
+    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+
+    LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+
+    gfx::Texture2DPtr createTexture2D() override;
+
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+
+    UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
+
+    void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
+#endif
+
+    void setDirtyState() override;
 
 private:
     RendererBackend& backend;
@@ -116,7 +137,7 @@ public:
     State<value::BindFramebuffer> bindFramebuffer;
     State<value::Viewport> viewport;
     State<value::ScissorTest> scissorTest;
-    std::array<State<value::BindTexture>, 2> texture;
+    std::array<State<value::BindTexture>, gfx::MaxActiveTextureUnits> texture;
     State<value::Program> program;
     State<value::BindVertexBuffer> vertexBuffer;
 
@@ -151,10 +172,12 @@ private:
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
+public:
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
                                                                 gfx::TexturePixelType,
                                                                 gfx::TextureChannelDataType) override;
 
+private:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,
                                                                           Size size) override;
 
@@ -163,8 +186,10 @@ private:
     UniqueFramebuffer createFramebuffer();
     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
 
+public:
     VertexArray createVertexArray();
 
+private:
     friend detail::ProgramDeleter;
     friend detail::ShaderDeleter;
     friend detail::BufferDeleter;

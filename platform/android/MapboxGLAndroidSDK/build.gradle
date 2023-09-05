@@ -58,6 +58,32 @@ android {
         buildConfigField "String", "MAPBOX_VERSION_STRING", String.format("\"Mapbox/%s\"", project.VERSION_NAME)
         buildConfigField "String", "MAPBOX_EVENTS_USER_AGENT", String.format("\"mapbox-maps-android/%s\"", project.VERSION_NAME)
         consumerProguardFiles 'proguard-rules.pro'
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF", "-DMLN_RENDERER_SPLIT_VIEW=OFF"
+            }
+        }
+    }
+
+    flavorDimensions += "renderer"
+    productFlavors {
+        create("legacy") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF", "-DMLN_RENDERER_SPLIT_VIEW=OFF"
+                }
+            }
+        }
+        create("drawable") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments "-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON", "-DMLN_RENDERER_SPLIT_VIEW=OFF"
+                }
+            }
+        }
     }
 
     // build native libraries
@@ -93,6 +119,7 @@ android {
         debug {
             testCoverageEnabled false
             jniDebuggable true
+            debuggable true
         }
     }
     namespace 'org.maplibre.android'

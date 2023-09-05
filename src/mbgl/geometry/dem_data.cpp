@@ -7,13 +7,13 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::DEMEncoding _encodin
     : dim(_image.size.height),
       // extra two pixels per row for border backfilling on either edge
       stride(dim + 2),
-      encoding(_encoding),
-      image({static_cast<uint32_t>(stride), static_cast<uint32_t>(stride)}) {
+      encoding(_encoding) {
+    image = std::make_shared<PremultipliedImage>(Size(static_cast<uint32_t>(stride), static_cast<uint32_t>(stride)));
     if (_image.size.height != _image.size.width) {
         throw std::runtime_error("raster-dem tiles must be square.");
     }
 
-    auto* dest = reinterpret_cast<uint32_t*>(image.data.get()) + stride + 1;
+    auto* dest = reinterpret_cast<uint32_t*>(image->data.get()) + stride + 1;
     auto* source = reinterpret_cast<uint32_t*>(_image.data.get());
     for (int32_t y = 0; y < dim; y++) {
         memcpy(dest, source, dim * 4);
@@ -27,7 +27,7 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::DEMEncoding _encodin
     // tile's neighboring tiles are loaded and the accurate data can be
     // backfilled using DEMData#backfillBorder
 
-    auto* data = reinterpret_cast<uint32_t*>(image.data.get());
+    auto* data = reinterpret_cast<uint32_t*>(image->data.get());
     for (int32_t x = 0; x < dim; x++) {
         auto rowOffset = stride * (x + 1);
         // left vertical border
@@ -77,8 +77,8 @@ void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy
     int32_t ox = -dx * dim;
     int32_t oy = -dy * dim;
 
-    auto* dest = reinterpret_cast<uint32_t*>(image.data.get());
-    auto* source = reinterpret_cast<uint32_t*>(o.image.data.get());
+    auto* dest = reinterpret_cast<uint32_t*>(image->data.get());
+    auto* source = reinterpret_cast<uint32_t*>(o.image->data.get());
 
     for (int32_t y = yMin; y < yMax; y++) {
         for (int32_t x = xMin; x < xMax; x++) {
@@ -89,7 +89,7 @@ void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy
 
 int32_t DEMData::get(const int32_t x, const int32_t y) const {
     const auto& unpack = getUnpackVector();
-    const uint8_t* value = image.data.get() + idx(x, y) * 4;
+    const uint8_t* value = image->data.get() + idx(x, y) * 4;
     return static_cast<int32_t>(value[0] * unpack[0] + value[1] * unpack[1] + value[2] * unpack[2] - unpack[3]);
 }
 

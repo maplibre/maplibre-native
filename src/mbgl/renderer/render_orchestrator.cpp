@@ -2,6 +2,9 @@
 
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/layermanager/layer_manager.hpp>
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/change_request.hpp>
+#endif
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_layer.hpp>
@@ -31,12 +34,12 @@ namespace mbgl {
 
 using namespace style;
 
-static RendererObserver& nullObserver() {
+namespace {
+
+RendererObserver& nullObserver() {
     static RendererObserver observer;
     return observer;
 }
-
-namespace {
 
 class LayerRenderItem final : public RenderItem {
 public:
@@ -55,6 +58,9 @@ private:
     void upload(gfx::UploadPass& pass) const override { layer.get().upload(pass); }
     void render(PaintParameters& parameters) const override { layer.get().render(parameters); }
     const std::string& getName() const override { return layer.get().getID(); }
+#if MLN_DRAWABLE_RENDERER
+    void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override{};
+#endif
 };
 
 class RenderTreeImpl final : public RenderTree {
@@ -222,9 +228,19 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     layerImpls = updateParameters->layers;
     const bool layersAddedOrRemoved = !layerDiff.added.empty() || !layerDiff.removed.empty();
 
+#if MLN_DRAWABLE_RENDERER
+    std::vector<std::unique_ptr<ChangeRequest>> changes;
+#endif
+
     // Remove render layers for removed layers.
     for (const auto& entry : layerDiff.removed) {
-        renderLayers.erase(entry.first);
+        const auto hit = renderLayers.find(entry.first);
+        if (hit != renderLayers.end()) {
+#if MLN_DRAWABLE_RENDERER
+            hit->second->layerRemoved(changes);
+#endif
+            renderLayers.erase(hit);
+        }
     }
 
     // Create render layers for newly added layers.
@@ -236,16 +252,30 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Update render layers for changed layers.
     for (const auto& entry : layerDiff.changed) {
-        renderLayers.at(entry.first)->transition(transitionParameters, entry.second.after);
+        if (const auto& renderLayer = renderLayers.at(entry.first)) {
+            const auto& newLayer = entry.second.after;
+
+#if MLN_DRAWABLE_RENDERER
+            renderLayer->layerChanged(transitionParameters, newLayer, changes);
+#endif // MLN_DRAWABLE_RENDERER
+
+            renderLayer->transition(transitionParameters, newLayer);
+        }
     }
 
     if (layersAddedOrRemoved) {
         orderedLayers.clear();
         orderedLayers.reserve(layerImpls->size());
+        [[maybe_unused]] int32_t layerIndex = 0;
         for (const auto& layerImpl : *layerImpls) {
             RenderLayer* layer = renderLayers.at(layerImpl->id).get();
             assert(layer);
             orderedLayers.emplace_back(*layer);
+
+#if MLN_DRAWABLE_RENDERER
+            // We're mutating the list of ordered layers and must notify them of their new assigned indices
+            layer->layerIndexChanged(layerIndex++, changes);
+#endif
         }
     }
     assert(orderedLayers.size() == renderLayers.size());
@@ -348,6 +378,21 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
     }
+
+#if MLN_DRAWABLE_RENDERER
+    // Mark layers included in the renderable set as renderable
+    // @TODO: Optimize this logic, combine with the above
+    for (auto orderedLayer : orderedLayers) {
+        RenderLayer& layer = orderedLayer;
+        layer.markLayerRenderable(
+            layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(layer.getLayerIndex()))) !=
+                layerRenderItems.end(),
+            changes);
+    }
+
+    // Add all change requests up to this point
+    addChanges(changes);
+#endif
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
     if (!isMapModeContinuous && !renderTreeParameters->loaded) {
@@ -712,19 +757,34 @@ bool RenderOrchestrator::hasTransitions(TimePoint timePoint) const {
 }
 
 bool RenderOrchestrator::isLoaded() const {
+    // do the simple boolean check before iterating over all the tiles in all the sources
+    if (!imageManager->isLoaded()) {
+        return false;
+    }
+
     for (const auto& entry : renderSources) {
         if (!entry.second->isLoaded()) {
             return false;
         }
     }
 
-    return imageManager->isLoaded();
+    return true;
 }
 
 void RenderOrchestrator::clearData() {
     if (!sourceImpls->empty()) sourceImpls = makeMutable<std::vector<Immutable<style::Source::Impl>>>();
     if (!layerImpls->empty()) layerImpls = makeMutable<std::vector<Immutable<style::Layer::Impl>>>();
     if (!imageImpls->empty()) imageImpls = makeMutable<std::vector<Immutable<style::Image::Impl>>>();
+
+#if MLN_DRAWABLE_RENDERER
+    UniqueChangeRequestVec changes;
+    for (const auto& entry : renderLayers) {
+        entry.second->layerRemoved(changes);
+    }
+    addChanges(changes);
+
+    debugLayerGroups.clear();
+#endif
 
     renderSources.clear();
     renderLayers.clear();
@@ -737,6 +797,182 @@ void RenderOrchestrator::clearData() {
     imageManager->clear();
     glyphManager->evict(fontStacks(*layerImpls));
 }
+
+#if MLN_DRAWABLE_RENDERER
+void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
+    pendingChanges.insert(
+        pendingChanges.end(), std::make_move_iterator(changes.begin()), std::make_move_iterator(changes.end()));
+    changes.clear();
+}
+
+void RenderOrchestrator::onRemoveLayerGroup(LayerGroupBase&) {}
+
+void RenderOrchestrator::updateLayerGroupOrder() {
+    // In the event layer indices change for layer groups, we must re-sort them
+    LayerGroupMap newMap;
+    for (auto& it : layerGroupsByLayerIndex) {
+        newMap.emplace(it.second->getLayerIndex(), it.second);
+    }
+    layerGroupsByLayerIndex = std::move(newMap);
+    layerGroupOrderDirty = false;
+}
+
+bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, const bool replace) {
+    const auto index = layerGroup->getLayerIndex();
+    auto range = layerGroupsByLayerIndex.equal_range(index);
+    bool found = false;
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second == layerGroup) {
+            found = true;
+            if (replace) {
+                onRemoveLayerGroup(*it->second);
+                it->second = std::move(layerGroup);
+            }
+            break;
+        }
+    }
+    if (found)
+        return replace;
+    else {
+        layerGroupsByLayerIndex.insert(std::make_pair(index, std::move(layerGroup)));
+    }
+    return true;
+}
+
+bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
+    LayerGroupMap::const_iterator hit;
+    bool removed = false;
+    while ((hit = layerGroupsByLayerIndex.find(layerIndex)) != layerGroupsByLayerIndex.end()) {
+        onRemoveLayerGroup(*hit->second);
+        layerGroupsByLayerIndex.erase(hit);
+        removed = true;
+    }
+    return removed;
+}
+
+int32_t RenderOrchestrator::maxLayerIndex() const {
+    if (!layerGroupsByLayerIndex.empty()) {
+        return layerGroupsByLayerIndex.crbegin()->second->getLayerIndex();
+    }
+    return -1;
+}
+
+static const LayerGroupBasePtr no_group;
+
+const LayerGroupBasePtr& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
+    const auto hit = layerGroupsByLayerIndex.find(layerIndex);
+    return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
+}
+
+void RenderOrchestrator::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
+    for (auto& pair : layerGroupsByLayerIndex) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
+void RenderOrchestrator::visitLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
+    for (const auto& pair : layerGroupsByLayerIndex) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
+void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
+                                      gfx::Context& context,
+                                      const TransformState& state,
+                                      const std::shared_ptr<UpdateParameters>& updateParameters,
+                                      const RenderTree& renderTree) {
+    const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
+    const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
+                                                       : style::TransitionOptions();
+    const auto defDuration = isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero();
+    const PropertyEvaluationParameters evalParameters{
+        getZoomHistory(),
+        updateParameters->timePoint,
+        transitionOptions.duration.value_or(defDuration),
+    };
+
+    std::vector<std::unique_ptr<ChangeRequest>> changes;
+    for (const auto& item : renderTree.getLayerRenderItems()) {
+        auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
+        renderLayer.update(shaders, context, state, renderTree, changes);
+    }
+    addChanges(changes);
+}
+
+void RenderOrchestrator::processChanges() {
+    auto localChanges = std::move(pendingChanges);
+    for (auto& change : localChanges) {
+        change->execute(*this);
+    }
+
+    if (layerGroupOrderDirty) {
+        updateLayerGroupOrder();
+    }
+}
+
+void RenderOrchestrator::markLayerGroupOrderDirty() {
+    layerGroupOrderDirty = true;
+}
+
+bool RenderOrchestrator::addRenderTarget(RenderTargetPtr renderTarget) {
+    auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
+    if (it == renderTargets.end()) {
+        renderTargets.emplace_back(renderTarget);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget) {
+    auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
+    if (it != renderTargets.end()) {
+        renderTargets.erase(it);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void RenderOrchestrator::visitRenderTargets(std::function<void(RenderTarget&)> f) {
+    for (auto& renderTarget : renderTargets) {
+        f(*renderTarget);
+    }
+}
+
+void RenderOrchestrator::visitRenderTargets(std::function<void(const RenderTarget&)> f) const {
+    for (const auto& renderTarget : renderTargets) {
+        f(*renderTarget);
+    }
+}
+
+void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {
+    for (const RenderItem& item : renderTree.getSourceRenderItems()) {
+        item.updateDebugDrawables(debugLayerGroups, parameters);
+    }
+}
+
+void RenderOrchestrator::visitDebugLayerGroups(std::function<void(LayerGroupBase&)> f) {
+    for (auto& pair : debugLayerGroups) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
+void RenderOrchestrator::visitDebugLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
+    for (const auto& pair : debugLayerGroups) {
+        if (pair.second) {
+            f(*pair.second);
+        }
+    }
+}
+
+#endif // MLN_DRAWABLE_RENDERER
 
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        const GlyphRange& glyphRange,

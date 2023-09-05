@@ -63,6 +63,8 @@ struct AttributeDataTypeOf<uint16_t, 3> : std::integral_constant<AttributeDataTy
 template <>
 struct AttributeDataTypeOf<uint16_t, 4> : std::integral_constant<AttributeDataType, AttributeDataType::UShort4> {};
 template <>
+struct AttributeDataTypeOf<uint16_t, 8> : std::integral_constant<AttributeDataType, AttributeDataType::UShort8> {};
+template <>
 struct AttributeDataTypeOf<int32_t, 1> : std::integral_constant<AttributeDataType, AttributeDataType::Int> {};
 template <>
 struct AttributeDataTypeOf<int32_t, 2> : std::integral_constant<AttributeDataType, AttributeDataType::Int2> {};
@@ -98,7 +100,7 @@ public:
 
 struct AttributeDescriptor {
     AttributeDataType dataType;
-    uint8_t offset;
+    uint32_t offset;
 };
 
 inline bool operator==(const AttributeDescriptor& lhs, const AttributeDescriptor& rhs) {
@@ -114,7 +116,7 @@ struct VertexDescriptor {
 class AttributeBinding {
 public:
     AttributeDescriptor attribute;
-    uint8_t vertexStride;
+    uint32_t vertexStride;
     const VertexBufferResource* vertexBufferResource;
     uint32_t vertexOffset;
 

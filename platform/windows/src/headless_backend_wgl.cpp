@@ -196,15 +196,10 @@ public:
 
     ~WGLDisplayConfig() { UnregisterClassA(renderingWindowClass.lpszClassName, renderingWindowClass.hInstance); }
 
-    static std::shared_ptr<WGLDisplayConfig> create() {
-        static std::weak_ptr<WGLDisplayConfig> instance;
-        auto shared = instance.lock();
+    static WGLDisplayConfig& create() {
+        static WGLDisplayConfig instance = WGLDisplayConfig{Key{}};
 
-        if (!shared) {
-            instance = shared = std::make_shared<WGLDisplayConfig>(Key{});
-        }
-
-        return shared;
+        return instance;
     }
 
 public:
@@ -219,7 +214,7 @@ public:
 
 class WGLBackendImpl final : public HeadlessBackend::Impl {
 private:
-    std::shared_ptr<WGLDisplayConfig> wglDisplayConfig = WGLDisplayConfig::create();
+    WGLDisplayConfig& wglDisplayConfig = WGLDisplayConfig::create();
 
     HWND renderingWindowHandle = NULL;
     HDC renderingWindowDeviceContext = NULL;
@@ -230,7 +225,7 @@ private:
         MSG message;
 
         renderingWindowHandle = CreateWindowExA(0,
-                                                wglDisplayConfig->renderingWindowClass.lpszClassName,
+                                                wglDisplayConfig.renderingWindowClass.lpszClassName,
                                                 "WGL Render Window",
                                                 WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
                                                 0,
@@ -239,7 +234,7 @@ private:
                                                 1,
                                                 NULL,
                                                 NULL,
-                                                wglDisplayConfig->renderingWindowClass.hInstance,
+                                                wglDisplayConfig.renderingWindowClass.hInstance,
                                                 NULL);
 
         if (!renderingWindowHandle) {
@@ -330,7 +325,7 @@ private:
             throw std::runtime_error("Failed to set pixel format for context");
         }
 
-        if (wglDisplayConfig->ARB_create_context) {
+        if (wglDisplayConfig.ARB_create_context) {
             renderingWindowRenderingContext = mbgl::platform::wglCreateContextAttribsARB(
                 renderingWindowDeviceContext,
                 NULL,
