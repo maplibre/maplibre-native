@@ -28,6 +28,7 @@
 #include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -350,8 +351,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         for (auto& drawable : builder.clearDrawables()) {
             drawable->setTileID(tileID);
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpUBO, context);
-            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileUBO, context);
+            uniforms.createOrUpdate(FillLayerTweaker::idFillInterpolateUBOName, &interpUBO, context);
+            uniforms.createOrUpdate(FillLayerTweaker::idFillTilePropsUBOName, &tileUBO, context);
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
@@ -432,8 +433,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(FillLayerTweaker::FillInterpolateUBOName, &interpolateUBO, context);
-            uniforms.createOrUpdate(FillLayerTweaker::FillTilePropsUBOName, &tileProps, context);
+            uniforms.createOrUpdate(FillLayerTweaker::idFillInterpolateUBOName, &interpolateUBO, context);
+            uniforms.createOrUpdate(FillLayerTweaker::idFillTilePropsUBOName, &tileProps, context);
             drawable.setVertexAttributes(vertexAttrs);
         };
         if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {

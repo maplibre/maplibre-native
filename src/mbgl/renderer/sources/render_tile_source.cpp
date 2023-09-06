@@ -16,6 +16,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <unordered_set>
 #endif
@@ -37,6 +38,10 @@ void TileSourceRenderItem::render(PaintParameters& parameters) const {
 }
 
 #if MLN_DRAWABLE_RENDERER
+namespace {
+static const StringIdentity idDebugUBOName = StringIndexer::get("DebugUBO");
+};
+
 void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGroups,
                                                 PaintParameters& parameters) const {
     if (!(parameters.debugOptions &
@@ -53,7 +58,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         float pad1, pad2, pad3;
     };
     static_assert(sizeof(DebugUBO) % 16 == 0);
-    constexpr auto DebugUBOName = "DebugUBO";
 
     // initialize
     auto& context = parameters.context;
@@ -116,7 +120,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // update existing drawable
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
+            uniforms.createOrUpdate(idDebugUBOName, &debugUBO, context);
         });
         return updatedCount;
     };
@@ -145,7 +149,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
+            uniforms.createOrUpdate(idDebugUBOName, &debugUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
         }

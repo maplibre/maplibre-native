@@ -12,6 +12,7 @@
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -38,8 +39,10 @@ struct alignas(16) FillDrawablePropsUBO {
 };
 static_assert(sizeof(FillDrawablePropsUBO) == 48);
 
-static constexpr std::string_view FillDrawableUBOName = "FillDrawableUBO";
-static constexpr std::string_view FillDrawablePropsUBOName = "FillDrawablePropsUBO";
+static const StringIdentity FillDrawableUBOName = StringIndexer::get("FillDrawableUBO");
+static const StringIdentity FillDrawablePropsUBOName = StringIndexer::get("FillDrawablePropsUBO");
+const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = StringIndexer::get("FillDrawableTilePropsUBO");
+const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = StringIndexer::get("FillInterpolateUBO");
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,

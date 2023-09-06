@@ -101,6 +101,12 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = StringIndexer::get("SymbolDrawableUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = StringIndexer::get("SymbolDynamicUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = StringIndexer::get("SymbolDrawablePaintUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = StringIndexer::get("SymbolDrawableTilePropsUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get("SymbolDrawableInterpolateUBO");
+
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
@@ -190,9 +196,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                              /*.pad2=*/{0, 0}};
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(SymbolDrawableUBOName, &drawableUBO, context);
-        uniforms.createOrUpdate(SymbolDynamicUBOName, &dynamicUBO, context);
-        uniforms.addOrReplace(SymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
+        uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idSymbolDynamicUBOName, &dynamicUBO, context);
+        uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
     });
 }
 

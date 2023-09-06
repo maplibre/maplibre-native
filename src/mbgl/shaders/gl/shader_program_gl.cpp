@@ -157,12 +157,12 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
         assert(length > 0 && size > 0);
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-        uniformBlocks.add(name.data(), index, size);
+        uniformBlocks.add(StringIndexer::get(name.data()), index, size);
     }
 
     SamplerLocationMap samplerLocations;
     GLint numActiveUniforms = 0;
-    glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms);
+    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms));
 
     for (GLint index = 0; index < numActiveUniforms; ++index) {
         GLsizei actualLength = 0;
@@ -170,11 +170,11 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         GLenum type = GL_ZERO;
         char uniformName[256];
 
-        glGetActiveUniform(program, index, sizeof(uniformName), &actualLength, &size, &type, uniformName);
+        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, sizeof(uniformName), &actualLength, &size, &type, uniformName));
 
         if (type == GL_SAMPLER_2D) {
             // This uniform is a texture sampler
-            GLint location = glGetUniformLocation(program, uniformName);
+            GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, uniformName));
             samplerLocations[uniformName] = location;
         }
     }

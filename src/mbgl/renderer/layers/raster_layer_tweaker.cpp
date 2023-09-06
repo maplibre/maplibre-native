@@ -9,6 +9,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -31,6 +32,7 @@ struct alignas(16) RasterDrawableUBO {
 };
 static_assert(sizeof(RasterDrawableUBO) == 128);
 static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
+static const StringIdentity idRasterDrawableUBOName = StringIndexer::get("RasterDrawableUBO");
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const RenderTree& renderTree,
@@ -93,7 +95,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate("RasterDrawableUBO", &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idRasterDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

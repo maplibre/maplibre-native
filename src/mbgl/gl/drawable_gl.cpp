@@ -8,6 +8,7 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -121,7 +122,7 @@ void DrawableGL::bindUniformBuffers() const {
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 Log::Error(Event::General,
-                           "DrawableGL::bindUniformBuffers: UBO "s + element.first + " not found. skipping.");
+                           "DrawableGL::bindUniformBuffers: UBO "s + StringIndexer::get(element.first) + " not found. skipping.");
                 assert(false);
                 continue;
             }

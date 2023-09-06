@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/util/string_indexer.hpp>
+
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -39,7 +41,7 @@ protected:
 /// Stores a collection of uniform buffers by name
 class UniformBufferArray {
 public:
-    using UniformBufferMap = std::unordered_map<std::string, std::shared_ptr<UniformBuffer>>;
+    using UniformBufferMap = std::unordered_map<StringIdentity, std::shared_ptr<UniformBuffer>>;
 
     UniformBufferArray(int initCapacity = 10);
     UniformBufferArray(UniformBufferArray&&);
@@ -52,27 +54,27 @@ public:
 
     /// Get an uniform buffer element.
     /// Returns a pointer to the element on success, or null if the uniform buffer doesn't exists.
-    const std::shared_ptr<UniformBuffer>& get(std::string_view name) const;
+    const std::shared_ptr<UniformBuffer>& get(const StringIdentity id) const;
 
     /// Add a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& addOrReplace(std::string_view name,
+    const std::shared_ptr<UniformBuffer>& addOrReplace(const StringIdentity id,
                                                        std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
-    void createOrUpdate(std::string_view name, const std::vector<uint8_t>& data, gfx::Context&);
-    void createOrUpdate(std::string_view name, const void* data, std::size_t size, gfx::Context&);
+    void createOrUpdate(const StringIdentity id, const std::vector<uint8_t>& data, gfx::Context&);
+    void createOrUpdate(const StringIdentity id, const void* data, std::size_t size, gfx::Context&);
     template <typename T>
-    std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(std::string_view name,
+    std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(const StringIdentity id,
                                                            const T* data,
                                                            gfx::Context& context) {
-        createOrUpdate(name, data, sizeof(T), context);
+        createOrUpdate(id, data, sizeof(T), context);
     }
 
     UniformBufferArray& operator=(UniformBufferArray&&);
     UniformBufferArray& operator=(const UniformBufferArray&);
 
 protected:
-    const std::shared_ptr<UniformBuffer>& add(const std::string_view name, std::shared_ptr<UniformBuffer>&&);
+    const std::shared_ptr<UniformBuffer>& add(const StringIdentity id, std::shared_ptr<UniformBuffer>&&);
 
     virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer& uniformBuffer) = 0;
 

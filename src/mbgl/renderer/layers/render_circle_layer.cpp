@@ -18,6 +18,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -278,7 +279,7 @@ struct alignas(16) CircleInterpolateUBO {
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-constexpr auto CircleInterpolateUBOName = "CircleInterpolateUBO";
+const StringIdentity CircleInterpolateUBOName = StringIndexer::get("CircleInterpolateUBO");
 constexpr auto VertexAttribName = "a_pos";
 
 } // namespace

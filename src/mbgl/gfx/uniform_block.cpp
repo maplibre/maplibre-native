@@ -24,13 +24,13 @@ UniformBlockArray& UniformBlockArray::operator=(const UniformBlockArray& other) 
     return *this;
 }
 
-const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const std::string& name) const {
-    const auto result = uniformBlockMap.find(name);
+const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const StringIdentity id) const {
+    const auto result = uniformBlockMap.find(id);
     return (result != uniformBlockMap.end()) ? result->second : nullref;
 }
 
-const std::unique_ptr<UniformBlock>& UniformBlockArray::add(std::string name, int index, std::size_t size) {
-    const auto result = uniformBlockMap.insert(std::make_pair(std::move(name), std::unique_ptr<UniformBlock>()));
+const std::unique_ptr<UniformBlock>& UniformBlockArray::add(const StringIdentity id, int index, std::size_t size) {
+    const auto result = uniformBlockMap.insert(std::make_pair(id, std::unique_ptr<UniformBlock>()));
     if (result.second) {
         result.first->second = create(index, size);
         return result.first->second;

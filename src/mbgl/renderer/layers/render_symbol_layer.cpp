@@ -828,8 +828,8 @@ void updateTileDrawable(gfx::Drawable& drawable,
     const auto interpolateUBO = buildInterpUBO(paintProps, isText, currentZoom);
 
     auto& uniforms = drawable.mutableUniformBuffers();
-    uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
-    uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
+    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, &interpolateUBO, context);
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -1303,8 +1303,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setData(std::move(drawData));
 
                 auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableTilePropsUBOName, &tileUBO, context);
-                uniforms.createOrUpdate(SymbolLayerTweaker::SymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+                uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
+                uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, &interpolateUBO, context);
 
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

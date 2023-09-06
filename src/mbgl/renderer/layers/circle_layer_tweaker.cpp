@@ -7,6 +7,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -40,9 +41,9 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) % 16 == 0);
 
-static constexpr std::string_view CircleDrawableUBOName = "CircleDrawableUBO";
-static constexpr std::string_view CirclePaintParamsUBOName = "CirclePaintParamsUBO";
-static constexpr std::string_view CircleEvaluatedPropsUBOName = "CircleEvaluatedPropsUBO";
+static const StringIdentity idCircleDrawableUBOName = StringIndexer::get("CircleDrawableUBO");
+static const StringIdentity idCirclePaintParamsUBOName = StringIndexer::get("CirclePaintParamsUBO");
+static const StringIdentity idCircleEvaluatedPropsUBOName = StringIndexer::get("CircleEvaluatedPropsUBO");
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
@@ -93,8 +94,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(CirclePaintParamsUBOName, paintParamsUniformBuffer);
-        uniforms.addOrReplace(CircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        uniforms.addOrReplace(idCirclePaintParamsUBOName, paintParamsUniformBuffer);
+        uniforms.addOrReplace(idCircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -117,7 +118,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             pitchWithMap ? std::array<float, 2>{{pixelsToTileUnits, pixelsToTileUnits}} : parameters.pixelsToGLUnits,
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(CircleDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idCircleDrawableUBOName, &drawableUBO, context);
     });
 }
 

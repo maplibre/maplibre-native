@@ -8,6 +8,7 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -47,10 +48,10 @@ struct alignas(16) BackgroundPatternLayerUBO {
 static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
 
 #if !defined(NDEBUG)
-static constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
+constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
-static constexpr auto BackgroundDrawableUBOName = "BackgroundDrawableUBO";
-static constexpr auto BackgroundLayerUBOName = "BackgroundLayerUBO";
+static const StringIdentity idBackgroundDrawableUBOName = StringIndexer::get("BackgroundDrawableUBO");
+static const StringIdentity idBackgroundLayerUBOName = StringIndexer::get("BackgroundLayerUBO");
 static constexpr auto texUniformName = "u_image";
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTree&, const PaintParameters& parameters) {
@@ -96,7 +97,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
         const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(BackgroundDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idBackgroundDrawableUBOName, &drawableUBO, context);
 
         if (hasPattern) {
             if (!samplerLocation.has_value()) {
@@ -138,7 +139,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ 0,
             };
-            uniforms.createOrUpdate(BackgroundLayerUBOName, &layerUBO, context);
+            uniforms.createOrUpdate(idBackgroundLayerUBOName, &layerUBO, context);
         } else {
             // UBOs can be shared
             if (!backgroundLayerBuffer) {
@@ -149,7 +150,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
             }
-            uniforms.addOrReplace(BackgroundLayerUBOName, backgroundLayerBuffer);
+            uniforms.addOrReplace(idBackgroundLayerUBOName, backgroundLayerBuffer);
         }
     });
 }

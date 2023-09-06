@@ -11,6 +11,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -23,7 +24,7 @@ struct alignas(16) LineUBO {
     float device_pixel_ratio;
 };
 static_assert(sizeof(LineUBO) % 16 == 0);
-static constexpr std::string_view LineUBOName = "LineUBO";
+static const StringIdentity idLineUBOName = StringIndexer::get("LineUBO");
 
 struct alignas(16) LinePropertiesUBO {
     Color color;
@@ -37,7 +38,7 @@ struct alignas(16) LinePropertiesUBO {
     std::array<float, 2> pad2;
 };
 static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
-static constexpr std::string_view LinePropertiesUBOName = "LinePropertiesUBO";
+static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO");
 
 struct alignas(16) LineGradientUBO {
     std::array<float, 4 * 4> matrix;
@@ -46,7 +47,7 @@ struct alignas(16) LineGradientUBO {
     float device_pixel_ratio;
 };
 static_assert(sizeof(LineGradientUBO) % 16 == 0);
-static constexpr std::string_view LineGradientUBOName = "LineGradientUBO";
+static const StringIdentity idLineGradientUBOName = StringIndexer::get("LineGradientUBO");
 
 struct alignas(16) LineGradientPropertiesUBO {
     float blur;
@@ -59,7 +60,7 @@ struct alignas(16) LineGradientPropertiesUBO {
     std::array<float, 2> pad2;
 };
 static_assert(sizeof(LineGradientPropertiesUBO) % 16 == 0);
-static constexpr std::string_view LineGradientPropertiesUBOName = "LineGradientPropertiesUBO";
+static const StringIdentity idLineGradientPropertiesUBOName = StringIndexer::get("LineGradientPropertiesUBO");
 
 struct alignas(16) LinePatternUBO {
     std::array<float, 4 * 4> matrix;
@@ -73,7 +74,7 @@ struct alignas(16) LinePatternUBO {
     float pad1;
 };
 static_assert(sizeof(LinePatternUBO) % 16 == 0);
-static constexpr std::string_view LinePatternUBOName = "LinePatternUBO";
+static const StringIdentity idLinePatternUBOName = StringIndexer::get("LinePatternUBO");
 
 struct alignas(16) LinePatternPropertiesUBO {
     float blur;
@@ -86,7 +87,7 @@ struct alignas(16) LinePatternPropertiesUBO {
     std::array<float, 2> pad2;
 };
 static_assert(sizeof(LinePatternPropertiesUBO) % 16 == 0);
-static constexpr std::string_view LinePatternPropertiesUBOName = "LinePatternPropertiesUBO";
+static const StringIdentity idLinePatternPropertiesUBOName = StringIndexer::get("LinePatternPropertiesUBO");
 
 struct alignas(16) LineSDFUBO {
     std::array<float, 4 * 4> matrix;
@@ -101,7 +102,7 @@ struct alignas(16) LineSDFUBO {
     float mix;
 };
 static_assert(sizeof(LineSDFUBO) % 16 == 0);
-static constexpr std::string_view LineSDFUBOName = "LineSDFUBO";
+static const StringIdentity idLineSDFUBOName = StringIndexer::get("LineSDFUBO");
 
 struct alignas(16) LineSDFPropertiesUBO {
     Color color;
@@ -115,7 +116,7 @@ struct alignas(16) LineSDFPropertiesUBO {
     std::array<float, 2> pad1;
 };
 static_assert(sizeof(LineSDFPropertiesUBO) % 16 == 0);
-static constexpr std::string_view LineSDFPropertiesUBOName = "LineSDFPropertiesUBO";
+static const StringIdentity idLineSDFPropertiesUBOName = StringIndexer::get("LineSDFPropertiesUBO");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
@@ -211,10 +212,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
-                uniforms.createOrUpdate(LineUBOName, &lineUBO, context);
+                uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(LinePropertiesUBOName, getLinePropsBuffer());
+                uniforms.addOrReplace(idLinePropertiesUBOName, getLinePropsBuffer());
             } break;
 
             case LineType::Gradient: {
@@ -224,10 +225,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
-                uniforms.createOrUpdate(LineGradientUBOName, &lineGradientUBO, context);
+                uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(LineGradientPropertiesUBOName, getLineGradientPropsBuffer());
+                uniforms.addOrReplace(idLineGradientPropertiesUBOName, getLineGradientPropsBuffer());
             } break;
 
             case LineType::Pattern: {
@@ -251,10 +252,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*device_pixel_ratio =*/parameters.pixelRatio,
                     /*fade =*/crossfade.t,
                     0};
-                uniforms.createOrUpdate(LinePatternUBOName, &linePatternUBO, context);
+                uniforms.createOrUpdate(idLinePatternUBOName, &linePatternUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(LinePatternPropertiesUBOName, getLinePatternPropsBuffer());
+                uniforms.addOrReplace(idLinePatternPropertiesUBOName, getLinePatternPropsBuffer());
             } break;
 
             case LineType::SDF: {
@@ -299,10 +300,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                         /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
                             (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
                         /* mix = */ crossfade.t};
-                    uniforms.createOrUpdate(LineSDFUBOName, &lineSDFUBO, context);
+                    uniforms.createOrUpdate(idLineSDFUBOName, &lineSDFUBO, context);
 
                     // properties UBO
-                    uniforms.addOrReplace(LineSDFPropertiesUBOName, getLineSDFPropsBuffer());
+                    uniforms.addOrReplace(idLineSDFPropertiesUBOName, getLineSDFPropsBuffer());
                 }
             } break;
 
