@@ -224,7 +224,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        //auto& drawableType = drawable.getShader()->typeName();
+        // auto& drawableType = drawable.getShader()->typeName();
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 

@@ -597,19 +597,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const std::string& interpolateUBOName,
-                                    const auto& interpolateUBO) {
-                builder.flush();
+            const auto finish =
+                [&](gfx::DrawableBuilder& builder, const std::string& interpolateUBOName, const auto& interpolateUBO) {
+                    builder.flush();
 
-                for (auto& drawable : builder.clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    auto& uniforms = drawable->mutableUniformBuffers();
-                    uniforms.createOrUpdate(interpolateUBOName, &interpolateUBO, context);
-                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
-                }
-            };
+                    for (auto& drawable : builder.clearDrawables()) {
+                        drawable->setTileID(tileID);
+                        auto& uniforms = drawable->mutableUniformBuffers();
+                        uniforms.createOrUpdate(interpolateUBOName, &interpolateUBO, context);
+                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                        ++stats.drawablesAdded;
+                    }
+                };
 
             if (fillBuilder) {
                 fillBuilder->setShader(fillShader);
@@ -631,8 +630,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
-                finish(
-                    *outlineBuilder, MLN_STRINGIZE(FillOutlineInterpolateUBO), getFillOutlineInterpolateUBO());
+                finish(*outlineBuilder, MLN_STRINGIZE(FillOutlineInterpolateUBO), getFillOutlineInterpolateUBO());
             }
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {

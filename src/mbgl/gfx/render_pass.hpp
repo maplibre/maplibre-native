@@ -25,7 +25,7 @@ protected:
     friend class DebugGroup<RenderPass>;
     virtual void pushDebugGroup(const char* name) = 0;
     virtual void popDebugGroup() = 0;
-    virtual void addDebugSignpost(const char* ) {}
+    virtual void addDebugSignpost(const char*) {}
 
 public:
     virtual ~RenderPass() = default;
