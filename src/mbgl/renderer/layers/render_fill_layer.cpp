@@ -495,14 +495,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         auto getAtlasTweaker = [&]() {
             if (!atlasTweaker) {
                 if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                    atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                 std::string(),
-                                                                                 IconTextureName,
-                                                                                 /*isText*/ false,
-                                                                                 /*sdfIcons*/ true, // to force linear filter
-                                                                                 /*rotationAlignment_*/ AlignmentType::Auto,
-                                                                                 /*iconScaled*/ false,
-                                                                                 /*textSizeIsZoomConstant_*/ false);
+                    atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                        atlases,
+                        std::string(),
+                        IconTextureName,
+                        /*isText*/ false,
+                        /*sdfIcons*/ true, // to force linear filter
+                        /*rotationAlignment_*/ AlignmentType::Auto,
+                        /*iconScaled*/ false,
+                        /*textSizeIsZoomConstant_*/ false);
                 }
             }
             return atlasTweaker;
