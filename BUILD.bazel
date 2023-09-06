@@ -49,7 +49,8 @@ filegroup(
 genrule(
     name = "generated_shaders",
     srcs = ["shader_data"],
-    outs = MLN_GENERATED_SHADER_HEADERS,
+    outs = MLN_GENERATED_SHADER_HEADERS +
+           MLN_GENERATED_OPENGL_SHADER_HEADERS,
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
 )
