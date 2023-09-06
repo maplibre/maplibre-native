@@ -46,7 +46,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
     };
 #endif
-    
+
     const auto zoom = parameters.state.getZoom();
 
     bool fillUniformBufferUpdated = false;
@@ -60,7 +60,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillPermutationUniformBuffer) {
-
             const FillPermutationUBO permutationUBO = {
                 /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
