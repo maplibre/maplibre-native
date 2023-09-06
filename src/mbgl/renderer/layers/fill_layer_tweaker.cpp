@@ -47,8 +47,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
     };
 #endif
 
-    const auto zoom = parameters.state.getZoom();
-
     bool fillUniformBufferUpdated = false;
     bool fillOutlineUniformBufferUpdated = false;
     bool fillPatternUniformBufferUpdated = false;
@@ -226,7 +224,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        auto& drawableType = drawable.getShader()->typeName();
+        //auto& drawableType = drawable.getShader()->typeName();
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 

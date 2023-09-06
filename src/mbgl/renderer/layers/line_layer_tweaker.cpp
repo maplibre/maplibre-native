@@ -151,7 +151,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         auto& uniforms = drawable.mutableUniformBuffers();
-        const auto& shaderUniforms = shader->getUniformBlocks();
 
         const auto matrix = getTileMatrix(
             tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);

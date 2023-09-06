@@ -598,7 +598,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const OverscaledTileID& tileID,
                                     const std::string& interpolateUBOName,
                                     const auto& interpolateUBO) {
                 builder.flush();
@@ -624,7 +623,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
-                finish(*fillBuilder, tileID, MLN_STRINGIZE(FillInterpolateUBO), getFillInterpolateUBO());
+                finish(*fillBuilder, MLN_STRINGIZE(FillInterpolateUBO), getFillInterpolateUBO());
             }
             if (outlineBuilder) {
                 outlineBuilder->setShader(outlineShader);
@@ -633,7 +632,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
                 finish(
-                    *outlineBuilder, tileID, MLN_STRINGIZE(FillOutlineInterpolateUBO), getFillOutlineInterpolateUBO());
+                    *outlineBuilder, MLN_STRINGIZE(FillOutlineInterpolateUBO), getFillOutlineInterpolateUBO());
             }
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {
@@ -695,7 +694,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const OverscaledTileID& tileID,
                                     const std::string& interpolateName,
                                     const auto& interpolateUBO,
                                     const std::string& tileUBOName,
@@ -727,7 +725,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                             bucket.triangleSegments.size());
 
                 finish(*patternBuilder,
-                       tileID,
                        MLN_STRINGIZE(FillPatternInterpolateUBO),
                        getFillPatternInterpolateUBO(),
                        MLN_STRINGIZE(FillPatternTilePropsUBO),
@@ -742,7 +739,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
 
                 finish(*outlinePatternBuilder,
-                       tileID,
                        MLN_STRINGIZE(FillOutlinePatternInterpolateUBO),
                        getFillOutlinePatternInterpolateUBO(),
                        MLN_STRINGIZE(FillOutlinePatternTilePropsUBO),

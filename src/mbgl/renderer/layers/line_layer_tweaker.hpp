@@ -23,8 +23,8 @@ public:
         SDF
     };
 
-    LineLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-        : LayerTweaker(std::move(id), properties) {}
+    LineLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
 
     ~LineLayerTweaker() override = default;
 

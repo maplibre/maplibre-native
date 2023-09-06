@@ -163,10 +163,6 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
-        const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
-        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
-        auto indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
-
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
         const auto& overrides = impl->vertexAttributes;

@@ -10,7 +10,7 @@ namespace mbgl {
 namespace gfx {
 
 namespace {
-static const UniqueVertexAttribute nullref;
+const UniqueVertexAttribute nullref;
 } // namespace
 
 std::size_t VertexAttribute::getCount() const {

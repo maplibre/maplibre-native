@@ -81,8 +81,8 @@ public:
           items(count_) {}
     VertexAttribute(const VertexAttribute& other)
         : index(other.index),
-          dataType(other.dataType),
           stride(other.stride),
+          dataType(other.dataType),
           items(other.items),
           sharedRawData(other.sharedRawData),
           sharedType(other.sharedType),
@@ -91,8 +91,8 @@ public:
           sharedStride(other.sharedStride) {}
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
-          dataType(other.dataType),
           stride(other.stride),
+          dataType(other.dataType),
           items(std::move(other.items)),
           sharedRawData(std::move(other.sharedRawData)),
           sharedType(other.sharedType),
