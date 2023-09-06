@@ -62,8 +62,10 @@ auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evalua
 
 } // namespace
 
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = StringIndexer::get("FillExtrusionDrawableTilePropsUBO");
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = StringIndexer::get("FillExtrusionInterpolateUBO");
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = StringIndexer::get(
+    "FillExtrusionDrawableTilePropsUBO");
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = StringIndexer::get(
+    "FillExtrusionInterpolateUBO");
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                         const RenderTree& renderTree,

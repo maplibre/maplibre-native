@@ -10,13 +10,12 @@ namespace mbgl {
 
 using StringIdentity = size_t;
 
-class StringIndexer
-{
+class StringIndexer {
 public:
     StringIndexer() = delete;
-    StringIndexer(StringIndexer const&)     = delete;
-    StringIndexer(StringIndexer&&)          = delete;
-    void operator=(StringIndexer const&)    = delete;
+    StringIndexer(StringIndexer const&) = delete;
+    StringIndexer(StringIndexer&&) = delete;
+    void operator=(StringIndexer const&) = delete;
     ~StringIndexer() = delete;
 
     static StringIdentity get(const std::string& string);
@@ -26,7 +25,7 @@ public:
 protected:
     using MapType = std::unordered_map<std::string, StringIdentity>;
     using VectorType = std::vector<std::string>;
-    
+
     static MapType& getMap() {
         static MapType stringToIdentity;
         return stringToIdentity;
@@ -38,4 +37,4 @@ protected:
     }
 };
 
-}  // namespace mbgl
+} // namespace mbgl

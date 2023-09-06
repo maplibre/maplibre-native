@@ -104,8 +104,10 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = StringIndexer::get("SymbolDrawableUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = StringIndexer::get("SymbolDynamicUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = StringIndexer::get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = StringIndexer::get("SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get("SymbolDrawableInterpolateUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = StringIndexer::get(
+    "SymbolDrawableTilePropsUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get(
+    "SymbolDrawableInterpolateUBO");
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,

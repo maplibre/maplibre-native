@@ -1224,92 +1224,92 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             builder->clearTweakers();
         }
 
-        const auto draw = [&](const gfx::ShaderGroupPtr& shaderGroup,
-                              const bool isHalo,
-                              const std::string_view suffix) {
-            if (!shaderGroup) {
-                return;
-            }
+        const auto draw =
+            [&](const gfx::ShaderGroupPtr& shaderGroup, const bool isHalo, const std::string_view suffix) {
+                if (!shaderGroup) {
+                    return;
+                }
 
-            // We can use the same tweakers for all the segments in a tile
-            if (isText && !tileInfo.textTweaker) {
-                const bool textSizeIsZoomConstant =
-                    bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom())).isZoomConstant;
-                tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                     iconTexUniformName,
-                                                                                     texUniformName,
-                                                                                     isText,
-                                                                                     false,
-                                                                                     values.rotationAlignment,
-                                                                                     false,
-                                                                                     textSizeIsZoomConstant);
-            }
-            if (!isText && !tileInfo.iconTweaker) {
-                const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
-                tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                     iconTexUniformName,
-                                                                                     texUniformName,
-                                                                                     isText,
-                                                                                     sdfIcons,
-                                                                                     values.rotationAlignment,
-                                                                                     iconScaled,
-                                                                                     false);
-            }
+                // We can use the same tweakers for all the segments in a tile
+                if (isText && !tileInfo.textTweaker) {
+                    const bool textSizeIsZoomConstant =
+                        bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom())).isZoomConstant;
+                    tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                                         iconTexUniformName,
+                                                                                         texUniformName,
+                                                                                         isText,
+                                                                                         false,
+                                                                                         values.rotationAlignment,
+                                                                                         false,
+                                                                                         textSizeIsZoomConstant);
+                }
+                if (!isText && !tileInfo.iconTweaker) {
+                    const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
+                    tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                                         iconTexUniformName,
+                                                                                         texUniformName,
+                                                                                         isText,
+                                                                                         sdfIcons,
+                                                                                         values.rotationAlignment,
+                                                                                         iconScaled,
+                                                                                         false);
+                }
 
-            if (!builder) {
-                builder = context.createDrawableBuilder(layerPrefix);
-                builder->setSubLayerIndex(0);
-                builder->setEnableStencil(false);
-                builder->setRenderPass(passes);
-                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setColorMode(
-                    ((mbgl::underlying_type(passes) & mbgl::underlying_type(RenderPass::Translucent)) != 0)
-                        ? gfx::ColorMode::alphaBlended()
-                        : gfx::ColorMode::unblended());
-                builder->setVertexAttrName(posOffsetAttribName);
-            }
+                if (!builder) {
+                    builder = context.createDrawableBuilder(layerPrefix);
+                    builder->setSubLayerIndex(0);
+                    builder->setEnableStencil(false);
+                    builder->setRenderPass(passes);
+                    builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+                    builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(
+                        ((mbgl::underlying_type(passes) & mbgl::underlying_type(RenderPass::Translucent)) != 0)
+                            ? gfx::ColorMode::alphaBlended()
+                            : gfx::ColorMode::unblended());
+                    builder->setVertexAttrName(posOffsetAttribName);
+                }
 
-            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                shaderGroup->getOrCreateShader(context, uniformProps, posOffsetAttribName));
-            if (!shader) {
-                return;
-            }
-            builder->setShader(shader);
+                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                    shaderGroup->getOrCreateShader(context, uniformProps, posOffsetAttribName));
+                if (!shader) {
+                    return;
+                }
+                builder->setShader(shader);
 
-            builder->clearTweakers();
-            builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
-            builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
-            builder->setDrawableName(layerPrefix + std::string(suffix));
-            builder->setVertexAttributes(attribs);
+                builder->clearTweakers();
+                builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
+                builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
+                builder->setDrawableName(layerPrefix + std::string(suffix));
+                builder->setVertexAttributes(attribs);
 
-            builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
+                builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
 
-            builder->flush();
+                builder->flush();
 
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setTileID(tileID);
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setTileID(tileID);
 
-                auto drawData = std::make_unique<gfx::SymbolDrawableData>(
-                    /*.isHalo=*/isHalo,
-                    /*.bucketVaraiblePlacement=*/bucket.hasVariablePlacement,
-                    /*.symbolType=*/renderable.type,
-                    /*.pitchAlignment=*/values.pitchAlignment,
-                    /*.rotationAlignment=*/values.rotationAlignment,
-                    /*.placement=*/layout.get<SymbolPlacement>(),
-                    /*.textFit=*/layout.get<IconTextFit>());
+                    auto drawData = std::make_unique<gfx::SymbolDrawableData>(
+                        /*.isHalo=*/isHalo,
+                        /*.bucketVaraiblePlacement=*/bucket.hasVariablePlacement,
+                        /*.symbolType=*/renderable.type,
+                        /*.pitchAlignment=*/values.pitchAlignment,
+                        /*.rotationAlignment=*/values.rotationAlignment,
+                        /*.placement=*/layout.get<SymbolPlacement>(),
+                        /*.textFit=*/layout.get<IconTextFit>());
 
-                const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
-                drawable->setData(std::move(drawData));
+                    const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
+                    drawable->setData(std::move(drawData));
 
-                auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
-                uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+                    auto& uniforms = drawable->mutableUniformBuffers();
+                    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
+                    uniforms.createOrUpdate(
+                        SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, &interpolateUBO, context);
 
-                tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
-            }
-        };
+                    tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
+                }
+            };
 
         if (isText) {
             if (bucket.iconsInText) {
