@@ -610,7 +610,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     }
                 };
 
-            if (fillBuilder) {
+            if (fillBuilder && bucket.sharedTriangles->elements()) {
                 fillBuilder->setShader(fillShader);
                 if (outlineBuilder) {
                     fillBuilder->setVertexAttributes(vertexAttrs);
@@ -624,7 +624,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.triangleSegments.size());
                 finish(*fillBuilder, MLN_STRINGIZE(FillInterpolateUBO), getFillInterpolateUBO());
             }
-            if (outlineBuilder) {
+            if (outlineBuilder && bucket.sharedLines->elements()) {
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);

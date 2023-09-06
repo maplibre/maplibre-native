@@ -197,6 +197,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 }
 
 void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
+    assert(indexes && indexes->elements());
     impl->indexes = std::move(indexes);
     impl->segments = std::move(segments);
 }
@@ -415,6 +416,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& contextBase = uploadPass.getContext();
     auto& context = static_cast<Context&>(contextBase);
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
+
+    if (!impl->indexes || !impl->indexes->bytes()) {
+        assert(!"Missing index data");
+        return;
+    }
 
     if (impl->indexes->getDirty()) {
         auto indexBufferResource{

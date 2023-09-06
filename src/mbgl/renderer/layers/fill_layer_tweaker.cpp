@@ -212,6 +212,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
     if (!expressionUniformBuffer) {
+        const auto zoom = parameters.state.getZoom();
         const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
                                                    /* .frame = */ parameters.frameCount,
                                                    /* .zoom = */ static_cast<float>(zoom),
