@@ -46,7 +46,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
     }
     layerGroup.setEnabled(true);
 
-    int32_t samplerLocation = -1;
+    std::optional<uint32_t> samplerLocation{};
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
 
@@ -64,14 +64,16 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
         uniforms.createOrUpdate(MLN_STRINGIZE(BackgroundDrawableUBO), &drawableUBO, context);
 
         if (hasPattern) {
-            if (samplerLocation < 0) {
-                if (const auto index = shader->getSamplerLocation(texUniformName)) {
-                    samplerLocation = *index;
+            if (!samplerLocation.has_value()) {
+                samplerLocation = shader->getSamplerLocation(texUniformName);
+                if (const auto& tex = parameters.patternAtlas.texture()) {
+                    tex->setSamplerConfiguration(
+                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
                 }
             }
-            if (0 <= samplerLocation) {
+            if (samplerLocation.has_value()) {
                 if (const auto& tex = parameters.patternAtlas.texture()) {
-                    drawable.setTexture(tex, samplerLocation);
+                    drawable.setTexture(tex, samplerLocation.value());
                 }
             }
 

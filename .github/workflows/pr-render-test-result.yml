@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.event.workflow_run.event == 'pull_request'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
@@ -23,7 +23,7 @@ jobs:
           expect-files: "metrics/linux-gcc8-release-style.html"
   
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}

@@ -9,6 +9,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
@@ -34,7 +35,7 @@ static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) FillExtrusionDrawablePropsUBO {
-    /*  0 */ std::array<float, 4> color;
+    /*  0 */ Color color;
     /* 16 */ std::array<float, 3> light_color;
     /* 28 */ float pad1;
     /* 32 */ std::array<float, 3> light_position;
@@ -48,9 +49,6 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
-
-constexpr auto FillExtrusionDrawableUBOName = "FillExtrusionDrawableUBO";
-constexpr auto FillExtrusionDrawablePropsUBOName = "FillExtrusionDrawablePropsUBO";
 
 constexpr auto texUniformName = "u_image";
 
@@ -77,7 +75,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
     const FillExtrusionDrawablePropsUBO paramsUBO = {
-        /* .color = */ gfx::VertexAttribute::colorAttrRGBA(constOrDefault<FillExtrusionColor>(evaluated)),
+        /* .color = */ constOrDefault<FillExtrusionColor>(evaluated),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
         /* .pad = */ 0,
         /* .light_position = */ FillExtrusionProgram::lightPosition(parameters.evaluatedLight, state),
@@ -98,7 +96,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(FillExtrusionDrawablePropsUBOName, propsBuffer);
+        uniforms.addOrReplace(MLN_STRINGIZE(FillExtrusionDrawablePropsUBO), propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -142,7 +140,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(MLN_STRINGIZE(FillExtrusionDrawableUBO), &drawableUBO, context);
     });
 }
 

@@ -81,8 +81,8 @@ public:
           items(count_) {}
     VertexAttribute(const VertexAttribute& other)
         : index(other.index),
-          dataType(other.dataType),
           stride(other.stride),
+          dataType(other.dataType),
           items(other.items),
           sharedRawData(other.sharedRawData),
           sharedType(other.sharedType),
@@ -91,8 +91,8 @@ public:
           sharedStride(other.sharedStride) {}
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
-          dataType(other.dataType),
           stride(other.stride),
+          dataType(other.dataType),
           items(std::move(other.items)),
           sharedRawData(std::move(other.sharedRawData)),
           sharedType(other.sharedType),
@@ -426,7 +426,7 @@ public:
     }
 
 protected:
-    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&& attr);
+    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);
@@ -438,6 +438,7 @@ protected:
 
 protected:
     AttributeMap attrs;
+    static std::unique_ptr<VertexAttribute> nullref;
 };
 
 } // namespace gfx

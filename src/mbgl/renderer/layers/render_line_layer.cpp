@@ -22,6 +22,7 @@
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -309,24 +310,12 @@ bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 }
 
 void RenderLineLayer::updateColorRamp() {
-    auto colorValue = unevaluated.get<LineGradient>().getValue();
-    if (colorValue.isUndefined()) {
+    const style::ColorRampPropertyValue colorValue = unevaluated.get<LineGradient>().getValue();
+    if (!colorRamp || !applyColorRamp(colorValue, *colorRamp)) {
         return;
     }
 
-    const auto length = colorRamp->bytes();
-
-    for (uint32_t i = 0; i < length; i += 4) {
-        const auto color = colorValue.evaluate(static_cast<double>(i) / length);
-        colorRamp->data[i] = static_cast<uint8_t>(std::floor(color.r * 255.f));
-        colorRamp->data[i + 1] = static_cast<uint8_t>(std::floor(color.g * 255.f));
-        colorRamp->data[i + 2] = static_cast<uint8_t>(std::floor(color.b * 255.f));
-        colorRamp->data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
-    }
-
-    if (colorRampTexture) {
-        colorRampTexture = std::nullopt;
-    }
+    colorRampTexture = std::nullopt;
 
 #if MLN_DRAWABLE_RENDERER
     if (colorRampTexture2D) {
@@ -357,6 +346,7 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 }
 
 #if MLN_DRAWABLE_RENDERER
+/// Property interpolation UBOs
 
 void RenderLineLayer::updateLayerTweaker() {
     if (layerGroup) {
@@ -369,12 +359,14 @@ void RenderLineLayer::updateLayerTweaker() {
     }
 }
 
+static constexpr auto LineImageUniformName = "u_image";
+
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
                              const std::shared_ptr<UpdateParameters>& updateParameters,
-                             const RenderTree&,
-                             UniqueChangeRequestVec& changes) {
+                             [[maybe_unused]] const RenderTree& renderTree,
+                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
@@ -443,7 +435,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     auto addAttributes =
         [&](gfx::DrawableBuilder& builder, const LineBucket& bucket, gfx::VertexAttributeArray&& vertexAttrs) {
             const auto vertexCount = bucket.vertices.elements();
-            builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
+            builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
             if (const auto& attr = vertexAttrs.add(VertexAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
@@ -609,6 +601,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
                                                                                           : LinePatternCap::Square;
             for (auto& drawable : builder->clearDrawables()) {
+                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::SDF));
                 drawable->setTileID(tileID);
                 drawable->setData(std::make_unique<gfx::LineDrawableData>(cap));
                 drawable->mutableUniformBuffers().createOrUpdate(
@@ -651,27 +644,35 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // texture
             if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
-                    builder->setTexture(atlases->icon, samplerLocation.value());
+                if (!iconTweaker) {
+                    iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                        atlases,
+                        "",
+                        LineImageUniformName,
+                        /*isText*/ false,
+                        /*sdfIcons*/ true, // to force linear filter
+                        /*rotationAlignment_*/ AlignmentType::Auto,
+                        /*iconScaled*/ false,
+                        /*textSizeIsZoomConstant_*/ false);
+                }
 
-                    // segments
-                    setSegments(builder, bucket);
+                builder->addTweaker(iconTweaker);
 
-                    // finish
-                    builder->flush();
-                    for (auto& drawable : builder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-                        drawable->mutableUniformBuffers().createOrUpdate(
-                            MLN_STRINGIZE(LinePatternInterpolationUBO), &linePatternInterpolationUBO, context);
-                        drawable->mutableUniformBuffers().createOrUpdate(
-                            MLN_STRINGIZE(LinePatternTilePropertiesUBO), &linePatternTilePropertiesUBO, context);
+                setSegments(builder, bucket);
 
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.drawablesAdded;
-                    }
+                builder->flush();
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
+                    drawable->setTileID(tileID);
+                    drawable->mutableUniformBuffers().createOrUpdate(
+                        MLN_STRINGIZE(LinePatternInterpolationUBO), &linePatternInterpolationUBO, context);
+                    drawable->mutableUniformBuffers().createOrUpdate(
+                        MLN_STRINGIZE(LinePatternTilePropertiesUBO), &linePatternTilePropertiesUBO, context);
+
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
                 }
             }
-
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
             // gradient line
             gfx::VertexAttributeArray vertexAttrs;
@@ -700,7 +701,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
             // texture
-            if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
+            if (const auto samplerLocation = builder->getShader()->getSamplerLocation(LineImageUniformName)) {
                 if (!colorRampTexture2D && colorRamp->valid()) {
                     // create texture. to be reused for all the tiles of the layer
                     colorRampTexture2D = context.createTexture2D();
@@ -718,6 +719,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     // finish
                     builder->flush();
                     for (auto& drawable : builder->clearDrawables()) {
+                        drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
                         drawable->setTileID(tileID);
                         drawable->mutableUniformBuffers().createOrUpdate(
                             MLN_STRINGIZE(LineGradientInterpolationUBO), &lineGradientInterpolationUBO, context);
@@ -768,6 +770,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // finish
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {
+                drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Simple));
                 drawable->setTileID(tileID);
                 drawable->mutableUniformBuffers().createOrUpdate(
                     MLN_STRINGIZE(LineInterpolationUBO), &lineInterpolationUBO, context);

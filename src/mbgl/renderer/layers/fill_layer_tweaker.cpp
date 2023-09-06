@@ -42,7 +42,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
 #if MLN_RENDER_BACKEND_METAL
-    const auto zoom = parameters.state.getZoom();
+    const auto source = [this](const std::string_view& attrName) {
+        return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+    };
+#endif
 
     bool fillUniformBufferUpdated = false;
     bool fillOutlineUniformBufferUpdated = false;
@@ -52,16 +55,19 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
     auto UpdateFillUniformBuffers = [&]() {
         if (fillUniformBufferUpdated) return;
 
+#if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillPermutationUniformBuffer) {
-            const auto source = [this](const std::string_view& attrName) {
-                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-            };
-
             const FillPermutationUBO permutationUBO = {
                 /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
             };
 
             if (fillPermutationUniformBuffer) {
@@ -71,11 +77,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             }
             fillUniformBufferUpdated = true;
         }
+#endif
 
         if (!fillPropsUniformBuffer) {
             const FillEvaluatedPropsUBO paramsUBO = {
                 /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+                0,
+                0,
+                0,
             };
             fillPropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
         }
@@ -84,16 +94,19 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
     auto UpdateFillOutlineUniformBuffers = [&]() {
         if (fillOutlineUniformBufferUpdated) return;
 
+#if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
-            const auto source = [this](const std::string_view& attrName) {
-                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-            };
-
             const FillOutlinePermutationUBO permutationUBO = {
                 /* .outline_color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
             };
 
             if (fillOutlinePermutationUniformBuffer) {
@@ -103,11 +116,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                                                   sizeof(permutationUBO));
             }
         }
+#endif
 
         if (!fillOutlinePropsUniformBuffer) {
             const FillOutlineEvaluatedPropsUBO paramsUBO = {
                 /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+                0,
+                0,
+                0,
             };
             fillOutlinePropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
         }
@@ -118,17 +135,18 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
     auto UpdateFillPatternUniformBuffers = [&]() {
         if (fillPatternUniformBufferUpdated) return;
 
+#if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillPatternPermutationUniformBuffer) {
-            const auto source = [this](const std::string_view& attrName) {
-                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-            };
-
             const FillPatternPermutationUBO permutationUBO = {
                 /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
+                0,
+                0,
+                0,
+                0,
             };
 
             if (fillPatternPermutationUniformBuffer) {
@@ -138,11 +156,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                                                   sizeof(permutationUBO));
             }
         }
+#endif
 
         if (!fillPatternPropsUniformBuffer) {
             const FillPatternEvaluatedPropsUBO paramsUBO = {
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-                /* .fade = */ crossfade.t};
+                /* .fade = */ crossfade.t,
+                0,
+                0,
+            };
             fillPatternPropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
         }
 
@@ -152,17 +174,18 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
     auto UpdateFillOutlinePatternUniformBuffers = [&]() {
         if (fillOutlinePatternUniformBufferUpdated) return;
 
+#if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
-            const auto source = [this](const std::string_view& attrName) {
-                return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-            };
-
             const FillOutlinePatternPermutationUBO permutationUBO = {
                 /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
+                0,
+                0,
+                0,
+                0,
             };
 
             if (fillOutlinePatternPermutationUniformBuffer) {
@@ -172,18 +195,24 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                                                          sizeof(permutationUBO));
             }
         }
+#endif
 
         if (!fillOutlinePatternPropsUniformBuffer) {
             const FillOutlinePatternEvaluatedPropsUBO paramsUBO = {
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-                /* .fade = */ crossfade.t};
+                /* .fade = */ crossfade.t,
+                0,
+                0,
+            };
             fillOutlinePatternPropsUniformBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
         }
 
         fillOutlinePatternUniformBufferUpdated = true;
     };
 
+#if MLN_RENDER_BACKEND_METAL
     if (!expressionUniformBuffer) {
+        const auto zoom = parameters.state.getZoom();
         const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
                                                    /* .frame = */ parameters.frameCount,
                                                    /* .zoom = */ static_cast<float>(zoom),
@@ -196,7 +225,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        auto& drawableType = drawable.getShader()->typeName();
+        // auto& drawableType = drawable.getShader()->typeName();
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
@@ -266,6 +295,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
                 /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                 /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                0,
+                0,
             };
 
             uniforms.createOrUpdate(MLN_STRINGIZE(FillPatternDrawableUBO), &drawableUBO, context);

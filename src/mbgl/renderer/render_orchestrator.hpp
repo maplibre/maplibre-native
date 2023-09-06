@@ -101,6 +101,7 @@ public:
     bool addLayerGroup(LayerGroupBasePtr, bool replace);
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
+    int32_t maxLayerIndex() const;
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
     void visitLayerGroups(std::function<void(LayerGroupBase&)>);
     void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
@@ -117,8 +118,12 @@ public:
 
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
-    void observeRenderTargets(std::function<void(RenderTarget&)> f);
-    void observeRenderTargets(std::function<void(const RenderTarget&)> f) const;
+    void visitRenderTargets(std::function<void(RenderTarget&)> f);
+    void visitRenderTargets(std::function<void(const RenderTarget&)> f) const;
+
+    void updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters);
+    void visitDebugLayerGroups(std::function<void(LayerGroupBase&)>);
+    void visitDebugLayerGroups(std::function<void(const LayerGroupBase&)>) const;
 #endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
@@ -195,11 +200,12 @@ private:
 #if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
 
-    using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
+    using LayerGroupMap = std::multimap<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
     bool layerGroupOrderDirty = false;
 
     std::vector<RenderTargetPtr> renderTargets;
+    RenderItem::DebugLayerGroupMap debugLayerGroups;
 #endif
 };
 

@@ -37,8 +37,13 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_pitch;
     bool u_rotate_symbol;
     highp float u_aspect_ratio;
+    highp vec2 u_pad1;
+};
+
+layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
-    highp float u_pad2;
+    highp float u_pad7;
+    highp vec2  u_pad8;
 };
 
 layout (std140) uniform SymbolDrawablePaintUBO {
@@ -207,8 +212,13 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_pitch;
     bool u_rotate_symbol;
     highp float u_aspect_ratio;
+    highp vec2 u_pad1;
+};
+
+layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
-    highp float u_pad2;
+    highp float u_pad7;
+    highp vec2  u_pad8;
 };
 
 layout (std140) uniform SymbolDrawablePaintUBO {

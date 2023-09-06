@@ -19,6 +19,7 @@
 namespace mbgl {
 
 using namespace style;
+
 using namespace shaders;
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,

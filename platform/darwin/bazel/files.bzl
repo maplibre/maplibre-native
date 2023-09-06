@@ -74,7 +74,6 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNOfflinePack.h",
     "src/MLNOfflineRegion.h",
     "src/MLNOfflineStorage.h",
-    "src/MLNOpenGLStyleLayer.h",
     "src/MLNOverlay.h",
     "src/MLNPointAnnotation.h",
     "src/MLNPointCollection.h",
@@ -100,6 +99,9 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSExpression+MLNAdditions.h",
     "src/NSPredicate+MLNAdditions.h",
     "src/NSValue+MLNAdditions.h",
+]
+MLN_DARWIN_OBJC_OPENGL_HEADERS = [
+    "src/MLNOpenGLStyleLayer.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -137,7 +139,6 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNOfflinePack_Private.h",
     "src/MLNOfflineRegion_Private.h",
     "src/MLNOfflineStorage_Private.h",
-    "src/MLNOpenGLStyleLayer_Private.h",
     "src/MLNPointCollection_Private.h",
     "src/MLNPolygon_Private.h",
     "src/MLNPolyline_Private.h",
@@ -156,6 +157,9 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
 ]
+MLN_DARWIN_PRIVATE_OPENGL_HEADERS = [
+    "src/MLNOpenGLStyleLayer_Private.h",
+]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNAttributionInfo.mm",
@@ -173,7 +177,6 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNNetworkConfiguration.mm",
     "src/MLNOfflinePack.mm",
     "src/MLNOfflineStorage.mm",
-    "src/MLNOpenGLStyleLayer.mm",
     "src/MLNPointAnnotation.mm",
     "src/MLNPointCollection.mm",
     "src/MLNPolygon.mm",
@@ -205,6 +208,9 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSExpression+MLNAdditions.mm",
     "src/NSPredicate+MLNAdditions.mm",
     "src/NSValue+MLNStyleAttributeAdditions.mm",
+]
+MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE = [
+    "src/MLNOpenGLStyleLayer.mm",
 ]
 
 MLN_DARWIN_PUBLIC_OBJC_SOURCE = [

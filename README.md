@@ -23,7 +23,7 @@ The documentation of MapLibre Native is a work in progress. To get an architectu
 ## Platforms
 
 - [⭐️ Android](platform/android/README.md) 
-- [⭐️ iOS](platform/ios/platform/ios/README.md)
+- [⭐️ iOS](platform/ios/README.md)
 - [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
 - [Node.js](platform/node/README.md)
@@ -73,6 +73,8 @@ Silver:
 <a href="https://komoot.com/"><img src="https://maplibre.org/img/komoot-logo.svg" alt="Logo komoot" width="25%"/></a>
 
 <a href="https://www.jawg.io/"><img src="https://maplibre.org/img/jawgmaps-logo.svg" alt="Logo JawgMaps" width="25%"/></a>
+
+<a href="https://www.radar.com/"><img src="https://maplibre.org/img/radar-logo.svg" alt="Logo Radar" width="25%"/></a>
 
 Backers and Supporters:
 

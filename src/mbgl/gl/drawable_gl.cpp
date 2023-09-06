@@ -40,8 +40,12 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         return;
     }
 
-    context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
-                                   : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+    if (enableDepth) {
+        context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
+                                       : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+    } else {
+        context.setDepthMode(gfx::DepthMode::disabled());
+    }
 
     // force disable depth test for debugging
     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
@@ -77,10 +81,10 @@ void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<Uniqu
     impl->segments = std::move(segments);
 }
 
-void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
+void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type_) {
     impl->vertexData = std::move(data);
     impl->vertexCount = count;
-    impl->vertexType = type;
+    impl->vertexType = type_;
 }
 
 const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
@@ -136,6 +140,14 @@ void DrawableGL::unbindUniformBuffers() const {
     }
 }
 
+struct IndexBufferGL : public gfx::IndexBufferBase {
+    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
+        : buffer(std::move(buffer_)) {}
+    ~IndexBufferGL() override = default;
+
+    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+};
+
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     if (!shader) {
         return;
@@ -150,10 +162,6 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         auto& context = uploadPass.getContext();
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
-
-        const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
-        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
-        auto indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
 
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
@@ -173,7 +181,17 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                           vertexBuffers);
 
         impl->attributeBuffers = std::move(vertexBuffers);
-        impl->indexBuffer = std::move(indexBuffer);
+
+        if (impl->indexes->getDirty()) {
+            auto indexBufferResource{
+                uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
+            auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
+                                                                  std::move(indexBufferResource));
+            auto buffer = std::make_unique<IndexBufferGL>(std::move(indexBuffer));
+
+            impl->indexes->setBuffer(std::move(buffer));
+            impl->indexes->setDirty(false);
+        }
 
         // Create a VAO for each group of vertexes described by a segment
         for (const auto& seg : impl->segments) {
@@ -190,13 +208,15 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                 }
             }
 
-            auto vertexArray = glContext.createVertexArray();
+            if (!glSeg.getVertexArray().isValid()) {
+                auto vertexArray = glContext.createVertexArray();
+                IndexBufferGL& indexBuffer = *static_cast<IndexBufferGL*>(impl->indexes->getBuffer());
+                vertexArray.bind(glContext, *indexBuffer.buffer, bindings);
 
-            vertexArray.bind(glContext, impl->indexBuffer, bindings);
+                assert(vertexArray.isValid());
 
-            assert(vertexArray.isValid());
-
-            glSeg.setVertexArray(std::move(vertexArray));
+                glSeg.setVertexArray(std::move(vertexArray));
+            }
         };
     }
 

@@ -34,7 +34,7 @@ android {
     }
     externalNativeBuild {
         cmake {
-            version '3.10.2'
+            version '3.19.0+'
             path '../../../CMakeLists.txt'
         }
     }
@@ -43,6 +43,8 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
+    namespace 'android.app'
 }
 
 dependencies {

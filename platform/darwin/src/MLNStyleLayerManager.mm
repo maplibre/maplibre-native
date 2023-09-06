@@ -9,7 +9,10 @@
 #import "MLNLineStyleLayer_Private.h"
 #import "MLNRasterStyleLayer_Private.h"
 #import "MLNSymbolStyleLayer_Private.h"
+
+#if !MLN_RENDER_BACKEND_METAL
 #import "MLNOpenGLStyleLayer_Private.h"
+#endif
 
 #include <vector>
 
@@ -63,7 +66,7 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #endif
 #if defined(MBGL_LAYER_CUSTOM_DISABLE_RUNTIME)
     addLayerTypeCoreOnly(std::make_unique<CustomLayerFactory>());
-#elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL) && !MLN_RENDER_BACKEND_METAL
     addLayerType(std::make_unique<OpenGLStyleLayerPeerFactory>());
 #endif
 }

@@ -11,8 +11,8 @@ namespace mbgl {
  */
 class FillLayerTweaker : public LayerTweaker {
 public:
-    FillLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-        : LayerTweaker(std::move(id), properties) {}
+    FillLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
 
 public:
     ~FillLayerTweaker() override = default;
@@ -25,11 +25,11 @@ private:
     gfx::UniformBufferPtr fillPatternPropsUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePatternPropsUniformBuffer;
 
-#if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr fillPermutationUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePermutationUniformBuffer;
     gfx::UniformBufferPtr fillPatternPermutationUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePatternPermutationUniformBuffer;
+#if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr expressionUniformBuffer;
 #endif // MLN_RENDER_BACKEND_METAL
 };
