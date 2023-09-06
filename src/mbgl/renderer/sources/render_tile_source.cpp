@@ -62,6 +62,9 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     auto& shaders = *parameters.staticData.shaders;
     constexpr auto DebugShaderName = "DebugShader";
     gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(shaders, std::string(DebugShaderName));
+    if (!debugShader) {
+        return;
+    }
 
     // create a builder
     constexpr auto VertexAttribName = "a_pos";

@@ -491,6 +491,23 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return *fillOutlinePatternTilePropsUBO;
         };
 
+        gfx::DrawableTweakerPtr atlasTweaker;
+        auto getAtlasTweaker = [&]() {
+            if (!atlasTweaker) {
+                if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
+                    atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                                 std::string(),
+                                                                                 IconTextureName,
+                                                                                 /*isText*/ false,
+                                                                                 /*sdfIcons*/ true, // to force linear filter
+                                                                                 /*rotationAlignment_*/ AlignmentType::Auto,
+                                                                                 /*iconScaled*/ false,
+                                                                                 /*textSizeIsZoomConstant_*/ false);
+                }
+            }
+            return atlasTweaker;
+        };
+
         // `Fill*Program` all use `style::FillPaintProperties`
         gfx::VertexAttributeArray vertexAttrs;
         const auto propertiesAsUniforms_ =
@@ -651,11 +668,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (const auto& atlases = tile.getAtlasTextures()) {
-                        if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
-                            builder->setTexture(atlases->icon, samplerLocation.value());
-                        }
-                    }
                     patternBuilder = std::move(builder);
                 }
             }
@@ -668,13 +680,17 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
                     builder->setRenderPass(RenderPass::Translucent);
-                    if (const auto& atlases = tile.getAtlasTextures()) {
-                        if (const auto samplerLocation = builder->getShader()->getSamplerLocation("u_image")) {
-                            builder->setTexture(atlases->icon, samplerLocation.value());
-                        }
-                    }
                     outlinePatternBuilder = std::move(builder);
                 }
+            }
+
+            if (patternBuilder) {
+                patternBuilder->clearTweakers();
+                patternBuilder->addTweaker(getAtlasTweaker());
+            }
+            if (outlinePatternBuilder) {
+                outlinePatternBuilder->clearTweakers();
+                outlinePatternBuilder->addTweaker(getAtlasTweaker());
             }
 
             const auto finish = [&](gfx::DrawableBuilder& builder,
