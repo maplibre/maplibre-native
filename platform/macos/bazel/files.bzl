@@ -1,12 +1,17 @@
 MLN_MACOS_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNAttributionButton.mm",
     "src/MLNMapView+IBAdditions.mm",
-    "src/MLNMapView+OpenGL.mm",
     "src/MLNMapView+Impl.mm",
     "src/MLNMapView.mm",
     "src/MLNOpenGLLayer.mm",
     "src/NSColor+MLNAdditions.mm",
     "src/NSImage+MLNAdditions.mm",
+]
+MLN_MACOS_PUBLIC_OBJCPP_OPENGL_SOURCE = [
+    "src/MLNMapView+OpenGL.mm",
+]
+MLN_MACOS_PUBLIC_OBJCPP_METAL_SOURCE = [
+    "src/MLNMapView+OpenGL.mm",
 ]
 
 MLN_MACOS_PUBLIC_OBJC_SOURCE = [
@@ -24,6 +29,7 @@ MLN_MACOS_PUBLIC_HEADERS = [
     "src/MLNMapView+Impl.h",
     "src/MLNMapView+IBAdditions.h",
     "src/MLNMapView+OpenGL.h",
+    "src/MLNMapView+Metal.h",
     "src/MLNMapViewDelegate.h",
     "src/MLNMapView.h",
     "src/Mapbox.h",

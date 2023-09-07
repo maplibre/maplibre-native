@@ -10,10 +10,11 @@
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/convert.hpp>
 
@@ -61,6 +62,9 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     auto& shaders = *parameters.staticData.shaders;
     constexpr auto DebugShaderName = "DebugShader";
     gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(shaders, std::string(DebugShaderName));
+    if (!debugShader) {
+        return;
+    }
 
     // create a builder
     constexpr auto VertexAttribName = "a_pos";

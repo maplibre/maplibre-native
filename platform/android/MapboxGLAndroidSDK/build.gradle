@@ -84,6 +84,14 @@ android {
                 }
             }
         }
+        create("split") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=ON", "-DMLN_RENDERER_SPLIT_VIEW=ON"
+                }
+            }
+        }
     }
 
     // build native libraries

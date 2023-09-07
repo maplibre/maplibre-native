@@ -2,6 +2,7 @@
 
 #include <mbgl/util/ignore.hpp>
 
+#include <memory>
 #include <vector>
 #include <memory>
 

@@ -14,6 +14,8 @@ load(
     "MLN_IOS_PRIVATE_HEADERS",
     "MLN_IOS_PUBLIC_HEADERS",
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
+    "MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE",
+    "MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE",
     "MLN_IOS_PUBLIC_OBJC_SOURCE",
     "MLN_IOS_SDK_HEADERS",
     "MLN_PUBLIC_IOS_APP_SOPURCE",
@@ -42,7 +44,10 @@ filegroup(
 
 filegroup(
     name = "ios_objcpp_srcs",
-    srcs = MLN_IOS_PUBLIC_OBJCPP_SOURCE,
+    srcs = MLN_IOS_PUBLIC_OBJCPP_SOURCE + select({
+        "//:metal_renderer": MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE,
+        "//conditions:default": MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE,
+    }),
     visibility = ["//visibility:public"],
 )
 
@@ -74,7 +79,13 @@ apple_static_xcframework(
         ":ios_sdk_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:darwin_objcpp_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_hdrs"
+        ],
+    }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
@@ -114,7 +125,13 @@ apple_xcframework(
         ":ios_sdk_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:darwin_objcpp_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_hdrs"
+        ],
+    }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],
@@ -307,6 +324,8 @@ exports_files(
     MLN_IOS_PUBLIC_HEADERS +
     MLN_IOS_PRIVATE_HEADERS +
     MLN_IOS_PUBLIC_OBJCPP_SOURCE +
+    MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE +
+    MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_IOS_PUBLIC_OBJC_SOURCE +
-    MLN_PUBLIC_IOS_APP_SOPURCE,
+    MLN_PUBLIC_IOS_APP_SOPURCE
 )

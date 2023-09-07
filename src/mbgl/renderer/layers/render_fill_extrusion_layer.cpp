@@ -76,7 +76,7 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -276,6 +276,7 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
+                                      const std::shared_ptr<UpdateParameters>&,
                                       const RenderTree& /*renderTree*/,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -286,7 +287,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(evaluatedProperties));
+            layerGroup_->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties));
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
@@ -403,6 +404,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                                                             FillExtrusionHeight,
                                                                             FillExtrusionPattern>(binders, evaluated);
 
+        if (!shaderGroup) {
+            continue;
+        }
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, uniformProps));
         if (!shader) {

@@ -15,6 +15,7 @@
 #endif
 
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace mbgl {
@@ -43,6 +44,12 @@ public:
     UploadPass& operator=(const UploadPass&) = delete;
 
     DebugGroup<UploadPass> createDebugGroup(const char* name) { return {*this, name}; }
+    DebugGroup<UploadPass> createDebugGroup(std::string_view name) { return createDebugGroup(name.data()); }
+
+#if MLN_DRAWABLE_RENDERER
+    virtual Context& getContext() = 0;
+    virtual const Context& getContext() const = 0;
+#endif
 
 #if MLN_DRAWABLE_RENDERER
     virtual Context& getContext() = 0;

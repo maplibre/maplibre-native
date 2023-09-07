@@ -4,6 +4,8 @@
 
 #include <array>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace mbgl {
 namespace gfx {
@@ -27,11 +29,20 @@ using mat4 = std::array<double, 16>;
  */
 class LayerTweaker {
 protected:
-    LayerTweaker(Immutable<style::LayerProperties> properties);
+    LayerTweaker(std::string id, Immutable<style::LayerProperties> properties);
 
 public:
     LayerTweaker() = delete;
     virtual ~LayerTweaker() = default;
+
+    const std::string& getID() const { return id; }
+
+#if MLN_RENDER_BACKEND_METAL
+    void setPropertiesAsUniforms(std::vector<std::string>);
+    bool hasPropertyAsUniform(std::string_view) const;
+#endif // MLN_RENDER_BACKEND_METAL
+
+    void enableOverdrawInspector(bool);
 
     virtual void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) = 0;
 
@@ -49,7 +60,15 @@ protected:
                               bool aligned = false);
 
 protected:
+    std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;
+
+#if MLN_RENDER_BACKEND_METAL
+    std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
+
+    bool propertiesChanged = true;
+    bool overdrawInspector = false;
 };
 
 } // namespace mbgl

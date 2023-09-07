@@ -3,6 +3,7 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/util/ignore.hpp>
 
+#include <memory>
 #include <vector>
 #include <memory>
 
@@ -23,6 +24,7 @@ public:
     IndexVectorBase() = default;
     IndexVectorBase(std::vector<uint16_t>&& indexes)
         : v(std::move(indexes)) {}
+
     IndexVectorBase(const IndexVectorBase& other)
         : v(other.v) {} // buffer is not copied
     IndexVectorBase(IndexVectorBase&& other)
@@ -83,6 +85,8 @@ protected:
     bool dirty = true;
     bool released = false;
 };
+
+using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 
 template <class DrawMode>
 class IndexVector final : public IndexVectorBase {

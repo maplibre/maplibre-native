@@ -40,6 +40,7 @@ public:
 
     VertexAttributeArrayGL vertexAttributes;
 
+    gfx::IndexBuffer indexBuffer = {0, nullptr};
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
 
     UniformBufferArrayGL uniformBuffers;

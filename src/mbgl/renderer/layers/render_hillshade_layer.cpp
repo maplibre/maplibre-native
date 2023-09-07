@@ -73,7 +73,7 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif
 }
@@ -287,6 +287,7 @@ constexpr auto TexturePosAttribName = "a_texture_pos";
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
+                                  const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -302,7 +303,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!layerGroup_) {
             return;
         }
-        layerGroup_->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
+        layerGroup_->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties));
         setLayerGroup(std::move(layerGroup_), changes);
     }
 
@@ -370,7 +371,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             if (!singleTileLayerGroup) {
                 return;
             }
-            singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
+            singleTileLayerGroup->setLayerTweaker(
+                std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties));
             renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
 
             gfx::VertexAttributeArray hillshadePrepareVertexAttrs;

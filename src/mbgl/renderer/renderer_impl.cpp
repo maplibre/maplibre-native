@@ -22,10 +22,13 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
 
 #include <limits>
 #endif
+
+#if !MLN_RENDER_BACKEND_METAL
+#include <mbgl/gl/defines.hpp>
+#endif // !MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
 
@@ -99,7 +102,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                renderTreeParameters.transformParams,
                                *staticData,
                                renderTree.getLineAtlas(),
-                               renderTree.getPatternAtlas()};
+                               renderTree.getPatternAtlas(),
+                               frameCount};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
@@ -109,7 +113,11 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
     {
-        const auto uploadPass = parameters.encoder->createUploadPass("upload");
+        const auto uploadPass = parameters.encoder->createUploadPass("upload",
+                                                                     parameters.backend.getDefaultRenderable());
+#if !defined(NDEBUG)
+        const auto debugGroup = uploadPass->createDebugGroup("upload");
+#endif
 
         // Update all clipping IDs + upload buckets.
         for (const RenderItem& item : sourceRenderItems) {
@@ -131,15 +139,27 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
     }
 
-    // Process changes
     orchestrator.processChanges();
 
-    // Run layer tweakers to update any dynamic elements
-    orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-        if (layerGroup.getLayerTweaker()) {
-            layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
-        }
-    });
+    // Give the layers a chance to do setup
+    // orchestrator.visitLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
+    // });
+
+    // Upload layer groups
+    {
+        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload",
+                                                                     parameters.backend.getDefaultRenderable());
+#if !defined(NDEBUG)
+        const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
+#endif
+
+        // Tweakers are run in the upload pass so they can set up uniforms.
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            if (layerGroup.getLayerTweaker()) {
+                layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
+            }
+        });
+    }
 
     // Update the debug layer groups
     orchestrator.updateDebugLayerGroups(renderTree, parameters);
@@ -150,7 +170,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Upload layer groups
     {
-        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload");
+        const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload",
+                                                                     parameters.backend.getDefaultRenderable());
 
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
@@ -367,7 +388,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     renderDebugOverlays();
 #else
     static_assert(0, "Must define one of (MLN_DRAWABLE_RENDERER, MLN_LEGACY_RENDERER)");
-#endif
+#endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
     //     Give the layers a chance to do cleanup
@@ -395,6 +416,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         renderState = RenderState::Fully;
         observer->onDidFinishRenderingMap();
     }
+
+    frameCount += 1;
 }
 
 void Renderer::Impl::reduceMemoryUse() {

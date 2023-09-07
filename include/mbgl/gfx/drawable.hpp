@@ -1,12 +1,12 @@
 #pragma once
 
+#include <mbgl/gfx/drawable_data.hpp>
+#include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/traits.hpp>
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/gfx/drawable_data.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -141,7 +141,6 @@ public:
     bool getEnableDepth() { return enableDepth; }
     void setEnableDepth(bool value) { enableDepth = value; }
 
-    /// Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
 
     /// Set sub-layer index

@@ -5,7 +5,7 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/timer.hpp>
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
 #include <mbgl/style/layers/location_indicator_layer.hpp>
 #endif
 
@@ -160,7 +160,7 @@ private:
     mbgl::ResourceOptions mapResourceOptions;
     mbgl::ClientOptions mapClientOptions;
 
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     bool puckFollowsCameraCenter = false;
     mbgl::style::LocationIndicatorLayer *puck = nullptr;
 #endif

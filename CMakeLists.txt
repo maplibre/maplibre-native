@@ -174,7 +174,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp            
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/collision_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
@@ -979,10 +979,10 @@ if(MLN_WITH_OPENGL)
     target_compile_definitions(
         mbgl-core
         PRIVATE
-            MBGL_RENDER_BACKEND_OPENGL=1
+        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
         PUBLIC
             "MLN_LEGACY_RENDERER=$<BOOL:${MLN_LEGACY_RENDERER}>"
-            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"    
+            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"
     )
     list(APPEND 
         INCLUDE_FILES
@@ -1108,6 +1108,89 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
+    )
+
+    if(MLN_DRAWABLE_RENDERER)
+        list(APPEND INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/raster_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/render_target_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
+        )
+        list(APPEND SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_target_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
+        )
+    endif()
+endif()
+
+if(MBGL_WITH_METAL)
+    message(STATUS "Configuring Metal renderer backend")
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MBGL_RENDER_BACKEND_METAL=1
+    )
+    list(APPEND 
+        INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/command_encoder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/context.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/index_buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/mtl_fwd.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/tile_layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_block.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_buffer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/upload_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_attribute.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
+            )
+    list(APPEND 
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_tweaker.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/mtl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/tile_layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_block.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_buffer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
     )
 endif()
 
