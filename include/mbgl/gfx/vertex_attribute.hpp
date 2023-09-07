@@ -373,8 +373,9 @@ public:
                                     const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
                                     const bool isInterpolated = binder->isInterpolated();
                                     const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-                                    assert(rawSize ==
-                                           static_cast<uint32_t>(isInterpolated ? sizeof(typename InterpType::Value) : sizeof(typename Type::Value)));
+                                    assert(rawSize == static_cast<uint32_t>(isInterpolated
+                                                                                ? sizeof(typename InterpType::Value)
+                                                                                : sizeof(typename Type::Value)));
                                     assert(sharedVector->getRawCount() == vertexCount);
                                     attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
                                 } else {
