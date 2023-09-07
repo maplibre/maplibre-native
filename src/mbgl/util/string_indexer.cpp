@@ -24,7 +24,6 @@ StringIdentity StringIndexer::get(const std::string& string) {
 }
 
 const std::string& StringIndexer::get(const StringIdentity id) {
-    MapType& stringToIdentity = getMap();
     const VectorType& identityToString = getVector();
     assert(id < identityToString.size());
 
@@ -37,7 +36,7 @@ void StringIndexer::clear() {
 }
 
 size_t StringIndexer::size() {
-    const MapType& stringToIdentity = getMap();
+    [[maybe_unused]] const MapType& stringToIdentity = getMap();
     const VectorType& identityToString = getVector();
     assert(stringToIdentity.size() == identityToString.size());
 
