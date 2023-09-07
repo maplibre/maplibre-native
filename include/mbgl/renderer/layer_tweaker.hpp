@@ -5,13 +5,15 @@
 #include <array>
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace mbgl {
 namespace gfx {
 class UniformBuffer;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
+namespace shaders {
+enum class AttributeSource : int32_t;
+} // namespace shaders
 namespace style {
 class LayerProperties;
 enum class TranslateAnchorType : bool;
@@ -40,6 +42,7 @@ public:
 #if MLN_RENDER_BACKEND_METAL
     void setPropertiesAsUniforms(std::vector<std::string>);
     bool hasPropertyAsUniform(std::string_view) const;
+    shaders::AttributeSource getAttributeSource(const std::string_view& attribName) const;
 #endif // MLN_RENDER_BACKEND_METAL
 
     void enableOverdrawInspector(bool);

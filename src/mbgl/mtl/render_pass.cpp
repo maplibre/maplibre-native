@@ -25,6 +25,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                 if (auto copy = NS::TransferPtr(rpd->copy())) {
                     if (auto* colorTarget = copy->colorAttachments()->object(0)) {
                         const auto& c = *descriptor.clearColor;
+                        colorTarget->setLoadAction(MTL::LoadActionClear);
                         colorTarget->setClearColor(MTL::ClearColor::Make(c.r, c.g, c.b, c.a));
                         rpd = copy;
                     }

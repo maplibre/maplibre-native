@@ -1,12 +1,14 @@
 #include <mbgl/mtl/drawable.hpp>
 
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable_impl.hpp>
 #include <mbgl/mtl/index_buffer_resource.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
+#include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
@@ -15,6 +17,7 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/variant.hpp>
 
 #include <Metal/Metal.hpp>
 
@@ -95,6 +98,28 @@ MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) {
     return nullptr;
 }
 
+MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) {
+    switch (mode) {
+        case gfx::CullFaceSideType::Front:
+            return MTL::CullModeFront;
+        case gfx::CullFaceSideType::Back:
+            return MTL::CullModeBack;
+        default:
+        case gfx::CullFaceSideType::FrontAndBack:
+            return MTL::CullModeNone;
+    }
+}
+
+MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
+    switch (mode) {
+        case gfx::CullFaceWindingType::Clockwise:
+            return MTL::Winding::WindingClockwise;
+        default:
+        case gfx::CullFaceWindingType::CounterClockwise:
+            return MTL::Winding::WindingCounterClockwise;
+    }
+}
+
 } // namespace
 
 void Drawable::draw(PaintParameters& parameters) const {
@@ -122,23 +147,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
 
-    /*
-     context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
-                                    : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
-
-     // force disable depth test for debugging
-     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
-
-     // For 3D mode, stenciling is handled by the layer group
-     if (!is3D) {
-         context.setStencilMode(makeStencilMode(parameters));
-     }
-
-     context.setColorMode(getColorMode());
-     context.setCullFaceMode(getCullFaceMode());
-
-     */
-
     bindAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
@@ -160,17 +168,33 @@ void Drawable::draw(PaintParameters& parameters) const {
         assert(!"Vertex descriptor missing");
     }
 
+    const auto& cullMode = getCullFaceMode();
+    encoder->setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
+    encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
+
+    if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode())) {
+        encoder->setRenderPipelineState(state.get());
+    } else {
+        assert(!"Failed to create render pipeline state");
+        return;
+    }
+
+    // For 3D mode, stenciling is handled by the layer group
+    if (!is3D) {
+        const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+        const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
+                                               : gfx::StencilMode::disabled();
+        if (auto depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderPass)) {
+            encoder->setDepthStencilState(depthStencilState.get());
+            encoder->setStencilReferenceValue(stencilMode.ref);
+        }
+    }
+
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
             const auto& mode = segment.getMode();
-            if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode())) {
-                encoder->setRenderPipelineState(state.get());
-            } else {
-                assert(!"Failed to create render pipeline state");
-                continue;
-            }
 
             const auto primitiveType = getPrimitiveType(mode.type);
             constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
@@ -180,6 +204,41 @@ void Drawable::draw(PaintParameters& parameters) const {
             const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize *
                                                                        mlSegment.indexOffset); // in bytes, not indexes
             const NS::Integer baseVertex = static_cast<NS::Integer>(mlSegment.vertexOffset);
+
+#if !defined(NDEBUG)
+            const auto indexBufferLength = indexBuffer->length() / indexSize;
+            const auto* indexes = static_cast<const std::uint16_t*>(const_cast<MTL::Buffer*>(indexBuffer)->contents());
+            const auto maxIndex = *std::max_element(indexes + mlSegment.indexOffset,
+                                                    indexes + mlSegment.indexOffset + mlSegment.indexLength);
+
+            // Uncomment for a detailed accounting of each draw call
+            // Log::Warning(Event::General,
+            //             util::toString(getID()) + "/" + getName() +
+            //             " => " + util::toString(mlSegment.indexLength) +
+            //             " idxs @ " + util::toString(mlSegment.indexOffset) +
+            //             " (=" + util::toString(mlSegment.indexLength + mlSegment.indexOffset) +
+            //             " of " + util::toString(indexBufferLength) +
+            //             ") max index " + util::toString(maxIndex) +
+            //             " on base vertex " + util::toString(baseVertex) +
+            //             " (" + util::toString(baseVertex + maxIndex) +
+            //             " of " + util::toString(impl->vertexCount) +
+            //             ") indexBuf=" + util::toString((uint64_t)indexBuffer) +
+            //             "/" + util::toString(indexBuffer->gpuAddress()));
+
+            assert(mlSegment.indexOffset + mlSegment.indexLength <= indexBufferLength);
+            assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
+
+            for (const auto& binding : attributeBindings) {
+                if (binding) {
+                    if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
+                        assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
+                    } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
+                        assert(binding->vertexStride <= buffer->length());
+                    }
+                }
+            }
+#endif
+
             encoder->drawIndexedPrimitives(primitiveType,
                                            mlSegment.indexLength,
                                            indexType,
@@ -250,7 +309,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            assert(getBufferSize(binding->vertexBufferResource) == binding->vertexStride * impl->vertexCount);
+            assert(getBufferSize(binding->vertexBufferResource) >= binding->vertexStride * impl->vertexCount);
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
@@ -498,20 +557,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         uploadTextures();
     }
 }
-/*
-gfx::ColorMode Drawable::makeColorMode(PaintParameters& parameters) const {
-    return enableColor ? parameters.colorModeForRenderPass() : gfx::ColorMode::disabled();
-}
 
-gfx::StencilMode Drawable::makeStencilMode(PaintParameters& parameters) const {
-    if (enableStencil) {
-        if (!is3D && tileID) {
-            return parameters.stencilModeForClipping(tileID->toUnwrapped());
-        }
-        assert(false);
-    }
-    return gfx::StencilMode::disabled();
-}
-*/
 } // namespace mtl
 } // namespace mbgl

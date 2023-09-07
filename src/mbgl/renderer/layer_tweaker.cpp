@@ -4,6 +4,7 @@
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/mat4.hpp>
 
 namespace mbgl {
@@ -46,6 +47,11 @@ bool LayerTweaker::hasPropertyAsUniform(const std::string_view attrName) const {
            std::find_if(propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
                return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
            });
+}
+
+using namespace shaders;
+AttributeSource LayerTweaker::getAttributeSource(const std::string_view& attribName) const {
+    return hasPropertyAsUniform(attribName) ? AttributeSource::Constant : AttributeSource::PerVertex;
 }
 #endif // MLN_RENDER_BACKEND_METAL
 

@@ -1114,6 +1114,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_extrusion_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/raster_layer_ubo.hpp
@@ -1170,7 +1171,10 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion_pattern.hpp
             )
     list(APPEND 
         SRC_FILES
