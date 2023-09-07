@@ -461,6 +461,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/style/layers/hillshade_layer_impl.hpp",
     "src/mbgl/style/layers/line_layer_impl.cpp",
     "src/mbgl/style/layers/line_layer_impl.hpp",
+    "src/mbgl/style/layers/location_indicator_layer_impl.cpp",
+    "src/mbgl/style/layers/location_indicator_layer_impl.hpp",
     "src/mbgl/style/layers/raster_layer_impl.cpp",
     "src/mbgl/style/layers/raster_layer_impl.hpp",
     "src/mbgl/style/layers/symbol_layer_impl.cpp",
@@ -883,8 +885,6 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/platform/gl_functions.cpp",
     "src/mbgl/renderer/layers/render_location_indicator_layer.cpp",
     "src/mbgl/renderer/layers/render_location_indicator_layer.hpp",
-    "src/mbgl/style/layers/location_indicator_layer_impl.cpp",
-    "src/mbgl/style/layers/location_indicator_layer_impl.hpp",
 ]
 
 MLN_OPENGL_HEADERS = [
@@ -939,7 +939,6 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/renderer/layers/collision_layer_tweaker.cpp",
     "src/mbgl/renderer/layers/collision_layer_tweaker.hpp",
     "src/mbgl/shaders/shader_program_base.cpp",
-    "src/mbgl/shaders/mtl/shader_program_mtl.cpp",
     "src/mbgl/util/identity.cpp",
 ]
 

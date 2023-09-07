@@ -154,6 +154,11 @@ cc_library(
             "//vendor:icu",
         ],
         "//conditions:default": [],
+    }) + select({
+        ":metal_renderer": [
+            "//vendor:metal-cpp",
+        ],
+        "//conditions:default": [],
     }),
 )
 

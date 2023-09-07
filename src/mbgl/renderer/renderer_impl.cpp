@@ -19,15 +19,17 @@
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_target.hpp>
 
 #include <limits>
-#endif
+#endif // MLN_DRAWABLE_RENDERER
 
 #if !MLN_RENDER_BACKEND_METAL
 #include <mbgl/gl/defines.hpp>
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/drawable_gl.hpp>
+#endif // MLN_DRAWABLE_RENDERER
 #endif // !MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {

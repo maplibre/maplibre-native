@@ -8,7 +8,6 @@
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {

@@ -175,6 +175,15 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+# vendor/metal-cpp.json
+cc_library(
+    name = "metal-cpp",
+    hdrs = glob(["metal-cpp/**/*.hpp"], allow_empty = False),
+    copts = CPP_FLAGS,
+    includes = ["metal-cpp"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/polylabel-files.json
 cc_library(
     name = "polylabel",
