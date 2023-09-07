@@ -228,6 +228,7 @@ protected:
     util::SimpleIdentity getRenderTileBucketID(const OverscaledTileID&) const;
 
     /// Set the bucket ID from which a given tile was built
+    /// @return true if updated, false if the tile ID is not present in the set of tiles to be rendered or the ID is
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 #endif // MLN_DRAWABLE_RENDERER

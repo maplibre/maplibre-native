@@ -37,7 +37,7 @@ struct alignas(16) SymbolDrawableUBO {
     /* 220 */ float pitch;
     /* 224 */ /*bool*/ int rotate_symbol;
     /* 228 */ float aspect_ratio;
-    /* 232 */ float fade_change;
+    /* 232 */ std::array<float, 2> pad;
     /* 240 */
 };
 static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
@@ -179,7 +179,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
             /*.aspect_ratio=*/state.getSize().aspectRatio(),
-            /*.pad=*/0,
+            /*.pad=*/{0},
         };
 
         const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
