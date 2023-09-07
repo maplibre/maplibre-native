@@ -212,9 +212,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                 auto vertexArray = glContext.createVertexArray();
                 IndexBufferGL& indexBuffer = *static_cast<IndexBufferGL*>(impl->indexes->getBuffer());
                 vertexArray.bind(glContext, *indexBuffer.buffer, bindings);
-
                 assert(vertexArray.isValid());
-
                 glSeg.setVertexArray(std::move(vertexArray));
             }
         };

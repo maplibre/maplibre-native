@@ -237,16 +237,6 @@ public:
     const gfx::UniqueVertexBufferResource& getBuffer() const { return buffer; }
     void setBuffer(gfx::UniqueVertexBufferResource&& value) { buffer = std::move(value); }
 
-    /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
-    /// RGBA.
-    static float4 colorAttrRGBA(const Color& color) {
-        const auto components = color.toArray();
-        return {static_cast<float>(components[0] / 255.0),
-                static_cast<float>(components[1] / 255.0),
-                static_cast<float>(components[2] / 255.0),
-                static_cast<float>(components[3])};
-    }
-
 protected:
     VertexAttribute& operator=(const VertexAttribute&) = delete;
     VertexAttribute& operator=(VertexAttribute&& other) {

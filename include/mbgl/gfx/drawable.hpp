@@ -141,6 +141,7 @@ public:
     bool getEnableDepth() { return enableDepth; }
     void setEnableDepth(bool value) { enableDepth = value; }
 
+    /// Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
 
     /// Set sub-layer index

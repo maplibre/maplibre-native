@@ -23,7 +23,6 @@ public:
     IndexVectorBase() = default;
     IndexVectorBase(std::vector<uint16_t>&& indexes)
         : v(std::move(indexes)) {}
-
     IndexVectorBase(const IndexVectorBase& other)
         : v(other.v) {} // buffer is not copied
     IndexVectorBase(IndexVectorBase&& other)
