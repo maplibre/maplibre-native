@@ -71,7 +71,8 @@ gfx::AttributeDataType mapType(platform::GLenum attrType) {
 
 using namespace platform;
 
-void addAttr(VertexAttributeArrayGL& attrs, const StringIdentity id, GLint index, GLsizei length, GLint count, GLenum glType) {
+void addAttr(
+    VertexAttributeArrayGL& attrs, const StringIdentity id, GLint index, GLsizei length, GLint count, GLenum glType) {
     const auto elementType = mapType(glType);
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
         if (const auto& newAttr = attrs.add(id, index, elementType, count)) {

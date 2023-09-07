@@ -355,9 +355,9 @@ public:
         std::vector<std::string> propertiesAsUniforms;
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (
-            [&](/*const auto& attributeNameIds, */const auto& attributeNames) {
+            [&](/*const auto& attributeNameIds, */ const auto& attributeNames) {
                 for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
-//                    const auto attributeNameId = attributeNameIds[attrIndex];
+                    //                    const auto attributeNameId = attributeNameIds[attrIndex];
                     const auto& attributeName = std::string(attributeNames[attrIndex]);
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
@@ -391,7 +391,7 @@ public:
                         }
                     }
                 }
-            }(/*DataDrivenPaintProperty::AttributeNameIds, */DataDrivenPaintProperty::AttributeNames),
+            }(/*DataDrivenPaintProperty::AttributeNameIds, */ DataDrivenPaintProperty::AttributeNames),
             ...);
         return propertiesAsUniforms;
     }
