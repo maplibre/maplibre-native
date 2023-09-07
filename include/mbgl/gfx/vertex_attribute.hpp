@@ -363,8 +363,6 @@ public:
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
                         using InterpType = ZoomInterpolatedAttributeType<Type>;
-                        using Value = typename Type::Value;             // std::array<T, N>
-                        using InterpValue = typename InterpType::Value; // std::array<T, 2*N>
 
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
@@ -376,7 +374,7 @@ public:
                                     const bool isInterpolated = binder->isInterpolated();
                                     const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
                                     assert(rawSize ==
-                                           static_cast<uint32_t>(isInterpolated ? sizeof(InterpValue) : sizeof(Value)));
+                                           static_cast<uint32_t>(isInterpolated ? sizeof(typename InterpType::Value) : sizeof(typename Type::Value)));
                                     assert(sharedVector->getRawCount() == vertexCount);
                                     attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
                                 } else {
@@ -391,7 +389,7 @@ public:
                         }
                     }
                 }
-            }(/*DataDrivenPaintProperty::AttributeNameIds, */ DataDrivenPaintProperty::AttributeNames),
+            }(DataDrivenPaintProperty::AttributeNames),
             ...);
         return propertiesAsUniforms;
     }
