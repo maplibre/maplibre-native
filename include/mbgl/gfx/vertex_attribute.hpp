@@ -355,10 +355,11 @@ public:
         std::vector<std::string> propertiesAsUniforms;
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (
-            [&](/*const auto& attributeNameIds, */ const auto& attributeNames) {
+            [&](const auto& attributeNames) {
                 for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
-                    //                    const auto attributeNameId = attributeNameIds[attrIndex];
+                    using namespace std::string_literals;
                     const auto& attributeName = std::string(attributeNames[attrIndex]);
+                    static const StringIdentity attributeNameId = StringIndexer::get("a_"s + attributeName);
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
@@ -367,8 +368,7 @@ public:
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
                         if (vertexCount > 0 && !isConstant) {
-                            using namespace std::string_literals;
-                            if (auto& attr = getOrAdd(StringIndexer::get("a_"s + attributeName))) {
+                            if (auto& attr = getOrAdd(attributeNameId)) {
                                 if (const auto& sharedVector = binder->getSharedVertexVector()) {
                                     const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
                                     const bool isInterpolated = binder->isInterpolated();
