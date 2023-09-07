@@ -835,8 +835,8 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, const bool 
         return replace;
     else {
         layerGroupsByLayerIndex.insert(std::make_pair(index, std::move(layerGroup)));
-        return true;
     }
+    return true;
 }
 
 bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {

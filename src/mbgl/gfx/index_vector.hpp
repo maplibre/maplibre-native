@@ -5,7 +5,6 @@
 
 #include <memory>
 #include <vector>
-#include <memory>
 
 namespace mbgl {
 namespace gfx {

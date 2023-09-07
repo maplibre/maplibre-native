@@ -248,7 +248,7 @@ public:
     }
 
 protected:
-    VertexAttribute& operator=(const VertexAttribute&) = default;
+    VertexAttribute& operator=(const VertexAttribute&) = delete;
     VertexAttribute& operator=(VertexAttribute&& other) {
         index = other.index;
         dataType = other.dataType;

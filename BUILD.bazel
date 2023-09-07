@@ -99,24 +99,24 @@ cc_library(
             ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
             ":legacy_renderer": MLN_OPENGL_HEADERS,
             ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
-            "//conditions:default": []
+            "//conditions:default": [],
         }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
         ":legacy_renderer": [
             "MLN_RENDER_BACKEND_OPENGL=1",
             "MLN_LEGACY_RENDERER=1",
-            "MLN_DRAWABLE_RENDERER=0"
+            "MLN_DRAWABLE_RENDERER=0",
         ],
         ":drawable_renderer": [
             "MLN_RENDER_BACKEND_OPENGL=1",
             "MLN_LEGACY_RENDERER=0",
-            "MLN_DRAWABLE_RENDERER=1"
+            "MLN_DRAWABLE_RENDERER=1",
         ],
         ":metal_renderer": [
             "MLN_RENDER_BACKEND_METAL=1",
             "MLN_LEGACY_RENDERER=0",
-            "MLN_DRAWABLE_RENDERER=1"
+            "MLN_DRAWABLE_RENDERER=1",
         ],
     }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
@@ -129,7 +129,7 @@ cc_library(
         ":metal_renderer": [
             "vendor/metal-cpp",
         ],
-        "//conditions:default": []
+        "//conditions:default": [],
     }),
     local_defines = [
         r"MLN_VERSION_REV=\"standalone\"",
@@ -204,7 +204,11 @@ config_setting(
 string_flag(
     name = "renderer",
     build_setting_default = "legacy",
-    values=["legacy", "drawable", "metal"]
+    values=[
+        "legacy",
+        "drawable",
+        "metal"
+    ]
 )
 
 config_setting(
@@ -216,7 +220,7 @@ config_setting(
 
 config_setting(
     name = "drawable_renderer",
-        flag_values = {
+    flag_values = {
         ":renderer": "drawable",
     },
 )

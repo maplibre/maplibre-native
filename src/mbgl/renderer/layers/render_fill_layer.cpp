@@ -21,15 +21,15 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/std.hpp>
-#include <mbgl/shaders/fill_layer_ubo.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/shaders/fill_layer_ubo.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
 #endif
 
 namespace mbgl {

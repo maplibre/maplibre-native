@@ -141,10 +141,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     orchestrator.processChanges();
 
-    // Give the layers a chance to do setup
-    // orchestrator.visitLayerGroups([&](LayerGroup& layerGroup) { layerGroup.preRender(orchestrator, parameters);
-    // });
-
     // Upload layer groups
     {
         const auto uploadPass = parameters.encoder->createUploadPass("layerGroup-upload",
