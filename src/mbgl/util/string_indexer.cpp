@@ -1,5 +1,7 @@
 #include <mbgl/util/string_indexer.hpp>
 
+#include <cassert>
+
 namespace mbgl {
 
 namespace {
