@@ -152,7 +152,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/render_target.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program_mtl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
         
@@ -1199,18 +1198,6 @@ if(MBGL_WITH_METAL)
     target_compile_definitions(
         mbgl-core
         PRIVATE MBGL_RENDER_BACKEND_METAL=1
-    )
-    list(APPEND 
-        INCLUDE_FILES
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_builder.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_mtl_tweaker.hpp
-    )
-    list(APPEND 
-        SRC_FILES
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_builder.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_mtl_tweaker.cpp
     )
 endif()
 

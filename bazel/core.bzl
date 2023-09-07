@@ -966,7 +966,6 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/line_layer_ubo.hpp",
     "include/mbgl/shaders/raster_layer_ubo.hpp",
     "include/mbgl/shaders/shader_program_base.hpp",
-    "include/mbgl/shaders/mtl/shader_program_mtl.hpp",
     "include/mbgl/util/identity.hpp",
 ]
 
