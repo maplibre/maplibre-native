@@ -111,11 +111,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // For layer groups with 3D features, enable either the single-value
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
-         if (features3d) {
-             const auto& state = drawable.getEnableStencil() ? stateWithStencil : stateWithoutStencil;
-             if (state) {
-                 encoder->setDepthStencilState(state.get());
-             }
+        if (features3d) {
+            const auto& state = drawable.getEnableStencil() ? stateWithStencil : stateWithoutStencil;
+            if (state) {
+                encoder->setDepthStencilState(state.get());
+            }
         }
 
         drawable.draw(parameters);

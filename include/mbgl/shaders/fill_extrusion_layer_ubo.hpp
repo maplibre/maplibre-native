@@ -69,4 +69,3 @@ static_assert(sizeof(FillExtrusionPermutationUBO) == 2 * 16);
 
 } // namespace shaders
 } // namespace mbgl
-

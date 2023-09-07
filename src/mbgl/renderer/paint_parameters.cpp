@@ -109,13 +109,14 @@ void PaintParameters::clearStencil() {
 
 #if MLN_RENDER_BACKEND_METAL
     // Metal doesn't have an equivalent of `glClear`, so we clear the buffer by drawing zero to (0:0,0)
-    std::set<UnwrappedTileID> ids { { 0, 0, 0 } };
-    auto f = [](const auto& ii) -> const UnwrappedTileID& { return ii; };
+    std::set<UnwrappedTileID> ids{{0, 0, 0}};
+    auto f = [](const auto& ii) -> const UnwrappedTileID& {
+        return ii;
+    };
     renderTileClippingMasks(ids.cbegin(), ids.cend(), std::move(f), /*clear=*/true);
 #else
     context.clearStencilBuffer(0b00000000);
 #endif
-
 }
 
 namespace {
@@ -137,12 +138,16 @@ bool tileIDsIdentical(TIter beg, TIter end, GetTileIDFunc<TIter>& f, const TileM
 } // namespace
 
 void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
-    auto f = [](const auto& ii) -> const UnwrappedTileID& { return ii; };
+    auto f = [](const auto& ii) -> const UnwrappedTileID& {
+        return ii;
+    };
     renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), std::move(f), /*clear=*/false);
 }
 
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    auto f = [](const auto& ii) -> const UnwrappedTileID& { return ii.get().id; };
+    auto f = [](const auto& ii) -> const UnwrappedTileID& {
+        return ii.get().id;
+    };
     renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), std::move(f), /*clear=*/false);
 }
 

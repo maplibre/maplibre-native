@@ -152,8 +152,8 @@ public:
     void clearStencilBuffer(int32_t) override;
 
     MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode& depthMode,
-                                                                const gfx::StencilMode& stencilMode,
-                                                                const mtl::RenderPass& renderPass) const;
+                                                  const gfx::StencilMode& stencilMode,
+                                                  const mtl::RenderPass& renderPass) const;
 
 private:
     RendererBackend& backend;
