@@ -36,16 +36,16 @@ VertexAttributeArray& VertexAttributeArray::operator=(const VertexAttributeArray
     return *this;
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const std::string& name) const {
-    const auto result = attrs.find(name);
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const StringIdentity id) const {
+    const auto result = attrs.find(id);
     return (result != attrs.end()) ? result->second : nullref;
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(std::string name,
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(const StringIdentity id,
                                                                   int index,
                                                                   AttributeDataType dataType,
                                                                   std::size_t count) {
-    const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = create(index, dataType, count);
         return result.first->second;
@@ -54,11 +54,11 @@ const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(std::string na
     }
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(std::string name,
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(const StringIdentity id,
                                                                        int index,
                                                                        AttributeDataType dataType,
                                                                        std::size_t count) {
-    const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
     if (auto& attr = result.first->second; result.second) {
         return attr = create(index, dataType, count);
     } else if ((dataType == AttributeDataType::Invalid || attr->getDataType() == dataType) &&

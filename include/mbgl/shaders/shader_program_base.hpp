@@ -18,8 +18,8 @@ protected:
     ~ShaderProgramBase() noexcept override = default;
 
     template <typename T>
-    bool set(gfx::VertexAttributeArray& attrs, const std::string& name, std::size_t i, T value) {
-        const auto& item = attrs.get(name);
+    bool set(gfx::VertexAttributeArray& attrs, const StringIdentity id, std::size_t i, T value) {
+        const auto& item = attrs.get(id);
         if (item && i < item->getCount()) {
             item->set(i, value);
             return true;

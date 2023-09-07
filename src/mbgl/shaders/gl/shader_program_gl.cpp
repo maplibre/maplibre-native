@@ -71,10 +71,10 @@ gfx::AttributeDataType mapType(platform::GLenum attrType) {
 
 using namespace platform;
 
-void addAttr(VertexAttributeArrayGL& attrs, const char* name, GLint index, GLsizei length, GLint count, GLenum glType) {
+void addAttr(VertexAttributeArrayGL& attrs, const StringIdentity id, GLint index, GLsizei length, GLint count, GLenum glType) {
     const auto elementType = mapType(glType);
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-        if (const auto& newAttr = attrs.add(name, index, elementType, count)) {
+        if (const auto& newAttr = attrs.add(id, index, elementType, count)) {
             const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
             glAttr->setGLType(glType);
         }
@@ -195,7 +195,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
             continue;
         }
         const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
-        addAttr(attrs, name.data(), location, length, size, glType);
+        addAttr(attrs, StringIndexer::get(name.data()), location, length, size, glType);
     }
 
     return std::make_shared<ShaderProgramGL>(

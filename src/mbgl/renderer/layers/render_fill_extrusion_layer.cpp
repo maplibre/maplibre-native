@@ -39,8 +39,8 @@ namespace {
 constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
 constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
 
-constexpr auto PosAttribName = "a_pos";
-constexpr auto NormAttribName = "a_normal_ed";
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idNormAttribName = StringIndexer::get("a_normal_ed");
 
 constexpr auto IconTextureName = "u_image";
 
@@ -462,14 +462,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = vertexAttrs.getOrAdd(PosAttribName)) {
+        if (const auto& attr = vertexAttrs.getOrAdd(idPosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a1),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
+        if (const auto& attr = vertexAttrs.getOrAdd(idNormAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
                                    /*vertexOffset=*/0,

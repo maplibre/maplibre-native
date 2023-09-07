@@ -22,6 +22,9 @@ public:
 
     static const std::string& get(const StringIdentity id);
 
+    static void clear();
+    static size_t size();
+
 protected:
     using MapType = std::unordered_map<std::string, StringIdentity>;
     using VectorType = std::vector<std::string>;

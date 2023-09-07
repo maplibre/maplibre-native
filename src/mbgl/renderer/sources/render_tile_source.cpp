@@ -38,10 +38,6 @@ void TileSourceRenderItem::render(PaintParameters& parameters) const {
 }
 
 #if MLN_DRAWABLE_RENDERER
-namespace {
-static const StringIdentity idDebugUBOName = StringIndexer::get("DebugUBO");
-};
-
 void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGroups,
                                                 PaintParameters& parameters) const {
     if (!(parameters.debugOptions &
@@ -67,7 +63,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(shaders, std::string(DebugShaderName));
 
     // create a builder
-    constexpr auto VertexAttribName = "a_pos";
+    static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
+    static const StringIdentity idDebugUBOName = StringIndexer::get("DebugUBO");
     std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder("debug-builder");
     builder->setShader(debugShader);
     builder->setRenderPass(renderPass);
@@ -75,7 +72,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     builder->setColorMode(gfx::ColorMode::unblended());
     builder->setCullFaceMode(gfx::CullFaceMode::disabled());
     builder->setEnableStencil(false);
-    builder->setVertexAttrName(VertexAttribName);
+    builder->setVertexAttrNameId(idVertexAttribName);
 
     // add or get the layer group for a debug type
     const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](

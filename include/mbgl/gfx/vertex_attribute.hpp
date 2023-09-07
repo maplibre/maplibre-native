@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <algorithm>
 #include <array>
@@ -257,7 +258,7 @@ protected:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray {
 public:
-    using AttributeMap = std::unordered_map<std::string, std::unique_ptr<VertexAttribute>>;
+    using AttributeMap = std::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
 
     VertexAttributeArray(int initCapacity = 10);
     VertexAttributeArray(VertexAttributeArray&&);
@@ -276,12 +277,12 @@ public:
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const std::unique_ptr<VertexAttribute>& get(const std::string& name) const;
+    const std::unique_ptr<VertexAttribute>& get(const StringIdentity id) const;
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const std::unique_ptr<VertexAttribute>& add(std::string name,
+    const std::unique_ptr<VertexAttribute>& add(const StringIdentity id,
                                                 int index = -1,
                                                 AttributeDataType = AttributeDataType::Invalid,
                                                 std::size_t count = 1);
@@ -292,15 +293,15 @@ public:
     /// @param index index to match, or -1 for any
     /// @param type type to match, or `Invalid` for any
     /// @param count type to match, or 0 for any
-    const std::unique_ptr<VertexAttribute>& getOrAdd(std::string name,
+    const std::unique_ptr<VertexAttribute>& getOrAdd(const StringIdentity id,
                                                      int index = -1,
                                                      AttributeDataType type = AttributeDataType::Invalid,
                                                      std::size_t count = 0);
 
     // Set a value if the element is present
     template <typename T>
-    bool set(const std::string& name, std::size_t i, T value) {
-        if (const auto& item = get(name)) {
+    bool set(const StringIdentity id, std::size_t i, T value) {
+        if (const auto& item = get(id)) {
             return item->set(i, value);
         }
         return false;
@@ -316,7 +317,7 @@ public:
     void clear();
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
+    void visitAttributes(const std::function<void(const StringIdentity, VertexAttribute&)>& f) {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -325,7 +326,7 @@ public:
     }
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const std::string&, const VertexAttribute&)>& f) const {
+    void visitAttributes(const std::function<void(const StringIdentity, const VertexAttribute&)>& f) const {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -334,7 +335,7 @@ public:
     }
 
     using ResolveDelegate =
-        std::function<void(const std::string&, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
+        std::function<void(const StringIdentity, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
@@ -354,8 +355,9 @@ public:
         std::vector<std::string> propertiesAsUniforms;
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (
-            [&](const auto& attributeNames) {
+            [&](/*const auto& attributeNameIds, */const auto& attributeNames) {
                 for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
+//                    const auto attributeNameId = attributeNameIds[attrIndex];
                     const auto& attributeName = std::string(attributeNames[attrIndex]);
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
@@ -367,7 +369,8 @@ public:
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
                         if (vertexCount > 0 && !isConstant) {
-                            if (auto& attr = getOrAdd("a_" + attributeName)) {
+                            using namespace std::string_literals;
+                            if (auto& attr = getOrAdd(StringIndexer::get("a_"s + attributeName))) {
                                 if (const auto& sharedVector = binder->getSharedVertexVector()) {
                                     const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
                                     const bool isInterpolated = binder->isInterpolated();
@@ -388,7 +391,7 @@ public:
                         }
                     }
                 }
-            }(DataDrivenPaintProperty::AttributeNames),
+            }(/*DataDrivenPaintProperty::AttributeNameIds, */DataDrivenPaintProperty::AttributeNames),
             ...);
         return propertiesAsUniforms;
     }
@@ -403,8 +406,8 @@ public:
     }
 
 protected:
-    const std::unique_ptr<VertexAttribute>& add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
-        const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+    const std::unique_ptr<VertexAttribute>& add(StringIdentity id, std::unique_ptr<VertexAttribute>&& attr) {
+        const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
         if (result.second) {
             result.first->second = std::move(attr);
             return result.first->second;

@@ -228,8 +228,8 @@ void RenderRasterLayer::markLayerRenderable(bool willRender, UniqueChangeRequest
     activateLayerGroup(imageLayerGroup, willRender, changes);
 }
 
-constexpr auto PosAttribName = "a_pos";
-constexpr auto TexturePosAttribName = "a_texture_pos";
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
 constexpr auto Image0UniformName = "u_image0";
 constexpr auto Image1UniformName = "u_image1";
 
@@ -282,7 +282,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                                                  : gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrName(PosAttribName);
+        builder->setVertexAttrNameId(idPosAttribName);
 
         return builder;
     };
@@ -321,7 +321,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         {
             gfx::VertexAttributeArray vertexAttrs;
 
-            if (auto& attr = vertexAttrs.add(PosAttribName)) {
+            if (auto& attr = vertexAttrs.add(idPosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a1),
                                        /*vertexOffset=*/0,
@@ -329,7 +329,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
-            if (auto& attr = vertexAttrs.add(TexturePosAttribName)) {
+            if (auto& attr = vertexAttrs.add(idTexturePosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a2),
                                        /*vertexOffset=*/0,

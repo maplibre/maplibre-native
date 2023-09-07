@@ -42,8 +42,8 @@ inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
 
 #if MLN_DRAWABLE_RENDERER
 
-constexpr auto VertexAttribName = "a_pos_normal";
-constexpr auto DataAttribName = "a_data";
+static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal");
+static const StringIdentity idDataAttribName = StringIndexer::get("a_data");
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -467,7 +467,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                     : gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setEnableStencil(true);
-        builder->setVertexAttrName(VertexAttribName);
+        builder->setVertexAttrNameId(idVertexAttribName);
 
         return builder;
     };
@@ -477,7 +477,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             const auto vertexCount = bucket.vertices.elements();
             builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
-            if (const auto& attr = vertexAttrs.add(VertexAttribName)) {
+            if (const auto& attr = vertexAttrs.add(idVertexAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a1),
                                        /*vertexOffset=*/0,
@@ -485,7 +485,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
-            if (const auto& attr = vertexAttrs.add(DataAttribName)) {
+            if (const auto& attr = vertexAttrs.add(idDataAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a2),
                                        /*vertexOffset=*/0,

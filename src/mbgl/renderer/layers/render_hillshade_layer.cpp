@@ -281,8 +281,8 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
-constexpr auto PosAttribName = "a_pos";
-constexpr auto TexturePosAttribName = "a_texture_pos";
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
@@ -375,14 +375,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
             gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
 
-            if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
+            if (const auto& attr = hillshadePrepareVertexAttrs.add(idPosAttribName)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a1),
                                        0,
                                        sizeof(HillshadeLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
-            if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(TexturePosAttribName)) {
+            if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(idTexturePosAttribName)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a2),
                                        0,
@@ -436,14 +436,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray hillshadeVertexAttrs;
 
-        if (const auto& attr = hillshadeVertexAttrs.add(PosAttribName)) {
+        if (const auto& attr = hillshadeVertexAttrs.add(idPosAttribName)) {
             attr->setSharedRawData(vertices,
                                    offsetof(HillshadeLayoutVertex, a1),
                                    0,
                                    sizeof(HillshadeLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(TexturePosAttribName)) {
+        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(idTexturePosAttribName)) {
             attr->setSharedRawData(vertices,
                                    offsetof(HillshadeLayoutVertex, a2),
                                    0,

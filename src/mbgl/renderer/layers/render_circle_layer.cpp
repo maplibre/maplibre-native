@@ -279,8 +279,8 @@ struct alignas(16) CircleInterpolateUBO {
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-const StringIdentity CircleInterpolateUBOName = StringIndexer::get("CircleInterpolateUBO");
-constexpr auto VertexAttribName = "a_pos";
+static const StringIdentity idCircleInterpolateUBOName = StringIndexer::get("CircleInterpolateUBO");
+static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
 
 } // namespace
 
@@ -362,7 +362,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(CircleInterpolateUBOName, &interpolateUBO, context);
+            uniforms.createOrUpdate(idCircleInterpolateUBOName, &interpolateUBO, context);
         };
         if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
@@ -385,7 +385,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        if (const auto& attr = circleVertexAttrs.add(VertexAttribName)) {
+        if (const auto& attr = circleVertexAttrs.add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),
                                    0,
@@ -412,7 +412,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
 
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.addOrReplace(CircleInterpolateUBOName, interpBuffer);
+            uniforms.addOrReplace(idCircleInterpolateUBOName, interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

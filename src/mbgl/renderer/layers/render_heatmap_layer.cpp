@@ -273,8 +273,8 @@ static_assert(sizeof(HeatmapInterpolateUBO) % 16 == 0);
 
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-const StringIdentity idHeatmapInterpolateUBOName = StringIndexer::get("HeatmapInterpolateUBO");
-constexpr auto VertexAttribName = "a_pos";
+static const StringIdentity idHeatmapInterpolateUBOName = StringIndexer::get("HeatmapInterpolateUBO");
+static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
 
 } // namespace
 
@@ -381,7 +381,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        if (const auto& attr = heatmapVertexAttrs.add(VertexAttribName)) {
+        if (const auto& attr = heatmapVertexAttrs.add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
                                    /*vertexOffset=*/0,
@@ -441,7 +441,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     const auto textureVertexCount = sharedTextureVertices->elements();
 
     gfx::VertexAttributeArray textureVertexAttrs;
-    if (const auto& attr = textureVertexAttrs.add(VertexAttribName)) {
+    if (const auto& attr = textureVertexAttrs.add(idVertexAttribName)) {
         attr->setSharedRawData(sharedTextureVertices,
                                offsetof(HeatmapLayoutVertex, a1),
                                /*vertexOffset=*/0,

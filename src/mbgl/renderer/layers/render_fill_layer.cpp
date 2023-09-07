@@ -43,7 +43,7 @@ constexpr auto FillOutlineShaderName = "FillOutlineShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
-constexpr auto PosAttribName = "a_pos";
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
 constexpr auto IconTextureName = "u_image";
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -422,7 +422,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                                                                              evaluated);
 
         const auto vertexCount = bucket.vertices.elements();
-        if (const auto& attr = vertexAttrs.add(PosAttribName)) {
+        if (const auto& attr = vertexAttrs.add(idPosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
                                    /*vertexOffset=*/0,
