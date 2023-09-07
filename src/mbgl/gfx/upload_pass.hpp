@@ -51,11 +51,6 @@ public:
     virtual const Context& getContext() const = 0;
 #endif
 
-#if MLN_DRAWABLE_RENDERER
-    virtual Context& getContext() = 0;
-    virtual const Context& getContext() const = 0;
-#endif
-
 public:
     template <class Vertex>
     VertexBuffer<Vertex> createVertexBuffer(const VertexVector<Vertex>& v,

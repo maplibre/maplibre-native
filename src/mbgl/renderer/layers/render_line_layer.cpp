@@ -20,7 +20,6 @@
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
-#include <mbgl/util/convert.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_builder.hpp>
