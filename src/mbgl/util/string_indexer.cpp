@@ -25,10 +25,23 @@ StringIdentity StringIndexer::get(const std::string& string) {
 
 const std::string& StringIndexer::get(const StringIdentity id) {
     MapType& stringToIdentity = getMap();
-    VectorType& identityToString = getVector();
+    const VectorType& identityToString = getVector();
     assert(id < identityToString.size());
 
     return id < identityToString.size() ? identityToString[id] : empty;
+}
+
+void StringIndexer::clear() {
+    StringIndexer::getMap().clear();
+    StringIndexer::getVector().clear();
+}
+
+size_t StringIndexer::size() {
+    const MapType& stringToIdentity = getMap();
+    const VectorType& identityToString = getVector();
+    assert(stringToIdentity.size() == identityToString.size());
+
+    return identityToString.size();
 }
 
 } // namespace mbgl
