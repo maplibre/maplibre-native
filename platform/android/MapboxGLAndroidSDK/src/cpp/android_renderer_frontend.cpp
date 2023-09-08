@@ -31,8 +31,12 @@ public:
 
     void onWillStartRenderingFrame() override { delegate.invoke(&RendererObserver::onWillStartRenderingFrame); }
 
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged, std::int64_t frameTimeNanos) override {
-        delegate.invoke(&RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged, frameTimeNanos);
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   std::int64_t frameTimeNanos) override {
+        delegate.invoke(
+            &RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged, frameTimeNanos);
     }
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
