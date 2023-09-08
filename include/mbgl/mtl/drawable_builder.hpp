@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gl/vertex_attribute_gl.hpp>
 
 namespace mbgl {
 namespace mtl {

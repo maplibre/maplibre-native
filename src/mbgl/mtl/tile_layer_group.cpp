@@ -9,7 +9,6 @@
 #include <mbgl/mtl/drawable.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 

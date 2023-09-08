@@ -125,6 +125,11 @@ jobs:
       - name: Running iOS UI tests
         run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors
 
+      - name: Build Metal Renderer
+        if: ${{ matrix.renderer }} = "drawable"
+        working-directory: ./
+        run: bazel build //:mbgl-core --//:renderer=metal --//:maplibre_platform=ios
+
       # size test
 
       - name: Build app for size test & output size
