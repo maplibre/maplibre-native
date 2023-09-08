@@ -78,10 +78,6 @@ constant const float ZERO = 1.0 / 255.0 / 16.0;
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 #define GAUSS_COEF 0.3989422804014327
 
-float2 mod(float2 x, float2 y) {
-    return x - y * floor(x/y);
-}
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const HeatmapDrawableUBO& drawable [[buffer(3)]],
                                 device const HeatmapEvaluatedPropsUBO& props [[buffer(4)]],
