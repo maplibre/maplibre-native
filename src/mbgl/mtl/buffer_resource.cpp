@@ -32,7 +32,6 @@ void BufferResource::update(const void* data, std::size_t size, std::size_t offs
     if (buffer && data) {
         if (void* content = buffer->contents()) {
             std::memcpy(static_cast<uint8_t*>(content) + offset, data, size);
-            // if (mode == MTL::StorageModeManaged) buffer->didModifyRange(NS::Range::Make(0, size));
         }
     }
 }
