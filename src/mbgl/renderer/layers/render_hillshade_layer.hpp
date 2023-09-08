@@ -42,7 +42,7 @@ private:
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
 #endif
-    
+
 #if MLN_DRAWABLE_RENDERER
     void updateLayerTweaker();
 #endif // MLN_DRAWABLE_RENDERER
@@ -74,7 +74,7 @@ private:
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
-    
+
     HillshadeLayerTweakerPtr tweaker;
     bool overdrawInspector = false;
 #endif

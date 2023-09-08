@@ -51,7 +51,8 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace(MLN_STRINGIZE(HillshadeEvaluatedPropsUBO), evaluatedPropsUniformBuffer);
+        drawable.mutableUniformBuffers().addOrReplace(MLN_STRINGIZE(HillshadeEvaluatedPropsUBO),
+                                                      evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -63,7 +64,8 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
                                             /* .latrange = */ getLatRange(tileID),
                                             /* .light = */ getLight(parameters, evaluated)};
 
-        drawable.mutableUniformBuffers().createOrUpdate(MLN_STRINGIZE(HillshadeDrawableUBO), &drawableUBO, parameters.context);
+        drawable.mutableUniformBuffers().createOrUpdate(
+            MLN_STRINGIZE(HillshadeDrawableUBO), &drawableUBO, parameters.context);
     });
 }
 

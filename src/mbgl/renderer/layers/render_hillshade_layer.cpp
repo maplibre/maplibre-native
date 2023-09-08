@@ -328,7 +328,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
-    
+
     const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
     if (overdrawInspector != overdraw) {
         overdrawInspector = overdraw;
