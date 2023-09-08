@@ -70,16 +70,11 @@ public:
         return {size, readFramebuffer(size, format, flip)};
     }
 
-    void clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil);
-
     void setDepthMode(const gfx::DepthMode&);
     void setStencilMode(const gfx::StencilMode&);
     void setColorMode(const gfx::ColorMode&);
     void setCullFaceMode(const gfx::CullFaceMode&);
 
-    void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
-
-    void finish();
 */
 
     // Actually remove the objects we marked as abandoned with the above methods.
@@ -87,22 +82,6 @@ public:
     void performCleanup() override;
 
     void reduceMemoryUsage() override;
-
-    /*
-        // Drain pools and remove abandoned objects, in preparation for destroying the store.
-        // Only call this while the Metal context is exclusive to this thread.
-        void reset();
-
-        bool empty() const {
-            return pooledTextures.empty() && abandonedPrograms.empty() && abandonedShaders.empty() &&
-                   abandonedBuffers.empty() && abandonedTextures.empty() && abandonedVertexArrays.empty() &&
-                   abandonedFramebuffers.empty();
-        }
-
-        extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
-
-        void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
-    */
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
