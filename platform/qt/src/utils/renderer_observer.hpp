@@ -34,8 +34,8 @@ public:
                                    bool repaintNeeded,
                                    bool placementChanged,
                                    std::int64_t frameTimeNanos) override {
-        void (RendererObserver::*f)(
-            RenderMode, bool, bool, std::int64_t) = &RendererObserver::onDidFinishRenderingFrame;
+        void (mbgl::RendererObserver::*f)(
+            RenderMode, bool, bool, std::int64_t) = &mbgl::RendererObserver::onDidFinishRenderingFrame;
         delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTimeNanos);
     }
 
