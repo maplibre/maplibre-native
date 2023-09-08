@@ -5,7 +5,7 @@
 namespace mbgl {
 namespace mtl {
 
-BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size_t size, NS::UInteger usage_)
+BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size_t size, MTL::ResourceOptions usage_)
     : device(std::move(device_)),
       usage(usage_) {
     if (data && size) {
