@@ -101,7 +101,6 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSValue+MLNAdditions.h",
 ]
 MLN_DARWIN_OBJC_OPENGL_HEADERS = [
-    "src/MLNOpenGLStyleLayer.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -158,7 +157,6 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/NSPredicate+MLNPrivateAdditions.h",
 ]
 MLN_DARWIN_PRIVATE_OPENGL_HEADERS = [
-    "src/MLNOpenGLStyleLayer_Private.h",
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
@@ -210,6 +208,8 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSValue+MLNStyleAttributeAdditions.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE = [
+    "src/MLNOpenGLStyleLayer_Private.h",
+    "src/MLNOpenGLStyleLayer.h",
     "src/MLNOpenGLStyleLayer.mm",
 ]
 
