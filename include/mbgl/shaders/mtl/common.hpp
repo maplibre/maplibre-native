@@ -15,6 +15,10 @@ inline auto mod(T1 x, T2 y) -> decltype(x - y * floor(x/y)) {
     return x - y * metal::floor(x/y);
 }
 
+float radians(float degrees) {
+    return M_PI_F * degrees / 180.0;
+}
+
 enum class AttributeSource : int32_t {
     Constant,
     PerVertex,

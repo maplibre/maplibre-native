@@ -63,10 +63,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-float radians(float degrees) {
-    return M_PI_F * degrees / 180.0;
-}
-
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const HillshadeDrawableUBO& drawable [[buffer(2)]],
                             device const HillshadeEvaluatedPropsUBO& props [[buffer(3)]],
@@ -86,7 +82,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float scaleFactor = cos(radians((drawable.latrange[0] - drawable.latrange[1]) * (1.0 - in.pos.y) + drawable.latrange[1]));
     // We also multiply the slope by an arbitrary z-factor of 1.25
     float slope = atan(1.25 * length(deriv) / scaleFactor);
-    float aspect = deriv.x != 0.0 ? atan(deriv.y / -deriv.x) : M_PI_F / 2.0 * (deriv.y > 0.0 ? 1.0 : -1.0);
+    float aspect = deriv.x != 0.0 ? atan2(deriv.y, -deriv.x) : M_PI_F / 2.0 * (deriv.y > 0.0 ? 1.0 : -1.0);
 
     float intensity = drawable.light.x;
     // We add PI to make this property match the global light object, which adds PI/2 to the light's azimuthal
