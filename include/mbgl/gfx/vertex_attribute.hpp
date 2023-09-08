@@ -308,7 +308,7 @@ public:
     }
 
     /// Indicates whether any values have changed
-    bool isDirty() const {
+    virtual bool isDirty() const {
         return std::any_of(
             attrs.begin(), attrs.end(), [](const auto& kv) { return kv.second && kv.second->isDirty(); });
     }

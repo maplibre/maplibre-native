@@ -72,6 +72,9 @@ public:
         return newAttrs;
     }
 
+    /// Indicates whether any values have changed
+    bool isDirty() const override;
+
 private:
     std::unique_ptr<gfx::VertexAttribute> create(int index,
                                                  gfx::AttributeDataType dataType,
