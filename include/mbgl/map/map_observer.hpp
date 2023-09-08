@@ -42,6 +42,7 @@ public:
         RenderMode mode;
         bool needsRepaint; // In continous mode, shows that there are ongoig transitions.
         bool placementChanged;
+        std::int64_t frameTimeNanos;
     };
 
     virtual void onCameraWillChange(CameraChangeMode) {}
