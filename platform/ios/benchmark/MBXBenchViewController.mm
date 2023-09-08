@@ -39,7 +39,7 @@
     const std::vector<std::string> styles = {
         "maptiler://maps/streets",
     };
-    constexpr auto styleIndex = 1;
+    constexpr auto styleIndex = 0;
     NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json" : [NSString stringWithCString:styles[styleIndex].c_str() encoding:NSUTF8StringEncoding]];
     NSLog(@"Using style URL: \"%@\"", [url absoluteString]);
     
@@ -109,6 +109,7 @@ NSDate* const currentDate = [NSDate date];
 size_t idx = 0;
 enum class State { None, WaitingForAssets, WarmingUp, Benchmarking } state = State::None;
 int frames = 0;
+std::int64_t totalFrameNanos = 0;
 std::chrono::steady_clock::time_point started;
 std::vector<std::pair<std::string, double>> result;
 
@@ -160,20 +161,24 @@ static const int benchmarkDuration = 200; // frames
     }
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(__unused BOOL)fullyRendered
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(__unused BOOL)fullyRendered
+                        frameTimeNanos:(long long)frameTimeNanos
 {
     if (state == State::Benchmarking)
     {
         frames++;
+        totalFrameNanos += frameTimeNanos;
         if (frames >= benchmarkDuration)
         {
             state = State::None;
 
             // Report FPS
-            const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count() ;
-            const auto fps = double(frames * 1e6) / duration;
-            result.emplace_back(mbgl::bench::locations[idx].name, fps);
-            NSLog(@"- FPS: %.1f", fps);
+            const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count();
+            const auto wallClockFPS = double(frames * 1e6) / duration;
+            const auto potentialFPS = frames / static_cast<double>(totalFrameNanos) * 1.0e9;
+            result.emplace_back(mbgl::bench::locations[idx].name, potentialFPS);
+            NSLog(@"- FPS: %.1f (%.1f)", potentialFPS, wallClockFPS);
 
             // Start benchmarking the next location.
             idx++;
@@ -190,6 +195,7 @@ static const int benchmarkDuration = 200; // frames
         if (frames >= warmupDuration)
         {
             frames = 0;
+            totalFrameNanos = 0;
             state = State::Benchmarking;
             started = std::chrono::steady_clock::now();
             NSLog(@"- Benchmarking for %d frames...", benchmarkDuration);

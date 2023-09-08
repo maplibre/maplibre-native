@@ -60,6 +60,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
     auto& context = backend.getContext();
 
+    const auto frameStartTime = std::chrono::steady_clock::now();
+
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
 
@@ -384,10 +386,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
 
+    const auto frameDuration = std::chrono::steady_clock::now() - frameStartTime;
+    const auto frameDurationNS = std::chrono::duration_cast<std::chrono::nanoseconds>(frameDuration).count();
+
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
-        renderTreeParameters.placementChanged);
+        renderTreeParameters.placementChanged,
+        frameDurationNS);
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;
