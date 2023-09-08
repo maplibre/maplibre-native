@@ -30,8 +30,13 @@ public:
 
     void onWillStartRenderingFrame() final { delegate.invoke(&mbgl::RendererObserver::onWillStartRenderingFrame); }
 
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) final {
-        delegate.invoke(&mbgl::RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   std::int64_t frameTimeNanos) override {
+        void (RendererObserver::*f)(
+            RenderMode, bool, bool, std::int64_t) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTimeNanos);
     }
 
     void onDidFinishRenderingMap() final { delegate.invoke(&mbgl::RendererObserver::onDidFinishRenderingMap); }
