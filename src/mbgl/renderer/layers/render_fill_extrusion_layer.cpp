@@ -410,6 +410,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, uniformProps));
         if (!shader) {
+            assert(false);
             continue;
         }
 

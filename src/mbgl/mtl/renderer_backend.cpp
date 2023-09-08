@@ -18,6 +18,7 @@
 #include <mbgl/shaders/mtl/heatmap_texture.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
 #include <mbgl/shaders/mtl/line_gradient.hpp>
+#include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 
 #include <cassert>
@@ -117,13 +118,14 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
-                  shaders::BuiltIn::RasterShader/*,
+                  shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
+                  shaders::BuiltIn::FillOutlinePatternShader,
+                  shaders::BuiltIn::FillPatternShader/*,
                   shaders::BuiltIn::LineSDFShader,
                   shaders::BuiltIn::LinePatternShader,
-                  shaders::BuiltIn::FillOutlinePatternShader,
-                  shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::HillshadePrepareShader,

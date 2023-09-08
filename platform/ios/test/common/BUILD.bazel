@@ -10,12 +10,13 @@ cc_library(
         ".",
     ],
     visibility = [
+        "//platform/ios/test/core:__pkg__",
         "//render-test/ios:__pkg__",
     ],
 )
 
 objc_library(
-    name = "render_test_app_srcs",
+    name = "test_app_srcs",
     srcs = [
         "AppDelegate.h",
         "AppDelegate.m",
@@ -24,6 +25,9 @@ objc_library(
     data = [
         "LaunchScreen.storyboard",
         "Main.storyboard",
+    ],
+    visibility = [
+        "//platform/ios/test/core:__pkg__",
     ],
     deps = [
         "ios_test_runner_lib",
@@ -43,7 +47,7 @@ ios_application(
         "//visibility:public",
     ],
     deps = [
-        "render_test_app_srcs",
+        "test_app_srcs",
         "//render-test/ios:render_test_ios_src",
     ],
 )

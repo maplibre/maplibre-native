@@ -61,7 +61,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF", "-DMLN_RENDERER_SPLIT_VIEW=OFF"
+                arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF"
             }
         }
     }
@@ -72,7 +72,7 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF", "-DMLN_RENDERER_SPLIT_VIEW=OFF"
+                    arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=OFF"
                 }
             }
         }
@@ -80,15 +80,7 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments "-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON", "-DMLN_RENDERER_SPLIT_VIEW=OFF"
-                }
-            }
-        }
-        create("split") {
-            dimension = "renderer"
-            externalNativeBuild {
-                cmake {
-                    arguments "-DMLN_LEGACY_RENDERER=ON", "-DMLN_DRAWABLE_RENDERER=ON", "-DMLN_RENDERER_SPLIT_VIEW=ON"
+                    arguments "-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON"
                 }
             }
         }

@@ -25,7 +25,7 @@
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
     BOOL fileFound = [fileManager fileExistsAtPath: styleResult];
-    XCTAssert(fileFound, @"Test result html '%@' doese not exit", styleResult);
+    XCTAssert(fileFound, @"Test result html '%@' does not exit", styleResult);
     NSURL *styleURL = [NSURL fileURLWithPath:styleResult];
     XCTAttachment *attachment1URL = [XCTAttachment attachmentWithContentsOfFileAtURL: styleURL];
     XCTAssert(attachment1URL, @"Failed to attach test result '%@'", styleResult);
@@ -33,7 +33,7 @@
     [self addAttachment:attachment1URL];
 
     fileFound = [fileManager fileExistsAtPath: metricResult];
-    XCTAssert(fileFound, @"Test result html '%@' doese not exit", metricResult);
+    XCTAssert(fileFound, @"Test result html '%@' does not exit", metricResult);
     NSURL *metricURL = [NSURL fileURLWithPath:metricResult];
     XCTAttachment *attachment2URL = [XCTAttachment attachmentWithContentsOfFileAtURL: metricURL];
     XCTAssert(attachment2URL, @"Failed to attach test result '%@'", metricResult);

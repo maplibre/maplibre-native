@@ -25,7 +25,6 @@ VERSION_TAG=${VERSION_TAG:-''}
 PUBLISH_VERSION=
 BINARY_DIRECTORY='build/ios/pkg/dynamic'
 PUBLISH_PRE_FLAG=''
-S3_DISTRIBUTION=false
 
 uploadToGithub() {
     local file_path=$1
@@ -37,24 +36,6 @@ uploadToGithub() {
         --file "${file_path}" > /dev/null
 
     EXT_TARGET_GITHUB_URL="https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${version_tag}/${file_name}"
-}
-
-uploadToS3() {
-    local file_path=$1
-    local progress=$2
-    file_name=${file_path##*/}
-
-    PROGRESS=""
-    if [ "${progress}" == false ]; then
-        PROGRESS="--no-progress"
-    fi
-    
-    local target_s3_location="s3://mapbox-gl-native/ios/builds/${file_name}"
-    local target_s3_url="https://mapbox-gl-native.s3.us-east-2.amazonaws.com/ios/builds/${file_name}"
-  
-    aws s3 cp ${file_path} ${target_s3_location} --acl public-read ${PROGRESS}
-
-    EXT_TARGET_S3_URL="${target_s3_url}"
 }
 
 rm -rf ${BINARY_DIRECTORY}
@@ -100,21 +81,16 @@ git checkout ${VERSION_TAG}
 npm install --ignore-scripts
 mkdir -p ${BINARY_DIRECTORY}
 
-step "Building: make xcframework"
-make xcframework
+step "Building XCFramework"
+bazel build //platform/ios:MapLibre.dynamic
 
-step "Zipping xcframeworks…"
-MAPBOX_ZIP_FILE="Mapbox-${PUBLISH_VERSION}.zip"
-(cd ${BINARY_DIRECTORY} && rm -f ${MAPBOX_ZIP_FILE} && zip -yr ${MAPBOX_ZIP_FILE} Mapbox.xcframework)
-
-if [[ ${S3_DISTRIBUTION} == true ]]; then    
-    step "Uploading ${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE} to s3"
-    uploadToS3 "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" false
-    MAPBOX_ZIP_FILE_URL=$EXT_TARGET_S3_URL
-fi
+step "Copying Bazel output"
+BUILT_XCFRAMEWORK="$(bazel info execution_root)/$(bazel cquery --output=files //platform/ios:MapLibre.dynamic)"
+MAPLIBRE_ZIP_FILE="MapLibre-${PUBLISH_VERSION}.zip"
+cp "$BUILT_XCFRAMEWORK" "$MAPLIBRE_ZIP_FILE"
 
 step "Create GitHub release…"
-RELEASE_NOTES=$( ./platform/ios/scripts/release-notes.js github )
+RELEASE_NOTES=$( ./scripts/release-notes.js github )
 
 if [[ -z "${RELEASE_NOTES}" ]]; then
     echo "Release notes cannot be empty."
@@ -126,14 +102,14 @@ github-release release \
     --name "ios-v${PUBLISH_VERSION}" \
     --description "${RELEASE_NOTES}"
 
-step "Uploading ${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE} to github release [${VERSION_TAG}]"
-uploadToGithub "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" "${VERSION_TAG}"
-MAPBOX_ZIP_FILE_URL=$EXT_TARGET_GITHUB_URL
+step "Uploading ${BINARY_DIRECTORY}/${MAPLIBRE_ZIP_FILE} to github release [${VERSION_TAG}]"
+uploadToGithub "${BINARY_DIRECTORY}/${MAPLIBRE_ZIP_FILE}" "${VERSION_TAG}"
+MAPLIBRE_ZIP_FILE_URL=$EXT_TARGET_GITHUB_URL
 
 step "Creating Swift package…"
 
 rm -f Package.swift
-cp platform/ios/scripts/swift_package_template.swift Package.swift
+cp scripts/swift_package_template.swift Package.swift
 
 setTarget() {
     local token=$1
@@ -149,7 +125,7 @@ setTarget() {
     sed -i '' -e 's|'"${token}_PACKAGE_CHECKSUM"'|'"${checksum}"'|g' Package.swift
 }
 
-setTarget "MAPBOX" "${BINARY_DIRECTORY}/${MAPBOX_ZIP_FILE}" "${MAPBOX_ZIP_FILE_URL}"
+setTarget "MAPLIBRE" "${BINARY_DIRECTORY}/${MAPLIBRE_ZIP_FILE}" "${MAPLIBRE_ZIP_FILE_URL}"
 
 step "Publishing Swift package…"
 
@@ -176,3 +152,5 @@ curl -v -X POST \
     -d "{\"tag_name\":\"${PUBLISH_VERSION}\"}"
 
 step "Finished deploying ${PUBLISH_VERSION} in $(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds"
+
+pod trunk push MapLibre.podspec

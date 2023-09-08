@@ -56,10 +56,6 @@ public:
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_METAL
             case gfx::Backend::Type::Metal: {
-                // program = std::make_unique<mtl::Program<Name>>(programParameters.withDefaultSource(
-                //     {gfx::Backend::Type::OpenGL,
-                //      shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
-                //      shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment}));
                 break;
             }
 #else // MLN_RENDER_BACKEND_OPENGL

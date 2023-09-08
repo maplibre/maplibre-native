@@ -21,6 +21,8 @@ protected:
     UniformBuffer(std::size_t size_)
         : size(size_) {}
     UniformBuffer(const UniformBuffer&) = default;
+    UniformBuffer(UniformBuffer&& other)
+        : size(other.size) {}
 
 public:
     virtual ~UniformBuffer() = default;
@@ -77,7 +79,7 @@ public:
 protected:
     const std::shared_ptr<UniformBuffer>& add(const std::string_view name, std::shared_ptr<UniformBuffer>&&);
 
-    virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer&) { return nullptr; }
+    virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer&) = 0;
 
 protected:
     UniformBufferMap uniformBufferMap;

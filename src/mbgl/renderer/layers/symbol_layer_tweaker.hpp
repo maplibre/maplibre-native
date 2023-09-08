@@ -11,8 +11,8 @@ namespace mbgl {
  */
 class SymbolLayerTweaker : public LayerTweaker {
 public:
-    SymbolLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-        : LayerTweaker(std::move(id), properties) {}
+    SymbolLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
 
 public:
     ~SymbolLayerTweaker() override = default;
@@ -20,6 +20,7 @@ public:
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
     static constexpr std::string_view SymbolDrawableUBOName = "SymbolDrawableUBO";
+    static constexpr std::string_view SymbolDynamicUBOName = "SymbolDynamicUBO";
     static constexpr std::string_view SymbolDrawablePaintUBOName = "SymbolDrawablePaintUBO";
     static constexpr std::string_view SymbolDrawableTilePropsUBOName = "SymbolDrawableTilePropsUBO";
     static constexpr std::string_view SymbolDrawableInterpolateUBOName = "SymbolDrawableInterpolateUBO";

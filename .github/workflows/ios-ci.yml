@@ -32,32 +32,10 @@ on:
   
   pull_request:
     branches:
-      - main
-      - topic/drawable
-    paths:
-      - CMakeLists.txt
-      - 'platform/ios/**'
-      - 'platform/darwin/**'
-      - ".github/workflows/ios-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
-      - WORKSPACE
-      - BUILD.bazel
-      - .bazelrc
-      - .bazelversion
+      - '*'
 
 jobs:
-  build:
+  ios-build:
     strategy:
       fail-fast: false
       matrix:
@@ -65,7 +43,7 @@ jobs:
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.renderer }}
       cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILDTYPE: Debug
@@ -76,7 +54,7 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -147,6 +125,11 @@ jobs:
       - name: Running iOS UI tests
         run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors
 
+      - name: Build Metal Renderer
+        if: ${{ matrix.renderer }} = "drawable"
+        working-directory: ./
+        run: bazel build //:mbgl-core --//:renderer=metal --//:maplibre_platform=ios
+
       # size test
 
       - name: Build app for size test & output size
@@ -182,7 +165,7 @@ jobs:
           cd Payload/RenderTestApp.app/PlugIns
           zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
-      
+
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.renderer }} = "legacy"
         with:
@@ -191,3 +174,29 @@ jobs:
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
+
+      # C++ unit tests
+      
+      - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
+        run: |
+          set -e
+          bazel run //platform/ios:xcodeproj
+          build_dir="$(mktemp -d)"
+          xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
+          cd "$ios_cpp_test_app_dir"
+          mkdir Payload
+          mv CppUnitTestsApp.app Payload
+          zip -r CppUnitTestsApp.zip Payload
+          mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
+          cd Payload/CppUnitTestsApp.app/PlugIns
+          zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
+          echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ios-cpp-unit-tests
+          retention-days: 3
+          path: |
+            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
+            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa

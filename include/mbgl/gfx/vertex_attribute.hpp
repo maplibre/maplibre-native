@@ -81,8 +81,8 @@ public:
           items(count_) {}
     VertexAttribute(const VertexAttribute& other)
         : index(other.index),
-          dataType(other.dataType),
           stride(other.stride),
+          dataType(other.dataType),
           items(other.items),
           sharedRawData(other.sharedRawData),
           sharedType(other.sharedType),
@@ -91,8 +91,8 @@ public:
           sharedStride(other.sharedStride) {}
     VertexAttribute(VertexAttribute&& other)
         : index(other.index),
-          dataType(other.dataType),
           stride(other.stride),
+          dataType(other.dataType),
           items(std::move(other.items)),
           sharedRawData(std::move(other.sharedRawData)),
           sharedType(other.sharedType),
@@ -237,18 +237,8 @@ public:
     const gfx::UniqueVertexBufferResource& getBuffer() const { return buffer; }
     void setBuffer(gfx::UniqueVertexBufferResource&& value) { buffer = std::move(value); }
 
-    /// Convert from the odd partially-normalized color component array produced by `Color::toArray` into normalized
-    /// RGBA.
-    static float4 colorAttrRGBA(const Color& color) {
-        const auto components = color.toArray();
-        return {static_cast<float>(components[0] / 255.0),
-                static_cast<float>(components[1] / 255.0),
-                static_cast<float>(components[2] / 255.0),
-                static_cast<float>(components[3])};
-    }
-
 protected:
-    VertexAttribute& operator=(const VertexAttribute&) = default;
+    VertexAttribute& operator=(const VertexAttribute&) = delete;
     VertexAttribute& operator=(VertexAttribute&& other) {
         index = other.index;
         dataType = other.dataType;
@@ -426,7 +416,7 @@ public:
     }
 
 protected:
-    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&& attr);
+    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);
@@ -438,6 +428,7 @@ protected:
 
 protected:
     AttributeMap attrs;
+    static std::unique_ptr<VertexAttribute> nullref;
 };
 
 } // namespace gfx

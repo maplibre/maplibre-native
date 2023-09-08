@@ -15,6 +15,11 @@ class FillPatternProgram;
 class FillOutlineProgram;
 class FillOutlinePatternProgram;
 
+#if MLN_DRAWABLE_RENDERER
+class FillLayerTweaker;
+using FillLayerTweakerPtr = std::shared_ptr<FillLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class RenderFillLayer final : public RenderLayer {
 public:
     explicit RenderFillLayer(Immutable<style::FillLayer::Impl>);
@@ -41,6 +46,10 @@ private:
     void render(PaintParameters&) override;
 #endif
 
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
+#endif // MLN_DRAWABLE_RENDERER
+
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
                                 float,
@@ -64,6 +73,13 @@ private:
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
+
+    FillLayerTweakerPtr tweaker;
+#if MLN_RENDER_BACKEND_METAL
+    std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
+    bool overdrawInspector = false;
+
 #endif
 };
 

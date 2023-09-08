@@ -56,9 +56,6 @@ android {
         create("drawable") {
             dimension = "renderer"
         }
-        create("split") {
-            dimension = "renderer"
-        }
     }
 
     buildFeatures {

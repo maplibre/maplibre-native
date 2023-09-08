@@ -62,5 +62,6 @@ ios_unit_test(
 )
 
 exports_files([
+    "Empty.plist",
     "Info.plist",
 ])
