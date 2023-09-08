@@ -4,6 +4,7 @@
 #include <mbgl/gfx/uniform_block.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/util/identity.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 #include <optional>
@@ -32,7 +33,7 @@ public:
 
     /// @brief Gets the sampler location
     /// @param name uniform name
-    virtual std::optional<uint32_t> getSamplerLocation(const std::string& name) = 0;
+    virtual std::optional<uint32_t> getSamplerLocation(const StringIdentity) const = 0;
 
     /// Get the available uniform blocks attached to this shader
     virtual const gfx::UniformBlockArray& getUniformBlocks() const = 0;

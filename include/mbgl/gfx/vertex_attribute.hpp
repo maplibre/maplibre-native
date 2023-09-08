@@ -260,7 +260,7 @@ class VertexAttributeArray {
 public:
     using AttributeMap = std::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
 
-    VertexAttributeArray(int initCapacity = 10);
+    VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&&);
     VertexAttributeArray(const VertexAttributeArray&) = delete; // Would need to use the virtual assignment operator
     virtual ~VertexAttributeArray() = default;

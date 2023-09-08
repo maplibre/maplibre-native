@@ -5,9 +5,6 @@ namespace gfx {
 
 std::unique_ptr<UniformBlock> UniformBlockArray::nullref = nullptr;
 
-UniformBlockArray::UniformBlockArray(int initCapacity)
-    : uniformBlockMap(initCapacity) {}
-
 UniformBlockArray::UniformBlockArray(UniformBlockArray&& other)
     : uniformBlockMap(std::move(other.uniformBlockMap)) {}
 

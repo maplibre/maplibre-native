@@ -42,7 +42,7 @@ constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatter
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
 static const StringIdentity idNormAttribName = StringIndexer::get("a_normal_ed");
 
-constexpr auto IconTextureName = "u_image";
+static const StringIdentity idIconTextureName = StringIndexer::get("u_image");
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -446,8 +446,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         if (hasPattern && !tweaker) {
             if (const auto& atlases = tile.getAtlasTextures()) {
                 tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                        std::string(),
-                                                                        std::string(IconTextureName),
+                                                                        0,
+                                                                        idIconTextureName,
                                                                         /*isText=*/false,
                                                                         false,
                                                                         style::AlignmentType::Auto,

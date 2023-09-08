@@ -105,9 +105,9 @@ ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
       vertexAttributes(std::move(other.vertexAttributes)),
       samplerLocations(std::move(other.samplerLocations)) {}
 
-std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string& name) {
+std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const StringIdentity id) const {
     std::optional<uint32_t> result{};
-    if (auto it = samplerLocations.find(name); it != samplerLocations.end()) {
+    if (auto it = samplerLocations.find(id); it != samplerLocations.end()) {
         result = it->second;
     }
     return result;
@@ -177,7 +177,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         if (type == GL_SAMPLER_2D) {
             // This uniform is a texture sampler
             GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, uniformName));
-            samplerLocations[uniformName] = location;
+            samplerLocations[StringIndexer::get(uniformName)] = location;
         }
     }
 

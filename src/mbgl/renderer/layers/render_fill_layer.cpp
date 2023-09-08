@@ -44,7 +44,7 @@ constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-constexpr auto IconTextureName = "u_image";
+static const StringIdentity idIconTextureName = StringIndexer::get("u_image");
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
@@ -548,8 +548,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (patternBuilder || outlinePatternBuilder) {
                 if (const auto& atlases = tile.getAtlasTextures()) {
                     auto tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                 /*glyphName=*/std::string(),
-                                                                                 std::string(IconTextureName),
+                                                                                 0,
+                                                                                 idIconTextureName,
                                                                                  /*isText=*/false,
                                                                                  false,
                                                                                  style::AlignmentType::Auto,

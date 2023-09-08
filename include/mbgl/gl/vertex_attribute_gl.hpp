@@ -53,8 +53,7 @@ private:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArrayGL final : public gfx::VertexAttributeArray {
 public:
-    VertexAttributeArrayGL(int initCapacity = 10)
-        : VertexAttributeArray(initCapacity) {}
+    VertexAttributeArrayGL() = default;
     VertexAttributeArrayGL(VertexAttributeArrayGL&& other)
         : VertexAttributeArray(std::move(other)) {}
 

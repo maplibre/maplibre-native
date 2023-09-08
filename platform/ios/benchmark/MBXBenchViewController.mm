@@ -38,8 +38,10 @@
     NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"openmaptiles" withExtension:@"json" subdirectory:@"tiles"];
     const std::vector<std::string> styles = {
         "maptiler://maps/streets",
+        "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
+        "https://zelonewolf.github.io/openstreetmap-americana/style.json",
     };
-    constexpr auto styleIndex = 0;
+    constexpr auto styleIndex = 2;
     NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json" : [NSString stringWithCString:styles[styleIndex].c_str() encoding:NSUTF8StringEncoding]];
     NSLog(@"Using style URL: \"%@\"", [url absoluteString]);
     
@@ -116,6 +118,10 @@ std::vector<std::pair<std::string, double>> result;
 static const int warmupDuration = 20; // frames
 static const int benchmarkDuration = 200; // frames
 
+namespace  mbgl {
+    extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploadInvalidSegments;
+}
+
 - (void)startBenchmarkIteration
 {
     if (mbgl::bench::locations.size() > idx) {
@@ -138,8 +144,15 @@ static const int benchmarkDuration = 200; // frames
             NSLog(@"| %-*s | %4.1f ms | %4.1f fps |", int(colWidth), row.first.c_str(), 1e3 * row.second, 1.0 / row.second);
             totalFrameTime += row.second;
         }
+
+        NSLog(@"Total FPS: %4.1f", totalFPS);
         NSLog(@"Average frame time: %4.1f ms", totalFrameTime * 1e3 / result.size());
         NSLog(@"Average FPS: %4.1f", result.size() / totalFrameTime);
+        
+        // NSLog(@"Total uploads: %zu", mbgl::uploadCount);
+        // NSLog(@"Total uploads with dirty vattr: %zu", mbgl::uploadVertextAttrsDirty);
+        // NSLog(@"Total uploads with invalid segs: %zu", mbgl::uploadInvalidSegments);
+        // NSLog(@"Total uploads with build: %zu", mbgl::uploadBuildCount);
 
         // this does not shut the application down correctly,
         // and results in an assertion failure in thread-local code

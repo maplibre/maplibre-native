@@ -283,6 +283,7 @@ static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
 static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
@@ -403,7 +404,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             hillshadePrepareBuilder->setSegments(
                 gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
 
-            auto imageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
+            auto imageLocation = hillshadePrepareShader->getSamplerLocation(idTexImageName);
             if (imageLocation.has_value()) {
                 std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
                 texture->setImage(bucket.getDEMData().getImagePtr());
@@ -473,7 +474,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 drawable.setIndexData(indices->vector(), std::move(drawSegments));
 
-                auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
+                auto imageLocation = hillshadeShader->getSamplerLocation(idTexImageName);
                 if (imageLocation.has_value()) {
                     drawable.setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
                 }
@@ -491,7 +492,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadeBuilder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
         hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
-        auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
+        auto imageLocation = hillshadeShader->getSamplerLocation(idTexImageName);
         if (imageLocation.has_value()) {
             hillshadeBuilder->setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
         }

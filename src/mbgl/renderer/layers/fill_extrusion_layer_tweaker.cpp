@@ -50,10 +50,9 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 
-const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
-const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
-
-constexpr auto texUniformName = "u_image";
+static const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
+static const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
 template <typename T, class... Is, class... Ts>
 auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
@@ -137,7 +136,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation(texUniformName)) {
+            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                 if (const auto& tex = drawable.getTexture(*index)) {
                     textureSize = tex->getSize();
                 }

@@ -105,8 +105,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         texture->setImage(emptyImage);
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        constexpr auto DebugOverlayUniformName = "u_overlay";
-        samplerLocation = debugShader->getSamplerLocation(DebugOverlayUniformName);
+        static const StringIdentity idDebugOverlayUniformName = StringIndexer::get("u_overlay");
+        samplerLocation = debugShader->getSamplerLocation(idDebugOverlayUniformName);
     }
     assert(samplerLocation.has_value());
     if (!samplerLocation.has_value()) return;

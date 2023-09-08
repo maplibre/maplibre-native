@@ -10,7 +10,7 @@ namespace gfx {
 
 void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool linearFilterForIcons) {
     if (const auto& shader = drawable.getShader()) {
-        if (const auto samplerLocation = shader->getSamplerLocation(glyphName)) {
+        if (const auto samplerLocation = shader->getSamplerLocation(glyphNameId)) {
             if (atlases) {
                 atlases->glyph->setSamplerConfiguration(
                     {TextureFilterType::Linear, TextureWrapType::Clamp, TextureWrapType::Clamp});
@@ -19,7 +19,7 @@ void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool l
                      TextureWrapType::Clamp,
                      TextureWrapType::Clamp});
             }
-            if (const auto iconSamplerLocation = shader->getSamplerLocation(iconName)) {
+            if (const auto iconSamplerLocation = shader->getSamplerLocation(iconNameId)) {
                 assert(*samplerLocation != *iconSamplerLocation);
                 drawable.setTexture(atlases ? atlases->glyph : nullptr, *samplerLocation);
                 drawable.setTexture(atlases ? atlases->icon : nullptr, *iconSamplerLocation);

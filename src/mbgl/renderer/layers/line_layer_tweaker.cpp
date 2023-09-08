@@ -117,6 +117,7 @@ struct alignas(16) LineSDFPropertiesUBO {
 };
 static_assert(sizeof(LineSDFPropertiesUBO) % 16 == 0);
 static const StringIdentity idLineSDFPropertiesUBOName = StringIndexer::get("LineSDFPropertiesUBO");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
@@ -234,7 +235,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
             case LineType::Pattern: {
                 // main UBO
                 Size textureSize{0, 0};
-                if (const auto index = shader->getSamplerLocation("u_image")) {
+                if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                     if (const auto& texture = drawable.getTexture(index.value())) {
                         textureSize = texture->getSize();
                     }
@@ -267,7 +268,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                         lineData.linePatternCap);
 
                     // texture
-                    if (const auto index = shader->getSamplerLocation("u_image")) {
+                    if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                         if (!drawable.getTexture(index.value())) {
                             const auto& texture = dashPatternTexture.getTexture();
                             drawable.setEnabled(!!texture);

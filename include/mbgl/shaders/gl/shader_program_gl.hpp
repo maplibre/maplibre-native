@@ -4,6 +4,7 @@
 #include <mbgl/gl/uniform_block_gl.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <unordered_map>
 
@@ -15,7 +16,7 @@ namespace gl {
 
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
-    using SamplerLocationMap = std::unordered_map<std::string, int>;
+    using SamplerLocationMap = std::unordered_map<StringIdentity, int>;
 
     ShaderProgramGL(UniqueProgram&& glProgram_);
     ShaderProgramGL(UniqueProgram&&,
@@ -36,7 +37,7 @@ public:
                                                    const std::string& fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);
 
-    std::optional<uint32_t> getSamplerLocation(const std::string& name) override;
+    std::optional<uint32_t> getSamplerLocation(const StringIdentity id) const override;
 
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
 

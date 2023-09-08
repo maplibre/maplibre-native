@@ -43,7 +43,7 @@ class UniformBufferArray {
 public:
     using UniformBufferMap = std::unordered_map<StringIdentity, std::shared_ptr<UniformBuffer>>;
 
-    UniformBufferArray(int initCapacity = 10);
+    UniformBufferArray() = default;
     UniformBufferArray(UniformBufferArray&&);
     // Would need to use the virtual assignment operator
     UniformBufferArray(const UniformBufferArray&) = delete;

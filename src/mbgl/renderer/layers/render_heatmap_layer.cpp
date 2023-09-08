@@ -275,6 +275,8 @@ constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 static const StringIdentity idHeatmapInterpolateUBOName = StringIndexer::get("HeatmapInterpolateUBO");
 static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+static const StringIdentity idTexColorRampName = StringIndexer::get("u_color_ramp");
 
 } // namespace
 
@@ -464,11 +466,11 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     heatmapTextureBuilder->setSegments(
         gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
 
-    auto imageLocation = heatmapTextureShader->getSamplerLocation("u_image");
+    auto imageLocation = heatmapTextureShader->getSamplerLocation(idTexImageName);
     if (imageLocation.has_value()) {
         heatmapTextureBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
     }
-    auto colorRampLocation = heatmapTextureShader->getSamplerLocation("u_color_ramp");
+    auto colorRampLocation = heatmapTextureShader->getSamplerLocation(idTexColorRampName);
     if (colorRampLocation.has_value()) {
         std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
         texture->setImage(colorRamp);

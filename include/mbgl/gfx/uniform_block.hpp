@@ -62,8 +62,7 @@ public:
     using UniformBlockMap = std::unordered_map<StringIdentity, std::unique_ptr<UniformBlock>>;
 
     /// @brief Constructor
-    /// @param initCapacity initial collection capacity
-    UniformBlockArray(int initCapacity = 10);
+    UniformBlockArray() = default;
 
     /// @brief Move constructor
     UniformBlockArray(UniformBlockArray&&);

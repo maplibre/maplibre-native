@@ -750,8 +750,8 @@ static const StringIdentity idPosOffsetAttribName = StringIndexer::get("a_pos_of
 static const StringIdentity idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
 static const StringIdentity idProjPosAttribName = StringIndexer::get("a_projected_pos");
 static const StringIdentity idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
-const auto texUniformName = "u_texture";
-const auto iconTexUniformName = "u_texture_icon";
+static const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
+static const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
 
 std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer,
                                               const bool isText,
@@ -1237,8 +1237,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     const bool textSizeIsZoomConstant =
                         bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom())).isZoomConstant;
                     tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                         iconTexUniformName,
-                                                                                         texUniformName,
+                                                                                         idTexIconUniformName,
+                                                                                         idTexUniformName,
                                                                                          isText,
                                                                                          false,
                                                                                          values.rotationAlignment,
@@ -1248,8 +1248,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 if (!isText && !tileInfo.iconTweaker) {
                     const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
                     tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                         iconTexUniformName,
-                                                                                         texUniformName,
+                                                                                         idTexIconUniformName,
+                                                                                         idTexUniformName,
                                                                                          isText,
                                                                                          sdfIcons,
                                                                                          values.rotationAlignment,

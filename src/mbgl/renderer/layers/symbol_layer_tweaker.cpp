@@ -63,9 +63,9 @@ struct alignas(16) SymbolDrawablePaintUBO {
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
-Size getTexSize(const gfx::Drawable& drawable, const std::string& name) {
+Size getTexSize(const gfx::Drawable& drawable, const StringIdentity nameId) {
     if (const auto& shader = drawable.getShader()) {
-        if (const auto index = shader->getSamplerLocation(name)) {
+        if (const auto index = shader->getSamplerLocation(nameId)) {
             if (const auto& tex = drawable.getTexture(*index)) {
                 return tex->getSize();
             }
@@ -78,8 +78,8 @@ std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
-constexpr auto texUniformName = "u_texture";
-constexpr auto texIconUniformName = "u_texture_icon";
+static const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
+static const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
 
 template <typename T, class... Is, class... Ts>
 auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
@@ -181,8 +181,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                                /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
                                                /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
-                                               /*.texsize=*/toArray(getTexSize(drawable, texUniformName)),
-                                               /*.texsize_icon=*/toArray(getTexSize(drawable, texIconUniformName)),
+                                               /*.texsize=*/toArray(getTexSize(drawable, idTexUniformName)),
+                                               /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
 
                                                /*.gamma_scale=*/gammaScale,
                                                /*.device_pixel_ratio=*/parameters.pixelRatio,

@@ -408,7 +408,7 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
 static const StringIdentity idLinePatternTilePropertiesUBOName = StringIndexer::get("LinePatternTilePropertiesUBO");
 
-static constexpr auto LineImageUniformName = "u_image";
+static const StringIdentity idLineImageUniformName = StringIndexer::get("u_image");
 
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
@@ -652,8 +652,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 if (!iconTweaker) {
                     iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
-                        "",
-                        LineImageUniformName,
+                        0,
+                        idLineImageUniformName,
                         /*isText*/ false,
                         /*sdfIcons*/ true, // to force linear filter
                         /*rotationAlignment_*/ AlignmentType::Auto,
@@ -695,7 +695,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
             // texture
-            if (const auto samplerLocation = builder->getShader()->getSamplerLocation(LineImageUniformName)) {
+            if (const auto samplerLocation = builder->getShader()->getSamplerLocation(idLineImageUniformName)) {
                 if (!colorRampTexture2D && colorRamp->valid()) {
                     // create texture. to be reused for all the tiles of the layer
                     colorRampTexture2D = context.createTexture2D();

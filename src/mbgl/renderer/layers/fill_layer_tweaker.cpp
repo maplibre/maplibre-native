@@ -43,6 +43,7 @@ static const StringIdentity FillDrawableUBOName = StringIndexer::get("FillDrawab
 static const StringIdentity FillDrawablePropsUBOName = StringIndexer::get("FillDrawablePropsUBO");
 const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = StringIndexer::get("FillDrawableTilePropsUBO");
 const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = StringIndexer::get("FillInterpolateUBO");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
@@ -103,7 +104,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation("u_image")) {
+            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                 if (const auto& tex = drawable.getTexture(*index)) {
                     textureSize = tex->getSize();
                 }

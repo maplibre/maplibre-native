@@ -7,9 +7,6 @@ namespace gfx {
 
 std::shared_ptr<UniformBuffer> UniformBufferArray::nullref = nullptr;
 
-UniformBufferArray::UniformBufferArray(int initCapacity)
-    : uniformBufferMap(initCapacity) {}
-
 UniformBufferArray::UniformBufferArray(UniformBufferArray&& other)
     : uniformBufferMap(std::move(other.uniformBufferMap)) {}
 

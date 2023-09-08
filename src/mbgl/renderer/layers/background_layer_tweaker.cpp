@@ -52,7 +52,7 @@ constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
 static const StringIdentity idBackgroundDrawableUBOName = StringIndexer::get("BackgroundDrawableUBO");
 static const StringIdentity idBackgroundLayerUBOName = StringIndexer::get("BackgroundLayerUBO");
-static constexpr auto texUniformName = "u_image";
+static const StringIdentity idTexUniformName = StringIndexer::get("u_image");
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& state = parameters.state;
@@ -101,7 +101,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
 
         if (hasPattern) {
             if (!samplerLocation.has_value()) {
-                samplerLocation = shader->getSamplerLocation(texUniformName);
+                samplerLocation = shader->getSamplerLocation(idTexUniformName);
                 if (const auto& tex = parameters.patternAtlas.texture()) {
                     tex->setSamplerConfiguration(
                         {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});

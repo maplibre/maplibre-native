@@ -15,9 +15,6 @@ std::size_t VertexAttribute::getCount() const {
 
 std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
 
-VertexAttributeArray::VertexAttributeArray(int initCapacity)
-    : attrs(initCapacity) {}
-
 VertexAttributeArray::VertexAttributeArray(VertexAttributeArray&& other)
     : attrs(std::move(other.attrs)) {}
 
