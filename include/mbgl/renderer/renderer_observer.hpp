@@ -39,7 +39,7 @@ public:
     virtual void onDidFinishRenderingFrame(RenderMode mode,
                                            bool repaint,
                                            bool placementChanged,
-                                           std::int64_t /*frameTimeNanos*/) {
+                                           double /*frameTime*/) {
         onDidFinishRenderingFrame(mode, repaint, placementChanged);
     }
 

@@ -109,9 +109,9 @@ NSDate* const currentDate = [NSDate date];
 size_t idx = 0;
 enum class State { None, WaitingForAssets, WarmingUp, Benchmarking } state = State::None;
 int frames = 0;
-std::int64_t totalFrameNanos = 0;
+double totalFrameTime = 0;
 std::chrono::steady_clock::time_point started;
-std::vector<std::pair<std::string, double>> result;
+std::vector<std::pair<std::string, double> > result;
 
 static const int warmupDuration = 20; // frames
 static const int benchmarkDuration = 200; // frames
@@ -143,7 +143,6 @@ namespace  mbgl {
             totalFrameTime += row.second;
         }
 
-        NSLog(@"Total FPS: %4.1f", totalFPS);
         NSLog(@"Average frame time: %4.1f ms", totalFrameTime * 1e3 / result.size());
         NSLog(@"Average FPS: %4.1f", result.size() / totalFrameTime);
         
@@ -174,12 +173,12 @@ namespace  mbgl {
 
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
                          fullyRendered:(__unused BOOL)fullyRendered
-                        frameTimeNanos:(long long)frameTimeNanos
+                        frameTime:(double)frameTime
 {
     if (state == State::Benchmarking)
     {
         frames++;
-        totalFrameNanos += frameTimeNanos;
+        totalFrameTime += frameTime;
         if (frames >= benchmarkDuration)
         {
             state = State::None;
@@ -187,10 +186,10 @@ namespace  mbgl {
             // Report FPS
             const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count();
             const auto wallClockFPS = double(frames * 1e6) / duration;
-            const auto frameTime = static_cast<double>(totalFrameNanos) / frames * 1.0e-9;
+            const auto frameTime = static_cast<double>(totalFrameTime) / frames;
             const auto potentialFPS = 1.0 / frameTime;
             result.emplace_back(mbgl::bench::locations[idx].name, frameTime);
-            NSLog(@"- Frame time: %.1f ms, FPS: %.1f (%.1f)", frameTime * 1e3, potentialFPS, wallClockFPS);
+            NSLog(@"- Frame time: %.1f ms, FPS: %.1f (%.1f sync FPS)", frameTime * 1e3, potentialFPS, wallClockFPS);
 
             // Start benchmarking the next location.
             idx++;
@@ -207,7 +206,7 @@ namespace  mbgl {
         if (frames >= warmupDuration)
         {
             frames = 0;
-            totalFrameNanos = 0;
+            totalFrameTime = 0;
             state = State::Benchmarking;
             started = std::chrono::steady_clock::now();
             NSLog(@"- Benchmarking for %d frames...", benchmarkDuration);

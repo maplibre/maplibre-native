@@ -252,8 +252,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view that has just redrawn.
  @param frameTimeNanos The time taken to render the frame, in nanoseconds
  */
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered
-                        frameTimeNanos:(long long)frameTimeNanos;
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                             frameTime:(double)frameTime;
 
 /**
  Tells the delegate that the map view is entering an idle state, and no more

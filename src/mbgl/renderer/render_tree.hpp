@@ -3,6 +3,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #endif
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <memory>
@@ -83,12 +84,19 @@ public:
     // Parameters
     const RenderTreeParameters& getParameters() const { return *parameters; }
 
+    double getElapsedTime() const {
+        return util::MonotonicTimer::now().count() - startTime;
+    }
+
 protected:
-    RenderTree(std::unique_ptr<RenderTreeParameters> parameters_)
-        : parameters(std::move(parameters_)) {
+    RenderTree(std::unique_ptr<RenderTreeParameters> parameters_, double startTime_)
+        : parameters(std::move(parameters_)),
+    startTime(startTime_) {
         assert(parameters);
     }
     std::unique_ptr<RenderTreeParameters> parameters;
+    
+    double startTime;
 };
 
 } // namespace mbgl

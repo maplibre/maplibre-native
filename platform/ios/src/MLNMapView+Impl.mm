@@ -71,7 +71,7 @@ void MLNMapViewImpl::onWillStartRenderingFrame() {
 
 void MLNMapViewImpl::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status) {
     bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
-    [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered frameTimeNanos:status.frameTimeNanos];
+    [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered frameTime:status.frameTime];
 }
 
 void MLNMapViewImpl::onWillStartRenderingMap() {
