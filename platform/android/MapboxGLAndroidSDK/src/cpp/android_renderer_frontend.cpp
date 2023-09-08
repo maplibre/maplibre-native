@@ -35,8 +35,7 @@ public:
                                    bool repaintNeeded,
                                    bool placementChanged,
                                    double frameTime) override {
-        void (RendererObserver::*f)(
-            RenderMode, bool, bool, double) = &RendererObserver::onDidFinishRenderingFrame;
+        void (RendererObserver::*f)(RenderMode, bool, bool, double) = &RendererObserver::onDidFinishRenderingFrame;
         delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTime);
     }
 
