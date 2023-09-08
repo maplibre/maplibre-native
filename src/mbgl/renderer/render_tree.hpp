@@ -84,18 +84,16 @@ public:
     // Parameters
     const RenderTreeParameters& getParameters() const { return *parameters; }
 
-    double getElapsedTime() const {
-        return util::MonotonicTimer::now().count() - startTime;
-    }
+    double getElapsedTime() const { return util::MonotonicTimer::now().count() - startTime; }
 
 protected:
     RenderTree(std::unique_ptr<RenderTreeParameters> parameters_, double startTime_)
         : parameters(std::move(parameters_)),
-    startTime(startTime_) {
+          startTime(startTime_) {
         assert(parameters);
     }
     std::unique_ptr<RenderTreeParameters> parameters;
-    
+
     double startTime;
 };
 
