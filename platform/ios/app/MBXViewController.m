@@ -34,6 +34,11 @@ static const MLNCoordinateBounds colorado = {
     .ne = { .latitude = 40.989329, .longitude = -102.062592},
 };
 
+static const MLNCoordinateBounds areaAroundBelgium = {
+    .sw = { .latitude = 52.2782, .longitude = 8.289179999999988},
+    .ne = { .latitude = 48.5584, .longitude = 1.0162300000000073},
+};
+
 static NSString * const MBXViewControllerAnnotationViewReuseIdentifer = @"MBXViewControllerAnnotationViewReuseIdentifer";
 
 typedef NS_ENUM(NSInteger, MBXSettingsSections) {
@@ -105,6 +110,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
+    MBXSettingsMiscellaneousLatLngBoundsConstraints,
     MBXSettingsMiscellaneousWorldTour,
     MBXSettingsMiscellaneousRandomTour,
     MBXSettingsMiscellaneousScrollView,
@@ -116,6 +122,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
     MBXSettingsMiscellaneousSetContentInsets,
     MBXSettingsMiscellaneousShowCustomLocationManager,
     MBXSettingsMiscellaneousOrnamentsPlacement,
+    MBXSettingsMiscellaneousLatLngBoundsWithPadding,
     MBXSettingsMiscellaneousPrintLogFile,
     MBXSettingsMiscellaneousDeleteLogFile
 };
@@ -233,6 +240,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     BOOL _isTouringWorld;
     BOOL _contentInsetsEnabled;
     UIEdgeInsets _originalContentInsets;
+    BOOL _hasLatLngBoundConstraints;
 }
 
 // MARK: - Setup & Teardown
@@ -433,6 +441,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             break;
         case MBXSettingsMiscellaneous:
             [settingsTitles addObjectsFromArray:@[
+                _hasLatLngBoundConstraints ? @"Remove LatLng bound constraints" : @"Set LatLng bound box constraint",
                 @"Start World Tour",
                 @"Random Tour",
                 @"Embedded Map View",
@@ -444,6 +453,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 [NSString stringWithFormat:@"Turn %@ Content Insets", (_contentInsetsEnabled ? @"Off" : @"On")],
                 @"View Route Simulation",
                 @"Ornaments Placement",
+                @"Lat Long bounds with padding"
             ]];
 
             break;
@@ -657,6 +667,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXSettingsMiscellaneous:
             switch (indexPath.row)
             {
+                case MBXSettingsMiscellaneousLatLngBoundsConstraints:
+                    [self setLatLngBoundsConstraints];
+                    break;
                 case MBXSettingsMiscellaneousLocalizeLabels:
                     [self toggleStyleLabelsLanguage];
                     break;
@@ -760,6 +773,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     [self.navigationController pushViewController:ornamentsViewController animated:YES];
                     break;
                 }
+                case MBXSettingsMiscellaneousLatLngBoundsWithPadding:
+                    [self flyToWithLatLngBoundsAndPadding];
+                    break;
                 default:
                     NSAssert(NO, @"All miscellaneous setting rows should be implemented");
                     break;
@@ -1463,6 +1479,20 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 
+-(void)setLatLngBoundsConstraints
+{
+    if(_hasLatLngBoundConstraints) {
+        [self.mapView clearLatLnBounds];
+        [self.mapView resetPosition];
+    } else {
+        MLNMapCamera *newCamera = [self.mapView cameraThatFitsCoordinateBounds: areaAroundBelgium];
+        [self.mapView setCamera: newCamera];
+        [self.mapView setLatLngBounds: areaAroundBelgium];
+    }
+    
+    _hasLatLngBoundConstraints = !_hasLatLngBoundConstraints;
+}
+
 -(void)toggleStyleLabelsLanguage
 {
     _localizingLabels = !_localizingLabels;
@@ -1779,6 +1809,30 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 - (UIImage *)mapView:(MLNMapView *)mapView didFailToLoadImage:(NSString *)imageName {
     UIImage *backupImage = [UIImage imageNamed:@"AppIcon"];
     return backupImage;
+}
+
+- (void)flyToWithLatLngBoundsAndPadding
+{
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    CLLocationCoordinate2D sw = CLLocationCoordinate2DMake(48, 11);
+    CLLocationCoordinate2D ne = CLLocationCoordinate2DMake(50, 12);
+    
+    UIEdgeInsets padding = UIEdgeInsetsMake(200, 200, 0, 0);
+    MLNMapCamera *cameraWithoutPadding = [self.mapView cameraThatFitsCoordinateBounds:MLNCoordinateBoundsMake(sw, ne)
+                                                                          edgePadding:padding];
+    
+    
+    MLNPointAnnotation *annotation = [MLNPointAnnotation new];
+    annotation.coordinate = cameraWithoutPadding.centerCoordinate;
+    annotation.title = @"Bounds center";
+    [self.mapView addAnnotation: annotation];
+    
+    __weak MBXViewController *weakSelf = self;
+    [self.mapView flyToCamera:cameraWithoutPadding edgePadding:padding withDuration:5 completionHandler:^{
+        [weakSelf.mapView flyToCamera:cameraWithoutPadding edgePadding:UIEdgeInsetsZero withDuration:5 completionHandler:^{
+            
+        }];
+    }];
 }
 
 // MARK: - Random World Tour

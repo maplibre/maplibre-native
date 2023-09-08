@@ -25,17 +25,17 @@ protected:
 class UniformBufferArray final : public gfx::UniformBufferArray {
 public:
     UniformBufferArray(int initCapacity = 10)
-        : UniformBufferArray(initCapacity) {}
+        : gfx::UniformBufferArray(initCapacity) {}
     UniformBufferArray(UniformBufferArray&& other)
-        : UniformBufferArray(std::move(other)) {}
+        : gfx::UniformBufferArray(std::move(other)) {}
     UniformBufferArray(const UniformBufferArray&) = delete;
 
     UniformBufferArray& operator=(UniformBufferArray&& other) {
-        UniformBufferArray::operator=(std::move(other));
+        gfx::UniformBufferArray::operator=(std::move(other));
         return *this;
     }
     UniformBufferArray& operator=(const UniformBufferArray& other) {
-        UniformBufferArray::operator=(other);
+        gfx::UniformBufferArray::operator=(other);
         return *this;
     }
 

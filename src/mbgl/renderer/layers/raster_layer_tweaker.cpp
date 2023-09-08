@@ -14,6 +14,7 @@
 namespace mbgl {
 
 using namespace style;
+
 using namespace shaders;
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,

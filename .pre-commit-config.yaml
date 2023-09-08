@@ -10,7 +10,7 @@ repos:
     files: '.*\.(hpp|cpp|h)'
     exclude: '(vendor/.*|platform/(ios|darwin|macos)/.*|test/ios/.*|render-test/ios/.*|benchmark/ios/.*)'
 - repo: https://github.com/keith/pre-commit-buildifier
-  rev: 6.1.0.2
+  rev: 6.3.3
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py

@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace mbgl {
 namespace gfx {
@@ -63,6 +64,8 @@ protected:
     Immutable<style::LayerProperties> evaluatedProperties;
 
 #if MLN_RENDER_BACKEND_METAL
+    // For Metal, whether a property is provided through attribtues or uniforms is specified in
+    // a uniform buffer rather than by a shader compiled with different preprocessor definitions.
     std::vector<std::string> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
 

@@ -36,13 +36,13 @@ bool ShaderRegistry::replaceShader(ShaderGroupPtr&& shader, const std::string& s
     return true;
 }
 
-bool ShaderRegistry::registerShaderGroup(ShaderGroupPtr&& shader, std::string shaderGroupName) noexcept {
+bool ShaderRegistry::registerShaderGroup(ShaderGroupPtr&& shader, const std::string& shaderGroupName) noexcept {
     std::unique_lock<std::shared_mutex> writerLock(shaderGroupLock);
     if (shaderGroups.find(shaderGroupName) != shaderGroups.end()) {
         return false;
     }
 
-    shaderGroups.emplace(std::move(shaderGroupName), std::move(shader));
+    shaderGroups.emplace(shaderGroupName, std::move(shader));
     return true;
 }
 
