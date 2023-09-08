@@ -129,19 +129,17 @@ static const int benchmarkDuration = 200; // frames
         // Do nothing. The benchmark is completed.
         NSLog(@"Benchmark completed.");
         NSLog(@"Result:");
-        double totalFPS = 0;
         double totalFrameTime = 0;
         size_t colWidth = 0;
         for (const auto& row : result) {
             colWidth = std::max(row.first.size(), colWidth);
         }
         for (const auto& row : result) {
-            NSLog(@"| %-*s | %4.1f ms | %4.1f fps |", int(colWidth), row.first.c_str(), 1e3 / row.second, row.second);
-            totalFPS += row.second;
-            totalFrameTime += 1.0 / row.second;
+            NSLog(@"| %-*s | %4.1f ms | %4.1f fps |", int(colWidth), row.first.c_str(), 1e3 * row.second, 1.0 / row.second);
+            totalFrameTime += row.second;
         }
         NSLog(@"Average frame time: %4.1f ms", totalFrameTime * 1e3 / result.size());
-        NSLog(@"Average FPS: %4.1f", totalFPS / result.size());
+        NSLog(@"Average FPS: %4.1f", result.size() / totalFrameTime);
 
         // this does not shut the application down correctly,
         // and results in an assertion failure in thread-local code
@@ -180,7 +178,7 @@ static const int benchmarkDuration = 200; // frames
             const auto wallClockFPS = double(frames * 1e6) / duration;
             const auto frameTime = static_cast<double>(totalFrameNanos) / frames * 1.0e-9;
             const auto potentialFPS = 1.0 / frameTime;
-            result.emplace_back(mbgl::bench::locations[idx].name, potentialFPS);
+            result.emplace_back(mbgl::bench::locations[idx].name, frameTime);
             NSLog(@"- Frame time: %.1f ms, FPS: %.1f (%.1f)", frameTime * 1e3, potentialFPS, wallClockFPS);
 
             // Start benchmarking the next location.
