@@ -33,4 +33,9 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, state, inViewportPixelUnits);
 }
 
+void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {
+    evaluatedProperties = std::move(newProps);
+    propertiesUpdated = true;
+}
+
 } // namespace mbgl

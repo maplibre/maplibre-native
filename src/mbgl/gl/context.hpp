@@ -121,6 +121,8 @@ public:
     UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
 
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
+    
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size) override;
 #endif
 
     void setDirtyState() override;

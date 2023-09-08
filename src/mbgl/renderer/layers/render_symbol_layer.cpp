@@ -378,8 +378,8 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
+    if (layerGroup && layerGroup->getLayerTweaker()) {
+        layerGroup->getLayerTweaker()->updateProperties(evaluatedProperties);
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -811,7 +811,9 @@ void updateTileDrawable(gfx::Drawable& drawable,
                         const SymbolBucket& bucket,
                         const SymbolBucket::PaintProperties& paintProps,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated,
-                        const TransformState& state) {
+                        const TransformState& state,
+                        gfx::UniformBufferPtr& textInterpUBO,
+                        gfx::UniformBufferPtr& iconInterpUBO) {
     if (!drawable.getData()) {
         return;
     }
@@ -824,12 +826,25 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
 
-    const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
-    const auto interpolateUBO = buildInterpUBO(paintProps, isText, currentZoom);
-
     auto& uniforms = drawable.mutableUniformBuffers();
+
+    // Create or update the shared interpolation UBO
+    gfx::UniformBufferPtr& interpUBO = isText ? textInterpUBO : iconInterpUBO;
+    if (interpUBO) {
+        uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+    } else {
+        const auto ubo = buildInterpUBO(paintProps, isText, currentZoom);
+        interpUBO = uniforms.get(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName);
+        if (interpUBO) {
+            interpUBO->update(&ubo, sizeof(ubo));
+        } else {
+            interpUBO = context.createUniformBuffer(&ubo, sizeof(ubo));
+            uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+        }
+    }
+
+    const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
     uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
-    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, &interpolateUBO, context);
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -1129,10 +1144,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
+            gfx::UniformBufferPtr textInterpUBO, iconInterpUBO;
+
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-                updateTileDrawable(drawable, context, bucket, bucketPaintProperties, evaluated, state);
+                updateTileDrawable(drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO);
             });
 
             // re-create collision drawables
@@ -1181,6 +1198,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     struct TileInfo {
         RawVertexVec textVertices, iconVertices;
         gfx::DrawableTweakerPtr textTweaker, iconTweaker;
+        gfx::UniformBufferPtr textInterp, iconInterp;
     };
     std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
 
@@ -1220,7 +1238,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                               evaluated.get<style::IconHaloWidth>().constantOr(1);
         const auto iconFill = evaluated.get<style::IconColor>().constantOr(Color::black()).a > 0.0f;
 
-        const auto interpolateUBO = buildInterpUBO(bucketPaintProperties, isText, currentZoom);
+        // Share interpolation UBOs across all the elements of the same type in each tile
+        auto& interpUBO = isText ? tileInfo.textInterp : tileInfo.iconInterp;
+        if (!interpUBO) {
+            const auto interpolateBuf = buildInterpUBO(bucketPaintProperties, isText, currentZoom);
+            interpUBO = context.createUniformBuffer(&interpolateBuf, sizeof(interpolateBuf));
+        }
 
         if (builder) {
             builder->clearTweakers();
@@ -1305,8 +1328,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                     auto& uniforms = drawable->mutableUniformBuffers();
                     uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
-                    uniforms.createOrUpdate(
-                        SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, &interpolateUBO, context);
+                    uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
 
                     tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                     ++stats.drawablesAdded;

@@ -35,6 +35,8 @@ public:
 
     virtual void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) = 0;
 
+    void updateProperties(Immutable<style::LayerProperties>);
+
 protected:
     /// Calculate matrices for this tile.
     /// @param nearClipped If true, the near plane is moved further to enhance depth buffer precision.
@@ -50,6 +52,7 @@ protected:
 
 protected:
     Immutable<style::LayerProperties> evaluatedProperties;
+    bool propertiesUpdated = true;
 };
 
 } // namespace mbgl
