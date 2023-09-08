@@ -16,6 +16,8 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/heatmap.hpp>
 #include <mbgl/shaders/mtl/heatmap_texture.hpp>
+#include <mbgl/shaders/mtl/hillshade.hpp>
+#include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
 #include <mbgl/shaders/mtl/line_gradient.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
@@ -116,6 +118,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
+                  shaders::BuiltIn::HillshadeShader,
+                  shaders::BuiltIn::HillshadePrepareShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::RasterShader,
@@ -128,8 +132,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::LineGradientShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
-                  shaders::BuiltIn::HillshadePrepareShader,
-                  shaders::BuiltIn::HillshadeShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFTextShader,
                   shaders::BuiltIn::SymbolSDFIconShader,

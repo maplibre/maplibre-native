@@ -6,23 +6,14 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {
 
 using namespace style;
-
-struct alignas(16) HillshadePrepareDrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 4> unpack;
-    std::array<float, 2> dimension;
-    float zoom;
-    float maxzoom;
-};
-static_assert(sizeof(HillshadePrepareDrawableUBO) % 16 == 0);
-
-static constexpr std::string_view HillshadePrepareDrawableUBOName = "HillshadePrepareDrawableUBO";
+using namespace shaders;
 
 const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
     // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
@@ -55,7 +46,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& drawableData = static_cast<const gfx::HillshadePrepareDrawableData&>(*drawable.getData());
 
         mat4 matrix;
-        matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
+        matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, -1, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
 
         HillshadePrepareDrawableUBO drawableUBO = {
@@ -66,7 +57,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            HillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
+            MLN_STRINGIZE(HillshadePrepareDrawableUBO), &drawableUBO, parameters.context);
     });
 }
 
