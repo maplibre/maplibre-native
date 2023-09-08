@@ -36,8 +36,12 @@ public:
 
     void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
 
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged, std::int64_t frameTimeNanos) override {
-        void(RendererObserver::*f)(RenderMode,bool,bool,std::int64_t) = &RendererObserver::onDidFinishRenderingFrame;
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   std::int64_t frameTimeNanos) override {
+        void (RendererObserver::*f)(
+            RenderMode, bool, bool, std::int64_t) = &RendererObserver::onDidFinishRenderingFrame;
         delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTimeNanos);
     }
 
@@ -78,7 +82,10 @@ public:
         rendererObserver->onDidFinishRenderingFrame(mode, repaintNeeded, placementChanged);
     }
 
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged, std::int64_t frameTimeNanos) override {
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   std::int64_t frameTimeNanos) override {
         if (mode == RenderMode::Full && hasPendingStillImageRequest) {
             stillImage = frontend.readStillImage();
         }

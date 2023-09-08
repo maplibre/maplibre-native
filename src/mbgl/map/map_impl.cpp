@@ -128,11 +128,15 @@ void Map::Impl::onWillStartRenderingFrame() {
     }
 }
 
-void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode, bool needsRepaint, bool placemenChanged, std::int64_t frameTimeNanos) {
+void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
+                                          bool needsRepaint,
+                                          bool placemenChanged,
+                                          std::int64_t frameTimeNanos) {
     rendererFullyLoaded = renderMode == RenderMode::Full;
 
     if (mode == MapMode::Continuous) {
-        observer.onDidFinishRenderingFrame({MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, frameTimeNanos});
+        observer.onDidFinishRenderingFrame(
+            {MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, frameTimeNanos});
 
         if (needsRepaint || transform.inTransition()) {
             onUpdate();

@@ -36,7 +36,10 @@ public:
     virtual void onDidFinishRenderingFrame(RenderMode, bool /*repaint*/, bool /*placementChanged*/) {}
 
     /// End of frame, booleans flags that a repaint is required and that placement changed.
-    virtual void onDidFinishRenderingFrame(RenderMode mode, bool repaint, bool placementChanged, std::int64_t /*frameTimeNanos*/) {
+    virtual void onDidFinishRenderingFrame(RenderMode mode,
+                                           bool repaint,
+                                           bool placementChanged,
+                                           std::int64_t /*frameTimeNanos*/) {
         onDidFinishRenderingFrame(mode, repaint, placementChanged);
     }
 
