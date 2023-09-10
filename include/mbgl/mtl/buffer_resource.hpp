@@ -13,7 +13,13 @@ namespace mtl {
 class BufferResource {
 public:
     BufferResource() = default;
-    BufferResource(MTLDevicePtr, const void*, std::size_t size, NS::UInteger usage);
+    /** @brief Create a new Metal buffer
+        @param device The Metal device on which to create the buffer.
+        @param raw Data to use for the contents of the new buffer.  May be null.
+        @param size The minimum size of the new buffer.  Must be non-zero.
+        @param usage A `MTL::ResourceOptions` value.  Currently, only `ResourceStorageModeShared` is supported.
+     */
+    BufferResource(MTLDevicePtr device, const void* raw, std::size_t size, MTL::ResourceOptions usage);
     BufferResource(const BufferResource&);
     BufferResource(BufferResource&&);
 
