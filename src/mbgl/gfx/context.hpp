@@ -150,7 +150,8 @@ public:
 
     /// `emplaceOrUpdateUniformBuffer` with type inference
     template <typename T>
-    std::enable_if_t<!std::is_pointer_v<T>,bool> emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const T* data) {
+    std::enable_if_t<!std::is_pointer_v<T>, bool> emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr,
+                                                                               const T* data) {
         return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T));
     }
 
