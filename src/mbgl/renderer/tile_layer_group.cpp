@@ -23,6 +23,10 @@ struct TileLayerGroupTileKey {
 };
 
 struct TileLayerGroup::Impl {
+    Impl(std::size_t initialCapacity) {
+        drawablesByTile.reserve(initialCapacity);
+    }
+    
     using TileMap = std::unordered_multimap<TileLayerGroupTileKey, gfx::UniqueDrawable, TileLayerGroupTileKey::hash>;
     TileMap drawablesByTile;
 
@@ -36,7 +40,7 @@ LayerGroupBase::LayerGroupBase(int32_t layerIndex_, std::string name_)
 
 TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
     : LayerGroupBase(layerIndex_, std::move(name_)),
-      impl(std::make_unique<Impl>()) {}
+      impl(std::make_unique<Impl>(initialCapacity)) {}
 
 TileLayerGroup::~TileLayerGroup() = default;
 
