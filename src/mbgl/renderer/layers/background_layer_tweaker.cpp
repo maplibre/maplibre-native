@@ -61,7 +61,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
         const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(MLN_STRINGIZE(BackgroundDrawableUBO), &drawableUBO, context);
+        uniforms.createOrUpdate("BackgroundDrawableUBO", &drawableUBO, context);
 
         if (hasPattern) {
             if (!samplerLocation.has_value()) {
@@ -103,7 +103,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ 0,
             };
-            uniforms.createOrUpdate(MLN_STRINGIZE(BackgroundLayerUBO), &layerUBO, context);
+            uniforms.createOrUpdate("BackgroundLayerUBO", &layerUBO, context);
         } else {
             // UBOs can be shared
             if (!backgroundLayerBuffer) {
@@ -114,7 +114,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
             }
-            uniforms.addOrReplace(MLN_STRINGIZE(BackgroundLayerUBO), backgroundLayerBuffer);
+            uniforms.addOrReplace("BackgroundLayerUBO", backgroundLayerBuffer);
         }
     });
 }

@@ -544,27 +544,23 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             auto& drawableUniforms = drawable.mutableUniformBuffers();
 
             // simple line interpolation UBO
-            if (shaderUniforms.get(MLN_STRINGIZE(LineInterpolationUBO))) {
-                drawableUniforms.createOrUpdate(MLN_STRINGIZE(LineInterpolationUBO), &lineInterpolationUBO, context);
+            if (shaderUniforms.get("LineInterpolationUBO")) {
+                drawableUniforms.createOrUpdate("LineInterpolationUBO", &lineInterpolationUBO, context);
             }
             // gradient line interpolation UBO
-            else if (shaderUniforms.get(MLN_STRINGIZE(LineGradientInterpolationUBO))) {
-                drawableUniforms.createOrUpdate(
-                    MLN_STRINGIZE(LineGradientInterpolationUBO), &lineGradientInterpolationUBO, context);
+            else if (shaderUniforms.get("LineGradientInterpolationUBO")) {
+                drawableUniforms.createOrUpdate("LineGradientInterpolationUBO", &lineGradientInterpolationUBO, context);
             }
             // pattern line interpolation UBO
-            else if (shaderUniforms.get(MLN_STRINGIZE(LinePatternInterpolationUBO))) {
+            else if (shaderUniforms.get("LinePatternInterpolationUBO")) {
                 // interpolation
-                drawableUniforms.createOrUpdate(
-                    MLN_STRINGIZE(LinePatternInterpolationUBO), &linePatternInterpolationUBO, context);
+                drawableUniforms.createOrUpdate("LinePatternInterpolationUBO", &linePatternInterpolationUBO, context);
                 // tile properties
-                drawableUniforms.createOrUpdate(
-                    MLN_STRINGIZE(LinePatternTilePropertiesUBO), &linePatternTilePropertiesUBO, context);
+                drawableUniforms.createOrUpdate("LinePatternTilePropertiesUBO", &linePatternTilePropertiesUBO, context);
             }
             // SDF line interpolation UBO
-            else if (shaderUniforms.get(MLN_STRINGIZE(LineSDFInterpolationUBO))) {
-                drawableUniforms.createOrUpdate(
-                    MLN_STRINGIZE(LineSDFInterpolationUBO), &lineSDFInterpolationUBO, context);
+            else if (shaderUniforms.get("LineSDFInterpolationUBO")) {
+                drawableUniforms.createOrUpdate("LineSDFInterpolationUBO", &lineSDFInterpolationUBO, context);
             }
         });
 
@@ -614,7 +610,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setTileID(tileID);
                 drawable->setData(std::make_unique<gfx::LineDrawableData>(cap));
                 drawable->mutableUniformBuffers().createOrUpdate(
-                    MLN_STRINGIZE(LineSDFInterpolationUBO), &lineSDFInterpolationUBO, context);
+                    "LineSDFInterpolationUBO", &lineSDFInterpolationUBO, context);
 
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
@@ -674,9 +670,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
                     drawable->setTileID(tileID);
                     drawable->mutableUniformBuffers().createOrUpdate(
-                        MLN_STRINGIZE(LinePatternInterpolationUBO), &linePatternInterpolationUBO, context);
+                        "LinePatternInterpolationUBO", &linePatternInterpolationUBO, context);
                     drawable->mutableUniformBuffers().createOrUpdate(
-                        MLN_STRINGIZE(LinePatternTilePropertiesUBO), &linePatternTilePropertiesUBO, context);
+                        "LinePatternTilePropertiesUBO", &linePatternTilePropertiesUBO, context);
 
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.drawablesAdded;
@@ -731,7 +727,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                         drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
                         drawable->setTileID(tileID);
                         drawable->mutableUniformBuffers().createOrUpdate(
-                            MLN_STRINGIZE(LineGradientInterpolationUBO), &lineGradientInterpolationUBO, context);
+                            "LineGradientInterpolationUBO", &lineGradientInterpolationUBO, context);
 
                         tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                         ++stats.drawablesAdded;
@@ -782,7 +778,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Simple));
                 drawable->setTileID(tileID);
                 drawable->mutableUniformBuffers().createOrUpdate(
-                    MLN_STRINGIZE(LineInterpolationUBO), &lineInterpolationUBO, context);
+                    "LineInterpolationUBO", &lineInterpolationUBO, context);
 
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
