@@ -75,21 +75,31 @@ UniqueShaderProgram Context::createProgram(std::string name,
         &rawDefines[numDefines], rawDefines.data(), static_cast<NS::UInteger>(numDefines));
     rawDefines.clear();
 
-    auto options = MTL::CompileOptions::alloc()->init();
+    auto options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
     options->setPreprocessorMacros(nsDefines);
     options->setFastMathEnabled(true);
-    options->setLanguageVersion(MTL::LanguageVersion3_0);
+
+    // TODO: We should specify the language version explicitly, but which one?
+    // v3.0 requires iOS 16
+    // options->setLanguageVersion(MTL::LanguageVersion3_0);
+
+    // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders
+    // instead of duplicating that code in each and every shader compilation.
     options->setLibraryType(MTL::LibraryTypeExecutable);
+
+    // Allows use of the [[invariant]] attribute on position outputs to
+    // guarantee that the GPU performs the calculations the same way.
     options->setPreserveInvariance(true);
-    options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
-    options->setCompileSymbolVisibility(MTL::CompileSymbolVisibilityDefault);
-    options->setAllowReferencingUndefinedSymbols(false);
+
+    // TODO: Allow use of `LibraryOptimizationLevelSize` which "may also reduce compile time"
+    // requires a check for iOS 16+
+    // options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
     NS::Error* error = nullptr;
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
 
     const auto& device = backend.getDevice();
-    MTL::Library* library = device->newLibrary(nsSource, nullptr, &error);
+    MTL::Library* library = device->newLibrary(nsSource, options.get(), &error);
     if (!library || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
