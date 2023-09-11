@@ -143,6 +143,17 @@ public:
 
     /// Resets the context state to defaults
     virtual void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) = 0;
+
+    /// Update the uniform buffer with the provided data if it already exists, otherwise create it.
+    ///  @return True if the buffer was created, false if it was updated
+    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size) = 0;
+
+    /// `emplaceOrUpdateUniformBuffer` with type inference
+    template <typename T>
+    std::enable_if_t<!std::is_pointer_v<T>,bool> emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const T* data) {
+        return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T));
+    }
+
 #endif
 };
 

@@ -432,6 +432,16 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
 }
+
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+    if (buffer) {
+        buffer->update(data, size);
+        return false;
+    } else {
+        buffer = createUniformBuffer(data, size);
+        return true;
+    }
+}
 #endif
 
 void Context::setDirtyState() {
