@@ -108,12 +108,7 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
       mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<MLNMapViewMetalRenderableResource>(*this)) {
 }
 
-MLNMapViewMetalImpl::~MLNMapViewMetalImpl() {
-    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
-    /*if (resource.context && [[EAGLContext currentContext] isEqual:resource.context]) {
-        [EAGLContext setCurrentContext:nil];
-    }*/
-}
+MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;
 
 void MLNMapViewMetalImpl::setOpaque(const bool opaque) {
     auto& resource = getResource<MLNMapViewMetalRenderableResource>();
@@ -147,11 +142,6 @@ void MLNMapViewMetalImpl::createView() {
     if (resource.mtlView) {
         return;
     }
-
-    /*if (!resource.context) {
-        resource.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
-        assert(resource.context);
-    }*/
 
     id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
 
@@ -190,8 +180,6 @@ void MLNMapViewMetalImpl::activate() {
     if (resource.activationCount++) {
         return;
     }
-
-    //[EAGLContext setCurrentContext:resource.context];
 }
 
 void MLNMapViewMetalImpl::deactivate() {
@@ -199,8 +187,6 @@ void MLNMapViewMetalImpl::deactivate() {
     if (--resource.activationCount) {
         return;
     }
-
-    //[EAGLContext setCurrentContext:nil];
 }
 
 /// This function is called before we start rendering, when iOS invokes our rendering method.
