@@ -79,7 +79,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
 
     // TODO: We should specify the language version explicitly, but which one?
     // v3.0 requires iOS 16
-    //options->setLanguageVersion(MTL::LanguageVersion3_0);
+    // options->setLanguageVersion(MTL::LanguageVersion3_0);
 
     // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders
     // instead of duplicating that code in each and every shader compilation.
@@ -91,7 +91,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
 
     // TODO: Allow use of `LibraryOptimizationLevelSize` which "may also reduce compile time"
     // requires a check for iOS 16+
-    //options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
+    // options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
     NS::Error* error = nullptr;
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
