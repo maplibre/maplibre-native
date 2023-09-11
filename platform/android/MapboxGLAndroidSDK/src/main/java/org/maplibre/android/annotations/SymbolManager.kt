@@ -85,8 +85,8 @@ class SymbolManager @UiThread internal constructor(
         mapView: MapView,
         maplibreMap: MapLibreMap,
         style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?,
+        belowLayerId: String? = null,
+        aboveLayerId: String? = null,
         clusterOptions: ClusterOptions
     ) : this(
         mapView,
