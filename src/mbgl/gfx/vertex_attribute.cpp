@@ -92,13 +92,15 @@ void VertexAttributeArray::resolve(const VertexAttributeArray& overrides, Resolv
     for (auto& kv : attrs) {
         delegate(kv.first, *kv.second, overrides.get(kv.first));
     }
-    // #if !defined(NDEBUG)
-    //     // Every override should match a defined attribute.
-    //     for (const auto& kv : overrides.attrs) {
-    //         const auto hit = attrs.find(kv.first);
-    //         assert(hit != attrs.end());
-    //     }
-    // #endif
+#if !MLN_RENDER_BACKEND_METAL // TODO: re-enable when Metal patterns are done
+#if !defined(NDEBUG)
+    // Every override should match a defined attribute.
+    for (const auto& kv : overrides.attrs) {
+        const auto hit = attrs.find(kv.first);
+        assert(hit != attrs.end());
+    }
+#endif
+#endif
 }
 
 const UniqueVertexAttribute& VertexAttributeArray::add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
