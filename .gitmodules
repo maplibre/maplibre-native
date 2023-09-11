@@ -54,4 +54,4 @@
 url=https://github.com/freetype/freetype.git
 [submodule "vendor/harfbuzzFreetype/harfbuzz"]
 	path = vendor/harfbuzzFreetype/harfbuzz
-url=https://github.com/alanchenboy/harfbuzz
+url=https://github.com/harfbuzz/harfbuzz

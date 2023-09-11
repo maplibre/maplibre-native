@@ -61,3 +61,9 @@ install(TARGETS harfbuzzFreetype ARCHIVE DESTINATION lib)
 
 install(FILES freetype_wrap.hpp harfbuzz_wrap.hpp DESTINATION include)
 
+target_compile_options(
+    harfbuzz
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+        $<$<CXX_COMPILER_ID:GNU>:-Wa,-mbig-obj>
+)

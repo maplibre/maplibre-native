@@ -251,6 +251,40 @@ filegroup(
 )
 
 cmake(
+    name = "freetype",
+    lib_source = ":srcs",
+    generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON -DHB_HAVE_FREETYPE=ON -DBAZEL_BUILD=ON"],
+    cache_entries = select({
+        "//conditions:default": {"CMAKE_BUILD_TYPE": "Release"},
+    }),
+    working_directory = "harfbuzzFreetype",
+    out_include_dir = "include",
+    out_static_libs = select({
+        "//conditions:default": ["libfreetype.a"],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+cmake(
+    name = "harfbuzz",
+    lib_source = ":srcs",
+    generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON -DHB_HAVE_FREETYPE=ON -DBAZEL_BUILD=ON"],
+    cache_entries = select({
+        "//conditions:default": {"CMAKE_BUILD_TYPE": "Release"},
+    }),
+    working_directory = "harfbuzzFreetype",
+    out_include_dir = "include",
+    out_static_libs = select({
+        "//conditions:default": ["libharfbuzz.a"],
+    }),
+    visibility = ["//visibility:public"],
+
+    deps = [
+        "freetype"
+    ],
+)
+
+cmake(
     name = "harfbuzzFreetype",
     lib_source = ":srcs",
     generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON -DHB_HAVE_FREETYPE=ON -DBAZEL_BUILD=ON"],
@@ -264,7 +298,12 @@ cmake(
     working_directory = "harfbuzzFreetype",
     out_include_dir = "include",
     out_static_libs = select({
-        "//conditions:default": ["libfreetype.a", "libharfbuzz.a", "libharfbuzz-subset.a", "libharfbuzzFreetype.a"],
+        "//conditions:default": ["libharfbuzzFreetype.a"],
     }),
     visibility = ["//visibility:public"],
+
+    deps = [
+        "freetype",
+        "harfbuzz",
+    ],
 )
