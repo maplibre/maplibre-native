@@ -181,7 +181,7 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
 
 #if MLN_RENDER_BACKEND_METAL
     using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal>;
-    const auto group = staticData.shaders->getShaderGroup(std::string(MLN_STRINGIZE(ClippingMaskProgram)));
+    const auto group = staticData.shaders->getShaderGroup("ClippingMaskProgram");
     if (!group) {
         return;
     }

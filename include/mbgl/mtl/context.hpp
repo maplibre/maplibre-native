@@ -55,10 +55,6 @@ public:
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 
     /*
-    void verifyProgramLinkage(ProgramID);
-    void linkProgram(ProgramID);
-    UniqueTexture createUniqueTexture();
-
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&,
                                   const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&);
@@ -74,40 +70,12 @@ public:
         static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1), "image format mismatch");
         return {size, readFramebuffer(size, format, flip)};
     }
-
-    void clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil);
-
-    void setDepthMode(const gfx::DepthMode&);
-    void setStencilMode(const gfx::StencilMode&);
-    void setColorMode(const gfx::ColorMode&);
-    void setCullFaceMode(const gfx::CullFaceMode&);
-
-    void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
-
-    void finish();
 */
 
     // Actually remove the objects we marked as abandoned with the above methods.
-    // Only call this while the OpenGL context is exclusive to this thread.
-    void performCleanup() override;
+    void performCleanup() override {}
 
-    void reduceMemoryUsage() override;
-
-    /*
-        // Drain pools and remove abandoned objects, in preparation for destroying the store.
-        // Only call this while the OpenGL context is exclusive to this thread.
-        void reset();
-
-        bool empty() const {
-            return pooledTextures.empty() && abandonedPrograms.empty() && abandonedShaders.empty() &&
-                   abandonedBuffers.empty() && abandonedTextures.empty() && abandonedVertexArrays.empty() &&
-                   abandonedFramebuffers.empty();
-        }
-
-        extension::Debugging* getDebuggingExtension() const { return debugging.get(); }
-
-        void setCleanupOnDestruction(bool cleanup) { cleanupOnDestruction = cleanup; }
-    */
+    void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
@@ -138,12 +106,11 @@ public:
                                                                           Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
-/*
-     UniqueFramebuffer createFramebuffer();
-     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
+    /*
+         UniqueFramebuffer createFramebuffer();
+         std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
+    */
 
-     VertexArray createVertexArray();
-*/
 #if !defined(NDEBUG)
     void visualizeStencilBuffer() override;
     void visualizeDepthBuffer(float depthRangeSize) override;

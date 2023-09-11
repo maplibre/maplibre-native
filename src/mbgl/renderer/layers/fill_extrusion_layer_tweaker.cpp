@@ -99,7 +99,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(MLN_STRINGIZE(FillExtrusionDrawablePropsUBO), propsBuffer);
+        uniforms.addOrReplace("FillExtrusionDrawablePropsUBO", propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -143,11 +143,11 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(MLN_STRINGIZE(FillExtrusionDrawableUBO), &drawableUBO, context);
+        uniforms.createOrUpdate("FillExtrusionDrawableUBO", &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
-        uniforms.addOrReplace(MLN_STRINGIZE(FillExtrusionPermutationUBO), permutationUniformBuffer);
+        uniforms.addOrReplace("ExpressionInputsUBO", expressionUniformBuffer);
+        uniforms.addOrReplace("FillExtrusionPermutationUBO", permutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 }

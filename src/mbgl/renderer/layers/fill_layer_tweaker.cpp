@@ -260,35 +260,35 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             return;
         }
 
-        if (uniforms.get(MLN_STRINGIZE(FillInterpolateUBO))) {
+        if (uniforms.get("FillInterpolateUBO")) {
             UpdateFillUniformBuffers();
 
-            uniforms.addOrReplace(MLN_STRINGIZE(FillEvaluatedPropsUBO), fillPropsUniformBuffer);
+            uniforms.addOrReplace("FillEvaluatedPropsUBO", fillPropsUniformBuffer);
             const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
 
-            uniforms.createOrUpdate(MLN_STRINGIZE(FillDrawableUBO), &drawableUBO, context);
+            uniforms.createOrUpdate("FillDrawableUBO", &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace(MLN_STRINGIZE(FillPermutationUBO), fillPermutationUniformBuffer);
+            uniforms.addOrReplace("FillPermutationUBO", fillPermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
-        } else if (uniforms.get(MLN_STRINGIZE(FillOutlineInterpolateUBO))) {
+        } else if (uniforms.get("FillOutlineInterpolateUBO")) {
             UpdateFillOutlineUniformBuffers();
 
-            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlineEvaluatedPropsUBO), fillOutlinePropsUniformBuffer);
+            uniforms.addOrReplace("FillOutlineEvaluatedPropsUBO", fillOutlinePropsUniformBuffer);
             const FillOutlineDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
             };
 
-            uniforms.createOrUpdate(MLN_STRINGIZE(FillOutlineDrawableUBO), &drawableUBO, context);
+            uniforms.createOrUpdate("FillOutlineDrawableUBO", &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlinePermutationUBO), fillOutlinePermutationUniformBuffer);
+            uniforms.addOrReplace("FillOutlinePermutationUBO", fillOutlinePermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
-        } else if (uniforms.get(MLN_STRINGIZE(FillPatternInterpolateUBO))) {
+        } else if (uniforms.get("FillPatternInterpolateUBO")) {
             UpdateFillPatternUniformBuffers();
 
-            uniforms.addOrReplace(MLN_STRINGIZE(FillPatternEvaluatedPropsUBO), fillPatternPropsUniformBuffer);
+            uniforms.addOrReplace("FillPatternEvaluatedPropsUBO", fillPatternPropsUniformBuffer);
             const FillPatternDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
@@ -299,16 +299,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                 0,
             };
 
-            uniforms.createOrUpdate(MLN_STRINGIZE(FillPatternDrawableUBO), &drawableUBO, context);
+            uniforms.createOrUpdate("FillPatternDrawableUBO", &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace(MLN_STRINGIZE(FillPatternPermutationUBO), fillPatternPermutationUniformBuffer);
+            uniforms.addOrReplace("FillPatternPermutationUBO", fillPatternPermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
-        } else if (uniforms.get(MLN_STRINGIZE(FillOutlinePatternInterpolateUBO))) {
+        } else if (uniforms.get("FillOutlinePatternInterpolateUBO")) {
             UpdateFillOutlinePatternUniformBuffers();
 
-            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlinePatternEvaluatedPropsUBO),
-                                  fillOutlinePatternPropsUniformBuffer);
+            uniforms.addOrReplace("FillOutlinePatternEvaluatedPropsUBO", fillOutlinePatternPropsUniformBuffer);
             const FillOutlinePatternDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
@@ -318,16 +317,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
             };
 
-            uniforms.createOrUpdate(MLN_STRINGIZE(FillOutlinePatternDrawableUBO), &drawableUBO, context);
+            uniforms.createOrUpdate("FillOutlinePatternDrawableUBO", &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace(MLN_STRINGIZE(FillOutlinePatternPermutationUBO),
-                                  fillOutlinePatternPermutationUniformBuffer);
+            uniforms.addOrReplace("FillOutlinePatternPermutationUBO", fillOutlinePatternPermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
         }
 
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
+        uniforms.addOrReplace("ExpressionInputsUBO", expressionUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 

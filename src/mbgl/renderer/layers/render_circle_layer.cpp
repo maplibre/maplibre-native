@@ -373,7 +373,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(MLN_STRINGIZE(CircleInterpolateUBO), &interpolateUBO, context);
+            uniforms.createOrUpdate("CircleInterpolateUBO", &interpolateUBO, context);
         };
         if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
@@ -433,7 +433,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
 
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.addOrReplace(MLN_STRINGIZE(CircleInterpolateUBO), interpBuffer);
+            uniforms.addOrReplace("CircleInterpolateUBO", interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

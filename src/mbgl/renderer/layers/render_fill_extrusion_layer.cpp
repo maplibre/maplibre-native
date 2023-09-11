@@ -293,10 +293,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!fillExtrusionGroup) {
-        fillExtrusionGroup = shaders.getShaderGroup(MLN_STRINGIZE(FillExtrusionShader));
+        fillExtrusionGroup = shaders.getShaderGroup("FillExtrusionShader");
     }
     if (!fillExtrusionPatternGroup) {
-        fillExtrusionPatternGroup = shaders.getShaderGroup(MLN_STRINGIZE(FillExtrusionPatternShader));
+        fillExtrusionPatternGroup = shaders.getShaderGroup("FillExtrusionPatternShader");
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
@@ -390,8 +390,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
                 auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate(MLN_STRINGIZE(FillExtrusionDrawableTilePropsUBO), &tilePropsUBO, context);
-                uniforms.createOrUpdate(MLN_STRINGIZE(FillExtrusionInterpolateUBO), &interpUBO, context);
+                uniforms.createOrUpdate("FillExtrusionDrawableTilePropsUBO", &tilePropsUBO, context);
+                uniforms.createOrUpdate("FillExtrusionInterpolateUBO", &interpUBO, context);
             });
             continue;
         }
@@ -502,8 +502,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setTileID(tileID);
 
                 auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(MLN_STRINGIZE(FillExtrusionDrawableTilePropsUBO), &tilePropsUBO, context);
-                uniforms.createOrUpdate(MLN_STRINGIZE(FillExtrusionInterpolateUBO), &interpUBO, context);
+                uniforms.createOrUpdate("FillExtrusionDrawableTilePropsUBO", &tilePropsUBO, context);
+                uniforms.createOrUpdate("FillExtrusionInterpolateUBO", &interpUBO, context);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

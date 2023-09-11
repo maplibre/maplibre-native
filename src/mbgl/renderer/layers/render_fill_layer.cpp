@@ -527,20 +527,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
             auto& uniforms = drawable.mutableUniformBuffers();
-            if (uniforms.get(MLN_STRINGIZE(FillInterpolateUBO))) {
-                uniforms.createOrUpdate(MLN_STRINGIZE(FillInterpolateUBO), &getFillInterpolateUBO(), context);
-            } else if (uniforms.get(MLN_STRINGIZE(FillOutlineInterpolateUBO))) {
+            if (uniforms.get("FillInterpolateUBO")) {
+                uniforms.createOrUpdate("FillInterpolateUBO", &getFillInterpolateUBO(), context);
+            } else if (uniforms.get("FillOutlineInterpolateUBO")) {
+                uniforms.createOrUpdate("FillOutlineInterpolateUBO", &getFillOutlineInterpolateUBO(), context);
+            } else if (uniforms.get("FillPatternInterpolateUBO")) {
+                uniforms.createOrUpdate("FillPatternInterpolateUBO", &getFillPatternInterpolateUBO(), context);
+                uniforms.createOrUpdate("FillPatternTilePropsUBO", &getFillPatternTilePropsUBO(), context);
+            } else if (uniforms.get("FillOutlinePatternInterpolateUBO")) {
                 uniforms.createOrUpdate(
-                    MLN_STRINGIZE(FillOutlineInterpolateUBO), &getFillOutlineInterpolateUBO(), context);
-            } else if (uniforms.get(MLN_STRINGIZE(FillPatternInterpolateUBO))) {
+                    "FillOutlinePatternInterpolateUBO", &getFillOutlinePatternInterpolateUBO(), context);
                 uniforms.createOrUpdate(
-                    MLN_STRINGIZE(FillPatternInterpolateUBO), &getFillPatternInterpolateUBO(), context);
-                uniforms.createOrUpdate(MLN_STRINGIZE(FillPatternTilePropsUBO), &getFillPatternTilePropsUBO(), context);
-            } else if (uniforms.get(MLN_STRINGIZE(FillOutlinePatternInterpolateUBO))) {
-                uniforms.createOrUpdate(
-                    MLN_STRINGIZE(FillOutlinePatternInterpolateUBO), &getFillOutlinePatternInterpolateUBO(), context);
-                uniforms.createOrUpdate(
-                    MLN_STRINGIZE(FillOutlinePatternTilePropsUBO), &getFillOutlinePatternTilePropsUBO(), context);
+                    "FillOutlinePatternTilePropsUBO", &getFillOutlinePatternTilePropsUBO(), context);
             } else {
                 assert(false);
             }
@@ -622,7 +620,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
-                finish(*fillBuilder, MLN_STRINGIZE(FillInterpolateUBO), getFillInterpolateUBO());
+                finish(*fillBuilder, "FillInterpolateUBO", getFillInterpolateUBO());
             }
             if (outlineBuilder && bucket.sharedLines->elements()) {
                 outlineBuilder->setShader(outlineShader);
@@ -630,7 +628,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
-                finish(*outlineBuilder, MLN_STRINGIZE(FillOutlineInterpolateUBO), getFillOutlineInterpolateUBO());
+                finish(*outlineBuilder, "FillOutlineInterpolateUBO", getFillOutlineInterpolateUBO());
             }
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {
@@ -723,9 +721,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                             bucket.triangleSegments.size());
 
                 finish(*patternBuilder,
-                       MLN_STRINGIZE(FillPatternInterpolateUBO),
+                       "FillPatternInterpolateUBO",
                        getFillPatternInterpolateUBO(),
-                       MLN_STRINGIZE(FillPatternTilePropsUBO),
+                       "FillPatternTilePropsUBO",
                        getFillPatternTilePropsUBO());
             }
             if (outlinePatternBuilder) {
@@ -737,9 +735,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
 
                 finish(*outlinePatternBuilder,
-                       MLN_STRINGIZE(FillOutlinePatternInterpolateUBO),
+                       "FillOutlinePatternInterpolateUBO",
                        getFillOutlinePatternInterpolateUBO(),
-                       MLN_STRINGIZE(FillOutlinePatternTilePropsUBO),
+                       "FillOutlinePatternTilePropsUBO",
                        getFillOutlinePatternTilePropsUBO());
             }
         }
