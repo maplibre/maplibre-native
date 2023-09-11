@@ -34,12 +34,10 @@ Context::Context(RendererBackend& backend_)
       stats() {}
 
 Context::~Context() noexcept {
-    /*
-        if (cleanupOnDestruction) {
-            reset();
-            assert(stats.isZero());
-        }
-     */
+    if (cleanupOnDestruction) {
+        performCleanup();
+        assert(stats.isZero());
+    }
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
@@ -86,7 +84,6 @@ UniqueShaderProgram Context::createProgram(std::string name,
     options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
     options->setCompileSymbolVisibility(MTL::CompileSymbolVisibilityDefault);
     options->setAllowReferencingUndefinedSymbols(false);
-    // options->setMaxTotalThreadsPerThreadgroup(NS::UInteger);
 
     NS::Error* error = nullptr;
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
@@ -132,10 +129,6 @@ MTLTexturePtr Context::createMetalTexture(MTLTextureDescriptorPtr textureDescrip
 MTLSamplerStatePtr Context::createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const {
     return NS::TransferPtr(backend.getDevice()->newSamplerState(samplerDescriptor.get()));
 }
-
-void Context::performCleanup() {}
-
-void Context::reduceMemoryUsage() {}
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));

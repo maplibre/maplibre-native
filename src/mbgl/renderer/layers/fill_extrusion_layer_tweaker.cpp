@@ -96,7 +96,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(MLN_STRINGIZE(FillExtrusionDrawablePropsUBO), propsBuffer);
+        uniforms.addOrReplace("FillExtrusionDrawablePropsUBO", propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -140,7 +140,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(MLN_STRINGIZE(FillExtrusionDrawableUBO), &drawableUBO, context);
+        uniforms.createOrUpdate("FillExtrusionDrawableUBO", &drawableUBO, context);
     });
 }
 

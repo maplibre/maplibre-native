@@ -44,9 +44,7 @@ class MLNMapViewMetalRenderableResource final : public mbgl::mtl::RenderableReso
 public:
     MLNMapViewMetalRenderableResource(MLNMapViewMetalImpl& backend_)
         : backend(backend_),
-          delegate([[MLNMapViewImplDelegate alloc] initWithImpl:&backend]),
-          atLeastiOS_12_2_0([NSProcessInfo.processInfo
-              isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){ 12, 2, 0 }]) {
+          delegate([[MLNMapViewImplDelegate alloc] initWithImpl:&backend]) {
     }
 
     void bind() override {
@@ -98,7 +96,6 @@ public:
     id<CAMetalDrawable> currentDrawable;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
-    const bool atLeastiOS_12_2_0;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
     // after the activation count drops to 0.
@@ -111,12 +108,7 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
       mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<MLNMapViewMetalRenderableResource>(*this)) {
 }
 
-MLNMapViewMetalImpl::~MLNMapViewMetalImpl() {
-    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
-    /*if (resource.context && [[EAGLContext currentContext] isEqual:resource.context]) {
-        [EAGLContext setCurrentContext:nil];
-    }*/
-}
+MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;
 
 void MLNMapViewMetalImpl::setOpaque(const bool opaque) {
     auto& resource = getResource<MLNMapViewMetalRenderableResource>();
@@ -150,11 +142,6 @@ void MLNMapViewMetalImpl::createView() {
     if (resource.mtlView) {
         return;
     }
-
-    /*if (!resource.context) {
-        resource.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
-        assert(resource.context);
-    }*/
 
     id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
 
@@ -193,8 +180,6 @@ void MLNMapViewMetalImpl::activate() {
     if (resource.activationCount++) {
         return;
     }
-
-    //[EAGLContext setCurrentContext:resource.context];
 }
 
 void MLNMapViewMetalImpl::deactivate() {
@@ -202,8 +187,6 @@ void MLNMapViewMetalImpl::deactivate() {
     if (--resource.activationCount) {
         return;
     }
-
-    //[EAGLContext setCurrentContext:nil];
 }
 
 /// This function is called before we start rendering, when iOS invokes our rendering method.
