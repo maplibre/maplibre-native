@@ -549,22 +549,18 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
             // gradient line interpolation UBO
             else if (shaderUniforms.get("LineGradientInterpolationUBO")) {
-                drawableUniforms.createOrUpdate(
-                    "LineGradientInterpolationUBO", &lineGradientInterpolationUBO, context);
+                drawableUniforms.createOrUpdate("LineGradientInterpolationUBO", &lineGradientInterpolationUBO, context);
             }
             // pattern line interpolation UBO
             else if (shaderUniforms.get("LinePatternInterpolationUBO")) {
                 // interpolation
-                drawableUniforms.createOrUpdate(
-                    "LinePatternInterpolationUBO", &linePatternInterpolationUBO, context);
+                drawableUniforms.createOrUpdate("LinePatternInterpolationUBO", &linePatternInterpolationUBO, context);
                 // tile properties
-                drawableUniforms.createOrUpdate(
-                    "LinePatternTilePropertiesUBO", &linePatternTilePropertiesUBO, context);
+                drawableUniforms.createOrUpdate("LinePatternTilePropertiesUBO", &linePatternTilePropertiesUBO, context);
             }
             // SDF line interpolation UBO
             else if (shaderUniforms.get("LineSDFInterpolationUBO")) {
-                drawableUniforms.createOrUpdate(
-                    "LineSDFInterpolationUBO", &lineSDFInterpolationUBO, context);
+                drawableUniforms.createOrUpdate("LineSDFInterpolationUBO", &lineSDFInterpolationUBO, context);
             }
         });
 

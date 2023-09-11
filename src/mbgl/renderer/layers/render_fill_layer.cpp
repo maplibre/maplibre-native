@@ -530,11 +530,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (uniforms.get("FillInterpolateUBO")) {
                 uniforms.createOrUpdate("FillInterpolateUBO", &getFillInterpolateUBO(), context);
             } else if (uniforms.get("FillOutlineInterpolateUBO")) {
-                uniforms.createOrUpdate(
-                    "FillOutlineInterpolateUBO", &getFillOutlineInterpolateUBO(), context);
+                uniforms.createOrUpdate("FillOutlineInterpolateUBO", &getFillOutlineInterpolateUBO(), context);
             } else if (uniforms.get("FillPatternInterpolateUBO")) {
-                uniforms.createOrUpdate(
-                    "FillPatternInterpolateUBO", &getFillPatternInterpolateUBO(), context);
+                uniforms.createOrUpdate("FillPatternInterpolateUBO", &getFillPatternInterpolateUBO(), context);
                 uniforms.createOrUpdate("FillPatternTilePropsUBO", &getFillPatternTilePropsUBO(), context);
             } else if (uniforms.get("FillOutlinePatternInterpolateUBO")) {
                 uniforms.createOrUpdate(

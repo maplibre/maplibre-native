@@ -68,9 +68,9 @@ public:
 */
 
     // Actually remove the objects we marked as abandoned with the above methods.
-    void performCleanup() override { }
+    void performCleanup() override {}
 
-    void reduceMemoryUsage() override { }
+    void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
@@ -101,10 +101,10 @@ public:
                                                                           Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
-/*
-     UniqueFramebuffer createFramebuffer();
-     std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
-*/
+    /*
+         UniqueFramebuffer createFramebuffer();
+         std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
+    */
 
 #if !defined(NDEBUG)
     void visualizeStencilBuffer() override;

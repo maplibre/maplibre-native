@@ -307,8 +307,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         } else if (uniforms.get("FillOutlinePatternInterpolateUBO")) {
             UpdateFillOutlinePatternUniformBuffers();
 
-            uniforms.addOrReplace("FillOutlinePatternEvaluatedPropsUBO",
-                                  fillOutlinePatternPropsUniformBuffer);
+            uniforms.addOrReplace("FillOutlinePatternEvaluatedPropsUBO", fillOutlinePatternPropsUniformBuffer);
             const FillOutlinePatternDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
@@ -321,8 +320,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             uniforms.createOrUpdate("FillOutlinePatternDrawableUBO", &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace("FillOutlinePatternPermutationUBO",
-                                  fillOutlinePatternPermutationUniformBuffer);
+            uniforms.addOrReplace("FillOutlinePatternPermutationUBO", fillOutlinePatternPermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
         }
 
