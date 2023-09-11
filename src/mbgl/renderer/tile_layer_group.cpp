@@ -23,10 +23,8 @@ struct TileLayerGroupTileKey {
 };
 
 struct TileLayerGroup::Impl {
-    Impl(std::size_t initialCapacity) {
-        drawablesByTile.reserve(initialCapacity);
-    }
-    
+    Impl(std::size_t initialCapacity) { drawablesByTile.reserve(initialCapacity); }
+
     using TileMap = std::unordered_multimap<TileLayerGroupTileKey, gfx::UniqueDrawable, TileLayerGroupTileKey::hash>;
     TileMap drawablesByTile;
 
