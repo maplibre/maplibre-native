@@ -44,9 +44,7 @@ class MLNMapViewMetalRenderableResource final : public mbgl::mtl::RenderableReso
 public:
     MLNMapViewMetalRenderableResource(MLNMapViewMetalImpl& backend_)
         : backend(backend_),
-          delegate([[MLNMapViewImplDelegate alloc] initWithImpl:&backend]),
-          atLeastiOS_12_2_0([NSProcessInfo.processInfo
-              isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){ 12, 2, 0 }]) {
+          delegate([[MLNMapViewImplDelegate alloc] initWithImpl:&backend]) {
     }
 
     void bind() override {
@@ -98,7 +96,6 @@ public:
     id<CAMetalDrawable> currentDrawable;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
-    const bool atLeastiOS_12_2_0;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
     // after the activation count drops to 0.

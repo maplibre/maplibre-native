@@ -50,10 +50,6 @@ public:
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 
     /*
-    void verifyProgramLinkage(ProgramID);
-    void linkProgram(ProgramID);
-    UniqueTexture createUniqueTexture();
-
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&,
                                   const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
     Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&);
@@ -69,19 +65,12 @@ public:
         static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1), "image format mismatch");
         return {size, readFramebuffer(size, format, flip)};
     }
-
-    void setDepthMode(const gfx::DepthMode&);
-    void setStencilMode(const gfx::StencilMode&);
-    void setColorMode(const gfx::ColorMode&);
-    void setCullFaceMode(const gfx::CullFaceMode&);
-
 */
 
     // Actually remove the objects we marked as abandoned with the above methods.
-    // Only call this while the Metal context is exclusive to this thread.
-    void performCleanup() override;
+    void performCleanup() override { }
 
-    void reduceMemoryUsage() override;
+    void reduceMemoryUsage() override { }
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
     gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
@@ -115,9 +104,8 @@ public:
 /*
      UniqueFramebuffer createFramebuffer();
      std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
-
-     VertexArray createVertexArray();
 */
+
 #if !defined(NDEBUG)
     void visualizeStencilBuffer() override;
     void visualizeDepthBuffer(float depthRangeSize) override;

@@ -165,8 +165,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
 
-                uniforms.createOrUpdate(MLN_STRINGIZE(LineUBO), &lineUBO, context);
-                uniforms.addOrReplace(MLN_STRINGIZE(LinePropertiesUBO), getLinePropsBuffer());
+                uniforms.createOrUpdate("LineUBO", &lineUBO, context);
+                uniforms.addOrReplace("LinePropertiesUBO", getLinePropsBuffer());
             } break;
 
             case LineType::Gradient: {
@@ -175,8 +175,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
-                uniforms.createOrUpdate(MLN_STRINGIZE(LineGradientUBO), &lineGradientUBO, context);
-                uniforms.addOrReplace(MLN_STRINGIZE(LineGradientPropertiesUBO), getLineGradientPropsBuffer());
+                uniforms.createOrUpdate("LineGradientUBO", &lineGradientUBO, context);
+                uniforms.addOrReplace("LineGradientPropertiesUBO", getLineGradientPropsBuffer());
             } break;
 
             case LineType::Pattern: {
@@ -198,9 +198,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*device_pixel_ratio =*/parameters.pixelRatio,
                     /*fade =*/crossfade.t,
                     0};
-                uniforms.createOrUpdate(MLN_STRINGIZE(LinePatternUBO), &linePatternUBO, context);
+                uniforms.createOrUpdate("LinePatternUBO", &linePatternUBO, context);
 
-                uniforms.addOrReplace(MLN_STRINGIZE(LinePatternPropertiesUBO), getLinePatternPropsBuffer());
+                uniforms.addOrReplace("LinePatternPropertiesUBO", getLinePatternPropsBuffer());
             } break;
 
             case LineType::SDF: {
@@ -241,9 +241,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                         /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
                             (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
                         /* mix = */ crossfade.t};
-                    uniforms.createOrUpdate(MLN_STRINGIZE(LineSDFUBO), &lineSDFUBO, context);
+                    uniforms.createOrUpdate("LineSDFUBO", &lineSDFUBO, context);
 
-                    uniforms.addOrReplace(MLN_STRINGIZE(LineSDFPropertiesUBO), getLineSDFPropsBuffer());
+                    uniforms.addOrReplace("LineSDFPropertiesUBO", getLineSDFPropsBuffer());
                 }
             } break;
 
@@ -255,8 +255,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
 
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
-        uniforms.addOrReplace(MLN_STRINGIZE(LinePermutationUBO), permutationUniformBuffer);
+        uniforms.addOrReplace("ExpressionInputsUBO", expressionUniformBuffer);
+        uniforms.addOrReplace("LinePermutationUBO", permutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 }
