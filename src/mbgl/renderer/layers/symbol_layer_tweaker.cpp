@@ -137,8 +137,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (isText && (!textPaintBuffer || propertiesUpdated)) {
             const auto props = buildPaintUBO(true, evaluated);
             textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
-        }
-        else if (!isText && (!iconPaintBuffer || propertiesUpdated)) {
+        } else if (!isText && (!iconPaintBuffer || propertiesUpdated)) {
             const auto props = buildPaintUBO(false, evaluated);
             iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
         }
