@@ -16,7 +16,7 @@ jobs:
         ]
       fail-fast: true
     runs-on: ubuntu-22.04
-    if: github.repository_owner == 'maplibre'
+    if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
 
