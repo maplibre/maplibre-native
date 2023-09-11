@@ -76,7 +76,7 @@ public:
     /// @param stride_ the vertex attribute stride
     VertexAttribute(int index_, AttributeDataType dataType_, std::size_t count_, std::size_t stride_)
         : index(index_),
-          stride((int)stride_),
+          stride(stride_),
           dataType(dataType_),
           items(count_) {}
     VertexAttribute(const VertexAttribute& other)
@@ -248,7 +248,7 @@ protected:
 
 protected:
     int index;
-    int stride;
+    std::size_t stride;
 
     /// indicates that a value has changed and any cached result should be discarded
     mutable bool dirty = true;
