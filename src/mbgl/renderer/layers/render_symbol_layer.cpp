@@ -1084,78 +1084,76 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
         auto addCollisionDrawables = [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
-                if (!hasCollisionBox && !hasCollisionCircle) return;
+            if (!hasCollisionBox && !hasCollisionCircle) return;
 
-                const auto& group = getCollisionTileLayerGroup();
-                if (!group) {
-                    return;
-                }
+            const auto& group = getCollisionTileLayerGroup();
+            if (!group) {
+                return;
+            }
 
-                const auto& layout = *bucket.layout;
-                const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-                const auto values = isText ? textPropertyValues(evaluated, layout)
-                                           : iconPropertyValues(evaluated, layout);
-                const std::string suffix = isText ? "text/" : "icon/";
+            const auto& layout = *bucket.layout;
+            const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
+            const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+            const std::string suffix = isText ? "text/" : "icon/";
 
-                auto addVertices = [&collisionBuilder](const auto& vertices, bool staticCopy) {
-                    if (staticCopy) {
-                        std::vector<std::array<int16_t, 2>> verts(vertices.size());
-                        std::transform(vertices.begin(),
-                                       vertices.end(),
-                                       verts.begin(),
-                                       [](const auto& v) -> std::array<int16_t, 2> { return v.a1; });
-                        collisionBuilder->addVertices(verts, 0, verts.size());
-                    } else {
-                        collisionBuilder->setRawVertices({}, vertices.size(), gfx::AttributeDataType::Short2);
-                    }
-                };
-
-                constexpr bool staticVertexAndAttributes = true;
-
-                if (hasCollisionBox) {
-                    const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
-                    if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                            collisionBoxGroup->getOrCreateShader(context, {}, CollisionPosAttribName))) {
-                        collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
-                        collisionBuilder->setShader(shader);
-                        addVertices(collisionBox->vertices().vector(), staticVertexAndAttributes);
-                        collisionBuilder->setVertexAttributes(
-                            getCollisionVertexAttributes(*collisionBox, staticVertexAndAttributes));
-                        collisionBuilder->setSegments(gfx::Lines(1.0f),
-                                                      collisionBox->sharedLines,
-                                                      collisionBox->segments.data(),
-                                                      collisionBox->segments.size());
-                        collisionBuilder->flush();
-                    }
-                }
-
-                if (hasCollisionCircle) {
-                    const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
-                    if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                            collisionCircleGroup->getOrCreateShader(context, {}, CollisionPosAttribName))) {
-                        collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
-                        collisionBuilder->setShader(shader);
-                        addVertices(collisionCircle->vertices().vector(), staticVertexAndAttributes);
-                        collisionBuilder->setVertexAttributes(
-                            getCollisionVertexAttributes(*collisionCircle, staticVertexAndAttributes));
-                        collisionBuilder->setSegments(gfx::Triangles(),
-                                                      collisionCircle->sharedTriangles,
-                                                      collisionCircle->segments.data(),
-                                                      collisionCircle->segments.size());
-                        collisionBuilder->flush();
-                    }
-                }
-
-                // add drawables to layer group
-                for (auto& drawable : collisionBuilder->clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate,
-                                                                                 values.translateAnchor);
-                    drawable->setData(std::move(drawData));
-                    group->addDrawable(passes, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
+            auto addVertices = [&collisionBuilder](const auto& vertices, bool staticCopy) {
+                if (staticCopy) {
+                    std::vector<std::array<int16_t, 2>> verts(vertices.size());
+                    std::transform(
+                        vertices.begin(), vertices.end(), verts.begin(), [](const auto& v) -> std::array<int16_t, 2> {
+                            return v.a1;
+                        });
+                    collisionBuilder->addVertices(verts, 0, verts.size());
+                } else {
+                    collisionBuilder->setRawVertices({}, vertices.size(), gfx::AttributeDataType::Short2);
                 }
             };
+
+            constexpr bool staticVertexAndAttributes = true;
+
+            if (hasCollisionBox) {
+                const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
+                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                        collisionBoxGroup->getOrCreateShader(context, {}, CollisionPosAttribName))) {
+                    collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
+                    collisionBuilder->setShader(shader);
+                    addVertices(collisionBox->vertices().vector(), staticVertexAndAttributes);
+                    collisionBuilder->setVertexAttributes(
+                        getCollisionVertexAttributes(*collisionBox, staticVertexAndAttributes));
+                    collisionBuilder->setSegments(gfx::Lines(1.0f),
+                                                  collisionBox->sharedLines,
+                                                  collisionBox->segments.data(),
+                                                  collisionBox->segments.size());
+                    collisionBuilder->flush();
+                }
+            }
+
+            if (hasCollisionCircle) {
+                const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
+                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                        collisionCircleGroup->getOrCreateShader(context, {}, CollisionPosAttribName))) {
+                    collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
+                    collisionBuilder->setShader(shader);
+                    addVertices(collisionCircle->vertices().vector(), staticVertexAndAttributes);
+                    collisionBuilder->setVertexAttributes(
+                        getCollisionVertexAttributes(*collisionCircle, staticVertexAndAttributes));
+                    collisionBuilder->setSegments(gfx::Triangles(),
+                                                  collisionCircle->sharedTriangles,
+                                                  collisionCircle->segments.data(),
+                                                  collisionCircle->segments.size());
+                    collisionBuilder->flush();
+                }
+            }
+
+            // add drawables to layer group
+            for (auto& drawable : collisionBuilder->clearDrawables()) {
+                drawable->setTileID(tileID);
+                auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
+                drawable->setData(std::move(drawData));
+                group->addDrawable(passes, tileID, std::move(drawable));
+                ++stats.drawablesAdded;
+            }
+        };
 
         // If we already have drawables for this tile, update them.
         if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
