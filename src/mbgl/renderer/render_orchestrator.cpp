@@ -843,10 +843,10 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
         }
     }
     if (found) {
-        return false;   // not added
+        return false; // not added
     } else {
         layerGroupsByLayerIndex.insert(std::make_pair(index, std::move(layerGroup)));
-        return true;    // added
+        return true; // added
     }
 }
 
