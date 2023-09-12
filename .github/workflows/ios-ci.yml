@@ -127,6 +127,7 @@ jobs:
         if: ${{ matrix.renderer }} = "legacy"
         uses: actions/upload-artifact@v3
         with:
+          if-no-files-found: error
           name: size-test-result
           path: |
             ./size
@@ -155,6 +156,7 @@ jobs:
         with:
           name: ios-render-test
           retention-days: 3
+          if-no-files-found: error
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
@@ -183,6 +185,7 @@ jobs:
         with:
           name: ios-cpp-unit-tests
           retention-days: 3
+          if-no-files-found: error
           path: |
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
