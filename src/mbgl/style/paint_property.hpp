@@ -7,9 +7,14 @@
 #include <mbgl/renderer/cross_faded_property_evaluator.hpp>
 #include <mbgl/renderer/data_driven_property_evaluator.hpp>
 
+#include <array>
+#include <optional>
 #include <utility>
 
 namespace mbgl {
+
+using StringIdentity = std::size_t;
+
 namespace style {
 
 template <class T>
@@ -41,7 +46,11 @@ public:
     using UniformList = TypeList<U>;
 
     static constexpr const std::array<std::string_view, 1> AttributeNames = {A::name()};
+    static std::array<std::optional<StringIdentity>, 1> AttributeNameIDs;
 };
+
+template <class T, class A, class U, bool B>
+std::array<std::optional<StringIdentity>, 1> DataDrivenPaintProperty<T,A,U,B>::AttributeNameIDs = {std::nullopt};
 
 template <class T, class A1, class U1, class A2, class U2>
 class CrossFadedDataDrivenPaintProperty {
@@ -60,7 +69,11 @@ public:
     using UniformList = TypeList<U1, U2>;
 
     static constexpr const std::array<std::string_view, 2> AttributeNames = {A1::name(), A2::name()};
+    static std::array<std::optional<StringIdentity>, 2> AttributeNameIDs;
 };
+
+template <class T, class A1, class U1, class A2, class U2>
+std::array<std::optional<StringIdentity>, 2> CrossFadedDataDrivenPaintProperty<T,A1,U1,A2,U2>::AttributeNameIDs = {std::nullopt,std::nullopt};
 
 template <class T>
 class CrossFadedPaintProperty {
