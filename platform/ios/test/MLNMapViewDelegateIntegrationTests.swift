@@ -59,7 +59,7 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapView(_ mapView: MLNMapView, tapOnCalloutFor annotation: MLNAnnotation) {}
 
-    func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool) {}
+    func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool, frameTime: Double) {}
     
     func mapView(_ mapView: MLNMapView, shapeAnnotationIsEnabled annotation: MLNShape) -> Bool { return false }
 
