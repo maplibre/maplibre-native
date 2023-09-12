@@ -356,10 +356,15 @@ public:
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (
             [&](const auto& attributeNames) {
+                assert(attributeNames.size() <= 2);
+                using namespace std::string_literals;
+                const auto index1 = 1 % attributeNames.size();
+                static const std::array<StringIdentity, 2> attributeNameIds {{ StringIndexer::get("a_"s + std::string(attributeNames[0])), StringIndexer::get("a_"s + std::string(attributeNames[index1])) }};
+                
                 for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
-                    using namespace std::string_literals;
                     const auto& attributeName = std::string(attributeNames[attrIndex]);
-                    static const StringIdentity attributeNameId = StringIndexer::get("a_"s + attributeName);
+                    const StringIdentity attributeNameId = attributeNameIds[attrIndex];
+                    
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
