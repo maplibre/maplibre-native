@@ -21,6 +21,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapView(_ mapView: MLNMapView, alphaForShapeAnnotation annotation: MLNShape) -> CGFloat { return 0 }
 
+    func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool) {}
+
     func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool, frameTime: Double) {}
 
     func mapViewDidFinishRenderingMap(_ mapView: MLNMapView, fullyRendered: Bool) {}
