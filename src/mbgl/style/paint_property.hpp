@@ -50,7 +50,7 @@ public:
 };
 
 template <class T, class A, class U, bool B>
-std::array<std::optional<StringIdentity>, 1> DataDrivenPaintProperty<T,A,U,B>::AttributeNameIDs = {std::nullopt};
+std::array<std::optional<StringIdentity>, 1> DataDrivenPaintProperty<T, A, U, B>::AttributeNameIDs = {std::nullopt};
 
 template <class T, class A1, class U1, class A2, class U2>
 class CrossFadedDataDrivenPaintProperty {
@@ -73,7 +73,8 @@ public:
 };
 
 template <class T, class A1, class U1, class A2, class U2>
-std::array<std::optional<StringIdentity>, 2> CrossFadedDataDrivenPaintProperty<T,A1,U1,A2,U2>::AttributeNameIDs = {std::nullopt,std::nullopt};
+std::array<std::optional<StringIdentity>, 2> CrossFadedDataDrivenPaintProperty<T, A1, U1, A2, U2>::AttributeNameIDs = {
+    std::nullopt, std::nullopt};
 
 template <class T>
 class CrossFadedPaintProperty {
