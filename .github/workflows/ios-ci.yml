@@ -5,37 +5,47 @@ on:
   push:
     branches:
       - main
-      - topic/drawable
     tags:
       - 'ios-*'
-    paths:
-      - CMakeLists.txt
-      - 'platform/ios/**'
-      - 'platform/darwin/**'
-      - ".github/workflows/ios-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
-      - WORKSPACE
-      - BUILD.bazel
-      - .bazelrc
-      - .bazelversion
   
   pull_request:
     branches:
       - '*'
 
 jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          paths: |
+            ["CMakeLists.txt",
+            "platform/ios/**",
+            "platform/darwin/**",
+            ".github/workflows/ios-ci.yml",
+            "bin/**",
+            "expression-test/**",
+            "include/**",
+            "metrics/**",
+            "platform/default/**",
+            "render-test/**",
+            "scripts/**",
+            "src/**",
+            "test/**",
+            "vendor/**",
+            ".gitmodules",
+            "!**/*.md",
+            "WORKSPACE",
+            "BUILD.bazel",
+            ".bazelrc",
+            ".bazelversion"]
+
   ios-build:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -86,27 +96,6 @@ jobs:
       - name: npm install
         run: npm ci --ignore-scripts
 
-      - name: Prepare ccache
-        run: ccache --clear
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
-
       - name: Generate app plists
         working-directory: ./
         run: bash platform/ios/scripts/bazel-generate-plists.sh
@@ -114,16 +103,16 @@ jobs:
       - run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Check debug symbols
-        run: bazel run //platform:check-public-symbols
+        run: bazel run //platform:check-public-symbols --//:renderer=${{ matrix.renderer }}
 
       - name: Lint plist files
-        run: bazel run //platform/ios:lint-plists
+        run: bazel run //platform/ios:lint-plists --//:renderer=${{ matrix.renderer }}
 
       - name: Running iOS tests
-        run: bazel test //platform/ios/test:ios_test --test_output=errors
+        run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=${{ matrix.renderer }}
 
       - name: Running iOS UI tests
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=${{ matrix.renderer }}
 
       # size test
 
@@ -138,6 +127,7 @@ jobs:
         if: ${{ matrix.renderer }} = "legacy"
         uses: actions/upload-artifact@v3
         with:
+          if-no-files-found: error
           name: size-test-result
           path: |
             ./size
@@ -166,6 +156,7 @@ jobs:
         with:
           name: ios-render-test
           retention-days: 3
+          if-no-files-found: error
           path: |
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
@@ -173,6 +164,7 @@ jobs:
       # C++ unit tests
       
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
+        if: ${{ matrix.renderer }} = "legacy"
         run: |
           set -e
           bazel run //platform/ios:xcodeproj
@@ -189,9 +181,22 @@ jobs:
           echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v3
+        if: ${{ matrix.renderer }} = "legacy"
         with:
           name: ios-cpp-unit-tests
           retention-days: 3
+          if-no-files-found: error
           path: |
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
+
+  ios-ci-result:
+    runs-on: ubuntu-latest
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    needs:
+      - pre_job
+      - ios-build
+    steps:
+      - name: Mark result as failed
+        if: needs.ios-build.result != 'success'
+        run: exit 1

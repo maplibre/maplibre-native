@@ -16,14 +16,9 @@ jobs:
         ]
       fail-fast: true
     runs-on: ubuntu-22.04
-    if: github.repository_owner == 'maplibre'
+    if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
-
-      - uses: ./.github/actions/download-workflow-run-artifact
-        with:
-          artifact-name: ${{ matrix.test.artifactName }}
-          expect-files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
 
       - name: Generate token
         id: generate_token
@@ -41,7 +36,18 @@ jobs:
           name: ${{ matrix.test.name }}
           sha: ${{ github.event.workflow_run.head_sha }}
 
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: ${{ matrix.test.artifactName }}
+
+      - name: Check if test files exist (otherwise the parent workflow was skipped)
+        id: check_files
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
+
       - name: Configure AWS Credentials
+        if: steps.check_files.outputs.files_exists == 'true'
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -52,6 +58,7 @@ jobs:
           role-session-name: MySessionName
 
       - name: Create upload app
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
           response=$(aws devicefarm create-upload --type IOS_APP --name ${{ matrix.test.ipaFile }} --project-arn ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }})
           echo "$response"
@@ -61,6 +68,7 @@ jobs:
           echo "app_url=$url" >> "$GITHUB_ENV"
 
       - name: Create upload test package
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
           response=$(aws devicefarm create-upload --type XCTEST_TEST_PACKAGE --name ${{ matrix.test.xcTestFile }} --project-arn ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }})
           echo "$response"
@@ -70,6 +78,7 @@ jobs:
           echo "test_package_url=$url" >> "$GITHUB_ENV"
 
       - name: Upload ${{ matrix.test.name }}
+        if: steps.check_files.outputs.files_exists == 'true'
         run: |
           curl -T ${{ matrix.test.ipaFile }} "${{ env.app_url }}"
           curl -T ${{ matrix.test.xcTestFile }} "${{ env.test_package_url }}"
@@ -96,6 +105,7 @@ jobs:
           done
 
       - name: Schedule test run
+        if: steps.check_files.outputs.files_exists == 'true'
         uses: realm/aws-devicefarm/test-application@master
         with:
           name: MapLibre Native ${{ matrix.test.name }}
