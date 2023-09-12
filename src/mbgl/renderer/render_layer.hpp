@@ -180,8 +180,7 @@ public:
     /// Called when the style layer is removed
     virtual void layerRemoved(UniqueChangeRequestVec&);
 
-    /// @brief Called by the RenderOrchestrator during RenderTree construction.
-    /// This event is run when a layer is added or removed from the style.
+    /// @brief Called when the layer index changes
     /// @param newLayerIndex The new layer index for this layer
     /// @param changes The collection of current pending change requests
     virtual void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes);

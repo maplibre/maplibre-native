@@ -931,6 +931,28 @@ gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::Colli
 
 } // namespace
 
+void RenderSymbolLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    RenderLayer::markLayerRenderable(willRender, changes);
+    if (collisionTileLayerGroup) {
+        activateLayerGroup(collisionTileLayerGroup, willRender, changes);
+    }
+}
+
+void RenderSymbolLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    RenderLayer::layerRemoved(changes);
+    if (collisionTileLayerGroup) {
+        activateLayerGroup(collisionTileLayerGroup, false, changes);
+    }
+}
+
+void RenderSymbolLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
+    RenderLayer::layerIndexChanged(newLayerIndex, changes);
+
+    if (collisionTileLayerGroup) {
+        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(collisionTileLayerGroup, newLayerIndex));
+    }
+}
+
 void RenderSymbolLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
         stats.drawablesRemoved += tileGroup->removeDrawables(renderPass, tileID).size();
@@ -970,14 +992,17 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 
-    if (!collisionTileLayerGroup) {
-        if ((collisionTileLayerGroup = context.createTileLayerGroup(
-                 layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
-            collisionTileLayerGroup->setLayerTweaker(
-                std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties));
-            activateLayerGroup(collisionTileLayerGroup, true, changes);
+    const auto& getCollisionTileLayerGroup = [&] {
+        if (!collisionTileLayerGroup) {
+            if ((collisionTileLayerGroup = context.createTileLayerGroup(
+                     layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
+                collisionTileLayerGroup->setLayerTweaker(
+                    std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties));
+                activateLayerGroup(collisionTileLayerGroup, true, changes);
+            }
         }
-    }
+        return collisionTileLayerGroup;
+    };
 
     if (!symbolIconGroup) {
         symbolIconGroup = shaders.getShaderGroup(std::string(SymbolIconShaderName));
@@ -1008,14 +1033,16 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
         return false;
     });
-    stats.drawablesRemoved += collisionTileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-        // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
-    });
+    if (collisionTileLayerGroup) {
+        stats.drawablesRemoved += collisionTileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
+            // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
+            const auto& tileID = drawable.getTileID();
+            if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
+                return true;
+            }
+            return false;
+        });
+    }
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
     std::multiset<RenderableSegment> renderableSegments;
@@ -1056,10 +1083,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        auto addCollisionDrawables =
-            [&collisionBuilder, this, &bucket, &renderData, &context, &layerCollisionPrefix, &tileID](
-                const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
+        auto addCollisionDrawables = [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
                 if (!hasCollisionBox && !hasCollisionCircle) return;
+
+                const auto& group = getCollisionTileLayerGroup();
+                if (!group) {
+                    return;
+                }
 
                 const auto& layout = *bucket.layout;
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
@@ -1122,7 +1152,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate,
                                                                                  values.translateAnchor);
                     drawable->setData(std::move(drawData));
-                    collisionTileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
+                    group->addDrawable(passes, tileID, std::move(drawable));
                     ++stats.drawablesAdded;
                 }
             };
@@ -1136,7 +1166,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             });
 
             // re-create collision drawables
-            collisionTileLayerGroup->removeDrawables(passes, tileID);
+            if (collisionTileLayerGroup) {
+                collisionTileLayerGroup->removeDrawables(passes, tileID);
+            }
             addCollisionDrawables(
                 false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
             addCollisionDrawables(

@@ -806,13 +806,16 @@ void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
 
 void RenderOrchestrator::onRemoveLayerGroup(LayerGroupBase&) {}
 
-void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, int32_t newIndex) {
+void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const int32_t newIndex) {
+    if (!layerGroup || layerGroup->getLayerIndex() == newIndex) {
+        return;
+    }
     const auto range = layerGroupsByLayerIndex.equal_range(layerGroup->getLayerIndex());
     for (auto it = range.first; it != range.second; ++it) {
         if (it->second == layerGroup) {
             layerGroupsByLayerIndex.erase(it);
             layerGroup->updateLayerIndex(newIndex);
-            addLayerGroup(std::move(layerGroup));
+            layerGroupsByLayerIndex.insert(std::make_pair(newIndex, std::move(layerGroup)));
             return;
         }
     }
