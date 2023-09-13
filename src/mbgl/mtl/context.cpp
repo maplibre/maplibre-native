@@ -93,9 +93,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
 
     // TODO: Allow use of `LibraryOptimizationLevelSize` which "may also reduce compile time"
     // requires a check for iOS 16+
-    options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
-    options->setCompileSymbolVisibility(MTL::CompileSymbolVisibilityDefault);
-    options->setAllowReferencingUndefinedSymbols(false);
+    // options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
     NS::Error* error = nullptr;
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);

@@ -10,10 +10,6 @@ constexpr auto prelude = R"(
 #include <metal_stdlib>
 using namespace metal;
 
-template <typename T1, typename T2>
-inline auto mod(T1 x, T2 y) -> decltype(x - y * floor(x/y)) {
-    return x - y * metal::floor(x/y);
-}
 // The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
 // in a byte (-128..127). We scale regular normals up to length 63, but there are also
 // "special" normals that have a bigger length (of up to 126 in this case).
@@ -26,7 +22,8 @@ inline auto mod(T1 x, T2 y) -> decltype(x - y * floor(x/y)) {
 
 // OpenGL `mod` is `x-y*floor(x/y)` where `floor` rounds down.
 // Metal `fmod` is `x-y*trunc(x/y)` where `trunc` rounds toward zero.
-float glMod(float x, float y) { return x - y * floor(x / y); }
+template <typename T1, typename T2>
+inline auto glMod(T1 x, T2 y) -> auto { return x - y * metal::floor(x/y); }
 
 enum class AttributeSource : int32_t {
     Constant,
@@ -201,8 +198,7 @@ float4 patternFor(device const Attribute& attrib,
 // unpack pattern position
 inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,
                      const float2 pattern_size, const float tile_units_to_pixels, const float2 pos) {
-    
-    float2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
+    const float2 offset = glMod(glMod(glMod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 

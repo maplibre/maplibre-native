@@ -18,6 +18,11 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
         {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
         {1, gfx::AttributeDataType::Float2, 1, "a_color"},
         {2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+
+        // This shader doesn't use it, but we need this so that the layer can assign the same
+        // attributes to all the drawables.  If/When `VertexAttributeArray::resolve` allows it,
+        // this can be removed.
+        {8, gfx::AttributeDataType::Float2, 1, "a_outline_color"},
     };
     static constexpr UniformBlockInfo uniforms[] = {
         MLN_MTL_UNIFORM_BLOCK(3, true, false, FillDrawableUBO),
@@ -103,6 +108,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
         {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
         {1, gfx::AttributeDataType::Float2, 1, "a_outline_color"},
         {2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+
+        // See `a_outline_color` in FillShader
+        {8, gfx::AttributeDataType::Float2, 1, "a_color"},
     };
     static constexpr UniformBlockInfo uniforms[] = {
         MLN_MTL_UNIFORM_BLOCK(3, true, false, FillOutlineDrawableUBO),
@@ -308,18 +316,18 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    float2 pattern_tl_a = in.pattern_from.xy;
-    float2 pattern_br_a = in.pattern_from.zw;
-    float2 pattern_tl_b = in.pattern_to.xy;
-    float2 pattern_br_b = in.pattern_to.zw;
+    const float2 pattern_tl_a = in.pattern_from.xy;
+    const float2 pattern_br_a = in.pattern_from.zw;
+    const float2 pattern_tl_b = in.pattern_to.xy;
+    const float2 pattern_br_b = in.pattern_to.zw;
 
-    float2 imagecoord = mod(in.v_pos_a, 1.0);
-    float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
-    float4 color1 = image0.sample(image0_sampler, pos);
-        
-    float2 imagecoord_b = mod(in.v_pos_b, 1.0);
-    float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
-    float4 color2 = image0.sample(image0_sampler, pos2);
+    const float2 imagecoord = glMod(in.v_pos_a, 1.0);
+    const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
+    const float4 color1 = image0.sample(image0_sampler, pos);
+
+    const float2 imagecoord_b = glMod(in.v_pos_b, 1.0);
+    const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
+    const float4 color2 = image0.sample(image0_sampler, pos2);
 
     return half4(mix(color1, color2, props.fade) * in.opacity);
 }
@@ -450,18 +458,18 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    float2 pattern_tl_a = in.pattern_from.xy;
-    float2 pattern_br_a = in.pattern_from.zw;
-    float2 pattern_tl_b = in.pattern_to.xy;
-    float2 pattern_br_b = in.pattern_to.zw;
+    const float2 pattern_tl_a = in.pattern_from.xy;
+    const float2 pattern_br_a = in.pattern_from.zw;
+    const float2 pattern_tl_b = in.pattern_to.xy;
+    const float2 pattern_br_b = in.pattern_to.zw;
 
-    float2 imagecoord = mod(in.v_pos_a, 1.0);
-    float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
-    float4 color1 = image0.sample(image0_sampler, pos);
-        
-    float2 imagecoord_b = mod(in.v_pos_b, 1.0);
-    float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
-    float4 color2 = image0.sample(image0_sampler, pos2);
+    const float2 imagecoord = glMod(in.v_pos_a, 1.0);
+    const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
+    const float4 color1 = image0.sample(image0_sampler, pos);
+
+    const float2 imagecoord_b = glMod(in.v_pos_b, 1.0);
+    const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
+    const float4 color2 = image0.sample(image0_sampler, pos2);
 
     // TODO: Should triangate the lines into triangles to support thick line and edge antialiased.
     //float dist = length(in.v_pos - in.position.xy);
