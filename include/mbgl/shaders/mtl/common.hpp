@@ -29,9 +29,14 @@ struct Attribute {
 };
 
 struct alignas(16) ExpressionInputsUBO {
-    float zoom;
-    float time;
-    uint64_t frame;
+    // These can use uint64_t in later versions of Metal
+    /*  0 */ uint32_t time_lo;  // Current scene time (nanoseconds)
+    /*  4 */ uint32_t time_hi;
+    /*  8 */ uint32_t frame_lo; // Current frame count
+    /* 12 */ uint32_t frame_hi;
+    /* 16 */ float zoom;     // Current zoom level
+    /* 20 */ float pad1, pad2, pad3;
+    /* 32 */
 };
 
 // Unpack a pair of values that have been packed into a single float.

@@ -26,8 +26,12 @@
 namespace mbgl {
 namespace mtl {
 
+// Maximum number of vertex attributes, per vertex descriptor
+// 31 for Apple2-8, Mac2, per https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+constexpr uint32_t maximumVertexBindingCount = 31;
+
 Context::Context(RendererBackend& backend_)
-    : gfx::Context(16), // TODO
+    : gfx::Context(mtl::maximumVertexBindingCount),
       backend(backend_),
       stats() {}
 
@@ -76,10 +80,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     auto options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
     options->setPreprocessorMacros(nsDefines);
     options->setFastMathEnabled(true);
-
-    // TODO: We should specify the language version explicitly, but which one?
-    // v3.0 requires iOS 16
-    // options->setLanguageVersion(MTL::LanguageVersion3_0);
+    options->setLanguageVersion(MTL::LanguageVersion2_1);
 
     // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders
     // instead of duplicating that code in each and every shader compilation.
