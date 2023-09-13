@@ -36,7 +36,8 @@ PaintParameters::PaintParameters(gfx::Context& context_,
                                  const TransformParameters& transformParams_,
                                  RenderStaticData& staticData_,
                                  LineAtlas& lineAtlas_,
-                                 PatternAtlas& patternAtlas_)
+                                 PatternAtlas& patternAtlas_,
+                                 uint64_t frameCount_)
     : context(context_),
       backend(backend_),
       encoder(context.createCommandEncoder()),
@@ -55,7 +56,8 @@ PaintParameters::PaintParameters(gfx::Context& context_,
 #else
       programs(staticData_.programs),
 #endif
-      shaders(*staticData_.shaders) {
+      shaders(*staticData_.shaders),
+      frameCount(frameCount_) {
     pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
 
     if (state.getViewportMode() == ViewportMode::FlippedY) {

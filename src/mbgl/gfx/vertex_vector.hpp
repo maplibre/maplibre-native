@@ -2,8 +2,8 @@
 
 #include <mbgl/util/ignore.hpp>
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace mbgl {
 namespace gfx {

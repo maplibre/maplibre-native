@@ -823,6 +823,7 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, const bool 
     for (auto it = range.first; it != range.second; ++it) {
         if (it->second == layerGroup) {
             found = true;
+            // not added
             if (replace) {
                 onRemoveLayerGroup(*it->second);
                 it->second = std::move(layerGroup);
@@ -847,6 +848,10 @@ bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
         removed = true;
     }
     return removed;
+}
+
+size_t RenderOrchestrator::numLayerGroups() const noexcept {
+    return layerGroupsByLayerIndex.size();
 }
 
 int32_t RenderOrchestrator::maxLayerIndex() const {
@@ -897,7 +902,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     for (const auto& item : renderTree.getLayerRenderItems()) {
         auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
-        renderLayer.update(shaders, context, state, renderTree, changes);
+        renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
     addChanges(changes);
 }

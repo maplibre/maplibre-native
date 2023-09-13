@@ -16,7 +16,7 @@ CommandEncoder::~CommandEncoder() {
     context.performCleanup();
 }
 
-std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name) {
+std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable&) {
     return std::make_unique<gl::UploadPass>(*this, name);
 }
 
