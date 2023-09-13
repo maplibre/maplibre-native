@@ -221,6 +221,7 @@ jobs:
         if: '!cancelled()'
         uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{ env.coverage_report }}
           fail_ci_if_error: true
           verbose: true

@@ -147,6 +147,23 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
 
+    /*
+     context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
+                                    : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
+
+     // force disable depth test for debugging
+     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
+
+     // For 3D mode, stenciling is handled by the layer group
+     if (!is3D) {
+         context.setStencilMode(makeStencilMode(parameters));
+     }
+
+     context.setColorMode(getColorMode());
+     context.setCullFaceMode(getCullFaceMode());
+
+     */
+
     bindAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
@@ -309,7 +326,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            assert(getBufferSize(binding->vertexBufferResource) >= binding->vertexStride * impl->vertexCount);
+            assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
@@ -557,6 +574,20 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         uploadTextures();
     }
 }
+/*
+gfx::ColorMode Drawable::makeColorMode(PaintParameters& parameters) const {
+    return enableColor ? parameters.colorModeForRenderPass() : gfx::ColorMode::disabled();
+}
 
+gfx::StencilMode Drawable::makeStencilMode(PaintParameters& parameters) const {
+    if (enableStencil) {
+        if (!is3D && tileID) {
+            return parameters.stencilModeForClipping(tileID->toUnwrapped());
+        }
+        assert(false);
+    }
+    return gfx::StencilMode::disabled();
+}
+*/
 } // namespace mtl
 } // namespace mbgl

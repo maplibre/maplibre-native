@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace mbgl {
 namespace gfx {
@@ -13,6 +14,7 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
 namespace shaders {
 enum class AttributeSource : int32_t;
+struct ExpressionInputsUBO;
 } // namespace shaders
 namespace style {
 class LayerProperties;
@@ -40,7 +42,16 @@ public:
     const std::string& getID() const { return id; }
 
 #if MLN_RENDER_BACKEND_METAL
+    /// Build the common expression inupts UBO
+    static shaders::ExpressionInputsUBO buildExpressionUBO(double zoom, uint64_t frameCount);
+
+    /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
+    /// attributes.
+    /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
     void setPropertiesAsUniforms(std::vector<std::string>);
+
+    /// @brief Check whether a property name exists within the previously set collection.
+    /// @details The string value provided is expected to have the "a_"  prefix, as defined in the shader classes.
     bool hasPropertyAsUniform(std::string_view) const;
     shaders::AttributeSource getAttributeSource(const std::string_view& attribName) const;
 #endif // MLN_RENDER_BACKEND_METAL

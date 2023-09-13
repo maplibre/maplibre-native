@@ -122,10 +122,13 @@ void MLNMapViewMetalImpl::setOpaque(const bool opaque) {
 }
 
 void MLNMapViewMetalImpl::setPresentsWithTransaction(const bool value) {
-    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    presentsWithTransaction = value;
+
     if (@available(iOS 13.0, *)) {
-        CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-        metalLayer.presentsWithTransaction = value;
+        auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+        if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
+            metalLayer.presentsWithTransaction = value;
+        }
     }
 }
 
@@ -161,10 +164,9 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.layer.opaque = mapView.opaque;
     resource.mtlView.enableSetNeedsDisplay = YES;
     //resource.mtlView.clearColor = MTLClearColorMake(1,0,0,1);
-    
     if (@available(iOS 13.0, *)) {
         CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-        metalLayer.presentsWithTransaction = NO;
+        metalLayer.presentsWithTransaction = presentsWithTransaction;
     }
 
     [mapView insertSubview:resource.mtlView atIndex:0];
