@@ -110,7 +110,8 @@ void Texture2D::createMetalTexture() noexcept {
     }
 
     // Create a new texture object
-    if (auto textureDescriptor = NS::RetainPtr(MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
+    if (auto textureDescriptor = NS::RetainPtr(
+            MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
         textureDescriptor->setUsage(usage);
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
     }
