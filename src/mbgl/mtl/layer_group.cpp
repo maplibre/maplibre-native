@@ -28,8 +28,8 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
 
     visitDrawables([&](gfx::Drawable& drawable) {
         if (drawable.getEnabled()) {
-            auto& drawableGL = static_cast<Drawable&>(drawable);
-            drawableGL.upload(uploadPass);
+            auto& drawableMTL = static_cast<mtl::Drawable&>(drawable);
+            drawableMTL.upload(uploadPass);
         }
     });
 }
