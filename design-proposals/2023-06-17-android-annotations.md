@@ -141,7 +141,7 @@ The following list shows concrete public properties or functions that should be 
 * `Icon`
     * `val image: Bitmap` (constructor alternatively takes and converts `Drawable`)
     * `val size: Float` (default `1f`)
-    * `val rotate: Float` (default 0)
+    * `val rotate: Float` (default `0f`)
     * `val offset: PointF` (default `PointF(0f, 0f)`)
     * `val anchor: Anchor` (default `CENTER`)
     * `val opacity: Float` (default `1f`)
@@ -165,7 +165,7 @@ The following list shows concrete public properties or functions that should be 
     * `val halo: Halo?`
 * `Image`: to be specified
 * `Halo`
-    * `val width: @ColorInt Int` (default `0` would represent no halo, so non-optional constructor parameter; throw if a number <= 0 is provided)
+    * `val width: Float` (default `0f` would represent no halo, so non-optional constructor parameter; throw if a number <= 0 is provided)
     * `val color: @ColorInt Int` (non-optional constructor parameter)
     * `val blur: Float?` (throw if <= 0)
 * `Text`
@@ -179,7 +179,7 @@ The following list shows concrete public properties or functions that should be 
     * `val rotate: Float` (default `0f` in degrees)
     * `val transform: Transform?` (`null` represents `NONE`)
     * `val offset: Offset?`
-    * `val opacity: Float` (default `0f`)
+    * `val opacity: Float` (default `1f`)
     * `val color: @ColorInt Int` (default `Color.BLACK`)
     * `val halo: Halo?`
     * `val pitchAlignment: Alignment?` (`null` represents `"auto"`) (NDD)
