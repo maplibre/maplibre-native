@@ -44,15 +44,14 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
 shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint64_t frameCount) {
     const auto time = util::MonotonicTimer::now();
     const auto time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(time).count();
-    return {
-        /* .time_lo = */ static_cast<uint32_t>(time_ns),
-        /* .time_hi = */ static_cast<uint32_t>(time_ns >> 32),
-        /* .frame_lo = */ static_cast<uint32_t>(frameCount),
-        /* .frame_hi = */ static_cast<uint32_t>(frameCount >> 32),
-        /* .zoom = */ static_cast<float>(zoom),
-        /* .zoom_frac = */ static_cast<float>(zoom - static_cast<float>(zoom)),
-        /* .pad = */ 0,
-        0};
+    return {/* .time_lo = */ static_cast<uint32_t>(time_ns),
+            /* .time_hi = */ static_cast<uint32_t>(time_ns >> 32),
+            /* .frame_lo = */ static_cast<uint32_t>(frameCount),
+            /* .frame_hi = */ static_cast<uint32_t>(frameCount >> 32),
+            /* .zoom = */ static_cast<float>(zoom),
+            /* .zoom_frac = */ static_cast<float>(zoom - static_cast<float>(zoom)),
+            /* .pad = */ 0,
+            0};
 }
 
 void LayerTweaker::setPropertiesAsUniforms(std::vector<std::string> props) {

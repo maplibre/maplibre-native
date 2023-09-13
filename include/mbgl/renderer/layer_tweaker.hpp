@@ -44,7 +44,8 @@ public:
     /// Build the common expression inupts UBO
     static shaders::ExpressionInputsUBO buildExpressionUBO(double zoom, uint64_t frameCount);
 
-    /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex attributes.
+    /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
+    /// attributes.
     /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
     void setPropertiesAsUniforms(std::vector<std::string>);
 
