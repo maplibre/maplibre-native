@@ -28,7 +28,7 @@ UniformBufferGL::~UniformBufferGL() {
 }
 
 void UniformBufferGL::update(const void* data_, std::size_t size_) {
-    assert(size == size_); // && size == data.size());
+    assert(size == size_);
     if (size != size_) {
         Log::Error(
             Event::General,

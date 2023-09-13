@@ -27,6 +27,9 @@ class UniformBuffer;
 using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
+
+class LineLayerTweaker;
+using LineLayerTweakerPtr = std::shared_ptr<LineLayerTweaker>;
 #endif
 
 class RenderLineLayer final : public RenderLayer {
@@ -39,6 +42,7 @@ public:
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
                 const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif
@@ -53,6 +57,9 @@ private:
 
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
 #endif
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
@@ -90,6 +97,13 @@ private:
     gfx::ShaderGroupPtr linePatternShaderGroup;
 
     gfx::DrawableTweakerPtr iconTweaker;
+    LineLayerTweakerPtr tweaker;
+
+#if MLN_RENDER_BACKEND_METAL
+    std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
+
+    bool overdrawInspector = false;
 #endif
 };
 

@@ -68,10 +68,11 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
 
 #if MLN_DRAWABLE_RENDERER
     if (renderTarget) {
-        renderTarget->getLayerGroup(0)->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
+        renderTarget->getLayerGroup(0)->setLayerTweaker(
+            std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
     }
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif
 }
@@ -280,6 +281,7 @@ constexpr auto VertexAttribName = "a_pos";
 void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
                                 const TransformState& state,
+                                const std::shared_ptr<UpdateParameters>&,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -305,7 +307,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (!tileLayerGroup) {
             return;
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(evaluatedProperties));
+        tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
         renderTarget->addLayerGroup(tileLayerGroup, /*replace=*/true);
     }
 
@@ -375,6 +377,9 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(paintPropertyBinders,
                                                                                            evaluated);
 
+        if (!heatmapShaderGroup) {
+            continue;
+        }
         const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!heatmapShader) {
             continue;
@@ -417,7 +422,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (!layerGroup_) {
             return;
         }
-        layerGroup_->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(evaluatedProperties));
+        layerGroup_->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
         setLayerGroup(std::move(layerGroup_), changes);
     }
 

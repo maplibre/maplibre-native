@@ -11,8 +11,8 @@ namespace mbgl {
  */
 class FillExtrusionLayerTweaker : public LayerTweaker {
 public:
-    FillExtrusionLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    FillExtrusionLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
 
 public:
     ~FillExtrusionLayerTweaker() override = default;
