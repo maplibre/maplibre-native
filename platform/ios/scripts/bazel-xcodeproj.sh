@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
       ;;
    --apikey)
       shift
-      args+=("--token" "$1")
+      token="$1"
       shift
       ;;
    -*|--*)
@@ -44,6 +44,10 @@ while [[ $# -gt 0 ]]; do
       ;;
    esac
 done
+
+if [ ! -z "$token" ]; then
+    args+=("--token" "$token")
+fi
 
 bash "platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
 

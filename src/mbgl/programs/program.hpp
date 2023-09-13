@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 #include <mbgl/shaders/shader_manifest.hpp>
-#ifdef MBGL_RENDER_BACKEND_OPENGL
+#if !MLN_RENDER_BACKEND_METAL
 #include <mbgl/gl/program.hpp>
 #endif
 
@@ -54,7 +54,11 @@ public:
 
     Program(const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
-#ifdef MBGL_RENDER_BACKEND_OPENGL
+#if MLN_RENDER_BACKEND_METAL
+            case gfx::Backend::Type::Metal: {
+                break;
+            }
+#else // MLN_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
                 program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,
