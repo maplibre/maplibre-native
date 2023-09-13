@@ -48,4 +48,7 @@ public:
     UIImage* snapshot() override;
     void layoutChanged() override;
     // End implementation of MLNMapViewImpl
+
+private:
+    bool presentsWithTransaction = false;
 };

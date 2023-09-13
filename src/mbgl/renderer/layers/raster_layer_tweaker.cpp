@@ -14,6 +14,7 @@
 namespace mbgl {
 
 using namespace style;
+
 using namespace shaders;
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
@@ -80,7 +81,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(MLN_STRINGIZE(RasterDrawableUBO), &drawableUBO, parameters.context);
+        uniforms.createOrUpdate("RasterDrawableUBO", &drawableUBO, parameters.context);
     });
 }
 

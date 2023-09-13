@@ -66,6 +66,9 @@ ios_unit_test(
         "//platform/darwin:shared_tests_objc_srcs",
         "//platform/darwin:shared_tests_objcpp_srcs",
         "//platform/darwin:shared_tests_swift_srcs",
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objcpp_hdrs",
+        "//platform/darwin:darwin_objc_opengl_hdrs",
     ],
 )
 

@@ -10,12 +10,14 @@ namespace mbgl {
 namespace gfx {
 
 namespace {
-static const UniqueVertexAttribute nullref;
+const UniqueVertexAttribute nullref;
 } // namespace
 
 std::size_t VertexAttribute::getCount() const {
     return sharedRawData ? sharedRawData->getRawCount() : items.size();
 }
+
+std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
 
 VertexAttributeArray::VertexAttributeArray(int initCapacity)
     : attrs(initCapacity) {}

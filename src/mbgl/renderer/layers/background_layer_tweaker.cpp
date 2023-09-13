@@ -46,7 +46,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
     }
     layerGroup.setEnabled(true);
 
-    int32_t samplerLocation = -1;
+    std::optional<uint32_t> samplerLocation{};
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
 
@@ -61,17 +61,19 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
         const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(MLN_STRINGIZE(BackgroundDrawableUBO), &drawableUBO, context);
+        uniforms.createOrUpdate("BackgroundDrawableUBO", &drawableUBO, context);
 
         if (hasPattern) {
-            if (samplerLocation < 0) {
-                if (const auto index = shader->getSamplerLocation(texUniformName)) {
-                    samplerLocation = *index;
+            if (!samplerLocation.has_value()) {
+                samplerLocation = shader->getSamplerLocation(texUniformName);
+                if (const auto& tex = parameters.patternAtlas.texture()) {
+                    tex->setSamplerConfiguration(
+                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
                 }
             }
-            if (0 <= samplerLocation) {
+            if (samplerLocation.has_value()) {
                 if (const auto& tex = parameters.patternAtlas.texture()) {
-                    drawable.setTexture(tex, samplerLocation);
+                    drawable.setTexture(tex, samplerLocation.value());
                 }
             }
 
@@ -101,7 +103,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ 0,
             };
-            uniforms.createOrUpdate(MLN_STRINGIZE(BackgroundLayerUBO), &layerUBO, context);
+            uniforms.createOrUpdate("BackgroundLayerUBO", &layerUBO, context);
         } else {
             // UBOs can be shared
             if (!backgroundLayerBuffer) {
@@ -112,7 +114,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
             }
-            uniforms.addOrReplace(MLN_STRINGIZE(BackgroundLayerUBO), backgroundLayerBuffer);
+            uniforms.addOrReplace("BackgroundLayerUBO", backgroundLayerBuffer);
         }
     });
 }

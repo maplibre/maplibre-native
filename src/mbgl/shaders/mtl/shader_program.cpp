@@ -136,6 +136,11 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         colorTarget->setSourceAlphaBlendFactor(srcFactor);
         colorTarget->setDestinationRGBBlendFactor(destFactor);
         colorTarget->setDestinationAlphaBlendFactor(destFactor);
+
+        colorTarget->setWriteMask((colorMode.mask.r ? MTL::ColorWriteMaskRed : MTL::ColorWriteMaskNone) |
+                                  (colorMode.mask.g ? MTL::ColorWriteMaskGreen : MTL::ColorWriteMaskNone) |
+                                  (colorMode.mask.b ? MTL::ColorWriteMaskBlue : MTL::ColorWriteMaskNone) |
+                                  (colorMode.mask.a ? MTL::ColorWriteMaskAlpha : MTL::ColorWriteMaskNone));
     }
 
     if (depthFormat) {

@@ -1,12 +1,14 @@
 #include <mbgl/mtl/drawable.hpp>
 
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable_impl.hpp>
 #include <mbgl/mtl/index_buffer_resource.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
+#include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
@@ -15,6 +17,7 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/variant.hpp>
 
 #include <Metal/Metal.hpp>
 
@@ -24,6 +27,14 @@
 
 namespace mbgl {
 namespace mtl {
+
+struct IndexBuffer : public gfx::IndexBufferBase {
+    IndexBuffer(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
+        : buffer(std::move(buffer_)) {}
+    ~IndexBuffer() override = default;
+
+    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+};
 
 Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
@@ -76,6 +87,39 @@ std::string debugLabel(const gfx::Drawable& drawable) {
     return result;
 }
 #endif // !defined(NDEBUG)
+
+MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) {
+    if (const auto* buf0 = indexes->getBuffer()) {
+        if (const auto* buf1 = static_cast<const IndexBuffer*>(buf0)->buffer.get()) {
+            const auto& buf2 = buf1->getResource<IndexBufferResource>().get();
+            return buf2.getMetalBuffer().get();
+        }
+    }
+    return nullptr;
+}
+
+MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) {
+    switch (mode) {
+        case gfx::CullFaceSideType::Front:
+            return MTL::CullModeFront;
+        case gfx::CullFaceSideType::Back:
+            return MTL::CullModeBack;
+        default:
+        case gfx::CullFaceSideType::FrontAndBack:
+            return MTL::CullModeNone;
+    }
+}
+
+MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
+    switch (mode) {
+        case gfx::CullFaceWindingType::Clockwise:
+            return MTL::Winding::WindingClockwise;
+        default:
+        case gfx::CullFaceWindingType::CounterClockwise:
+            return MTL::Winding::WindingCounterClockwise;
+    }
+}
+
 } // namespace
 
 void Drawable::draw(PaintParameters& parameters) const {
@@ -126,10 +170,14 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     const auto& renderPassDescriptor = renderPass.getDescriptor();
 
-    const auto& indexResource = impl->indexBuffer.getResource<IndexBufferResource>().get();
-    const auto& indexBuffer = indexResource.getMetalBuffer().get();
-    if (!indexBuffer) {
-        assert(!"Index buffer missing");
+    if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
+        assert(!"Index buffer not uploaded");
+        return;
+    }
+
+    const auto* indexBuffer = getMetalBuffer(impl->indexes);
+    if (!indexBuffer || impl->indexes->getDirty()) {
+        assert(!"Index buffer not uploaded");
         return;
     }
 
@@ -137,17 +185,33 @@ void Drawable::draw(PaintParameters& parameters) const {
         assert(!"Vertex descriptor missing");
     }
 
+    const auto& cullMode = getCullFaceMode();
+    encoder->setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
+    encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
+
+    if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode())) {
+        encoder->setRenderPipelineState(state.get());
+    } else {
+        assert(!"Failed to create render pipeline state");
+        return;
+    }
+
+    // For 3D mode, stenciling is handled by the layer group
+    if (!is3D) {
+        const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+        const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
+                                               : gfx::StencilMode::disabled();
+        if (auto depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderPass)) {
+            encoder->setDepthStencilState(depthStencilState.get());
+            encoder->setStencilReferenceValue(stencilMode.ref);
+        }
+    }
+
     for (const auto& seg_ : impl->segments) {
         const auto& segment = static_cast<DrawSegment&>(*seg_);
         const auto& mlSegment = segment.getSegment();
         if (mlSegment.indexLength > 0) {
             const auto& mode = segment.getMode();
-            if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode())) {
-                encoder->setRenderPipelineState(state.get());
-            } else {
-                assert(!"Failed to create render pipeline state");
-                continue;
-            }
 
             const auto primitiveType = getPrimitiveType(mode.type);
             constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
@@ -160,7 +224,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
 #if !defined(NDEBUG)
             const auto indexBufferLength = indexBuffer->length() / indexSize;
-            const auto* indexes = static_cast<const std::uint16_t*>(indexBuffer->contents());
+            const auto* indexes = static_cast<const std::uint16_t*>(const_cast<MTL::Buffer*>(indexBuffer)->contents());
             const auto maxIndex = *std::max_element(indexes + mlSegment.indexOffset,
                                                     indexes + mlSegment.indexOffset + mlSegment.indexLength);
 
@@ -209,6 +273,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 }
 
 void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
+    assert(indexes && indexes->elements());
     impl->indexes = std::move(indexes);
     impl->segments = std::move(segments);
 }
@@ -261,7 +326,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            assert(getBufferSize(binding->vertexBufferResource) >= binding->vertexStride * impl->vertexCount);
+            assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
@@ -426,6 +491,23 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
     auto& contextBase = uploadPass.getContext();
     auto& context = static_cast<Context&>(contextBase);
+    constexpr auto usage = gfx::BufferUsageType::StaticDraw;
+
+    if (!impl->indexes || !impl->indexes->bytes()) {
+        assert(!"Missing index data");
+        return;
+    }
+
+    if (impl->indexes->getDirty()) {
+        auto indexBufferResource{
+            uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
+        auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
+                                                              std::move(indexBufferResource));
+        auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
+
+        impl->indexes->setBuffer(std::move(buffer));
+        impl->indexes->setDirty(false);
+    }
 
     const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;
 
@@ -433,12 +515,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
 #endif
-
-        constexpr auto usage = gfx::BufferUsageType::StaticDraw;
-
-        const auto indexBytes = impl->indexes->elements() * sizeof(gfx::IndexVectorBase::value_type);
-        auto indexBufferResource = uploadPass.createIndexBufferResource(impl->indexes->data(), indexBytes, usage);
-        impl->indexBuffer = gfx::IndexBuffer{impl->indexes->elements(), std::move(indexBufferResource)};
 
         // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;

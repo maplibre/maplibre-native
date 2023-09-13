@@ -19,6 +19,7 @@
 namespace mbgl {
 
 using namespace style;
+
 using namespace shaders;
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
@@ -81,12 +82,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         propertiesChanged = false;
     }
     if (!expressionUniformBuffer) {
-        const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
-                                                   /* .frame = */ parameters.frameCount,
-                                                   /* .zoom = */ static_cast<float>(zoom),
-                                                   /* .pad = */ 0,
-                                                   0,
-                                                   0};
+        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
 #endif
@@ -112,8 +108,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(MLN_STRINGIZE(CirclePaintParamsUBO), paintParamsUniformBuffer);
-        uniforms.addOrReplace(MLN_STRINGIZE(CircleEvaluatedPropsUBO), evaluatedPropsUniformBuffer);
+        uniforms.addOrReplace("CirclePaintParamsUBO", paintParamsUniformBuffer);
+        uniforms.addOrReplace("CircleEvaluatedPropsUBO", evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             assert(!"Circles only render with tiles");
@@ -136,11 +132,11 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         const CircleDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                                /* .extrude_scale = */ extrudeScale,
                                                /* .padding = */ 0};
-        uniforms.createOrUpdate(MLN_STRINGIZE(CircleDrawableUBO), &drawableUBO, context);
+        uniforms.createOrUpdate("CircleDrawableUBO", &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
-        uniforms.addOrReplace(MLN_STRINGIZE(CirclePermutationUBO), permutationUniformBuffer);
+        uniforms.addOrReplace("ExpressionInputsUBO", expressionUniformBuffer);
+        uniforms.addOrReplace("CirclePermutationUBO", permutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 }

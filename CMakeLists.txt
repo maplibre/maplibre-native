@@ -13,8 +13,6 @@ option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
-option(MLN_RENDERER_SPLIT_VIEW "Enable a split view if both renderers are enabled" ON)
-option(MLN_RENDERER_QUAD_SPLIT_VIEW "When using split view, split opaque and translucent passes as well" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -177,6 +175,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/symbol_drawable_data.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/collision_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_block.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
@@ -208,6 +207,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
@@ -336,6 +337,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/match.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/number_format.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/parsing_context.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/slice.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/step.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/type.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/value.hpp
@@ -736,6 +738,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/match.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/number_format.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/parsing_context.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/slice.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/step.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.hpp
@@ -973,10 +976,7 @@ if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE
-            "MLN_RENDER_BACKEND_OPENGL=1"
-            "MLN_RENDERER_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_SPLIT_VIEW}>"
-            "MLN_RENDERER_QUAD_SPLIT_VIEW=$<BOOL:${MLN_RENDERER_QUAD_SPLIT_VIEW}>"
+        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
         PUBLIC
             "MLN_LEGACY_RENDERER=$<BOOL:${MLN_LEGACY_RENDERER}>"
             "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"
@@ -999,6 +999,9 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_box.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_fill_outline.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/drawable_line.hpp
@@ -1107,7 +1110,11 @@ if(MLN_WITH_OPENGL)
         list(APPEND INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_extrusion_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/raster_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
@@ -1161,7 +1168,10 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_sdf.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_text_and_icon.hpp
@@ -1184,6 +1194,14 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
+    )
+endif()
+
+if(MBGL_WITH_METAL)
+    message(STATUS "Configuring Metal renderer backend")
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MBGL_RENDER_BACKEND_METAL=1
     )
 endif()
 

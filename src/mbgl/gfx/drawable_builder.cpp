@@ -52,6 +52,7 @@ void DrawableBuilder::flush() {
         draw->setRenderPass(renderPass);
         draw->setDrawPriority(drawPriority);
         draw->setSubLayerIndex(subLayerIndex);
+        draw->setEnableDepth(enableDepth);
         draw->setDepthType(depthType);
         draw->setIs3D(is3D);
         draw->setColorMode(impl->colorMode);
@@ -166,6 +167,7 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
                                   gfx::IndexVectorBasePtr indexes,
                                   const SegmentBase* segments,
                                   const std::size_t segmentCount) {
+    assert(indexes && indexes->elements());
     impl->sharedIndexes = std::move(indexes);
     for (std::size_t i = 0; i < segmentCount; ++i) {
         const auto& seg = segments[i];

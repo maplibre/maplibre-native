@@ -21,7 +21,6 @@ public:
     Texture2D(Context& context_);
     ~Texture2D() override;
 
-public:
     gfx::Texture2D& setSamplerConfiguration(const SamplerState&) noexcept override;
 
     gfx::Texture2D& setFormat(gfx::TexturePixelType, gfx::TextureChannelDataType) noexcept override;
@@ -46,10 +45,6 @@ public:
 
     bool needsUpload() const noexcept override { return !!image; };
 
-public:
-    gfx::Texture2D& setUsage(MTL::TextureUsage usage_) noexcept;
-
-    MTL::Texture* getMetalTexture() const noexcept;
 
     void updateSamplerConfiguration() noexcept;
 
@@ -67,7 +62,6 @@ private:
     MTL::PixelFormat getMetalPixelFormat() const noexcept;
     void createMetalTexture() noexcept;
 
-private:
     Context& context;
     MTLTexturePtr metalTexture;
     MTLSamplerStatePtr metalSamplerState;
@@ -75,7 +69,6 @@ private:
     Size size{0, 0};
     gfx::TexturePixelType pixelFormat{gfx::TexturePixelType::RGBA};
     gfx::TextureChannelDataType channelType{gfx::TextureChannelDataType::UnsignedByte};
-    MTL::TextureUsage usage{MTL::TextureUsageShaderRead};
     SamplerState samplerState{};
 
     std::shared_ptr<PremultipliedImage> image{nullptr};

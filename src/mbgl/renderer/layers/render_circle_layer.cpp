@@ -9,7 +9,6 @@
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/math.hpp>
@@ -20,6 +19,7 @@
 #include <mbgl/renderer/layers/circle_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
 
@@ -299,6 +299,15 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    // Set up a layer group
+    if (!layerGroup) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+            layerGroup_->setLayerTweaker(std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties));
+            setLayerGroup(std::move(layerGroup_), changes);
+        }
+    }
+    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+
     if (!circleShaderGroup) {
         circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);
     }
@@ -314,15 +323,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             tweaker->enableOverdrawInspector(overdrawInspector);
         }
     }
-
-    // Set up a layer group
-    if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            setLayerGroup(std::move(layerGroup_), changes);
-            updateLayerTweaker();
-        }
-    }
-    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
     constexpr auto renderPass = RenderPass::Translucent;
@@ -373,7 +373,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(MLN_STRINGIZE(CircleInterpolateUBO), &interpolateUBO, context);
+            uniforms.createOrUpdate("CircleInterpolateUBO", &interpolateUBO, context);
         };
         if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
@@ -433,7 +433,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
 
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.addOrReplace(MLN_STRINGIZE(CircleInterpolateUBO), interpBuffer);
+            uniforms.addOrReplace("CircleInterpolateUBO", interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

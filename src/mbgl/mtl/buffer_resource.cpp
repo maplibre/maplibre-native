@@ -5,7 +5,7 @@
 namespace mbgl {
 namespace mtl {
 
-BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size_t size, NS::UInteger usage_)
+BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size_t size, MTL::ResourceOptions usage_)
     : device(std::move(device_)),
       usage(usage_) {
     if (data && size) {
@@ -29,10 +29,13 @@ BufferResource::BufferResource(BufferResource&& other)
       usage(other.usage) {}
 
 void BufferResource::update(const void* data, std::size_t size, std::size_t offset) {
-    if (buffer && data) {
+    assert(buffer && (data || size == 0));
+    if (buffer && data && size > 0) {
+        assert(buffer->contents());
         if (void* content = buffer->contents()) {
-            std::memcpy(static_cast<uint8_t*>(content) + offset, data, size);
-            // if (mode == MTL::StorageModeManaged) buffer->didModifyRange(NS::Range::Make(0, size));
+            const auto size_ = std::min(size, static_cast<std::size_t>(buffer->length()) - offset);
+            assert(size == size_);
+            std::memcpy(static_cast<uint8_t*>(content) + offset, data, size_);
         }
     }
 }

@@ -27,6 +27,44 @@ using namespace style;
 using namespace shaders;
 
 namespace {
+struct alignas(16) SymbolDrawableUBO {
+    /*   0 */ std::array<float, 4 * 4> matrix;
+    /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
+    /* 128 */ std::array<float, 4 * 4> coord_matrix;
+
+    /* 192 */ std::array<float, 2> texsize;
+    /* 200 */ std::array<float, 2> texsize_icon;
+
+    /* 208 */ float gamma_scale;
+    /* 212 */ float device_pixel_ratio;
+
+    /* 216 */ float camera_to_center_distance;
+    /* 220 */ float pitch;
+    /* 224 */ /*bool*/ int rotate_symbol;
+    /* 228 */ float aspect_ratio;
+    /* 232 */ std::array<float, 2> pad;
+    /* 240 */
+};
+static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
+/// Dynamic UBO
+struct alignas(16) SymbolDynamicUBO {
+    /* 0 */ float fade_change;
+    /* 4 */ float pad1;
+    /* 8 */ std::array<float, 2> pad2;
+    /* 16 */
+};
+static_assert(sizeof(SymbolDynamicUBO) == 16);
+
+struct alignas(16) SymbolDrawablePaintUBO {
+    /*  0 */ Color fill_color;
+    /* 16 */ Color halo_color;
+    /* 32 */ float opacity;
+    /* 36 */ float halo_width;
+    /* 40 */ float halo_blur;
+    /* 44 */ float padding;
+    /* 48 */
+};
+static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
 Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
     if (const auto& shader = drawable.getShader()) {
@@ -48,11 +86,9 @@ constexpr auto texIconUniformName = "u_texture_icon";
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
-        /*.fill_color=*/gfx::VertexAttribute::colorAttrRGBA(isText ? constOrDefault<TextColor>(evaluated)
-                                                                   : constOrDefault<IconColor>(evaluated)),
+        /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated),
         /*.halo_color=*/
-        gfx::VertexAttribute::colorAttrRGBA(isText ? constOrDefault<TextHaloColor>(evaluated)
-                                                   : constOrDefault<IconHaloColor>(evaluated)),
+        isText ? constOrDefault<TextHaloColor>(evaluated) : constOrDefault<IconHaloColor>(evaluated),
         /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
         /*.halo_width=*/
         isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
@@ -180,12 +216,16 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
             /*.aspect_ratio=*/state.getSize().aspectRatio(),
-            /*.fade_change=*/parameters.symbolFadeChange,
-            /*.pad=*/0,
+            /*.pad=*/{0},
         };
+
+        const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
+                                             /*.pad1=*/0,
+                                             /*.pad2=*/{0, 0}};
 
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(SymbolDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(SymbolDynamicUBOName, &dynamicUBO, context);
         uniforms.addOrReplace(SymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
 
 #if MLN_RENDER_BACKEND_METAL

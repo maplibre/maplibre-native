@@ -44,9 +44,7 @@ class MLNMapViewMetalRenderableResource final : public mbgl::mtl::RenderableReso
 public:
     MLNMapViewMetalRenderableResource(MLNMapViewMetalImpl& backend_)
         : backend(backend_),
-          delegate([[MLNMapViewImplDelegate alloc] initWithImpl:&backend]),
-          atLeastiOS_12_2_0([NSProcessInfo.processInfo
-              isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){ 12, 2, 0 }]) {
+          delegate([[MLNMapViewImplDelegate alloc] initWithImpl:&backend]) {
     }
 
     void bind() override {
@@ -103,7 +101,6 @@ public:
     id<CAMetalDrawable> currentDrawable;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
-    const bool atLeastiOS_12_2_0;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
     // after the activation count drops to 0.
@@ -116,12 +113,7 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
       mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<MLNMapViewMetalRenderableResource>(*this)) {
 }
 
-MLNMapViewMetalImpl::~MLNMapViewMetalImpl() {
-    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
-    /*if (resource.context && [[EAGLContext currentContext] isEqual:resource.context]) {
-        [EAGLContext setCurrentContext:nil];
-    }*/
-}
+MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;
 
 void MLNMapViewMetalImpl::setOpaque(const bool opaque) {
     auto& resource = getResource<MLNMapViewMetalRenderableResource>();
@@ -130,10 +122,13 @@ void MLNMapViewMetalImpl::setOpaque(const bool opaque) {
 }
 
 void MLNMapViewMetalImpl::setPresentsWithTransaction(const bool value) {
-    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    presentsWithTransaction = value;
+
     if (@available(iOS 13.0, *)) {
-        CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-        metalLayer.presentsWithTransaction = value;
+        auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+        if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
+            metalLayer.presentsWithTransaction = value;
+        }
     }
 }
 
@@ -156,11 +151,6 @@ void MLNMapViewMetalImpl::createView() {
         return;
     }
 
-    /*if (!resource.context) {
-        resource.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
-        assert(resource.context);
-    }*/
-
     id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
 
     resource.mtlView = [[MTKView alloc] initWithFrame:mapView.bounds device:device];
@@ -173,11 +163,9 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.opaque = mapView.opaque;
     resource.mtlView.layer.opaque = mapView.opaque;
     resource.mtlView.enableSetNeedsDisplay = YES;
-    //resource.mtlView.clearColor = MTLClearColorMake(1,0,0,1);
-    
     if (@available(iOS 13.0, *)) {
         CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-        metalLayer.presentsWithTransaction = NO;
+        metalLayer.presentsWithTransaction = presentsWithTransaction;
     }
 
     [mapView insertSubview:resource.mtlView atIndex:0];
@@ -198,8 +186,6 @@ void MLNMapViewMetalImpl::activate() {
     if (resource.activationCount++) {
         return;
     }
-
-    //[EAGLContext setCurrentContext:resource.context];
 }
 
 void MLNMapViewMetalImpl::deactivate() {
@@ -207,8 +193,6 @@ void MLNMapViewMetalImpl::deactivate() {
     if (--resource.activationCount) {
         return;
     }
-
-    //[EAGLContext setCurrentContext:nil];
 }
 
 /// This function is called before we start rendering, when iOS invokes our rendering method.

@@ -100,6 +100,15 @@ public:
                 UniqueChangeRequestVec&) override;
 #endif // MLN_DRAWABLE_RENDERER
 
+protected:
+#if MLN_DRAWABLE_RENDERER
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&) override;
+
+    /// Remove all the drawables for tiles
+    void removeAllDrawables() override;
+#endif // MLN_DRAWABLE_RENDERER
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -132,6 +141,10 @@ private:
     gfx::ShaderGroupPtr symbolIconGroup;
     gfx::ShaderGroupPtr symbolSDFGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
+
+    gfx::ShaderGroupPtr collisionBoxGroup;
+    gfx::ShaderGroupPtr collisionCircleGroup;
+    std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
 #endif // MLN_DRAWABLE_RENDERER
 
 #if MLN_RENDER_BACKEND_METAL

@@ -1,11 +1,11 @@
 #include "expression_test_logger.hpp"
 #include "expression_test_runner.hpp"
-#include "filesystem.hpp"
 
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <sstream>
+#include <filesystem>
 
 using namespace mbgl;
 using namespace std::literals;
@@ -172,7 +172,7 @@ void printStats(const TestStats& stats) {
 }
 
 void writeHTMLResults(const TestStats& stats, const std::string& rootPath, bool shuffle, uint32_t seed) {
-    filesystem::path path = filesystem::path(rootPath) / "index.html"s;
+    std::filesystem::path path = std::filesystem::path(rootPath) / "index.html"s;
     try {
         util::write_file(path.string(), createResultPage(stats, shuffle, seed));
         printf("Results at: %s\n", path.string().c_str());

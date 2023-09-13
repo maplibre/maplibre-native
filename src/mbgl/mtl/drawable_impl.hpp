@@ -8,6 +8,7 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -42,10 +43,9 @@ public:
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
     gfx::VertexAttributeArray vertexAttributes;
 
-    gfx::IndexBuffer indexBuffer = {0, nullptr};
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
 
-    gfx::UniformBufferArray uniformBuffers;
+    UniformBufferArray uniformBuffers;
 
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();
     gfx::StencilMode stencilMode;

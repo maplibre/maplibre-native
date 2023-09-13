@@ -24,7 +24,7 @@ public:
     RendererBackend(gfx::ContextMode);
     ~RendererBackend() override;
 
-    /// Called prior to rendering to update the internally assumed OpenGL state.
+    /// Called prior to rendering to update the internally assumed MetalMetal  state.
     virtual void updateAssumedState() = 0;
 
     /// One-time shader initialization
@@ -42,7 +42,7 @@ protected:
     /// A constant to signal that a framebuffer is bound, but with an unknown ID.
     static constexpr const FramebufferID ImplicitFramebufferBinding = std::numeric_limits<FramebufferID>::max();
 
-    /// Tells the renderer that OpenGL state has already been set by the windowing toolkit.
+    /// Tells the renderer that the Metal state has already been set by the windowing toolkit.
     /// It sets the internal assumed state to the supplied values.
     void assumeFramebufferBinding(FramebufferID fbo);
     void assumeViewport(int32_t x, int32_t y, const Size&);
@@ -52,7 +52,7 @@ protected:
     bool implicitFramebufferBound();
 
 public:
-    /// Triggers an OpenGL state update if the internal assumed state doesn't
+    /// Triggers a Metal state update if the internal assumed state doesn't
     /// match the supplied values.
     void setFramebufferBinding(FramebufferID fbo);
     void setViewport(int32_t x, int32_t y, const Size&);

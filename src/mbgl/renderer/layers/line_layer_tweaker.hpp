@@ -16,8 +16,16 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
  */
 class LineLayerTweaker : public LayerTweaker {
 public:
-    LineLayerTweaker(std::string id, Immutable<style::LayerProperties> properties)
-        : LayerTweaker(std::move(id), properties) {}
+    enum class LineType {
+        Simple,
+        Pattern,
+        Gradient,
+        SDF
+    };
+
+    LineLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
+
     ~LineLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
@@ -25,6 +33,7 @@ public:
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
+    gfx::UniformBufferPtr linePatternPropertiesBuffer;
     gfx::UniformBufferPtr lineSDFPropertiesBuffer;
 
 #if MLN_RENDER_BACKEND_METAL

@@ -1,3 +1,5 @@
+#include <mbgl/renderer/layers/render_fill_extrusion_layer.hpp>
+
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/render_pass.hpp>
@@ -7,11 +9,11 @@
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/layers/render_fill_extrusion_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
@@ -31,13 +33,11 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 namespace {
 
 #if MLN_DRAWABLE_RENDERER
-
-constexpr std::string_view FillExtrusionShaderName = "FillExtrusionShader";
-constexpr std::string_view FillExtrusionPatternShaderName = "FillExtrusionPatternShader";
 
 constexpr auto PosAttribName = "a_pos";
 constexpr auto NormAttribName = "a_normal_ed";
@@ -293,10 +293,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!fillExtrusionGroup) {
-        fillExtrusionGroup = shaders.getShaderGroup(std::string(FillExtrusionShaderName));
+        fillExtrusionGroup = shaders.getShaderGroup("FillExtrusionShader");
     }
     if (!fillExtrusionPatternGroup) {
-        fillExtrusionPatternGroup = shaders.getShaderGroup(std::string(FillExtrusionPatternShaderName));
+        fillExtrusionPatternGroup = shaders.getShaderGroup("FillExtrusionPatternShader");
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
@@ -390,10 +390,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
                 auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
+                uniforms.createOrUpdate("FillExtrusionDrawableTilePropsUBO", &tilePropsUBO, context);
+                uniforms.createOrUpdate("FillExtrusionInterpolateUBO", &interpUBO, context);
             });
             continue;
         }
@@ -504,10 +502,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setTileID(tileID);
 
                 auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::FillExtrusionTilePropsUBOName, &tilePropsUBO, context);
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::FillExtrusionInterpolateUBOName, &interpUBO, context);
+                uniforms.createOrUpdate("FillExtrusionDrawableTilePropsUBO", &tilePropsUBO, context);
+                uniforms.createOrUpdate("FillExtrusionInterpolateUBO", &interpUBO, context);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
