@@ -5,7 +5,7 @@ package org.maplibre.android.annotations
  *
  * @param T generic parameter extending from Annotation
  */
-interface OnAnnotationLongClickListener<T : AbstractAnnotation<*>> {
+interface OnAnnotationLongClickListener<T : KAnnotation<*>> {
     /**
      * Called when an annotation has been long clicked
      *
@@ -15,3 +15,8 @@ interface OnAnnotationLongClickListener<T : AbstractAnnotation<*>> {
      */
     fun onAnnotationLongClick(t: T): Boolean
 }
+
+/**
+ * Interface definition for a callback to be invoked when a symbol has been long clicked.
+ */
+typealias OnSymbolLongClickListener = OnAnnotationLongClickListener<KSymbol>

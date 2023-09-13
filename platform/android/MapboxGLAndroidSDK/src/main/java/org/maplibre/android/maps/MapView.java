@@ -173,7 +173,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     List<MapLibreMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
     maplibreMap = new MapLibreMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
             developerAnimationListeners);
-    maplibreMap.injectAnnotationManager(annotationManager);
+    maplibreMap.injectAnnotationManager(annotationManager, this);
 
     // user input
     mapGestureDetector = new MapGestureDetector(context, transform, proj, uiSettings,

@@ -1,6 +1,7 @@
 package org.maplibre.android.testapp.activity.annotation
 
 import android.app.ProgressDialog
+import android.graphics.Color
 import android.os.AsyncTask
 import android.os.Bundle
 import android.view.Menu
@@ -10,8 +11,13 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.MenuItemCompat
+import androidx.core.view.postDelayed
+import org.maplibre.android.annotations.KSymbol
 import org.maplibre.android.annotations.MarkerOptions
+import org.maplibre.android.annotations.data.Icon
+import org.maplibre.android.annotations.data.Text
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
@@ -90,21 +96,20 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
     }
 
     private fun showGlMarkers(amount: Int) {
-        val markerOptionsList: MutableList<MarkerOptions> = ArrayList()
-        val formatter = DecimalFormat("#.#####")
         val random = Random()
         var randomIndex: Int
+        val icon = Icon(AppCompatResources.getDrawable(this, R.drawable.ic_android)!!)
         for (i in 0 until amount) {
             randomIndex = random.nextInt(locations!!.size)
             val latLng = locations!![randomIndex]
-            markerOptionsList.add(
-                MarkerOptions()
-                    .position(latLng)
-                    .title(i.toString())
-                    .snippet(formatter.format(latLng.latitude) + "`, " + formatter.format(latLng.longitude))
+            maplibreMap.addSymbol(
+                KSymbol(
+                    position = latLng,
+                    text = Text(i.toString(), color = Color.WHITE),
+                    icon = icon
+                )
             )
         }
-        maplibreMap.addMarkers(markerOptionsList)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
