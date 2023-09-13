@@ -95,7 +95,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
         stateWithoutStencil = context.makeDepthStencilState(depthMode, gfx::StencilMode::disabled(), renderPass);
     } else if (!tileIDs.empty()) {
-
         parameters.renderTileClippingMasks(tileIDs);
     }
 
