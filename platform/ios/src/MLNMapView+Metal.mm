@@ -158,8 +158,7 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.opaque = mapView.opaque;
     resource.mtlView.layer.opaque = mapView.opaque;
     resource.mtlView.enableSetNeedsDisplay = YES;
-    //resource.mtlView.clearColor = MTLClearColorMake(1,0,0,1);
-    
+
     if (@available(iOS 13.0, *)) {
         CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
         metalLayer.presentsWithTransaction = presentsWithTransaction;
