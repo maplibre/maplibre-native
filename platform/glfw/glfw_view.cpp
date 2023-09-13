@@ -55,7 +55,7 @@
 #include <utility>
 #include <sstream>
 
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
 #include <mbgl/style/layers/location_indicator_layer.hpp>
 
 namespace {
@@ -824,7 +824,7 @@ void GLFWView::onScroll(GLFWwindow *window, double /*xOffset*/, double yOffset) 
     }
 
     view->map->scaleBy(scale, mbgl::ScreenCoordinate{view->lastX, view->lastY});
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     if (view->puck && view->puckFollowsCameraCenter) {
         mbgl::LatLng mapCenter = view->map->getCameraOptions().center.value();
         view->puck->setLocation(toArray(mapCenter));
@@ -899,7 +899,7 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
     }
     view->lastX = x;
     view->lastY = y;
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     if (view->puck && view->puckFollowsCameraCenter) {
         mbgl::LatLng mapCenter = view->map->getCameraOptions().center.value();
         view->puck->setLocation(toArray(mapCenter));
@@ -1034,7 +1034,7 @@ void GLFWView::setWindowTitle(const std::string &title) {
 }
 
 void GLFWView::onDidFinishLoadingStyle() {
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     puck = nullptr;
 #endif
 
@@ -1099,7 +1099,7 @@ void GLFWView::toggleCustomSource() {
 }
 
 void GLFWView::toggleLocationIndicatorLayer() {
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
     puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
     static const mbgl::LatLng puckLocation{35.683389, 139.76525}; // A location on the crossing of 4 tiles
     if (puck == nullptr) {
@@ -1162,7 +1162,7 @@ void GLFWView::toggleLocationIndicatorLayer() {
 using Nanoseconds = std::chrono::nanoseconds;
 
 void GLFWView::onWillStartRenderingFrame() {
-#if defined(MBGL_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
+#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
     puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
     if (puck) {
         uint64_t ns = mbgl::Clock::now().time_since_epoch().count();

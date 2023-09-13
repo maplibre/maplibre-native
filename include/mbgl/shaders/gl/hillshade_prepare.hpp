@@ -78,7 +78,7 @@ void main() {
     // we want to vertically exaggerate the hillshading though, because otherwise
     // it is barely noticeable at low zooms. to do this, we multiply this by some
     // scale factor pow(2, (u_zoom - u_maxzoom) * a) where a is an arbitrary value
-    // Here we use a=0.3 which works out to the expression below. see 
+    // Here we use a=0.3 which works out to the expression below. see
     // nickidlugash's awesome breakdown for more info
     // https://github.com/mapbox/mapbox-gl-js/pull/5286#discussion_r148419556
     float exaggeration = u_zoom < 2.0 ? 0.4 : u_zoom < 4.5 ? 0.35 : 0.3;

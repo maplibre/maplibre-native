@@ -304,5 +304,10 @@ public:
 template <class... Ps>
 using ConcatenateProperties = typename TypeListConcat<typename Ps::PropertyTypes...>::template ExpandInto<Properties>;
 
+template <typename T, class... Is, class... Ts>
+auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
+    return evaluated.template get<T>().constantOr(T::defaultValue());
+}
+
 } // namespace style
 } // namespace mbgl

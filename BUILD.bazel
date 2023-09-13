@@ -5,7 +5,12 @@ load(
     "MLN_CORE_SOURCE",
     "MLN_DRAWABLES_HEADERS",
     "MLN_DRAWABLES_SOURCE",
+    "MLN_DRAWABLES_GL_HEADERS",
+    "MLN_DRAWABLES_GL_SOURCE",
+    "MLN_DRAWABLES_MTL_HEADERS",
+    "MLN_DRAWABLES_MTL_SOURCE",
     "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
@@ -44,7 +49,8 @@ filegroup(
 genrule(
     name = "generated_shaders",
     srcs = ["shader_data"],
-    outs = MLN_GENERATED_SHADER_HEADERS,
+    outs = MLN_GENERATED_SHADER_HEADERS +
+           MLN_GENERATED_OPENGL_SHADER_HEADERS,
     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
     tools = ["shaders/generate_shader_code.js"],
 )
@@ -55,7 +61,11 @@ cc_library(
     name = "mbgl-core-generated-public-artifacts",
     srcs = [],
     hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_SHADER_HEADERS,
+           MLN_GENERATED_SHADER_HEADERS +
+           select({
+               "//:metal_renderer": [],
+               "//conditions:default": MLN_GENERATED_OPENGL_SHADER_HEADERS,
+           }),
     visibility = ["//visibility:public"],
     deps = [
         ":generated_shaders",
@@ -79,23 +89,32 @@ cc_library(
 cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE +
-           MLN_GENERATED_STYLE_SOURCE +
-           MLN_OPENGL_SOURCE + select({
-        ":drawable_renderer": MLN_DRAWABLES_SOURCE,
-        "//conditions:default": [],
-    }),
-    hdrs = MLN_CORE_HEADERS +
-           MLN_OPENGL_HEADERS + select({
-        ":drawable_renderer": MLN_DRAWABLES_HEADERS,
-        "//conditions:default": [],
-    }),
+           MLN_GENERATED_STYLE_SOURCE + select({
+            ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+            ":legacy_renderer": MLN_OPENGL_SOURCE,
+            ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+            "//conditions:default": [],
+        }),
+    hdrs = MLN_CORE_HEADERS + select({
+            ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+            ":legacy_renderer": MLN_OPENGL_HEADERS,
+            ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
+            "//conditions:default": [],
+        }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
         ":legacy_renderer": [
+            "MLN_RENDER_BACKEND_OPENGL=1",
             "MLN_LEGACY_RENDERER=1",
             "MLN_DRAWABLE_RENDERER=0",
         ],
         ":drawable_renderer": [
+            "MLN_RENDER_BACKEND_OPENGL=1",
+            "MLN_LEGACY_RENDERER=0",
+            "MLN_DRAWABLE_RENDERER=1",
+        ],
+        ":metal_renderer": [
+            "MLN_RENDER_BACKEND_METAL=1",
             "MLN_LEGACY_RENDERER=0",
             "MLN_DRAWABLE_RENDERER=1",
         ],
@@ -106,7 +125,12 @@ cc_library(
     includes = [
         "include",
         "src",
-    ],
+    ] + select({
+        ":metal_renderer": [
+            "vendor/metal-cpp",
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = [
         r"MLN_VERSION_REV=\"standalone\"",
     ],
@@ -128,6 +152,11 @@ cc_library(
     ] + select({
         "//:ios": [
             "//vendor:icu",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":metal_renderer": [
+            "//vendor:metal-cpp",
         ],
         "//conditions:default": [],
     }),
@@ -180,10 +209,11 @@ config_setting(
 string_flag(
     name = "renderer",
     build_setting_default = "legacy",
-    values = [
+    values=[
         "legacy",
         "drawable",
-    ],
+        "metal"
+    ]
 )
 
 config_setting(
@@ -198,6 +228,13 @@ config_setting(
     flag_values = {
         ":renderer": "drawable",
     },
+)
+
+config_setting(
+    name = "metal_renderer",
+    flag_values = {
+        ":renderer": "metal"
+    }
 )
 
 exports_files(

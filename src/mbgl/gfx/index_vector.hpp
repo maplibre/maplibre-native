@@ -3,8 +3,8 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/util/ignore.hpp>
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace mbgl {
 namespace gfx {
@@ -83,6 +83,8 @@ protected:
     bool dirty = true;
     bool released = false;
 };
+
+using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 
 template <class DrawMode>
 class IndexVector final : public IndexVectorBase {
