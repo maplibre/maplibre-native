@@ -183,6 +183,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:
+          if-no-files-found: error
           name: uploadsEnv
           path: uploads.env
 
@@ -198,6 +199,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: android-render-tests
+          if-no-files-found: error
           path: |
             ./render-test/android/RenderTestsApp.apk
             ./render-test/android/RenderTests.apk
