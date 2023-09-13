@@ -80,7 +80,7 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
                     return MTL::PixelFormat::PixelFormatA8Unorm;
                 default:
                     assert(false);
-                    throw std::runtime_error("Pixel format not supported on Metal!");
+                    return MTL::PixelFormat::PixelFormatInvalid;
             }
         case gfx::TextureChannelDataType::HalfFloat:
             switch (pixelFormat) {
@@ -90,8 +90,11 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
                     return MTL::PixelFormat::PixelFormatR16Float;
                 default:
                     assert(false);
-                    throw std::runtime_error("Pixel format not supported on Metal!");
+                    return MTL::PixelFormat::PixelFormatInvalid;
             }
+        default:
+            assert(false);
+            return MTL::PixelFormat::PixelFormatInvalid;
     }
 }
 
@@ -100,13 +103,23 @@ void Texture2D::createMetalTexture() noexcept {
         return;
     }
     metalTexture.reset();
+
+    const auto format = getMetalPixelFormat();
+    if (format == MTL::PixelFormat::PixelFormatInvalid) {
+        return;
+    }
+
     // Create a new texture object
-    auto textureDescriptor = NS::RetainPtr(
-        MTL::TextureDescriptor::texture2DDescriptor(getMetalPixelFormat(), size.width, size.height, false));
-    textureDescriptor->setUsage(usage);
-    metalTexture = context.createMetalTexture(textureDescriptor);
-    textureDirty = false;
-    context.renderingStats().memTextures += getDataSize();
+    if (auto textureDescriptor = NS::RetainPtr(
+            MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
+        textureDescriptor->setUsage(usage);
+        metalTexture = context.createMetalTexture(std::move(textureDescriptor));
+    }
+
+    if (metalTexture) {
+        textureDirty = false;
+        context.renderingStats().memTextures += getDataSize();
+    }
 }
 
 void Texture2D::create() noexcept {
