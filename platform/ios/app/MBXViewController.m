@@ -2029,21 +2029,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 
-    [self.styleNames addObject:@"US"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"http://data.local/us-map-style.json"]];
-
-    [self.styleNames addObject:@"Americana"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://zelonewolf.github.io/openstreetmap-americana/style.json"]];
-
-    [self.styleNames addObject:@"Facebook Light"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US"]];
-
-    [self.styleNames addObject:@"Facebook Dark"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://external.xx.fbcdn.net/maps/vt/style/dark/?locale=en_US"]];
-
-    [self.styleNames addObject:@"Facebook 3D"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://external.xx.fbcdn.net/maps/vt/style/default_3d/?locale=en_US"]];
-
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
     if (apiKey.length)
@@ -2057,12 +2042,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         });
     }
-
-    [self.styleNames addObject:@"Heatmap"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/efd813d5-c532-4157-8953-47899b373eae/style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
-
-    [self.styleNames addObject:@"Hillshade"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/b33abf35-1ba5-46cb-b172-fdf3a718a5a7/style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
 
     NSAssert(self.styleNames.count == self.styleURLs.count, @"Style names and URLs don’t match.");
 }

@@ -169,15 +169,14 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         GLsizei actualLength = 0;
         GLint size = 0;
         GLenum type = GL_ZERO;
-        char uniformName[256];
 
         MBGL_CHECK_ERROR(
-            glGetActiveUniform(program, index, sizeof(uniformName), &actualLength, &size, &type, uniformName));
+            glGetActiveUniform(program, index, maxLength, &actualLength, &size, &type, name.data()));
 
         if (type == GL_SAMPLER_2D) {
             // This uniform is a texture sampler
-            GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, uniformName));
-            samplerLocations[StringIndexer::get(uniformName)] = location;
+            GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.data()));
+            samplerLocations[StringIndexer::get(name.data())] = location;
         }
     }
 
