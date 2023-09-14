@@ -47,6 +47,7 @@ jobs:
     steps:
       - name: Update Apt Package Cache
         run: sudo apt-get update
+        working-directory: .
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
