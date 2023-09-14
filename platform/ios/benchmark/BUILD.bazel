@@ -39,3 +39,5 @@ info_plist(
     base_info_plist = "Info.plist",
     visibility = ["//platform/ios:__pkg__"],
 )
+
+exports_files(["Info.plist"])
