@@ -37,7 +37,8 @@
 //   * @param jsonObject the features of the annotation
 //   * @param geometry   the geometry of the annotation
 //   */
-//  Line(long id, AnnotationManager<?, Line, ?, ?, ?, ?> annotationManager, JsonObject jsonObject, LineString geometry) {
+//  Line(long id, AnnotationManager<?, Line, ?, ?, ?, ?> annotationManager, JsonObject jsonObject, LineString geometry)
+//  {
 //    super(id, jsonObject, geometry);
 //    this.annotationManager = annotationManager;
 //  }
@@ -327,8 +328,8 @@
 //  /**
 //   * Get the LinePattern property
 //   * <p>
-//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two
-//   * (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of
+//   * two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
 //   * </p>
 //   *
 //   * @return property wrapper value around String
@@ -340,8 +341,8 @@
 //  /**
 //   * Set the LinePattern property
 //   * <p>
-//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two
-//   * (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of
+//   * two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
 //   * </p>
 //   * <p>
 //   * To update the line on the map use {@link LineManager#update(AbstractAnnotation)}.

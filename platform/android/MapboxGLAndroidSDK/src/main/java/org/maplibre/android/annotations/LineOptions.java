@@ -231,8 +231,8 @@
 //  /**
 //   * Set line-pattern to initialise the line with.
 //   * <p>
-//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two
-//   * (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of
+//   * two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
 //   * </p>
 //   *
 //   * @param linePattern the line-pattern value
@@ -246,8 +246,8 @@
 //  /**
 //   * Get the current configured  line-pattern for the line
 //   * <p>
-//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of two
-//   * (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+//   * Name of image in sprite to use for drawing image lines. For seamless patterns, image width must be a factor of
+//   * two (2, 4, 8, ..., 512). Note that zoom-dependent expressions will be evaluated only at integer zoom levels.
 //   * </p>
 //   *
 //   * @return linePattern value
