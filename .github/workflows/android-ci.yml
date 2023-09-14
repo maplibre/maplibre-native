@@ -45,6 +45,9 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
+      - name: Update Apt Package Cache
+        run: sudo apt-get update
+
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
