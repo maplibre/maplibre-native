@@ -36,7 +36,8 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
     private val aboveLayerId: String?,
     geoJsonOptions: GeoJsonOptions?
 ) {
-    private val annotations: MutableMap<Long, T> = mutableMapOf()
+    @VisibleForTesting
+    internal val annotations: MutableMap<Long, T> = mutableMapOf()
 
     @VisibleForTesting
     internal var usedDataDrivenProperties: MutableList<String> = mutableListOf()

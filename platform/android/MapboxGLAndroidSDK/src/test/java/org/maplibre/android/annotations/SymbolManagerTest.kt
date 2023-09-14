@@ -226,7 +226,7 @@ class SymbolManagerTest {
         )
         val symbol = KSymbol(LatLng())
         symbolManager.add(symbol)
-        Assert.assertEquals(symbolManager.annotations[0], symbol)
+        Assert.assertEquals(symbolManager.annotations.values.first(), symbol)
     }
 
     /*@Test
