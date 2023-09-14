@@ -13,7 +13,6 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
-#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
@@ -27,6 +26,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
