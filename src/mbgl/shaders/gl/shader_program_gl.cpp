@@ -125,14 +125,14 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         ShaderType::Vertex,
         std::initializer_list<const char*>{
             "#version 300 es\n",
-            programParameters.getDefines().c_str(),
+            programParameters.getDefinesString().c_str(),
             additionalDefines.c_str(),
             shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::vertex,
             vertexSource.c_str()});
     auto fragProg = context.createShader(
         ShaderType::Fragment,
         {"#version 300 es\n",
-         programParameters.getDefines().c_str(),
+         programParameters.getDefinesString().c_str(),
          additionalDefines.c_str(),
          shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
          fragmentSource.c_str()});

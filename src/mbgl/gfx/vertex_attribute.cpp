@@ -9,6 +9,10 @@
 namespace mbgl {
 namespace gfx {
 
+namespace {
+const UniqueVertexAttribute nullref;
+} // namespace
+
 std::size_t VertexAttribute::getCount() const {
     return sharedRawData ? sharedRawData->getRawCount() : items.size();
 }
@@ -84,6 +88,16 @@ void VertexAttributeArray::clear() {
 void VertexAttributeArray::resolve(const VertexAttributeArray& overrides, ResolveDelegate delegate) const {
     for (auto& kv : attrs) {
         delegate(kv.first, *kv.second, overrides.get(kv.first));
+    }
+}
+
+const UniqueVertexAttribute& VertexAttributeArray::add(const StringIdentity id, std::unique_ptr<VertexAttribute>&& attr) {
+    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
+    if (result.second) {
+        result.first->second = std::move(attr);
+        return result.first->second;
+    } else {
+        return nullref;
     }
 }
 

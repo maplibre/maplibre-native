@@ -11,6 +11,11 @@ namespace mbgl {
 namespace gfx {
 
 class Context;
+class UniformBuffer;
+class UniformBufferArray;
+
+using UniqueUniformBuffer = std::unique_ptr<UniformBuffer>;
+using UniqueUniformBufferArray = std::unique_ptr<UniformBufferArray>;
 
 class UniformBuffer {
     // Can only be created by platform specific implementations
@@ -76,7 +81,7 @@ public:
 protected:
     const std::shared_ptr<UniformBuffer>& add(const StringIdentity id, std::shared_ptr<UniformBuffer>&&);
 
-    virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer& uniformBuffer) = 0;
+    virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer&) = 0;
 
 protected:
     UniformBufferMap uniformBufferMap;

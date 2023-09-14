@@ -969,6 +969,7 @@ void RenderSymbolLayer::removeAllDrawables() {
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
+                               const std::shared_ptr<UpdateParameters>&,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -979,7 +980,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(evaluatedProperties));
+            layerGroup_->setLayerTweaker(std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties));
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
@@ -987,7 +988,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     if (!collisionTileLayerGroup) {
         if ((collisionTileLayerGroup = context.createTileLayerGroup(
                  layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
-            collisionTileLayerGroup->setLayerTweaker(std::make_shared<CollisionLayerTweaker>(evaluatedProperties));
+            collisionTileLayerGroup->setLayerTweaker(
+                std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties));
             activateLayerGroup(collisionTileLayerGroup, true, changes);
         }
     }
@@ -1295,12 +1297,15 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setVertexAttrNameId(idPosOffsetAttribName);
                 }
 
-                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    shaderGroup->getOrCreateShader(context, uniformProps, StringIndexer::get(idPosOffsetAttribName)));
-                if (!shader) {
-                    return;
-                }
-                builder->setShader(shader);
+            if (!shaderGroup) {
+                return;
+            }
+            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                shaderGroup->getOrCreateShader(context, uniformProps, StringIndexer::get(idPosOffsetAttribName)));
+            if (!shader) {
+                return;
+            }
+            builder->setShader(shader);
 
                 builder->clearTweakers();
                 builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);

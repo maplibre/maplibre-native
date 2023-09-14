@@ -81,11 +81,6 @@ std::array<float, 2> toArray(const Size& s) {
 static const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
 static const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
 
-template <typename T, class... Is, class... Ts>
-auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
-    return evaluated.template get<T>().constantOr(T::defaultValue());
-}
-
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
         /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated),
@@ -177,21 +172,23 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-        const SymbolDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix),
-                                               /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
-                                               /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
+        const SymbolDrawableUBO drawableUBO = {
+            /*.matrix=*/util::cast<float>(matrix),
+            /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
+            /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
-                                               /*.texsize=*/toArray(getTexSize(drawable, idTexUniformName)),
-                                               /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
+            /*.texsize=*/toArray(getTexSize(drawable, idTexUniformName)),
+            /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
 
-                                               /*.gamma_scale=*/gammaScale,
-                                               /*.device_pixel_ratio=*/parameters.pixelRatio,
+            /*.gamma_scale=*/gammaScale,
+            /*.device_pixel_ratio=*/parameters.pixelRatio,
 
-                                               /*.camera_to_center_distance=*/camDist,
-                                               /*.pitch=*/static_cast<float>(state.getPitch()),
-                                               /*.rotate_symbol=*/rotateInShader,
-                                               /*.aspect_ratio=*/state.getSize().aspectRatio(),
-                                               /*.pad=*/{0, 0}};
+            /*.camera_to_center_distance=*/camDist,
+            /*.pitch=*/static_cast<float>(state.getPitch()),
+            /*.rotate_symbol=*/rotateInShader,
+            /*.aspect_ratio=*/state.getSize().aspectRatio(),
+            /*.pad=*/{0},
+        };
 
         const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
                                              /*.pad1=*/0,

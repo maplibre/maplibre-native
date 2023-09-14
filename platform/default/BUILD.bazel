@@ -32,7 +32,6 @@ cc_library(
     srcs = [
         "src/mbgl/gfx/headless_backend.cpp",
         "src/mbgl/gfx/headless_frontend.cpp",
-        "src/mbgl/gl/headless_backend.cpp",
         "src/mbgl/map/map_snapshotter.cpp",
         "src/mbgl/platform/time.cpp",
         "src/mbgl/storage/asset_file_source.cpp",
@@ -56,6 +55,9 @@ cc_library(
         "src/mbgl/util/thread_local.cpp",
         "src/mbgl/util/utf.cpp",
     ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["src/mbgl/gl/headless_backend.cpp"],
+    }) + select({
         "//:linux": [
             "src/mbgl/i18n/number_format.cpp",
             "src/mbgl/layermanager/layer_manager.cpp",
@@ -77,7 +79,6 @@ cc_library(
     hdrs = [
         "include/mbgl/gfx/headless_backend.hpp",
         "include/mbgl/gfx/headless_frontend.hpp",
-        "include/mbgl/gl/headless_backend.hpp",
         "include/mbgl/map/map_snapshotter.hpp",
         "include/mbgl/storage/file_source_request.hpp",
         "include/mbgl/storage/local_file_request.hpp",
@@ -87,7 +88,10 @@ cc_library(
         "include/mbgl/storage/offline_schema.hpp",
         "include/mbgl/storage/sqlite3.hpp",
         "include/mbgl/text/unaccent.hpp",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["include/mbgl/gl/headless_backend.hpp"],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     includes = [
         "include",

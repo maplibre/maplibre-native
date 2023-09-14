@@ -9,6 +9,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
@@ -53,11 +54,6 @@ static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 static const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
 static const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
 static const StringIdentity idTexImageName = StringIndexer::get("u_image");
-
-template <typename T, class... Is, class... Ts>
-auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
-    return evaluated.template get<T>().constantOr(T::defaultValue());
-}
 
 } // namespace
 
