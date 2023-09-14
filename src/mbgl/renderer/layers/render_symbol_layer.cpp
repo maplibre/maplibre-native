@@ -47,8 +47,7 @@ namespace {
 #if MLN_DRAWABLE_RENDERER
 
 constexpr std::string_view SymbolIconShaderName = "SymbolIconShader";
-constexpr std::string_view SymbolSDFIconShaderName = "SymbolSDFTextShader";
-constexpr std::string_view SymbolSDFTextShaderName = "SymbolSDFIconShader";
+constexpr std::string_view SymbolSDFIconShaderName = "SymbolSDFIconShader";
 constexpr std::string_view SymbolTextAndIconShaderName = "SymbolTextAndIconShader";
 constexpr std::string_view CollisionBoxShaderName = "CollisionBoxShader";
 constexpr std::string_view CollisionCircleShaderName = "CollisionCircleShader";
@@ -992,11 +991,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     if (!symbolIconGroup) {
         symbolIconGroup = shaders.getShaderGroup(std::string(SymbolIconShaderName));
     }
-    if (!symbolSDFIconGroup) {
-        symbolSDFIconGroup = shaders.getShaderGroup(std::string(SymbolSDFIconShaderName));
-    }
-    if (!symbolSDFTextGroup) {
-        symbolSDFTextGroup = shaders.getShaderGroup(std::string(SymbolSDFTextShaderName));
+    if (!symbolSDFGroup) {
+        symbolSDFGroup = shaders.getShaderGroup(std::string(SymbolSDFIconShaderName));
     }
     if (!symbolTextAndIconGroup) {
         symbolTextAndIconGroup = shaders.getShaderGroup(std::string(SymbolTextAndIconShaderName));

@@ -27,44 +27,6 @@ using namespace style;
 using namespace shaders;
 
 namespace {
-struct alignas(16) SymbolDrawableUBO {
-    /*   0 */ std::array<float, 4 * 4> matrix;
-    /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
-    /* 128 */ std::array<float, 4 * 4> coord_matrix;
-
-    /* 192 */ std::array<float, 2> texsize;
-    /* 200 */ std::array<float, 2> texsize_icon;
-
-    /* 208 */ float gamma_scale;
-    /* 212 */ float device_pixel_ratio;
-
-    /* 216 */ float camera_to_center_distance;
-    /* 220 */ float pitch;
-    /* 224 */ /*bool*/ int rotate_symbol;
-    /* 228 */ float aspect_ratio;
-    /* 232 */ std::array<float, 2> pad;
-    /* 240 */
-};
-static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
-/// Dynamic UBO
-struct alignas(16) SymbolDynamicUBO {
-    /* 0 */ float fade_change;
-    /* 4 */ float pad1;
-    /* 8 */ std::array<float, 2> pad2;
-    /* 16 */
-};
-static_assert(sizeof(SymbolDynamicUBO) == 16);
-
-struct alignas(16) SymbolDrawablePaintUBO {
-    /*  0 */ Color fill_color;
-    /* 16 */ Color halo_color;
-    /* 32 */ float opacity;
-    /* 36 */ float halo_width;
-    /* 40 */ float halo_blur;
-    /* 44 */ float padding;
-    /* 48 */
-};
-static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
 Size getTexSize(const gfx::Drawable& drawable, const std::string_view name) {
     if (const auto& shader = drawable.getShader()) {
@@ -139,12 +101,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         propertiesChanged = false;
     }
     if (!expressionUniformBuffer) {
-        const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
-                                                   /* .frame = */ parameters.frameCount,
-                                                   /* .zoom = */ static_cast<float>(zoom),
-                                                   /* .pad = */ 0,
-                                                   0,
-                                                   0};
+        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
 #endif

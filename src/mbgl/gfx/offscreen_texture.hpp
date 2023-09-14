@@ -7,8 +7,6 @@ namespace mbgl {
 namespace gfx {
 
 class Texture;
-class Texture2D;
-using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class OffscreenTexture : public gfx::Renderable {
 protected:
@@ -21,12 +19,7 @@ public:
     virtual bool isRenderable() = 0;
 
     virtual PremultipliedImage readStillImage() = 0;
-
-#if MLN_LEGACY_RENDERER
     virtual gfx::Texture& getTexture() = 0;
-#else
-    virtual const gfx::Texture2DPtr& getTexture() = 0;
-#endif
 };
 
 } // namespace gfx

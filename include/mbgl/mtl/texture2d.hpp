@@ -6,7 +6,6 @@
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLPixelFormat.hpp>
-#include <Metal/MTLTexture.hpp>
 
 #include <memory>
 
@@ -44,7 +43,6 @@ public:
     void upload() noexcept override;
 
     bool needsUpload() const noexcept override { return !!image; };
-
 
     void updateSamplerConfiguration() noexcept;
 

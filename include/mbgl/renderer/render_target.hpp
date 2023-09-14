@@ -9,7 +9,6 @@ namespace mbgl {
 
 namespace gfx {
 class Texture2D;
-class OffscreenTexture;
 class UploadPass;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 } // namespace gfx
@@ -26,8 +25,11 @@ class RenderTarget {
 public:
     virtual ~RenderTarget() = default;
 
+    /// Set the render target texture
+    void setTexture(const gfx::Texture2DPtr& texture_) { texture = std::move(texture_); };
+
     /// Get the render target texture
-    const gfx::Texture2DPtr& getTexture();
+    const gfx::Texture2DPtr& getTexture() const { return texture; };
 
     /// @brief Add a layer group to the render target
     /// @param replace Flag to replace if exists
@@ -58,7 +60,7 @@ public:
     virtual void render(RenderOrchestrator&, const RenderTree&, PaintParameters&) = 0;
 
 protected:
-    std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
+    gfx::Texture2DPtr texture;
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
 };

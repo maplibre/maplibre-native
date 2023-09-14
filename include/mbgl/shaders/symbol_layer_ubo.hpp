@@ -46,16 +46,24 @@ struct alignas(16) SymbolDrawableUBO {
     /* 220 */ float pitch;
     /* 224 */ /*bool*/ int rotate_symbol;
     /* 228 */ float aspect_ratio;
-    /* 232 */ float fade_change;
-    /* 236 */ float pad;
+    /* 232 */ std::array<float, 2> pad;
     /* 240 */
 };
 static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
 
+/// Dynamic UBO
+struct alignas(16) SymbolDynamicUBO {
+    /* 0 */ float fade_change;
+    /* 4 */ float pad1;
+    /* 8 */ std::array<float, 2> pad2;
+    /* 16 */
+};
+static_assert(sizeof(SymbolDynamicUBO) == 16);
+
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) SymbolDrawablePaintUBO {
-    /*  0 */ std::array<float, 4> fill_color;
-    /* 16 */ std::array<float, 4> halo_color;
+    /*  0 */ Color fill_color;
+    /* 16 */ Color halo_color;
     /* 32 */ float opacity;
     /* 36 */ float halo_width;
     /* 40 */ float halo_blur;

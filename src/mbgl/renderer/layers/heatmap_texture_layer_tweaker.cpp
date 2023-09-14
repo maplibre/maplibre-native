@@ -6,14 +6,22 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {
 
 using namespace style;
-using namespace shaders;
+
+struct alignas(16) HeatmapTextureDrawableUBO {
+    std::array<float, 4 * 4> matrix;
+    std::array<float, 2> world;
+    float opacity;
+    float padding;
+};
+static_assert(sizeof(HeatmapTextureDrawableUBO) % 16 == 0);
+
+static constexpr std::string_view HeatmapTextureDrawableUBOName = "HeatmapTextureDrawableUBO";
 
 void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
                                          [[maybe_unused]] const RenderTree& renderTree,
@@ -32,18 +40,15 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         const auto& size = parameters.staticData.backendSize;
         mat4 viewportMat;
-        matrix::ortho(viewportMat, 0, size.width, size.height, 0, 1, 0);
+        matrix::ortho(viewportMat, 0, size.width, size.height, 0, 0, 1);
         const HeatmapTextureDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(viewportMat),
             /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
             /* .opacity = */ evaluated.get<HeatmapOpacity>(),
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad1 = */ 0,
-            /* .pad2 = */ 0,
-            /* .pad3 = */ 0};
+            /* .padding = */ 0};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            MLN_STRINGIZE(HeatmapTextureDrawableUBO), &drawableUBO, parameters.context);
+            HeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

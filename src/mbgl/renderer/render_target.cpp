@@ -1,14 +1,9 @@
 #include <mbgl/renderer/render_target.hpp>
 
 #include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/offscreen_texture.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 
 namespace mbgl {
-
-const gfx::Texture2DPtr& RenderTarget::getTexture() {
-    return offscreenTexture->getTexture();
-};
 
 bool RenderTarget::addLayerGroup(LayerGroupBasePtr layerGroup, const bool replace) {
     const auto index = layerGroup->getLayerIndex();
