@@ -117,8 +117,8 @@ void Texture2D::createMetalTexture() noexcept {
     }
 
     if (metalTexture) {
-    textureDirty = false;
-    context.renderingStats().memTextures += getDataSize();
+        textureDirty = false;
+        context.renderingStats().memTextures += getDataSize();
     }
 }
 
