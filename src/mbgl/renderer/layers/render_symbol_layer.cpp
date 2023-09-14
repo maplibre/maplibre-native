@@ -1297,15 +1297,15 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setVertexAttrNameId(idPosOffsetAttribName);
                 }
 
-            if (!shaderGroup) {
-                return;
-            }
-            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                shaderGroup->getOrCreateShader(context, uniformProps, StringIndexer::get(idPosOffsetAttribName)));
-            if (!shader) {
-                return;
-            }
-            builder->setShader(shader);
+                if (!shaderGroup) {
+                    return;
+                }
+                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                    shaderGroup->getOrCreateShader(context, uniformProps, StringIndexer::get(idPosOffsetAttribName)));
+                if (!shader) {
+                    return;
+                }
+                builder->setShader(shader);
 
                 builder->clearTweakers();
                 builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);

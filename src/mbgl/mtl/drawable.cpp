@@ -211,7 +211,9 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
             attrib->setRawData(std::move(data));
             attrib->setStride(VertexAttribute::getStrideOf(type));
         } else {
-            Log::Warning(Event::General, "Vertex attribute type mismatch: " + name + " / " + StringIndexer::get(impl->idVertexAttrName));
+            Log::Warning(
+                Event::General,
+                "Vertex attribute type mismatch: " + name + " / " + StringIndexer::get(impl->idVertexAttrName));
             assert(false);
         }
     }
@@ -278,7 +280,8 @@ void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 Log::Error(Event::General,
-                           "Drawable::bindUniformBuffers: UBO "s + StringIndexer::get(element.first) + " not found. skipping.");
+                           "Drawable::bindUniformBuffers: UBO "s + StringIndexer::get(element.first) +
+                               " not found. skipping.");
                 assert(false);
                 continue;
             }

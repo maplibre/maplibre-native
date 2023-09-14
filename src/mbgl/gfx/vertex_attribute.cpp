@@ -91,7 +91,8 @@ void VertexAttributeArray::resolve(const VertexAttributeArray& overrides, Resolv
     }
 }
 
-const UniqueVertexAttribute& VertexAttributeArray::add(const StringIdentity id, std::unique_ptr<VertexAttribute>&& attr) {
+const UniqueVertexAttribute& VertexAttributeArray::add(const StringIdentity id,
+                                                       std::unique_ptr<VertexAttribute>&& attr) {
     const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = std::move(attr);

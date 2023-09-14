@@ -49,7 +49,8 @@ constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 static const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
 static const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO");
 static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
-static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get("FillOutlinePatternInterpolateUBO");
+static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get(
+    "FillOutlinePatternInterpolateUBO");
 static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
 
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
@@ -505,7 +506,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
                         0,
-                                                                             idIconTextureName,
+                        idIconTextureName,
                         /*isText*/ false,
                         /*sdfIcons*/ true, // to force linear filter
                         /*rotationAlignment_*/ AlignmentType::Auto,
@@ -543,9 +544,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 uniforms.createOrUpdate(idFillPatternTilePropsUBOName, &getFillPatternTilePropsUBO(), context);
             } else if (uniforms.get(idFillOutlinePatternInterpolateUBOName)) {
                 uniforms.createOrUpdate(
-                                        idFillOutlinePatternInterpolateUBOName, &getFillOutlinePatternInterpolateUBO(), context);
+                    idFillOutlinePatternInterpolateUBOName, &getFillOutlinePatternInterpolateUBO(), context);
                 uniforms.createOrUpdate(
-                                        idFillOutlinePatternTilePropsUBOName, &getFillOutlinePatternTilePropsUBO(), context);
+                    idFillOutlinePatternTilePropsUBOName, &getFillOutlinePatternTilePropsUBO(), context);
             } else {
                 assert(false);
             }
@@ -602,18 +603,19 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            const auto finish =
-                [&](gfx::DrawableBuilder& builder, const StringIdentity interpolateUBONameId, const auto& interpolateUBO) {
-                    builder.flush();
+            const auto finish = [&](gfx::DrawableBuilder& builder,
+                                    const StringIdentity interpolateUBONameId,
+                                    const auto& interpolateUBO) {
+                builder.flush();
 
-                    for (auto& drawable : builder.clearDrawables()) {
-                        drawable->setTileID(tileID);
-                        auto& uniforms = drawable->mutableUniformBuffers();
-                        uniforms.createOrUpdate(interpolateUBONameId, &interpolateUBO, context);
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.drawablesAdded;
-                    }
-                };
+                for (auto& drawable : builder.clearDrawables()) {
+                    drawable->setTileID(tileID);
+                    auto& uniforms = drawable->mutableUniformBuffers();
+                    uniforms.createOrUpdate(interpolateUBONameId, &interpolateUBO, context);
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
+                }
+            };
 
             if (fillBuilder && bucket.sharedTriangles->elements()) {
                 fillBuilder->setShader(fillShader);
@@ -635,7 +637,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
-                finish(*outlineBuilder, FillLayerTweaker::idFillOutlineInterpolateUBOName, getFillOutlineInterpolateUBO());
+                finish(
+                    *outlineBuilder, FillLayerTweaker::idFillOutlineInterpolateUBOName, getFillOutlineInterpolateUBO());
             }
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {

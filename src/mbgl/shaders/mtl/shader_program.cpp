@@ -174,7 +174,8 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
-    if (const auto& block_ = uniformBlocks.add(StringIndexer::get(info.name.data()), static_cast<int>(info.index), info.size)) {
+    if (const auto& block_ = uniformBlocks.add(
+            StringIndexer::get(info.name.data()), static_cast<int>(info.index), info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);

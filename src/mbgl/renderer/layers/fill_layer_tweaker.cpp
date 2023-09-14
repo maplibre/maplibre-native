@@ -29,10 +29,10 @@ static const StringIdentity idFillDrawablePropsUBOName = StringIndexer::get("Fil
 static const StringIdentity idFillEvaluatedPropsUBOName = StringIndexer::get("FillEvaluatedPropsUBO");
 static const StringIdentity idFillPermutationUBOName = StringIndexer::get("FillPermutationUBO");
 
-
 const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = StringIndexer::get("FillDrawableTilePropsUBO");
 const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = StringIndexer::get("FillInterpolateUBO");
-const StringIdentity FillLayerTweaker::idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
+const StringIdentity FillLayerTweaker::idFillOutlineInterpolateUBOName = StringIndexer::get(
+    "FillOutlineInterpolateUBO");
 
 static const StringIdentity idFillOutlineDrawableUBOName = StringIndexer::get("FillOutlineDrawableUBO");
 static const StringIdentity idFillOutlineEvaluatedPropsUBOName = StringIndexer::get("FillOutlineEvaluatedPropsUBO");
@@ -47,9 +47,12 @@ static const StringIdentity idFillPatternEvaluatedPropsUBOName = StringIndexer::
 static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
 
 static const StringIdentity idFillOutlinePatternDrawableUBOName = StringIndexer::get("FillOutlinePatternDrawableUBO");
-static const StringIdentity idFillOutlinePatternPermutationUBOName = StringIndexer::get("FillOutlinePatternPermutationUBO");
-static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get("FillOutlinePatternInterpolateUBO");
-static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = StringIndexer::get("FillOutlinePatternEvaluatedPropsUBO");
+static const StringIdentity idFillOutlinePatternPermutationUBOName = StringIndexer::get(
+    "FillOutlinePatternPermutationUBO");
+static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get(
+    "FillOutlinePatternInterpolateUBO");
+static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = StringIndexer::get(
+    "FillOutlinePatternEvaluatedPropsUBO");
 static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
 
 static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
