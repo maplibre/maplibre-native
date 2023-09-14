@@ -79,9 +79,7 @@ void RenderTarget::upload(gfx::UploadPass& uploadPass) {
     visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
 
-void RenderTarget::render(RenderOrchestrator& orchestrator,
-                          const RenderTree& renderTree,
-                          PaintParameters& parameters) {
+void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {
     parameters.renderPass = parameters.encoder->createRenderPass(
         "render target", {*offscreenTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
 

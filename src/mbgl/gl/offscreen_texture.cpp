@@ -51,10 +51,10 @@ public:
     }
 
 #if MLN_LEGACY_RENDERER
-     gfx::Texture& getTexture() {
-         assert(texture);
-         return *texture;
-     }
+    gfx::Texture& getTexture() {
+        assert(texture);
+        return *texture;
+    }
 #else
     gfx::Texture2DPtr& getTexture() {
         assert(texture);
