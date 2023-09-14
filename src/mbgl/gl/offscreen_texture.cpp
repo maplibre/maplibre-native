@@ -14,11 +14,11 @@ public:
           type(type_) {
         assert(!size.isEmpty());
 #if MLN_DRAWABLE_RENDERER
-      texture = context.createTexture2D();
-      texture->setSize(size);
-      texture->setFormat(gfx::TexturePixelType::RGBA, type);
-      texture->setSamplerConfiguration(
-          {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        texture = context.createTexture2D();
+        texture->setSize(size);
+        texture->setFormat(gfx::TexturePixelType::RGBA, type);
+        texture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 #endif
     }
 
@@ -49,7 +49,7 @@ public:
         context.bindFramebuffer = framebuffer->framebuffer;
         return context.readFramebuffer<PremultipliedImage>(size);
     }
-    
+
 #if MLN_LEGACY_RENDERER
     gfx::Texture& getTexture() {
         assert(texture);
@@ -61,7 +61,7 @@ public:
         return texture;
     }
 #endif
-    
+
 private:
     gl::Context& context;
     const Size size;

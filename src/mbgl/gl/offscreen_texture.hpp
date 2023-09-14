@@ -17,7 +17,7 @@ public:
     bool isRenderable() override;
 
     PremultipliedImage readStillImage() override;
-    
+
 #if MLN_LEGACY_RENDERER
     gfx::Texture& getTexture() override;
 #else
