@@ -5,7 +5,6 @@
 #include <mbgl/mtl/drawable_builder.hpp>
 #include <mbgl/mtl/layer_group.hpp>
 #include <mbgl/mtl/offscreen_texture.hpp>
-#include <mbgl/mtl/render_target.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/texture2d.hpp>
@@ -14,6 +13,7 @@
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>

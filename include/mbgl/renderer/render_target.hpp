@@ -1,5 +1,8 @@
 #pragma once
 
+#include <mbgl/gfx/types.hpp>
+#include <mbgl/util/size.hpp>
+
 #include <functional>
 #include <map>
 #include <memory>
@@ -8,6 +11,7 @@
 namespace mbgl {
 
 namespace gfx {
+class Context;
 class Texture2D;
 class OffscreenTexture;
 class UploadPass;
@@ -24,7 +28,8 @@ using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 /// Render target class
 class RenderTarget {
 public:
-    virtual ~RenderTarget() = default;
+    RenderTarget(gfx::Context& context, const Size size, const gfx::TextureChannelDataType type);
+    ~RenderTarget();
 
     /// Get the render target texture
     const gfx::Texture2DPtr& getTexture();
@@ -52,12 +57,13 @@ public:
     void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
 
     /// Upload the layer groups
-    virtual void upload(gfx::UploadPass& uploadPass) = 0;
+    void upload(gfx::UploadPass& uploadPass);
 
     /// Render the layer groups
-    virtual void render(RenderOrchestrator&, const RenderTree&, PaintParameters&) = 0;
+    void render(RenderOrchestrator&, const RenderTree&, PaintParameters&);
 
 protected:
+    gfx::Context& context;
     std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
