@@ -842,6 +842,7 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
     for (auto it = range.first; it != range.second; ++it) {
         if (it->second == layerGroup) {
             found = true;
+            // not added
             break;
         }
     }
@@ -862,6 +863,10 @@ bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
         removed = true;
     }
     return removed;
+}
+
+size_t RenderOrchestrator::numLayerGroups() const noexcept {
+    return layerGroupsByLayerIndex.size();
 }
 
 size_t RenderOrchestrator::numLayerGroups() const noexcept {

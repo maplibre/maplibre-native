@@ -82,12 +82,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         propertiesChanged = false;
     }
     if (!expressionUniformBuffer) {
-        const ExpressionInputsUBO expressionUBO = {/* .time = */ 0,
-                                                   /* .frame = */ parameters.frameCount,
-                                                   /* .zoom = */ static_cast<float>(zoom),
-                                                   /* .pad = */ 0,
-                                                   0,
-                                                   0};
+        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
 #endif
