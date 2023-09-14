@@ -17,6 +17,7 @@ DrawableGL::DrawableGL(std::string name_)
       impl(std::make_unique<Impl>()) {}
 
 DrawableGL::~DrawableGL() {
+    impl->indexBuffer = {0, nullptr};
     impl->attributeBuffers.clear();
 }
 

@@ -23,9 +23,8 @@ public:
         SDF
     };
 
-public:
-    LineLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    LineLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
 
     ~LineLayerTweaker() override = default;
 
@@ -36,6 +35,11 @@ protected:
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
     gfx::UniformBufferPtr linePatternPropertiesBuffer;
     gfx::UniformBufferPtr lineSDFPropertiesBuffer;
+
+#if MLN_RENDER_BACKEND_METAL
+    gfx::UniformBufferPtr permutationUniformBuffer;
+    gfx::UniformBufferPtr expressionUniformBuffer;
+#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

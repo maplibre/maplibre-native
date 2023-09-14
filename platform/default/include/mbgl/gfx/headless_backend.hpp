@@ -24,7 +24,11 @@ public:
     static std::unique_ptr<HeadlessBackend> Create(const Size size = {256, 256},
                                                    SwapBehaviour swapBehavior = SwapBehaviour::NoFlush,
                                                    const gfx::ContextMode contextMode = gfx::ContextMode::Unique) {
+#if MLN_RENDER_BACKEND_METAL
+        return nullptr;
+#else // MLN_RENDER_BACKEND_OPENGL
         return Backend::Create<HeadlessBackend, Size, SwapBehaviour, gfx::ContextMode>(size, swapBehavior, contextMode);
+#endif
     }
 
     virtual PremultipliedImage readStillImage() = 0;

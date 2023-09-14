@@ -9,6 +9,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
@@ -49,15 +50,7 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 
-constexpr auto FillExtrusionDrawableUBOName = "FillExtrusionDrawableUBO";
-constexpr auto FillExtrusionDrawablePropsUBOName = "FillExtrusionDrawablePropsUBO";
-
 constexpr auto texUniformName = "u_image";
-
-template <typename T, class... Is, class... Ts>
-auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evaluated) {
-    return evaluated.template get<T>().constantOr(T::defaultValue());
-}
 
 } // namespace
 
@@ -103,7 +96,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(FillExtrusionDrawablePropsUBOName, propsBuffer);
+        uniforms.addOrReplace("FillExtrusionDrawablePropsUBO", propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -147,7 +140,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(FillExtrusionDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate("FillExtrusionDrawableUBO", &drawableUBO, context);
     });
 }
 
