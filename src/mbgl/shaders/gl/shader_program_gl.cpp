@@ -170,8 +170,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         GLint size = 0;
         GLenum type = GL_ZERO;
 
-        MBGL_CHECK_ERROR(
-            glGetActiveUniform(program, index, maxLength, &actualLength, &size, &type, name.data()));
+        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &actualLength, &size, &type, name.data()));
 
         if (type == GL_SAMPLER_2D) {
             // This uniform is a texture sampler
