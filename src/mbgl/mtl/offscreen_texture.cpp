@@ -20,7 +20,7 @@ public:
         texture->setSize(size);
         texture->setFormat(gfx::TexturePixelType::RGBA, type);
         texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         static_cast<Texture2D*>(texture.get())
             ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
     }

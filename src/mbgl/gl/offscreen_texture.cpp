@@ -13,15 +13,28 @@ public:
           size(size_),
           type(type_) {
         assert(!size.isEmpty());
+#if MLN_DRAWABLE_RENDERER
+        texture = context.createTexture2D();
+        texture->setSize(size);
+        texture->setFormat(gfx::TexturePixelType::RGBA, type);
+        texture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+#endif
     }
 
     ~OffscreenTextureResource() noexcept override = default;
 
     void bind() override {
         if (!framebuffer) {
+#if MLN_LEGACY_RENDERER
             assert(!texture);
             texture = context.createTexture(size, gfx::TexturePixelType::RGBA, type);
             framebuffer = context.createFramebuffer(*texture);
+#else
+            assert(texture);
+            texture->create();
+            framebuffer = context.createFramebuffer(*texture);
+#endif
         } else {
             context.bindFramebuffer = framebuffer->framebuffer;
         }
@@ -37,15 +50,26 @@ public:
         return context.readFramebuffer<PremultipliedImage>(size);
     }
 
-    gfx::Texture& getTexture() {
+#if MLN_LEGACY_RENDERER
+     gfx::Texture& getTexture() {
+         assert(texture);
+         return *texture;
+     }
+#else
+    gfx::Texture2DPtr& getTexture() {
         assert(texture);
-        return *texture;
+        return texture;
     }
+#endif
 
 private:
     gl::Context& context;
     const Size size;
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::Texture> texture;
+#else
+    gfx::Texture2DPtr texture;
+#endif
     const gfx::TextureChannelDataType type;
     std::optional<gl::Framebuffer> framebuffer;
 };
@@ -66,9 +90,15 @@ PremultipliedImage OffscreenTexture::readStillImage() {
     return getResource<OffscreenTextureResource>().readStillImage();
 }
 
+#if MLN_LEGACY_RENDERER
 gfx::Texture& OffscreenTexture::getTexture() {
     return getResource<OffscreenTextureResource>().getTexture();
 }
+#else
+const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
+    return getResource<OffscreenTextureResource>().getTexture();
+}
+#endif
 
 } // namespace gl
 } // namespace mbgl

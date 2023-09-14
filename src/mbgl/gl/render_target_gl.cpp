@@ -2,6 +2,8 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/framebuffer.hpp>
+#include <mbgl/gl/offscreen_texture.hpp>
+#include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -19,19 +21,10 @@ using namespace platform;
 
 RenderTargetGL::RenderTargetGL(Context& context, const Size size, const gfx::TextureChannelDataType type)
     : glContext(context) {
-    texture = glContext.createTexture2D();
-    texture->setSize(size);
-    texture->setFormat(gfx::TexturePixelType::RGBA, type);
-    texture->setSamplerConfiguration(
-        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    offscreenTexture = glContext.createOffscreenTexture(size, type);
 }
 
-RenderTargetGL::~RenderTargetGL() {
-    if (framebuffer) {
-        MBGL_CHECK_ERROR(glDeleteFramebuffers(1, &framebuffer->get()));
-        framebuffer.reset();
-    }
-}
+RenderTargetGL::~RenderTargetGL() {}
 
 void RenderTargetGL::upload(gfx::UploadPass& uploadPass) {
     visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
@@ -40,16 +33,8 @@ void RenderTargetGL::upload(gfx::UploadPass& uploadPass) {
 void RenderTargetGL::render(RenderOrchestrator& orchestrator,
                             const RenderTree& renderTree,
                             PaintParameters& parameters) {
-    texture->create();
-    if (!framebuffer) {
-        framebuffer = std::make_shared<UniqueFramebuffer>(glContext.createFramebuffer(*texture));
-    }
-
-    glContext.bindFramebuffer = *framebuffer;
-    glContext.activeTextureUnit = 0;
-    glContext.scissorTest = false;
-    glContext.viewport = {0, 0, texture->getSize()};
-    glContext.clear(Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {});
+    parameters.renderPass = parameters.encoder->createRenderPass(
+        "render target", {*offscreenTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
 
     // Run layer tweakers to update any dynamic elements
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
@@ -79,6 +64,9 @@ void RenderTargetGL::render(RenderOrchestrator& orchestrator,
             parameters.currentLayer--;
         }
     });
+
+    parameters.renderPass.reset();
+    parameters.encoder->present(*offscreenTexture);
 }
 
 } // namespace gl
