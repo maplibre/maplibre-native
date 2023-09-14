@@ -80,9 +80,6 @@ UniqueShaderProgram Context::createProgram(std::string name,
     auto options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
     options->setPreprocessorMacros(nsDefines);
     options->setFastMathEnabled(true);
-
-    // TODO: We should specify the language version explicitly, but which one?
-    // v3.0 requires iOS 16
     options->setLanguageVersion(MTL::LanguageVersion2_1);
 
     // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders

@@ -869,10 +869,6 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
     return layerGroupsByLayerIndex.size();
 }
 
-size_t RenderOrchestrator::numLayerGroups() const noexcept {
-    return layerGroupsByLayerIndex.size();
-}
-
 int32_t RenderOrchestrator::maxLayerIndex() const {
     if (!layerGroupsByLayerIndex.empty()) {
         return layerGroupsByLayerIndex.crbegin()->second->getLayerIndex();
