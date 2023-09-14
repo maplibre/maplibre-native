@@ -22,7 +22,6 @@ public:
 
 private:
     Context& glContext;
-    UniqueFramebufferPtr framebuffer;
 };
 
 } // namespace gl

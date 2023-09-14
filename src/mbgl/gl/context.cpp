@@ -503,7 +503,7 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
     return std::make_shared<gl::RenderTargetGL>(*this, size, type);
 }
 
-UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
+Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
     MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -512,7 +512,7 @@ UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
     checkFramebuffer();
-    return fbo;
+    return {color.getSize(), std::move(fbo)};
 }
 #endif
 
