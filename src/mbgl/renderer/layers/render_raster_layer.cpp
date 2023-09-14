@@ -243,7 +243,6 @@ void RenderRasterLayer::updateLayerTweaker() {
             imageLayerGroup->setLayerTweaker(tweaker);
         }
     }
-    
 }
 
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
