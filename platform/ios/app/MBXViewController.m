@@ -1807,7 +1807,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (UIImage *)mapView:(MLNMapView *)mapView didFailToLoadImage:(NSString *)imageName {
-    return nil;
+    UIImage *backupImage = [UIImage imageNamed:@"MissingImage"];
+    return backupImage;
 }
 
 - (void)flyToWithLatLngBoundsAndPadding
