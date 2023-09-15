@@ -23,7 +23,7 @@ public:
     static const std::string& get(const StringIdentity id);
 
     static void clear();
-    
+
     static size_t size();
 
 protected:
@@ -37,7 +37,7 @@ protected:
         static StringIndexer inst;
         return inst;
     }
-    
+
     MapType stringToIdentity;
     VectorType identityToString;
     std::shared_mutex sharedMutex;
