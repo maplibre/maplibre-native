@@ -4,6 +4,7 @@ namespace mbgl {
 namespace bench {
 
 const std::vector<Location> locations = {
+    { "boston",         -71.07766,  42.36513, 16,   0.0 },
     { "paris",             2.3411,   48.8664, 11,   0.0 },
     { "paris2",            2.3516,   48.8356, 13, 273.8 },
     { "alps",             10.6107,   46.9599,  6,   0.0 },

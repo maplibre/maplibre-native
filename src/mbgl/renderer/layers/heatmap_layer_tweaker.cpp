@@ -8,6 +8,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -28,8 +29,8 @@ struct alignas(16) HeatmapEvaluatedPropsUBO {
 };
 static_assert(sizeof(HeatmapEvaluatedPropsUBO) % 16 == 0);
 
-static constexpr std::string_view HeatmapDrawableUBOName = "HeatmapDrawableUBO";
-static constexpr std::string_view HeatmapEvaluatedPropsUBOName = "HeatmapEvaluatedPropsUBO";
+static const StringIdentity idHeatmapDrawableUBOName = StringIndexer::get("HeatmapDrawableUBO");
+static const StringIdentity idHeatmapEvaluatedPropsUBOName = StringIndexer::get("HeatmapEvaluatedPropsUBO");
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                   const RenderTree& renderTree,
@@ -58,7 +59,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(HeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        uniforms.addOrReplace(idHeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -78,7 +79,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(HeatmapDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idHeatmapDrawableUBOName, &drawableUBO, context);
     });
 }
 

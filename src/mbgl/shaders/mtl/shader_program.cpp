@@ -10,12 +10,14 @@
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <Metal/MTLRenderPass.hpp>
 #include <Metal/MTLRenderPipeline.hpp>
 
 #include <cstring>
 #include <utility>
+#include <algorithm>
 
 using namespace std::string_literals;
 
@@ -165,13 +167,9 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     return rps;
 }
 
-std::optional<uint32_t> ShaderProgram::getSamplerLocation(std::string_view name) const {
-    std::size_t index = 0;
-    for (const auto& bindingName : textureBindings) {
-        if (bindingName == name) {
-            return index;
-        }
-        index += 1;
+std::optional<uint32_t> ShaderProgram::getSamplerLocation(const StringIdentity id) const {
+    if (auto it = textureBindings.find(id); it != textureBindings.end()) {
+        return it->second;
     }
     return std::nullopt;
 }
@@ -181,10 +179,10 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
     vertexAttributes.visitAttributes(
-        [&](const std::string&, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
-    uniformBlocks.visit([&](const std::string&, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
+        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    vertexAttributes.add(std::string(info.name), index, info.dataType, info.count);
+    vertexAttributes.add(StringIndexer::get(info.name), index, info.dataType, info.count);
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
@@ -192,10 +190,10 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
     vertexAttributes.visitAttributes(
-        [&](const std::string&, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
-    uniformBlocks.visit([&](const std::string&, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
+        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    if (const auto& block_ = uniformBlocks.add(info.name.data(), index, info.size)) {
+    if (const auto& block_ = uniformBlocks.add(StringIndexer::get(info.name), index, info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);
@@ -203,8 +201,7 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
 }
 
 void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
-    textureBindings.resize(std::max(textureBindings.size(), info.index + 1));
-    textureBindings[info.index] = info.name;
+    textureBindings[StringIndexer::get(info.name.data())] = info.index;
 }
 
 } // namespace mtl

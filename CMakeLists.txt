@@ -407,6 +407,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/run_loop.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/string_indexer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp
@@ -949,6 +950,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/stopwatch.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/stopwatch.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/string.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/string_indexer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/thread.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/thread_local.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/thread_pool.cpp

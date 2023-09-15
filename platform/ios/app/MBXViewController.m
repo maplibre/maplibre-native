@@ -1807,7 +1807,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (UIImage *)mapView:(MLNMapView *)mapView didFailToLoadImage:(NSString *)imageName {
-    UIImage *backupImage = [UIImage imageNamed:@"AppIcon"];
+    UIImage *backupImage = [UIImage imageNamed:@"MissingImage"];
     return backupImage;
 }
 
@@ -2043,7 +2043,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         });
     }
-    
+
     NSAssert(self.styleNames.count == self.styleURLs.count, @"Style names and URLs don’t match.");
 }
 

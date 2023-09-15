@@ -39,10 +39,10 @@ namespace {
 
 #if MLN_DRAWABLE_RENDERER
 
-constexpr auto PosAttribName = "a_pos";
-constexpr auto NormAttribName = "a_normal_ed";
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idNormAttribName = StringIndexer::get("a_normal_ed");
 
-constexpr auto IconTextureName = "u_image";
+static const StringIdentity idIconTextureName = StringIndexer::get("u_image");
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -390,8 +390,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
                 auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate("FillExtrusionDrawableTilePropsUBO", &tilePropsUBO, context);
-                uniforms.createOrUpdate("FillExtrusionInterpolateUBO", &interpUBO, context);
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName, &interpUBO, context);
             });
             continue;
         }
@@ -447,8 +449,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         if (hasPattern && !tweaker) {
             if (const auto& atlases = tile.getAtlasTextures()) {
                 tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                        std::string(),
-                                                                        std::string(IconTextureName),
+                                                                        0,
+                                                                        idIconTextureName,
                                                                         /*isText=*/false,
                                                                         false,
                                                                         style::AlignmentType::Auto,
@@ -463,14 +465,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = vertexAttrs.getOrAdd(PosAttribName)) {
+        if (const auto& attr = vertexAttrs.getOrAdd(idPosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a1),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = vertexAttrs.getOrAdd(NormAttribName)) {
+        if (const auto& attr = vertexAttrs.getOrAdd(idNormAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
                                    /*vertexOffset=*/0,
@@ -502,8 +504,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setTileID(tileID);
 
                 auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate("FillExtrusionDrawableTilePropsUBO", &tilePropsUBO, context);
-                uniforms.createOrUpdate("FillExtrusionInterpolateUBO", &interpUBO, context);
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);
+                uniforms.createOrUpdate(
+                    FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName, &interpUBO, context);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
