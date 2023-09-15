@@ -3,15 +3,14 @@
 
 namespace mbgl {
 
-AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupBasePtr layerGroup_, bool canReplace)
-    : layerGroup(std::move(layerGroup_)),
-      replace(canReplace) {}
+AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupBasePtr layerGroup_)
+    : layerGroup(std::move(layerGroup_)) {}
 
 AddLayerGroupRequest::AddLayerGroupRequest(AddLayerGroupRequest &&other)
     : layerGroup(std::move(other.layerGroup)) {}
 
 void AddLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
-    orchestrator.addLayerGroup(std::move(layerGroup), replace);
+    orchestrator.addLayerGroup(std::move(layerGroup));
 }
 
 void RemoveLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
@@ -23,10 +22,7 @@ UpdateLayerGroupIndexRequest::UpdateLayerGroupIndexRequest(LayerGroupBasePtr til
       newLayerIndex(newLayerIndex_) {}
 
 void UpdateLayerGroupIndexRequest::execute(RenderOrchestrator &orchestrator) {
-    // Update the index of a tile layer group and indicate to the
-    // orchestrator that it must rebuild the map of ordered layer groups
-    layerGroup->updateLayerIndex(newLayerIndex);
-    orchestrator.markLayerGroupOrderDirty();
+    orchestrator.updateLayerIndex(layerGroup, newLayerIndex);
 }
 
 AddRenderTargetRequest::AddRenderTargetRequest(RenderTargetPtr renderTarget_)
