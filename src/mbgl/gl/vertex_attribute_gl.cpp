@@ -182,5 +182,18 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute&
     return rawData;
 }
 
+bool VertexAttributeArrayGL::isDirty() const {
+    return std::any_of(attrs.begin(), attrs.end(), [](const auto& kv) {
+        if (kv.second) {
+            // If we have shared data, the dirty flag from that overrides ours
+            const auto& glAttrib = static_cast<const VertexAttributeGL&>(*kv.second);
+            if (const auto& shared = glAttrib.getSharedRawData()) {
+                return shared->getDirty();
+            }
+        }
+        return kv.second && kv.second->isDirty();
+    });
+}
+
 } // namespace gl
 } // namespace mbgl

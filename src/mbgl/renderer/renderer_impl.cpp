@@ -406,7 +406,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
-        renderTreeParameters.placementChanged);
+        renderTreeParameters.placementChanged,
+        renderTree.getElapsedTime());
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

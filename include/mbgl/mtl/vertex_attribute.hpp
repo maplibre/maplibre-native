@@ -39,8 +39,7 @@ public:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray final : public gfx::VertexAttributeArray {
 public:
-    VertexAttributeArray(int initCapacity = 10)
-        : gfx::VertexAttributeArray(initCapacity) {}
+    VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&& other)
         : gfx::VertexAttributeArray(std::move(other)) {}
 

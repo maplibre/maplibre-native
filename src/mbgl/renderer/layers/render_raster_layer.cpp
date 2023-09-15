@@ -244,10 +244,10 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     }
 }
 
-constexpr auto PosAttribName = "a_pos";
-constexpr auto TexturePosAttribName = "a_texture_pos";
-constexpr auto Image0UniformName = "u_image0";
-constexpr auto Image1UniformName = "u_image1";
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
+static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
+static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
 
 void RenderRasterLayer::updateLayerTweaker() {
     if (layerGroup || imageLayerGroup) {
@@ -323,7 +323,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                                                  : gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrName(PosAttribName);
+        builder->setVertexAttrNameId(idPosAttribName);
 
         return builder;
     };
@@ -331,14 +331,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
                                                  const RasterBucket& bucket) {
         // textures
-        auto location0 = rasterShader->getSamplerLocation(Image0UniformName);
+        auto location0 = rasterShader->getSamplerLocation(idTexImage0Name);
         if (location0.has_value()) {
             std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
             tex0->setImage(bucket.image);
             tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             builder->setTexture(tex0, location0.value());
         }
-        auto location1 = rasterShader->getSamplerLocation(Image1UniformName);
+        auto location1 = rasterShader->getSamplerLocation(idTexImage1Name);
         if (location1.has_value()) {
             std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
             tex1->setImage(bucket.image);
@@ -362,7 +362,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         {
             gfx::VertexAttributeArray vertexAttrs;
 
-            if (auto& attr = vertexAttrs.add(PosAttribName)) {
+            if (auto& attr = vertexAttrs.add(idPosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a1),
                                        /*vertexOffset=*/0,
@@ -370,7 +370,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
-            if (auto& attr = vertexAttrs.add(TexturePosAttribName)) {
+            if (auto& attr = vertexAttrs.add(idTexturePosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a2),
                                        /*vertexOffset=*/0,

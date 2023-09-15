@@ -31,8 +31,12 @@ public:
 
     void onWillStartRenderingFrame() override { delegate.invoke(&RendererObserver::onWillStartRenderingFrame); }
 
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) override {
-        delegate.invoke(&RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   double frameTime) override {
+        void (RendererObserver::*f)(RenderMode, bool, bool, double) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTime);
     }
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }

@@ -196,10 +196,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     constexpr std::uint8_t padding = 0;
 
     std::vector<std::uint8_t> allData;
-    allData.reserve(vertexData.size() + (defaults.getTotalSize() + align) * vertexCount);
 
     uint32_t vertexStride = 0;
-    if (vertexAttributeIndex != static_cast<std::size_t>(-1)) {
+    if (vertexAttributeIndex != static_cast<std::size_t>(-1) && !vertexData.empty()) {
+        allData.reserve(vertexData.size() + (defaults.getTotalSize() + align) * vertexCount);
+
         // Fill in vertices
         allData.insert(allData.end(), vertexData.begin(), vertexData.end());
         bindings.resize(vertexAttributeIndex + 1);
@@ -213,7 +214,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     }
 
     // For each attribute in the program, with the corresponding default and optional override...
-    const auto resolveAttr = [&](const std::string& name, auto& defaultAttr, auto& overrideAttr) -> void {
+    const auto resolveAttr = [&](const StringIdentity id, auto& defaultAttr, auto& overrideAttr) -> void {
         auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
         const auto& defaultGL = static_cast<const VertexAttributeGL&>(defaultAttr);
         const auto stride = defaultAttr.getStride();
@@ -237,6 +238,10 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
+        if (allData.empty()) {
+            allData.reserve(vertexData.size() + (defaults.getTotalSize() + align) * vertexCount);
+        }
+
         // Get the raw data for the values in the desired format
         const auto& rawData = VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType());
         if (rawData.empty()) {
@@ -255,9 +260,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // something else, the binding is invalid
             // TODO: throw?
             Log::Warning(Event::General,
-                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + name + "' (" +
-                             util::toString(defaultGL.getIndex()) + "), expected " + util::toString(stride) + " or " +
-                             util::toString(stride * vertexCount));
+                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + StringIndexer::get(id) +
+                             "' (" + util::toString(defaultGL.getIndex()) + "), expected " + util::toString(stride) +
+                             " or " + util::toString(stride * vertexCount));
             return;
         }
 

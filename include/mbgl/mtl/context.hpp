@@ -113,6 +113,8 @@ public:
 
     void clearStencilBuffer(int32_t) override;
 
+    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size);
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
