@@ -98,13 +98,14 @@ public:
     void update(const std::shared_ptr<UpdateParameters>&);
 
 #if MLN_DRAWABLE_RENDERER
-    bool addLayerGroup(LayerGroupBasePtr, bool replace);
+    bool addLayerGroup(LayerGroupBasePtr);
     bool removeLayerGroup(const int32_t layerIndex);
     size_t numLayerGroups() const noexcept;
     int32_t maxLayerIndex() const;
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
     void visitLayerGroups(std::function<void(LayerGroupBase&)>);
     void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
+    void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
 
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
