@@ -167,6 +167,10 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
                                   gfx::IndexVectorBasePtr indexes,
                                   const SegmentBase* segments,
                                   const std::size_t segmentCount) {
+    if (!indexes || !indexes->elements()) {
+        assert("Missing segment indexes");
+        return;
+    }
     impl->sharedIndexes = std::move(indexes);
     for (std::size_t i = 0; i < segmentCount; ++i) {
         const auto& seg = segments[i];

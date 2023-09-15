@@ -19,6 +19,7 @@ MLN_IOS_PUBLIC_HEADERS = [
     "src/MLNFaux3DUserLocationAnnotationView.h",
     "src/MLNMapAccessibilityElement.h",
     "src/MLNMapView+Impl.h",
+    "src/MLNMapView+Metal.h",
     "src/MLNMapView+OpenGL.h",
     "src/MLNScaleBar.h",
     "src/MLNUserLocationHeadingArrowLayer.h",
@@ -66,10 +67,15 @@ MLN_IOS_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNMapProjection.mm",
     "src/MLNMapView.mm",
     "src/MLNMapView+Impl.mm",
-    "src/MLNMapView+OpenGL.mm",
     "src/MLNScaleBar.mm",
     "src/UIColor+MLNAdditions.mm",
     "src/UIImage+MLNAdditions.mm",
+]
+MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE = [
+    "src/MLNMapView+OpenGL.mm",
+]
+MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE = [
+    "src/MLNMapView+Metal.mm",
 ]
 
 MLN_PUBLIC_IOS_APP_SOPURCE = [

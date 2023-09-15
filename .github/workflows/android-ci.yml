@@ -45,6 +45,10 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
+      - name: Update Apt Package Cache
+        run: sudo apt-get update
+        working-directory: .
+
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
@@ -56,7 +60,7 @@ jobs:
           docker-images: true
           swap-storage: false
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -183,6 +187,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:
+          if-no-files-found: error
           name: uploadsEnv
           path: uploads.env
 
@@ -198,6 +203,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: android-render-tests
+          if-no-files-found: error
           path: |
             ./render-test/android/RenderTestsApp.apk
             ./render-test/android/RenderTests.apk

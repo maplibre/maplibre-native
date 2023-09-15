@@ -30,6 +30,7 @@ class RenderTree;
 class SymbolBucket;
 class TransformState;
 class TransitionParameters;
+class UpdateParameters;
 class UploadParameters;
 
 #if MLN_DRAWABLE_RENDERER
@@ -164,8 +165,12 @@ public:
 
 #if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
-    virtual void update(
-        gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const RenderTree&, UniqueChangeRequestVec&) {}
+    virtual void update(gfx::ShaderRegistry&,
+                        gfx::Context&,
+                        const TransformState&,
+                        const std::shared_ptr<UpdateParameters>&,
+                        const RenderTree&,
+                        UniqueChangeRequestVec&) {}
 
     /// Called when the style layer is replaced (same ID and type), and the render layer is reused.
     virtual void layerChanged(const TransitionParameters&,

@@ -17,6 +17,7 @@ DrawableGL::DrawableGL(std::string name_)
       impl(std::make_unique<Impl>()) {}
 
 DrawableGL::~DrawableGL() {
+    impl->indexBuffer = {0, nullptr};
     impl->attributeBuffers.clear();
 }
 
@@ -209,10 +210,12 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
             if (!glSeg.getVertexArray().isValid()) {
                 auto vertexArray = glContext.createVertexArray();
-                IndexBufferGL& indexBuffer = *static_cast<IndexBufferGL*>(impl->indexes->getBuffer());
+                const auto& indexBuffer = static_cast<IndexBufferGL&>(*impl->indexes->getBuffer());
                 vertexArray.bind(glContext, *indexBuffer.buffer, bindings);
                 assert(vertexArray.isValid());
-                glSeg.setVertexArray(std::move(vertexArray));
+                if (vertexArray.isValid()) {
+                    glSeg.setVertexArray(std::move(vertexArray));
+                }
             }
         };
     }
