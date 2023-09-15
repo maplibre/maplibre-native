@@ -374,8 +374,10 @@ public:
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
                         using InterpType = ZoomInterpolatedAttributeType<Type>;
+#if !defined(NDEBUG)
                         using Value = typename Type::Value;             // std::array<T, N>
                         using InterpValue = typename InterpType::Value; // std::array<T, 2*N>
+#endif
 
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
