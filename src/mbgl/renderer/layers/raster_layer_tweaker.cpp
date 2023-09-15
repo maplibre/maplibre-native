@@ -10,12 +10,14 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
-
 using namespace shaders;
+
+static const StringIdentity idRasterDrawableUBOName = StringIndexer::get("RasterDrawableUBO");
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const RenderTree& renderTree,
@@ -75,13 +77,13 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
             /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
             /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
-            /* .overdrawInspector = */ overdrawInspector,
+            /*.overdrawInspector = */ overdrawInspector,
             0,
             0,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate("RasterDrawableUBO", &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idRasterDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

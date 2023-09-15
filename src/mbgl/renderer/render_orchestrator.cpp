@@ -72,8 +72,9 @@ public:
                    PatternAtlas& patternAtlas_,
                    RenderLayerReferences layersNeedPlacement_,
                    Immutable<Placement> placement_,
-                   bool updateSymbolOpacities_)
-        : RenderTree(std::move(parameters_)),
+                   bool updateSymbolOpacities_,
+                   double startTime_)
+        : RenderTree(std::move(parameters_), startTime_),
           layerRenderItems(std::move(layerRenderItems_)),
           sourceRenderItems(std::move(sourceRenderItems_)),
           lineAtlas(lineAtlas_),
@@ -143,6 +144,8 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const std::shared_ptr<UpdateParameters>& updateParameters) {
+    const auto startTime = util::MonotonicTimer::now().count();
+
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     if (!isMapModeContinuous) {
         // Reset zoom history state.
@@ -504,7 +507,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             *patternAtlas,
                                             std::move(layersNeedPlacement),
                                             placementController.getPlacement(),
-                                            symbolBucketsChanged);
+                                            symbolBucketsChanged,
+                                            startTime);
 }
 
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineString& geometry,

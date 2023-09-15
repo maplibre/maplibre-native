@@ -14,6 +14,7 @@
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/fill.hpp>
@@ -22,6 +23,41 @@
 namespace mbgl {
 
 using namespace style;
+
+static const StringIdentity idFillDrawableUBOName = StringIndexer::get("FillDrawableUBO");
+static const StringIdentity idFillDrawablePropsUBOName = StringIndexer::get("FillDrawablePropsUBO");
+static const StringIdentity idFillEvaluatedPropsUBOName = StringIndexer::get("FillEvaluatedPropsUBO");
+static const StringIdentity idFillPermutationUBOName = StringIndexer::get("FillPermutationUBO");
+
+const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = StringIndexer::get("FillDrawableTilePropsUBO");
+const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = StringIndexer::get("FillInterpolateUBO");
+const StringIdentity FillLayerTweaker::idFillOutlineInterpolateUBOName = StringIndexer::get(
+    "FillOutlineInterpolateUBO");
+
+static const StringIdentity idFillOutlineDrawableUBOName = StringIndexer::get("FillOutlineDrawableUBO");
+static const StringIdentity idFillOutlineEvaluatedPropsUBOName = StringIndexer::get("FillOutlineEvaluatedPropsUBO");
+static const StringIdentity idFillOutlinePermutationUBOName = StringIndexer::get("FillOutlinePermutationUBO");
+
+static const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
+
+static const StringIdentity idFillPatternDrawableUBOName = StringIndexer::get("FillPatternDrawableUBO");
+static const StringIdentity idFillPatternPermutationUBOName = StringIndexer::get("FillPatternPermutationUBO");
+static const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO");
+static const StringIdentity idFillPatternEvaluatedPropsUBOName = StringIndexer::get("FillPatternEvaluatedPropsUBO");
+static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
+
+static const StringIdentity idFillOutlinePatternDrawableUBOName = StringIndexer::get("FillOutlinePatternDrawableUBO");
+static const StringIdentity idFillOutlinePatternPermutationUBOName = StringIndexer::get(
+    "FillOutlinePatternPermutationUBO");
+static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get(
+    "FillOutlinePatternInterpolateUBO");
+static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = StringIndexer::get(
+    "FillOutlinePatternEvaluatedPropsUBO");
+static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
+
+static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
@@ -245,7 +281,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation("u_image")) {
+            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                 if (const auto& tex = drawable.getTexture(*index)) {
                     textureSize = tex->getSize();
                 }
@@ -255,35 +291,35 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             return;
         }
 
-        if (uniforms.get("FillInterpolateUBO")) {
+        if (uniforms.get(idFillInterpolateUBOName)) {
             UpdateFillUniformBuffers();
 
-            uniforms.addOrReplace("FillEvaluatedPropsUBO", fillPropsUniformBuffer);
+            uniforms.addOrReplace(idFillEvaluatedPropsUBOName, fillPropsUniformBuffer);
             const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
 
-            uniforms.createOrUpdate("FillDrawableUBO", &drawableUBO, context);
+            uniforms.createOrUpdate(idFillDrawableUBOName, &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace("FillPermutationUBO", fillPermutationUniformBuffer);
+            uniforms.addOrReplace(idFillPermutationUBOName, fillPermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
-        } else if (uniforms.get("FillOutlineInterpolateUBO")) {
+        } else if (uniforms.get(idFillOutlineInterpolateUBOName)) {
             UpdateFillOutlineUniformBuffers();
 
-            uniforms.addOrReplace("FillOutlineEvaluatedPropsUBO", fillOutlinePropsUniformBuffer);
+            uniforms.addOrReplace(idFillOutlineEvaluatedPropsUBOName, fillOutlinePropsUniformBuffer);
             const FillOutlineDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
             };
 
-            uniforms.createOrUpdate("FillOutlineDrawableUBO", &drawableUBO, context);
+            uniforms.createOrUpdate(idFillOutlineDrawableUBOName, &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace("FillOutlinePermutationUBO", fillOutlinePermutationUniformBuffer);
+            uniforms.addOrReplace(idFillOutlinePermutationUBOName, fillOutlinePermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
-        } else if (uniforms.get("FillPatternInterpolateUBO")) {
+        } else if (uniforms.get(idFillPatternInterpolateUBOName)) {
             UpdateFillPatternUniformBuffers();
 
-            uniforms.addOrReplace("FillPatternEvaluatedPropsUBO", fillPatternPropsUniformBuffer);
+            uniforms.addOrReplace(idFillPatternEvaluatedPropsUBOName, fillPatternPropsUniformBuffer);
             const FillPatternDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
@@ -294,15 +330,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                 0,
             };
 
-            uniforms.createOrUpdate("FillPatternDrawableUBO", &drawableUBO, context);
+            uniforms.createOrUpdate(idFillPatternDrawableUBOName, &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace("FillPatternPermutationUBO", fillPatternPermutationUniformBuffer);
+            uniforms.addOrReplace(idFillPatternPermutationUBOName, fillPatternPermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
-        } else if (uniforms.get("FillOutlinePatternInterpolateUBO")) {
+        } else if (uniforms.get(idFillOutlinePatternInterpolateUBOName)) {
             UpdateFillOutlinePatternUniformBuffers();
 
-            uniforms.addOrReplace("FillOutlinePatternEvaluatedPropsUBO", fillOutlinePatternPropsUniformBuffer);
+            uniforms.addOrReplace(idFillOutlinePatternEvaluatedPropsUBOName, fillOutlinePatternPropsUniformBuffer);
             const FillOutlinePatternDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
@@ -312,15 +348,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                 /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
             };
 
-            uniforms.createOrUpdate("FillOutlinePatternDrawableUBO", &drawableUBO, context);
+            uniforms.createOrUpdate(idFillOutlinePatternDrawableUBOName, &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-            uniforms.addOrReplace("FillOutlinePatternPermutationUBO", fillOutlinePatternPermutationUniformBuffer);
+            uniforms.addOrReplace(idFillOutlinePatternPermutationUBOName, fillOutlinePatternPermutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
         }
 
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace("ExpressionInputsUBO", expressionUniformBuffer);
+        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 

@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <algorithm>
 #include <array>
@@ -271,9 +272,9 @@ protected:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray {
 public:
-    using AttributeMap = std::unordered_map<std::string, std::unique_ptr<VertexAttribute>>;
+    using AttributeMap = std::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
 
-    VertexAttributeArray(int initCapacity = 10);
+    VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&&);
     VertexAttributeArray(const VertexAttributeArray&) = delete; // Would need to use the virtual assignment operator
     virtual ~VertexAttributeArray() = default;
@@ -290,15 +291,15 @@ public:
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const UniqueVertexAttribute& get(const std::string& name) const;
+    const std::unique_ptr<VertexAttribute>& get(const StringIdentity id) const;
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const UniqueVertexAttribute& add(std::string name,
-                                     int index = -1,
-                                     AttributeDataType = AttributeDataType::Invalid,
-                                     std::size_t count = 1);
+    const std::unique_ptr<VertexAttribute>& add(const StringIdentity id,
+                                                int index = -1,
+                                                AttributeDataType = AttributeDataType::Invalid,
+                                                std::size_t count = 1);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
@@ -306,22 +307,22 @@ public:
     /// @param index index to match, or -1 for any
     /// @param type type to match, or `Invalid` for any
     /// @param count type to match, or 0 for any
-    const UniqueVertexAttribute& getOrAdd(std::string name,
-                                          int index = -1,
-                                          AttributeDataType type = AttributeDataType::Invalid,
-                                          std::size_t count = 0);
+    const std::unique_ptr<VertexAttribute>& getOrAdd(const StringIdentity id,
+                                                     int index = -1,
+                                                     AttributeDataType type = AttributeDataType::Invalid,
+                                                     std::size_t count = 0);
 
     // Set a value if the element is present
     template <typename T>
-    bool set(const std::string& name, std::size_t i, T value) {
-        if (const auto& item = get(name)) {
+    bool set(const StringIdentity id, std::size_t i, T value) {
+        if (const auto& item = get(id)) {
             return item->set(i, value);
         }
         return false;
     }
 
     /// Indicates whether any values have changed
-    bool isDirty() const {
+    virtual bool isDirty() const {
         return std::any_of(
             attrs.begin(), attrs.end(), [](const auto& kv) { return kv.second && kv.second->isDirty(); });
     }
@@ -330,7 +331,7 @@ public:
     void clear();
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
+    void visitAttributes(const std::function<void(const StringIdentity, VertexAttribute&)>& f) {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -339,7 +340,7 @@ public:
     }
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const std::string&, const VertexAttribute&)>& f) const {
+    void visitAttributes(const std::function<void(const StringIdentity, const VertexAttribute&)>& f) const {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -347,7 +348,8 @@ public:
         });
     }
 
-    using ResolveDelegate = std::function<void(const std::string&, VertexAttribute&, const UniqueVertexAttribute&)>;
+    using ResolveDelegate =
+        std::function<void(const StringIdentity, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
@@ -369,26 +371,29 @@ public:
         (
             [&](const auto& attributeNames) {
                 for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
-                    const auto& attributeName = std::string(attributeNames[attrIndex]);
+                    const auto& attributeName = attributeNames[attrIndex];
                     if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
                         using Attribute = typename DataDrivenPaintProperty::Attribute;
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
                         using InterpType = ZoomInterpolatedAttributeType<Type>;
-#if !defined(NDEBUG)
-                        using Value = typename Type::Value;             // std::array<T, N>
-                        using InterpValue = typename InterpType::Value; // std::array<T, 2*N>
-#endif
 
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
                         if (vertexCount > 0 && !isConstant) {
-                            if (auto& attr = getOrAdd("a_" + attributeName)) {
+                            auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
+                            if (!attributeNameID) {
+                                static const std::string attributePrefix = "a_";
+                                attributeNameID = StringIndexer::get(attributePrefix + attributeName.data());
+                            }
+
+                            if (auto& attr = getOrAdd(*attributeNameID)) {
                                 if (const auto& sharedVector = binder->getSharedVertexVector()) {
                                     const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
                                     const bool isInterpolated = binder->isInterpolated();
                                     const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-                                    assert(rawSize ==
-                                           static_cast<uint32_t>(isInterpolated ? sizeof(InterpValue) : sizeof(Value)));
+                                    assert(rawSize == static_cast<uint32_t>(isInterpolated
+                                                                                ? sizeof(typename InterpType::Value)
+                                                                                : sizeof(typename Type::Value)));
                                     assert(sharedVector->getRawCount() == vertexCount);
                                     attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
                                 } else {
@@ -418,7 +423,7 @@ public:
     }
 
 protected:
-    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&&);
+    const UniqueVertexAttribute& add(const StringIdentity id, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);

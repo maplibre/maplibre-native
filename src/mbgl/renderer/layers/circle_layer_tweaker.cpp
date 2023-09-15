@@ -9,6 +9,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/circle.hpp>
@@ -19,8 +20,14 @@
 namespace mbgl {
 
 using namespace style;
-
 using namespace shaders;
+
+static const StringIdentity idCircleDrawableUBOName = StringIndexer::get("CircleDrawableUBO");
+static const StringIdentity idCirclePaintParamsUBOName = StringIndexer::get("CirclePaintParamsUBO");
+static const StringIdentity idCircleEvaluatedPropsUBOName = StringIndexer::get("CircleEvaluatedPropsUBO");
+
+static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+static const StringIdentity idCirclePermutationUBOName = StringIndexer::get("CirclePermutationUBO");
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,
@@ -108,8 +115,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace("CirclePaintParamsUBO", paintParamsUniformBuffer);
-        uniforms.addOrReplace("CircleEvaluatedPropsUBO", evaluatedPropsUniformBuffer);
+        uniforms.addOrReplace(idCirclePaintParamsUBOName, paintParamsUniformBuffer);
+        uniforms.addOrReplace(idCircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             assert(!"Circles only render with tiles");
@@ -132,11 +139,11 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         const CircleDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                                /* .extrude_scale = */ extrudeScale,
                                                /* .padding = */ 0};
-        uniforms.createOrUpdate("CircleDrawableUBO", &drawableUBO, context);
 
+        uniforms.createOrUpdate(idCircleDrawableUBOName, &drawableUBO, context);
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace("ExpressionInputsUBO", expressionUniformBuffer);
-        uniforms.addOrReplace("CirclePermutationUBO", permutationUniformBuffer);
+        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
+        uniforms.addOrReplace(idCirclePermutationUBOName, permutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 }
