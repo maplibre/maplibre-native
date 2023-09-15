@@ -1,17 +1,30 @@
 #include <mbgl/gl/context.hpp>
+
+#include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/gl/command_encoder.hpp>
+#include <mbgl/gl/defines.hpp>
+#include <mbgl/gl/draw_scope_resource.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
-#include <mbgl/gl/draw_scope_resource.hpp>
+#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
-#include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
-#include <mbgl/gl/defines.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/drawable_gl.hpp>
+#include <mbgl/gl/drawable_gl_builder.hpp>
+#include <mbgl/gl/layer_group_gl.hpp>
+#include <mbgl/gl/render_target_gl.hpp>
+#include <mbgl/gl/uniform_buffer_gl.hpp>
+#include <mbgl/gl/texture2d.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#endif
 
 #include <cstring>
 #include <iterator>
@@ -410,6 +423,17 @@ void Context::reset() {
     performCleanup();
 }
 
+#if MLN_DRAWABLE_RENDERER
+void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
+    // Reset GL state to a known state so the CustomLayer always has a clean slate.
+    bindVertexArray = value::BindVertexArray::Default;
+    setDepthMode(depthMode);
+    setStencilMode(gfx::StencilMode::disabled());
+    setColorMode(colorMode);
+    setCullFaceMode(gfx::CullFaceMode::disabled());
+}
+#endif
+
 void Context::setDirtyState() {
     // Note: does not set viewport/scissorTest/bindFramebuffer to dirty
     // since they are handled separately in the view object.
@@ -444,6 +468,53 @@ void Context::setDirtyState() {
     bindVertexArray.setDirty();
     globalVertexArrayState.setDirty();
 }
+
+#if MLN_DRAWABLE_RENDERER
+gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
+    return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
+}
+
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
+    return std::make_shared<gl::UniformBufferGL>(data, size);
+}
+
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
+    std::vector<std::string> emptyProperties(0);
+    auto shaderGroup = shaders.getShaderGroup(name);
+    if (!shaderGroup) {
+        return nullptr;
+    }
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, emptyProperties));
+}
+
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+}
+
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+}
+
+gfx::Texture2DPtr Context::createTexture2D() {
+    return std::make_shared<gl::Texture2D>(*this);
+}
+
+RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
+    return std::make_shared<gl::RenderTargetGL>(*this, size, type);
+}
+
+UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    checkFramebuffer();
+    return fbo;
+}
+#endif
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     GLbitfield mask = 0;
@@ -573,10 +644,10 @@ void Context::performCleanup() {
     // TODO: Find a better way to unbind VAOs after we're done with them without
     // introducing unnecessary bind(0)/bind(N) sequences.
     {
-        activeTextureUnit = 1;
-        texture[1] = 0;
-        activeTextureUnit = 0;
-        texture[0] = 0;
+        for (auto i = 0; i < gfx::MaxActiveTextureUnits; i++) {
+            activeTextureUnit = i;
+            texture[i] = 0;
+        }
 
         bindVertexArray = 0;
     }

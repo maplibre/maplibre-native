@@ -137,6 +137,14 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+cc_library(
+    name = "httplib",
+    hdrs = ["cpp-httplib/httplib.h"],
+    copts = CPP_FLAGS,
+    includes = ["cpp-httplib"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/protozero-files.json
 cc_library(
     name = "protozero",
@@ -164,6 +172,15 @@ cc_library(
     hdrs = ["eternal/include/mapbox/eternal.hpp"],
     copts = CPP_FLAGS,
     includes = ["eternal/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/metal-cpp.json
+cc_library(
+    name = "metal-cpp",
+    hdrs = glob(["metal-cpp/**/*.hpp"], allow_empty = False),
+    copts = CPP_FLAGS,
+    includes = ["metal-cpp"],
     visibility = ["//visibility:public"],
 )
 

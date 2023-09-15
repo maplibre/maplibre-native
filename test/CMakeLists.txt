@@ -135,7 +135,7 @@ if(MLN_WITH_OPENGL)
     )
     target_compile_definitions(
         mbgl-test
-        PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
+        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
     )
 endif()
 
@@ -187,18 +187,6 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
 
-if(CMAKE_SYSTEM_NAME STREQUAL iOS)
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE bitcode)
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE bitcode)
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-endif()
-
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
     set_target_properties(mbgl-test mbgl-vendor-googletest
@@ -240,4 +228,11 @@ set_property(TARGET mbgl-test PROPERTY FOLDER Core)
 
 if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE USE_CPP_TEST_SERVER
+    )
 endif()

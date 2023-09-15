@@ -5,14 +5,17 @@ load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
     "xcodeproj",
+    "xcode_schemes",
 )
 load("//platform/ios/bazel:macros.bzl", "info_plist")
-load("//platform/ios/bazel:config.bzl", "BUNDLE_ID_PREFIX")
+load("//platform/ios/bazel:config.bzl", "BUILD_MODE", "BUNDLE_ID_PREFIX")
 load(
     "//platform/ios/bazel:files.bzl",
     "MLN_IOS_PRIVATE_HEADERS",
     "MLN_IOS_PUBLIC_HEADERS",
     "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
+    "MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE",
+    "MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE",
     "MLN_IOS_PUBLIC_OBJC_SOURCE",
     "MLN_IOS_SDK_HEADERS",
     "MLN_PUBLIC_IOS_APP_SOPURCE",
@@ -41,7 +44,10 @@ filegroup(
 
 filegroup(
     name = "ios_objcpp_srcs",
-    srcs = MLN_IOS_PUBLIC_OBJCPP_SOURCE,
+    srcs = MLN_IOS_PUBLIC_OBJCPP_SOURCE + select({
+        "//:metal_renderer": MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE,
+        "//conditions:default": MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE,
+    }),
     visibility = ["//visibility:public"],
 )
 
@@ -73,7 +79,13 @@ apple_static_xcframework(
         ":ios_sdk_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:darwin_objcpp_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_hdrs"
+        ],
+    }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
@@ -92,9 +104,9 @@ info_plist(
 )
 
 apple_xcframework(
-    name = "Mapbox.dynamic",
+    name = "MapLibre.dynamic",
     bundle_id = "com.maplibre.mapbox",
-    bundle_name = "Mapbox",
+    bundle_name = "MapLibre",
     data = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
@@ -113,7 +125,13 @@ apple_xcframework(
         ":ios_sdk_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:darwin_objcpp_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_hdrs"
+        ],
+    }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],
@@ -165,7 +183,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["app/Info.plist"],
+    infoplists = ["build/Info-app.plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
@@ -195,6 +213,24 @@ ios_application(
     ],
 )
 
+ios_application(
+    name = "BenchmarkApp",
+    bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    infoplists = ["build/Info-benchmark.plist"],
+    minimum_os_version = "12.0",
+    provisioning_profile = "xcode_profile",
+    resources = ["//platform/ios/benchmark:bundle_resources"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//platform:ios-benchapp",
+        "//platform:ios-sdk",
+    ],
+)
+
 # Outputs a file with the size of MapLibre as a dynamic library in bytes
 genrule(
     name = "size",
@@ -213,7 +249,7 @@ genrule(
 xcodeproj(
     name = "xcodeproj",
     bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
-    build_mode = "xcode",
+    build_mode = BUILD_MODE,
     default_xcode_configuration = "Debug",
     minimum_xcode_version = "14",
     project_name = "MapLibre",
@@ -221,6 +257,13 @@ xcodeproj(
     top_level_targets = [
         top_level_target(
             "App",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "BenchmarkApp",
             target_environments = [
                 "simulator",
                 "device",
@@ -247,6 +290,13 @@ xcodeproj(
                 "device",
             ],
         ),
+        top_level_target(
+            "//platform/ios/test/core:CppUnitTests",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
     ],
     xcode_configurations = {
         "Debug": {"//command_line_option:compilation_mode": "dbg"},
@@ -262,9 +312,9 @@ sh_binary(
         "Integration_Tests/Info.plist",
         "app/Info.plist",
         "bench_UITests/Info.plist",
-        "benchmark/Info.plist",
         "framework/Info.plist",
         "framework/Info-static.plist",
+        "//platform/ios/benchmark:Info.plist",
         "//platform/ios/iosapp-UITests:Info.plist",
         "//platform/ios/test:Info.plist",
     ],
@@ -274,6 +324,8 @@ exports_files(
     MLN_IOS_PUBLIC_HEADERS +
     MLN_IOS_PRIVATE_HEADERS +
     MLN_IOS_PUBLIC_OBJCPP_SOURCE +
+    MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE +
+    MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_IOS_PUBLIC_OBJC_SOURCE +
-    MLN_PUBLIC_IOS_APP_SOPURCE,
+    MLN_PUBLIC_IOS_APP_SOPURCE
 )

@@ -24,3 +24,18 @@ filegroup(
         "//render-test:__subpackages__",
     ],
 )
+
+filegroup(
+    name = "expression-test-files",
+    srcs = glob(
+        [
+            "integration/expression-tests/**",
+        ],
+        allow_empty = False,
+    ) + [
+        "ignores/platform-all.json",
+    ],
+    visibility = [
+        "//expression-test:__pkg__",
+    ],
+)

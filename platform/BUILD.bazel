@@ -10,7 +10,12 @@ objc_library(
         "//platform/ios:ios_private_hdrs",
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_opengl_srcs",
+        ],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
         "-fmodules",
@@ -28,10 +33,16 @@ objc_library(
         "CoreImage",
         "CoreGraphics",
         "CoreLocation",
-        "GLKit",
-        "OpenGLES",
         "QuartzCore",
-    ],
+    ] + select({
+        "//:metal_renderer": [
+            "MetalKit"
+        ],
+        "//conditions:default": [
+            "OpenGLES",
+            "GLKit"
+        ],
+    }),
     deps = [
         ":objc-headers",
         "//:mbgl-core",
@@ -56,7 +67,7 @@ objc_library(
     hdrs = [
         "//platform/darwin:include/mbgl/util/image+MLNAdditions.hpp",
     ],
-    copts = WARNING_FLAGS + MAPLIBRE_FLAGS + [
+    copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
         "-fmodules",
         "-Wno-gnu-zero-variadic-macro-arguments",
         "-Wno-variadic-macros",
@@ -110,7 +121,12 @@ objc_library(
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+        ],
+    }),
     data = ["//platform/ios:resources"],
     module_name = "MapLibre",
     sdk_dylibs = [
@@ -146,18 +162,22 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//:objc-sdk",
-        "//:objcpp-sdk",
+        ":objc-sdk",
+        ":objcpp-sdk",
     ],
 )
 
 objc_library(
     name = "iosapp",
     srcs = [
-        "//platform/darwin:app/LimeGreenStyleLayer.h",
-        "//platform/darwin:app/LimeGreenStyleLayer.m",
         "//platform/ios:ios_app_srcs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:app/LimeGreenStyleLayer.h",
+            "//platform/darwin:app/LimeGreenStyleLayer.m",
+        ],
+    }),
     data = glob([
         "app/Assets.xcassets/**",
     ]),
@@ -168,11 +188,33 @@ objc_library(
         "ios/src",
     ],
     sdk_frameworks = [
-        "GLKit",  # needed for LimeGreenStyleLayer
-    ],
+        ] + select({
+        "//:metal_renderer": [
+            "MetalKit"
+        ],
+        "//conditions:default": [
+            "GLKit",  # needed for LimeGreenStyleLayer
+        ]}),
     visibility = ["//visibility:public"],
     deps = [
         ":ios-sdk",
+    ],
+)
+
+objc_library(
+    name = "ios-benchapp",
+    copts = MAPLIBRE_FLAGS,
+    srcs = ["//platform/ios/benchmark:ios_benchmark_srcs"],
+    hdrs = ["//platform/ios/benchmark:ios_benchmark_hdrs"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+        "ios/src",
+    ],
+    visibility = ["//platform/ios:__pkg__"],
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
     ],
 )
 
@@ -197,7 +239,14 @@ sh_binary(
         "//platform/macos:macos_objcpp_srcs",
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_private_opengl_hdrs",
+            "//platform/darwin:darwin_objc_opengl_hdrs",
+            "//platform/darwin:darwin_objcpp_opengl_srcs",
+        ],
+    }),
     deps = [
         "//platform/darwin:generated_code",
     ],

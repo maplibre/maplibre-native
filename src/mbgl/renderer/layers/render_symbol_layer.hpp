@@ -6,6 +6,10 @@
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <unordered_map>
+#endif // MLN_DRAWABLE_RENDERER
+
 namespace mbgl {
 
 namespace style {
@@ -81,14 +85,38 @@ public:
     static style::TextPaintProperties::PossiblyEvaluated textPaintProperties(
         const style::SymbolPaintProperties::PossiblyEvaluated&);
 
+#if MLN_DRAWABLE_RENDERER
+    /// Generate any changes needed by the layer
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
+#endif // MLN_DRAWABLE_RENDERER
+
+protected:
+#if MLN_DRAWABLE_RENDERER
+    /// Remove all drawables for the tile from the layer group
+    void removeTile(RenderPass, const OverscaledTileID&) override;
+
+    /// Remove all the drawables for tiles
+    void removeAllDrawables() override;
+#endif // MLN_DRAWABLE_RENDERER
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
+
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif // MLN_LEGACY_RENDERER
+
     void prepare(const LayerPrepareParameters&) override;
 
+private:
     // Paint properties
     style::SymbolPaintProperties::Unevaluated unevaluated;
 
@@ -97,8 +125,21 @@ private:
 
     bool hasFormatSectionOverrides = false;
 
+#if MLN_LEGACY_RENDERER
     // Programs
     Programs programs;
+#endif // MLN_LEGACY_RENDERER
+
+#if MLN_DRAWABLE_RENDERER
+    gfx::ShaderGroupPtr symbolIconGroup;
+    gfx::ShaderGroupPtr symbolSDFIconGroup;
+    gfx::ShaderGroupPtr symbolSDFTextGroup;
+    gfx::ShaderGroupPtr symbolTextAndIconGroup;
+
+    gfx::ShaderGroupPtr collisionBoxGroup;
+    gfx::ShaderGroupPtr collisionCircleGroup;
+    std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
+#endif // MLN_DRAWABLE_RENDERER
 };
 
 } // namespace mbgl

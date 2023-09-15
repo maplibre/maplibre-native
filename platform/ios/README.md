@@ -95,12 +95,6 @@ cp bazel/example_config.bzl bazel/config.bzl
 
 You need to set your `BUNDLE_ID_PREFIX` to be unique (ideally use a domain that you own in reverse domain name notation).
 
-```
-APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "FFNX6834U8"
-APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "iOS Team Provisioning Profile: *"
-BUNDLE_ID_PREFIX = "com.firstnamelastname"
-```
-
 You can keep leave the `APPLE_MOBILE_PROVISIONING_PROFILE_NAME` alone.
 
 Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work). If you do not know your Team ID, enter the following command in the terminal:
@@ -129,6 +123,8 @@ Confirm that no errors are shown:
 <img width="921" alt="image" src="https://github.com/polvi/maplibre-native/assets/649392/a1ef30cb-97fc-429a-acee-194436f3fb8a">
 
 Try to run the example App in the simulator and on a device to confirm your setup works.
+
+If no provisioning profile was found, you could try changing the `BUILD_MODE` in `config.bzl` to `"xcode"`. Try the steps in this section again afterwards.
 
 #### Using Bazel from the Command Line
 

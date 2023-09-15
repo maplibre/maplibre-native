@@ -7,12 +7,15 @@
 #import "MBXOfflinePacksTableViewController.h"
 #import "MBXAnnotationView.h"
 #import "MBXUserLocationAnnotationView.h"
-#import "LimeGreenStyleLayer.h"
 #import "MBXEmbeddedMapViewController.h"
 #import "MBXOrnamentsViewController.h"
 #import "MBXStateManager.h"
 #import "MBXState.h"
 #import "MLNSettings.h"
+
+#if !MLN_RENDER_BACKEND_METAL
+#import "LimeGreenStyleLayer.h"
+#endif
 
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
@@ -29,6 +32,11 @@ static const CLLocationCoordinate2D WorldTourDestinations[] = {
 static const MLNCoordinateBounds colorado = {
     .sw = { .latitude = 36.986207, .longitude = -109.049896},
     .ne = { .latitude = 40.989329, .longitude = -102.062592},
+};
+
+static const MLNCoordinateBounds areaAroundBelgium = {
+    .sw = { .latitude = 52.2782, .longitude = 8.289179999999988},
+    .ne = { .latitude = 48.5584, .longitude = 1.0162300000000073},
 };
 
 static NSString * const MBXViewControllerAnnotationViewReuseIdentifer = @"MBXViewControllerAnnotationViewReuseIdentifer";
@@ -93,12 +101,16 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingRasterTileSource,
     MBXSettingsRuntimeStylingImageSource,
     MBXSettingsRuntimeStylingRouteLine,
+#if !MLN_RENDER_BACKEND_METAL
     MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
+#endif
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
+    MBXSettingsRuntimeStylingLineGradient,
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
+    MBXSettingsMiscellaneousLatLngBoundsConstraints,
     MBXSettingsMiscellaneousWorldTour,
     MBXSettingsMiscellaneousRandomTour,
     MBXSettingsMiscellaneousScrollView,
@@ -110,6 +122,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
     MBXSettingsMiscellaneousSetContentInsets,
     MBXSettingsMiscellaneousShowCustomLocationManager,
     MBXSettingsMiscellaneousOrnamentsPlacement,
+    MBXSettingsMiscellaneousLatLngBoundsWithPadding,
     MBXSettingsMiscellaneousPrintLogFile,
     MBXSettingsMiscellaneousDeleteLogFile
 };
@@ -227,6 +240,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     BOOL _isTouringWorld;
     BOOL _contentInsetsEnabled;
     UIEdgeInsets _originalContentInsets;
+    BOOL _hasLatLngBoundConstraints;
 }
 
 // MARK: - Setup & Teardown
@@ -422,10 +436,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Add Lime Green Triangle Layer",
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
+                @"Style Route line with gradient",
             ]];
             break;
         case MBXSettingsMiscellaneous:
             [settingsTitles addObjectsFromArray:@[
+                _hasLatLngBoundConstraints ? @"Remove LatLng bound constraints" : @"Set LatLng bound box constraint",
                 @"Start World Tour",
                 @"Random Tour",
                 @"Embedded Map View",
@@ -437,6 +453,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 [NSString stringWithFormat:@"Turn %@ Content Insets", (_contentInsetsEnabled ? @"Off" : @"On")],
                 @"View Route Simulation",
                 @"Ornaments Placement",
+                @"Lat Long bounds with padding"
             ]];
 
             break;
@@ -628,14 +645,19 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingRouteLine:
                     [self styleRouteLine];
                     break;
+#if !MLN_RENDER_BACKEND_METAL
                 case MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer:
                     [self styleAddLimeGreenTriangleLayer];
                     break;
+#endif
                 case MBXSettingsRuntimeStylingDDSPolygon:
                     [self stylePolygonWithDDS];
                     break;
                 case MBXSettingsRuntimeStylingCustomLatLonGrid:
                     [self addLatLonGrid];
+                    break;
+                case MBXSettingsRuntimeStylingLineGradient:
+                    [self styleLineGradient];
                     break;
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
@@ -645,6 +667,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXSettingsMiscellaneous:
             switch (indexPath.row)
             {
+                case MBXSettingsMiscellaneousLatLngBoundsConstraints:
+                    [self setLatLngBoundsConstraints];
+                    break;
                 case MBXSettingsMiscellaneousLocalizeLabels:
                     [self toggleStyleLabelsLanguage];
                     break;
@@ -748,6 +773,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     [self.navigationController pushViewController:ornamentsViewController animated:YES];
                     break;
                 }
+                case MBXSettingsMiscellaneousLatLngBoundsWithPadding:
+                    [self flyToWithLatLngBoundsAndPadding];
+                    break;
                 default:
                     NSAssert(NO, @"All miscellaneous setting rows should be implemented");
                     break;
@@ -1451,10 +1479,77 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 
+-(void)setLatLngBoundsConstraints
+{
+    if(_hasLatLngBoundConstraints) {
+        [self.mapView clearLatLnBounds];
+        [self.mapView resetPosition];
+    } else {
+        MLNMapCamera *newCamera = [self.mapView cameraThatFitsCoordinateBounds: areaAroundBelgium];
+        [self.mapView setCamera: newCamera];
+        [self.mapView setLatLngBounds: areaAroundBelgium];
+    }
+    
+    _hasLatLngBoundConstraints = !_hasLatLngBoundConstraints;
+}
+
 -(void)toggleStyleLabelsLanguage
 {
     _localizingLabels = !_localizingLabels;
     [self.mapView.style localizeLabelsIntoLocale:_localizingLabels ? [NSLocale localeWithLocaleIdentifier:@"mul"] : nil];
+}
+
+- (void)styleLineGradient
+{
+    CLLocationCoordinate2D coords[] = {
+        { 43.84455590478528, 10.504238605499268 },
+        { 43.84385562343126, 10.504125952720642 },
+        { 43.84388657526694, 10.503299832344055 },
+        { 43.84332557075269, 10.503235459327698 },
+        { 43.843441641085036, 10.502264499664307 },
+        { 43.84396395478592, 10.50242006778717 },
+        { 43.84406067904351, 10.501744151115416 },
+        { 43.84422317544319, 10.501792430877686 }
+    };
+    NSInteger count = sizeof(coords) / sizeof(coords[0]);
+
+    [self.mapView setCenterCoordinate:coords[0] zoomLevel:16 animated:YES];
+
+    MLNPolylineFeature *routeLine = [MLNPolylineFeature polylineWithCoordinates:coords count:count];
+
+    NSDictionary *sourceOptions = @{ MLNShapeSourceOptionLineDistanceMetrics: @YES };
+    
+    MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:sourceOptions];
+    [self.mapView.style addSource:routeSource];
+
+    MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
+    baseRouteLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor orangeColor]];
+    baseRouteLayer.lineWidth = [NSExpression expressionForConstantValue:@20];
+    baseRouteLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.95];
+    baseRouteLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
+    baseRouteLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    [self.mapView.style addLayer:baseRouteLayer];
+
+    MLNLineStyleLayer *routeLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-route-layer" source:routeSource];
+    routeLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
+    routeLayer.lineWidth = [NSExpression expressionForConstantValue:@15];
+    routeLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.8];
+    routeLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
+    routeLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    // Create stops dictionary
+    NSDictionary *stops = @{
+        @0: [UIColor blueColor],
+        @0.1: [UIColor colorWithRed:25 / 255.0 green:41 /255.0 blue:88 / 255.0 alpha:1.0],
+        @0.3: [UIColor cyanColor],
+        @0.5: [UIColor greenColor],
+        @0.7: [UIColor yellowColor],
+        @1: [UIColor redColor],
+    };
+    // Create an expression that will interpolate the color of the line
+    // (mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@))
+    NSExpression *lineGradientExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@)", stops];
+    routeLayer.lineGradient = lineGradientExpression;
+    [self.mapView.style addLayer:routeLayer];
 }
 
 - (void)styleRouteLine
@@ -1495,11 +1590,13 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
+#if !MLN_RENDER_BACKEND_METAL
 - (void)styleAddLimeGreenTriangleLayer
 {
     LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
+#endif
 
 - (void)stylePolygonWithDDS {
     CLLocationCoordinate2D leftCoords[] = {
@@ -1710,8 +1807,32 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (UIImage *)mapView:(MLNMapView *)mapView didFailToLoadImage:(NSString *)imageName {
-    UIImage *backupImage = [UIImage imageNamed:@"AppIcon"];
+    UIImage *backupImage = [UIImage imageNamed:@"MissingImage"];
     return backupImage;
+}
+
+- (void)flyToWithLatLngBoundsAndPadding
+{
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    CLLocationCoordinate2D sw = CLLocationCoordinate2DMake(48, 11);
+    CLLocationCoordinate2D ne = CLLocationCoordinate2DMake(50, 12);
+    
+    UIEdgeInsets padding = UIEdgeInsetsMake(200, 200, 0, 0);
+    MLNMapCamera *cameraWithoutPadding = [self.mapView cameraThatFitsCoordinateBounds:MLNCoordinateBoundsMake(sw, ne)
+                                                                          edgePadding:padding];
+    
+    
+    MLNPointAnnotation *annotation = [MLNPointAnnotation new];
+    annotation.coordinate = cameraWithoutPadding.centerCoordinate;
+    annotation.title = @"Bounds center";
+    [self.mapView addAnnotation: annotation];
+    
+    __weak MBXViewController *weakSelf = self;
+    [self.mapView flyToCamera:cameraWithoutPadding edgePadding:padding withDuration:5 completionHandler:^{
+        [weakSelf.mapView flyToCamera:cameraWithoutPadding edgePadding:UIEdgeInsetsZero withDuration:5 completionHandler:^{
+            
+        }];
+    }];
 }
 
 // MARK: - Random World Tour

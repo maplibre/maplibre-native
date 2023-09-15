@@ -5,6 +5,8 @@
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
 
+#include <memory>
+
 namespace mbgl {
 
 class FillBucket;
@@ -13,17 +15,40 @@ class FillPatternProgram;
 class FillOutlineProgram;
 class FillOutlinePatternProgram;
 
+#if MLN_DRAWABLE_RENDERER
+class FillLayerTweaker;
+using FillLayerTweakerPtr = std::shared_ptr<FillLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class RenderFillLayer final : public RenderLayer {
 public:
     explicit RenderFillLayer(Immutable<style::FillLayer::Impl>);
     ~RenderFillLayer() override;
 
+#if MLN_DRAWABLE_RENDERER
+    /// Generate any changes needed by the layer
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
+#endif
+
 private:
+    void prepare(const LayerPrepareParameters&) override;
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
+
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
+#endif // MLN_DRAWABLE_RENDERER
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -36,11 +61,26 @@ private:
     // Paint properties
     style::FillPaintProperties::Unevaluated unevaluated;
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<FillProgram> fillProgram;
     std::shared_ptr<FillPatternProgram> fillPatternProgram;
     std::shared_ptr<FillOutlineProgram> fillOutlineProgram;
     std::shared_ptr<FillOutlinePatternProgram> fillOutlinePatternProgram;
+#endif
+#if MLN_DRAWABLE_RENDERER
+    gfx::ShaderGroupPtr fillShaderGroup;
+    gfx::ShaderGroupPtr outlineShaderGroup;
+    gfx::ShaderGroupPtr patternShaderGroup;
+    gfx::ShaderGroupPtr outlinePatternShaderGroup;
+
+    FillLayerTweakerPtr tweaker;
+#if MLN_RENDER_BACKEND_METAL
+    std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
+    bool overdrawInspector = false;
+
+#endif
 };
 
 } // namespace mbgl

@@ -7,11 +7,12 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-#include <string>
 #include <limits>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace mbgl {
-
 namespace style {
 
 /**

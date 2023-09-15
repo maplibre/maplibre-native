@@ -42,12 +42,20 @@ public:
 
     PossiblyEvaluatedLayoutProperties layout;
 
-    gfx::VertexVector<LineLayoutVertex> vertices;
-    gfx::IndexVector<gfx::Triangles> triangles;
+    using VertexVector = gfx::VertexVector<LineLayoutVertex>;
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+    TriangleIndexVector& triangles = *sharedTriangles;
+
     SegmentVector<LineAttributes> segments;
 
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<LineLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
 
     std::map<std::string, LineProgram::Binders> paintPropertyBinders;
 
