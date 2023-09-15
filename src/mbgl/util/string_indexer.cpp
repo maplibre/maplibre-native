@@ -7,7 +7,7 @@ namespace mbgl {
 namespace {
 const std::string empty;
 constexpr std::size_t initialCapacity = 100;
-}
+} // namespace
 
 StringIndexer::StringIndexer()
     : stringToIdentity(initialCapacity) {
