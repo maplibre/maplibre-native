@@ -224,7 +224,24 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
 #if MLN_DRAWABLE_RENDERER
 void RenderRasterLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
-    activateLayerGroup(imageLayerGroup, willRender, changes);
+    if (imageLayerGroup) {
+        activateLayerGroup(imageLayerGroup, willRender, changes);
+    }
+}
+
+void RenderRasterLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    RenderLayer::layerRemoved(changes);
+    if (imageLayerGroup) {
+        activateLayerGroup(imageLayerGroup, false, changes);
+    }
+}
+
+void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
+    RenderLayer::layerIndexChanged(newLayerIndex, changes);
+
+    if (imageLayerGroup) {
+        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(imageLayerGroup, newLayerIndex));
+    }
 }
 
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
