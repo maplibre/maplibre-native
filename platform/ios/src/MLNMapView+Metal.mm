@@ -76,6 +76,11 @@ public:
     void swap() override {
         [commandBuffer presentDrawable:currentDrawable];
         [commandBuffer commit];
+
+        // Un-comment for synchronous, which can help troubleshoot rendering problems,
+        // particularly those related to resource tracking and multiple queued buffers.
+        //[commandBuffer waitUntilCompleted];
+
         commandBuffer = nil;
         commandBufferPtr.reset();
     }
@@ -158,7 +163,6 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.opaque = mapView.opaque;
     resource.mtlView.layer.opaque = mapView.opaque;
     resource.mtlView.enableSetNeedsDisplay = YES;
-
     if (@available(iOS 13.0, *)) {
         CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
         metalLayer.presentsWithTransaction = presentsWithTransaction;

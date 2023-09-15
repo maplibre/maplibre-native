@@ -25,7 +25,7 @@ public:
                                                    SwapBehaviour swapBehavior = SwapBehaviour::NoFlush,
                                                    const gfx::ContextMode contextMode = gfx::ContextMode::Unique) {
 #if MLN_RENDER_BACKEND_METAL
-        return nullptr;
+        throw std::runtime_error("Not yet implemented");
 #else // MLN_RENDER_BACKEND_OPENGL
         return Backend::Create<HeadlessBackend, Size, SwapBehaviour, gfx::ContextMode>(size, swapBehavior, contextMode);
 #endif
