@@ -54,14 +54,13 @@ protected:
  */
 class AddLayerGroupRequest : public ChangeRequest {
 public:
-    AddLayerGroupRequest(LayerGroupBasePtr layerGroup_, bool canReplace);
+    AddLayerGroupRequest(LayerGroupBasePtr layerGroup_);
     AddLayerGroupRequest(AddLayerGroupRequest &&other);
 
     void execute(RenderOrchestrator &) override;
 
 protected:
     LayerGroupBasePtr layerGroup;
-    bool replace;
 };
 
 /**
