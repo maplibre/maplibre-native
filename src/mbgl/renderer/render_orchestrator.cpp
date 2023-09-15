@@ -810,6 +810,24 @@ void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
 
 void RenderOrchestrator::onRemoveLayerGroup(LayerGroupBase&) {}
 
+void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const int32_t newIndex) {
+    if (!layerGroup || layerGroup->getLayerIndex() == newIndex) {
+        return;
+    }
+    const auto range = layerGroupsByLayerIndex.equal_range(layerGroup->getLayerIndex());
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second == layerGroup) {
+            layerGroupsByLayerIndex.erase(it);
+            layerGroup->updateLayerIndex(newIndex);
+            layerGroupsByLayerIndex.insert(std::make_pair(newIndex, std::move(layerGroup)));
+            return;
+        }
+    }
+    // We should have found it, maybe the index was changed manually.
+    assert(!"Missing layer group");
+    layerGroup->updateLayerIndex(newIndex);
+}
+
 void RenderOrchestrator::updateLayerGroupOrder() {
     // In the event layer indices change for layer groups, we must re-sort them
     LayerGroupMap newMap;
@@ -820,27 +838,24 @@ void RenderOrchestrator::updateLayerGroupOrder() {
     layerGroupOrderDirty = false;
 }
 
-bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup, const bool replace) {
+bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
+    assert(!layerGroupOrderDirty);
     const auto index = layerGroup->getLayerIndex();
-    auto range = layerGroupsByLayerIndex.equal_range(index);
+    const auto range = layerGroupsByLayerIndex.equal_range(index);
     bool found = false;
     for (auto it = range.first; it != range.second; ++it) {
         if (it->second == layerGroup) {
             found = true;
             // not added
-            if (replace) {
-                onRemoveLayerGroup(*it->second);
-                it->second = std::move(layerGroup);
-            }
             break;
         }
     }
-    if (found)
-        return replace;
-    else {
+    if (found) {
+        return false; // not added
+    } else {
         layerGroupsByLayerIndex.insert(std::make_pair(index, std::move(layerGroup)));
+        return true; // added
     }
-    return true;
 }
 
 bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
