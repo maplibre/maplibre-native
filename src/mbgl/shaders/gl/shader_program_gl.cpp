@@ -148,7 +148,6 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
     GLint maxLength = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCKS, &count));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxLength));
-    maxLength++;
 
     auto name = std::vector<GLchar>(maxLength);
     for (GLint index = 0; index < count; ++index) {
@@ -165,7 +164,8 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
     SamplerLocationMap samplerLocations;
     GLint numActiveUniforms = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms));
-
+    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
+    name.resize(maxLength);
     for (GLint index = 0; index < numActiveUniforms; ++index) {
         GLsizei actualLength = 0;
         GLint size = 0;
