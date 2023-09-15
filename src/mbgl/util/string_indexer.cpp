@@ -13,7 +13,7 @@ StringIdentity StringIndexer::get(const std::string& string) {
         std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
         
         auto& stringToIdentity = instance().stringToIdentity;
-        auto& identityToString = instance().identityToString;
+        [[maybe_unused]] auto& identityToString = instance().identityToString;
         assert(stringToIdentity.size() == identityToString.size());
         
         if (auto it = stringToIdentity.find(string); it != stringToIdentity.end()) {
