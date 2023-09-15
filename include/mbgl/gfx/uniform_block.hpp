@@ -96,6 +96,15 @@ public:
     /// @brief  Copy assignment operator
     UniformBlockArray& operator=(const UniformBlockArray&);
 
+    /// Do something with each block
+    void visit(const std::function<void(const StringIdentity, const UniformBlock&)>& f) {
+        std::for_each(uniformBlockMap.begin(), uniformBlockMap.end(), [&](const auto& kv) {
+            if (kv.second) {
+                f(kv.first, *kv.second);
+            }
+        });
+    }
+
 protected:
     const std::unique_ptr<UniformBlock>& add(const StringIdentity id, std::unique_ptr<UniformBlock>&& uniformBlock) {
         const auto result = uniformBlockMap.insert(std::make_pair(id, std::unique_ptr<UniformBlock>()));

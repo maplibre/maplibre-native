@@ -6,8 +6,25 @@ namespace mbgl {
 
 namespace {
 const std::string empty;
+constexpr std::size_t initialCapacity = 100;
+} // namespace
+
+StringIndexer::StringIndexer()
+    : stringToIdentity(initialCapacity) {
+    identityToString.reserve(initialCapacity);
 }
 
+// For now, we have to make a copy to search the string-keyed container.
+StringIdentity StringIndexer::get(const char* string) {
+    return get(std::string(string));
+}
+// Once we can search using a string_view this should be the primary version.
+StringIdentity StringIndexer::get(std::string_view string) {
+    return get(std::string(string));
+}
+
+// We take a const reference rather than an lvalue (copy) under the assumption that most calls will
+// find a match and insertions where we could move are rare.
 StringIdentity StringIndexer::get(const std::string& string) {
     {
         std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);

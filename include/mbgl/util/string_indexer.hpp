@@ -18,7 +18,9 @@ public:
     StringIndexer(StringIndexer&&) = delete;
     void operator=(StringIndexer const&) = delete;
 
-    static StringIdentity get(const std::string& string);
+    static StringIdentity get(const char*);
+    static StringIdentity get(std::string_view);
+    static StringIdentity get(const std::string&);
 
     static const std::string& get(const StringIdentity id);
 
@@ -27,7 +29,7 @@ public:
     static size_t size();
 
 protected:
-    StringIndexer() = default;
+    StringIndexer();
     ~StringIndexer() = default;
 
     using MapType = std::unordered_map<std::string, StringIdentity>;
