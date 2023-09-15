@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 
@@ -18,6 +19,10 @@ public:
     ~FillLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
+
+    static const StringIdentity idFillTilePropsUBOName;
+    static const StringIdentity idFillInterpolateUBOName;
+    static const StringIdentity idFillOutlineInterpolateUBOName;
 
 private:
     gfx::UniformBufferPtr fillPropsUniformBuffer;

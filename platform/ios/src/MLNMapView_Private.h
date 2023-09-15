@@ -37,7 +37,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)mapViewDidFinishLoadingMap;
 - (void)mapViewDidFailLoadingMapWithError:(nonnull NSError *)error;
 - (void)mapViewWillStartRenderingFrame;
-- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered;
+- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
+                                     frameTime:(double)frameTime;
 - (void)mapViewWillStartRenderingMap;
 - (void)mapViewDidFinishRenderingMapFullyRendered:(BOOL)fullyRendered;
 - (void)mapViewDidBecomeIdle;
