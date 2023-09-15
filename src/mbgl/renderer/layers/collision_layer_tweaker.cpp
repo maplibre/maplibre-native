@@ -31,6 +31,9 @@ static_assert(sizeof(CollisionUBO) == 20 * 4);
 
 } // namespace
 
+const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = StringIndexer::get(CollisionCircleUBOName);
+const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = StringIndexer::get(CollisionBoxUBOName);
+
 void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                     const RenderTree& renderTree,
                                     const PaintParameters& parameters) {
@@ -79,12 +82,12 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& shaderUniforms = shader->getUniformBlocks();
         auto& uniforms = drawable.mutableUniformBuffers();
 
-        if (shaderUniforms.get(std::string(CollisionBoxUBOName))) {
+        if (shaderUniforms.get(idCollisionBoxUBOName)) {
             // collision box
-            uniforms.createOrUpdate(CollisionBoxUBOName, &drawableUBO, context);
-        } else if (shaderUniforms.get(std::string(CollisionCircleUBOName))) {
+            uniforms.createOrUpdate(idCollisionBoxUBOName, &drawableUBO, context);
+        } else if (shaderUniforms.get(idCollisionCircleUBOName)) {
             // collision circle
-            uniforms.createOrUpdate(CollisionCircleUBOName, &drawableUBO, context);
+            uniforms.createOrUpdate(idCollisionCircleUBOName, &drawableUBO, context);
         } else {
             Log::Error(Event::General, "Collision shader uniform name unknown.");
         }

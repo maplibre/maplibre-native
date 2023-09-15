@@ -14,6 +14,7 @@
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -50,9 +51,16 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 
-constexpr auto texUniformName = "u_image";
+static const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
+static const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
 } // namespace
+
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = StringIndexer::get(
+    "FillExtrusionDrawableTilePropsUBO");
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = StringIndexer::get(
+    "FillExtrusionInterpolateUBO");
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                         const RenderTree& renderTree,
@@ -96,7 +104,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace("FillExtrusionDrawablePropsUBO", propsBuffer);
+        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -124,7 +132,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation(texUniformName)) {
+            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                 if (const auto& tex = drawable.getTexture(*index)) {
                     textureSize = tex->getSize();
                 }
@@ -140,7 +148,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate("FillExtrusionDrawableUBO", &drawableUBO, context);
+        uniforms.createOrUpdate(idFillExtrusionDrawableUBOName, &drawableUBO, context);
     });
 }
 

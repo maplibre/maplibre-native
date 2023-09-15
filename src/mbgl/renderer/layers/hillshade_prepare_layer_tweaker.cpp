@@ -9,11 +9,14 @@
 #include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
+
+static const StringIdentity idHillshadePrepareDrawableUBOName = StringIndexer::get("HillshadePrepareDrawableUBO");
 
 const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
     // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
@@ -57,7 +60,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            MLN_STRINGIZE(HillshadePrepareDrawableUBO), &drawableUBO, parameters.context);
+            idHillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

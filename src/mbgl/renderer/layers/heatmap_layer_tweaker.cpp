@@ -9,6 +9,7 @@
 #include <mbgl/shaders/heatmap_layer_ubo.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/heatmap.hpp>
@@ -18,6 +19,11 @@ namespace mbgl {
 
 using namespace style;
 using namespace shaders;
+
+static const StringIdentity idHeatmapDrawableUBOName = StringIndexer::get("HeatmapDrawableUBO");
+static const StringIdentity idHeatmapEvaluatedPropsUBOName = StringIndexer::get("HeatmapEvaluatedPropsUBO");
+static const StringIdentity idHeatmapPermutationUBOName = StringIndexer::get("HeatmapPermutationUBO");
+static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                   const RenderTree& renderTree,
@@ -80,7 +86,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(MLN_STRINGIZE(HeatmapEvaluatedPropsUBO), evaluatedPropsUniformBuffer);
+        uniforms.addOrReplace(idHeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -100,11 +106,11 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(MLN_STRINGIZE(HeatmapDrawableUBO), &drawableUBO, context);
+        uniforms.createOrUpdate(idHeatmapDrawableUBOName, &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(MLN_STRINGIZE(ExpressionInputsUBO), expressionUniformBuffer);
-        uniforms.addOrReplace(MLN_STRINGIZE(HeatmapPermutationUBO), permutationUniformBuffer);
+        uniforms.addOrReplace(idHeatmapPermutationUBOName, permutationUniformBuffer);
+        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 }

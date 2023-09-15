@@ -58,6 +58,8 @@ public:
 
     virtual void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) = 0;
 
+    void updateProperties(Immutable<style::LayerProperties>);
+
 protected:
     /// Calculate matrices for this tile.
     /// @param nearClipped If true, the near plane is moved further to enhance depth buffer precision.
@@ -74,6 +76,7 @@ protected:
 protected:
     std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;
+    bool propertiesUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
     // For Metal, whether a property is provided through attribtues or uniforms is specified in

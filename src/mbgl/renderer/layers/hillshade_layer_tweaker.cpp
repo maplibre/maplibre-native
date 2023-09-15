@@ -8,11 +8,15 @@
 #include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
+
+static const StringIdentity idHillshadeDrawableUBOName = StringIndexer::get("HillshadeDrawableUBO");
+static const StringIdentity idHillshadeEvaluatedPropsUBOName = StringIndexer::get("HillshadeEvaluatedPropsUBO");
 
 std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
     const LatLng latlng0 = LatLng(id);
@@ -51,8 +55,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace(MLN_STRINGIZE(HillshadeEvaluatedPropsUBO),
-                                                      evaluatedPropsUniformBuffer);
+        drawable.mutableUniformBuffers().addOrReplace(idHillshadeEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -64,8 +67,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
                                             /* .latrange = */ getLatRange(tileID),
                                             /* .light = */ getLight(parameters, evaluated)};
 
-        drawable.mutableUniformBuffers().createOrUpdate(
-            MLN_STRINGIZE(HillshadeDrawableUBO), &drawableUBO, parameters.context);
+        drawable.mutableUniformBuffers().createOrUpdate(idHillshadeDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

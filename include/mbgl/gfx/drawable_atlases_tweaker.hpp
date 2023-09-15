@@ -3,6 +3,7 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <memory>
 #include <string>
@@ -22,16 +23,16 @@ class Drawable;
 class DrawableAtlasesTweaker : public gfx::DrawableTweaker {
 public:
     DrawableAtlasesTweaker(TileAtlasTexturesPtr atlases_,
-                           std::string iconName_,
-                           std::string glyphName_,
+                           const StringIdentity iconNameId_,
+                           const StringIdentity glyphNameId_,
                            bool isText_,
                            const bool sdfIcons_,
                            const style::AlignmentType rotationAlignment_,
                            const bool iconScaled_,
                            const bool textSizeIsZoomConstant_)
         : atlases(std::move(atlases_)),
-          iconName(std::move(iconName_)),
-          glyphName(std::move(glyphName_)),
+          iconNameId(iconNameId_),
+          glyphNameId(glyphNameId_),
           isText(isText_),
           sdfIcons(sdfIcons_),
           rotationAlignment(rotationAlignment_),
@@ -47,8 +48,8 @@ protected:
     void setupTextures(Drawable&, const bool);
 
     TileAtlasTexturesPtr atlases;
-    std::string iconName;
-    std::string glyphName;
+    StringIdentity iconNameId;
+    StringIdentity glyphNameId;
     bool isText;
 
     const bool sdfIcons;

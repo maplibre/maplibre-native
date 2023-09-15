@@ -176,6 +176,16 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
 
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
 
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+    if (buffer) {
+        buffer->update(data, size);
+        return false;
+    } else {
+        buffer = createUniformBuffer(data, size);
+        return true;
+    }
+}
+
 void Context::setDirtyState() {}
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {

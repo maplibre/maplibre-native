@@ -9,11 +9,14 @@
 #include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
+
+static const StringIdentity idHeatmapTextureDrawableUBOName = StringIndexer::get("HeatmapTextureDrawableUBO");
 
 void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
                                          [[maybe_unused]] const RenderTree& renderTree,
@@ -43,7 +46,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .pad3 = */ 0};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            MLN_STRINGIZE(HeatmapTextureDrawableUBO), &drawableUBO, parameters.context);
+            idHeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 
