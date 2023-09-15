@@ -24,8 +24,7 @@ protected:
 /// Stores a collection of uniform buffers by name
 class UniformBufferArray final : public gfx::UniformBufferArray {
 public:
-    UniformBufferArray(int initCapacity = 10)
-        : gfx::UniformBufferArray(initCapacity) {}
+    UniformBufferArray() = default;
     UniformBufferArray(UniformBufferArray&& other)
         : gfx::UniformBufferArray(std::move(other)) {}
     UniformBufferArray(const UniformBufferArray&) = delete;

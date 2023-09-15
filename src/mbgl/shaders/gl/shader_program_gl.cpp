@@ -71,10 +71,11 @@ gfx::AttributeDataType mapType(platform::GLenum attrType) {
 
 using namespace platform;
 
-void addAttr(VertexAttributeArrayGL& attrs, const char* name, GLint index, GLsizei length, GLint count, GLenum glType) {
+void addAttr(
+    VertexAttributeArrayGL& attrs, const StringIdentity id, GLint index, GLsizei length, GLint count, GLenum glType) {
     const auto elementType = mapType(glType);
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-        if (const auto& newAttr = attrs.add(name, index, elementType, count)) {
+        if (const auto& newAttr = attrs.add(id, index, elementType, count)) {
             const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
             glAttr->setGLType(glType);
         }
@@ -89,21 +90,27 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
 
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
                                  UniformBlockArrayGL&& uniformBlocks_,
-                                 VertexAttributeArrayGL&& attributes_)
+                                 VertexAttributeArrayGL&& attributes_,
+                                 SamplerLocationMap&& samplerLocations_)
     : ShaderProgramBase(),
       glProgram(std::move(program)),
       uniformBlocks(std::move(uniformBlocks_)),
-      vertexAttributes(std::move(attributes_)) {}
+      vertexAttributes(std::move(attributes_)),
+      samplerLocations(std::move(samplerLocations_)) {}
 
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
       glProgram(std::move(other.glProgram)),
       uniformBlocks(std::move(other.uniformBlocks)),
-      vertexAttributes(std::move(other.vertexAttributes)) {}
+      vertexAttributes(std::move(other.vertexAttributes)),
+      samplerLocations(std::move(other.samplerLocations)) {}
 
-std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const std::string_view name) const {
-    GLint sampler_location = MBGL_CHECK_ERROR(glGetUniformLocation(glProgram, name.data()));
-    return (sampler_location == -1) ? std::optional<uint32_t>{} : sampler_location;
+std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const StringIdentity id) const {
+    std::optional<uint32_t> result{};
+    if (auto it = samplerLocations.find(id); it != samplerLocations.end()) {
+        result = it->second;
+    }
+    return result;
 }
 
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
@@ -151,7 +158,29 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
         assert(length > 0 && size > 0);
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-        uniformBlocks.add(name.data(), index, size);
+        uniformBlocks.add(StringIndexer::get(name.data()), index, size);
+    }
+
+    SamplerLocationMap samplerLocations;
+    GLint numActiveUniforms = 0;
+    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms));
+    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
+    name.resize(maxLength);
+    for (GLint index = 0; index < numActiveUniforms; ++index) {
+        GLsizei actualLength = 0;
+        GLint size = 0;
+        GLenum type = GL_ZERO;
+
+        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &actualLength, &size, &type, name.data()));
+
+        if (type == GL_SAMPLER_2D) {
+            // This uniform is a texture sampler
+            GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.data()));
+            assert(location != -1);
+            if (location != -1) {
+                samplerLocations[StringIndexer::get(name.data())] = location;
+            }
+        }
     }
 
     VertexAttributeArrayGL attrs;
@@ -169,10 +198,11 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
             continue;
         }
         const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
-        addAttr(attrs, name.data(), location, length, size, glType);
+        addAttr(attrs, StringIndexer::get(name.data()), location, length, size, glType);
     }
 
-    return std::make_shared<ShaderProgramGL>(std::move(program), std::move(uniformBlocks), std::move(attrs));
+    return std::make_shared<ShaderProgramGL>(
+        std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
 }
 
 } // namespace gl
