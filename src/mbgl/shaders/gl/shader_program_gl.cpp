@@ -176,7 +176,10 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         if (type == GL_SAMPLER_2D) {
             // This uniform is a texture sampler
             GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.data()));
-            samplerLocations[StringIndexer::get(name.data())] = location;
+            assert(location != -1);
+            if (location != -1) {
+                samplerLocations[StringIndexer::get(name.data())] = location;
+            }
         }
     }
 
