@@ -233,10 +233,15 @@ static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
 static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
 
 void RenderRasterLayer::updateLayerTweaker() {
-    if (layerGroup) {
+    if (layerGroup || imageLayerGroup) {
         tweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
         tweaker->enableOverdrawInspector(overdrawInspector);
-        layerGroup->setLayerTweaker(tweaker);
+        if (layerGroup) {
+            layerGroup->setLayerTweaker(tweaker);
+        }
+        if (imageLayerGroup) {
+            imageLayerGroup->setLayerTweaker(tweaker);
+        }
     }
 }
 

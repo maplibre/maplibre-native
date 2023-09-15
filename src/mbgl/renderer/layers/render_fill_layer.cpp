@@ -716,7 +716,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             };
 
-            if (patternBuilder) {
+            if (patternBuilder && bucket.sharedTriangles->elements()) {
                 patternBuilder->setShader(fillShader);
                 patternBuilder->setRenderPass(renderPass);
                 if (outlinePatternBuilder) {
@@ -736,7 +736,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                        idFillPatternTilePropsUBOName,
                        getFillPatternTilePropsUBO());
             }
-            if (outlinePatternBuilder) {
+            if (outlinePatternBuilder && bucket.sharedLines->elements()) {
                 outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
