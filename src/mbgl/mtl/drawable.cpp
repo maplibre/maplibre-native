@@ -206,12 +206,14 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
     impl->vertexCount = count;
     impl->vertexType = type;
 
-    if (count && type != gfx::AttributeDataType::Invalid && !data.empty() && !impl->vertexAttrName.empty()) {
-        if (auto& attrib = impl->vertexAttributes.getOrAdd(impl->vertexAttrName, /*index=*/-1, type)) {
+    if (count && type != gfx::AttributeDataType::Invalid && !data.empty()) {
+        if (auto& attrib = impl->vertexAttributes.getOrAdd(impl->idVertexAttrName, /*index=*/-1, type)) {
             attrib->setRawData(std::move(data));
             attrib->setStride(VertexAttribute::getStrideOf(type));
         } else {
-            Log::Warning(Event::General, "Vertex attribute type mismatch: " + name + " / " + impl->vertexAttrName);
+            Log::Warning(
+                Event::General,
+                "Vertex attribute type mismatch: " + name + " / " + StringIndexer::get(impl->idVertexAttrName));
             assert(false);
         }
     }
@@ -240,8 +242,8 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void Drawable::setVertexAttrName(std::string value) {
-    impl->vertexAttrName = std::move(value);
+void Drawable::setVertexAttrNameId(const StringIdentity value) {
+    impl->idVertexAttrName = value;
 }
 
 void Drawable::bindAttributes(const RenderPass& renderPass) const {
@@ -278,7 +280,8 @@ void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 Log::Error(Event::General,
-                           "Drawable::bindUniformBuffers: UBO "s + element.first + " not found. skipping.");
+                           "Drawable::bindUniformBuffers: UBO "s + StringIndexer::get(element.first) +
+                               " not found. skipping.");
                 assert(false);
                 continue;
             }

@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/types.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <array>
 #include <memory>
@@ -137,7 +138,7 @@ public:
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
     /// The attribute names for vertex/position attributes
-    void setVertexAttrName(std::string value) { vertexAttrName = std::move(value); }
+    void setVertexAttrNameId(const StringIdentity id) { vertexAttrNameId = id; }
 
     /// @brief Attach the given texture at the given sampler location.
     /// @param texture Texture2D instance
@@ -203,7 +204,7 @@ protected:
 protected:
     std::string name;
     std::string drawableName;
-    std::string vertexAttrName;
+    StringIdentity vertexAttrNameId;
     mbgl::RenderPass renderPass;
     bool enabled = true;
     bool enableColor = true;
