@@ -3,6 +3,7 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
+#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -21,8 +22,20 @@
 namespace mbgl {
 
 using namespace style;
-
 using namespace shaders;
+
+static const StringIdentity idLineUBOName = StringIndexer::get("LineUBO");
+static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO");
+static const StringIdentity idLineGradientUBOName = StringIndexer::get("LineGradientUBO");
+static const StringIdentity idLineGradientPropertiesUBOName = StringIndexer::get("LineGradientPropertiesUBO");
+static const StringIdentity idLinePatternUBOName = StringIndexer::get("LinePatternUBO");
+static const StringIdentity idLinePatternPropertiesUBOName = StringIndexer::get("LinePatternPropertiesUBO");
+static const StringIdentity idLineSDFUBOName = StringIndexer::get("LineSDFUBO");
+static const StringIdentity idLineSDFPropertiesUBOName = StringIndexer::get("LineSDFPropertiesUBO");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+
+static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+static const StringIdentity idLinePermutationUBOName = StringIndexer::get("LinePermutationUBO");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
@@ -159,9 +172,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
+                uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
 
-                uniforms.createOrUpdate("LineUBO", &lineUBO, context);
-                uniforms.addOrReplace("LinePropertiesUBO", getLinePropsBuffer());
+                // properties UBO
+                uniforms.addOrReplace(idLinePropertiesUBOName, getLinePropsBuffer());
             } break;
 
             case LineType::Gradient: {
@@ -170,13 +184,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
-                uniforms.createOrUpdate("LineGradientUBO", &lineGradientUBO, context);
-                uniforms.addOrReplace("LineGradientPropertiesUBO", getLineGradientPropsBuffer());
+                uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
+
+                // properties UBO
+                uniforms.addOrReplace(idLineGradientPropertiesUBOName, getLineGradientPropsBuffer());
             } break;
 
             case LineType::Pattern: {
                 Size textureSize{0, 0};
-                if (const auto index = shader->getSamplerLocation("u_image")) {
+                if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                     if (const auto& texture = drawable.getTexture(index.value())) {
                         textureSize = texture->getSize();
                     }
@@ -193,9 +209,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                     /*device_pixel_ratio =*/parameters.pixelRatio,
                     /*fade =*/crossfade.t,
                     0};
-                uniforms.createOrUpdate("LinePatternUBO", &linePatternUBO, context);
+                uniforms.createOrUpdate(idLinePatternUBOName, &linePatternUBO, context);
 
-                uniforms.addOrReplace("LinePatternPropertiesUBO", getLinePatternPropsBuffer());
+                // properties UBO
+                uniforms.addOrReplace(idLinePatternPropertiesUBOName, getLinePatternPropsBuffer());
             } break;
 
             case LineType::SDF: {
@@ -206,7 +223,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                         evaluated.get<LineDasharray>().to,
                         lineData.linePatternCap);
 
-                    if (const auto index = shader->getSamplerLocation("u_image")) {
+                    // texture
+                    if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                         if (!drawable.getTexture(index.value())) {
                             const auto& texture = dashPatternTexture.getTexture();
                             drawable.setEnabled(!!texture);
@@ -236,9 +254,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                         /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
                             (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
                         /* mix = */ crossfade.t};
-                    uniforms.createOrUpdate("LineSDFUBO", &lineSDFUBO, context);
+                    uniforms.createOrUpdate(idLineSDFUBOName, &lineSDFUBO, context);
 
-                    uniforms.addOrReplace("LineSDFPropertiesUBO", getLineSDFPropsBuffer());
+                    // properties UBO
+                    uniforms.addOrReplace(idLineSDFPropertiesUBOName, getLineSDFPropsBuffer());
                 }
             } break;
 
@@ -250,8 +269,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
 
 #if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace("ExpressionInputsUBO", expressionUniformBuffer);
-        uniforms.addOrReplace("LinePermutationUBO", permutationUniformBuffer);
+        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
+        uniforms.addOrReplace(idLinePermutationUBOName, permutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 }

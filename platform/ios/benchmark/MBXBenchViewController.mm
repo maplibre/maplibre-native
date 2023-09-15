@@ -36,7 +36,13 @@
     // Use a local style and local assets if they’ve been downloaded.
     NSURL *tile = [[NSBundle mainBundle] URLForResource:@"11" withExtension:@"pbf" subdirectory:@"tiles/tiles/v3/5/7"];
     NSURL *tileSourceURL = [[NSBundle mainBundle] URLForResource:@"openmaptiles" withExtension:@"json" subdirectory:@"tiles"];
-    NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json" : @"maptiler://maps/streets"];
+    const std::vector<std::string> styles = {
+        "maptiler://maps/streets",
+    };
+    constexpr auto styleIndex = 0;
+    NSURL *url = [NSURL URLWithString:tile ? @"asset://styles/streets.json" : [NSString stringWithCString:styles[styleIndex].c_str() encoding:NSUTF8StringEncoding]];
+    NSLog(@"Using style URL: \"%@\"", [url absoluteString]);
+    
     self.mapView = [[MLNMapView alloc] initWithFrame:self.view.bounds styleURL:url];
     self.mapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.mapView.delegate = self;
@@ -103,11 +109,16 @@ NSDate* const currentDate = [NSDate date];
 size_t idx = 0;
 enum class State { None, WaitingForAssets, WarmingUp, Benchmarking } state = State::None;
 int frames = 0;
+double totalFrameTime = 0;
 std::chrono::steady_clock::time_point started;
-std::vector<std::pair<std::string, double>> result;
+std::vector<std::pair<std::string, double> > result;
 
 static const int warmupDuration = 20; // frames
 static const int benchmarkDuration = 200; // frames
+
+namespace  mbgl {
+    extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploadInvalidSegments;
+}
 
 - (void)startBenchmarkIteration
 {
@@ -122,17 +133,23 @@ static const int benchmarkDuration = 200; // frames
         // Do nothing. The benchmark is completed.
         NSLog(@"Benchmark completed.");
         NSLog(@"Result:");
-        double totalFPS = 0;
+        double totalFrameTime = 0;
         size_t colWidth = 0;
         for (const auto& row : result) {
             colWidth = std::max(row.first.size(), colWidth);
         }
         for (const auto& row : result) {
-            NSLog(@"| %-*s | %4.1f fps |", int(colWidth), row.first.c_str(), row.second);
-            totalFPS += row.second;
+            NSLog(@"| %-*s | %4.1f ms | %4.1f fps |", int(colWidth), row.first.c_str(), 1e3 * row.second, 1.0 / row.second);
+            totalFrameTime += row.second;
         }
-        NSLog(@"Total FPS: %4.1f", totalFPS);
-        NSLog(@"Average FPS: %4.1f", totalFPS / result.size());
+
+        NSLog(@"Average frame time: %4.1f ms", totalFrameTime * 1e3 / result.size());
+        NSLog(@"Average FPS: %4.1f", result.size() / totalFrameTime);
+        
+        // NSLog(@"Total uploads: %zu", mbgl::uploadCount);
+        // NSLog(@"Total uploads with dirty vattr: %zu", mbgl::uploadVertextAttrsDirty);
+        // NSLog(@"Total uploads with invalid segs: %zu", mbgl::uploadInvalidSegments);
+        // NSLog(@"Total uploads with build: %zu", mbgl::uploadBuildCount);
 
         // this does not shut the application down correctly,
         // and results in an assertion failure in thread-local code
@@ -154,20 +171,25 @@ static const int benchmarkDuration = 200; // frames
     }
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(__unused BOOL)fullyRendered
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(__unused BOOL)fullyRendered
+                        frameTime:(double)frameTime
 {
     if (state == State::Benchmarking)
     {
         frames++;
+        totalFrameTime += frameTime;
         if (frames >= benchmarkDuration)
         {
             state = State::None;
 
             // Report FPS
-            const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count() ;
-            const auto fps = double(frames * 1e6) / duration;
-            result.emplace_back(mbgl::bench::locations[idx].name, fps);
-            NSLog(@"- FPS: %.1f", fps);
+            const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count();
+            const auto wallClockFPS = double(frames * 1e6) / duration;
+            const auto frameTime = static_cast<double>(totalFrameTime) / frames;
+            const auto potentialFPS = 1.0 / frameTime;
+            result.emplace_back(mbgl::bench::locations[idx].name, frameTime);
+            NSLog(@"- Frame time: %.1f ms, FPS: %.1f (%.1f sync FPS)", frameTime * 1e3, potentialFPS, wallClockFPS);
 
             // Start benchmarking the next location.
             idx++;
@@ -184,6 +206,7 @@ static const int benchmarkDuration = 200; // frames
         if (frames >= warmupDuration)
         {
             frames = 0;
+            totalFrameTime = 0;
             state = State::Benchmarking;
             started = std::chrono::steady_clock::now();
             NSLog(@"- Benchmarking for %d frames...", benchmarkDuration);

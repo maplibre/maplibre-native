@@ -28,8 +28,7 @@ public:
 /// Stores a collection of uniform blocks by name
 class UniformBlockArrayGL final : public gfx::UniformBlockArray {
 public:
-    UniformBlockArrayGL(int initCapacity = 10)
-        : UniformBlockArray(initCapacity) {}
+    UniformBlockArrayGL() = default;
     UniformBlockArrayGL(UniformBlockArrayGL&& other)
         : UniformBlockArray(std::move(other)) {}
     UniformBlockArrayGL(const UniformBlockArrayGL&) = delete;

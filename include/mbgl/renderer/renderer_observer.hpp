@@ -35,6 +35,11 @@ public:
     /// End of frame, booleans flags that a repaint is required and that placement changed.
     virtual void onDidFinishRenderingFrame(RenderMode, bool /*repaint*/, bool /*placementChanged*/) {}
 
+    /// End of frame, booleans flags that a repaint is required and that placement changed.
+    virtual void onDidFinishRenderingFrame(RenderMode mode, bool repaint, bool placementChanged, double /*frameTime*/) {
+        onDidFinishRenderingFrame(mode, repaint, placementChanged);
+    }
+
     /// Final frame
     virtual void onDidFinishRenderingMap() {}
 
