@@ -138,6 +138,11 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         colorTarget->setSourceAlphaBlendFactor(srcFactor);
         colorTarget->setDestinationRGBBlendFactor(destFactor);
         colorTarget->setDestinationAlphaBlendFactor(destFactor);
+
+        colorTarget->setWriteMask((colorMode.mask.r ? MTL::ColorWriteMaskRed : MTL::ColorWriteMaskNone) |
+                                  (colorMode.mask.g ? MTL::ColorWriteMaskGreen : MTL::ColorWriteMaskNone) |
+                                  (colorMode.mask.b ? MTL::ColorWriteMaskBlue : MTL::ColorWriteMaskNone) |
+                                  (colorMode.mask.a ? MTL::ColorWriteMaskAlpha : MTL::ColorWriteMaskNone));
     }
 
     if (depthFormat) {
@@ -170,12 +175,25 @@ std::optional<uint32_t> ShaderProgram::getSamplerLocation(const StringIdentity i
 }
 
 void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
-    vertexAttributes.add(StringIndexer::get(info.name.data()), static_cast<int>(info.index), info.dataType, info.count);
+    const auto index = static_cast<int>(info.index);
+#if !defined(NDEBUG)
+    // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
+    vertexAttributes.visitAttributes(
+        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
+#endif
+    vertexAttributes.add(StringIndexer::get(info.name), index, info.dataType, info.count);
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
-    if (const auto& block_ = uniformBlocks.add(
-            StringIndexer::get(info.name.data()), static_cast<int>(info.index), info.size)) {
+    const auto index = static_cast<int>(info.index);
+#if !defined(NDEBUG)
+    // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
+    vertexAttributes.visitAttributes(
+        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
+#endif
+    if (const auto& block_ = uniformBlocks.add(StringIndexer::get(info.name), index, info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);
