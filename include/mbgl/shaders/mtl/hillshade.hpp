@@ -105,7 +105,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // so that intensities >= 0.5 do not additionally affect the color values
     // while intensity values < 0.5 make the overall color more transparent.
     float4 accent_color = (1.0 - accent) * props.accent * clamp(intensity * 2.0, 0.0, 1.0);
-    float shade = abs(mod((aspect + azimuth) / M_PI_F + 0.5, 2.0) - 1.0);
+    float shade = abs(glMod((aspect + azimuth) / M_PI_F + 0.5, 2.0) - 1.0);
     float4 shade_color = mix(props.shadow, props.highlight, shade) * sin(scaledSlope) * clamp(intensity * 2.0, 0.0, 1.0);
     float4 color = accent_color * (1.0 - shade_color.a) + shade_color;
 
