@@ -89,7 +89,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto radius = valueFor(permutation.radius, props.radius, vertx.radius, interp.radius_t, expr);
     
     // unencode the extrusion vector that we snuck into the a_pos vector
-    float2 unscaled_extrude = float2(mod(float2(vertx.pos), 2.0) * 2.0 - 1.0);
+    float2 unscaled_extrude = float2(glMod(float2(vertx.pos), 2.0) * 2.0 - 1.0);
 
     // This 'extrude' comes in ranging from [-1, -1], to [1, 1].  We'll use
     // it to produce the vertices of a square mesh framing the point feature
