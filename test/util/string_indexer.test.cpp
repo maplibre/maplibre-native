@@ -14,7 +14,8 @@ TEST(StringIndexer, AddStrings) {
     EXPECT_EQ(id1, 0);
     EXPECT_EQ(StringIndexer::size(), 1);
 
-    const auto id2 = StringIndexer::get("test string2");
+    const std::string_view s2 = "test string2";
+    const auto id2 = StringIndexer::get(s2);
     EXPECT_EQ(id2, 1);
     EXPECT_EQ(StringIndexer::size(), 2);
 }
