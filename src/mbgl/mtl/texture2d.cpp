@@ -6,7 +6,6 @@
 #include <Metal/MTLDevice.hpp>
 #include <Metal/MTLRenderCommandEncoder.hpp>
 #include <Metal/MTLSampler.hpp>
-#include <Metal/MTLTexture.hpp>
 
 namespace mbgl {
 namespace mtl {
@@ -113,6 +112,7 @@ void Texture2D::createMetalTexture() noexcept {
     // Create a new texture object
     if (auto textureDescriptor = NS::RetainPtr(
             MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
+        textureDescriptor->setUsage(usage);
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
     }
 
@@ -129,6 +129,17 @@ void Texture2D::create() noexcept {
     if (samplerStateDirty) {
         updateSamplerConfiguration();
     }
+}
+
+gfx::Texture2D& Texture2D::setUsage(MTL::TextureUsage usage_) noexcept {
+    usage = usage_;
+    textureDirty = true;
+    return *this;
+}
+
+MTL::Texture* Texture2D::getMetalTexture() const noexcept {
+    assert(metalTexture);
+    return metalTexture.get();
 }
 
 void Texture2D::updateSamplerConfiguration() noexcept {
