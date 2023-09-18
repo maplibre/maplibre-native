@@ -21,6 +21,8 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -267,7 +269,8 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-constexpr auto VertexAttribName = "a_pos";
+static const StringIdentity idCircleInterpolateUBOName = StringIndexer::get("CircleInterpolateUBO");
+static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
 
 } // namespace
 
@@ -373,7 +376,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate("CircleInterpolateUBO", &interpolateUBO, context);
+            uniforms.createOrUpdate(idCircleInterpolateUBOName, &interpolateUBO, context);
         };
         if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
             continue;
@@ -406,7 +409,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         }
 #endif // MLN_RENDER_BACKEND_METAL
 
-        if (const auto& attr = circleVertexAttrs.add(VertexAttribName)) {
+        if (const auto& attr = circleVertexAttrs.add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),
                                    0,
@@ -433,7 +436,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
 
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.addOrReplace("CircleInterpolateUBO", interpBuffer);
+            uniforms.addOrReplace(idCircleInterpolateUBOName, interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

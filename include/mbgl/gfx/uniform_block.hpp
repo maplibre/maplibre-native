@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -58,11 +59,10 @@ protected:
 /// Stores a collection of uniform blocks by name
 class UniformBlockArray {
 public:
-    using UniformBlockMap = std::unordered_map<std::string, std::unique_ptr<UniformBlock>>;
+    using UniformBlockMap = std::unordered_map<StringIdentity, std::unique_ptr<UniformBlock>>;
 
     /// @brief Constructor
-    /// @param initCapacity initial collection capacity
-    UniformBlockArray(int initCapacity = 10);
+    UniformBlockArray() = default;
 
     /// @brief Move constructor
     UniformBlockArray(UniformBlockArray&&);
@@ -81,14 +81,14 @@ public:
 
     /// @brief Get an uniform block element.
     /// @return Pointer to the element on success, or null if the uniform block doesn't exists.
-    const std::unique_ptr<UniformBlock>& get(const std::string& name) const;
+    const std::unique_ptr<UniformBlock>& get(const StringIdentity id) const;
 
     /// @brief Add a new uniform block element.
     /// @param name
     /// @param index
     /// @param size
     /// @return Pointer to the new element on success, or null if the uniform block already exists.
-    const std::unique_ptr<UniformBlock>& add(std::string name, int index, std::size_t size);
+    const std::unique_ptr<UniformBlock>& add(const StringIdentity id, int index, std::size_t size);
 
     /// @brief  Move assignment operator
     UniformBlockArray& operator=(UniformBlockArray&&);
@@ -97,7 +97,7 @@ public:
     UniformBlockArray& operator=(const UniformBlockArray&);
 
     /// Do something with each block
-    void visit(const std::function<void(const std::string&, const UniformBlock&)>& f) {
+    void visit(const std::function<void(const StringIdentity, const UniformBlock&)>& f) {
         std::for_each(uniformBlockMap.begin(), uniformBlockMap.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -106,8 +106,8 @@ public:
     }
 
 protected:
-    const std::unique_ptr<UniformBlock>& add(std::string name, std::unique_ptr<UniformBlock>&& uniformBlock) {
-        const auto result = uniformBlockMap.insert(std::make_pair(std::move(name), std::unique_ptr<UniformBlock>()));
+    const std::unique_ptr<UniformBlock>& add(const StringIdentity id, std::unique_ptr<UniformBlock>&& uniformBlock) {
+        const auto result = uniformBlockMap.insert(std::make_pair(id, std::unique_ptr<UniformBlock>()));
         if (result.second) {
             result.first->second = std::move(uniformBlock);
             return result.first->second;

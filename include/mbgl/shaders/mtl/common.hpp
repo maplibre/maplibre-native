@@ -22,8 +22,9 @@ using namespace metal;
 
 // OpenGL `mod` is `x-y*floor(x/y)` where `floor` rounds down.
 // Metal `fmod` is `x-y*trunc(x/y)` where `trunc` rounds toward zero.
+// This function provides GL-compatible modulus for porting GLSL shaders.
 template <typename T1, typename T2>
-inline auto glMod(T1 x, T2 y) -> auto { return x - y * metal::floor(x/y); }
+inline auto glMod(T1 x, T2 y) { return x - y * metal::floor(x/y); }
 
 enum class AttributeSource : int32_t {
     Constant,

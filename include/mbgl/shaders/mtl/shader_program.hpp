@@ -10,7 +10,7 @@
 
 #include <optional>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 namespace mbgl {
 namespace shaders {
@@ -53,7 +53,7 @@ public:
                                                      const MTLVertexDescriptorPtr&,
                                                      const gfx::ColorMode& colorMode) const;
 
-    std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
+    std::optional<uint32_t> getSamplerLocation(const StringIdentity id) const override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     gfx::VertexAttributeArray& mutableVertexAttributes() override { return vertexAttributes; }
@@ -72,7 +72,7 @@ protected:
     MTLFunctionPtr fragmentFunction;
     UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
-    std::vector<std::string> textureBindings;
+    std::unordered_map<StringIdentity, std::size_t> textureBindings;
 };
 
 } // namespace mtl

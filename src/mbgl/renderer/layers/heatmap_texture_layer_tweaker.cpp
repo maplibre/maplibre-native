@@ -8,6 +8,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -21,7 +22,7 @@ struct alignas(16) HeatmapTextureDrawableUBO {
 };
 static_assert(sizeof(HeatmapTextureDrawableUBO) % 16 == 0);
 
-static constexpr std::string_view HeatmapTextureDrawableUBOName = "HeatmapTextureDrawableUBO";
+static const StringIdentity idHeatmapTextureDrawableUBOName = StringIndexer::get("HeatmapTextureDrawableUBO");
 
 void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
                                          [[maybe_unused]] const RenderTree& renderTree,
@@ -48,7 +49,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .padding = */ 0};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            HeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);
+            idHeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

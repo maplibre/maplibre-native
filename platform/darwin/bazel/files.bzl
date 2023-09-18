@@ -100,8 +100,6 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSPredicate+MLNAdditions.h",
     "src/NSValue+MLNAdditions.h",
 ]
-MLN_DARWIN_OBJC_OPENGL_HEADERS = [
-]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
     "src/MLNConversion.h",
@@ -155,8 +153,6 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNVectorTileSource_Private.h",
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
-]
-MLN_DARWIN_PRIVATE_OPENGL_HEADERS = [
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [

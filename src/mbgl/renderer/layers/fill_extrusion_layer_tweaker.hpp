@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 
@@ -19,6 +20,8 @@ public:
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
+    static const StringIdentity idFillExtrusionTilePropsUBOName;
+    static const StringIdentity idFillExtrusionInterpolateUBOName;
 private:
     gfx::UniformBufferPtr propsBuffer;
 

@@ -41,6 +41,11 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, state, inViewportPixelUnits);
 }
 
+void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {
+    evaluatedProperties = std::move(newProps);
+    propertiesUpdated = true;
+}
+
 #if MLN_RENDER_BACKEND_METAL
 shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint64_t frameCount) {
     const auto time = util::MonotonicTimer::now();

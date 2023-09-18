@@ -5,13 +5,14 @@
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
-      vertexAttrName("a_pos"),
+      vertexAttrNameId(StringIndexer::get("a_pos")),
       renderPass(mbgl::RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
@@ -167,7 +168,10 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
                                   gfx::IndexVectorBasePtr indexes,
                                   const SegmentBase* segments,
                                   const std::size_t segmentCount) {
-    assert(indexes && indexes->elements());
+    if (!indexes || !indexes->elements()) {
+        assert("Missing segment indexes");
+        return;
+    }
     impl->sharedIndexes = std::move(indexes);
     for (std::size_t i = 0; i < segmentCount; ++i) {
         const auto& seg = segments[i];
