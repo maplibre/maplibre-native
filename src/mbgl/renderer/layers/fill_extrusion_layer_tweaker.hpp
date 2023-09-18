@@ -22,6 +22,7 @@ public:
 
     static const StringIdentity idFillExtrusionTilePropsUBOName;
     static const StringIdentity idFillExtrusionInterpolateUBOName;
+
 private:
     gfx::UniformBufferPtr propsBuffer;
 
