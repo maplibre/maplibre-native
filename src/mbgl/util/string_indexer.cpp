@@ -42,7 +42,7 @@ StringIdentity StringIndexer::get(std::string_view string) {
             auto result = stringToIdentity.insert(
                 {std::string_view(identityToString.back().data(), identityToString.back().length()), id});
             assert(result.second);
-            
+
             return id;
         } else {
             // another writer inserted into the map
