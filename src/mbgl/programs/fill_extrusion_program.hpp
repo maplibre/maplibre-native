@@ -69,7 +69,7 @@ public:
         const auto factor = pow(2, 13);
 
         return LayoutVertex{{{p.x, p.y}},
-                            {{// Multiply normal vector components by 2^14 to pack them into
+                            {{// Multiply normal vector components by 2^13 to pack them into
                               // integers We pack a bool (`t`) into the x component indicating
                               // whether it is an upper or lower vertex
                               static_cast<int16_t>(floor(nx * factor) * 2 + t),

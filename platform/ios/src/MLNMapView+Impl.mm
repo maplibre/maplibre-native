@@ -1,10 +1,20 @@
 #import "MLNMapView+Impl.h"
-#import "MLNMapView+OpenGL.h"
+#import "MLNMapView_Private.h"
 #import "MLNStyle_Private.h"
 #import "NSBundle+MLNAdditions.h"
 
+#if MLN_RENDER_BACKEND_METAL
+#import "MLNMapView+Metal.h"
+#else // MLN_RENDER_BACKEND_OPENGL
+#import "MLNMapView+OpenGL.h"
+#endif
+
 std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
+#if MLN_RENDER_BACKEND_METAL
+    return std::make_unique<MLNMapViewMetalImpl>(nativeView);
+#else // MLN_RENDER_BACKEND_OPENGL
     return std::make_unique<MLNMapViewOpenGLImpl>(nativeView);
+#endif
 }
 
 MLNMapViewImpl::MLNMapViewImpl(MLNMapView* nativeView_) : mapView(nativeView_) {
@@ -71,7 +81,7 @@ void MLNMapViewImpl::onWillStartRenderingFrame() {
 
 void MLNMapViewImpl::onDidFinishRenderingFrame(mbgl::MapObserver::RenderFrameStatus status) {
     bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
-    [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered];
+    [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered frameTime:status.frameTime];
 }
 
 void MLNMapViewImpl::onWillStartRenderingMap() {

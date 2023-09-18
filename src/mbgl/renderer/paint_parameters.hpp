@@ -57,7 +57,8 @@ public:
                     const TransformParameters&,
                     RenderStaticData&,
                     LineAtlas&,
-                    PatternAtlas&);
+                    PatternAtlas&,
+                    uint64_t frameCount);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -103,27 +104,36 @@ public:
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)
     void clearStencil();
 
+    /// @brief Get a stencil mode for rendering constrined to the specified tile ID.
+    /// The tile ID must have been present in the set previously passed to `renderTileClippingMasks`
     gfx::StencilMode stencilModeForClipping(const UnwrappedTileID&) const;
+
+    /// @brief Initialize a stencil mode for 3D rendering.
+    /// @details Clears the tile stencil masks, so `stencilModeForClipping`
+    ///          cannot be used until `renderTileClippingMasks` is called again.
+    /// @return The stencil mode, each value is unique.
     gfx::StencilMode stencilModeFor3D();
 
 private:
     template <typename TIter>
     using GetTileIDFunc = std::function<const UnwrappedTileID&(const typename TIter::value_type&)>;
     template <typename TIter>
-    void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&&);
+    void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&&, bool clear);
 
     // This needs to be an ordered map so that we have the same order as the renderTiles.
     std::map<UnwrappedTileID, int32_t> tileClippingMaskIDs;
     int32_t nextStencilID = 1;
 
 public:
-    int numSublayers = 3;
+    const int numSublayers = 3;
     uint32_t currentLayer;
     float depthRangeSize;
-    static constexpr float depthEpsilon = 1.0f / (1 << 16);
-    static constexpr int maxStencilValue = 255;
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
+    const uint64_t frameCount;
+
+    static constexpr float depthEpsilon = 1.0f / (1 << 16);
+    static constexpr int maxStencilValue = 255;
 };
 
 } // namespace mbgl

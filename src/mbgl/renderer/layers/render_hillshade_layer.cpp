@@ -73,7 +73,7 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
+        layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties));
     }
 #endif
 }
@@ -281,12 +281,14 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
-constexpr auto PosAttribName = "a_pos";
-constexpr auto TexturePosAttribName = "a_texture_pos";
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
+                                  const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -302,7 +304,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!layerGroup_) {
             return;
         }
-        layerGroup_->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(evaluatedProperties));
+        layerGroup_->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties));
         setLayerGroup(std::move(layerGroup_), changes);
     }
 
@@ -370,19 +372,20 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             if (!singleTileLayerGroup) {
                 return;
             }
-            singleTileLayerGroup->setLayerTweaker(std::make_shared<HillshadePrepareLayerTweaker>(evaluatedProperties));
+            singleTileLayerGroup->setLayerTweaker(
+                std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties));
             renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
 
             gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
 
-            if (const auto& attr = hillshadePrepareVertexAttrs.add(PosAttribName)) {
+            if (const auto& attr = hillshadePrepareVertexAttrs.add(idPosAttribName)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a1),
                                        0,
                                        sizeof(HillshadeLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
-            if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(TexturePosAttribName)) {
+            if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(idTexturePosAttribName)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a2),
                                        0,
@@ -403,7 +406,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             hillshadePrepareBuilder->setSegments(
                 gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
 
-            auto imageLocation = hillshadePrepareShader->getSamplerLocation("u_image");
+            auto imageLocation = hillshadePrepareShader->getSamplerLocation(idTexImageName);
             if (imageLocation.has_value()) {
                 std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
                 texture->setImage(bucket.getDEMData().getImagePtr());
@@ -436,14 +439,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray hillshadeVertexAttrs;
 
-        if (const auto& attr = hillshadeVertexAttrs.add(PosAttribName)) {
+        if (const auto& attr = hillshadeVertexAttrs.add(idPosAttribName)) {
             attr->setSharedRawData(vertices,
                                    offsetof(HillshadeLayoutVertex, a1),
                                    0,
                                    sizeof(HillshadeLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(TexturePosAttribName)) {
+        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(idTexturePosAttribName)) {
             attr->setSharedRawData(vertices,
                                    offsetof(HillshadeLayoutVertex, a2),
                                    0,
@@ -473,7 +476,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 drawable.setIndexData(indices->vector(), std::move(drawSegments));
 
-                auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
+                auto imageLocation = hillshadeShader->getSamplerLocation(idTexImageName);
                 if (imageLocation.has_value()) {
                     drawable.setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
                 }
@@ -491,7 +494,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadeBuilder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
         hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
-        auto imageLocation = hillshadeShader->getSamplerLocation("u_image");
+        auto imageLocation = hillshadeShader->getSamplerLocation(idTexImageName);
         if (imageLocation.has_value()) {
             hillshadeBuilder->setTexture(bucket.renderTarget->getTexture(), imageLocation.value());
         }

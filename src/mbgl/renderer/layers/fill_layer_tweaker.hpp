@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 
@@ -11,40 +12,31 @@ namespace mbgl {
  */
 class FillLayerTweaker : public LayerTweaker {
 public:
-    FillLayerTweaker(Immutable<style::LayerProperties> properties)
-        : LayerTweaker(properties){};
+    FillLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
 
 public:
     ~FillLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
-    static constexpr std::string_view FillTilePropsUBOName = "FillDrawableTilePropsUBO";
-    static constexpr std::string_view FillInterpolateUBOName = "FillInterpolateUBO";
+    static const StringIdentity idFillTilePropsUBOName;
+    static const StringIdentity idFillInterpolateUBOName;
+    static const StringIdentity idFillOutlineInterpolateUBOName;
 
 private:
-    gfx::UniformBufferPtr propsBuffer;
-};
+    gfx::UniformBufferPtr fillPropsUniformBuffer;
+    gfx::UniformBufferPtr fillOutlinePropsUniformBuffer;
+    gfx::UniformBufferPtr fillPatternPropsUniformBuffer;
+    gfx::UniformBufferPtr fillOutlinePatternPropsUniformBuffer;
 
-/// Evaluated properties that depend on the tile
-struct alignas(16) FillDrawableTilePropsUBO {
-    /*  0 */ std::array<float, 4> pattern_from;
-    /* 16 */ std::array<float, 4> pattern_to;
-    /* 32 */
+    gfx::UniformBufferPtr fillPermutationUniformBuffer;
+    gfx::UniformBufferPtr fillOutlinePermutationUniformBuffer;
+    gfx::UniformBufferPtr fillPatternPermutationUniformBuffer;
+    gfx::UniformBufferPtr fillOutlinePatternPermutationUniformBuffer;
+#if MLN_RENDER_BACKEND_METAL
+    gfx::UniformBufferPtr expressionUniformBuffer;
+#endif // MLN_RENDER_BACKEND_METAL
 };
-static_assert(sizeof(FillDrawableTilePropsUBO) == 32);
-
-/// Attribute interpolations
-struct alignas(16) FillInterpolateUBO {
-    /*  0 */ float color_t;
-    /*  4 */ float opacity_t;
-    /*  8 */ float outline_color_t;
-    /* 12 */ float pattern_from_t;
-    /* 16 */ float pattern_to_t;
-    /* 20 */ float fade;
-    /* 24 */ float pad1, pad2;
-    /* 32 */
-};
-static_assert(sizeof(FillInterpolateUBO) == 32);
 
 } // namespace mbgl

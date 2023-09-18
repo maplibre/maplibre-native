@@ -1,3 +1,5 @@
+load("//platform/ios/bazel:macros.bzl", "info_plist")
+
 filegroup(
     name = "ios_benchmark_srcs",
     srcs = [
@@ -31,6 +33,11 @@ filegroup(
     visibility = ["//platform/ios:__pkg__"],
 )
 
-exports_files([
-    "Info.plist",
-])
+info_plist(
+    name = "info_benchmark_plist",
+    out = "Info-benchmark.plist",
+    base_info_plist = "Info.plist",
+    visibility = ["//platform/ios:__pkg__"],
+)
+
+exports_files(["Info.plist"])

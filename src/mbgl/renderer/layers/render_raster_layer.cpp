@@ -18,6 +18,7 @@
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
 
@@ -52,9 +53,7 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup && layerGroup->getLayerTweaker()) {
-        layerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
-    }
+    updateLayerTweaker();
 #endif
 }
 
@@ -225,17 +224,48 @@ void RenderRasterLayer::render(PaintParameters& parameters) {
 #if MLN_DRAWABLE_RENDERER
 void RenderRasterLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
-    activateLayerGroup(imageLayerGroup, willRender, changes);
+    if (imageLayerGroup) {
+        activateLayerGroup(imageLayerGroup, willRender, changes);
+    }
 }
 
-constexpr auto PosAttribName = "a_pos";
-constexpr auto TexturePosAttribName = "a_texture_pos";
-constexpr auto Image0UniformName = "u_image0";
-constexpr auto Image1UniformName = "u_image1";
+void RenderRasterLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    RenderLayer::layerRemoved(changes);
+    if (imageLayerGroup) {
+        activateLayerGroup(imageLayerGroup, false, changes);
+    }
+}
+
+void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
+    RenderLayer::layerIndexChanged(newLayerIndex, changes);
+
+    if (imageLayerGroup) {
+        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(imageLayerGroup, newLayerIndex));
+    }
+}
+
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
+static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
+static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
+
+void RenderRasterLayer::updateLayerTweaker() {
+    if (layerGroup || imageLayerGroup) {
+        tweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+        tweaker->enableOverdrawInspector(overdrawInspector);
+        if (layerGroup) {
+            layerGroup->setLayerTweaker(tweaker);
+        }
+        if (imageLayerGroup) {
+            imageLayerGroup->setLayerTweaker(tweaker);
+        }
+    }
+}
 
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
+                               const std::shared_ptr<UpdateParameters>& updateParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -254,6 +284,17 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!rasterShader) {
         rasterShader = context.getGenericShader(shaders, "RasterShader");
+        if (!rasterShader) {
+            return;
+        }
+    }
+
+    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
+    if (overdrawInspector != overdraw) {
+        overdrawInspector = overdraw;
+        if (tweaker) {
+            tweaker->enableOverdrawInspector(overdrawInspector);
+        }
     }
 
     if (!staticDataVertices) {
@@ -282,7 +323,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                                                  : gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrName(PosAttribName);
+        builder->setVertexAttrNameId(idPosAttribName);
 
         return builder;
     };
@@ -290,14 +331,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
                                                  const RasterBucket& bucket) {
         // textures
-        auto location0 = rasterShader->getSamplerLocation(Image0UniformName);
+        auto location0 = rasterShader->getSamplerLocation(idTexImage0Name);
         if (location0.has_value()) {
             std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
             tex0->setImage(bucket.image);
             tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             builder->setTexture(tex0, location0.value());
         }
-        auto location1 = rasterShader->getSamplerLocation(Image1UniformName);
+        auto location1 = rasterShader->getSamplerLocation(idTexImage1Name);
         if (location1.has_value()) {
             std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
             tex1->setImage(bucket.image);
@@ -321,7 +362,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         {
             gfx::VertexAttributeArray vertexAttrs;
 
-            if (auto& attr = vertexAttrs.add(PosAttribName)) {
+            if (auto& attr = vertexAttrs.add(idPosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a1),
                                        /*vertexOffset=*/0,
@@ -329,13 +370,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
-            if (auto& attr = vertexAttrs.add(TexturePosAttribName)) {
+            if (auto& attr = vertexAttrs.add(idTexturePosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a2),
                                        /*vertexOffset=*/0,
                                        sizeof(RasterLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
+
             builder->setVertexAttributes(std::move(vertexAttrs));
         }
 
@@ -371,8 +413,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             } else {
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-                imageLayerGroup->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
+                updateLayerTweaker();
             }
 
             auto builder = createBuilder();
@@ -398,8 +440,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         } else {
             // Set up a tile layer group
             if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-                layerGroup_->setLayerTweaker(std::make_shared<RasterLayerTweaker>(evaluatedProperties));
                 setLayerGroup(std::move(layerGroup_), changes);
+                updateLayerTweaker();
             }
         }
 

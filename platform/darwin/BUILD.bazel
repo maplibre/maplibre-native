@@ -5,6 +5,7 @@ load(
     "MLN_DARWIN_OBJC_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
     "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
+    "MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
     "MLN_GENERATED_DARWIN_STYLE_HEADERS",
     "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
@@ -37,6 +38,11 @@ filegroup(
 filegroup(
     name = "darwin_objcpp_srcs",
     srcs = MLN_DARWIN_PUBLIC_OBJCPP_SOURCE,
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "darwin_objcpp_opengl_srcs",
+    srcs = MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE,
     visibility = ["//visibility:public"],
 )
 
@@ -247,7 +253,6 @@ objc_library(
     srcs = [
         "src/CFHandle.hpp",
         "src/collator.mm",
-        "src/headless_backend_eagl.mm",
         "src/http_file_source.mm",
         "src/image.mm",
         "src/local_glyph_rasterizer.mm",
@@ -255,7 +260,10 @@ objc_library(
         "src/nsthread.mm",
         "src/number_format.mm",
         "src/string_nsstring.mm",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["src/headless_backend_eagl.mm"],
+    }),
     hdrs = [
         "include/mbgl/interface/native_apple_interface.h",
         "include/mbgl/storage/reachability.h",
@@ -286,19 +294,23 @@ objc_library(
     name = "darwin-loop",
     srcs = [
         "src/async_task.cpp",
-        "src/gl_functions.cpp",
         "src/run_loop.cpp",
         "src/timer.cpp",
-    ],
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": ["src/gl_functions.cpp"],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = [
         "GLES_SILENCE_DEPRECATION=1",
         "GL_SILENCE_DEPRECATION=1",
     ],
     sdk_frameworks = [
-        "OpenGLES",
         "SystemConfiguration",
-    ],
+    ] + select({
+        "//:metal_renderer": ["Metal"],
+        "//conditions:default": ["OpenGLES"],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//:mbgl-core",
@@ -316,6 +328,7 @@ exports_files(
         "scripts/check-public-symbols.sh",
     ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
+    MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_DARWIN_PRIVATE_HEADERS +
     MLN_DARWIN_OBJC_HEADERS +
     MLN_DARWIN_OBJCPP_HEADERS,

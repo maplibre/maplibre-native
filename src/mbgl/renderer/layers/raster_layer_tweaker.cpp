@@ -5,32 +5,19 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/raster_layer_ubo.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
-struct alignas(16) RasterDrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 4> spin_weights;
-    std::array<float, 2> tl_parent;
-    float scale_parent;
-    float buffer_scale;
-    float fade_t;
-    float opacity;
-    float brightness_low;
-    float brightness_high;
-    float saturation_factor;
-    float contrast_factor;
-    float pad1;
-    float pad2;
-};
-static_assert(sizeof(RasterDrawableUBO) == 128);
-static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
+static const StringIdentity idRasterDrawableUBOName = StringIndexer::get("RasterDrawableUBO");
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const RenderTree& renderTree,
@@ -90,10 +77,13 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
             /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
             /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
+            /*.overdrawInspector = */ overdrawInspector,
+            0,
+            0,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate("RasterDrawableUBO", &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idRasterDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

@@ -432,6 +432,16 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
 }
+
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+    if (buffer) {
+        buffer->update(data, size);
+        return false;
+    } else {
+        buffer = createUniformBuffer(data, size);
+        return true;
+    }
+}
 #endif
 
 void Context::setDirtyState() {
@@ -480,8 +490,11 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
     std::vector<std::string> emptyProperties(0);
-    return std::static_pointer_cast<gfx::ShaderProgramBase>(
-        shaders.getShaderGroup(name)->getOrCreateShader(*this, emptyProperties));
+    auto shaderGroup = shaders.getShaderGroup(name);
+    if (!shaderGroup) {
+        return nullptr;
+    }
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, emptyProperties));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
