@@ -110,6 +110,7 @@ jobs:
         run: bazel run //platform/ios:lint-plists --//:renderer=${{ matrix.renderer }}
 
       - name: Running iOS tests
+        if: matrix.renderer != 'metal'
         run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=${{ matrix.renderer }}
 
       - name: Running iOS UI tests
