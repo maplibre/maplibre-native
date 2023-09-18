@@ -63,9 +63,27 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+info_plist(
+    name = "info_plist",
+    out = "Info.plist",
+    base_info_plist = "framework/Info.plist",
+)
+
+info_plist(
+    name = "info_static_plist",
+    out = "Info-static.plist",
+    base_info_plist = "framework/Info-static.plist",
+)
+
+info_plist(
+    name = "info_app_plist",
+    out = "Info-app.plist",
+    base_info_plist = "app/Info.plist",
+)
+
 apple_static_xcframework(
-    name = "Mapbox.static",
-    bundle_name = "Mapbox",
+    name = "MapLibre.static",
+    bundle_name = "MapLibre",
     ios = {
         "simulator": [
             "x86_64",
@@ -81,26 +99,11 @@ apple_static_xcframework(
         "//platform/darwin:darwin_objcpp_hdrs",
     ] + select({
         "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objc_opengl_hdrs",
-            "//platform/darwin:darwin_objcpp_opengl_hdrs"
-        ],
+        "//conditions:default": [],
     }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
-)
-
-info_plist(
-    name = "info_plist",
-    out = "Info.plist",
-    base_info_plist = "framework/Info.plist",
-)
-
-info_plist(
-    name = "info_static_plist",
-    out = "Info-static.plist",
-    base_info_plist = "framework/Info-static.plist",
 )
 
 apple_xcframework(
@@ -127,10 +130,7 @@ apple_xcframework(
         "//platform/darwin:darwin_objcpp_hdrs",
     ] + select({
         "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objc_opengl_hdrs",
-            "//platform/darwin:darwin_objcpp_opengl_hdrs"
-        ],
+        "//conditions:default": [],
     }),
     umbrella_header = "src/Mapbox.h",
     visibility = ["//visibility:public"],
@@ -183,7 +183,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["build/Info-app.plist"],
+    infoplists = ["info_app_plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
@@ -220,7 +220,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["build/Info-benchmark.plist"],
+    infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = ["//platform/ios/benchmark:bundle_resources"],
