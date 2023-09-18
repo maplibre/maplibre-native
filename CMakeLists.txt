@@ -159,7 +159,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/render_target_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
@@ -180,7 +179,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_buffer.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_attribute.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/render_target.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_target_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/change_request.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layer_group.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/tile_layer_group.cpp
@@ -1114,6 +1112,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_extrusion_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_texture_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/raster_layer_ubo.hpp
@@ -1121,14 +1121,12 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/render_target_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
         )
         list(APPEND SRC_FILES
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_target_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
@@ -1153,12 +1151,15 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/context.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/layer_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_builder.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/drawable_tweaker.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/index_buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/layer_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/mtl_fwd.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/offscreen_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/render_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/renderer_backend.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/texture2d.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/tile_layer_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/uniform_block.hpp
@@ -1166,14 +1167,21 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/upload_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_attribute.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/vertex_buffer_resource.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion_pattern.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/heatmap_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/line_gradient.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/shader_program.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_sdf.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_text_and_icon.hpp
@@ -1184,18 +1192,21 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_builder.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_tweaker.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/mtl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/offscreen_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/tile_layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_block.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
+    ]
     )
 endif()
 

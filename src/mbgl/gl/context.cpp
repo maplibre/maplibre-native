@@ -20,9 +20,9 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
-#include <mbgl/gl/render_target_gl.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/texture2d.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #endif
 
@@ -510,10 +510,10 @@ gfx::Texture2DPtr Context::createTexture2D() {
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<gl::RenderTargetGL>(*this, size, type);
+    return std::make_shared<RenderTarget>(*this, size, type);
 }
 
-UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
+Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
     MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -522,7 +522,7 @@ UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
     checkFramebuffer();
-    return fbo;
+    return {color.getSize(), std::move(fbo)};
 }
 #endif
 

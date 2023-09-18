@@ -10,7 +10,7 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = MLN_STRINGIZE(SymbolSDFIconShader);
+    static constexpr auto name = "SymbolSDFIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
