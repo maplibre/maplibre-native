@@ -54,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        renderer: [legacy, drawable]
+        renderer: [legacy, drawable, metal]
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
