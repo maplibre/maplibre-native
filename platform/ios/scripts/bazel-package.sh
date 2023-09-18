@@ -11,12 +11,6 @@ release_type="release"
 # Renderer flavor
 flavor="legacy"
 
-echo "------ Determining Maplibre version and hash ------"
-sem_version=$(git describe --tags --match=ios-v*.*.* --abbrev=0 | sed 's/^ios-v//')
-hash=$(git log | head -1 | awk '{ print $2 }' | cut -c 1-10) && true
-
-args=("--sem-ver" "$sem_version" "--hash" "$hash")
-
 while [[ $# -gt 0 ]]; do
    case $1 in
    --static)
@@ -39,16 +33,6 @@ while [[ $# -gt 0 ]]; do
       build_type="link"
       shift
       ;;
-   --teamid)
-      shift
-      args+=("--team-id" "$1")
-      shift
-      ;;
-   --bundleidprefix)
-      shift
-      args+=("--bundleidprefix" "$1")
-      shift
-      ;;
    --help)
       echo "Build the maplibre xcframework using the bazel build files. You must install Baselisk to build using this method."
       echo "Usage: .bazel-package.sh --static|--dynamic --release|--debug"
@@ -69,7 +53,7 @@ done
 
 echo "------ Build type: $build_type Release type: $release_type ------"
 
-target="Mapbox.$build_type"
+target="MapLibre.$build_type"
 
 compilation_mode="opt"
 if [ "$release_type" = "debug" ]; then
@@ -80,9 +64,7 @@ if [ ! -d platform/ios/build ]; then
    mkdir platform/ios/build
 fi
 
-bash "platform/ios/scripts/bazel-generate-plists.sh" "${args[@]}"
-
-echo "------ Building Maplibre version: $sem_version hash: $hash ------"
+echo "------ Building Maplibre ------"
 
 # Build
 ncpu=$(sysctl -n hw.ncpu)

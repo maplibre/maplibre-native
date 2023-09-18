@@ -95,10 +95,6 @@ jobs:
       
       - name: npm install
         run: npm ci --ignore-scripts
-
-      - name: Generate app plists
-        working-directory: ./
-        run: bash platform/ios/scripts/bazel-generate-plists.sh
       
       - run: cp bazel/example_config.bzl bazel/config.bzl
 
