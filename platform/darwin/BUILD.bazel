@@ -3,9 +3,7 @@ load(
     "bazel/files.bzl",
     "MLN_DARWIN_OBJCPP_HEADERS",
     "MLN_DARWIN_OBJC_HEADERS",
-    "MLN_DARWIN_OBJC_OPENGL_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
-    "MLN_DARWIN_PRIVATE_OPENGL_HEADERS",
     "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
@@ -24,20 +22,10 @@ filegroup(
     srcs = MLN_DARWIN_PRIVATE_HEADERS,
     visibility = ["//visibility:public"],
 )
-filegroup(
-    name = "darwin_private_opengl_hdrs",
-    srcs = MLN_DARWIN_PRIVATE_OPENGL_HEADERS,
-    visibility = ["//visibility:public"],
-)
 
 filegroup(
     name = "darwin_objc_hdrs",
     srcs = MLN_DARWIN_OBJC_HEADERS,
-    visibility = ["//visibility:public"],
-)
-filegroup(
-    name = "darwin_objc_opengl_hdrs",
-    srcs = MLN_DARWIN_OBJC_OPENGL_HEADERS,
     visibility = ["//visibility:public"],
 )
 
@@ -342,8 +330,6 @@ exports_files(
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_DARWIN_PRIVATE_HEADERS +
-    MLN_DARWIN_PRIVATE_OPENGL_HEADERS +
     MLN_DARWIN_OBJC_HEADERS +
-    MLN_DARWIN_OBJC_OPENGL_HEADERS +
     MLN_DARWIN_OBJCPP_HEADERS,
 )
