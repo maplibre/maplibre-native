@@ -39,7 +39,7 @@ StringIdentity StringIndexer::get(std::string_view string) {
             const StringIdentity id = identityToString.size();
             identityToString.push_back(std::string(string));
 
-            auto result = stringToIdentity.insert(
+            [[maybe_unused]] auto result = stringToIdentity.insert(
                 {std::string_view(identityToString.back().data(), identityToString.back().length()), id});
             assert(result.second);
 
