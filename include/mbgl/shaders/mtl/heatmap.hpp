@@ -78,10 +78,6 @@ constant const float ZERO = 1.0 / 255.0 / 16.0;
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 #define GAUSS_COEF 0.3989422804014327
 
-float2 mod(float2 x, float2 y) {
-    return x - y * floor(x/y);
-}
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const HeatmapDrawableUBO& drawable [[buffer(3)]],
                                 device const HeatmapEvaluatedPropsUBO& props [[buffer(4)]],
@@ -93,7 +89,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto radius = valueFor(permutation.radius, props.radius, vertx.radius, interp.radius_t, expr);
     
     // unencode the extrusion vector that we snuck into the a_pos vector
-    float2 unscaled_extrude = float2(mod(float2(vertx.pos), 2.0) * 2.0 - 1.0);
+    float2 unscaled_extrude = float2(glMod(float2(vertx.pos), 2.0) * 2.0 - 1.0);
 
     // This 'extrude' comes in ranging from [-1, -1], to [1, 1].  We'll use
     // it to produce the vertices of a square mesh framing the point feature
