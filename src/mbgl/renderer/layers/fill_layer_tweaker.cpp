@@ -309,6 +309,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
             const FillOutlineDrawableUBO drawableUBO = {
                 /*.matrix=*/util::cast<float>(matrix),
                 /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
+                /* pad1 */0,
+                /* pad2 */0
             };
 
             uniforms.createOrUpdate(idFillOutlineDrawableUBOName, &drawableUBO, context);
