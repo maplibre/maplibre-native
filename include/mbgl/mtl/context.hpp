@@ -54,24 +54,6 @@ public:
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 
-    /*
-    Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
-    Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&);
-    Framebuffer createFramebuffer(const gfx::Texture&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
-    Framebuffer createFramebuffer(const gfx::Texture&);
-    Framebuffer createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
-
-    template <typename Image,
-              gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA
-                                                                  : gfx::TexturePixelType::Alpha>
-    Image readFramebuffer(const Size size, bool flip = true) {
-        static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1), "image format mismatch");
-        return {size, readFramebuffer(size, format, flip)};
-    }
-*/
-
     // Actually remove the objects we marked as abandoned with the above methods.
     void performCleanup() override {}
 

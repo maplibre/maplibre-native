@@ -4,6 +4,7 @@
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/drawable_builder.hpp>
 #include <mbgl/mtl/layer_group.hpp>
+#include <mbgl/mtl/offscreen_texture.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/texture2d.hpp>
@@ -13,6 +14,7 @@
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
@@ -170,8 +172,7 @@ gfx::Texture2DPtr Context::createTexture2D() {
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    assert(false);
-    return nullptr;
+    return std::make_shared<RenderTarget>(*this, size, type);
 }
 
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
@@ -188,9 +189,8 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const 
 
 void Context::setDirtyState() {}
 
-std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size, gfx::TextureChannelDataType) {
-    assert(false);
-    return nullptr;
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
+    return std::make_unique<OffscreenTexture>(*this, size, type);
 }
 
 std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
