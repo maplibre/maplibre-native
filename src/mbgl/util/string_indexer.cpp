@@ -37,7 +37,7 @@ StringIdentity StringIndexer::get(std::string_view string) {
         StringIdentity id = identityToString.size();
         auto result = stringToIdentity.insert({string, id});
         if (result.second) {
-            // this writer made the insert            
+            // this writer made the insert
             identityToString.push_back(std::string(string));
             stringToIdentity.erase(result.first);
             result = stringToIdentity.insert({std::string_view(identityToString.back().data()), id});
