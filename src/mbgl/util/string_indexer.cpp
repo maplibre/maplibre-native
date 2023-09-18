@@ -38,8 +38,9 @@ StringIdentity StringIndexer::get(std::string_view string) {
             // this writer to insert
             StringIdentity id = identityToString.size();
             identityToString.push_back(std::string(string));
-            
-            auto result = stringToIdentity.insert({std::string_view(identityToString.back().data(), identityToString.back().length()), id});
+
+            auto result = stringToIdentity.insert(
+                {std::string_view(identityToString.back().data(), identityToString.back().length()), id});
             assert(result.second);
             return id;
         } else {
