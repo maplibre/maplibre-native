@@ -215,7 +215,7 @@ void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
     if (layerGroup_) {
         if (activate) {
             // The RenderTree has determined this layer should be included in the renderable set for a frame
-            changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_, /*canReplace=*/true));
+            changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
         } else {
             // The RenderTree is informing us we should not render anything
             changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(layerGroup_->getLayerIndex()));

@@ -13,6 +13,7 @@ class UniformBuffer;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
 namespace shaders {
+enum class AttributeSource : int32_t;
 struct ExpressionInputsUBO;
 } // namespace shaders
 namespace style {
@@ -52,11 +53,14 @@ public:
     /// @brief Check whether a property name exists within the previously set collection.
     /// @details The string value provided is expected to have the "a_"  prefix, as defined in the shader classes.
     bool hasPropertyAsUniform(std::string_view) const;
+    shaders::AttributeSource getAttributeSource(const std::string_view& attribName) const;
 #endif // MLN_RENDER_BACKEND_METAL
 
     void enableOverdrawInspector(bool);
 
     virtual void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) = 0;
+
+    void updateProperties(Immutable<style::LayerProperties>);
 
 protected:
     /// Calculate matrices for this tile.
@@ -74,6 +78,7 @@ protected:
 protected:
     std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;
+    bool propertiesUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
     // For Metal, whether a property is provided through attribtues or uniforms is specified in

@@ -8,6 +8,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -22,7 +23,7 @@ struct alignas(16) HillshadePrepareDrawableUBO {
 };
 static_assert(sizeof(HillshadePrepareDrawableUBO) % 16 == 0);
 
-static constexpr std::string_view HillshadePrepareDrawableUBOName = "HillshadePrepareDrawableUBO";
+static const StringIdentity idHillshadePrepareDrawableUBOName = StringIndexer::get("HillshadePrepareDrawableUBO");
 
 const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
     // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
@@ -66,7 +67,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            HillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
+            idHillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

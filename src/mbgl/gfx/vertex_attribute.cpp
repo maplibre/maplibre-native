@@ -19,9 +19,6 @@ std::size_t VertexAttribute::getCount() const {
 
 std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
 
-VertexAttributeArray::VertexAttributeArray(int initCapacity)
-    : attrs(initCapacity) {}
-
 VertexAttributeArray::VertexAttributeArray(VertexAttributeArray&& other)
     : attrs(std::move(other.attrs)) {}
 
@@ -40,16 +37,16 @@ VertexAttributeArray& VertexAttributeArray::operator=(const VertexAttributeArray
     return *this;
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const std::string& name) const {
-    const auto result = attrs.find(name);
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const StringIdentity id) const {
+    const auto result = attrs.find(id);
     return (result != attrs.end()) ? result->second : nullref;
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(std::string name,
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(const StringIdentity id,
                                                                   int index,
                                                                   AttributeDataType dataType,
                                                                   std::size_t count) {
-    const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = create(index, dataType, count);
         return result.first->second;
@@ -58,11 +55,11 @@ const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(std::string na
     }
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(std::string name,
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(const StringIdentity id,
                                                                        int index,
                                                                        AttributeDataType dataType,
                                                                        std::size_t count) {
-    const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
     if (auto& attr = result.first->second; result.second) {
         return attr = create(index, dataType, count);
     } else if ((dataType == AttributeDataType::Invalid || attr->getDataType() == dataType) &&
@@ -92,10 +89,20 @@ void VertexAttributeArray::resolve(const VertexAttributeArray& overrides, Resolv
     for (auto& kv : attrs) {
         delegate(kv.first, *kv.second, overrides.get(kv.first));
     }
+    // For OpenGL, the shader attributes are established with reflection, and we have extra
+    // entries when we share attributes between, e.g., fill and fill-outline drawables.
+#if !defined(NDEBUG) && MLN_RENDERER_BACKEND_METAL
+    // Every override should match a defined attribute.
+    for (const auto& kv : overrides.attrs) {
+        const auto hit = attrs.find(kv.first);
+        assert(hit != attrs.end());
+    }
+#endif
 }
 
-const UniqueVertexAttribute& VertexAttributeArray::add(std::string name, std::unique_ptr<VertexAttribute>&& attr) {
-    const auto result = attrs.insert(std::make_pair(std::move(name), std::unique_ptr<VertexAttribute>()));
+const UniqueVertexAttribute& VertexAttributeArray::add(const StringIdentity id,
+                                                       std::unique_ptr<VertexAttribute>&& attr) {
+    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
     if (result.second) {
         result.first->second = std::move(attr);
         return result.first->second;

@@ -23,6 +23,8 @@ extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
 
     func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool) {}
 
+    func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool, frameTime: Double) {}
+
     func mapViewDidFinishRenderingMap(_ mapView: MLNMapView, fullyRendered: Bool) {}
     
     func mapViewDidBecomeIdle(_ mapView: MLNMapView) {}

@@ -207,12 +207,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     const auto drawable3DPass = [&] {
         const auto debugGroup(parameters.encoder->createDebugGroup("drawables-3d"));
         assert(parameters.pass == RenderPass::Pass3D);
-        parameters.currentLayer = 0;
 
-        // draw layer groups, opaque pass
+        // draw layer groups, 3D pass
+        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer++;
+            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
         });
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -406,7 +406,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
-        renderTreeParameters.placementChanged);
+        renderTreeParameters.placementChanged,
+        renderTree.getElapsedTime());
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

@@ -11,6 +11,8 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
+#include <mbgl/mtl/mtl_fwd.hpp>
+
 #include <memory>
 #include <unordered_map>
 
@@ -20,6 +22,7 @@ class ProgramParameters;
 
 namespace mtl {
 
+class RenderPass;
 class RendererBackend;
 class ShaderProgram;
 
@@ -31,6 +34,8 @@ public:
     ~Context() noexcept override;
     Context(const Context&) = delete;
     Context& operator=(const Context& other) = delete;
+
+    const RendererBackend& getBackend() const { return backend; }
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
@@ -112,6 +117,12 @@ public:
 #endif
 
     void clearStencilBuffer(int32_t) override;
+
+    MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode& depthMode,
+                                                  const gfx::StencilMode& stencilMode,
+                                                  const mtl::RenderPass& renderPass) const;
+
+    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size);
 
 private:
     RendererBackend& backend;

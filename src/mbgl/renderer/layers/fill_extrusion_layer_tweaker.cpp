@@ -9,50 +9,32 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
+using namespace shaders;
 using namespace style;
 
 namespace {
 
-struct alignas(16) FillExtrusionDrawableUBO {
-    /*   0 */ std::array<float, 4 * 4> matrix;
-    /*  64 */ std::array<float, 4> scale;
-    /*  80 */ std::array<float, 2> texsize;
-    /*  88 */ std::array<float, 2> pixel_coord_upper;
-    /*  96 */ std::array<float, 2> pixel_coord_lower;
-    /* 104 */ float height_factor;
-    /* 108 */ float pad;
-    /* 112 */
-};
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
-
-/// Evaluated properties that do not depend on the tile
-struct alignas(16) FillExtrusionDrawablePropsUBO {
-    /*  0 */ Color color;
-    /* 16 */ std::array<float, 3> light_color;
-    /* 28 */ float pad1;
-    /* 32 */ std::array<float, 3> light_position;
-    /* 44 */ float base;
-    /* 48 */ float height;
-    /* 52 */ float light_intensity;
-    /* 56 */ float vertical_gradient;
-    /* 60 */ float opacity;
-    /* 64 */ float fade;
-    /* 68 */ float pad2, pad3, pad4;
-    /* 80 */
-};
-static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
-
-constexpr auto texUniformName = "u_image";
+const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
+const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
+const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+const StringIdentity idFillExtrusionPermutationUBOName = StringIndexer::get("FillExtrusionPermutationUBO");
+const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
 } // namespace
+
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = StringIndexer::get(
+    "FillExtrusionDrawableTilePropsUBO");
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = StringIndexer::get(
+    "FillExtrusionInterpolateUBO");
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                         const RenderTree& renderTree,
@@ -94,9 +76,35 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         propsBuffer->update(&paramsUBO, sizeof(paramsUBO));
     }
 
+#if MLN_RENDER_BACKEND_METAL
+    const auto zoom = parameters.state.getZoom();
+    if (propertiesChanged) {
+        const FillExtrusionPermutationUBO permutationUBO = {
+            /* .color = */ {/*.source=*/getAttributeSource("a_color"), /*.expression=*/{}},
+            /* .base = */ {/*.source=*/getAttributeSource("a_base"), /*.expression=*/{}},
+            /* .height = */ {/*.source=*/getAttributeSource("a_height"), /*.expression=*/{}},
+            /* .overdrawInspector = */ overdrawInspector,
+            /* .pad = */ 0,
+            0,
+            0,
+            0};
+
+        if (permutationUniformBuffer) {
+            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
+        } else {
+            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
+        }
+        propertiesChanged = false;
+    }
+    if (!expressionUniformBuffer) {
+        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
+        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
+    }
+#endif
+
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace("FillExtrusionDrawablePropsUBO", propsBuffer);
+        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
 
         if (!drawable.getTileID()) {
             return;
@@ -124,7 +132,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         Size textureSize = {0, 0};
         if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation(texUniformName)) {
+            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
                 if (const auto& tex = drawable.getTexture(*index)) {
                     textureSize = tex->getSize();
                 }
@@ -140,7 +148,12 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate("FillExtrusionDrawableUBO", &drawableUBO, context);
+        uniforms.createOrUpdate(idFillExtrusionDrawableUBOName, &drawableUBO, context);
+
+#if MLN_RENDER_BACKEND_METAL
+        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
+        uniforms.addOrReplace(idFillExtrusionPermutationUBOName, permutationUniformBuffer);
+#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 
