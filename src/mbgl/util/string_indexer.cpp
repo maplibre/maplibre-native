@@ -34,19 +34,18 @@ StringIdentity StringIndexer::get(std::string_view string) {
         auto& identityToString = instance().identityToString;
         assert(stringToIdentity.size() == identityToString.size());
 
-        StringIdentity id = identityToString.size();
-        auto result = stringToIdentity.insert({string, id});
-        if (result.second) {
-            // this writer made the insert
+        if (const auto it = stringToIdentity.find(string); it == stringToIdentity.end()) {
+            // this writer to insert
+            StringIdentity id = identityToString.size();
             identityToString.push_back(std::string(string));
-            stringToIdentity.erase(result.first);
-            result = stringToIdentity.insert({std::string_view(identityToString.back().data()), id});
+            
+            auto result = stringToIdentity.insert({std::string_view(identityToString.back().data(), identityToString.back().length()), id});
             assert(result.second);
+            return id;
         } else {
             // another writer inserted into the map
-            id = result.first->second;
+            return it->second;
         }
-        return id;
     }
 }
 
