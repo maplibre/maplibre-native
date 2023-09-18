@@ -18,11 +18,11 @@ StringIdentity StringIndexer::get(std::string_view string) {
     {
         std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
 
-        auto& stringToIdentity = instance().stringToIdentity;
-        [[maybe_unused]] auto& identityToString = instance().identityToString;
+        const auto& stringToIdentity = instance().stringToIdentity;
+        [[maybe_unused]] const auto& identityToString = instance().identityToString;
         assert(stringToIdentity.size() == identityToString.size());
 
-        if (auto it = stringToIdentity.find(string); it != stringToIdentity.end()) {
+        if (const auto it = stringToIdentity.find(string); it != stringToIdentity.end()) {
             return it->second;
         }
     }
@@ -36,12 +36,13 @@ StringIdentity StringIndexer::get(std::string_view string) {
 
         if (const auto it = stringToIdentity.find(string); it == stringToIdentity.end()) {
             // this writer to insert
-            StringIdentity id = identityToString.size();
+            const StringIdentity id = identityToString.size();
             identityToString.push_back(std::string(string));
 
             auto result = stringToIdentity.insert(
                 {std::string_view(identityToString.back().data(), identityToString.back().length()), id});
             assert(result.second);
+            
             return id;
         } else {
             // another writer inserted into the map
