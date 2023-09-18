@@ -18,6 +18,8 @@
 #include <mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/shaders/heatmap_layer_ubo.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/shader_group.hpp>
@@ -68,13 +70,8 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (renderTarget) {
-        renderTarget->getLayerGroup(0)->setLayerTweaker(
-            std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
-    }
-    if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
-    }
+    updateLayerTweaker();
+    updateLayerTextureTweaker();
 #endif
 }
 
@@ -86,13 +83,13 @@ bool RenderHeatmapLayer::hasCrossfade() const {
     return false;
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderHeatmapLayer::upload(gfx::UploadPass& uploadPass) {
     if (!colorRampTexture) {
         colorRampTexture = uploadPass.createTexture(*colorRamp, gfx::TextureChannelDataType::UnsignedByte);
     }
 }
 
-#if MLN_LEGACY_RENDERER
 void RenderHeatmapLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass == RenderPass::Opaque) {
@@ -265,13 +262,6 @@ void RenderHeatmapLayer::removeAllDrawables() {
 
 namespace {
 
-struct alignas(16) HeatmapInterpolateUBO {
-    float weight_t;
-    float radius_t;
-    std::array<float, 2> padding;
-};
-static_assert(sizeof(HeatmapInterpolateUBO) % 16 == 0);
-
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 static const StringIdentity idHeatmapInterpolateUBOName = StringIndexer::get("HeatmapInterpolateUBO");
@@ -281,10 +271,33 @@ static const StringIdentity idTexColorRampName = StringIndexer::get("u_color_ram
 
 } // namespace
 
+using namespace shaders;
+
+#if MLN_DRAWABLE_RENDERER
+void RenderHeatmapLayer::updateLayerTweaker() {
+    if (renderTarget) {
+        tweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+#endif // MLN_RENDER_BACKEND_METAL
+        tweaker->enableOverdrawInspector(overdrawInspector);
+        renderTarget->getLayerGroup(0)->setLayerTweaker(tweaker);
+    }
+}
+
+void RenderHeatmapLayer::updateLayerTextureTweaker() {
+    if (layerGroup) {
+        textureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
+        textureTweaker->enableOverdrawInspector(overdrawInspector);
+        layerGroup->setLayerTweaker(textureTweaker);
+    }
+}
+#endif // MLN_DRAWABLE_RENDERER
+
 void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
                                 const TransformState& state,
-                                const std::shared_ptr<UpdateParameters>&,
+                                const std::shared_ptr<UpdateParameters>& updateParameters,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -310,8 +323,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (!tileLayerGroup) {
             return;
         }
-        tileLayerGroup->setLayerTweaker(std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties));
         renderTarget->addLayerGroup(tileLayerGroup, /*replace=*/true);
+        updateLayerTweaker();
     }
 
     if (renderTarget->getTexture()->getSize() != size) {
@@ -326,6 +339,15 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     if (!heatmapShaderGroup) {
         removeAllDrawables();
         return;
+    }
+
+    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
+    if (overdrawInspector != overdraw) {
+        overdrawInspector = overdraw;
+        if (tweaker) {
+            tweaker->enableOverdrawInspector(overdrawInspector);
+            textureTweaker->enableOverdrawInspector(overdrawInspector);
+        }
     }
 
     std::unique_ptr<gfx::DrawableBuilder> heatmapBuilder;
@@ -376,17 +398,24 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray heatmapVertexAttrs;
 
-        const auto propertiesAsUniforms =
+        const auto propertiesAsUniforms_ =
             heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(paintPropertyBinders,
                                                                                            evaluated);
 
         if (!heatmapShaderGroup) {
             continue;
         }
-        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms_);
         if (!heatmapShader) {
             continue;
         }
+
+#if MLN_RENDER_BACKEND_METAL
+        propertiesAsUniforms = std::move(propertiesAsUniforms_);
+        if (tweaker) {
+            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+        }
+#endif // MLN_RENDER_BACKEND_METAL
 
         if (const auto& attr = heatmapVertexAttrs.add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
@@ -425,8 +454,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         if (!layerGroup_) {
             return;
         }
-        layerGroup_->setLayerTweaker(std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties));
         setLayerGroup(std::move(layerGroup_), changes);
+        updateLayerTextureTweaker();
     }
 
     if (!heatmapTextureShader) {
