@@ -1603,16 +1603,14 @@ TEST(Map, ObserveShaderRegistration) {
 
 TEST(Map, ResourceError) {
     MapTest<> test;
-    test.fileSource->glyphsResponse = [&] (const Resource& resource) {
+    test.fileSource->glyphsResponse = [&](const Resource& resource) {
         Response response;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::Server,
-            "Font file Server failed");
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Server, "Font file Server failed");
         return response;
     };
 
     test.map.getStyle().loadJSON(
-R"(
+        R"(
 {
   "version": 8,
   "zoom": 0,
