@@ -9,23 +9,12 @@ const std::string empty;
 constexpr std::size_t initialCapacity = 100;
 } // namespace
 
-StringIndexer::StringIndexer()
-    : stringToIdentity(initialCapacity) {
+StringIndexer::StringIndexer() {
+    stringToIdentity.reserve(initialCapacity);
     identityToString.reserve(initialCapacity);
 }
 
-// For now, we have to make a copy to search the string-keyed container.
-StringIdentity StringIndexer::get(const char* string) {
-    return get(std::string(string));
-}
-// Once we can search using a string_view this should be the primary version.
 StringIdentity StringIndexer::get(std::string_view string) {
-    return get(std::string(string));
-}
-
-// We take a const reference rather than an lvalue (copy) under the assumption that most calls will
-// find a match and insertions where we could move are rare.
-StringIdentity StringIndexer::get(const std::string& string) {
     {
         std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
 
@@ -48,8 +37,11 @@ StringIdentity StringIndexer::get(const std::string& string) {
         StringIdentity id = identityToString.size();
         auto result = stringToIdentity.insert({string, id});
         if (result.second) {
-            // this writer made the insert
-            identityToString.push_back(string);
+            // this writer made the insert            
+            identityToString.push_back(std::string(string));
+            stringToIdentity.erase(result.first);
+            result = stringToIdentity.insert({std::string_view(identityToString.back().data()), id});
+            assert(result.second);
         } else {
             // another writer inserted into the map
             id = result.first->second;
