@@ -73,7 +73,7 @@ protected:
     const std::unique_ptr<Impl> impl;
 
     gfx::AttributeBindingArray attributeBindings;
-    
+
     mutable MTLRenderPipelineStatePtr pipelineState;
 };
 
