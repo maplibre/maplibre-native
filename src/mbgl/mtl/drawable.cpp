@@ -189,8 +189,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     encoder->setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
     encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
-    if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode())) {
-        encoder->setRenderPipelineState(state.get());
+    if (!pipelineState) {
+        pipelineState = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode());
+    }
+    if (pipelineState) {
+        encoder->setRenderPipelineState(pipelineState.get());
     } else {
         assert(!"Failed to create render pipeline state");
         return;

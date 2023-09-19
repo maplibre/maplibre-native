@@ -4,6 +4,7 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
+#include <mbgl/mtl/mtl_fwd.hpp>
 
 #include <memory>
 
@@ -72,6 +73,8 @@ protected:
     const std::unique_ptr<Impl> impl;
 
     gfx::AttributeBindingArray attributeBindings;
+    
+    mutable MTLRenderPipelineStatePtr pipelineState;
 };
 
 } // namespace mtl
