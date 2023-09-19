@@ -260,9 +260,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // something else, the binding is invalid
             // TODO: throw?
             Log::Warning(Event::General,
-                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" +
-                             StringIndexer::get(id) + "' (" + util::toString(defaultGL.getIndex()) +
-                             "), expected " + util::toString(stride) + " or " + util::toString(stride * vertexCount));
+                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + StringIndexer::get(id) +
+                             "' (" + util::toString(defaultGL.getIndex()) + "), expected " + util::toString(stride) +
+                             " or " + util::toString(stride * vertexCount));
             return;
         }
 
