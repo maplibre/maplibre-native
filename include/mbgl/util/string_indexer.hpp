@@ -21,7 +21,7 @@ public:
 
     static StringIdentity get(std::string_view);
 
-    static const std::string& get(const StringIdentity id);
+    static std::string_view get(const StringIdentity id);
 
     static void clear();
 
@@ -32,7 +32,8 @@ protected:
     ~StringIndexer() = default;
 
     using MapType = std::unordered_map<std::string_view, StringIdentity>;
-    using VectorType = std::vector<std::string>;
+    using VectorType = std::vector<std::size_t>;
+    using BufferType = std::vector<char>;
 
     static StringIndexer& instance() {
         static StringIndexer inst;
@@ -41,6 +42,8 @@ protected:
 
     MapType stringToIdentity;
     VectorType identityToString;
+    BufferType buffer;
+
     std::shared_mutex sharedMutex;
 };
 
