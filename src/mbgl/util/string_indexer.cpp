@@ -7,7 +7,7 @@ namespace mbgl {
 
 namespace {
 constexpr std::string_view empty{""};
-constexpr std::size_t initialCapacity = 200;
+constexpr std::size_t initialCapacity = 100;
 constexpr std::size_t initialBufferCapacity = initialCapacity * 32;
 } // namespace
 
