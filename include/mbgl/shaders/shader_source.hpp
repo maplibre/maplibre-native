@@ -31,7 +31,6 @@ enum class BuiltIn {
     HillshadeShader,
     RasterShader,
     SymbolIconShader,
-    SymbolSDFTextShader,
     SymbolSDFIconShader,
     SymbolTextAndIconShader,
     Prelude,
