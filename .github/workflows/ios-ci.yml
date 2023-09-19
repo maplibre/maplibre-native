@@ -198,8 +198,7 @@ jobs:
         run: echo make_release=true >> "$GITHUB_ENV"
 
       - name: Build XCFramework
-        if: env.make_release
-        run:
+        run: |
           bazel build --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
 
