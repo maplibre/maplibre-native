@@ -49,8 +49,8 @@ StringIdentity StringIndexer::get(std::string_view string) {
             if (buffer.capacity() != previousCapacity) {
                 // reallocation happened
                 stringToIdentity.clear();
-                for (auto it = identityToString.begin(); it != identityToString.end(); ++it) {
-                    stringToIdentity[std::string_view(buffer.data() + *it)] = it - identityToString.begin();
+                for (auto iIdentity = identityToString.begin(); iIdentity != identityToString.end(); ++iIdentity) {
+                    stringToIdentity[std::string_view(buffer.data() + *iIdentity)] = iIdentity - identityToString.begin();
                 }
             } else {
                 [[maybe_unused]] auto result = stringToIdentity.insert(

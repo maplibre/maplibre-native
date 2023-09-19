@@ -30,7 +30,7 @@ TEST(StringIndexer, GetString) {
     EXPECT_EQ(id1, 0);
     EXPECT_EQ(StringIndexer::size(), 1);
 
-    const std::string str1 = StringIndexer::get(id1);
+    const auto str1 = StringIndexer::get(id1);
     EXPECT_EQ(str, str1);
 
     const auto str2 = str;
