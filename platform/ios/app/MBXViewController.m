@@ -2043,7 +2043,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         });
     }
-
+    
     NSAssert(self.styleNames.count == self.styleURLs.count, @"Style names and URLs don’t match.");
 }
 
