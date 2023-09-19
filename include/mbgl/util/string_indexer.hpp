@@ -21,7 +21,7 @@ public:
 
     static StringIdentity get(std::string_view);
 
-    static std::string_view get(const StringIdentity id);
+    static std::string get(const StringIdentity id);
 
     static void clear();
 

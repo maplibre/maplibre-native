@@ -261,7 +261,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // TODO: throw?
             Log::Warning(Event::General,
                          "Got " + util::toString(rawData.size()) + " bytes for attribute '" +
-                             std::string(StringIndexer::get(id)) + "' (" + util::toString(defaultGL.getIndex()) +
+                             StringIndexer::get(id) + "' (" + util::toString(defaultGL.getIndex()) +
                              "), expected " + util::toString(stride) + " or " + util::toString(stride * vertexCount));
             return;
         }

@@ -6,7 +6,7 @@
 namespace mbgl {
 
 namespace {
-constexpr std::string_view empty{""};
+const std::string empty;
 constexpr std::size_t initialCapacity = 100;
 constexpr std::size_t initialBufferCapacity = initialCapacity * 32;
 } // namespace
@@ -66,7 +66,7 @@ StringIdentity StringIndexer::get(std::string_view string) {
     }
 }
 
-std::string_view StringIndexer::get(const StringIdentity id) {
+std::string StringIndexer::get(const StringIdentity id) {
     std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
 
     const auto& identityToString = instance().identityToString;
