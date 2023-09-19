@@ -139,6 +139,7 @@ struct FragmentStage {
 struct alignas(16) FillOutlineDrawableUBO {
     float4x4 matrix;
     float2 world;
+    float2 pad1;
 };
 
 struct alignas(16) FillOutlineEvaluatedPropsUBO {
