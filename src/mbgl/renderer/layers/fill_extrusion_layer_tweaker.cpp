@@ -22,7 +22,6 @@ using namespace shaders;
 using namespace style;
 
 namespace {
-
 const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
 const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
 const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
