@@ -24,7 +24,11 @@
 #include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
 #include <mbgl/shaders/mtl/line_gradient.hpp>
+#include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
+#include <mbgl/shaders/mtl/symbol_icon.hpp>
+#include <mbgl/shaders/mtl/symbol_sdf.hpp>
+#include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
 
 #include <cassert>
 #include <string>
@@ -132,13 +136,12 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::HillshadePrepareShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
-                  shaders::BuiltIn::RasterShader/*,
-                  shaders::BuiltIn::LineSDFShader,
-                  shaders::BuiltIn::LinePatternShader,
+                  // shaders::BuiltIn::LineSDFShader,
+                  // shaders::BuiltIn::LinePatternShader,
+                  shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
-                  shaders::BuiltIn::SymbolSDFTextShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
-                  shaders::BuiltIn::SymbolTextAndIconShader*/>(shaders, programParameters);
+                  shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
 }
 
 } // namespace mtl

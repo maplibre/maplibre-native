@@ -38,7 +38,6 @@ using namespace shaders;
 namespace {
 
 #if MLN_DRAWABLE_RENDERER
-
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
 static const StringIdentity idNormAttribName = StringIndexer::get("a_normal_ed");
 
