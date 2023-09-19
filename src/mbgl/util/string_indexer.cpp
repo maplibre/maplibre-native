@@ -50,7 +50,8 @@ StringIdentity StringIndexer::get(std::string_view string) {
                 // reallocation happened
                 stringToIdentity.clear();
                 for (auto iIdentity = identityToString.begin(); iIdentity != identityToString.end(); ++iIdentity) {
-                    stringToIdentity[std::string_view(buffer.data() + *iIdentity)] = iIdentity - identityToString.begin();
+                    stringToIdentity[std::string_view(buffer.data() + *iIdentity)] = iIdentity -
+                                                                                     identityToString.begin();
                 }
             } else {
                 [[maybe_unused]] auto result = stringToIdentity.insert(
