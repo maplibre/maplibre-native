@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 #include <mutex>
@@ -18,9 +19,7 @@ public:
     StringIndexer(StringIndexer&&) = delete;
     void operator=(StringIndexer const&) = delete;
 
-    static StringIdentity get(const char*);
     static StringIdentity get(std::string_view);
-    static StringIdentity get(const std::string&);
 
     static const std::string& get(const StringIdentity id);
 
@@ -32,7 +31,7 @@ protected:
     StringIndexer();
     ~StringIndexer() = default;
 
-    using MapType = std::unordered_map<std::string, StringIdentity>;
+    using MapType = std::unordered_map<std::string_view, StringIdentity>;
     using VectorType = std::vector<std::string>;
 
     static StringIndexer& instance() {

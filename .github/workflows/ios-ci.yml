@@ -2,6 +2,11 @@ name: ios-ci
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        required: false
+        type: boolean
+        description: Makes a release with version platform/ios/VERSION
   push:
     branches:
       - main
@@ -49,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        renderer: [legacy, drawable]
+        renderer: [legacy, drawable, metal]
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
@@ -92,7 +97,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      
+
       - name: npm install
         run: npm ci --ignore-scripts
       
@@ -105,6 +110,7 @@ jobs:
         run: bazel run //platform/ios:lint-plists --//:renderer=${{ matrix.renderer }}
 
       - name: Running iOS tests
+        if: matrix.renderer != 'metal'
         run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=${{ matrix.renderer }}
 
       - name: Running iOS UI tests
@@ -113,14 +119,14 @@ jobs:
       # size test
 
       - name: Build app for size test & output size
-        if: ${{ matrix.renderer }} = "legacy"
+        if: ${{ matrix.renderer }} == "legacy"
         working-directory: ./
         run: | 
           bazel build --compilation_mode=opt //platform/ios:size --//:maplibre_platform=ios
           cp "$(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios)" ./size
 
       - name: Upload size test result
-        if: ${{ matrix.renderer }} = "legacy"
+        if: ${{ matrix.renderer }} == "legacy"
         uses: actions/upload-artifact@v3
         with:
           if-no-files-found: error
@@ -131,7 +137,7 @@ jobs:
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
-        if: ${{ matrix.renderer }} = "legacy"
+        if: ${{ matrix.renderer }} == "legacy"
         run: |
           set -e
           bazel run //platform/ios:xcodeproj
@@ -148,7 +154,7 @@ jobs:
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.renderer }} = "legacy"
+        if: ${{ matrix.renderer }} == "legacy"
         with:
           name: ios-render-test
           retention-days: 3
@@ -160,7 +166,7 @@ jobs:
       # C++ unit tests
       
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
-        if: ${{ matrix.renderer }} = "legacy"
+        if: ${{ matrix.renderer }} == "legacy"
         run: |
           set -e
           bazel run //platform/ios:xcodeproj
@@ -177,7 +183,7 @@ jobs:
           echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.renderer }} = "legacy"
+        if: ${{ matrix.renderer }} == "legacy"
         with:
           name: ios-cpp-unit-tests
           retention-days: 3
@@ -185,6 +191,32 @@ jobs:
           path: |
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
+
+      # Make Metal XCFramework release
+      - name: Should make release?
+        if: ${{ github.ref == 'refs/heads/main' && matrix.renderer == 'metal' }}
+        run: echo make_release=true >> "$GITHUB_ENV"
+
+      - name: Build XCFramework
+        run: |
+          bazel build --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic
+          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+
+      - name: Get version (release)
+        if: env.make_release && github.event.inputs.release
+        run: echo version="$(cat VERSION)" >> "$GITHUB_ENV"
+
+      - name: Get version (pre-release)
+        if: env.make_release && !github.event.inputs.release
+        run: echo version="$(cat VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
+
+      - name: Release
+        if: env.make_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ios-v${{ env.version }}
+          files: ${{ env.xcframework }}
+          prerelease: ${{ !github.event.inputs.release }}
 
   ios-ci-result:
     runs-on: ubuntu-latest

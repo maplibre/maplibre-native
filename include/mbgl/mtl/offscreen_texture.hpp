@@ -4,26 +4,20 @@
 #include <mbgl/gfx/types.hpp>
 
 namespace mbgl {
-namespace gl {
+namespace mtl {
 
 class Context;
+class Texture2D;
 
 class OffscreenTexture final : public gfx::OffscreenTexture {
 public:
-    OffscreenTexture(gl::Context&,
-                     Size size,
-                     gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
+    OffscreenTexture(Context&, Size size, gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
 
     bool isRenderable() override;
 
     PremultipliedImage readStillImage() override;
-
-#if MLN_LEGACY_RENDERER
-    gfx::Texture& getTexture() override;
-#else
     const gfx::Texture2DPtr& getTexture() override;
-#endif
 };
 
-} // namespace gl
+} // namespace mtl
 } // namespace mbgl

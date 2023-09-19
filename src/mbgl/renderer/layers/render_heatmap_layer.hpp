@@ -11,6 +11,13 @@
 
 namespace mbgl {
 
+#if MLN_DRAWABLE_RENDERER
+class HeatmapLayerTweaker;
+class HeatmapTextureLayerTweaker;
+using HeatmapLayerTweakerPtr = std::shared_ptr<HeatmapLayerTweaker>;
+using HeatmapTextureLayerTweakerPtr = std::shared_ptr<HeatmapTextureLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class RenderHeatmapLayer final : public RenderLayer {
 public:
     explicit RenderHeatmapLayer(Immutable<style::HeatmapLayer::Impl>);
@@ -34,11 +41,16 @@ private:
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-    void upload(gfx::UploadPass&) override;
 
 #if MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass&) override;
     void render(PaintParameters&) override;
 #endif
+
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
+    void updateLayerTextureTweaker();
+#endif // MLN_DRAWABLE_RENDERER
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -77,6 +89,14 @@ private:
 
     using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
     std::shared_ptr<TextureVertexVector> sharedTextureVertices;
+
+    HeatmapLayerTweakerPtr tweaker;
+    HeatmapTextureLayerTweakerPtr textureTweaker;
+#if MLN_RENDER_BACKEND_METAL
+    std::vector<std::string> propertiesAsUniforms;
+#endif // MLN_RENDER_BACKEND_METAL
+
+    bool overdrawInspector = false;
 #endif
 };
 
