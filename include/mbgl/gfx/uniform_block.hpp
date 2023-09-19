@@ -1,10 +1,11 @@
 #pragma once
 
+#include <mbgl/util/string_indexer.hpp>
+
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include <mbgl/util/string_indexer.hpp>
-
+#include <functional>
 namespace mbgl {
 namespace gfx {
 
