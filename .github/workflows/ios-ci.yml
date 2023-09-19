@@ -223,6 +223,7 @@ jobs:
         with:
           name: ios-v${{ env.version }}
           files: ${{ env.xcframework }}
+          tag_name: ios-v${{ env.version }}
           prerelease: ${{ !github.event.inputs.release }}
 
   ios-ci-result:
