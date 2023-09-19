@@ -808,8 +808,6 @@ void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
     changes.clear();
 }
 
-void RenderOrchestrator::onRemoveLayerGroup(LayerGroupBase&) {}
-
 void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const int32_t newIndex) {
     if (!layerGroup || layerGroup->getLayerIndex() == newIndex) {
         return;
@@ -828,18 +826,7 @@ void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const in
     layerGroup->updateLayerIndex(newIndex);
 }
 
-void RenderOrchestrator::updateLayerGroupOrder() {
-    // In the event layer indices change for layer groups, we must re-sort them
-    LayerGroupMap newMap;
-    for (auto& it : layerGroupsByLayerIndex) {
-        newMap.emplace(it.second->getLayerIndex(), it.second);
-    }
-    layerGroupsByLayerIndex = std::move(newMap);
-    layerGroupOrderDirty = false;
-}
-
 bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
-    assert(!layerGroupOrderDirty);
     const auto index = layerGroup->getLayerIndex();
     const auto range = layerGroupsByLayerIndex.equal_range(index);
     bool found = false;
@@ -858,15 +845,18 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
     }
 }
 
-bool RenderOrchestrator::removeLayerGroup(const int32_t layerIndex) {
-    LayerGroupMap::const_iterator hit;
-    bool removed = false;
-    while ((hit = layerGroupsByLayerIndex.find(layerIndex)) != layerGroupsByLayerIndex.end()) {
-        onRemoveLayerGroup(*hit->second);
-        layerGroupsByLayerIndex.erase(hit);
-        removed = true;
+bool RenderOrchestrator::removeLayerGroup(const LayerGroupBasePtr& layerGroup) {
+    if (!layerGroup) {
+        return false;
     }
-    return removed;
+    const auto range = layerGroupsByLayerIndex.equal_range(layerGroup->getLayerIndex());
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second == layerGroup) {
+            layerGroupsByLayerIndex.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 
 size_t RenderOrchestrator::numLayerGroups() const noexcept {
@@ -875,16 +865,10 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
 
 int32_t RenderOrchestrator::maxLayerIndex() const {
     if (!layerGroupsByLayerIndex.empty()) {
-        return layerGroupsByLayerIndex.crbegin()->second->getLayerIndex();
+        assert(layerGroupsByLayerIndex.crbegin()->first == layerGroupsByLayerIndex.crbegin()->second->getLayerIndex());
+        return layerGroupsByLayerIndex.crbegin()->first;
     }
     return -1;
-}
-
-static const LayerGroupBasePtr no_group;
-
-const LayerGroupBasePtr& RenderOrchestrator::getLayerGroup(const int32_t layerIndex) const {
-    const auto hit = layerGroupsByLayerIndex.find(layerIndex);
-    return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }
 
 void RenderOrchestrator::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
@@ -931,14 +915,6 @@ void RenderOrchestrator::processChanges() {
     for (auto& change : localChanges) {
         change->execute(*this);
     }
-
-    if (layerGroupOrderDirty) {
-        updateLayerGroupOrder();
-    }
-}
-
-void RenderOrchestrator::markLayerGroupOrderDirty() {
-    layerGroupOrderDirty = true;
 }
 
 bool RenderOrchestrator::addRenderTarget(RenderTargetPtr renderTarget) {

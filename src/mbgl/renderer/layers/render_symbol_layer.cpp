@@ -967,9 +967,7 @@ void RenderSymbolLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 void RenderSymbolLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
     RenderLayer::layerIndexChanged(newLayerIndex, changes);
 
-    if (collisionTileLayerGroup) {
-        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(collisionTileLayerGroup, newLayerIndex));
-    }
+    changeLayerIndex(collisionTileLayerGroup, newLayerIndex, changes);
 }
 
 void RenderSymbolLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
