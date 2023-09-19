@@ -9,31 +9,20 @@ const std::string empty;
 constexpr std::size_t initialCapacity = 100;
 } // namespace
 
-StringIndexer::StringIndexer()
-    : stringToIdentity(initialCapacity) {
+StringIndexer::StringIndexer() {
+    stringToIdentity.reserve(initialCapacity);
     identityToString.reserve(initialCapacity);
 }
 
-// For now, we have to make a copy to search the string-keyed container.
-StringIdentity StringIndexer::get(const char* string) {
-    return get(std::string(string));
-}
-// Once we can search using a string_view this should be the primary version.
 StringIdentity StringIndexer::get(std::string_view string) {
-    return get(std::string(string));
-}
-
-// We take a const reference rather than an lvalue (copy) under the assumption that most calls will
-// find a match and insertions where we could move are rare.
-StringIdentity StringIndexer::get(const std::string& string) {
     {
         std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
 
-        auto& stringToIdentity = instance().stringToIdentity;
-        [[maybe_unused]] auto& identityToString = instance().identityToString;
+        const auto& stringToIdentity = instance().stringToIdentity;
+        [[maybe_unused]] const auto& identityToString = instance().identityToString;
         assert(stringToIdentity.size() == identityToString.size());
 
-        if (auto it = stringToIdentity.find(string); it != stringToIdentity.end()) {
+        if (const auto it = stringToIdentity.find(string); it != stringToIdentity.end()) {
             return it->second;
         }
     }
@@ -45,16 +34,20 @@ StringIdentity StringIndexer::get(const std::string& string) {
         auto& identityToString = instance().identityToString;
         assert(stringToIdentity.size() == identityToString.size());
 
-        StringIdentity id = identityToString.size();
-        auto result = stringToIdentity.insert({string, id});
-        if (result.second) {
-            // this writer made the insert
-            identityToString.push_back(string);
+        if (const auto it = stringToIdentity.find(string); it == stringToIdentity.end()) {
+            // this writer to insert
+            const StringIdentity id = identityToString.size();
+            identityToString.push_back(std::string(string));
+
+            [[maybe_unused]] auto result = stringToIdentity.insert(
+                {std::string_view(identityToString.back().data(), identityToString.back().length()), id});
+            assert(result.second);
+
+            return id;
         } else {
             // another writer inserted into the map
-            id = result.first->second;
+            return it->second;
         }
-        return id;
     }
 }
 
