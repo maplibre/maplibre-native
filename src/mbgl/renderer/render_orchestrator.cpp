@@ -821,8 +821,7 @@ void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const in
             return;
         }
     }
-    // We should have found it, maybe the index was changed manually.
-    assert(!"Missing layer group");
+    // We're not tracking the layer, indicating that it's currently disabled, so update it directly.
     layerGroup->updateLayerIndex(newIndex);
 }
 
@@ -832,6 +831,7 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
     bool found = false;
     for (auto it = range.first; it != range.second; ++it) {
         if (it->second == layerGroup) {
+            assert(layerGroup->getLayerIndex() == it->first);
             found = true;
             // not added
             break;
