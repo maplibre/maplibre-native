@@ -41,6 +41,7 @@ cc_library(
 
 cc_test(
     name = "render-test",
+    timeout = "long",
     args = [
         "--manifestPath",
         "metrics/linux-gcc8-release-style.json",
