@@ -11,11 +11,17 @@ import org.maplibre.android.maps.Style
 class KAnnotationContainer(
     private val mapLibreMap: MapLibreMap,
     private val mapView: MapView,
-    internal var style: Style?
+    private var style: Style?
 ) {
 
     private val annotationList: MutableList<KAnnotation<*>> = mutableListOf()
     private val managers: MutableMap<Key, AnnotationManager<*, *>> = mutableMapOf()
+
+    @JvmName("setStyle")
+    internal fun setStyle(style: Style) {
+        this.style = style
+        updateAll()
+    }
 
     @UiThread
     fun add(annotation: KAnnotation<*>) {
@@ -24,6 +30,7 @@ class KAnnotationContainer(
         if (annotation is KSymbol) annotation.icon?.let { style?.addImage(it.image.toString(), it.image) }
     }
 
+    @UiThread
     fun updateAll() {
         managers.values.forEach {
             it.onDestroy()
@@ -42,9 +49,7 @@ class KAnnotationContainer(
     private fun addToManager(annotation: KAnnotation<*>) {
         val manager = managers.getOrCreate(annotation.key())
         when (annotation) {
-            is KSymbol -> (manager as SymbolManager).add(annotation)
-            else -> throw IllegalStateException("For an unknown reason, the compiler started insisting " +
-                    "on adding an unreachable else branch. (KAnnotation is a sealed class.)") // TODO
+            is KSymbol -> (manager as SymbolManager?)?.add(annotation)
         }
     }
 
@@ -56,8 +61,6 @@ class KAnnotationContainer(
             managers[annotation.key()]?.let { manager ->
                 when (annotation) {
                     is KSymbol -> (manager as SymbolManager).add(annotation)
-                    else -> throw IllegalStateException("For an unknown reason, the compiler started insisting " +
-                            "on adding an unreachable else branch. (KAnnotation is a sealed class.)") // TODO
                 }
             }
 
@@ -83,8 +86,9 @@ class KAnnotationContainer(
 
     private fun KAnnotation<*>.key() = Key(this.javaClass)
 
-    private fun MutableMap<Key, AnnotationManager<*, *>>.getOrCreate(key: Key) =
-        getOrPut(key) {
-            SymbolManager(mapView, mapLibreMap, style!!)
-        }
+    private fun MutableMap<Key, AnnotationManager<*, *>>.getOrCreate(key: Key): AnnotationManager<*, *>? =
+        get(key) ?: style?.let {
+            SymbolManager(mapView, mapLibreMap, it)
+        }?.also { put(key, it) }
+
 }

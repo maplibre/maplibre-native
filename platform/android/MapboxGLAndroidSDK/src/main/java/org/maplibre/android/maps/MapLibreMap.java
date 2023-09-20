@@ -984,7 +984,7 @@ public final class MapLibreMap {
         styleGetter.onStyleLoaded(style);
       }
 
-      annotationContainer.setStyle$MapboxGLAndroidSDK_debug(style);
+      annotationContainer.setStyle(style);
     } else {
       MapStrictMode.strictModeViolation("No style to provide.");
     }
