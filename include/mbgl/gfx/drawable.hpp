@@ -68,7 +68,7 @@ public:
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
 
     /// Set the shader to be used
-    void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
+    virtual void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// The pass on which we'll be rendered
     mbgl::RenderPass getRenderPass() const { return renderPass; }

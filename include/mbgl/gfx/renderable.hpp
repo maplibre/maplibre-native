@@ -26,7 +26,7 @@ protected:
         : size(size_),
           resource(std::move(resource_)) {}
     virtual ~Renderable() = default;
-
+    
 public:
     Size getSize() const { return size; }
 
@@ -37,6 +37,10 @@ public:
     }
 
     virtual void wait() {}
+
+    bool operator!=(const Renderable& other) const {
+        return resource.get() != other.resource.get();
+    }
 
 protected:
     Size size;

@@ -2,13 +2,12 @@
 
 #include <mbgl/gfx/debug_group.hpp>
 #include <mbgl/util/color.hpp>
+#include <mbgl/gfx/renderable.hpp>
 
 #include <cstdint>
 
 namespace mbgl {
 namespace gfx {
-
-class Renderable;
 
 class RenderPassDescriptor {
 public:
@@ -16,6 +15,11 @@ public:
     std::optional<Color> clearColor;
     std::optional<float> clearDepth;
     std::optional<int32_t> clearStencil;
+    
+    bool operator!=(const RenderPassDescriptor& other) const {
+        return other.clearColor != clearColor || other.clearDepth != clearDepth || other.clearStencil != clearStencil 
+            || other.renderable != renderable;
+    }
 };
 
 class RenderPass {

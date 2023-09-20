@@ -127,6 +127,11 @@ void Drawable::setColorMode(const gfx::ColorMode& value) {
     gfx::Drawable::setColorMode(value);
 }
 
+void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
+    pipelineState.reset();
+    gfx::Drawable::setShader(value);
+}
+
 void Drawable::draw(PaintParameters& parameters) const {
     if (isCustom) {
         return;
@@ -146,6 +151,11 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
+    if (renderPassDescriptor.has_value() && renderPass.getDescriptor() != renderPassDescriptor.value()) {
+        pipelineState.reset();
+    }
+    renderPassDescriptor.emplace(gfx::RenderPassDescriptor{renderPass.getDescriptor().renderable, renderPass.getDescriptor().clearColor, renderPass.getDescriptor().clearDepth, renderPass.getDescriptor().clearStencil});
+    
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
 #if !defined(NDEBUG)
@@ -576,7 +586,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         }
 
         impl->vertexDesc = std::move(vertDesc);
-        pipelineState.reset();
     }
 
     const bool texturesNeedUpload = std::any_of(
