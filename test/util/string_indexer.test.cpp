@@ -49,7 +49,7 @@ TEST(StringIndexer, Reallocate) {
     EXPECT_EQ(StringIndexer::size(), 1);
 
     // force reallocation. assume capacity: 100 strings, 100 * 32 bytes buffer space
-    constexpr auto N = 200;
+    constexpr auto N = 1000;
     auto string_for_i = [](int i) -> std::string {
         using namespace std::string_literals;
         return "1234567890"s + "1234567890"s + "1234567890"s + "---" + std::to_string(i);
@@ -63,8 +63,10 @@ TEST(StringIndexer, Reallocate) {
     const auto str1 = StringIndexer::get(id1);
     EXPECT_EQ(str, str1);
 
-    const auto strN1 = StringIndexer::get(N - 1);
-    EXPECT_EQ(strN1, string_for_i(N - 1));
+    for (auto i = 1; i < N; ++i) {
+        const auto strN1 = StringIndexer::get(i);
+        EXPECT_EQ(strN1, string_for_i(i));
+    }
 }
 
 TEST(StringIndexer, GetOOBIdentity) {
