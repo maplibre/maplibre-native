@@ -151,8 +151,6 @@ private:
 #endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
-    SymbolLayerTweakerPtr tweaker;
-
     gfx::ShaderGroupPtr symbolIconGroup;
     gfx::ShaderGroupPtr symbolSDFGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
@@ -160,13 +158,9 @@ private:
     gfx::ShaderGroupPtr collisionBoxGroup;
     gfx::ShaderGroupPtr collisionCircleGroup;
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
-    
+
     LayerTweakerPtr collisionLayerTweaker;
 #endif // MLN_DRAWABLE_RENDERER
-
-#if MLN_RENDER_BACKEND_METAL
-    std::vector<std::string> propertiesAsUniforms;
-#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

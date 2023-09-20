@@ -103,7 +103,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 #if !defined(NDEBUG)
         std::string label_tile;
         if (const auto& tileID = drawable.getTileID()) {
-            label_tile = drawable.getName() + "/" + util::toString(*tileID);
+            label_tile = util::toString(drawable.getID().id()) + "/" + drawable.getName() + "/" + util::toString(*tileID);
         }
         const auto labelPtr = (label_tile.empty() ? drawable.getName() : label_tile).c_str();
         const auto debugGroupTile = parameters.encoder->createDebugGroup(labelPtr);

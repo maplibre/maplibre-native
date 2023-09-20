@@ -255,6 +255,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
+
         auto& uniforms = drawable.mutableUniformBuffers();
         // auto& drawableType = drawable.getShader()->typeName();
 
@@ -286,9 +290,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                     textureSize = tex->getSize();
                 }
             }
-        }
-        if (!drawable.getTileID()) {
-            return;
         }
 
         if (uniforms.get(idFillInterpolateUBOName)) {

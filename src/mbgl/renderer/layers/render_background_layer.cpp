@@ -3,7 +3,6 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/programs/programs.hpp>
-#include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/pattern_atlas.hpp>
@@ -66,9 +65,8 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties));
-    }
+    auto newTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
+    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
 #endif
 }
 
@@ -250,12 +248,17 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
-            layerGroup_->setLayerTweaker(layerTweaker);
             setLayerGroup(std::move(layerGroup_), changes);
+        } else {
+            return;
         }
     }
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
+        layerGroup->addLayerTweaker(layerTweaker);
+    }
 
     if (!hasPattern && !plainShader) {
         plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));
@@ -313,6 +316,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);
+            drawable->setLayerTweaker(layerTweaker);
             tileLayerGroup->addDrawable(drawPasses, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }

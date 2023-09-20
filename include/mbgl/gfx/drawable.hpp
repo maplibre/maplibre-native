@@ -239,6 +239,7 @@ public:
 
     /// Associate the drawable with a layer tweaker.  This is used to manage the lifetime of the tweaker.
     void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
+    const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
 
 protected:
     bool enabled = true;

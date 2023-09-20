@@ -29,6 +29,7 @@
 #include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 #include <mbgl/gfx/collision_drawable_data.hpp>
@@ -379,10 +380,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup && layerTweaker) {
-#if MLN_RENDER_BACKEND_METAL
-        layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-#endif // MLN_RENDER_BACKEND_METAL
+    if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
 #endif // MLN_DRAWABLE_RENDERER
@@ -995,7 +993,7 @@ void RenderSymbolLayer::removeAllDrawables() {
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& updateParameters,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -1006,23 +1004,26 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerTweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
-#if MLN_RENDER_BACKEND_METAL
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-#endif // MLN_RENDER_BACKEND_METAL
-            layerGroup_->setLayerTweaker(layerTweaker);
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
+
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
+        layerGroup->addLayerTweaker(layerTweaker);
+    }
+    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     const auto& getCollisionTileLayerGroup = [&] {
         if (!collisionTileLayerGroup) {
             if ((collisionTileLayerGroup = context.createTileLayerGroup(
                      layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
-                collisionLayerTweaker = std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties);
-                collisionTileLayerGroup->setLayerTweaker(collisionLayerTweaker);
                 activateLayerGroup(collisionTileLayerGroup, true, changes);
             }
+        }
+        if (!collisionLayerTweaker) {
+            collisionLayerTweaker = std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties);
+            collisionTileLayerGroup->addLayerTweaker(collisionLayerTweaker);
         }
         return collisionTileLayerGroup;
     };
@@ -1268,14 +1269,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = buffer.vertices().elements();
 
         gfx::VertexAttributeArray attribs;
-        const auto uniformProps = updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs);
-
-#if MLN_RENDER_BACKEND_METAL
-        propertiesAsUniforms = uniformProps;
+        const auto propertiesAsUniforms = updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs);
         if (layerTweaker) {
             layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
-#endif // MLN_RENDER_BACKEND_METAL
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1345,7 +1342,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     return;
                 }
                 const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    shaderGroup->getOrCreateShader(context, uniformProps, StringIndexer::get(idPosOffsetAttribName)));
+                    shaderGroup->getOrCreateShader(context, propertiesAsUniforms, StringIndexer::get(idPosOffsetAttribName)));
                 if (!shader) {
                     return;
                 }

@@ -114,15 +114,15 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idCirclePaintParamsUBOName, paintParamsUniformBuffer);
-        uniforms.addOrReplace(idCircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
-
-        if (!drawable.getTileID()) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             assert(!"Circles only render with tiles");
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(idCirclePaintParamsUBOName, paintParamsUniformBuffer);
+        uniforms.addOrReplace(idCircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         const auto& translation = evaluated.get<CircleTranslate>();
         const auto anchor = evaluated.get<CircleTranslateAnchor>();

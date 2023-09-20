@@ -230,6 +230,12 @@ protected:
     /// @return true if updated, false if the tile ID is not present in the set of tiles to be rendered or the ID is
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
+
+    /// Update the layer tweaker and drawables which reference it
+    static void replaceTweaker(LayerTweakerPtr& toReplace,
+                               LayerTweakerPtr newTweaker,
+                               const std::vector<LayerGroupBasePtr>&);
+
 #endif // MLN_DRAWABLE_RENDERER
 
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);

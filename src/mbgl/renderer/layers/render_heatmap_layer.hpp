@@ -47,11 +47,6 @@ private:
     void render(PaintParameters&) override;
 #endif
 
-#if MLN_DRAWABLE_RENDERER
-    void updateLayerTweaker();
-    void updateLayerTextureTweaker();
-#endif // MLN_DRAWABLE_RENDERER
-
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
                                 float,
@@ -90,13 +85,9 @@ private:
     using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
     std::shared_ptr<TextureVertexVector> sharedTextureVertices;
 
-    HeatmapLayerTweakerPtr tweaker;
-    HeatmapTextureLayerTweakerPtr textureTweaker;
-#if MLN_RENDER_BACKEND_METAL
-    std::vector<std::string> propertiesAsUniforms;
-#endif // MLN_RENDER_BACKEND_METAL
-
-    bool overdrawInspector = false;
+    // This is the layer tweaker for applying the off-screen texture to the framebuffer.
+    // The inherited layer tweaker is for applying tiles to the off-screen texture.
+    LayerTweakerPtr textureTweaker;
 #endif
 };
 

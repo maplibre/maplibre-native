@@ -6,6 +6,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 
 namespace mbgl {
 
@@ -85,9 +86,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
 
     // Run layer tweakers to update any dynamic elements
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
-        if (layerGroup.getLayerTweaker()) {
-            layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
-        }
+        layerGroup.runTweakers(renderTree, parameters);
     });
 
     // draw layer groups, opaque pass

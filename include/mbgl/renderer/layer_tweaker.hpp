@@ -9,6 +9,7 @@
 
 namespace mbgl {
 namespace gfx {
+class Drawable;
 class UniformBuffer;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
@@ -45,16 +46,20 @@ public:
     /// Build the common expression inupts UBO
     static shaders::ExpressionInputsUBO buildExpressionUBO(double zoom, uint64_t frameCount);
 
-    /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
-    /// attributes.
-    /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
-    void setPropertiesAsUniforms(std::vector<std::string>);
-
     /// @brief Check whether a property name exists within the previously set collection.
     /// @details The string value provided is expected to have the "a_"  prefix, as defined in the shader classes.
     bool hasPropertyAsUniform(std::string_view) const;
     shaders::AttributeSource getAttributeSource(const std::string_view& attribName) const;
 #endif // MLN_RENDER_BACKEND_METAL
+
+    /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
+    /// attributes.
+    /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
+#if MLN_RENDER_BACKEND_OPENGL
+    void setPropertiesAsUniforms(const std::vector<std::string>&) {}
+#else
+    void setPropertiesAsUniforms(std::vector<std::string>);
+#endif
 
     void enableOverdrawInspector(bool);
 
@@ -63,6 +68,9 @@ public:
     void updateProperties(Immutable<style::LayerProperties>);
 
 protected:
+    /// Determine whether this tweaker should apply to the given drawable
+    bool checkTweakDrawable(const gfx::Drawable&) const;
+
     /// Calculate matrices for this tile.
     /// @param nearClipped If true, the near plane is moved further to enhance depth buffer precision.
     /// @param inViewportPixelUnits If false, the translation is scaled based on the current zoom.
@@ -78,13 +86,14 @@ protected:
 protected:
     std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;
-    bool propertiesUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
     // For Metal, whether a property is provided through attribtues or uniforms is specified in
     // a uniform buffer rather than by a shader compiled with different preprocessor definitions.
     std::vector<std::string> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
+
+    bool propertiesUpdated = true;
 
     bool propertiesChanged = true;
     bool overdrawInspector = false;

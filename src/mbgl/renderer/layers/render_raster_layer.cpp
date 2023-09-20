@@ -53,7 +53,8 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    updateLayerTweaker();
+    auto newTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup, imageLayerGroup});
 #endif
 }
 
@@ -249,19 +250,6 @@ static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_textu
 static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
 static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
 
-void RenderRasterLayer::updateLayerTweaker() {
-    if (layerGroup || imageLayerGroup) {
-        tweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
-        tweaker->enableOverdrawInspector(overdrawInspector);
-        if (layerGroup) {
-            layerGroup->setLayerTweaker(tweaker);
-        }
-        if (imageLayerGroup) {
-            imageLayerGroup->setLayerTweaker(tweaker);
-        }
-    }
-}
-
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -289,13 +277,16 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 
-    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
-    if (overdrawInspector != overdraw) {
-        overdrawInspector = overdraw;
-        if (tweaker) {
-            tweaker->enableOverdrawInspector(overdrawInspector);
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+        if (layerGroup) {
+            layerGroup->addLayerTweaker(layerTweaker);
+        }
+        if (imageLayerGroup) {
+            imageLayerGroup->addLayerTweaker(layerTweaker);
         }
     }
+    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!staticDataVertices) {
         staticDataVertices = std::make_shared<RasterVertexVector>(RenderStaticData::rasterVertices());
@@ -414,7 +405,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
-                updateLayerTweaker();
             }
 
             auto builder = createBuilder();
@@ -426,6 +416,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
+                    drawable->setLayerTweaker(layerTweaker);
                     imageLayerGroup->addDrawable(std::move(drawable));
                     ++stats.drawablesAdded;
                 }
@@ -441,7 +432,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             // Set up a tile layer group
             if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
                 setLayerGroup(std::move(layerGroup_), changes);
-                updateLayerTweaker();
             }
         }
 
@@ -481,7 +471,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
-                drawable->setLayerTweaker(tweaker);
+                drawable->setLayerTweaker(layerTweaker);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }

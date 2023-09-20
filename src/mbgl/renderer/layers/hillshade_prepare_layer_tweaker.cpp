@@ -49,7 +49,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID() || !drawable.getData()) {
+        if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) {
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
