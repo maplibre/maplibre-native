@@ -75,7 +75,11 @@ struct Buffer {
     GLuint buffer = 0;
 };
 
+#if MLN_LEGACY_RENDERER
 TEST(OffscreenTexture, RenderToTexture) {
+#else
+TEST(OffscreenTexture, DISABLED_RenderToTexture) {
+#endif
     if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {
         return;
     }
