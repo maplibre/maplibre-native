@@ -543,53 +543,58 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
-        attributeBindings = uploadPass.buildAttributeBindings(impl->vertexCount,
-                                                              impl->vertexType,
-                                                              /*vertexAttributeIndex=*/-1,
-                                                              /*vertexData=*/{},
-                                                              shader->getVertexAttributes(),
-                                                              impl->vertexAttributes,
-                                                              usage,
-                                                              vertexBuffers);
+        auto attributeBindings_ = uploadPass.buildAttributeBindings(impl->vertexCount,
+                                                                    impl->vertexType,
+                                                                    /*vertexAttributeIndex=*/-1,
+                                                                    /*vertexData=*/{},
+                                                                    shader->getVertexAttributes(),
+                                                                    impl->vertexAttributes,
+                                                                    usage,
+                                                                    vertexBuffers);
         impl->attributeBuffers = std::move(vertexBuffers);
 
         impl->vertexAttributes.visitAttributes(
             [](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
-        // Create a layout descriptor for each attribute
-        auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
-
-        NS::UInteger index = 0;
-        for (auto& binding : attributeBindings) {
-            if (!binding) {
-                assert("Missing attribute binding");
-                continue;
+        if (attributeBindings != attributeBindings_) {
+            attributeBindings = attributeBindings_;
+            
+            // Create a layout descriptor for each attribute
+            auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
+            
+            NS::UInteger index = 0;
+            for (auto& binding : attributeBindings) {
+                if (!binding) {
+                    assert("Missing attribute binding");
+                    continue;
+                }
+                
+                if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
+                    impl->noBindingBuffer = uploadPass.createVertexBufferResource(
+                                                                                  nullptr, 64, gfx::BufferUsageType::StaticDraw);
+                }
+                
+                auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
+                attribDesc->setBufferIndex(index);
+                attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
+                attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
+                assert(binding->vertexStride > 0);
+                
+                auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
+                layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
+                layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
+                                            : MTL::VertexStepFunctionConstant);
+                layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
+                
+                vertDesc->attributes()->setObject(attribDesc.get(), index);
+                vertDesc->layouts()->setObject(layoutDesc.get(), index);
+                
+                index += 1;
             }
-
-            if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
-                impl->noBindingBuffer = uploadPass.createVertexBufferResource(
-                    nullptr, 64, gfx::BufferUsageType::StaticDraw);
-            }
-
-            auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
-            attribDesc->setBufferIndex(index);
-            attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
-            attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
-            assert(binding->vertexStride > 0);
-
-            auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
-            layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
-            layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
-                                                                      : MTL::VertexStepFunctionConstant);
-            layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
-
-            vertDesc->attributes()->setObject(attribDesc.get(), index);
-            vertDesc->layouts()->setObject(layoutDesc.get(), index);
-
-            index += 1;
+            
+            impl->vertexDesc = std::move(vertDesc);
+            pipelineState.reset();
         }
-
-        impl->vertexDesc = std::move(vertDesc);
     }
 
     const bool texturesNeedUpload = std::any_of(
