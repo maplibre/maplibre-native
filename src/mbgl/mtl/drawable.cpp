@@ -122,6 +122,11 @@ MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
 
 } // namespace
 
+void Drawable::setColorMode(const gfx::ColorMode& value) {
+    pipelineState.reset();
+    gfx::Drawable::setColorMode(value);
+}
+
 void Drawable::draw(PaintParameters& parameters) const {
     if (isCustom) {
         return;
@@ -571,6 +576,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         }
 
         impl->vertexDesc = std::move(vertDesc);
+        pipelineState.reset();
     }
 
     const bool texturesNeedUpload = std::any_of(

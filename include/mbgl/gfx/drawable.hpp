@@ -181,7 +181,7 @@ public:
     const gfx::ColorMode& getColorMode() const;
 
     /// Set color mode
-    void setColorMode(const gfx::ColorMode&);
+    virtual void setColorMode(const gfx::ColorMode&);
 
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;

@@ -54,6 +54,8 @@ public:
 
     void upload(gfx::UploadPass&);
 
+    void setColorMode(const gfx::ColorMode&) override;
+
 protected:
     // For testing only.
     Drawable(std::unique_ptr<Impl>);
