@@ -56,6 +56,8 @@ public:
         commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
 
         currentDrawable = [mtlView currentDrawable];
+        
+        start = [NSDate date];
     }
 
     const mbgl::mtl::RendererBackend& getBackend() const override { return backend; }
@@ -74,6 +76,9 @@ public:
     }
 
     void swap() override {
+        NSTimeInterval timeInterval = [start timeIntervalSinceNow] * -1000;
+        NSLog(@"Time = %.2f", timeInterval);
+        
         [commandBuffer presentDrawable:currentDrawable];
         [commandBuffer commit];
 
@@ -101,6 +106,7 @@ public:
     id<CAMetalDrawable> currentDrawable;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
+    NSDate *start;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
     // after the activation count drops to 0.
