@@ -558,40 +558,40 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         if (attributeBindings != attributeBindings_) {
             attributeBindings = attributeBindings_;
-            
+
             // Create a layout descriptor for each attribute
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
-            
+
             NS::UInteger index = 0;
             for (auto& binding : attributeBindings) {
                 if (!binding) {
                     assert("Missing attribute binding");
                     continue;
                 }
-                
+
                 if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
                     impl->noBindingBuffer = uploadPass.createVertexBufferResource(
-                                                                                  nullptr, 64, gfx::BufferUsageType::StaticDraw);
+                        nullptr, 64, gfx::BufferUsageType::StaticDraw);
                 }
-                
+
                 auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
                 attribDesc->setBufferIndex(index);
                 attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
                 attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
                 assert(binding->vertexStride > 0);
-                
+
                 auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
                 layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
                 layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
-                                            : MTL::VertexStepFunctionConstant);
+                                                                          : MTL::VertexStepFunctionConstant);
                 layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
-                
+
                 vertDesc->attributes()->setObject(attribDesc.get(), index);
                 vertDesc->layouts()->setObject(layoutDesc.get(), index);
-                
+
                 index += 1;
             }
-            
+
             impl->vertexDesc = std::move(vertDesc);
             pipelineState.reset();
         }
