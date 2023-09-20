@@ -182,7 +182,70 @@ struct alignas(16) LineGradientInterpolationUBO {
     float pad1, pad2, pad3;
 };
 
-// interpolated packed pattern
+struct alignas(16) SymbolDrawableTilePropsUBO {
+    /*bool*/ int is_text;
+    /*bool*/ int is_halo;
+    /*bool*/ int pitch_with_map;
+    /*bool*/ int is_size_zoom_constant;
+    /*bool*/ int is_size_feature_constant;
+    float size_t;
+    float size;
+    float padding;
+};
+static_assert(sizeof(SymbolDrawableTilePropsUBO) == 2 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDrawableInterpolateUBO {
+    float fill_color_t;
+    float halo_color_t;
+    float opacity_t;
+    float halo_width_t;
+    float halo_blur_t;
+    float pad1, pad2, pad3;
+};
+static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32, "unexpected padding");
+
+struct alignas(16) SymbolDrawableUBO {
+    float4x4 matrix;
+    float4x4 label_plane_matrix;
+    float4x4 coord_matrix;
+
+    float2 texsize;
+    float2 texsize_icon;
+
+    float gamma_scale;
+    float device_pixel_ratio;
+
+    float camera_to_center_distance;
+    float pitch;
+    /*bool*/ int rotate_symbol;
+    float aspect_ratio;
+    float fade_change;
+    float pad;
+};
+static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDrawablePaintUBO {
+    float4 fill_color;
+    float4 halo_color;
+    float opacity;
+    float halo_width;
+    float halo_blur;
+    float padding;
+};
+static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16, "unexpected padding");
+
+struct alignas(16) SymbolPermutationUBO {
+    Attribute fill_color;
+    Attribute halo_color;
+    Attribute opacity;
+    Attribute halo_width;
+    Attribute halo_blur;
+    int32_t /*bool*/ overdrawInspector;
+    float pad1, pad2, pad3;
+};
+static_assert(sizeof(SymbolPermutationUBO) == 4 * 16, "unexpected padding");
+
+
 float4 patternFor(device const Attribute& attrib,
                 device const float4& constValue,
                 thread const ushort4& vertexValue,

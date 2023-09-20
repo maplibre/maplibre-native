@@ -45,3 +45,7 @@ node_modules
 CMakeLists.txt.user
 CMakeFiles
 __generated__
+
+/metrics/integration/query-tests/**/actual.json
+/metrics/integration/render-tests/**/actual.png
+/metrics/integration/render-tests/**/diff.png
