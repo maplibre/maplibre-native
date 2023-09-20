@@ -4,6 +4,8 @@ layout (std140) uniform FillPatternDrawableUBO {
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
+    highp float pad1;
+    highp float pad2;
 };
 layout (std140) uniform FillPatternEvaluatedPropsUBO {
     highp float u_opacity;

@@ -43,6 +43,7 @@ static_assert(sizeof(FillPermutationUBO) == 2 * 16);
 struct alignas(16) FillOutlineDrawableUBO {
     /*  0 */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
     /* 64 */ std::array<float, 2> world;
+    /* 72 */ float pad1, pad2;
     /* 80 */
 };
 static_assert(sizeof(FillOutlineDrawableUBO) == 5 * 16);
