@@ -75,7 +75,8 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties));
+        layerTweaker = std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties);
+        layerGroup->setLayerTweaker(layerTweaker);
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -501,6 +502,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(layerTweaker);
 
                 auto& uniforms = drawable->mutableUniformBuffers();
                 uniforms.createOrUpdate(

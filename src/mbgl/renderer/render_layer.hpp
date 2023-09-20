@@ -248,6 +248,9 @@ protected:
     // will need to be overriden to handle their activation.
     LayerGroupBasePtr layerGroup;
 
+    // An optional tweaker that will update drawables
+    LayerTweakerPtr layerTweaker;
+
     // The set of Tile IDs in `renderTiles`, along with the
     // identity of the bucket from which they were built.
     std::unordered_map<OverscaledTileID, util::SimpleIdentity> renderTileIDs;

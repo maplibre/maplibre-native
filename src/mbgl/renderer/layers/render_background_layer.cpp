@@ -250,7 +250,8 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties));
+            layerTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
+            layerGroup_->setLayerTweaker(layerTweaker);
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }

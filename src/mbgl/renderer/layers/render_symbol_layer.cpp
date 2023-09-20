@@ -379,11 +379,11 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup && layerGroup->getLayerTweaker()) {
+    if (layerGroup && layerTweaker) {
 #if MLN_RENDER_BACKEND_METAL
-        layerGroup->getLayerTweaker()->setPropertiesAsUniforms(propertiesAsUniforms);
+        layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
 #endif // MLN_RENDER_BACKEND_METAL
-        layerGroup->getLayerTweaker()->updateProperties(evaluatedProperties);
+        layerTweaker->updateProperties(evaluatedProperties);
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -1006,11 +1006,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            tweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
+            layerTweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
 #if MLN_RENDER_BACKEND_METAL
-            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
 #endif // MLN_RENDER_BACKEND_METAL
-            layerGroup_->setLayerTweaker(tweaker);
+            layerGroup_->setLayerTweaker(layerTweaker);
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
@@ -1019,8 +1019,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         if (!collisionTileLayerGroup) {
             if ((collisionTileLayerGroup = context.createTileLayerGroup(
                      layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
-                collisionTileLayerGroup->setLayerTweaker(
-                    std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties));
+                collisionLayerTweaker = std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties);
+                collisionTileLayerGroup->setLayerTweaker(collisionLayerTweaker);
                 activateLayerGroup(collisionTileLayerGroup, true, changes);
             }
         }
@@ -1170,6 +1170,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // add drawables to layer group
             for (auto& drawable : collisionBuilder->clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(collisionLayerTweaker);
+
                 auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
                 drawable->setData(std::move(drawData));
                 group->addDrawable(passes, tileID, std::move(drawable));
@@ -1270,8 +1272,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
 #if MLN_RENDER_BACKEND_METAL
         propertiesAsUniforms = uniformProps;
-        if (tweaker) {
-            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+        if (layerTweaker) {
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 #endif // MLN_RENDER_BACKEND_METAL
 
@@ -1361,6 +1363,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(layerTweaker);
 
                     auto drawData = std::make_unique<gfx::SymbolDrawableData>(
                         /*.isHalo=*/isHalo,

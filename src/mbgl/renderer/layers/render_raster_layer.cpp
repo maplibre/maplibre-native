@@ -481,6 +481,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(tweaker);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }

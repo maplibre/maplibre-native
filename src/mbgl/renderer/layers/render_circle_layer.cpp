@@ -434,6 +434,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : circleBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
+            drawable->setLayerTweaker(tweaker);
 
             auto& uniforms = drawable->mutableUniformBuffers();
             uniforms.addOrReplace(idCircleInterpolateUBOName, interpBuffer);

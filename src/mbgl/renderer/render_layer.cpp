@@ -75,6 +75,11 @@ void RenderLayer::layerChanged(const TransitionParameters&,
                                UniqueChangeRequestVec&) {
     // When a layer changes, the bucket won't be replaced until the new source(s) load.
     // If we remove the drawables here, they will just be re-created based on the current data.
+
+    // Detach the layer tweaker, if any.  This keeps the existing tiles up-to-date with the
+    // most recent evaluated properties, while a new one will be created along with new drawables
+    // when tiles are loaded and new buckets are available.
+    layerTweaker.reset();
 }
 
 void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {

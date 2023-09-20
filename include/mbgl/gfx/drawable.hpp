@@ -18,7 +18,10 @@ namespace mbgl {
 
 class Color;
 class PaintParameters;
+class LayerTweaker;
 enum class RenderPass : uint8_t;
+
+using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
 
 namespace gfx {
 
@@ -234,6 +237,9 @@ public:
     /// Get drawable user-defined type
     size_t getType() const { return type; }
 
+    /// Associate the drawable with a layer tweaker.  This is used to manage the lifetime of the tweaker.
+    void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
+
 protected:
     bool enabled = true;
     bool enableColor = true;
@@ -257,6 +263,7 @@ protected:
 
     Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
+    LayerTweakerPtr layerTweaker;
 
     std::size_t type = 0;
 };

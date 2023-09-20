@@ -160,6 +160,8 @@ private:
     gfx::ShaderGroupPtr collisionBoxGroup;
     gfx::ShaderGroupPtr collisionCircleGroup;
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
+    
+    LayerTweakerPtr collisionLayerTweaker;
 #endif // MLN_DRAWABLE_RENDERER
 
 #if MLN_RENDER_BACKEND_METAL

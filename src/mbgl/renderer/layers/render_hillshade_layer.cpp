@@ -73,7 +73,8 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties));
+        layerTweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
+        layerGroup->setLayerTweaker(layerTweaker);
     }
 #endif
 }
@@ -503,6 +504,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : hillshadeBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
+            drawable->setLayerTweaker(layerTweaker);
+
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }

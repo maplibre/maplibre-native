@@ -441,6 +441,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         for (auto& drawable : heatmapBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
+            drawable->setLayerTweaker(tweaker);
+
             drawable->mutableUniformBuffers().createOrUpdate(idHeatmapInterpolateUBOName, &interpolateUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
@@ -517,6 +519,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     for (auto& drawable : heatmapTextureBuilder->clearDrawables()) {
         textureLayerGroup->addDrawable(std::move(drawable));
+        drawable->setLayerTweaker(tweaker);
         ++stats.drawablesAdded;
     }
 }

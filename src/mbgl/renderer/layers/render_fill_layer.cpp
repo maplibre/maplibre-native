@@ -610,6 +610,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(tweaker);
+
                     auto& uniforms = drawable->mutableUniformBuffers();
                     uniforms.createOrUpdate(interpolateUBONameId, &interpolateUBO, context);
                     tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
@@ -708,6 +710,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(tweaker);
+
                     auto& uniforms = drawable->mutableUniformBuffers();
                     uniforms.createOrUpdate(interpolateNameId, &interpolateUBO, context);
                     uniforms.createOrUpdate(tileUBONameId, &tileUBO, context);

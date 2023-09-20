@@ -618,6 +618,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::SDF));
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(tweaker);
                 drawable->setData(std::make_unique<gfx::LineDrawableData>(cap));
                 drawable->mutableUniformBuffers().createOrUpdate(
                     idLineSDFInterpolationUBOName, &lineSDFInterpolationUBO, context);
@@ -679,6 +680,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
                     drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(tweaker);
                     drawable->mutableUniformBuffers().createOrUpdate(
                         idLinePatternInterpolationUBOName, &linePatternInterpolationUBO, context);
                     drawable->mutableUniformBuffers().createOrUpdate(
@@ -736,6 +738,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     for (auto& drawable : builder->clearDrawables()) {
                         drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
                         drawable->setTileID(tileID);
+                        drawable->setLayerTweaker(tweaker);
                         drawable->mutableUniformBuffers().createOrUpdate(
                             idLineGradientInterpolationUBOName, &lineGradientInterpolationUBO, context);
 
@@ -787,6 +790,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Simple));
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(tweaker);
                 drawable->mutableUniformBuffers().createOrUpdate(
                     idLineInterpolationUBOName, &lineInterpolationUBO, context);
 
