@@ -80,7 +80,7 @@ protected:
     gfx::AttributeBindingArray attributeBindings;
 
     mutable MTLRenderPipelineStatePtr pipelineState;
-    
+
     mutable std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
 };
 

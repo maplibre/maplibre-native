@@ -15,10 +15,10 @@ public:
     std::optional<Color> clearColor;
     std::optional<float> clearDepth;
     std::optional<int32_t> clearStencil;
-    
+
     bool operator!=(const RenderPassDescriptor& other) const {
-        return other.clearColor != clearColor || other.clearDepth != clearDepth || other.clearStencil != clearStencil 
-            || other.renderable != renderable;
+        return other.clearColor != clearColor || other.clearDepth != clearDepth || other.clearStencil != clearStencil ||
+               other.renderable != renderable;
     }
 };
 

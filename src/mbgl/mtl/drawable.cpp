@@ -154,8 +154,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (renderPassDescriptor.has_value() && renderPass.getDescriptor() != renderPassDescriptor.value()) {
         pipelineState.reset();
     }
-    renderPassDescriptor.emplace(gfx::RenderPassDescriptor{renderPass.getDescriptor().renderable, renderPass.getDescriptor().clearColor, renderPass.getDescriptor().clearDepth, renderPass.getDescriptor().clearStencil});
-    
+    renderPassDescriptor.emplace(gfx::RenderPassDescriptor{renderPass.getDescriptor().renderable,
+                                                           renderPass.getDescriptor().clearColor,
+                                                           renderPass.getDescriptor().clearDepth,
+                                                           renderPass.getDescriptor().clearStencil});
+
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
 #if !defined(NDEBUG)
