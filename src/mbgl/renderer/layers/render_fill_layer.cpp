@@ -51,7 +51,8 @@ static const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get
 static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO"sv);
 static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get(
     "FillOutlinePatternInterpolateUBO"sv);
-static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO"sv);
+static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get(
+    "FillOutlinePatternTilePropsUBO"sv);
 
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos"sv);
 static const StringIdentity idIconTextureName = StringIndexer::get("u_image"sv);

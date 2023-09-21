@@ -53,7 +53,8 @@ static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndex
     "FillOutlinePatternInterpolateUBO"sv);
 static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = StringIndexer::get(
     "FillOutlinePatternEvaluatedPropsUBO"sv);
-static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO"sv);
+static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get(
+    "FillOutlinePatternTilePropsUBO"sv);
 
 static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO"sv);
 
