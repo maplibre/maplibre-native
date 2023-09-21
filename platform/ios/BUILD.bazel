@@ -29,6 +29,19 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+genrule(
+    name = "umbrella_header",
+    srcs = ["src/Mapbox.h"],
+    outs = ["Mapbox.h"],
+    cmd = select({
+        "//:metal_renderer": """
+        echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
+        cat $(location src/Mapbox.h) >> $@;
+    """,
+        "//conditions:default": "cat $(location src/Mapbox.h) >> $@"
+    }),
+)
+
 filegroup(
     name = "ios_public_hdrs",
     srcs = MLN_IOS_PUBLIC_HEADERS,
@@ -78,19 +91,6 @@ info_plist(
     name = "info_app_plist",
     out = "Info-app.plist",
     base_info_plist = "app/Info.plist",
-)
-
-genrule(
-    name = "umbrella_header",
-    srcs = ["src/Mapbox.h"],
-    outs = ["Mapbox.h"],
-    cmd = select({
-        "//:metal_renderer": """
-        echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
-        cat $(location src/Mapbox.h) >> $@;
-    """,
-        "//conditions:default": "cat $(location src/Mapbox.h) >> $@"
-    }),
 )
 
 public_hdrs = [
@@ -326,6 +326,7 @@ sh_binary(
 )
 
 exports_files(
+    ["src/Mapbox.h"] +
     MLN_IOS_PUBLIC_HEADERS +
     MLN_IOS_PRIVATE_HEADERS +
     MLN_IOS_PUBLIC_OBJCPP_SOURCE +
