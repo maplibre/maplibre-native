@@ -99,10 +99,9 @@ public:
 
 #if MLN_DRAWABLE_RENDERER
     bool addLayerGroup(LayerGroupBasePtr);
-    bool removeLayerGroup(const int32_t layerIndex);
+    bool removeLayerGroup(const LayerGroupBasePtr&);
     size_t numLayerGroups() const noexcept;
     int32_t maxLayerIndex() const;
-    const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
     void visitLayerGroups(std::function<void(LayerGroupBase&)>);
     void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
@@ -114,8 +113,6 @@ public:
                       const RenderTree&);
 
     void processChanges();
-    /// @brief Indicate that the orchestrator needs to re-sort layer groups when processing changes
-    void markLayerGroupOrderDirty();
 
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
@@ -161,10 +158,6 @@ private:
 #if MLN_DRAWABLE_RENDERER
     /// Move changes into the pending set, clearing the provided collection
     void addChanges(UniqueChangeRequestVec&);
-
-    void onRemoveLayerGroup(LayerGroupBase&);
-
-    void updateLayerGroupOrder();
 #endif
 
     RendererObserver* observer;
@@ -203,7 +196,6 @@ private:
 
     using LayerGroupMap = std::multimap<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
-    bool layerGroupOrderDirty = false;
 
     std::vector<RenderTargetPtr> renderTargets;
     RenderItem::DebugLayerGroupMap debugLayerGroups;
