@@ -54,10 +54,6 @@ public:
 
         commandBuffer = [commandQueue commandBuffer];
         commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
-
-        currentDrawable = [mtlView currentDrawable];
-        
-        start = [NSDate date];
     }
 
     const mbgl::mtl::RendererBackend& getBackend() const override { return backend; }
@@ -76,9 +72,7 @@ public:
     }
 
     void swap() override {
-        NSTimeInterval timeInterval = [start timeIntervalSinceNow] * -1000;
-        NSLog(@"Time = %.2f", timeInterval);
-        
+        id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
         [commandBuffer presentDrawable:currentDrawable];
         [commandBuffer commit];
 
@@ -103,7 +97,6 @@ private:
 public:
     MLNMapViewImplDelegate* delegate = nil;
     MTKView *mtlView = nil;
-    id<CAMetalDrawable> currentDrawable;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
     NSDate *start;
