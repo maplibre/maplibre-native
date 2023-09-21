@@ -57,7 +57,14 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .unpack = */ getUnpackVector(drawableData.encoding),
             /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
             /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
+            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom),
+            /* .overdrawInspector = */ overdrawInspector,
+            /* .pad1/2/3 = */ 0,
+            0,
+            0,
+            /* .pad4/5/6 = */ 0,
+            0,
+            0};
 
         drawable.mutableUniformBuffers().createOrUpdate(
             idHillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);

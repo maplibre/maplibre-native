@@ -42,6 +42,9 @@ struct alignas(16) HillshadePrepareDrawableUBO {
     float2 dimension;
     float zoom;
     float maxzoom;
+    bool overdrawInspector;
+    uint8_t pad1, pad2, pad3;
+    float pad4, pad5, pad6;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -71,9 +74,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 
-    /*if (drawable.overdrawInspector) {
+    if (drawable.overdrawInspector) {
         return half4(1.0);
-    }*/
+    }
 
     float2 epsilon = 1.0 / drawable.dimension;
 

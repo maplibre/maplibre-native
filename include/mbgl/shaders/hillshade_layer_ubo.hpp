@@ -9,6 +9,10 @@ struct alignas(16) HillshadeDrawableUBO {
     std::array<float, 4 * 4> matrix;
     std::array<float, 2> latrange;
     std::array<float, 2> light;
+    // overdrawInspector is used only in Metal, while in GL this is a 16 bytes empty padding.
+    bool overdrawInspector;
+    uint8_t pad1, pad2, pad3;
+    float pad4, pad5, pad6;
 };
 static_assert(sizeof(HillshadeDrawableUBO) % 16 == 0);
 
