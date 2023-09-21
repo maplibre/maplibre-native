@@ -85,9 +85,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
         "render target", {*offscreenTexture, Color{0.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
 
     // Run layer tweakers to update any dynamic elements
-    visitLayerGroups([&](LayerGroupBase& layerGroup) {
-        layerGroup.runTweakers(renderTree, parameters);
-    });
+    visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
 
     // draw layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;

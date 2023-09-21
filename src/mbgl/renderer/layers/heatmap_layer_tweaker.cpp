@@ -90,7 +90,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        
+
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.addOrReplace(idHeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 

@@ -68,7 +68,7 @@ private:
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
-    
+
     LayerTweakerPtr prepareLayerTweaker;
 #endif
 };

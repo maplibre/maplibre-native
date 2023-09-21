@@ -70,9 +70,9 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
-        
+
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        
+
         drawable.mutableUniformBuffers().addOrReplace(idHillshadeEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         const auto matrix = getTileMatrix(

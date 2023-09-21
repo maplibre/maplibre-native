@@ -1280,7 +1280,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = buffer.vertices().elements();
 
         gfx::VertexAttributeArray attribs;
-        const auto propertiesAsUniforms = updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs);
+        const auto propertiesAsUniforms = updateTileAttributes(
+            buffer, isText, bucketPaintProperties, evaluated, attribs);
         if (layerTweaker) {
             layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
@@ -1352,8 +1353,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 if (!shaderGroup) {
                     return;
                 }
-                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    shaderGroup->getOrCreateShader(context, propertiesAsUniforms, StringIndexer::get(idPosOffsetAttribName)));
+                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(
+                    context, propertiesAsUniforms, StringIndexer::get(idPosOffsetAttribName)));
                 if (!shader) {
                     return;
                 }

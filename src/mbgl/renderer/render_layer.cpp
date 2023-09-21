@@ -83,7 +83,7 @@ void RenderLayer::replaceTweaker(LayerTweakerPtr& curTweaker,
     for (const auto& group : layerGroups) {
         if (group) {
             group->addLayerTweaker(newTweaker);
-            
+
             group->visitDrawables([&](gfx::Drawable& drawable) {
                 if (drawable.getLayerTweaker() == prevTweaker) {
                     drawable.setLayerTweaker(curTweaker);

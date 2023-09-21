@@ -735,8 +735,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                                         LineOpacity,
                                                                                         LineGapWidth,
                                                                                         LineOffset,
-                                                                                        LineWidth>(
-                paintPropertyBinders, evaluated);
+                                                                                        LineWidth>(paintPropertyBinders,
+                                                                                                   evaluated);
 
             assert(6 == propertiesAsUniforms.size());
             assert(vertexAttrs.size() == (size_t)std::count_if(propertiesAsUniforms.begin(),

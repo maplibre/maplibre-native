@@ -144,7 +144,7 @@ public:
     /// @param texture Texture2D instance
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
-    
+
     /// Direct access to the current texture set
     const gfx::Drawable::Textures& getTextures() const { return textures; }
 

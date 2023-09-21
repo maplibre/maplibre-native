@@ -281,7 +281,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!layerTweaker) {
         layerTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
-        
+
         if (layerGroup) {
             layerGroup->addLayerTweaker(layerTweaker);
         }

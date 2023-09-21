@@ -125,7 +125,8 @@ void DrawableGL::bindUniformBuffers() const {
                 const auto tileID = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 Log::Error(Event::General,
                            "bindUniformBuffers: UBO "s + std::string(StringIndexer::get(element.first)) +
-                           " not found for " + util::toString(getID()) + " / " + getName() + " / " + tileID + ". skipping.");
+                               " not found for " + util::toString(getID()) + " / " + getName() + " / " + tileID +
+                               ". skipping.");
                 assert(false);
                 continue;
             }

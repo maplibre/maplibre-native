@@ -29,8 +29,6 @@ void LayerGroupBase::runTweakers(const RenderTree& renderTree, PaintParameters& 
     }
 }
 
-
-
 struct LayerGroup::Impl {
     using DrawableCollection = std::set<gfx::UniqueDrawable, gfx::DrawableLessByPriority>;
     DrawableCollection drawables;
