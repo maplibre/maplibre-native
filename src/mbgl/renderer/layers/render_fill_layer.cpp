@@ -103,8 +103,10 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    auto newTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
-    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerGroup) {
+        auto newTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    }
 #endif
 }
 

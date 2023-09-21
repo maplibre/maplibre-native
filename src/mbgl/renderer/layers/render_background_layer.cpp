@@ -65,8 +65,10 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    auto newTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
-    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerGroup) {
+        auto newTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    }
 #endif
 }
 

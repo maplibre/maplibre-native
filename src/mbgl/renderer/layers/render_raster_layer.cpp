@@ -53,8 +53,10 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    auto newTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
-    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup, imageLayerGroup});
+    if (layerGroup) {
+        auto newTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup, imageLayerGroup});
+    }
 #endif
 }
 
@@ -279,6 +281,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!layerTweaker) {
         layerTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+        
         if (layerGroup) {
             layerGroup->addLayerTweaker(layerTweaker);
         }
@@ -390,6 +393,12 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
         buildVertexData(builder, bucket);
         tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return;
+            }
+
+            // Copy textures from existing drawable
             for (auto& tex : drawable.getTextures()) {
                 builder->setTexture(tex.second, tex.first);
             }
@@ -404,6 +413,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             } else {
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+                imageLayerGroup->addLayerTweaker(layerTweaker);
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
             }
 
@@ -431,6 +441,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         } else {
             // Set up a tile layer group
             if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+                layerGroup_->addLayerTweaker(layerTweaker);
                 setLayerGroup(std::move(layerGroup_), changes);
             }
         }

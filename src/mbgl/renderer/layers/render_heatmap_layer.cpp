@@ -70,8 +70,10 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    auto newTextureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
-    replaceTweaker(textureTweaker, std::move(newTextureTweaker), {layerGroup});
+    if (layerGroup) {
+        auto newTextureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(textureTweaker, std::move(newTextureTweaker), {layerGroup});
+    }
 
     if (renderTarget) {
         if (auto tileLayerGroup = renderTarget->getLayerGroup(0)) {
@@ -378,6 +380,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             /* .padding = */ {0}};
 
         tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return;
+            }
             drawable.mutableUniformBuffers().createOrUpdate(idHeatmapInterpolateUBOName, &interpolateUBO, context);
         });
 

@@ -93,8 +93,10 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    auto newTweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
-    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerGroup) {
+        auto newTweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    }
 #endif // MLN_DRAWABLE_RENDERER
 }
 
@@ -362,6 +364,11 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return;
+            }
+
             auto& uniforms = drawable.mutableUniformBuffers();
             uniforms.createOrUpdate(idCircleInterpolateUBOName, &interpolateUBO, context);
         };

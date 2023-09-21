@@ -75,8 +75,10 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    auto newTweaker = std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties);
-    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerGroup) {
+        auto newTweaker = std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    }
 #endif // MLN_DRAWABLE_RENDERER
 }
 
@@ -396,6 +398,11 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         if (tileLayerGroup->getDrawableCount(drawPass, tileID) > 0) {
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
+                if (drawable.getLayerTweaker() != layerTweaker) {
+                    // This drawable was produced on a previous style/bucket, and should not be updated.
+                    return;
+                }
+
                 auto& uniforms = drawable.mutableUniformBuffers();
                 uniforms.createOrUpdate(
                     FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);

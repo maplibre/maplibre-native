@@ -380,6 +380,8 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
+    // The symbol tweaker supports updating properties.
+    // When the style changes, it will be replaced in `RenderLayer::layerChanged`
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
@@ -1186,6 +1188,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                if (drawable.getLayerTweaker() != layerTweaker) {
+                    // This drawable was produced on a previous style/bucket, and should not be updated.
+                    return;
+                }
+
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
                 updateTileDrawable(
                     drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO);

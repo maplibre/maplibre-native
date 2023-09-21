@@ -81,8 +81,10 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    auto newTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
-    replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerGroup) {
+        auto newTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    }
 #endif
 }
 
@@ -527,6 +529,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         // update existing drawables
         tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return;
+            }
+
             const auto& shader = drawable.getShader();
             const auto& shaderUniforms = shader->getUniformBlocks();
             auto& drawableUniforms = drawable.mutableUniformBuffers();
