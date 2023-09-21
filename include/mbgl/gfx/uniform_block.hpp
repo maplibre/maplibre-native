@@ -2,10 +2,12 @@
 
 #include <mbgl/util/string_indexer.hpp>
 
+#include <algorithm>
+#include <functional>
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include <functional>
+
 namespace mbgl {
 namespace gfx {
 
