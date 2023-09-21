@@ -256,17 +256,24 @@ void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeReques
     activateRenderTarget(renderTarget, willRender, changes);
 }
 
-void RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get());
-    stats.drawablesRemoved += tileLayerGroup->removeDrawables(renderPass, tileID).size();
+std::size_t RenderHeatmapLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    if (auto* tileLayerGroup = static_cast<TileLayerGroup*>(renderTarget->getLayerGroup(0).get())) {
+        const auto count = tileLayerGroup->removeDrawables(renderPass, tileID).size();
+        stats.drawablesRemoved += count;
+        return count;
+    }
+    return 0;
 }
 
-void RenderHeatmapLayer::removeAllDrawables() {
-    RenderLayer::removeAllDrawables();
+std::size_t RenderHeatmapLayer::removeAllDrawables() {
+    auto removed = RenderLayer::removeAllDrawables();
     if (renderTarget) {
-        stats.drawablesRemoved += renderTarget->getLayerGroup(0)->getDrawableCount();
+        const auto count = renderTarget->getLayerGroup(0)->getDrawableCount();
+        removed += count;
+        stats.drawablesRemoved += count;
         renderTarget->getLayerGroup(0)->clearDrawables();
     }
+    return removed;
 }
 
 namespace {

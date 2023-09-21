@@ -58,10 +58,12 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&) override;
+    /// @return The number of drawables actually removed.
+    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
-    void removeAllDrawables() override;
+    /// @return The number of drawables actually removed.
+    std::size_t removeAllDrawables() override;
 #endif
 
     // Paint properties

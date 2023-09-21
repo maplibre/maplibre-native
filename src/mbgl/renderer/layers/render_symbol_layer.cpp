@@ -972,16 +972,19 @@ void RenderSymbolLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     }
 }
 
-void RenderSymbolLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+std::size_t RenderSymbolLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    const auto oldValue = stats.drawablesRemoved;
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
         stats.drawablesRemoved += tileGroup->removeDrawables(renderPass, tileID).size();
     }
     if (collisionTileLayerGroup) {
         stats.drawablesRemoved += collisionTileLayerGroup->removeDrawables(renderPass, tileID).size();
     }
+    return stats.drawablesRemoved - oldValue;
 }
 
-void RenderSymbolLayer::removeAllDrawables() {
+std::size_t RenderSymbolLayer::removeAllDrawables() {
+    const auto oldValue = stats.drawablesRemoved;
     if (layerGroup) {
         stats.drawablesRemoved += layerGroup->getDrawableCount();
         layerGroup->clearDrawables();
@@ -990,6 +993,7 @@ void RenderSymbolLayer::removeAllDrawables() {
         stats.drawablesRemoved += collisionTileLayerGroup->getDrawableCount();
         collisionTileLayerGroup->clearDrawables();
     }
+    return stats.drawablesRemoved - oldValue;
 }
 
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,

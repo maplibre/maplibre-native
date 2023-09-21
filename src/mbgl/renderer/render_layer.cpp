@@ -166,17 +166,23 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
 }
 
 #if MLN_DRAWABLE_RENDERER
-void RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
-        stats.drawablesRemoved += tileGroup->removeDrawables(renderPass, tileID).size();
+        const auto n = tileGroup->removeDrawables(renderPass, tileID).size();
+        stats.drawablesRemoved += n;
+        return n;
     }
+    return 0;
 }
 
-void RenderLayer::removeAllDrawables() {
+std::size_t RenderLayer::removeAllDrawables() {
     if (layerGroup) {
-        stats.drawablesRemoved += layerGroup->getDrawableCount();
+        const auto count = layerGroup->getDrawableCount();
+        stats.drawablesRemoved += count;
         layerGroup->clearDrawables();
+        return count;
     }
+    return 0;
 }
 
 void RenderLayer::updateRenderTileIDs() {

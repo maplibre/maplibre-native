@@ -208,10 +208,11 @@ protected:
     void activateLayerGroup(const LayerGroupBasePtr&, bool activate, UniqueChangeRequestVec& changes);
 
     /// Remove all drawables for the tile from the layer group
-    virtual void removeTile(RenderPass, const OverscaledTileID&);
+    /// @return The number of drawables actually removed.
+    virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
 
     /// Remove all the drawables for tiles
-    virtual void removeAllDrawables();
+    virtual std::size_t removeAllDrawables();
 
     /// Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();

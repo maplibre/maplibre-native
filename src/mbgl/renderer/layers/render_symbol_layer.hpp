@@ -118,10 +118,10 @@ protected:
     void layerRemoved(UniqueChangeRequestVec&) override;
 
     /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&) override;
+    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
-    void removeAllDrawables() override;
+    std::size_t removeAllDrawables() override;
 #endif // MLN_DRAWABLE_RENDERER
 
 private:
