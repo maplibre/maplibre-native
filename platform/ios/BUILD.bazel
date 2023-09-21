@@ -80,7 +80,21 @@ info_plist(
     base_info_plist = "app/Info.plist",
 )
 
+genrule(
+    name = "umbrella_header",
+    srcs = ["src/Mapbox.h"],
+    outs = ["Mapbox.h"],
+    cmd = select({
+        "//:metal_renderer": """
+        echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
+        cat $(location src/Mapbox.h) >> $@;
+    """,
+        "//conditions:default": "cat $(location src/Mapbox.h) >> $@"
+    }),
+)
+
 public_hdrs = [
+    ":umbrella_header",
     ":ios_public_hdrs",
     ":ios_sdk_hdrs",
     "//platform/darwin:darwin_objc_hdrs",
@@ -100,7 +114,7 @@ apple_static_xcframework(
     },
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
-    umbrella_header = "src/Mapbox.h",
+    umbrella_header = "umbrella_header",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
 )
@@ -123,7 +137,7 @@ apple_xcframework(
     },
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
-    umbrella_header = "src/Mapbox.h",
+    umbrella_header = "umbrella_header",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],
 )
