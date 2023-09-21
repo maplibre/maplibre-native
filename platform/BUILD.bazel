@@ -236,8 +236,7 @@ sh_binary(
         "//platform/macos:macos_objc_srcs",
         "//platform/macos:macos_objcpp_srcs",
         "//platform/macos:macos_private_hdrs",
-        "//platform/macos:macos_public_hdrs",
-        "//platform/ios:src/Mapbox.h"
+        "//platform/macos:macos_public_hdrs"
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": [

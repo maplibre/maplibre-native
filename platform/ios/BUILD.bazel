@@ -29,22 +29,23 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+# this can be removed once the legacy renderer is removed completely for iOS
 genrule(
     name = "umbrella_header",
-    srcs = ["src/Mapbox.h"],
-    outs = ["Mapbox.h"],
+    srcs = ["src/Mapbox.template.h"],
+    outs = ["src/Mapbox.h"],
     cmd = select({
         "//:metal_renderer": """
         echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
-        cat $(location src/Mapbox.h) >> $@;
+        cat $(location src/Mapbox.template.h) >> $@;
     """,
-        "//conditions:default": "cat $(location src/Mapbox.h) >> $@"
+        "//conditions:default": "cat $(location src/Mapbox.template.h) >> $@"
     }),
 )
 
 filegroup(
     name = "ios_public_hdrs",
-    srcs = MLN_IOS_PUBLIC_HEADERS,
+    srcs = MLN_IOS_PUBLIC_HEADERS + [":umbrella_header"],
     visibility = ["//visibility:public"],
 )
 
@@ -326,7 +327,6 @@ sh_binary(
 )
 
 exports_files(
-    ["src/Mapbox.h"] +
     MLN_IOS_PUBLIC_HEADERS +
     MLN_IOS_PRIVATE_HEADERS +
     MLN_IOS_PUBLIC_OBJCPP_SOURCE +
