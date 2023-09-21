@@ -116,6 +116,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 #endif
 
+    if (propertiesUpdated) {
+        textPropertiesUpdated = true;
+        iconPropertiesUpdated = true;
+        propertiesUpdated = false;
+    }
+
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -125,14 +131,15 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
 
-        if (isText && (!textPaintBuffer || propertiesUpdated)) {
+        if (isText && (textPaintBuffer || textPropertiesUpdated)) {
             const auto props = buildPaintUBO(true, evaluated);
             textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
-        } else if (!isText && (!iconPaintBuffer || propertiesUpdated)) {
+            textPropertiesUpdated = false;
+        } else if (!isText && (!iconPaintBuffer || iconPropertiesUpdated)) {
             const auto props = buildPaintUBO(false, evaluated);
             iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
+            iconPropertiesUpdated = false;
         }
-        propertiesUpdated = false;
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
