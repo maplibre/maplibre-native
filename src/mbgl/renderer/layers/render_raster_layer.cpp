@@ -391,7 +391,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                    const RasterBucket& bucket) {
         // TODO: check for oportunity to skip
 
-        buildVertexData(builder, bucket);
         tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
@@ -473,10 +472,16 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
                 // erase current drawable
                 removeTile(renderPass, tileID);
-            } else if (bucket.image) {
+            }
+
+            // Even if we had drawables, we may not have copied their textures because they're
+            // from a previous style.  Set up the builder with textures if it needs them.
+            if (bucket.image && builder->getTextures().size() == 0) {
                 // build new drawable for this tile
-                buildDrawables(builder, bucket);
+                setTextures(builder, bucket);
             };
+
+            buildVertexData(builder, bucket);
 
             // finish
             builder->flush();

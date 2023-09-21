@@ -22,7 +22,6 @@ LayerTweaker::LayerTweaker(std::string id_, Immutable<style::LayerProperties> pr
 bool LayerTweaker::checkTweakDrawable(const gfx::Drawable& drawable) const {
     // Apply to a drawable if it references us, or if doesn't reference anything.
     const auto& tweaker = drawable.getLayerTweaker();
-    auto tileID = drawable.getTileID() ? util::toString(*drawable.getTileID()) : "<none>";
     return !tweaker || tweaker.get() == this;
 }
 
