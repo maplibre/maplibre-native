@@ -20,9 +20,9 @@ public:
 
     void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
 
-    static constexpr auto CollisionCircleUBOName = "CollisionCircleUBO";
+    static constexpr auto CollisionCircleUBOName = "CollisionCircleUBO"sv;
     static const StringIdentity idCollisionCircleUBOName;
-    static constexpr auto CollisionBoxUBOName = "CollisionBoxUBO";
+    static constexpr auto CollisionBoxUBOName = "CollisionBoxUBO"sv;
     static const StringIdentity idCollisionBoxUBOName;
 };
 

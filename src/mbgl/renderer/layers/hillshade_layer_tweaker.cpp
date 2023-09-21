@@ -27,8 +27,8 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 };
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) % 16 == 0);
 
-static const StringIdentity idHillshadeDrawableUBOName = StringIndexer::get("HillshadeDrawableUBO");
-static const StringIdentity idHillshadeEvaluatedPropsUBOName = StringIndexer::get("HillshadeEvaluatedPropsUBO");
+static const StringIdentity idHillshadeDrawableUBOName = StringIndexer::get("HillshadeDrawableUBO"sv);
+static const StringIdentity idHillshadeEvaluatedPropsUBOName = StringIndexer::get("HillshadeEvaluatedPropsUBO"sv);
 
 std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
     const LatLng latlng0 = LatLng(id);

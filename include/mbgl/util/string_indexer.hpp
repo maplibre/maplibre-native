@@ -9,6 +9,8 @@
 #include <mutex>
 #include <shared_mutex>
 
+using namespace std::string_view_literals;
+
 namespace mbgl {
 
 using StringIdentity = size_t;

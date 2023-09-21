@@ -749,13 +749,13 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
-static const StringIdentity idDataAttibName = StringIndexer::get("a_data");
-static const StringIdentity idPosOffsetAttribName = StringIndexer::get("a_pos_offset");
-static const StringIdentity idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
-static const StringIdentity idProjPosAttribName = StringIndexer::get("a_projected_pos");
-static const StringIdentity idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
-static const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-static const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
+static const StringIdentity idDataAttibName = StringIndexer::get("a_data"sv);
+static const StringIdentity idPosOffsetAttribName = StringIndexer::get("a_pos_offset"sv);
+static const StringIdentity idPixOffsetAttribName = StringIndexer::get("a_pixeloffset"sv);
+static const StringIdentity idProjPosAttribName = StringIndexer::get("a_projected_pos"sv);
+static const StringIdentity idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity"sv);
+static const StringIdentity idTexUniformName = StringIndexer::get("u_texture"sv);
+static const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon"sv);
 
 std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer,
                                               const bool isText,
@@ -863,11 +863,11 @@ void updateTileDrawable(gfx::Drawable& drawable,
     drawable.setVertexAttributes(std::move(attribs));
 }
 
-static const StringIdentity idCollisionPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idCollisionAnchorPosAttribName = StringIndexer::get("a_anchor_pos");
-static const StringIdentity idCollisionExtrudeAttribName = StringIndexer::get("a_extrude");
-static const StringIdentity idCollisionPlacedAttribName = StringIndexer::get("a_placed");
-static const StringIdentity idCollisionShiftAttribName = StringIndexer::get("a_shift");
+static const StringIdentity idCollisionPosAttribName = StringIndexer::get("a_pos"sv);
+static const StringIdentity idCollisionAnchorPosAttribName = StringIndexer::get("a_anchor_pos"sv);
+static const StringIdentity idCollisionExtrudeAttribName = StringIndexer::get("a_extrude"sv);
+static const StringIdentity idCollisionPlacedAttribName = StringIndexer::get("a_placed"sv);
+static const StringIdentity idCollisionShiftAttribName = StringIndexer::get("a_shift"sv);
 
 gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer, bool staticCopy) {
     gfx::VertexAttributeArray vertexAttrs;

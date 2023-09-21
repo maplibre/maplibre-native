@@ -23,7 +23,7 @@ struct alignas(16) HillshadePrepareDrawableUBO {
 };
 static_assert(sizeof(HillshadePrepareDrawableUBO) % 16 == 0);
 
-static const StringIdentity idHillshadePrepareDrawableUBOName = StringIndexer::get("HillshadePrepareDrawableUBO");
+static const StringIdentity idHillshadePrepareDrawableUBOName = StringIndexer::get("HillshadePrepareDrawableUBO"sv);
 
 const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
     // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb

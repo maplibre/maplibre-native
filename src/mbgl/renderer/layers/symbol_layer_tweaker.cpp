@@ -43,10 +43,10 @@ std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
-const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
-const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-const StringIdentity idSymbolPermutationUBOName = StringIndexer::get("SymbolPermutationUBO");
+const StringIdentity idTexUniformName = StringIndexer::get("u_texture"sv);
+const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon"sv);
+const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO"sv);
+const StringIdentity idSymbolPermutationUBOName = StringIndexer::get("SymbolPermutationUBO"sv);
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -63,13 +63,13 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = StringIndexer::get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = StringIndexer::get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = StringIndexer::get("SymbolDrawablePaintUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = StringIndexer::get("SymbolDrawableUBO"sv);
+const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = StringIndexer::get("SymbolDynamicUBO"sv);
+const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = StringIndexer::get("SymbolDrawablePaintUBO"sv);
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = StringIndexer::get(
-    "SymbolDrawableTilePropsUBO");
+    "SymbolDrawableTilePropsUBO"sv);
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get(
-    "SymbolDrawableInterpolateUBO");
+    "SymbolDrawableInterpolateUBO"sv);
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,

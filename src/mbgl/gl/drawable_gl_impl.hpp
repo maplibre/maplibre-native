@@ -51,7 +51,7 @@ public:
     gfx::CullFaceMode cullFaceMode;
     GLfloat pointSize = 0.0f;
 
-    StringIdentity idVertexAttrName = StringIndexer::get("a_pos");
+    StringIdentity idVertexAttrName = StringIndexer::get("a_pos"sv);
 };
 
 struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {

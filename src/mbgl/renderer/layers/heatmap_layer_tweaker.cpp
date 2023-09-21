@@ -20,10 +20,10 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapDrawableUBOName = StringIndexer::get("HeatmapDrawableUBO");
-static const StringIdentity idHeatmapEvaluatedPropsUBOName = StringIndexer::get("HeatmapEvaluatedPropsUBO");
-static const StringIdentity idHeatmapPermutationUBOName = StringIndexer::get("HeatmapPermutationUBO");
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+static const StringIdentity idHeatmapDrawableUBOName = StringIndexer::get("HeatmapDrawableUBO"sv);
+static const StringIdentity idHeatmapEvaluatedPropsUBOName = StringIndexer::get("HeatmapEvaluatedPropsUBO"sv);
+static const StringIdentity idHeatmapPermutationUBOName = StringIndexer::get("HeatmapPermutationUBO"sv);
+static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO"sv);
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                   const RenderTree& renderTree,

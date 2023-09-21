@@ -244,10 +244,10 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     }
 }
 
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
-static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
-static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos"sv);
+static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos"sv);
+static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0"sv);
+static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1"sv);
 
 void RenderRasterLayer::updateLayerTweaker() {
     if (layerGroup || imageLayerGroup) {

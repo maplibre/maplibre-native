@@ -22,18 +22,18 @@ using namespace shaders;
 using namespace style;
 
 namespace {
-const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
-const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
-const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-const StringIdentity idFillExtrusionPermutationUBOName = StringIndexer::get("FillExtrusionPermutationUBO");
-const StringIdentity idTexImageName = StringIndexer::get("u_image");
+const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO"sv);
+const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO"sv);
+const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO"sv);
+const StringIdentity idFillExtrusionPermutationUBOName = StringIndexer::get("FillExtrusionPermutationUBO"sv);
+const StringIdentity idTexImageName = StringIndexer::get("u_image"sv);
 
 } // namespace
 
 const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = StringIndexer::get(
-    "FillExtrusionDrawableTilePropsUBO");
+    "FillExtrusionDrawableTilePropsUBO"sv);
 const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = StringIndexer::get(
-    "FillExtrusionInterpolateUBO");
+    "FillExtrusionInterpolateUBO"sv);
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                         const RenderTree& renderTree,

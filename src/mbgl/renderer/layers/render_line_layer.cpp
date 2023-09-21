@@ -56,8 +56,8 @@ inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
 
 #if MLN_DRAWABLE_RENDERER
 
-static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal");
-static const StringIdentity idDataAttribName = StringIndexer::get("a_data");
+static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal"sv);
+static const StringIdentity idDataAttribName = StringIndexer::get("a_data"sv);
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -357,13 +357,13 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 
 #if MLN_DRAWABLE_RENDERER
 /// Property interpolation UBOs
-static const StringIdentity idLineInterpolationUBOName = StringIndexer::get("LineInterpolationUBO");
-static const StringIdentity idLineGradientInterpolationUBOName = StringIndexer::get("LineGradientInterpolationUBO");
-static const StringIdentity idLinePatternInterpolationUBOName = StringIndexer::get("LinePatternInterpolationUBO");
-static const StringIdentity idLineSDFInterpolationUBOName = StringIndexer::get("LineSDFInterpolationUBO");
+static const StringIdentity idLineInterpolationUBOName = StringIndexer::get("LineInterpolationUBO"sv);
+static const StringIdentity idLineGradientInterpolationUBOName = StringIndexer::get("LineGradientInterpolationUBO"sv);
+static const StringIdentity idLinePatternInterpolationUBOName = StringIndexer::get("LinePatternInterpolationUBO"sv);
+static const StringIdentity idLineSDFInterpolationUBOName = StringIndexer::get("LineSDFInterpolationUBO"sv);
 
 /// Evaluated properties that depend on the tile
-static const StringIdentity idLinePatternTilePropertiesUBOName = StringIndexer::get("LinePatternTilePropertiesUBO");
+static const StringIdentity idLinePatternTilePropertiesUBOName = StringIndexer::get("LinePatternTilePropertiesUBO"sv);
 void RenderLineLayer::updateLayerTweaker() {
     if (layerGroup) {
         tweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
@@ -375,7 +375,7 @@ void RenderLineLayer::updateLayerTweaker() {
     }
 }
 
-static const StringIdentity idLineImageUniformName = StringIndexer::get("u_image");
+static const StringIdentity idLineImageUniformName = StringIndexer::get("u_image"sv);
 
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,

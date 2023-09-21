@@ -24,40 +24,40 @@ namespace mbgl {
 
 using namespace style;
 
-static const StringIdentity idFillDrawableUBOName = StringIndexer::get("FillDrawableUBO");
-static const StringIdentity idFillDrawablePropsUBOName = StringIndexer::get("FillDrawablePropsUBO");
-static const StringIdentity idFillEvaluatedPropsUBOName = StringIndexer::get("FillEvaluatedPropsUBO");
-static const StringIdentity idFillPermutationUBOName = StringIndexer::get("FillPermutationUBO");
+static const StringIdentity idFillDrawableUBOName = StringIndexer::get("FillDrawableUBO"sv);
+static const StringIdentity idFillDrawablePropsUBOName = StringIndexer::get("FillDrawablePropsUBO"sv);
+static const StringIdentity idFillEvaluatedPropsUBOName = StringIndexer::get("FillEvaluatedPropsUBO"sv);
+static const StringIdentity idFillPermutationUBOName = StringIndexer::get("FillPermutationUBO"sv);
 
-const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = StringIndexer::get("FillDrawableTilePropsUBO");
-const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = StringIndexer::get("FillInterpolateUBO");
+const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = StringIndexer::get("FillDrawableTilePropsUBO"sv);
+const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = StringIndexer::get("FillInterpolateUBO"sv);
 const StringIdentity FillLayerTweaker::idFillOutlineInterpolateUBOName = StringIndexer::get(
-    "FillOutlineInterpolateUBO");
+    "FillOutlineInterpolateUBO"sv);
 
-static const StringIdentity idFillOutlineDrawableUBOName = StringIndexer::get("FillOutlineDrawableUBO");
-static const StringIdentity idFillOutlineEvaluatedPropsUBOName = StringIndexer::get("FillOutlineEvaluatedPropsUBO");
-static const StringIdentity idFillOutlinePermutationUBOName = StringIndexer::get("FillOutlinePermutationUBO");
+static const StringIdentity idFillOutlineDrawableUBOName = StringIndexer::get("FillOutlineDrawableUBO"sv);
+static const StringIdentity idFillOutlineEvaluatedPropsUBOName = StringIndexer::get("FillOutlineEvaluatedPropsUBO"sv);
+static const StringIdentity idFillOutlinePermutationUBOName = StringIndexer::get("FillOutlinePermutationUBO"sv);
 
-static const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
+static const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO"sv);
 
-static const StringIdentity idFillPatternDrawableUBOName = StringIndexer::get("FillPatternDrawableUBO");
-static const StringIdentity idFillPatternPermutationUBOName = StringIndexer::get("FillPatternPermutationUBO");
-static const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO");
-static const StringIdentity idFillPatternEvaluatedPropsUBOName = StringIndexer::get("FillPatternEvaluatedPropsUBO");
-static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
+static const StringIdentity idFillPatternDrawableUBOName = StringIndexer::get("FillPatternDrawableUBO"sv);
+static const StringIdentity idFillPatternPermutationUBOName = StringIndexer::get("FillPatternPermutationUBO"sv);
+static const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO"sv);
+static const StringIdentity idFillPatternEvaluatedPropsUBOName = StringIndexer::get("FillPatternEvaluatedPropsUBO"sv);
+static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO"sv);
 
-static const StringIdentity idFillOutlinePatternDrawableUBOName = StringIndexer::get("FillOutlinePatternDrawableUBO");
+static const StringIdentity idFillOutlinePatternDrawableUBOName = StringIndexer::get("FillOutlinePatternDrawableUBO"sv);
 static const StringIdentity idFillOutlinePatternPermutationUBOName = StringIndexer::get(
-    "FillOutlinePatternPermutationUBO");
+    "FillOutlinePatternPermutationUBO"sv);
 static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get(
-    "FillOutlinePatternInterpolateUBO");
+    "FillOutlinePatternInterpolateUBO"sv);
 static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = StringIndexer::get(
-    "FillOutlinePatternEvaluatedPropsUBO");
-static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
+    "FillOutlinePatternEvaluatedPropsUBO"sv);
+static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO"sv);
 
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO"sv);
 
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+static const StringIdentity idTexImageName = StringIndexer::get("u_image"sv);
 using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,

@@ -24,18 +24,18 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idLineUBOName = StringIndexer::get("LineUBO");
-static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO");
-static const StringIdentity idLineGradientUBOName = StringIndexer::get("LineGradientUBO");
-static const StringIdentity idLineGradientPropertiesUBOName = StringIndexer::get("LineGradientPropertiesUBO");
-static const StringIdentity idLinePatternUBOName = StringIndexer::get("LinePatternUBO");
-static const StringIdentity idLinePatternPropertiesUBOName = StringIndexer::get("LinePatternPropertiesUBO");
-static const StringIdentity idLineSDFUBOName = StringIndexer::get("LineSDFUBO");
-static const StringIdentity idLineSDFPropertiesUBOName = StringIndexer::get("LineSDFPropertiesUBO");
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+static const StringIdentity idLineUBOName = StringIndexer::get("LineUBO"sv);
+static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO"sv);
+static const StringIdentity idLineGradientUBOName = StringIndexer::get("LineGradientUBO"sv);
+static const StringIdentity idLineGradientPropertiesUBOName = StringIndexer::get("LineGradientPropertiesUBO"sv);
+static const StringIdentity idLinePatternUBOName = StringIndexer::get("LinePatternUBO"sv);
+static const StringIdentity idLinePatternPropertiesUBOName = StringIndexer::get("LinePatternPropertiesUBO"sv);
+static const StringIdentity idLineSDFUBOName = StringIndexer::get("LineSDFUBO"sv);
+static const StringIdentity idLineSDFPropertiesUBOName = StringIndexer::get("LineSDFPropertiesUBO"sv);
+static const StringIdentity idTexImageName = StringIndexer::get("u_image"sv);
 
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-static const StringIdentity idLinePermutationUBOName = StringIndexer::get("LinePermutationUBO");
+static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO"sv);
+static const StringIdentity idLinePermutationUBOName = StringIndexer::get("LinePermutationUBO"sv);
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,

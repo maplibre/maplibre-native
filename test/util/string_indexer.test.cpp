@@ -10,7 +10,7 @@ TEST(StringIndexer, AddStrings) {
     StringIndexer::clear();
     EXPECT_EQ(StringIndexer::size(), 0);
 
-    const auto id1 = StringIndexer::get("test string1");
+    const auto id1 = StringIndexer::get("test string1"sv);
     EXPECT_EQ(id1, 0);
     EXPECT_EQ(StringIndexer::size(), 1);
 
@@ -24,7 +24,7 @@ TEST(StringIndexer, GetString) {
     StringIndexer::clear();
     EXPECT_EQ(StringIndexer::size(), 0);
 
-    constexpr auto str = "test string1";
+    constexpr auto str = "test string1"sv;
 
     const auto id1 = StringIndexer::get(str);
     EXPECT_EQ(id1, 0);
@@ -42,7 +42,7 @@ TEST(StringIndexer, Reallocate) {
     StringIndexer::clear();
     EXPECT_EQ(StringIndexer::size(), 0);
 
-    constexpr auto str = "reallocate test string1";
+    constexpr auto str = "reallocate test string1"sv;
 
     const auto id1 = StringIndexer::get(str);
     EXPECT_EQ(id1, 0);

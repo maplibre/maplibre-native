@@ -38,10 +38,10 @@ using namespace shaders;
 namespace {
 
 #if MLN_DRAWABLE_RENDERER
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idNormAttribName = StringIndexer::get("a_normal_ed");
+static const StringIdentity idPosAttribName = StringIndexer::get("a_pos"sv);
+static const StringIdentity idNormAttribName = StringIndexer::get("a_normal_ed"sv);
 
-static const StringIdentity idIconTextureName = StringIndexer::get("u_image");
+static const StringIdentity idIconTextureName = StringIndexer::get("u_image"sv);
 
 #endif // MLN_DRAWABLE_RENDERER
 
