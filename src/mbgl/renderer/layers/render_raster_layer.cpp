@@ -453,13 +453,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
             setRenderTileBucketID(tileID, bucket.getID());
 
-            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-                // re-create drawable geometry and pass texture
-                updateTileDrawables(builder, tileLayerGroup, tileID);
+            // Copy textures from old drawables into the builder
+            updateTileDrawables(builder, tileLayerGroup, tileID);
 
-                // erase current drawable
-                removeTile(renderPass, tileID);
-            }
+            // erase current drawables
+            removeTile(renderPass, tileID);
 
             // Even if we had drawables, we may not have copied their textures because they're
             // from a previous style.  Set up the builder with textures if it needs them.
