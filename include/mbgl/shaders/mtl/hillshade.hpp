@@ -82,7 +82,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // We divide the slope by a scale factor based on the cosin of the pixel's approximate latitude
     // to account for mercator projection distortion. see #4807 for details
-    float scaleFactor = cos(radians((drawable.latrange[0] - drawable.latrange[1]) * (1.0 - in.pos.y) + drawable.latrange[1]));
+    float scaleFactor = cos(radians((drawable.latrange[0] - drawable.latrange[1]) * in.pos.y + drawable.latrange[1]));
     // We also multiply the slope by an arbitrary z-factor of 1.25
     float slope = atan(1.25 * length(deriv) / scaleFactor);
     float aspect = deriv.x != 0.0 ? atan2(deriv.y, -deriv.x) : M_PI_F / 2.0 * (deriv.y > 0.0 ? 1.0 : -1.0);
