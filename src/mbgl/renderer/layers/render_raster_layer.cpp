@@ -386,18 +386,37 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         setTextures(builder, bucket);
     };
 
+    auto finish = [&](auto& builder, const auto& tileID, TileLayerGroup* layerGroup_) {
+        builder->flush();
+        for (auto& drawable : builder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            layerGroup_->addDrawable(renderPass, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+        }
+    };
+
     auto updateTileDrawables = [&](std::unique_ptr<gfx::DrawableBuilder>& builder,
                                    auto* tileLayerGroup,
                                    const auto& tileID,
                                    const RasterBucket& bucket) {
-        // TODO: check for oportunity to skip
+        // check if update is needed
+        if (bucket.vertices.getDirty() || bucket.indices.getDirty()) {
+            // rebuild buffers
+            buildVertexData(builder, bucket);
 
-        buildVertexData(builder, bucket);
-        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            for (auto& tex : drawable.getTextures()) {
-                builder->setTexture(tex.second, tex.first);
-            }
-        });
+            // pass texture
+            tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                for (auto& tex : drawable.getTextures()) {
+                    builder->setTexture(tex.second, tex.first);
+                }
+            });
+
+            // erase current drawable
+            removeTile(renderPass, tileID);
+
+            // finish
+            finish(builder, tileID, tileLayerGroup);
+        }
     };
 
     if (imageData) {
@@ -418,7 +437,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
                 // finish
                 builder->flush();
-
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
                     imageLayerGroup->addDrawable(std::move(drawable));
@@ -462,23 +480,18 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             setRenderTileBucketID(tileID, bucket.getID());
 
             if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-                // re-create drawable geometry and pass texture
+                // update drawables
                 updateTileDrawables(builder, tileLayerGroup, tileID, bucket);
+                continue;
+            }
 
-                // erase current drawable
-                removeTile(renderPass, tileID);
-            } else if (bucket.image) {
+            if (bucket.image) {
                 // build new drawable for this tile
                 buildDrawables(builder, bucket);
-            };
 
-            // finish
-            builder->flush();
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setTileID(tileID);
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
-            }
+                // finish
+                finish(builder, tileID, tileLayerGroup);
+            };
         }
     }
 }
