@@ -228,5 +228,7 @@ protected:
     std::unique_ptr<Impl> impl;
 };
 
+using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
+
 } // namespace gfx
 } // namespace mbgl

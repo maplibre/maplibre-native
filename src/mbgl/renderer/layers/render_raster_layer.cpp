@@ -277,6 +277,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (!rasterShader) {
             return;
         }
+        rasterSampler0 = rasterShader->getSamplerLocation(idTexImage0Name);
+        rasterSampler1 = rasterShader->getSamplerLocation(idTexImage1Name);
     }
 
     if (!layerTweaker) {
@@ -308,7 +310,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                               ? gfx::TextureFilterType::Nearest
                                               : gfx::TextureFilterType::Linear;
 
-    auto createBuilder = [&context, &renderPass, this]() -> std::unique_ptr<gfx::DrawableBuilder> {
+    const auto createBuilder = [&context, &renderPass, this]() -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
@@ -322,26 +324,24 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                                 const RasterBucket& bucket) {
+    const auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
+                                                       const RasterBucket& bucket) {
         // textures
-        auto location0 = rasterShader->getSamplerLocation(idTexImage0Name);
-        if (location0.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
-            tex0->setImage(bucket.image);
-            tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex0, location0.value());
-        }
-        auto location1 = rasterShader->getSamplerLocation(idTexImage1Name);
-        if (location1.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
-            tex1->setImage(bucket.image);
-            tex1->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex1, location1.value());
+        if (bucket.image && (rasterSampler0 || rasterSampler1)) {
+            auto tex = context.createTexture2D();
+            tex->setImage(bucket.image);
+            tex->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+
+            if (rasterSampler0) {
+                builder->setTexture(tex, *rasterSampler0);
+            }
+            if (rasterSampler1) {
+                builder->setTexture(std::move(tex), *rasterSampler1);
+            }
         }
     };
 
-    auto buildVertexData = [this](std::unique_ptr<gfx::DrawableBuilder>& builder, const RasterBucket& bucket) {
+    const auto buildVertexData = [this](std::unique_ptr<gfx::DrawableBuilder>& builder, const RasterBucket& bucket) {
         RasterVertexVectorPtr vertices = staticDataVertices;
         TriangleIndexVectorPtr indices = staticDataIndices;
         const RasterSegmentVector* segments = staticDataSegments.get();
@@ -379,27 +379,16 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), indices, segments->data(), segments->size());
     };
 
-    auto buildDrawables = [&setTextures, &buildVertexData](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                                           const RasterBucket& bucket) {
-        buildVertexData(builder, bucket);
-        setTextures(builder, bucket);
-    };
-
-    auto updateTileDrawables = [&](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                   auto* tileLayerGroup,
-                                   const auto& tileID,
-                                   const RasterBucket& bucket) {
-        // TODO: check for oportunity to skip
-
+    const auto updateTileDrawables = [&](gfx::UniqueDrawableBuilder& builder,
+                                         auto* tileLayerGroup,
+                                         const auto& tileID) {
         tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
-            }
-
-            // Copy textures from existing drawable
-            for (auto& tex : drawable.getTextures()) {
-                builder->setTexture(tex.second, tex.first);
+            // If this tile was created based on the current style/bucket, copy the textures
+            // over from the existing drawable, otherwise we will build new textures.
+            if (drawable.getLayerTweaker() == layerTweaker) {
+                for (auto& tex : drawable.getTextures()) {
+                    builder->setTexture(tex.second, tex.first);
+                }
             }
         });
     };
@@ -418,7 +407,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
             auto builder = createBuilder();
             for (const auto& matrix_ : imageData->matrices) {
-                buildDrawables(builder, bucket);
+                buildVertexData(builder, bucket);
+                setTextures(builder, bucket);
 
                 // finish
                 builder->flush();
@@ -468,7 +458,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
             if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
                 // re-create drawable geometry and pass texture
-                updateTileDrawables(builder, tileLayerGroup, tileID, bucket);
+                updateTileDrawables(builder, tileLayerGroup, tileID);
 
                 // erase current drawable
                 removeTile(renderPass, tileID);

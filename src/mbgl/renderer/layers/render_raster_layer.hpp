@@ -66,6 +66,8 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr rasterShader;
+    std::optional<uint32_t> rasterSampler0;
+    std::optional<uint32_t> rasterSampler1;
     LayerGroupPtr imageLayerGroup;
 
     using RasterVertexVector = gfx::VertexVector<RasterLayoutVertex>;
