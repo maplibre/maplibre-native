@@ -9,8 +9,10 @@
 
 namespace mbgl {
 
-class HillshadeProgram;
-class HillshadePrepareProgram;
+#if MLN_DRAWABLE_RENDERER
+class HillshadeLayerTweaker;
+using HillshadeLayerTweakerPtr = std::shared_ptr<HillshadeLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
 
 class RenderHillshadeLayer : public RenderLayer {
 public:
@@ -41,6 +43,10 @@ private:
     void render(PaintParameters&) override;
 #endif
 
+#if MLN_DRAWABLE_RENDERER
+    void updateLayerTweaker();
+#endif // MLN_DRAWABLE_RENDERER
+
     void prepare(const LayerPrepareParameters&) override;
 
 #if MLN_DRAWABLE_RENDERER
@@ -68,6 +74,9 @@ private:
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
+
+    HillshadeLayerTweakerPtr tweaker;
+    bool overdrawInspector = false;
 #endif
 };
 

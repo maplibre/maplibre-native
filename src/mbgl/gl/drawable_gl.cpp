@@ -123,7 +123,7 @@ void DrawableGL::bindUniformBuffers() const {
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 Log::Error(Event::General,
-                           "DrawableGL::bindUniformBuffers: UBO "s + StringIndexer::get(element.first) +
+                           "DrawableGL::bindUniformBuffers: UBO "s + std::string(StringIndexer::get(element.first)) +
                                " not found. skipping.");
                 assert(false);
                 continue;

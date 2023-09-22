@@ -25,7 +25,6 @@ MLN_IOS_PUBLIC_HEADERS = [
     "src/MLNUserLocationHeadingArrowLayer.h",
     "src/MLNUserLocationHeadingBeamLayer.h",
     "src/MLNUserLocationHeadingIndicator.h",
-    "src/Mapbox.h",
     "src/NSOrthography+MLNAdditions.h",
     "src/UIColor+MLNAdditions.h",
     "src/UIDevice+MLNAdditions.h",

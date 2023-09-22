@@ -26,6 +26,7 @@ jobs:
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@v5
         with:
+          do_not_skip: '["workflow_dispatch", "push"]'
           paths: |
             ["CMakeLists.txt",
             "platform/ios/**",
@@ -210,12 +211,19 @@ jobs:
         if: env.make_release && !github.event.inputs.release
         run: echo version="$(cat VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
 
+      - name: Create tag
+        if: env.make_release
+        run: |
+          git tag -a ios-v${{ env.version }} -m "Publish ios-v${{ env.version }}" ${{ github.sha }}
+          git push origin ios-v${{ env.version }}
+
       - name: Release
         if: env.make_release
         uses: softprops/action-gh-release@v1
         with:
           name: ios-v${{ env.version }}
           files: ${{ env.xcframework }}
+          tag_name: ios-v${{ env.version }}
           prerelease: ${{ !github.event.inputs.release }}
 
   ios-ci-result:

@@ -122,6 +122,16 @@ MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
 
 } // namespace
 
+void Drawable::setColorMode(const gfx::ColorMode& value) {
+    pipelineState.reset();
+    gfx::Drawable::setColorMode(value);
+}
+
+void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
+    pipelineState.reset();
+    gfx::Drawable::setShader(value);
+}
+
 void Drawable::draw(PaintParameters& parameters) const {
     if (isCustom) {
         return;
@@ -140,6 +150,14 @@ void Drawable::draw(PaintParameters& parameters) const {
         assert(false);
         return;
     }
+
+    if (renderPassDescriptor.has_value() && renderPass.getDescriptor() != renderPassDescriptor.value()) {
+        pipelineState.reset();
+    }
+    renderPassDescriptor.emplace(gfx::RenderPassDescriptor{renderPass.getDescriptor().renderable,
+                                                           renderPass.getDescriptor().clearColor,
+                                                           renderPass.getDescriptor().clearDepth,
+                                                           renderPass.getDescriptor().clearStencil});
 
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
@@ -189,8 +207,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     encoder->setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
     encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
-    if (auto state = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode())) {
-        encoder->setRenderPipelineState(state.get());
+    if (!pipelineState) {
+        pipelineState = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode());
+    }
+    if (pipelineState) {
+        encoder->setRenderPipelineState(pipelineState.get());
     } else {
         assert(!"Failed to create render pipeline state");
         return;
@@ -287,9 +308,10 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
             attrib->setRawData(std::move(data));
             attrib->setStride(VertexAttribute::getStrideOf(type));
         } else {
+            using namespace std::string_literals;
             Log::Warning(
                 Event::General,
-                "Vertex attribute type mismatch: " + name + " / " + StringIndexer::get(impl->idVertexAttrName));
+                "Vertex attribute type mismatch: "s + name + " / " + StringIndexer::get(impl->idVertexAttrName));
             assert(false);
         }
     }
@@ -521,53 +543,58 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
-        attributeBindings = uploadPass.buildAttributeBindings(impl->vertexCount,
-                                                              impl->vertexType,
-                                                              /*vertexAttributeIndex=*/-1,
-                                                              /*vertexData=*/{},
-                                                              shader->getVertexAttributes(),
-                                                              impl->vertexAttributes,
-                                                              usage,
-                                                              vertexBuffers);
+        auto attributeBindings_ = uploadPass.buildAttributeBindings(impl->vertexCount,
+                                                                    impl->vertexType,
+                                                                    /*vertexAttributeIndex=*/-1,
+                                                                    /*vertexData=*/{},
+                                                                    shader->getVertexAttributes(),
+                                                                    impl->vertexAttributes,
+                                                                    usage,
+                                                                    vertexBuffers);
         impl->attributeBuffers = std::move(vertexBuffers);
 
         impl->vertexAttributes.visitAttributes(
             [](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
-        // Create a layout descriptor for each attribute
-        auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
+        if (attributeBindings != attributeBindings_) {
+            attributeBindings = attributeBindings_;
 
-        NS::UInteger index = 0;
-        for (auto& binding : attributeBindings) {
-            if (!binding) {
-                assert("Missing attribute binding");
-                continue;
+            // Create a layout descriptor for each attribute
+            auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
+
+            NS::UInteger index = 0;
+            for (auto& binding : attributeBindings) {
+                if (!binding) {
+                    assert("Missing attribute binding");
+                    continue;
+                }
+
+                if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
+                    impl->noBindingBuffer = uploadPass.createVertexBufferResource(
+                        nullptr, 64, gfx::BufferUsageType::StaticDraw);
+                }
+
+                auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
+                attribDesc->setBufferIndex(index);
+                attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
+                attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
+                assert(binding->vertexStride > 0);
+
+                auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
+                layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
+                layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
+                                                                          : MTL::VertexStepFunctionConstant);
+                layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
+
+                vertDesc->attributes()->setObject(attribDesc.get(), index);
+                vertDesc->layouts()->setObject(layoutDesc.get(), index);
+
+                index += 1;
             }
 
-            if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
-                impl->noBindingBuffer = uploadPass.createVertexBufferResource(
-                    nullptr, 64, gfx::BufferUsageType::StaticDraw);
-            }
-
-            auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
-            attribDesc->setBufferIndex(index);
-            attribDesc->setOffset(static_cast<NS::UInteger>(binding->attribute.offset));
-            attribDesc->setFormat(mtlVertexTypeOf(binding->attribute.dataType));
-            assert(binding->vertexStride > 0);
-
-            auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
-            layoutDesc->setStride(static_cast<NS::UInteger>(binding->vertexStride));
-            layoutDesc->setStepFunction(binding->vertexBufferResource ? MTL::VertexStepFunctionPerVertex
-                                                                      : MTL::VertexStepFunctionConstant);
-            layoutDesc->setStepRate(binding->vertexBufferResource ? 1 : 0);
-
-            vertDesc->attributes()->setObject(attribDesc.get(), index);
-            vertDesc->layouts()->setObject(layoutDesc.get(), index);
-
-            index += 1;
+            impl->vertexDesc = std::move(vertDesc);
+            pipelineState.reset();
         }
-
-        impl->vertexDesc = std::move(vertDesc);
     }
 
     const bool texturesNeedUpload = std::any_of(
