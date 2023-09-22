@@ -14,7 +14,7 @@ void AddLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
 }
 
 void RemoveLayerGroupRequest::execute(RenderOrchestrator &orchestrator) {
-    orchestrator.removeLayerGroup(layerIndex);
+    orchestrator.removeLayerGroup(layerGroup);
 }
 
 UpdateLayerGroupIndexRequest::UpdateLayerGroupIndexRequest(LayerGroupBasePtr tileLayerGroup_, int32_t newLayerIndex_)

@@ -38,6 +38,8 @@ public:
 
     virtual void wait() {}
 
+    bool operator!=(const Renderable& other) const { return resource.get() != other.resource.get(); }
+
 protected:
     Size size;
     std::unique_ptr<RenderableResource> resource;
