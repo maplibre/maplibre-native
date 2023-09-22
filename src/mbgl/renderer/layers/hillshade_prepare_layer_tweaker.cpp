@@ -6,6 +6,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string_indexer.hpp>
@@ -13,15 +14,7 @@
 namespace mbgl {
 
 using namespace style;
-
-struct alignas(16) HillshadePrepareDrawableUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 4> unpack;
-    std::array<float, 2> dimension;
-    float zoom;
-    float maxzoom;
-};
-static_assert(sizeof(HillshadePrepareDrawableUBO) % 16 == 0);
+using namespace shaders;
 
 static const StringIdentity idHillshadePrepareDrawableUBOName = StringIndexer::get("HillshadePrepareDrawableUBO");
 
@@ -56,7 +49,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& drawableData = static_cast<const gfx::HillshadePrepareDrawableData&>(*drawable.getData());
 
         mat4 matrix;
-        matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
+        matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, -1, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
 
         const HillshadePrepareDrawableUBO drawableUBO = {
@@ -64,7 +57,14 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .unpack = */ getUnpackVector(drawableData.encoding),
             /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
             /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
+            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom),
+            /* .overdrawInspector = */ overdrawInspector,
+            /* .pad1/2/3 = */ 0,
+            0,
+            0,
+            /* .pad4/5/6 = */ 0,
+            0,
+            0};
 
         drawable.mutableUniformBuffers().createOrUpdate(
             idHillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);

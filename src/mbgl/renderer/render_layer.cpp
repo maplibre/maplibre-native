@@ -222,8 +222,12 @@ void RenderLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVe
     layerIndex = newLayerIndex;
 
     // Submit a change request to update the layer index of our tile layer group
-    if (layerGroup) {
-        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(layerGroup, newLayerIndex));
+    changeLayerIndex(layerGroup, newLayerIndex, changes);
+}
+
+void RenderLayer::changeLayerIndex(const LayerGroupBasePtr& group, int32_t newIndex, UniqueChangeRequestVec& changes) {
+    if (group && group->getLayerIndex() != newIndex) {
+        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(group, newIndex));
     }
 }
 
@@ -254,7 +258,7 @@ void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
             changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
         } else {
             // The RenderTree is informing us we should not render anything
-            changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(layerGroup_->getLayerIndex()));
+            changes.emplace_back(std::make_unique<RemoveLayerGroupRequest>(layerGroup_));
         }
     }
 }

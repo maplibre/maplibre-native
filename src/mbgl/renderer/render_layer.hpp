@@ -207,6 +207,9 @@ protected:
     /// (Un-)Register the layer group with the orchestrator
     void activateLayerGroup(const LayerGroupBasePtr&, bool activate, UniqueChangeRequestVec& changes);
 
+    /// Change the layer index on a layer group associated with this layer
+    void changeLayerIndex(const LayerGroupBasePtr&, int32_t newLayerIndex, UniqueChangeRequestVec&);
+
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
     virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
