@@ -377,19 +377,18 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), indices, segments->data(), segments->size());
     };
 
-    const auto updateTileDrawables = [&](gfx::UniqueDrawableBuilder& builder,
-                                         auto* tileLayerGroup,
-                                         const auto& tileID) {
-        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            // If this tile was created based on the current style/bucket, copy the textures
-            // over from the existing drawable, otherwise we will build new textures.
-            if (drawable.getLayerTweaker() == layerTweaker) {
-                for (auto& tex : drawable.getTextures()) {
-                    builder->setTexture(tex.second, tex.first);
+    const auto updateTileDrawables =
+        [&](gfx::UniqueDrawableBuilder& builder, auto* tileLayerGroup, const auto& tileID) {
+            tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                // If this tile was created based on the current style/bucket, copy the textures
+                // over from the existing drawable, otherwise we will build new textures.
+                if (drawable.getLayerTweaker() == layerTweaker) {
+                    for (auto& tex : drawable.getTextures()) {
+                        builder->setTexture(tex.second, tex.first);
+                    }
                 }
-            }
-        });
-    };
+            });
+        };
 
     if (imageData) {
         RasterBucket& bucket = *imageData->bucket;
