@@ -215,15 +215,6 @@ jobs:
           key: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
 
-      - name: Install Boost
-        if: runner.os == 'Windows'
-        uses: MarkusJx/install-boost@v2.4.4
-        id: install-boost
-        with:
-          boost_version: 1.83.0
-          platform_version: 2022
-          toolset: msvc
-
       - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
         run: |
@@ -232,8 +223,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
             -DMLN_WITH_NODE=ON
-        env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
 
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'

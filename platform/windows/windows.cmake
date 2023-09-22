@@ -258,11 +258,3 @@ endif()
 add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 install(TARGETS mbgl-render-test-runner RUNTIME DESTINATION bin)
-
-
-find_package(Boost 1.83.0)
-if(Boost_FOUND)
-    link_directories(${Boost_LIBRARY_DIR})
-else()
-    message(WARNING "Did not find Boost. Linking may fail.")
-endif()
