@@ -332,11 +332,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
         texture->setImage(bucket.image);
         texture->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        
+
         if (auto location0 = rasterShader->getSamplerLocation(idTexImage0Name); location0.has_value()) {
             builder->setTexture(texture, location0.value());
         }
-        
+
         if (auto location1 = rasterShader->getSamplerLocation(idTexImage1Name); location1.has_value()) {
             builder->setTexture(texture, location1.value());
         }
