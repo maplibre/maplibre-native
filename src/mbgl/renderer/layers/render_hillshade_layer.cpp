@@ -18,6 +18,7 @@
 #include <mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
@@ -72,9 +73,7 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties));
-    }
+    updateLayerTweaker();
 #endif
 }
 
@@ -285,10 +284,20 @@ static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
 static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
 static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 
+#if MLN_DRAWABLE_RENDERER
+void RenderHillshadeLayer::updateLayerTweaker() {
+    if (layerGroup) {
+        tweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
+        tweaker->enableOverdrawInspector(overdrawInspector);
+        layerGroup->setLayerTweaker(tweaker);
+    }
+}
+#endif // MLN_DRAWABLE_RENDERER
+
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
-                                  const std::shared_ptr<UpdateParameters>&,
+                                  const std::shared_ptr<UpdateParameters>& updateParameters,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -304,8 +313,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!layerGroup_) {
             return;
         }
-        layerGroup_->setLayerTweaker(std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties));
         setLayerGroup(std::move(layerGroup_), changes);
+        updateLayerTweaker();
     }
 
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
@@ -319,6 +328,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     if (!hillshadePrepareShader || !hillshadeShader) {
         removeAllDrawables();
         return;
+    }
+
+    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
+    if (overdrawInspector != overdraw) {
+        overdrawInspector = overdraw;
+        if (tweaker) {
+            tweaker->enableOverdrawInspector(overdrawInspector);
+        }
     }
 
     auto renderPass = RenderPass::Translucent;
@@ -372,8 +389,9 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             if (!singleTileLayerGroup) {
                 return;
             }
-            singleTileLayerGroup->setLayerTweaker(
-                std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties));
+            const auto prepareTweaker = std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties);
+            prepareTweaker->enableOverdrawInspector(overdrawInspector);
+            singleTileLayerGroup->setLayerTweaker(prepareTweaker);
             renderTarget->addLayerGroup(singleTileLayerGroup, /*replace=*/true);
 
             gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
