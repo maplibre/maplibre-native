@@ -19,6 +19,7 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/utf_impl.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/utrie2.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/utypes.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/icu/src/unistr.cpp
 )
 
 target_compile_definitions(
