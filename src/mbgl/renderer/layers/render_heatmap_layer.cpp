@@ -342,12 +342,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     }
     layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
-    if (!textureTweaker) {
-        textureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
-        layerGroup->addLayerTweaker(textureTweaker);
-    }
-    textureTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
-
     std::unique_ptr<gfx::DrawableBuilder> heatmapBuilder;
     constexpr auto renderPass = RenderPass::Translucent;
 
@@ -448,13 +442,20 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up texture layer group
     if (!layerGroup) {
-        auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID());
-        if (!layerGroup_) {
+        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
+            if (textureTweaker) {
+                layerGroup_->addLayerTweaker(textureTweaker);
+            }
+            setLayerGroup(std::move(layerGroup_), changes);
+        } else {
             return;
         }
-        setLayerGroup(std::move(layerGroup_), changes);
-        textureTweaker.reset();
     }
+    if (!textureTweaker) {
+        textureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
+        layerGroup->addLayerTweaker(textureTweaker);
+    }
+    textureTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!heatmapTextureShader) {
         heatmapTextureShader = context.getGenericShader(shaders, HeatmapTextureShaderGroupName);
@@ -465,6 +466,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     auto* textureLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
+    // TODO: Don't rebuild drawables every time
     textureLayerGroup->clearDrawables();
 
     std::unique_ptr<gfx::DrawableBuilder> heatmapTextureBuilder;
@@ -514,8 +516,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     heatmapTextureBuilder->flush();
 
     for (auto& drawable : heatmapTextureBuilder->clearDrawables()) {
+        drawable->setLayerTweaker(textureTweaker);
         textureLayerGroup->addDrawable(std::move(drawable));
-        drawable->setLayerTweaker(layerTweaker);
         ++stats.drawablesAdded;
     }
 }
