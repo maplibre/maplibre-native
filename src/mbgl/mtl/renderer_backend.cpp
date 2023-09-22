@@ -20,6 +20,8 @@
 #include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
 #include <mbgl/shaders/mtl/heatmap.hpp>
 #include <mbgl/shaders/mtl/heatmap_texture.hpp>
+#include <mbgl/shaders/mtl/hillshade.hpp>
+#include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
 #include <mbgl/shaders/mtl/line_gradient.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
@@ -130,7 +132,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
-                  // shaders::BuiltIn::HillshadeShader,
+                  shaders::BuiltIn::HillshadeShader,
+                  shaders::BuiltIn::HillshadePrepareShader,
                   shaders::BuiltIn::LineShader,
                   shaders::BuiltIn::LineGradientShader,
                   // shaders::BuiltIn::LineSDFShader,

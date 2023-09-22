@@ -45,7 +45,6 @@ public:
 
     bool needsUpload() const noexcept override { return !!image; };
 
-public:
     gfx::Texture2D& setUsage(MTL::TextureUsage usage_) noexcept;
 
     MTL::Texture* getMetalTexture() const noexcept;
