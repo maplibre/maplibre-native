@@ -259,6 +259,7 @@ objc_library(
         "src/logging_nslog.mm",
         "src/nsthread.mm",
         "src/number_format.mm",
+        "src/utf.mm",
         "src/string_nsstring.mm",
     ] + select({
         "//:metal_renderer": [],

@@ -53,7 +53,6 @@ cc_library(
         "src/mbgl/util/monotonic_timer.cpp",
         "src/mbgl/util/png_writer.cpp",
         "src/mbgl/util/thread_local.cpp",
-        "src/mbgl/util/utf.cpp",
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": ["src/mbgl/gl/headless_backend.cpp"],
@@ -75,6 +74,11 @@ cc_library(
             "src/mbgl/util/webp_reader.cpp",
         ],
         "//:ios": [],
+    }) + select({
+        "//:ios": [],
+        "//conditions:default": [
+            "src/mbgl/util/utf.cpp",
+        ]
     }),
     hdrs = [
         "include/mbgl/gfx/headless_backend.hpp",
