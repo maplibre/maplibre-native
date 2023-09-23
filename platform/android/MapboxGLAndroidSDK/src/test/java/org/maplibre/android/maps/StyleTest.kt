@@ -81,6 +81,7 @@ class StyleTest {
         every { layer.id } returns "1"
         val builder = Style.Builder().withLayer(layer)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
@@ -96,6 +97,7 @@ class StyleTest {
         every { layer.id } returns "1"
         val builder = Style.Builder().withLayerAbove(layer, "id")
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { nativeMapView.addLayerAbove(layer, "id") }
     }
@@ -106,6 +108,7 @@ class StyleTest {
         every { layer.id } returns "1"
         val builder = Style.Builder().withLayerBelow(layer, "id")
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { nativeMapView.addLayerBelow(layer, "id") }
     }
@@ -116,6 +119,7 @@ class StyleTest {
         every { layer.id } returns "1"
         val builder = Style.Builder().withLayerAt(layer, 1)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { nativeMapView.addLayerAt(layer, 1) }
     }
@@ -126,6 +130,7 @@ class StyleTest {
         every { source.id } returns "1"
         val builder = Style.Builder().withSource(source)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { nativeMapView.addSource(source) }
     }
@@ -135,6 +140,7 @@ class StyleTest {
         val transitionOptions = TransitionOptions(100, 200)
         val builder = Style.Builder().withTransition(transitionOptions)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { nativeMapView.transitionOptions = transitionOptions }
     }
@@ -147,6 +153,7 @@ class StyleTest {
             Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withSource(source)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addSource(source) }
     }
@@ -158,6 +165,7 @@ class StyleTest {
         val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayer(layer)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
@@ -175,6 +183,7 @@ class StyleTest {
             Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayerAt(layer, 1)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addLayerAt(layer, 1) }
     }
@@ -187,6 +196,7 @@ class StyleTest {
             .withLayerBelow(layer, "below")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addLayerBelow(layer, "below") }
     }
@@ -199,6 +209,7 @@ class StyleTest {
             .withLayerBelow(layer, "below")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addLayerBelow(layer, "below") }
     }
@@ -210,6 +221,7 @@ class StyleTest {
             .withTransition(transitionOptions)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.transitionOptions = transitionOptions }
     }
@@ -221,6 +233,7 @@ class StyleTest {
         val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
         maplibreMap.setStyle(builder, callback)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
     }
@@ -233,6 +246,7 @@ class StyleTest {
         every { source.id } returns "1"
         val builder = Style.Builder().withSource(source)
         maplibreMap.setStyle(builder, callback)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { nativeMapView.addSource(source) }
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
@@ -247,6 +261,7 @@ class StyleTest {
         every { source.id } returns "1"
         val builder = Style.Builder().withSource(source)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
         verify(exactly = 1) { nativeMapView.addSource(source) }
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
@@ -262,6 +277,7 @@ class StyleTest {
         val builder = Style.Builder().fromJson("{}")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleJson = "{}" }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
     }
@@ -277,6 +293,7 @@ class StyleTest {
             Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withSource(source)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addSource(source) }
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
@@ -294,6 +311,7 @@ class StyleTest {
             .withTransition(transitionOptions)
         maplibreMap.setStyle(builder)
         Assert.assertNull(maplibreMap.style)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         Assert.assertNotNull(maplibreMap.style)
     }
@@ -308,6 +326,7 @@ class StyleTest {
         val builder = Style.Builder().fromJson("{}")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleJson = "{}" }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
         verify(exactly = 1) { callback.onStyleLoaded(any()) }
@@ -317,6 +336,7 @@ class StyleTest {
     fun testIllegalStateExceptionWithStyleReload() {
         val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         val style = maplibreMap.style
         maplibreMap.setStyle(Style.Builder().fromUrl(Style.getPredefinedStyle("Bright")))
@@ -331,6 +351,7 @@ class StyleTest {
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Satellite Hybrid") }
         verify(exactly = 0) { nativeMapView.addImages(any()) }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addImages(any()) }
     }
@@ -345,6 +366,7 @@ class StyleTest {
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Satellite Hybrid") }
         verify(exactly = 0) { nativeMapView.addImages(any()) }
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
         verify(exactly = 1) { nativeMapView.addImages(any()) }
     }
@@ -358,6 +380,7 @@ class StyleTest {
 
         val builder = Style.Builder().withSource(source1)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
 
         every { nativeMapView.addSource(any()) } throws CannotAddSourceException("Duplicate ID")
@@ -382,6 +405,7 @@ class StyleTest {
 
         val builder = Style.Builder().withLayer(layer1)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
 
         every { nativeMapView.addLayer(any()) } throws CannotAddLayerException("Duplicate ID")
@@ -406,6 +430,7 @@ class StyleTest {
 
         val builder = Style.Builder().withLayer(layer1)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
 
         every {
@@ -435,6 +460,7 @@ class StyleTest {
 
         val builder = Style.Builder().withLayer(layer1)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
 
         every {
@@ -464,6 +490,7 @@ class StyleTest {
 
         val builder = Style.Builder().withLayer(layer1)
         maplibreMap.setStyle(builder)
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.notifyStyleLoaded()
 
         every { nativeMapView.addLayerAt(any(), 5) } throws CannotAddLayerException("Duplicate ID")

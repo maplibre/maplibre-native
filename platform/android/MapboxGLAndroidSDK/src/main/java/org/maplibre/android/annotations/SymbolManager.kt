@@ -1,7 +1,6 @@
 package org.maplibre.android.annotations
 
 import androidx.annotation.UiThread
-import com.mapbox.geojson.FeatureCollection
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
@@ -33,7 +32,7 @@ class SymbolManager @UiThread internal constructor(
         mapView,
         maplibreMap
     )
-) : AnnotationManager<SymbolLayer, Symbol, SymbolOptions, OnSymbolDragListener, OnSymbolClickListener, OnSymbolLongClickListener>(
+) : AnnotationManager<SymbolLayer, KSymbol>(
     mapView,
     maplibreMap,
     style,
@@ -85,8 +84,8 @@ class SymbolManager @UiThread internal constructor(
         mapView: MapView,
         maplibreMap: MapLibreMap,
         style: Style,
-        belowLayerId: String?,
-        aboveLayerId: String?,
+        belowLayerId: String? = null,
+        aboveLayerId: String? = null,
         clusterOptions: ClusterOptions
     ) : this(
         mapView,
@@ -100,307 +99,146 @@ class SymbolManager @UiThread internal constructor(
         clusterOptions.apply(style, coreElementProvider.sourceId)
     }
 
-    override fun initializeDataDrivenPropertyMap() = listOf(
-        SymbolOptions.PROPERTY_SYMBOL_SORT_KEY,
-        SymbolOptions.PROPERTY_ICON_SIZE,
-        SymbolOptions.PROPERTY_ICON_IMAGE,
-        SymbolOptions.PROPERTY_ICON_ROTATE,
-        SymbolOptions.PROPERTY_ICON_OFFSET,
-        SymbolOptions.PROPERTY_ICON_ANCHOR,
-        SymbolOptions.PROPERTY_TEXT_FIELD,
-        SymbolOptions.PROPERTY_TEXT_FONT,
-        SymbolOptions.PROPERTY_TEXT_SIZE,
-        SymbolOptions.PROPERTY_TEXT_MAX_WIDTH,
-        SymbolOptions.PROPERTY_TEXT_LETTER_SPACING,
-        SymbolOptions.PROPERTY_TEXT_JUSTIFY,
-        SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET,
-        SymbolOptions.PROPERTY_TEXT_ANCHOR,
-        SymbolOptions.PROPERTY_TEXT_ROTATE,
-        SymbolOptions.PROPERTY_TEXT_TRANSFORM,
-        SymbolOptions.PROPERTY_TEXT_OFFSET,
-        SymbolOptions.PROPERTY_ICON_OPACITY,
-        SymbolOptions.PROPERTY_ICON_COLOR,
-        SymbolOptions.PROPERTY_ICON_HALO_COLOR,
-        SymbolOptions.PROPERTY_ICON_HALO_WIDTH,
-        SymbolOptions.PROPERTY_ICON_HALO_BLUR,
-        SymbolOptions.PROPERTY_TEXT_OPACITY,
-        SymbolOptions.PROPERTY_TEXT_COLOR,
-        SymbolOptions.PROPERTY_TEXT_HALO_COLOR,
-        SymbolOptions.PROPERTY_TEXT_HALO_WIDTH,
-        SymbolOptions.PROPERTY_TEXT_HALO_BLUR
-    ).associateWith { false }.let { dataDrivenPropertyUsageMap.putAll(it) }
+    override fun generateDataDrivenPropertyExpression(property: String): PropertyValue<Expression> = when (property) {
+        KSymbol.PROPERTY_SYMBOL_SORT_KEY -> PropertyFactory.symbolSortKey(
+            Expression.get(KSymbol.PROPERTY_SYMBOL_SORT_KEY)
+        )
 
-    override fun setDataDrivenPropertyIsUsed(property: String) {
-        when (property) {
-            SymbolOptions.PROPERTY_SYMBOL_SORT_KEY -> layer.setProperties(
-                PropertyFactory.symbolSortKey(
-                    Expression.get(SymbolOptions.PROPERTY_SYMBOL_SORT_KEY)
-                )
-            )
+        KSymbol.PROPERTY_ICON_SIZE -> PropertyFactory.iconSize(
+            Expression.get(KSymbol.PROPERTY_ICON_SIZE)
+        )
 
-            SymbolOptions.PROPERTY_ICON_SIZE -> layer.setProperties(
-                PropertyFactory.iconSize(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_SIZE)
-                )
-            )
+        KSymbol.PROPERTY_ICON_IMAGE -> PropertyFactory.iconImage(
+            Expression.get(KSymbol.PROPERTY_ICON_IMAGE)
+        )
 
-            SymbolOptions.PROPERTY_ICON_IMAGE -> layer.setProperties(
-                PropertyFactory.iconImage(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_IMAGE)
-                )
-            )
+        KSymbol.PROPERTY_ICON_ROTATE -> PropertyFactory.iconRotate(
+            Expression.get(KSymbol.PROPERTY_ICON_ROTATE)
+        )
 
-            SymbolOptions.PROPERTY_ICON_ROTATE -> layer.setProperties(
-                PropertyFactory.iconRotate(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_ROTATE)
-                )
-            )
+        KSymbol.PROPERTY_ICON_OFFSET -> PropertyFactory.iconOffset(
+            Expression.get(KSymbol.PROPERTY_ICON_OFFSET)
+        )
 
-            SymbolOptions.PROPERTY_ICON_OFFSET -> layer.setProperties(
-                PropertyFactory.iconOffset(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_OFFSET)
-                )
-            )
+        KSymbol.PROPERTY_ICON_ANCHOR -> PropertyFactory.iconAnchor(
+            Expression.get(KSymbol.PROPERTY_ICON_ANCHOR)
+        )
 
-            SymbolOptions.PROPERTY_ICON_ANCHOR -> layer.setProperties(
-                PropertyFactory.iconAnchor(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_ANCHOR)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_FIELD -> PropertyFactory.textField(
+            Expression.get(KSymbol.PROPERTY_TEXT_FIELD)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_FIELD -> layer.setProperties(
-                PropertyFactory.textField(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_FIELD)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_FONT -> PropertyFactory.textFont(
+            Expression.get(KSymbol.PROPERTY_TEXT_FONT)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_FONT -> layer.setProperties(
-                PropertyFactory.textFont(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_FONT)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_SIZE -> PropertyFactory.textSize(
+            Expression.get(KSymbol.PROPERTY_TEXT_SIZE)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_SIZE -> layer.setProperties(
-                PropertyFactory.textSize(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_SIZE)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_MAX_WIDTH -> PropertyFactory.textMaxWidth(
+            Expression.get(KSymbol.PROPERTY_TEXT_MAX_WIDTH)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_MAX_WIDTH -> layer.setProperties(
-                PropertyFactory.textMaxWidth(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_MAX_WIDTH)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_LETTER_SPACING -> PropertyFactory.textLetterSpacing(
+            Expression.get(KSymbol.PROPERTY_TEXT_LETTER_SPACING)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_LETTER_SPACING -> layer.setProperties(
-                PropertyFactory.textLetterSpacing(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_LETTER_SPACING)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_JUSTIFY -> PropertyFactory.textJustify(
+            Expression.get(KSymbol.PROPERTY_TEXT_JUSTIFY)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_JUSTIFY -> layer.setProperties(
-                PropertyFactory.textJustify(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_JUSTIFY)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_RADIAL_OFFSET -> PropertyFactory.textRadialOffset(
+            Expression.get(KSymbol.PROPERTY_TEXT_RADIAL_OFFSET)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET -> layer.setProperties(
-                PropertyFactory.textRadialOffset(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_ANCHOR -> PropertyFactory.textAnchor(
+            Expression.get(KSymbol.PROPERTY_TEXT_ANCHOR)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_ANCHOR -> layer.setProperties(
-                PropertyFactory.textAnchor(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_ANCHOR)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_ROTATE -> PropertyFactory.textRotate(
+            Expression.get(KSymbol.PROPERTY_TEXT_ROTATE)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_ROTATE -> layer.setProperties(
-                PropertyFactory.textRotate(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_ROTATE)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_TRANSFORM -> PropertyFactory.textTransform(
+            Expression.get(KSymbol.PROPERTY_TEXT_TRANSFORM)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_TRANSFORM -> layer.setProperties(
-                PropertyFactory.textTransform(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_TRANSFORM)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_OFFSET -> PropertyFactory.textOffset(
+            Expression.get(KSymbol.PROPERTY_TEXT_OFFSET)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_OFFSET -> layer.setProperties(
-                PropertyFactory.textOffset(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_OFFSET)
-                )
-            )
+        KSymbol.PROPERTY_ICON_OPACITY -> PropertyFactory.iconOpacity(
+            Expression.get(KSymbol.PROPERTY_ICON_OPACITY)
 
-            SymbolOptions.PROPERTY_ICON_OPACITY -> layer.setProperties(
-                PropertyFactory.iconOpacity(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_OPACITY)
-                )
-            )
+        )
 
-            SymbolOptions.PROPERTY_ICON_COLOR -> layer.setProperties(
-                PropertyFactory.iconColor(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_COLOR)
-                )
-            )
+        KSymbol.PROPERTY_ICON_COLOR -> PropertyFactory.iconColor(
+            Expression.get(KSymbol.PROPERTY_ICON_COLOR)
+        )
 
-            SymbolOptions.PROPERTY_ICON_HALO_COLOR -> layer.setProperties(
-                PropertyFactory.iconHaloColor(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_HALO_COLOR)
-                )
-            )
+        KSymbol.PROPERTY_ICON_HALO_COLOR -> PropertyFactory.iconHaloColor(
+            Expression.get(KSymbol.PROPERTY_ICON_HALO_COLOR)
+        )
 
-            SymbolOptions.PROPERTY_ICON_HALO_WIDTH -> layer.setProperties(
-                PropertyFactory.iconHaloWidth(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_HALO_WIDTH)
-                )
-            )
+        KSymbol.PROPERTY_ICON_HALO_WIDTH -> PropertyFactory.iconHaloWidth(
+            Expression.get(KSymbol.PROPERTY_ICON_HALO_WIDTH)
+        )
 
-            SymbolOptions.PROPERTY_ICON_HALO_BLUR -> layer.setProperties(
-                PropertyFactory.iconHaloBlur(
-                    Expression.get(SymbolOptions.PROPERTY_ICON_HALO_BLUR)
-                )
-            )
+        KSymbol.PROPERTY_ICON_HALO_BLUR -> PropertyFactory.iconHaloBlur(
+            Expression.get(KSymbol.PROPERTY_ICON_HALO_BLUR)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_OPACITY -> layer.setProperties(
-                PropertyFactory.textOpacity(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_OPACITY)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_OPACITY -> PropertyFactory.textOpacity(
+            Expression.get(KSymbol.PROPERTY_TEXT_OPACITY)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_COLOR -> layer.setProperties(
-                PropertyFactory.textColor(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_COLOR)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_COLOR -> PropertyFactory.textColor(
+            Expression.get(KSymbol.PROPERTY_TEXT_COLOR)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_HALO_COLOR -> layer.setProperties(
-                PropertyFactory.textHaloColor(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_HALO_COLOR)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_HALO_COLOR -> PropertyFactory.textHaloColor(
+            Expression.get(KSymbol.PROPERTY_TEXT_HALO_COLOR)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_HALO_WIDTH -> layer.setProperties(
-                PropertyFactory.textHaloWidth(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_HALO_WIDTH)
-                )
-            )
+        KSymbol.PROPERTY_TEXT_HALO_WIDTH -> PropertyFactory.textHaloWidth(
+            Expression.get(KSymbol.PROPERTY_TEXT_HALO_WIDTH)
+        )
 
-            SymbolOptions.PROPERTY_TEXT_HALO_BLUR -> layer.setProperties(
-                PropertyFactory.textHaloBlur(
-                    Expression.get(SymbolOptions.PROPERTY_TEXT_HALO_BLUR)
-                )
-            )
-        }
+        KSymbol.PROPERTY_TEXT_HALO_BLUR -> PropertyFactory.textHaloBlur(
+            Expression.get(KSymbol.PROPERTY_TEXT_HALO_BLUR)
+        )
+
+        else -> throw IllegalArgumentException(
+            "$property is not a valid data-driven property for a symbol."
+        )
     }
 
-    /**
-     * Create a list of symbols on the map.
-     *
-     *
-     * Symbols are going to be created only for features with a matching geometry.
-     *
-     *
-     * All supported properties are:<br></br>
-     * SymbolOptions.PROPERTY_SYMBOL_SORT_KEY - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_SIZE - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_IMAGE - String<br></br>
-     * SymbolOptions.PROPERTY_ICON_ROTATE - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_OFFSET - Float[]<br></br>
-     * SymbolOptions.PROPERTY_ICON_ANCHOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_FIELD - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_FONT - String[]<br></br>
-     * SymbolOptions.PROPERTY_TEXT_SIZE - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_MAX_WIDTH - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_LETTER_SPACING - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_JUSTIFY - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_ANCHOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_ROTATE - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_TRANSFORM - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_OFFSET - Float[]<br></br>
-     * SymbolOptions.PROPERTY_ICON_OPACITY - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_ICON_HALO_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_ICON_HALO_WIDTH - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_HALO_BLUR - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_OPACITY - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_HALO_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_HALO_WIDTH - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_HALO_BLUR - Float<br></br>
-     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
-     *
-     *
-     * Out of spec properties:<br></br>
-     * "is-draggable" - Boolean, true if the symbol should be draggable, false otherwise
-     *
-     * @param json the GeoJSON defining the list of symbols to build
-     * @return the list of built symbols
-     */
-    @UiThread
-    fun create(json: String): List<Symbol?> {
-        return create(FeatureCollection.fromJson(json))
+    override fun addDragListener(d: OnSymbolDragListener) {
+        super.addDragListener(d)
     }
 
-    /**
-     * Create a list of symbols on the map.
-     *
-     *
-     * Symbols are going to be created only for features with a matching geometry.
-     *
-     *
-     * All supported properties are:<br></br>
-     * SymbolOptions.PROPERTY_SYMBOL_SORT_KEY - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_SIZE - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_IMAGE - String<br></br>
-     * SymbolOptions.PROPERTY_ICON_ROTATE - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_OFFSET - Float[]<br></br>
-     * SymbolOptions.PROPERTY_ICON_ANCHOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_FIELD - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_FONT - String[]<br></br>
-     * SymbolOptions.PROPERTY_TEXT_SIZE - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_MAX_WIDTH - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_LETTER_SPACING - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_JUSTIFY - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_RADIAL_OFFSET - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_ANCHOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_ROTATE - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_TRANSFORM - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_OFFSET - Float[]<br></br>
-     * SymbolOptions.PROPERTY_ICON_OPACITY - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_ICON_HALO_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_ICON_HALO_WIDTH - Float<br></br>
-     * SymbolOptions.PROPERTY_ICON_HALO_BLUR - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_OPACITY - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_HALO_COLOR - String<br></br>
-     * SymbolOptions.PROPERTY_TEXT_HALO_WIDTH - Float<br></br>
-     * SymbolOptions.PROPERTY_TEXT_HALO_BLUR - Float<br></br>
-     * Learn more about above properties in the [Style specification](https://maplibre.org/maplibre-style-spec/).
-     *
-     *
-     * Out of spec properties:<br></br>
-     * "is-draggable" - Boolean, true if the symbol should be draggable, false otherwise
-     *
-     * @param featureCollection the featureCollection defining the list of symbols to build
-     * @return the list of built symbols
-     */
-    @UiThread
-    fun create(featureCollection: FeatureCollection): List<Symbol> = featureCollection.features()?.mapNotNull {
-        SymbolOptions.fromFeature(it)
-    }.let { create(it ?: emptyList()) }
+    override fun removeDragListener(d: OnSymbolDragListener) {
+        super.removeDragListener(d)
+    }
 
-    /**
-     * Key of the id of the annotation.
-     */
-    override val annotationIdKey: String
-        get() = Symbol.ID_KEY
+    override fun addClickListener(u: OnSymbolClickListener) {
+        super.addClickListener(u)
+    }
 
-    // Property accessors
+    override fun removeClickListener(u: OnSymbolClickListener) {
+        super.removeClickListener(u)
+    }
+
+    override fun addLongClickListener(v: OnSymbolLongClickListener) {
+        super.addLongClickListener(v)
+    }
+
+    override fun removeLongClickListener(v: OnSymbolLongClickListener) {
+        super.removeLongClickListener(v)
+    }
+
+// Property accessors
     /**
      * Label placement relative to its geometry.
      */
@@ -573,7 +411,7 @@ class SymbolManager @UiThread internal constructor(
         get() = layer.textVariableAnchor.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textVariableAnchor(value)
-            constantPropertyUsageMap.put(PROPERTY_TEXT_VARIABLE_ANCHOR, propertyValue)
+            constantPropertyUsageMap[PROPERTY_TEXT_VARIABLE_ANCHOR] = propertyValue
             layer.setProperties(propertyValue)
         }
 
@@ -650,7 +488,7 @@ class SymbolManager @UiThread internal constructor(
         get() = layer.iconTranslate.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconTranslate(value)
-            constantPropertyUsageMap.put(PROPERTY_ICON_TRANSLATE, propertyValue)
+            constantPropertyUsageMap[PROPERTY_ICON_TRANSLATE] = propertyValue
             layer.setProperties(propertyValue)
         }
 
@@ -674,7 +512,7 @@ class SymbolManager @UiThread internal constructor(
         get() = layer.textTranslate.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textTranslate(value)
-            constantPropertyUsageMap.put(PROPERTY_TEXT_TRANSLATE, propertyValue)
+            constantPropertyUsageMap[PROPERTY_TEXT_TRANSLATE] = propertyValue
             layer.setProperties(propertyValue)
         }
 

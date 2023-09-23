@@ -58,6 +58,7 @@ class MapLibreMapTest {
         every { nativeMapView.nativePtr } returns 5
         maplibreMap.injectLocationComponent(spyk())
         maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
         maplibreMap.onFinishLoadingStyle()
     }
 

@@ -51,7 +51,7 @@ final class DraggableAnnotationController {
   private final int touchAreaMaxY;
 
   @Nullable
-  private AbstractAnnotation draggedAnnotation;
+  private KAnnotation draggedAnnotation;
   @Nullable
   private AnnotationManager draggedAnnotationManager;
 
@@ -79,7 +79,7 @@ final class DraggableAnnotationController {
       @Override
       public boolean onTouch(View v, MotionEvent event) {
         // Using active gesture manager
-        AbstractAnnotation oldAnnotation = draggedAnnotation;
+        KAnnotation oldAnnotation = draggedAnnotation;
         androidGesturesManager.onTouchEvent(event);
         // if drag is started or drag is finished, don't pass motion events further
         return draggedAnnotation != null || oldAnnotation != null;
@@ -98,7 +98,7 @@ final class DraggableAnnotationController {
     }
   }
 
-  void onAnnotationDeleted(AbstractAnnotation annotation) {
+  void onAnnotationDeleted(KAnnotation annotation) {
     if (annotation == draggedAnnotation) {
       stopDragging(draggedAnnotation, draggedAnnotationManager);
     }
@@ -107,7 +107,7 @@ final class DraggableAnnotationController {
   boolean onMoveBegin(MoveGestureDetector detector) {
     for (AnnotationManager annotationManager : annotationManagers) {
       if (detector.getPointersCount() == 1) {
-        AbstractAnnotation annotation = annotationManager.queryMapForFeatures(detector.getFocalPoint());
+        KAnnotation annotation = annotationManager.queryMapForFeatures(detector.getFocalPoint());
         if (annotation != null && startDragging(annotation, annotationManager)) {
           return true;
         }
@@ -142,7 +142,7 @@ final class DraggableAnnotationController {
       );
 
       if (shiftedGeometry != null) {
-        draggedAnnotation.setGeometry(
+        draggedAnnotation.setGeometry$MapboxGLAndroidSDK_debug(
           shiftedGeometry
         );
         draggedAnnotationManager.updateSource();
@@ -163,7 +163,7 @@ final class DraggableAnnotationController {
     stopDragging(draggedAnnotation, draggedAnnotationManager);
   }
 
-  boolean startDragging(@NonNull AbstractAnnotation annotation, @NonNull AnnotationManager annotationManager) {
+  boolean startDragging(@NonNull KAnnotation annotation, @NonNull AnnotationManager annotationManager) {
     if (annotation.isDraggable()) {
       for (OnAnnotationDragListener d : (List<OnAnnotationDragListener>) annotationManager.getDragListeners()) {
         d.onAnnotationDragStarted(annotation);
@@ -175,7 +175,7 @@ final class DraggableAnnotationController {
     return false;
   }
 
-  void stopDragging(@Nullable AbstractAnnotation annotation, @Nullable AnnotationManager annotationManager) {
+  void stopDragging(@Nullable KAnnotation annotation, @Nullable AnnotationManager annotationManager) {
     if (annotation != null && annotationManager != null) {
       for (OnAnnotationDragListener d : (List<OnAnnotationDragListener>) annotationManager.getDragListeners()) {
         d.onAnnotationDragFinished(annotation);

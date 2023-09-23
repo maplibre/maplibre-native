@@ -5,7 +5,7 @@ package org.maplibre.android.annotations
  *
  * @param T generic parameter extending from Annotation
  */
-interface OnAnnotationDragListener<T : AbstractAnnotation<*>> {
+interface OnAnnotationDragListener<T : KAnnotation<*>> {
     /**
      * Called when an annotation dragging has started.
      *
@@ -27,3 +27,8 @@ interface OnAnnotationDragListener<T : AbstractAnnotation<*>> {
      */
     fun onAnnotationDragFinished(annotation: T)
 }
+
+/**
+ * Interface definition for a callback to be invoked when a symbol is dragged.
+ */
+typealias OnSymbolDragListener = OnAnnotationDragListener<KSymbol>
