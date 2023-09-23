@@ -56,10 +56,10 @@ ifeq ($(MASON_PLATFORM),macos)
 endif
 
 ifeq ($(V), 1)
-  export XCPRETTY
+  export XCBEAUTIFY
   NINJA_ARGS ?= -v
 else
-  export XCPRETTY ?= | tee '$(shell pwd)/build/xcodebuild-$(shell date +"%Y-%m-%d_%H%M%S").log' | xcpretty
+  export XCBEAUTIFY ?= | tee '$(shell pwd)/build/xcodebuild-$(shell date +"%Y-%m-%d_%H%M%S").log' | xcbeautify
   NINJA_ARGS ?=
 endif
 
@@ -127,7 +127,7 @@ $(IOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/ios/WorkspaceSettin
 
 .PHONY: ios
 ios: $(IOS_PROJ_PATH)
-	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' build $(XCPRETTY)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' build $(XCBEAUTIFY)
 
 #  make iproj
 .PHONY: iproj
@@ -165,28 +165,28 @@ ios-sizetest:
 #  make ios-uitest
 .PHONY: ios-uitest
 ios-uitest: $(IOS_PROJ_PATH)
-	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'iosapp' test $(XCPRETTY)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'iosapp' test $(XCBEAUTIFY)
 	echo "You can review uitest results:  open $(IOS_OUTPUT_PATH)/Logs/Test"
 
 .PHONY: ios-test
 ios-test: style-code $(IOS_PROJ_PATH)
-	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCPRETTY)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' test $(XCBEAUTIFY)
 
 .PHONY: ios-integration-test
 ios-integration-test: $(IOS_PROJ_PATH)
-	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'Integration Test Harness' test $(XCPRETTY)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'Integration Test Harness' test $(XCBEAUTIFY)
 
 .PHONY: ios-sanitize
 ios-sanitize: $(IOS_PROJ_PATH)
-	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' -enableThreadSanitizer YES -enableUndefinedBehaviorSanitizer YES test $(XCPRETTY)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' -enableThreadSanitizer YES -enableUndefinedBehaviorSanitizer YES test $(XCBEAUTIFY)
 
 .PHONY: ios-sanitize-address
 ios-sanitize-address: $(IOS_PROJ_PATH)
-	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' -enableAddressSanitizer YES test $(XCPRETTY)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) -scheme 'CI' -enableAddressSanitizer YES test $(XCBEAUTIFY)
 
 .PHONY: ios-static-analyzer
 ios-static-analyzer: $(IOS_PROJ_PATH)
-	set -o pipefail && $(IOS_XCODEBUILD_SIM) analyze -scheme 'CI' test $(XCPRETTY)
+	set -o pipefail && $(IOS_XCODEBUILD_SIM) analyze -scheme 'CI' test $(XCBEAUTIFY)
 
 .PHONY: ios-install-simulators
 ios-install-simulators:
@@ -265,7 +265,7 @@ $(MACOS_USER_DATA_PATH)/WorkspaceSettings.xcsettings: platform/macos/WorkspaceSe
 
 .PHONY: macos
 macos: $(MACOS_PROJ_PATH)
-	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' build $(XCPRETTY)
+	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' build $(XCBEAUTIFY)
 
 .PHONY: xproj
 xproj: $(MACOS_PROJ_PATH) style-code
@@ -274,7 +274,7 @@ xproj: $(MACOS_PROJ_PATH) style-code
 #  make macos-test
 .PHONY: macos-test
 macos-test: style-code $(MACOS_PROJ_PATH)
-	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCPRETTY)
+	set -o pipefail && $(MACOS_XCODEBUILD) -scheme 'CI' test $(XCBEAUTIFY)
 
 .PHONY: macos-lint
 macos-lint:

@@ -23,9 +23,9 @@ Before building, follow these steps to install prerequisites:
    # To install the CMake documentation
    brew list cmake-docs || brew install cmake-docs
    ```
-1. Install [xcpretty](https://github.com/supermarin/xcpretty) (optional, used for prettifying command line builds):
+1. Install [xcbeautify](https://github.com/tuist/xcbeautify) (optional, used for prettifying command line builds):
    ```
-   [sudo] gem install xcpretty
+   [sudo] brew install xcbeautify
    ```
 1. Install [jazzy](https://github.com/realm/jazzy) for generating API documentation:
    ```

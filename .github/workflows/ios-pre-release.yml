@@ -30,7 +30,7 @@ jobs:
           brew list pkg-config 1> /dev/null || brew install pkg-config
           brew list glfw 1> /dev/null || brew install glfw
           brew list node 1> /dev/null || brew install node
-          gem list -i xcpretty || sudo gem install xcpretty
+          brew list xbeautify 1> /dev/null || brew install xbeautify
 
       - name: Cache node modules
         uses: actions/cache@v3

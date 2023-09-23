@@ -74,7 +74,7 @@ xcodebuild \
     -scheme ${SCHEME} \
     -configuration ${BUILDTYPE} \
     -sdk iphonesimulator \
-    -jobs ${JOBS} | tee ${LOG_PATH} | xcpretty
+    -jobs ${JOBS} | tee ${LOG_PATH} | xcbeautify
 
 step "Building ${FORMAT} archive for iOS devices using ${SCHEME} scheme  -> ${BINOUT}/${NAME}-iphoneos.xcarchive"
 xcodebuild \
@@ -88,7 +88,7 @@ xcodebuild \
     -scheme ${SCHEME} \
     -configuration ${BUILDTYPE} \
     -sdk iphoneos \
-    -jobs ${JOBS} | tee ${LOG_PATH} | xcpretty
+    -jobs ${JOBS} | tee ${LOG_PATH} | xcbeautify
 
 LIBS=(Mapbox.a)
 
