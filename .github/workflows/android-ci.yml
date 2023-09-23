@@ -7,22 +7,6 @@ on:
       - main
     tags:
       - 'android-*'
-    paths:
-      - CMakeLists.txt
-      - 'platform/android/**'
-      - ".github/workflows/android-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
 
   pull_request:
     branches:
@@ -34,7 +18,35 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          paths: |
+            ["CMakeLists.txt",
+            "platform/android/**",
+            ".github/workflows/android-ci.yml",
+            "bin/**",
+            "expression-test/**",
+            "include/**",
+            "metrics/**",
+            "platform/default/**",
+            "render-test/**",
+            "scripts/**",
+            "src/**",
+            "test/**",
+            "vendor/**",
+            ".gitmodules",
+            "!**/*.md",
+            ".bazelversion"]
+          paths_ignore: '["**/*.md"]'
+
   android-build:
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -174,8 +186,8 @@ jobs:
       - name: Upload Android UI test
         if: github.ref == 'refs/heads/main'
         run: |
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
@@ -225,7 +237,7 @@ jobs:
     needs: android-build
 
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
+    if: needs.pre_job.outputs.should_skip != 'true' && github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -255,3 +267,14 @@ jobs:
           test_type: INSTRUMENTATION
           test_package_arn: ${{ env.ANDROID_TEST_ARN }}
           timeout: 28800
+
+  android-ci-result:
+    runs-on: ubuntu-latest
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    needs:
+      - pre_job
+      - android-build
+    steps:
+      - name: Mark result as failed
+        if: needs.android-build.result != 'success'
+        run: exit 1

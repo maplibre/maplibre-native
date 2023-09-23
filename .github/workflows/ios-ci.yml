@@ -48,6 +48,7 @@ jobs:
             "BUILD.bazel",
             ".bazelrc",
             ".bazelversion"]
+          paths_ignore: '["**/*.md"]'
 
   ios-build:
     needs: pre_job

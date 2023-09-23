@@ -38,6 +38,7 @@ jobs:
             "BUILD.bazel",
             ".bazelrc",
             ".bazelversion"]
+          paths_ignore: '["**/*.md"]'
 
   linux-build:
     if: needs.pre_job.outputs.should_skip != 'true'
