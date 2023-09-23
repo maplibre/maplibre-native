@@ -44,6 +44,8 @@ jobs:
             "!**/*.md"]
 
   android-build:
+    needs:
+      - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-22.04
     defaults:
