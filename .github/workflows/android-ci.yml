@@ -98,29 +98,9 @@ jobs:
         run: npm install --ignore-scripts
         working-directory: platform/android
 
-      - name: Install ccache
-        run: sudo apt-get install -y ccache
-
-      - name: Prepare ccache
-        run: ccache --clear
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
+      - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
+          key: ${{ github.job }}
 
       - name: restore-gradle-cache
         uses: actions/cache@v3
