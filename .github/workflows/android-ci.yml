@@ -27,7 +27,7 @@ jobs:
         uses: fkirc/skip-duplicate-actions@v5
         with:
           paths: |
-            '["CMakeLists.txt",
+            ["CMakeLists.txt",
             "platform/android/**",
             ".github/workflows/android-ci.yml",
             "bin/**",
@@ -41,7 +41,7 @@ jobs:
             "test/**",
             "vendor/**",
             ".gitmodules",
-            "!**/*.md"]'
+            "!**/*.md"]
 
   android-build:
     if: needs.pre_job.outputs.should_skip != 'true'
