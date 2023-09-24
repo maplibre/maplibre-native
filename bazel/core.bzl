@@ -893,7 +893,7 @@ MLN_OPENGL_HEADERS = [
     "include/mbgl/gl/renderable_resource.hpp",
     "include/mbgl/gl/renderer_backend.hpp",
     "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
-    "include/mbgl/platform/gl_functions.hpp"
+    "include/mbgl/platform/gl_functions.hpp",
 ]
 
 MLN_DRAWABLES_SOURCE = [
@@ -973,7 +973,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/shaders/symbol_layer_ubo.hpp",
     "include/mbgl/util/identity.hpp",
-    "include/mbgl/util/suppress_copies.hpp"
+    "include/mbgl/util/suppress_copies.hpp",
 ]
 
 MLN_DRAWABLES_GL_SOURCE = [
@@ -997,7 +997,7 @@ MLN_DRAWABLES_GL_HEADERS = [
     "include/mbgl/gl/vertex_attribute_gl.hpp",
     "include/mbgl/gl/texture2d.hpp",
     "include/mbgl/shaders/gl/shader_program_gl.hpp",
-    "include/mbgl/shaders/gl/shader_group_gl.hpp"
+    "include/mbgl/shaders/gl/shader_group_gl.hpp",
 ]
 
 MLN_DRAWABLES_MTL_SOURCE = [

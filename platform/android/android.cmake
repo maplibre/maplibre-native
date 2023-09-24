@@ -2,10 +2,7 @@ if(NOT ANDROID_NDK_TOOLCHAIN_INCLUDED)
     message(FATAL_ERROR "-- Toolchain file not included, see https://developer.android.com/ndk/guides/cmake")
 endif()
 
-target_compile_definitions(
-    mbgl-core
-    PUBLIC
-)
+target_compile_definitions(mbgl-core PUBLIC)
 
 include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
@@ -19,12 +16,8 @@ target_compile_options(mbgl-compiler-options INTERFACE $<$<CONFIG:Release>:-Oz> 
 # cmake-format: on
 
 target_link_libraries(
-    mbgl-compiler-options
-    INTERFACE
-        $<$<CONFIG:Release>:-O2>
-        $<$<CONFIG:Release>:-Wl,--icf=all>
-        $<$<CONFIG:Release>:-flto>
-        $<$<CONFIG:Release>:-fuse-ld=gold>
+    mbgl-compiler-options INTERFACE $<$<CONFIG:Release>:-O2> $<$<CONFIG:Release>:-Wl,--icf=all> $<$<CONFIG:Release>:-flto>
+                                    $<$<CONFIG:Release>:-fuse-ld=gold>
 )
 
 target_sources(
@@ -75,10 +68,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
 )
 
-target_include_directories(
-    mbgl-core
-    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include
-)
+target_include_directories(mbgl-core PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include)
 
 target_link_libraries(
     mbgl-core
@@ -95,77 +85,39 @@ target_link_libraries(
         z
 )
 
-add_library(
-    example-custom-layer MODULE
-    ${PROJECT_SOURCE_DIR}/platform/android/src/example_custom_layer.cpp
-)
+add_library(example-custom-layer MODULE ${PROJECT_SOURCE_DIR}/platform/android/src/example_custom_layer.cpp)
 
-target_include_directories(
-    example-custom-layer
-    PRIVATE ${PROJECT_SOURCE_DIR}/include
-)
+target_include_directories(example-custom-layer PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(
-    example-custom-layer
-    PRIVATE
-        GLESv3
-        Mapbox::Base
-        Mapbox::Base::optional
-        log
-        mbgl-compiler-options
-)
+target_link_libraries(example-custom-layer PRIVATE GLESv3 Mapbox::Base Mapbox::Base::optional log mbgl-compiler-options)
 
 add_library(
     mbgl-test-runner SHARED
     ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
-    ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner.cpp
-    ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner_common.cpp
+    ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner.cpp ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner_common.cpp
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
 )
 
 target_include_directories(
-    mbgl-test-runner
-    PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src ${PROJECT_SOURCE_DIR}/src
+    mbgl-test-runner PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src
+                             ${PROJECT_SOURCE_DIR}/src
 )
 
 target_link_libraries(
-    mbgl-test-runner
-    PRIVATE
-        Mapbox::Base::jni.hpp
-        mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-test
-        -Wl,--no-whole-archive
+    mbgl-test-runner PRIVATE Mapbox::Base::jni.hpp mbgl-compiler-options -Wl,--whole-archive mbgl-test -Wl,--no-whole-archive
 )
 
-
-target_sources(
-    mbgl-test-runner
-    PRIVATE ${PROJECT_SOURCE_DIR}/platform/android/MapboxGLAndroidSDK/src/cpp/http_file_source.cpp
-)
+target_sources(mbgl-test-runner PRIVATE ${PROJECT_SOURCE_DIR}/platform/android/MapboxGLAndroidSDK/src/cpp/http_file_source.cpp)
 
 add_custom_command(
-    TARGET mbgl-test-runner PRE_BUILD
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        make_directory
-        ${PROJECT_SOURCE_DIR}/test/results
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        tar
-        "chf"
-        "test/android/app/src/main/assets/data.zip"
-        --format=zip
-        --files-from=test/android/app/src/main/assets/to_zip.txt
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        remove_directory
-        ${PROJECT_SOURCE_DIR}/test/results
+    TARGET mbgl-test-runner
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/test/results
+    COMMAND ${CMAKE_COMMAND} -E tar "chf" "test/android/app/src/main/assets/data.zip" --format=zip
+            --files-from=test/android/app/src/main/assets/to_zip.txt
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_SOURCE_DIR}/test/results
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
@@ -181,40 +133,21 @@ add_library(
 )
 
 target_include_directories(
-    mbgl-benchmark-runner
-    PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src ${PROJECT_SOURCE_DIR}/src
+    mbgl-benchmark-runner PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src
+                                  ${PROJECT_SOURCE_DIR}/src
 )
 
 target_link_libraries(
-    mbgl-benchmark-runner
-    PRIVATE
-        Mapbox::Base::jni.hpp
-        mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-benchmark
-        -Wl,--no-whole-archive
+    mbgl-benchmark-runner PRIVATE Mapbox::Base::jni.hpp mbgl-compiler-options -Wl,--whole-archive mbgl-benchmark -Wl,--no-whole-archive
 )
 
 add_custom_command(
-    TARGET mbgl-benchmark-runner PRE_BUILD
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        make_directory
-        ${PROJECT_SOURCE_DIR}/benchmark/results
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        tar
-        "chf"
-        "benchmark/android/app/src/main/assets/data.zip"
-        --format=zip
-        --files-from=benchmark/android/app/src/main/assets/to_zip.txt
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        remove_directory
-        ${PROJECT_SOURCE_DIR}/benchmark/results
+    TARGET mbgl-benchmark-runner
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/benchmark/results
+    COMMAND ${CMAKE_COMMAND} -E tar "chf" "benchmark/android/app/src/main/assets/data.zip" --format=zip
+            --files-from=benchmark/android/app/src/main/assets/to_zip.txt
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_SOURCE_DIR}/benchmark/results
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 
@@ -230,30 +163,17 @@ add_library(
 )
 
 target_include_directories(
-    mbgl-render-test-runner
-    PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src ${PROJECT_SOURCE_DIR}/src
+    mbgl-render-test-runner PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src
+                                    ${PROJECT_SOURCE_DIR}/src
 )
 
-target_link_libraries(
-    mbgl-render-test-runner
-    PRIVATE
-        Mapbox::Base::jni.hpp
-        android
-        log
-        mbgl-compiler-options
-        mbgl-render-test
-)
+target_link_libraries(mbgl-render-test-runner PRIVATE Mapbox::Base::jni.hpp android log mbgl-compiler-options mbgl-render-test)
 
 add_custom_command(
-    TARGET mbgl-render-test-runner PRE_BUILD
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        tar
-        "chf"
-        "render-test/android/app/src/main/assets/data.zip"
-        --format=zip
-        --files-from=render-test/android/app/src/main/assets/to_zip.txt
+    TARGET mbgl-render-test-runner
+    PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E tar "chf" "render-test/android/app/src/main/assets/data.zip" --format=zip
+            --files-from=render-test/android/app/src/main/assets/to_zip.txt
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 )
 

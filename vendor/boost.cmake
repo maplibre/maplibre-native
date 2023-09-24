@@ -2,14 +2,9 @@ if(TARGET mbgl-vendor-boost)
     return()
 endif()
 
-add_library(
-    mbgl-vendor-boost INTERFACE
-)
+add_library(mbgl-vendor-boost INTERFACE)
 
-target_include_directories(
-    mbgl-vendor-boost SYSTEM
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/boost/include
-)
+target_include_directories(mbgl-vendor-boost SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/boost/include)
 
 set_target_properties(
     mbgl-vendor-boost

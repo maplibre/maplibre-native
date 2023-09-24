@@ -8,20 +8,11 @@ else()
     add_library(mbgl-vendor-parsedate STATIC)
 endif()
 
-target_sources(
-    mbgl-vendor-parsedate PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/parsedate/parsedate.cpp
-)
+target_sources(mbgl-vendor-parsedate PRIVATE ${CMAKE_CURRENT_LIST_DIR}/parsedate/parsedate.cpp)
 
-target_link_libraries(
-    mbgl-vendor-parsedate
-    PRIVATE mbgl-compiler-options
-)
+target_link_libraries(mbgl-vendor-parsedate PRIVATE mbgl-compiler-options)
 
-target_include_directories(
-    mbgl-vendor-parsedate SYSTEM
-    PUBLIC ${CMAKE_CURRENT_LIST_DIR}/parsedate
-)
+target_include_directories(mbgl-vendor-parsedate SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/parsedate)
 
 set_target_properties(
     mbgl-vendor-parsedate

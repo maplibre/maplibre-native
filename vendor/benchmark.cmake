@@ -24,14 +24,8 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/benchmark/src/timers.cc
 )
 
-target_compile_definitions(
-    mbgl-vendor-benchmark
-    PRIVATE HAVE_STEADY_CLOCK
-)
+target_compile_definitions(mbgl-vendor-benchmark PRIVATE HAVE_STEADY_CLOCK)
 
-target_include_directories(
-    mbgl-vendor-benchmark SYSTEM
-    PUBLIC ${CMAKE_CURRENT_LIST_DIR}/benchmark/include
-)
+target_include_directories(mbgl-vendor-benchmark SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/benchmark/include)
 
 set_property(TARGET mbgl-vendor-benchmark PROPERTY FOLDER Core)

@@ -12,23 +12,17 @@ add_executable(
 )
 
 # FIXME: Should not use core private interface
-target_include_directories(
-    mbgl-expression-test
-    PRIVATE ${PROJECT_SOURCE_DIR}/src
-)
+target_include_directories(mbgl-expression-test PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
-target_link_libraries(
-    mbgl-expression-test
-    PRIVATE
-        Mapbox::Base
-        Mapbox::Base::Extras::args
-        mbgl-core
-        mbgl-compiler-options
-)
+target_link_libraries(mbgl-expression-test PRIVATE Mapbox::Base Mapbox::Base::Extras::args mbgl-core mbgl-compiler-options)
 
 set_property(TARGET mbgl-expression-test PROPERTY FOLDER Executables)
 
-string(RANDOM LENGTH 5 ALPHABET 0123456789 MLN_EXPRESSION_TEST_SEED)
+string(
+    RANDOM
+    LENGTH 5
+    ALPHABET 0123456789 MLN_EXPRESSION_TEST_SEED
+)
 
 add_test(
     NAME mbgl-expression-test

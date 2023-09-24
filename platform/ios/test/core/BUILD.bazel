@@ -1,7 +1,7 @@
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_unit_test")
-load("//platform/ios/bazel:config.bzl", "BUNDLE_ID_PREFIX")
-load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+load("//platform/ios/bazel:config.bzl", "BUNDLE_ID_PREFIX")
 
 cc_library(
     name = "test_cpp_srcs",

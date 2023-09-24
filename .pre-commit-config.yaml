@@ -18,6 +18,10 @@ repos:
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.10
+  hooks:
+  - id: cmake-format
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]

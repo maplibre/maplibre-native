@@ -37,14 +37,12 @@ if(NOT MSVC)
     target_compile_options(mbgl-vendor-icu PRIVATE -Wno-error -Wno-shorten-64-to-32)
 endif()
 
-target_include_directories(
-    mbgl-vendor-icu SYSTEM
-    PUBLIC ${CMAKE_CURRENT_LIST_DIR}/icu/include
-)
+target_include_directories(mbgl-vendor-icu SYSTEM PUBLIC ${CMAKE_CURRENT_LIST_DIR}/icu/include)
 
 set_property(TARGET mbgl-vendor-icu PROPERTY FOLDER Core)
 
-export(TARGETS
-    mbgl-vendor-icu
-    APPEND FILE MapboxCoreTargets.cmake
+export(
+    TARGETS mbgl-vendor-icu
+    APPEND
+    FILE MapboxCoreTargets.cmake
 )

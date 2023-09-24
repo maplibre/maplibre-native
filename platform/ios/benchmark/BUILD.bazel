@@ -3,10 +3,10 @@ load("//platform/ios/bazel:macros.bzl", "info_plist")
 filegroup(
     name = "ios_benchmark_srcs",
     srcs = [
-        "main.m",
         "MBXBenchAppDelegate.m",
         "MBXBenchViewController.mm",
         "locations.cpp",
+        "main.m",
     ],
     visibility = ["//platform:__pkg__"],
 )

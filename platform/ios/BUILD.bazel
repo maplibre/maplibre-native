@@ -39,7 +39,7 @@ genrule(
         echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
         cat $(location src/Mapbox.template.h) >> $@;
     """,
-        "//conditions:default": "cat $(location src/Mapbox.template.h) >> $@"
+        "//conditions:default": "cat $(location src/Mapbox.template.h) >> $@",
     }),
 )
 

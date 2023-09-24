@@ -39,24 +39,9 @@ add_library(
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/minizip/mz_zip_rw.h
 )
 
-target_link_libraries(
-    mbgl-vendor-zip-archive
-    PRIVATE z
-)
+target_link_libraries(mbgl-vendor-zip-archive PRIVATE z)
 
-target_include_directories(
-    mbgl-vendor-zip-archive SYSTEM
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive
-)
+target_include_directories(mbgl-vendor-zip-archive SYSTEM INTERFACE ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive)
 
-target_compile_definitions(
-    mbgl-vendor-zip-archive
-    PRIVATE
-        HAVE_INTTYPES_H
-        HAVE_PKCRYPT
-        HAVE_STDINT_H
-        HAVE_WZAES
-        HAVE_ZLIB
-        ZLIB_COMPAT
-)
+target_compile_definitions(mbgl-vendor-zip-archive PRIVATE HAVE_INTTYPES_H HAVE_PKCRYPT HAVE_STDINT_H HAVE_WZAES HAVE_ZLIB ZLIB_COMPAT)
 set_property(TARGET mbgl-vendor-zip-archive PROPERTY FOLDER RenderTestApp)

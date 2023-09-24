@@ -7,9 +7,9 @@ find_package(ICU OPTIONAL_COMPONENTS uc)
 find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(PkgConfig REQUIRED)
-if (MLN_WITH_X11)
+if(MLN_WITH_X11)
     find_package(X11 REQUIRED)
-endif ()
+endif()
 find_package(Threads REQUIRED)
 
 pkg_search_module(WEBP libwebp REQUIRED)
@@ -62,56 +62,27 @@ target_sources(
 
 if(MLN_WITH_EGL)
     find_package(OpenGL REQUIRED EGL)
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
-    )
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            OpenGL::EGL
-    )
-    if (MLN_WITH_WAYLAND)
-        target_compile_definitions(mbgl-core PUBLIC
-                EGL_NO_X11
-                MESA_EGL_NO_X11_HEADERS
-                WL_EGL_PLATFORM
-        )
+    target_sources(mbgl-core PRIVATE ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp)
+    target_link_libraries(mbgl-core PRIVATE OpenGL::EGL)
+    if(MLN_WITH_WAYLAND)
+        target_compile_definitions(mbgl-core PUBLIC EGL_NO_X11 MESA_EGL_NO_X11_HEADERS WL_EGL_PLATFORM)
     endif()
 else()
     find_package(OpenGL REQUIRED GLX)
-    target_sources(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_glx.cpp
-    )
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            OpenGL::GLX
-    )
+    target_sources(mbgl-core PRIVATE ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_glx.cpp)
+    target_link_libraries(mbgl-core PRIVATE OpenGL::GLX)
 endif()
 
-if (DEFINED ENV{CI})
+if(DEFINED ENV{CI})
     message("Building for CI")
-    target_compile_definitions(
-        mbgl-core
-        PRIVATE
-            CI_BUILD=1
-    )
+    target_compile_definitions(mbgl-core PRIVATE CI_BUILD=1)
 endif()
 
 # FIXME: Should not be needed, but now needed by node because of the headless frontend.
 target_include_directories(
     mbgl-core
     PUBLIC ${PROJECT_SOURCE_DIR}/platform/default/include
-    PRIVATE
-        ${CURL_INCLUDE_DIRS}
-        ${JPEG_INCLUDE_DIRS}
-        ${LIBUV_INCLUDE_DIRS}
-        ${X11_INCLUDE_DIRS}
-        ${WEBP_INCLUDE_DIRS}
+    PRIVATE ${CURL_INCLUDE_DIRS} ${JPEG_INCLUDE_DIRS} ${LIBUV_INCLUDE_DIRS} ${X11_INCLUDE_DIRS} ${WEBP_INCLUDE_DIRS}
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
@@ -124,10 +95,7 @@ if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0)
     include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
-        PROPERTIES
-        COMPILE_DEFINITIONS
-        MBGL_USE_BUILTIN_ICU
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp PROPERTIES COMPILE_DEFINITIONS MBGL_USE_BUILTIN_ICU
     )
 endif()
 
@@ -155,63 +123,37 @@ if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
 endif()
 
-add_executable(
-    mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/test/main.cpp
-)
+add_executable(mbgl-test-runner ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/test/main.cpp)
 
-target_compile_definitions(
-    mbgl-test-runner
-    PRIVATE
-        WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
-)
+target_compile_definitions(mbgl-test-runner PRIVATE WORK_DIRECTORY=${PROJECT_SOURCE_DIR})
 
-if (DEFINED ENV{CI})
+if(DEFINED ENV{CI})
     message("Building for CI")
-    target_compile_definitions(
-        mbgl-test-runner
-        PRIVATE
-            CI_BUILD=1
-    )
+    target_compile_definitions(mbgl-test-runner PRIVATE CI_BUILD=1)
 endif()
 
-target_link_libraries(
-    mbgl-test-runner
-    PRIVATE
-        mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-test
-        -Wl,--no-whole-archive
-)
+target_link_libraries(mbgl-test-runner PRIVATE mbgl-compiler-options -Wl,--whole-archive mbgl-test -Wl,--no-whole-archive)
 
-add_executable(
-    mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/benchmark/main.cpp
-)
+add_executable(mbgl-benchmark-runner ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/benchmark/main.cpp)
 
-target_link_libraries(
-    mbgl-benchmark-runner
-    PRIVATE
-        mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-benchmark
-        -Wl,--no-whole-archive
-)
+target_link_libraries(mbgl-benchmark-runner PRIVATE mbgl-compiler-options -Wl,--whole-archive mbgl-benchmark -Wl,--no-whole-archive)
 
-add_executable(
-    mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/render-test/main.cpp
-)
+add_executable(mbgl-render-test-runner ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/render-test/main.cpp)
 
-target_link_libraries(
-    mbgl-render-test-runner
-    PRIVATE mbgl-compiler-options mbgl-render-test
-)
+target_link_libraries(mbgl-render-test-runner PRIVATE mbgl-compiler-options mbgl-render-test)
 
 # Disable benchmarks in CI as they run in VM environment
 if(NOT DEFINED ENV{CI})
-    add_test(NAME mbgl-benchmark-runner COMMAND mbgl-benchmark-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+    add_test(
+        NAME mbgl-benchmark-runner
+        COMMAND mbgl-benchmark-runner
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
 endif()
-add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_test(
+    NAME mbgl-test-runner
+    COMMAND mbgl-test-runner
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+)
 
 install(TARGETS mbgl-render-test-runner RUNTIME DESTINATION bin)

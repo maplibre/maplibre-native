@@ -1,5 +1,6 @@
 add_library(
     mbgl-test STATIC EXCLUDE_FROM_ALL
+    $<$<AND:$<NOT:$<BOOL:MBGL_WITH_QT>>,$<NOT:$<PLATFORM_ID:Windows>>>:${PROJECT_SOURCE_DIR}/test/text/bidi.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/actor/actor.test.cpp
     ${PROJECT_SOURCE_DIR}/test/actor/actor_ref.test.cpp
     ${PROJECT_SOURCE_DIR}/test/algorithm/update_renderables.test.cpp
@@ -61,7 +62,6 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/style_image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_parser.test.cpp
-    $<$<AND:$<NOT:$<BOOL:MBGL_WITH_QT>>,$<NOT:$<PLATFORM_ID:Windows>>>:${PROJECT_SOURCE_DIR}/test/text/bidi.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/text/calculate_tile_distances.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/cross_tile_symbol_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/formatted.test.cpp
@@ -105,10 +105,10 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/thread_local.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_cover.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_range.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/timer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -116,9 +116,8 @@ add_library(
 # QT on macOS. https://github.com/mapbox/mapbox-gl-native/issues/16267
 if(NOT (MLN_WITH_QT AND CMAKE_SYSTEM_NAME STREQUAL Darwin))
     target_sources(
-        mbgl-test
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp ${PROJECT_SOURCE_DIR}/test/map/map_snapshotter.test.cpp
+        mbgl-test PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
+                          ${PROJECT_SOURCE_DIR}/test/map/map_snapshotter.test.cpp
     )
 endif()
 
@@ -134,33 +133,23 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
-    )
+    target_compile_definitions(mbgl-test PRIVATE MLN_RENDER_BACKEND_OPENGL=1)
 endif()
 
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Android AND ANDROID_NATIVE_API_LEVEL VERSION_LESS 24)
+if(WIN32
+   OR CMAKE_SYSTEM_NAME STREQUAL Android
+   AND ANDROID_NATIVE_API_LEVEL VERSION_LESS 24
+)
     message("Target platform does not support HTTP tests or dependencies not found.")
 
     set(MLN_TEST_HAS_TEST_SERVER 0)
 else()
     set(MLN_TEST_HAS_TEST_SERVER 1)
-    target_sources(
-        mbgl-test
-        PRIVATE ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
-    )
+    target_sources(mbgl-test PRIVATE ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
-        PROPERTIES
-        COMPILE_FLAGS
-        -Wno-shadow
-    )
-    set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
-        PROPERTIES
-        COMPILE_OPTIONS
-        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>:-Wno-shorten-64-to-32>
+        ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp PROPERTIES COMPILE_OPTIONS
+                                                                            $<$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>:-Wno-shorten-64-to-32>
     )
 endif()
 
@@ -170,31 +159,22 @@ else()
     set(MLN_TEST_BUILD_ON_CI 1)
 endif()
 
-target_compile_definitions(
-    mbgl-test
-    PRIVATE TEST_HAS_SERVER=${MLN_TEST_HAS_TEST_SERVER} CI_BUILD=${MLN_TEST_BUILD_ON_CI}
-)
+target_compile_definitions(mbgl-test PRIVATE TEST_HAS_SERVER=${MLN_TEST_HAS_TEST_SERVER} CI_BUILD=${MLN_TEST_BUILD_ON_CI})
 
 target_include_directories(
-    mbgl-test
-    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/test/src
+    mbgl-test PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/test/src
 )
 
-target_include_directories(
-    mbgl-test
-    PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/test/include
-)
+target_include_directories(mbgl-test PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/test/include)
 
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-    set_target_properties(mbgl-test mbgl-vendor-googletest
-        PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+    set_target_properties(
+        mbgl-test mbgl-vendor-googletest PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" LIBRARY_OUTPUT_DIRECTORY
+                                                    "${CMAKE_BINARY_DIR}" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 endif()
 
@@ -203,37 +183,23 @@ get_target_property(MLN_CORE_PRIVATE_LIBRARIES mbgl-core LINK_LIBRARIES)
 
 target_link_libraries(
     mbgl-test
-    PRIVATE
-        ${MLN_CORE_PRIVATE_LIBRARIES}
-        Mapbox::Base::Extras::args
-        Mapbox::Base::pixelmatch-cpp
-        mbgl-compiler-options
-        mbgl-vendor-cpp-httplib
+    PRIVATE ${MLN_CORE_PRIVATE_LIBRARIES} Mapbox::Base::Extras::args Mapbox::Base::pixelmatch-cpp mbgl-compiler-options
+            mbgl-vendor-cpp-httplib
     PUBLIC mbgl-core
 )
 
-target_link_libraries(
-    mbgl-test
-    PUBLIC mbgl-vendor-googletest
-    $<$<AND:$<PLATFORM_ID:Windows>,$<BOOL:MINGW>>:psapi>
-)
+target_link_libraries(mbgl-test PUBLIC mbgl-vendor-googletest $<$<AND:$<PLATFORM_ID:Windows>,$<BOOL:MINGW>>:psapi>)
 
 if(WIN32)
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE MBGL_BUILDING_LIB
-    )
+    target_compile_definitions(mbgl-test PRIVATE MBGL_BUILDING_LIB)
 endif()
 
 set_property(TARGET mbgl-test PROPERTY FOLDER Core)
 
-if (MLN_WITH_CLANG_TIDY)
+if(MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    target_compile_definitions(
-        mbgl-test
-        PRIVATE USE_CPP_TEST_SERVER
-    )
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    target_compile_definitions(mbgl-test PRIVATE USE_CPP_TEST_SERVER)
 endif()
