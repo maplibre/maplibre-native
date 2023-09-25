@@ -2439,9 +2439,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return features;
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered {
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered frameTime:(double)frameTime {
     if (self.frameTimeGraphEnabled) {
-        [self.frameTimeGraphView updatePathWithFrameDuration:mapView.frameTime];
+        [self.frameTimeGraphView updatePathWithFrameDuration:frameTime];
     }
 }
 
