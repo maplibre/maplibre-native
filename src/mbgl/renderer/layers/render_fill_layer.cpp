@@ -373,6 +373,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         return tileID && !hasRenderTile(*tileID);
     });
 
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -503,9 +504,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // `Fill*Program` all use `style::FillPaintProperties`
         gfx::VertexAttributeArray vertexAttrs;
-        const auto propertiesAsUniforms =
-            vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(binders,
-                                                                                                             evaluated);
+        propertiesAsUniforms.clear();
+        vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(binders, evaluated, propertiesAsUniforms);
 
         if (layerTweaker) {
             layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);

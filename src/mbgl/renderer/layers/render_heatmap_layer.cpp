@@ -353,6 +353,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -393,10 +394,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         gfx::VertexAttributeArray heatmapVertexAttrs;
-
-        const auto propertiesAsUniforms =
-            heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(paintPropertyBinders,
-                                                                                           evaluated);
+        propertiesAsUniforms.clear();
+        heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(paintPropertyBinders,
+                                                                                       evaluated,
+                                                                                       propertiesAsUniforms);
 
         const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!heatmapShader) {
@@ -404,7 +405,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
         if (const auto& attr = heatmapVertexAttrs.add(idVertexAttribName)) {

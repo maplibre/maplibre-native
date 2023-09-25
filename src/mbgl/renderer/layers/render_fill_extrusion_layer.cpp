@@ -341,6 +341,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -413,11 +414,13 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         gfx::VertexAttributeArray vertexAttrs;
-        const auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
-                                                                                    FillExtrusionColor,
-                                                                                    FillExtrusionHeight,
-                                                                                    FillExtrusionPattern>(binders,
-                                                                                                          evaluated);
+        propertiesAsUniforms.clear();
+        vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
+                                                  FillExtrusionColor,
+                                                  FillExtrusionHeight,
+                                                  FillExtrusionPattern>(binders,
+                                                                        evaluated,
+                                                                        propertiesAsUniforms);
 
         if (!shaderGroup) {
             continue;
@@ -429,7 +432,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
         // The non-pattern path in `render()` only uses two-pass rendering if there's translucency.
