@@ -20,15 +20,15 @@
 ******************************************************************************
 */
 
-#include "unicode/utypes.h"
-#include "unicode/appendable.h"
-#include "unicode/putil.h"
+#include <unicode/utypes.h>
+#include <unicode/appendable.h>
+#include <unicode/putil.h>
 #include "cstring.h"
 #include "cmemory.h"
-#include "unicode/ustring.h"
-#include "unicode/unistr.h"
-#include "unicode/utf.h"
-#include "unicode/utf16.h"
+#include <unicode/ustring.h>
+#include <unicode/unistr.h>
+#include <unicode/utf.h>
+#include <unicode/utf16.h>
 #include "uelement.h"
 #include "ustr_imp.h"
 #include "umutex.h"
@@ -309,8 +309,7 @@ UnicodeString::UnicodeString(const UnicodeString& that) {
 }
 
 UnicodeString::UnicodeString(UnicodeString &&src) U_NOEXCEPT {
-  fUnion.fFields.fLengthAndFlags = kShortString;
-  moveFrom(src);
+  copyFieldsFrom(src, TRUE);
 }
 
 UnicodeString::UnicodeString(const UnicodeString& that,
@@ -333,9 +332,10 @@ Replaceable::clone() const {
 }
 
 // UnicodeString overrides clone() with a real implementation
-Replaceable *
+UnicodeString *
 UnicodeString::clone() const {
-  return new UnicodeString(*this);
+  LocalPointer<UnicodeString> clonedString(new UnicodeString(*this));
+  return clonedString.isValid() && !clonedString->isBogus() ? clonedString.orphan() : nullptr;
 }
 
 //========================================
@@ -572,7 +572,7 @@ UnicodeString::copyFrom(const UnicodeString &src, UBool fastCopy) {
   return *this;
 }
 
-UnicodeString &UnicodeString::moveFrom(UnicodeString &src) U_NOEXCEPT {
+UnicodeString &UnicodeString::operator=(UnicodeString &&src) U_NOEXCEPT {
   // No explicit check for self move assignment, consistent with standard library.
   // Self move assignment causes no crash nor leak but might make the object bogus.
   releaseArray();
@@ -580,7 +580,7 @@ UnicodeString &UnicodeString::moveFrom(UnicodeString &src) U_NOEXCEPT {
   return *this;
 }
 
-// Same as moveFrom() except without memory management.
+// Same as move assignment except without memory management.
 void UnicodeString::copyFieldsFrom(UnicodeString &src, UBool setSrcToBogus) U_NOEXCEPT {
   int16_t lengthAndFlags = fUnion.fFields.fLengthAndFlags = src.fUnion.fFields.fLengthAndFlags;
   if(lengthAndFlags & kUsingStackBuffer) {
@@ -1447,10 +1447,15 @@ UnicodeString::doReplace(int32_t start,
   }
 
   if(srcChars == 0) {
-    srcStart = srcLength = 0;
-  } else if(srcLength < 0) {
-    // get the srcLength if necessary
-    srcLength = u_strlen(srcChars + srcStart);
+    srcLength = 0;
+  } else {
+    // Perform all remaining operations relative to srcChars + srcStart.
+    // From this point forward, do not use srcStart.
+    srcChars += srcStart;
+    if (srcLength < 0) {
+      // get the srcLength if necessary
+      srcLength = u_strlen(srcChars);
+    }
   }
 
   // pin the indices to legal values
@@ -1465,17 +1470,28 @@ UnicodeString::doReplace(int32_t start,
   }
   newLength += srcLength;
 
+  // Check for insertion into ourself
+  const UChar *oldArray = getArrayStart();
+  if (isBufferWritable() &&
+      oldArray < srcChars + srcLength &&
+      srcChars < oldArray + oldLength) {
+    // Copy into a new UnicodeString and start over
+    UnicodeString copy(srcChars, srcLength);
+    if (copy.isBogus()) {
+      setToBogus();
+      return *this;
+    }
+    return doReplace(start, length, copy.getArrayStart(), 0, srcLength);
+  }
+
   // cloneArrayIfNeeded(doCopyArray=FALSE) may change fArray but will not copy the current contents;
   // therefore we need to keep the current fArray
   UChar oldStackBuffer[US_STACKBUF_SIZE];
-  UChar *oldArray;
   if((fUnion.fFields.fLengthAndFlags&kUsingStackBuffer) && (newLength > US_STACKBUF_SIZE)) {
     // copy the stack buffer contents because it will be overwritten with
     // fUnion.fFields values
-    u_memcpy(oldStackBuffer, fUnion.fStackFields.fBuffer, oldLength);
+    u_memcpy(oldStackBuffer, oldArray, oldLength);
     oldArray = oldStackBuffer;
-  } else {
-    oldArray = getArrayStart();
   }
 
   // clone our array and allocate a bigger array if needed
@@ -1503,7 +1519,7 @@ UnicodeString::doReplace(int32_t start,
   }
 
   // now fill in the hole with the new string
-  us_arrayCopy(srcChars, srcStart, newArray, start, srcLength);
+  us_arrayCopy(srcChars, 0, newArray, start, srcLength);
 
   setLength(newLength);
 
@@ -1536,15 +1552,38 @@ UnicodeString::doAppend(const UChar *srcChars, int32_t srcStart, int32_t srcLeng
     return *this;
   }
 
+  // Perform all remaining operations relative to srcChars + srcStart.
+  // From this point forward, do not use srcStart.
+  srcChars += srcStart;
+
   if(srcLength < 0) {
     // get the srcLength if necessary
-    if((srcLength = u_strlen(srcChars + srcStart)) == 0) {
+    if((srcLength = u_strlen(srcChars)) == 0) {
       return *this;
     }
   }
 
   int32_t oldLength = length();
-  int32_t newLength = oldLength + srcLength;
+  int32_t newLength;
+  if (uprv_add32_overflow(oldLength, srcLength, &newLength)) {
+    setToBogus();
+    return *this;
+  }
+
+  // Check for append onto ourself
+  const UChar* oldArray = getArrayStart();
+  if (isBufferWritable() &&
+      oldArray < srcChars + srcLength &&
+      srcChars < oldArray + oldLength) {
+    // Copy into a new UnicodeString and start over
+    UnicodeString copy(srcChars, srcLength);
+    if (copy.isBogus()) {
+      setToBogus();
+      return *this;
+    }
+    return doAppend(copy.getArrayStart(), 0, srcLength);
+  }
+
   // optimize append() onto a large-enough, owned string
   if((newLength <= getCapacity() && isBufferWritable()) ||
       cloneArrayIfNeeded(newLength, getGrowCapacity(newLength))) {
@@ -1556,8 +1595,8 @@ UnicodeString::doAppend(const UChar *srcChars, int32_t srcStart, int32_t srcLeng
     // or
     //   str.appendString(buffer, length)
     // or similar.
-    if(srcChars + srcStart != newArray + oldLength) {
-      us_arrayCopy(srcChars, srcStart, newArray, oldLength, srcLength);
+    if(srcChars != newArray + oldLength) {
+      us_arrayCopy(srcChars, 0, newArray, oldLength, srcLength);
     }
     setLength(newLength);
   }
@@ -1938,7 +1977,12 @@ The vector deleting destructor is already a part of UObject,
 but defining it here makes sure that it is included with this object file.
 This makes sure that static library dependencies are kept to a minimum.
 */
+#if defined(__clang__) || U_GCC_MAJOR_MINOR >= 1100
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 static void uprv_UnicodeStringDummy(void) {
     delete [] (new UnicodeString[2]);
 }
+#pragma GCC diagnostic pop
+#endif
 #endif

@@ -1,3 +1,4 @@
+include/unicode/appendable.h
 include/unicode/bytestream.h
 include/unicode/char16ptr.h
 include/unicode/localpointer.h
@@ -12,6 +13,7 @@ include/unicode/ubidi.h
 include/unicode/uchar.h
 include/unicode/uclean.h
 include/unicode/uconfig.h
+include/unicode/ucpmap.h
 include/unicode/udata.h
 include/unicode/uiter.h
 include/unicode/umachine.h
@@ -52,11 +54,13 @@ src/ucmndata.h
 src/udatamem.h
 src/udataswp.cpp
 src/udataswp.h
+src/uelement.h
 src/uinvchar.cpp
 src/uinvchar.h
 src/umapfile.h
 src/umath.cpp
 src/umutex.h
+src/unistr.cpp
 src/uprops.h
 src/uset_imp.h
 src/ushape.cpp
