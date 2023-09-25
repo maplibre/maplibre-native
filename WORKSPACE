@@ -10,8 +10,8 @@ http_archive(
 
 http_archive(
     name = "rules_xcodeproj",
-    sha256 = "bc8b1ae066b7333a151fd3a9ebee0d51d7779886bfb8cf9fc6e0f9d6c110fc83",
-    url = "https://github.com/MobileNativeFoundation/rules_xcodeproj/releases/download/1.10.1/release.tar.gz",
+    sha256 = "4886d10566dade9048a0b239fc43c21c29bb0ba03fb611a997f7b786d6e859b6",
+    url = "https://github.com/MobileNativeFoundation/rules_xcodeproj/releases/download/1.11.0/release.tar.gz",
 )
 
 load(

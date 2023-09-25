@@ -17,6 +17,10 @@ layout (std140) uniform HillshadePrepareDrawableUBO {
     highp vec2 u_dimension;
     highp float u_zoom;
     highp float u_maxzoom;
+    lowp float pad0_;
+    lowp float pad1_;
+    lowp float pad2_;
+    lowp float pad3_;
 };
 
 out vec2 v_pos;
@@ -42,6 +46,10 @@ layout (std140) uniform HillshadePrepareDrawableUBO {
     highp vec2 u_dimension;
     highp float u_zoom;
     highp float u_maxzoom;
+    lowp float pad0_;
+    lowp float pad1_;
+    lowp float pad2_;
+    lowp float pad3_;
 };
 
 float getElevation(vec2 coord, float bias) {

@@ -40,6 +40,8 @@ jobs:
             ".bazelversion"]
 
   linux-build:
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: pre_job
     strategy:
       fail-fast: false
       matrix:
@@ -57,6 +59,8 @@ jobs:
           languages: cpp
 
       - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}
 
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -116,7 +120,10 @@ jobs:
           retention-days: 1
 
   linux-test:
-    needs: linux-build
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs:
+      - pre_job
+      - linux-build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -138,7 +145,10 @@ jobs:
         run: xvfb-run -a ./mbgl-test-runner
 
   linux-expression-test:
-    needs: linux-build
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs:
+      - pre_job
+      - linux-build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -153,7 +163,10 @@ jobs:
         run: ./mbgl-expression-test
 
   linux-render-test:
-    needs: linux-build
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs:
+      - pre_job
+      - linux-build
     runs-on: ubuntu-22.04
     steps:
       - name: Install dependencies

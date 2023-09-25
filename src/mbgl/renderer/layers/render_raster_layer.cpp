@@ -239,9 +239,7 @@ void RenderRasterLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
     RenderLayer::layerIndexChanged(newLayerIndex, changes);
 
-    if (imageLayerGroup) {
-        changes.emplace_back(std::make_unique<UpdateLayerGroupIndexRequest>(imageLayerGroup, newLayerIndex));
-    }
+    changeLayerIndex(imageLayerGroup, newLayerIndex, changes);
 }
 
 static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
