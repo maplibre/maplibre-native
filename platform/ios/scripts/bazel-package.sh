@@ -34,7 +34,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
    --help)
-      echo "Build the maplibre xcframework using the bazel build files. You must install Baselisk to build using this method."
+      echo "Build the maplibre xcframework using the bazel build files. You must install Bazelisk to build using this method."
       echo "Usage: .bazel-package.sh --static|--dynamic --release|--debug"
       echo "Defaults to \"--static --release\""
       exit 1
