@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   android-build:
-    runs-on: ubuntu-22.04
+    runs-on: MapLibre_Native_Large_Runner
     defaults:
       run:
         working-directory: platform/android
