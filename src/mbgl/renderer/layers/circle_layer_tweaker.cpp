@@ -114,8 +114,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        assert(drawable.getTileID() || !"Circles only render with tiles");
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
-            assert(!"Circles only render with tiles");
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
