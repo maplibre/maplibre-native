@@ -46,3 +46,6 @@
 [submodule "platform/windows/vendor/vcpkg"]
 	path = platform/windows/vendor/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "vendor/boost"]
+	path = vendor/boost
+	url = https://github.com/maplibre/maplibre-gl-native-boost.git
