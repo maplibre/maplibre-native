@@ -105,7 +105,6 @@ cc_library(
     ],
     deps = [
         "//:mbgl-core",
-        "//vendor:icu",
     ] + select({
         "//:ios": [
             "//platform/darwin:darwin-loop",
