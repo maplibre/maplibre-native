@@ -1110,6 +1110,7 @@ if(MLN_WITH_OPENGL)
         list(APPEND INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/collision_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_extrusion_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_layer_ubo.hpp
@@ -1174,6 +1175,8 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_box.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion_pattern.hpp
