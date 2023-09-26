@@ -95,15 +95,8 @@ enum {
      * denominator: den = 20<<(frac20>>2)
      */
     UPROPS_NTV_FRACTION20_START=UPROPS_NTV_BASE60_START+36,  // 0x300+9*4=0x324
-    /**
-     * Fraction-32 values:
-     * frac32 = ntv-0x34c = 0..15 -> 1|3|5|7 / 32|64|128|256
-     * numerator: num = 2*(frac32&3)+1
-     * denominator: den = 32<<(frac32>>2)
-     */
-    UPROPS_NTV_FRACTION32_START=UPROPS_NTV_FRACTION20_START+24,  // 0x324+6*4=0x34c
     /** No numeric value (yet). */
-    UPROPS_NTV_RESERVED_START=UPROPS_NTV_FRACTION32_START+16,  // 0x34c+4*4=0x35c
+    UPROPS_NTV_RESERVED_START=UPROPS_NTV_FRACTION20_START+24,  // 0x324+6*4=0x34c
 
     UPROPS_NTV_MAX_SMALL_INT=UPROPS_NTV_FRACTION_START-UPROPS_NTV_NUMERIC_START-1
 };
@@ -121,12 +114,12 @@ enum {
  * Properties in vector word 0
  * Bits
  * 31..24   DerivedAge version major/minor one nibble each
- * 23..22   3..1: Bits 21..20 & 7..0 = Script_Extensions index
+ * 23..22   3..1: Bits 7..0 = Script_Extensions index
  *             3: Script value from Script_Extensions
  *             2: Script=Inherited
  *             1: Script=Common
- *             0: Script=bits 21..20 & 7..0
- * 21..20   Bits 9..8 of the UScriptCode, or index to Script_Extensions
+ *             0: Script=bits 7..0
+ * 21..20   reserved
  * 19..17   East Asian Width
  * 16.. 8   UBlockCode
  *  7.. 0   UScriptCode, or index to Script_Extensions
@@ -137,15 +130,8 @@ enum {
 #define UPROPS_AGE_SHIFT        24
 
 /* Script_Extensions: mask includes Script */
-#define UPROPS_SCRIPT_X_MASK    0x00f000ff
+#define UPROPS_SCRIPT_X_MASK    0x00c000ff
 #define UPROPS_SCRIPT_X_SHIFT   22
-
-// The UScriptCode or Script_Extensions index is split across two bit fields.
-// (Starting with Unicode 13/ICU 66/2019 due to more varied Script_Extensions.)
-// Shift the high bits right by 12 to assemble the full value.
-#define UPROPS_SCRIPT_HIGH_MASK    0x00300000
-#define UPROPS_SCRIPT_HIGH_SHIFT   12
-#define UPROPS_MAX_SCRIPT          0x3ff
 
 #define UPROPS_EA_MASK          0x000e0000
 #define UPROPS_EA_SHIFT         17
@@ -153,26 +139,12 @@ enum {
 #define UPROPS_BLOCK_MASK       0x0001ff00
 #define UPROPS_BLOCK_SHIFT      8
 
-#define UPROPS_SCRIPT_LOW_MASK  0x000000ff
+#define UPROPS_SCRIPT_MASK      0x000000ff
 
 /* UPROPS_SCRIPT_X_WITH_COMMON must be the lowest value that involves Script_Extensions. */
 #define UPROPS_SCRIPT_X_WITH_COMMON     0x400000
 #define UPROPS_SCRIPT_X_WITH_INHERITED  0x800000
 #define UPROPS_SCRIPT_X_WITH_OTHER      0xc00000
-
-#ifdef __cplusplus
-
-namespace {
-
-inline uint32_t uprops_mergeScriptCodeOrIndex(uint32_t scriptX) {
-    return
-        ((scriptX & UPROPS_SCRIPT_HIGH_MASK) >> UPROPS_SCRIPT_HIGH_SHIFT) |
-        (scriptX & UPROPS_SCRIPT_LOW_MASK);
-}
-
-}  // namespace
-
-#endif  // __cplusplus
 
 /*
  * Properties in vector word 1
@@ -224,8 +196,8 @@ enum {
 /*
  * Properties in vector word 2
  * Bits
- * 31..26   unused since ICU 70 added uemoji.icu;
- *          in ICU 57..69 stored emoji properties
+ * 31..27   http://www.unicode.org/reports/tr51/#Emoji_Properties
+ *     26   reserved
  * 25..20   Line Break
  * 19..15   Sentence Break
  * 14..10   Word Break
@@ -233,12 +205,11 @@ enum {
  *  4.. 0   Decomposition Type
  */
 enum {
-    UPROPS_2_UNUSED_WAS_EXTENDED_PICTOGRAPHIC=26,  // ICU 62..69
-    UPROPS_2_UNUSED_WAS_EMOJI_COMPONENT,  // ICU 60..69
-    UPROPS_2_UNUSED_WAS_EMOJI,  // ICU 57..69
-    UPROPS_2_UNUSED_WAS_EMOJI_PRESENTATION,  // ICU 57..69
-    UPROPS_2_UNUSED_WAS_EMOJI_MODIFIER,  // ICU 57..69
-    UPROPS_2_UNUSED_WAS_EMOJI_MODIFIER_BASE  // ICU 57..69
+    UPROPS_2_EMOJI_COMPONENT=27,
+    UPROPS_2_EMOJI,
+    UPROPS_2_EMOJI_PRESENTATION,
+    UPROPS_2_EMOJI_MODIFIER,
+    UPROPS_2_EMOJI_MODIFIER_BASE
 };
 
 #define UPROPS_LB_MASK          0x03f00000
@@ -311,12 +282,55 @@ u_isgraphPOSIX(UChar32 c);
 U_CFUNC UBool
 u_isprintPOSIX(UChar32 c);
 
+/** Turn a bit index into a bit flag. @internal */
+#define FLAG(n) ((uint32_t)1<<(n))
+
+/** Flags for general categories in the order of UCharCategory. @internal */
+#define _Cn     FLAG(U_GENERAL_OTHER_TYPES)
+#define _Lu     FLAG(U_UPPERCASE_LETTER)
+#define _Ll     FLAG(U_LOWERCASE_LETTER)
+#define _Lt     FLAG(U_TITLECASE_LETTER)
+#define _Lm     FLAG(U_MODIFIER_LETTER)
+/* #define _Lo     FLAG(U_OTHER_LETTER) -- conflicts with MS Visual Studio 9.0 xiosbase */
+#define _Mn     FLAG(U_NON_SPACING_MARK)
+#define _Me     FLAG(U_ENCLOSING_MARK)
+#define _Mc     FLAG(U_COMBINING_SPACING_MARK)
+#define _Nd     FLAG(U_DECIMAL_DIGIT_NUMBER)
+#define _Nl     FLAG(U_LETTER_NUMBER)
+#define _No     FLAG(U_OTHER_NUMBER)
+#define _Zs     FLAG(U_SPACE_SEPARATOR)
+#define _Zl     FLAG(U_LINE_SEPARATOR)
+#define _Zp     FLAG(U_PARAGRAPH_SEPARATOR)
+#define _Cc     FLAG(U_CONTROL_CHAR)
+#define _Cf     FLAG(U_FORMAT_CHAR)
+#define _Co     FLAG(U_PRIVATE_USE_CHAR)
+#define _Cs     FLAG(U_SURROGATE)
+#define _Pd     FLAG(U_DASH_PUNCTUATION)
+#define _Ps     FLAG(U_START_PUNCTUATION)
+/* #define _Pe     FLAG(U_END_PUNCTUATION) -- conflicts with MS Visual Studio 9.0 xlocnum */
+/* #define _Pc     FLAG(U_CONNECTOR_PUNCTUATION) -- conflicts with MS Visual Studio 9.0 streambuf */
+#define _Po     FLAG(U_OTHER_PUNCTUATION)
+#define _Sm     FLAG(U_MATH_SYMBOL)
+#define _Sc     FLAG(U_CURRENCY_SYMBOL)
+#define _Sk     FLAG(U_MODIFIER_SYMBOL)
+#define _So     FLAG(U_OTHER_SYMBOL)
+#define _Pi     FLAG(U_INITIAL_PUNCTUATION)
+/* #define _Pf     FLAG(U_FINAL_PUNCTUATION) -- conflicts with MS Visual Studio 9.0 streambuf */
+
 /** Some code points. @internal */
 enum {
     TAB     =0x0009,
     LF      =0x000a,
     FF      =0x000c,
     CR      =0x000d,
+    U_A     =0x0041,
+    U_F     =0x0046,
+    U_Z     =0x005a,
+    U_a     =0x0061,
+    U_f     =0x0066,
+    U_z     =0x007a,
+    DEL     =0x007f,
+    NL      =0x0085,
     NBSP    =0x00a0,
     CGJ     =0x034f,
     FIGURESP=0x2007,
@@ -325,6 +339,15 @@ enum {
     ZWJ     =0x200d,
     RLM     =0x200f,
     NNBSP   =0x202f,
+    WJ      =0x2060,
+    INHSWAP =0x206a,
+    NOMDIG  =0x206f,
+    U_FW_A  =0xff21,
+    U_FW_F  =0xff26,
+    U_FW_Z  =0xff3a,
+    U_FW_a  =0xff41,
+    U_FW_f  =0xff46,
+    U_FW_z  =0xff5a,
     ZWNBSP  =0xfeff
 };
 
@@ -374,11 +397,6 @@ enum UPropertySource {
     UPROPS_SRC_NFKC_CF,
     /** From normalizer2impl.cpp/nfc.nrm canonical iterator data */
     UPROPS_SRC_NFC_CANON_ITER,
-    // Text layout properties.
-    UPROPS_SRC_INPC,
-    UPROPS_SRC_INSC,
-    UPROPS_SRC_VO,
-    UPROPS_SRC_EMOJI,
     /** One more than the highest UPropertySource (UPROPS_SRC_) constant. */
     UPROPS_SRC_COUNT
 };
@@ -407,9 +425,6 @@ uchar_addPropertyStarts(const USetAdder *sa, UErrorCode *pErrorCode);
 U_CFUNC void U_EXPORT2
 upropsvec_addPropertyStarts(const USetAdder *sa, UErrorCode *pErrorCode);
 
-U_CFUNC void U_EXPORT2
-uprops_addPropertyStarts(UPropertySource src, const USetAdder *sa, UErrorCode *pErrorCode);
-
 /**
  * Return a set of characters for property enumeration.
  * For each two consecutive characters (start, limit) in the set,
@@ -436,13 +451,6 @@ uchar_swapNames(const UDataSwapper *ds,
 U_NAMESPACE_BEGIN
 
 class UnicodeSet;
-
-class CharacterProperties {
-public:
-    CharacterProperties() = delete;
-    static const UnicodeSet *getInclusionsForProperty(UProperty prop, UErrorCode &errorCode);
-    static const UnicodeSet *getBinaryPropertySet(UProperty property, UErrorCode &errorCode);
-};
 
 // implemented in uniset_props.cpp
 U_CFUNC UnicodeSet *

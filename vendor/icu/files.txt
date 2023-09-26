@@ -12,7 +12,6 @@ include/unicode/ubidi.h
 include/unicode/uchar.h
 include/unicode/uclean.h
 include/unicode/uconfig.h
-include/unicode/ucpmap.h
 include/unicode/udata.h
 include/unicode/uiter.h
 include/unicode/umachine.h
@@ -26,6 +25,7 @@ include/unicode/ustring.h
 include/unicode/utf.h
 include/unicode/utf16.h
 include/unicode/utf8.h
+include/unicode/utf_old.h
 include/unicode/utypes.h
 include/unicode/uvernum.h
 include/unicode/uversion.h
@@ -34,6 +34,7 @@ src/cmemory.h
 src/cstring.cpp
 src/cstring.h
 src/cwchar.h
+src/mutex.h
 src/putilimp.h
 src/uassert.h
 src/ubidi.cpp
@@ -55,6 +56,7 @@ src/uinvchar.cpp
 src/uinvchar.h
 src/umapfile.h
 src/umath.cpp
+src/umutex.h
 src/uprops.h
 src/uset_imp.h
 src/ushape.cpp
