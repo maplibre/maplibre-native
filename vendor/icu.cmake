@@ -4,30 +4,19 @@ endif()
 
 add_library(
     mbgl-vendor-icu STATIC
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/appendable.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/bytestream.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/charstr.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/cmemory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/cstring.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/putil.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/stringpiece.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ubidi.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ubidi_props.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ubidiln.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ubidiwrt.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/uchar.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/ucln_cmn.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/udataswp.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/uinvchar.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/umath.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/umutex.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/unistr.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/uobject.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ushape.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ustring.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/ustrtrns.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/utf_impl.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/icu/src/utrace.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/utrie2.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/utypes.cpp
 )
@@ -35,7 +24,6 @@ add_library(
 target_compile_definitions(
     mbgl-vendor-icu
     PRIVATE
-        U_COMMON_IMPLEMENTATION=1
         UCONFIG_NO_BREAK_ITERATION=1
         UCONFIG_NO_LEGACY_CONVERSION=1
         U_CHARSET_IS_UTF8=1

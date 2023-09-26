@@ -28,17 +28,6 @@ FILES=(
     utypes.cpp
     cmemory.cpp
     cstring.cpp
-    unistr.cpp
-    appendable.cpp
-    stringpiece.cpp
-    bytestream.cpp
-    uobject.cpp
-    ustrtrns.cpp
-    putil.cpp
-    charstr.cpp
-    umutex.cpp
-    ucln_cmn.cpp
-    utrace.cpp
 )
 
 # Find dependencies for all of these files
