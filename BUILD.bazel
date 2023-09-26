@@ -120,7 +120,6 @@ cc_library(
         ],
     }) + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
-        "//:linux": ["MBGL_USE_BUILTIN_ICU=1"],
         "//conditions:default": [],
     }),
     includes = [
