@@ -34,7 +34,7 @@ FILES=(
 echo ">> Finding dependencies..."
 ALL=()
 for FILE in "${FILES[@]}"; do 
-    ALL+=($(cd "common" && $CXX -std=c++17 -I. -c "$FILE" -M -DU_COMMON_IMPLEMENTATION=1 | sed -e 's/^[a-z0-9._-]*: *//;s/ *\\$//'))
+    ALL+=($(cd "common" && $CXX -std=c++17 -I. -c "$FILE" -M | sed -e 's/^[a-z0-9._-]*: *//;s/ *\\$//'))
 done
 
 # Remove duplicates

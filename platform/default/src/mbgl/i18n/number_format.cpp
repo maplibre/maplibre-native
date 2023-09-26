@@ -1,13 +1,6 @@
 #include <mbgl/i18n/number_format.hpp>
 
 #if !defined(MBGL_USE_BUILTIN_ICU)
-
-// these defines are removed from ICU 72
-// they might still be needed by the system unicode/numberformatter.h which we do not vendor...
-#define U_NOEXCEPT noexcept
-#define U_FINAL final
-#define U_OVERRIDE override
-
 #include <unicode/numberformatter.h>
 #include <unicode/uvernum.h>
 #endif
