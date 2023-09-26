@@ -231,7 +231,7 @@ cc_library(
     copts = CPP_FLAGS + [
         "-Wno-c11-extensions",
         "-Wno-conversion",
-        "-DU_SHOW_CPLUSPLUS_API=1",
+        "-DU_COMMON_IMPLEMENTATION=1",
     ],
     includes = ["icu/include"],
     visibility = ["//visibility:public"],

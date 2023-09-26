@@ -29,13 +29,23 @@ FILES=(
     cmemory.cpp
     cstring.cpp
     unistr.cpp
+    appendable.cpp
+    stringpiece.cpp
+    bytestream.cpp
+    uobject.cpp
+    ustrtrns.cpp
+    putil.cpp
+    charstr.cpp
+    umutex.cpp
+    ucln_cmn.cpp
+    utrace.cpp
 )
 
 # Find dependencies for all of these files
 echo ">> Finding dependencies..."
 ALL=()
 for FILE in "${FILES[@]}"; do 
-    ALL+=($(cd "common" && $CXX -std=c++17 -I. -c "$FILE" -M | sed -e 's/^[a-z0-9._-]*: *//;s/ *\\$//'))
+    ALL+=($(cd "common" && $CXX -std=c++17 -I. -c "$FILE" -M -DU_COMMON_IMPLEMENTATION=1 | sed -e 's/^[a-z0-9._-]*: *//;s/ *\\$//'))
 done
 
 # Remove duplicates
