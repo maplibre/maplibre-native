@@ -44,8 +44,8 @@ jobs:
             "!**/*.md"]
 
   android-build:
-    runs-on:
-      group: maplibre-native
+    runs-on: MapLibre_Native_Linux_16_core
+
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
