@@ -25,6 +25,7 @@ add_library(
 target_compile_definitions(
     mbgl-vendor-icu
     PRIVATE
+        U_SHOW_CPLUSPLUS_API=1
         UCONFIG_NO_BREAK_ITERATION=1
         UCONFIG_NO_LEGACY_CONVERSION=1
         U_CHARSET_IS_UTF8=1

@@ -178,7 +178,10 @@ cc_library(
 # vendor/metal-cpp.json
 cc_library(
     name = "metal-cpp",
-    hdrs = glob(["metal-cpp/**/*.hpp"], allow_empty = False),
+    hdrs = glob(
+        ["metal-cpp/**/*.hpp"],
+        allow_empty = False,
+    ),
     copts = CPP_FLAGS,
     includes = ["metal-cpp"],
     visibility = ["//visibility:public"],
@@ -228,6 +231,7 @@ cc_library(
     copts = CPP_FLAGS + [
         "-Wno-c11-extensions",
         "-Wno-conversion",
+        "-DU_SHOW_CPLUSPLUS_API=1",
     ],
     includes = ["icu/include"],
     visibility = ["//visibility:public"],
