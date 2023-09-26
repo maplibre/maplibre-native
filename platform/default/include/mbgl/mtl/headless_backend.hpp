@@ -22,7 +22,8 @@ public:
 
 private:
     void activate() override;
-    void deactivate() override;;
+    void deactivate() override;
+    ;
 
 private:
     bool active = false;

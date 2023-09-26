@@ -22,20 +22,16 @@ public:
 
     ~HeadlessRenderableResource() noexcept override = default;
 
-    void bind() override {
-        offscreenTexture->getResource<RenderableResource>().bind();
-    }
+    void bind() override { offscreenTexture->getResource<RenderableResource>().bind(); }
 
     void swap() override {
         if (backend.getSwapBehaviour() == HeadlessBackend::SwapBehaviour::Flush) {
             offscreenTexture->getResource<RenderableResource>().swap();
         }
     }
-    
-    PremultipliedImage readStillImage() {
-        return offscreenTexture->readStillImage();
-    }
-    
+
+    PremultipliedImage readStillImage() { return offscreenTexture->readStillImage(); }
+
     const RendererBackend& getBackend() const override { return context.getBackend(); }
 
     const MTLCommandBufferPtr& getCommandBuffer() const override {

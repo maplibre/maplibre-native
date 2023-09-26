@@ -44,9 +44,9 @@ public:
         auto data = std::make_unique<uint8_t[]>(texture->getDataSize());
         MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);
         NS::UInteger bytesPerRow = size.width * texture->getPixelStride();
-        
+
         static_cast<Texture2D*>(texture.get())->getMetalTexture()->getBytes(data.get(), bytesPerRow, region, 0);
-        
+
         return {size, std::move(data)};
     }
 
