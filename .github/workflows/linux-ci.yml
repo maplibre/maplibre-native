@@ -46,7 +46,8 @@ jobs:
       fail-fast: false
       matrix:
         renderer: [legacy, drawable]
-    runs-on: MapLibre_Native_Large_Runner
+    runs-on:
+      group: maplibre-native
     steps:
       - uses: actions/checkout@v4
         with:
