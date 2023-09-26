@@ -14,8 +14,8 @@ struct alignas(16) CollisionUBO {
 static_assert(sizeof(CollisionUBO) % 16 == 0);
 static_assert(sizeof(CollisionUBO) == 80);
 
-using CollisionUBO CollisionBoxUBO;
-using CollisionUBO CollisionCircleUBO;
+using CollisionBoxUBO =  CollisionUBO;
+using CollisionCircleUBO = CollisionUBO;
 
 } // namespace shaders
 } // namespace mbgl
