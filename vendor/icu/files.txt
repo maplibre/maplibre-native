@@ -36,7 +36,6 @@ src/cmemory.h
 src/cstring.cpp
 src/cstring.h
 src/cwchar.h
-src/mutex.h
 src/putilimp.h
 src/uassert.h
 src/ubidi.cpp

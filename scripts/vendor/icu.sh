@@ -2,11 +2,11 @@
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 NAME=icu
-VERSION=61.1
+VERSION=73.2
 ROOT=icu/source
 
 VERSION_=${VERSION//./_}
-download "https://github.com/unicode-org/icu/releases/download/release-${VERSION_}/icu4c-${VERSION_}-src.tgz"
+download "https://github.com/unicode-org/icu/releases/download/release-${VERSION//./-}/icu4c-${VERSION_}-src.tgz"
 init
 STRIP_COMPONENTS=2 extract_gzip "${ROOT}/common/*.h" "${ROOT}/common/*.cpp"
 STRIP_COMPONENTS=1 extract_gzip "icu/LICENSE"
