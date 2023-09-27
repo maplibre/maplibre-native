@@ -12,7 +12,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/style_impl.hpp>
 
-#include <boost/function_output_iterator.hpp>
+#include <boost/iterator/function_output_iterator.hpp>
 
 // Note: LayerManager::annotationsEnabled is defined
 // at compile time, so that linker (with LTO on) is able
