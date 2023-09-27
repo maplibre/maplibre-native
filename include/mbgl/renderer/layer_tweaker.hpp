@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/immutable.hpp>
 
 #include <array>
@@ -54,6 +55,12 @@ public:
     /// @brief Check whether a property name exists within the previously set collection.
     bool hasPropertyAsUniform(StringIdentity) const;
     shaders::AttributeSource getAttributeSource(StringIdentity) const;
+
+    template <shaders::BuiltIn ShaderType>
+    shaders::AttributeSource getAttributeSource(size_t index) {
+        using ShaderClass = shaders::ShaderSource<ShaderType, gfx::Backend::Type::Metal>;
+        return getAttributeSource(ShaderClass::attributes[index].nameID);
+    }
 #endif // MLN_RENDER_BACKEND_METAL
 
     /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex

@@ -71,8 +71,8 @@ bool LayerTweaker::hasPropertyAsUniform(const StringIdentity attrNameID) const {
 }
 
 using namespace shaders;
-AttributeSource LayerTweaker::getAttributeSource(const std::string_view& attribName) const {
-    return hasPropertyAsUniform(attribName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+AttributeSource LayerTweaker::getAttributeSource(const StringIdentity attribNameID) const {
+    return hasPropertyAsUniform(attribNameID) ? AttributeSource::Constant : AttributeSource::PerVertex;
 }
 #endif // MLN_RENDER_BACKEND_METAL
 

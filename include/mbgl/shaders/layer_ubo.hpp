@@ -5,8 +5,6 @@
 #include <array>
 #include <cstdint>
 
-#define MLN_STRINGIZE(X) #X
-
 namespace mbgl {
 namespace shaders {
 

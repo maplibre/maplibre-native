@@ -14,32 +14,9 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        // always attributes
-        {0, gfx::AttributeDataType::Short4, 1, "a_pos_offset"},
-        {1, gfx::AttributeDataType::UShort4, 1, "a_data"},
-        {2, gfx::AttributeDataType::Float3, 1, "a_projected_pos"},
-        {3, gfx::AttributeDataType::Float, 1, "a_fade_opacity"},
-
-        // sometimes uniforms
-        {4, gfx::AttributeDataType::Float4, 1, "a_fill_color"},
-        {5, gfx::AttributeDataType::Float4, 1, "a_halo_color"},
-        {6, gfx::AttributeDataType::Float, 1, "a_opacity"},
-        {7, gfx::AttributeDataType::Float, 1, "a_halo_width"},
-        {8, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(9, true, true, SymbolDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, false, SymbolDrawablePaintUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, true, SymbolDrawableTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(12, true, false, SymbolDrawableInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(13, true, true, SymbolPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(14, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {
-        {0, "u_texture"},
-        {1, "u_texture_icon"},
-    };
+    static const std::array<AttributeInfo,9> attributes;
+    static const std::array<UniformBlockInfo,6> uniforms;
+    static const std::array<TextureInfo,2> textures;
 
     static constexpr auto source = R"(
 #define SDF 1.0

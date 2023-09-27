@@ -77,12 +77,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-#if MLN_RENDER_BACKEND_METAL
-    const auto source = [this](const std::string_view& attrName) {
-        return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-    };
-#endif
-
     bool fillUniformBufferUpdated = false;
     bool fillOutlineUniformBufferUpdated = false;
     bool fillPatternUniformBufferUpdated = false;
@@ -92,11 +86,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (fillUniformBufferUpdated) return;
 
 #if MLN_RENDER_BACKEND_METAL
-        using ShaderClass = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillPermutationUniformBuffer) {
             const FillPermutationUBO permutationUBO = {
-                /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+                /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::FillShader>(1), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillShader>(2), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
                 0,
                 0,
@@ -131,11 +124,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (fillOutlineUniformBufferUpdated) return;
 
 #if MLN_RENDER_BACKEND_METAL
-        using ShaderClass = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
             const FillOutlinePermutationUBO permutationUBO = {
-                /* .outline_color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+                /* .outline_color = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlineShader>(1), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlineShader>(2), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
                 0,
                 0,
@@ -172,12 +164,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (fillPatternUniformBufferUpdated) return;
 
 #if MLN_RENDER_BACKEND_METAL
-        using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
         if (propertiesChanged || !fillPatternPermutationUniformBuffer) {
             const FillPatternPermutationUBO permutationUBO = {
-                /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-                /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
-                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
+                /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(1), /*.expression=*/{}},
+                /* .pattern_to = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(2), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(3), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
                 0,
                 0,
@@ -211,12 +202,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         if (fillOutlinePatternUniformBufferUpdated) return;
 
 #if MLN_RENDER_BACKEND_METAL
-        using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
-        if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
+        if (propertiesChanged || !fillOutlinePatternPermutationUniformBuffer) {
             const FillOutlinePatternPermutationUBO permutationUBO = {
-                /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-                /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
-                /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
+                /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(1), /*.expression=*/{}},
+                /* .pattern_to = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(2), /*.expression=*/{}},
+                /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(3), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
                 0,
                 0,

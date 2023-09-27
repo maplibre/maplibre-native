@@ -16,6 +16,10 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/string_indexer.hpp>
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/mtl/fill_extrusion.hpp>
+#endif
+
 namespace mbgl {
 
 using namespace shaders;
@@ -79,9 +83,9 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
     if (propertiesChanged) {
         const FillExtrusionPermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/getAttributeSource("a_color"), /*.expression=*/{}},
-            /* .base = */ {/*.source=*/getAttributeSource("a_base"), /*.expression=*/{}},
-            /* .height = */ {/*.source=*/getAttributeSource("a_height"), /*.expression=*/{}},
+            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(2), /*.expression=*/{}},
+            /* .base = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(3), /*.expression=*/{}},
+            /* .height = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(4), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,

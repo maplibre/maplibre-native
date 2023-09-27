@@ -14,14 +14,9 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Float3, 1, "a_pos"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(1, true, true, BackgroundLayerUBO),
-        MLN_MTL_UNIFORM_BLOCK(2, true, false, BackgroundDrawableUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo,1> attributes;
+    static const std::array<UniformBlockInfo,2> uniforms;
+    static const std::array<TextureInfo,0> textures;
 
     static constexpr auto source = R"(
 #include <metal_stdlib>

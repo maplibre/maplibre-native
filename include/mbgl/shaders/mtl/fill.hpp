@@ -14,24 +14,9 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Float2, 1, "a_color"},
-        {2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-
-        // This shader doesn't use it, but we need this so that the layer can assign the same
-        // attributes to all the drawables.  If/When `VertexAttributeArray::resolve` allows it,
-        // this can be removed.
-        {8, gfx::AttributeDataType::Float2, 1, "a_outline_color"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(3, true, false, FillDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo,4> attributes;
+    static const std::array<UniformBlockInfo,5> uniforms;
+    static const std::array<TextureInfo,0> textures;
 
     static constexpr auto source = R"(
 
@@ -104,22 +89,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Float2, 1, "a_outline_color"},
-        {2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-
-        // See `a_outline_color` in FillShader
-        {8, gfx::AttributeDataType::Float2, 1, "a_color"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(3, true, false, FillOutlineDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillOutlineEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillOutlineInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillOutlinePermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo,4> attributes;
+    static const std::array<UniformBlockInfo,5> uniforms;
+    static const std::array<TextureInfo,0> textures;
 
     static constexpr auto source = R"(
 
@@ -203,24 +175,9 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-        {2, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-        {3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillPatternDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillPatternTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillPatternEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, FillPatternInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(8, true, true, FillPatternPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
-    };
-
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo,4> attributes;
+    static const std::array<UniformBlockInfo,6> uniforms;
+    static const std::array<TextureInfo,1> textures;
 
     static constexpr auto source = R"(
 
@@ -341,24 +298,9 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-        {2, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-        {3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillOutlinePatternDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillOutlinePatternTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillOutlinePatternEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, FillOutlinePatternInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(8, true, true, FillOutlinePatternPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
-    };
-
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo,4> attributes;
+    static const std::array<UniformBlockInfo,6> uniforms;
+    static const std::array<TextureInfo,1> textures;
 
     static constexpr auto source = R"(
 

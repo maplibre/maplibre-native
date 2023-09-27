@@ -14,24 +14,9 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos_normal"},
-        {1, gfx::AttributeDataType::UByte4, 1, "a_data"},
-        {2, gfx::AttributeDataType::Float4, 1, "a_color"},
-        {3, gfx::AttributeDataType::Float2, 1, "a_blur"},
-        {4, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-        {5, gfx::AttributeDataType::Float2, 1, "a_gapwidth"},
-        {6, gfx::AttributeDataType::Float2, 1, "a_offset"},
-        {7, gfx::AttributeDataType::Float2, 1, "a_width"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(8, true, true, LineUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, LinePropertiesUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, false, LineInterpolationUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, true, LinePermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(12, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo,8> attributes;
+    static const std::array<UniformBlockInfo,5> uniforms;
+    static const std::array<TextureInfo,0> textures;
 
     static constexpr auto source = R"(
 
@@ -143,28 +128,9 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos_normal"},
-        {1, gfx::AttributeDataType::UByte4, 1, "a_data"},
-        {2, gfx::AttributeDataType::Float2, 1, "a_blur"},
-        {3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-        {4, gfx::AttributeDataType::Float2, 1, "a_gapwidth"},
-        {5, gfx::AttributeDataType::Float2, 1, "a_offset"},
-        {6, gfx::AttributeDataType::Float2, 1, "a_width"},
-        {7, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-        {8, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(9, true, true, LinePatternUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, false, LinePatternPropertiesUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, false, LinePatternInterpolationUBO),
-        MLN_MTL_UNIFORM_BLOCK(12, true, false, LinePatternTilePropertiesUBO),
-        MLN_MTL_UNIFORM_BLOCK(13, true, true, LinePermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(14, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo,9> attributes;
+    static const std::array<UniformBlockInfo,6> uniforms;
+    static const std::array<TextureInfo,1> textures;
 
     static constexpr auto source = R"(
 
