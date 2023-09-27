@@ -168,6 +168,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp

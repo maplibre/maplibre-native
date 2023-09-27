@@ -255,5 +255,9 @@ std::size_t DrawableBuilder::curVertexCount() const {
     return impl->rawVerticesCount ? impl->rawVerticesCount : impl->vertices.elements();
 }
 
+void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates) {
+    
+}
+
 } // namespace gfx
 } // namespace mbgl

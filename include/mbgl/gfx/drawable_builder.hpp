@@ -3,6 +3,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
 
 #include <array>
 #include <memory>
@@ -191,6 +192,9 @@ public:
 
     /// Create a segment wrapper
     virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
+    
+    /// Add a polyline. If the last point equals the first it will be closed, otherwise open
+    void addPolyline(const GeometryCoordinates& coordinates);
 
 protected:
     std::size_t curVertexCount() const;
