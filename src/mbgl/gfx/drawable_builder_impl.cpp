@@ -526,12 +526,14 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
     double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
 
     if (endLeft) extrude = extrude - (util::perp(normal) * endLeft);
-    emplace_back(rawVertices, rawVerticesCount, layoutVertex(currentCoordinate,
-                                       extrude,
-                                       round,
-                                       false,
-                                       static_cast<int8_t>(endLeft),
-                                       static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
+    emplace_back(rawVertices,
+                 rawVerticesCount,
+                 layoutVertex(currentCoordinate,
+                              extrude,
+                              round,
+                              false,
+                              static_cast<int8_t>(endLeft),
+                              static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
     e3 = rawVerticesCount - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -541,12 +543,14 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
 
     extrude = normal * -1.0;
     if (endRight) extrude = extrude - (util::perp(normal) * endRight);
-    emplace_back(rawVertices, rawVerticesCount, layoutVertex(currentCoordinate,
-                                       extrude,
-                                       round,
-                                       true,
-                                       static_cast<int8_t>(-endRight),
-                                       static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
+    emplace_back(rawVertices,
+                 rawVerticesCount,
+                 layoutVertex(currentCoordinate,
+                              extrude,
+                              round,
+                              true,
+                              static_cast<int8_t>(-endRight),
+                              static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
     e3 = rawVerticesCount - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -577,8 +581,14 @@ void DrawableBuilder::Impl::addPieSliceVertex(const GeometryCoordinate& currentV
         distance = lineDistances->scaleToMaxLineDistance(distance);
     }
 
-    emplace_back(rawVertices, rawVerticesCount, layoutVertex(
-        currentVertex, flippedExtrude, false, lineTurnsLeft, 0, static_cast<int32_t>(distance * LINE_DISTANCE_SCALE)));
+    emplace_back(rawVertices,
+                 rawVerticesCount,
+                 layoutVertex(currentVertex,
+                              flippedExtrude,
+                              false,
+                              lineTurnsLeft,
+                              0,
+                              static_cast<int32_t>(distance * LINE_DISTANCE_SCALE)));
     e3 = rawVerticesCount - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));

@@ -192,7 +192,7 @@ public:
 
     /// Create a segment wrapper
     virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
-    
+
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
     void addPolyline(const GeometryCoordinates& coordinates);
 
