@@ -144,11 +144,13 @@ public:
     /// @param propertiesAsUniforms Set of data driven properties as uniforms.
     /// @param firstAttribName Name of the first attribute
     /// @return A `gfx::ShaderPtr`
-    virtual gfx::ShaderPtr getOrCreateShader(gfx::Context&,
-                                             [[maybe_unused]] const std::unordered_set<StringIdentity>& propertiesAsUniforms,
-                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
+    virtual gfx::ShaderPtr getOrCreateShader(
+        gfx::Context&,
+        [[maybe_unused]] const std::unordered_set<StringIdentity>& propertiesAsUniforms,
+        [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
     }
+
 private:
     std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
     mutable std::shared_mutex programLock;

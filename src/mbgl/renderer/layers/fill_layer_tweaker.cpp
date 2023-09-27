@@ -126,7 +126,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #if MLN_RENDER_BACKEND_METAL
         if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
             const FillOutlinePermutationUBO permutationUBO = {
-                /* .outline_color = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlineShader>(1), /*.expression=*/{}},
+                /* .outline_color = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlineShader>(1),
+                                        /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlineShader>(2), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
                 0,
@@ -166,9 +167,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #if MLN_RENDER_BACKEND_METAL
         if (propertiesChanged || !fillPatternPermutationUniformBuffer) {
             const FillPatternPermutationUBO permutationUBO = {
-                /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(1), /*.expression=*/{}},
-                /* .pattern_to = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(2), /*.expression=*/{}},
-                /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(3), /*.expression=*/{}},
+                /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(1),
+                                       /*.expression=*/{}},
+                /* .pattern_to = */
+                {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(2), /*.expression=*/{}},
+                /* .opacity = */
+                {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(3), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
                 0,
                 0,
@@ -204,9 +208,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #if MLN_RENDER_BACKEND_METAL
         if (propertiesChanged || !fillOutlinePatternPermutationUniformBuffer) {
             const FillOutlinePatternPermutationUBO permutationUBO = {
-                /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(1), /*.expression=*/{}},
-                /* .pattern_to = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(2), /*.expression=*/{}},
-                /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(3), /*.expression=*/{}},
+                /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(1),
+                                       /*.expression=*/{}},
+                /* .pattern_to = */
+                {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(2), /*.expression=*/{}},
+                /* .opacity = */
+                {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(3), /*.expression=*/{}},
                 /* .overdrawInspector = */ overdrawInspector,
                 0,
                 0,

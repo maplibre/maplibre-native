@@ -367,7 +367,8 @@ public:
     /// Specialized DataDrivenPaintProperty reader
     /// @param binders Property binders for the target shader
     /// @param evaluated Evaluated properties
-    /// @param propertiesAsUniforms [out] A set of string identities for the properties which will be constant, not attributes.
+    /// @param propertiesAsUniforms [out] A set of string identities for the properties which will be constant, not
+    /// attributes.
     /// @details The property name IDs refer to the "a\_" prefixed values to match the shader definitions.
     template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
     void readDataDrivenPaintProperties(const Binders& binders,

@@ -15,7 +15,7 @@ class ShaderGroupGL final : public gfx::ShaderGroup {
 public:
     ShaderGroupGL(const ProgramParameters& programParameters_)
         : ShaderGroup(),
-          programParameters(programParameters_){}
+          programParameters(programParameters_) {}
     ~ShaderGroupGL() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
@@ -52,7 +52,7 @@ public:
             if (prefix[0] == 'a' && prefix[1] == '_') {
                 prefix += 2;
             }
-            
+
             additionalDefines += "#define HAS_UNIFORM_u_";
             additionalDefines += prefix;
             additionalDefines += "\n";

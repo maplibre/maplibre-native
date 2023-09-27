@@ -418,9 +418,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
                                                   FillExtrusionColor,
                                                   FillExtrusionHeight,
-                                                  FillExtrusionPattern>(binders,
-                                                                        evaluated,
-                                                                        propertiesAsUniforms);
+                                                  FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
 
         if (!shaderGroup) {
             continue;

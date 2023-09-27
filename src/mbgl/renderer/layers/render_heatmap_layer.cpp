@@ -395,9 +395,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         gfx::VertexAttributeArray heatmapVertexAttrs;
         propertiesAsUniforms.clear();
-        heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(paintPropertyBinders,
-                                                                                       evaluated,
-                                                                                       propertiesAsUniforms);
+        heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
+            paintPropertyBinders, evaluated, propertiesAsUniforms);
 
         const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!heatmapShader) {

@@ -14,9 +14,9 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo,5> attributes;
-    static const std::array<UniformBlockInfo,5> uniforms;
-    static const std::array<TextureInfo,0> textures;
+    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 struct alignas(16) FillExtrusionInterpolateUBO {

@@ -505,7 +505,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         // `Fill*Program` all use `style::FillPaintProperties`
         gfx::VertexAttributeArray vertexAttrs;
         propertiesAsUniforms.clear();
-        vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(binders, evaluated, propertiesAsUniforms);
+        vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+            binders, evaluated, propertiesAsUniforms);
 
         if (layerTweaker) {
             layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);

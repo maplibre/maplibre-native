@@ -581,8 +581,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                       LineGapWidth,
                                                       LineOffset,
                                                       LineWidth,
-                                                      LineFloorWidth>(paintPropertyBinders,
-                                                                      evaluated, propertiesAsUniforms);
+                                                      LineFloorWidth>(
+                paintPropertyBinders, evaluated, propertiesAsUniforms);
 
             auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
@@ -624,14 +624,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             propertiesAsUniforms.clear();
             gfx::VertexAttributeArray vertexAttrs;
-            vertexAttrs.readDataDrivenPaintProperties<LineBlur,
-                                                      LineOpacity,
-                                                      LineOffset,
-                                                      LineGapWidth,
-                                                      LineWidth,
-                                                      LinePattern>(paintPropertyBinders,
-                                                                   evaluated,
-                                                                   propertiesAsUniforms);
+            vertexAttrs
+                .readDataDrivenPaintProperties<LineBlur, LineOpacity, LineOffset, LineGapWidth, LineWidth, LinePattern>(
+                    paintPropertyBinders, evaluated, propertiesAsUniforms);
 
             auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
@@ -742,14 +737,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             // simple line
             propertiesAsUniforms.clear();
             gfx::VertexAttributeArray vertexAttrs;
-            vertexAttrs.readDataDrivenPaintProperties<LineColor,
-                                                      LineBlur,
-                                                      LineOpacity,
-                                                      LineGapWidth,
-                                                      LineOffset,
-                                                      LineWidth>(paintPropertyBinders,
-                                                                 evaluated,
-                                                                 propertiesAsUniforms);
+            vertexAttrs
+                .readDataDrivenPaintProperties<LineColor, LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
+                    paintPropertyBinders, evaluated, propertiesAsUniforms);
 
             auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {

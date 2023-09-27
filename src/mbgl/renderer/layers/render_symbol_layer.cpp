@@ -1201,8 +1201,15 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
                 propertiesAsUniforms.clear();
-                updateTileDrawable(
-                    drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO, propertiesAsUniforms);
+                updateTileDrawable(drawable,
+                                   context,
+                                   bucket,
+                                   bucketPaintProperties,
+                                   evaluated,
+                                   state,
+                                   textInterpUBO,
+                                   iconInterpUBO,
+                                   propertiesAsUniforms);
             });
 
             // re-create collision drawables
@@ -1356,8 +1363,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 if (!shaderGroup) {
                     return;
                 }
-                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(
-                    context, propertiesAsUniforms, posOffsetAttribName));
+                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                    shaderGroup->getOrCreateShader(context, propertiesAsUniforms, posOffsetAttribName));
                 if (!shader) {
                     return;
                 }

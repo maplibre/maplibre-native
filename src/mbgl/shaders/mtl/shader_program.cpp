@@ -26,36 +26,26 @@ namespace mbgl {
 shaders::AttributeInfo::AttributeInfo(std::size_t index_,
                                       gfx::AttributeDataType dataType_,
                                       std::size_t count_,
-                                      std::string_view name_) :
-    index(index_),
-    dataType(dataType_),
-    count(count_),
-    name(name_),
-    nameID(StringIndexer::get(name_))
-{
-}
+                                      std::string_view name_)
+    : index(index_),
+      dataType(dataType_),
+      count(count_),
+      name(name_),
+      nameID(StringIndexer::get(name_)) {}
 
-shaders::UniformBlockInfo::UniformBlockInfo(std::size_t index_,
-                                            bool vertex_,
-                                            bool fragment_,
-                                            std::size_t size_,
-                                            std::string_view name_) :
-    index(index_),
-    vertex(vertex_),
-    fragment(fragment_),
-    size(size_),
-    name(name_),
-    nameID(StringIndexer::get(name_))
-{
-}
+shaders::UniformBlockInfo::UniformBlockInfo(
+    std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::string_view name_)
+    : index(index_),
+      vertex(vertex_),
+      fragment(fragment_),
+      size(size_),
+      name(name_),
+      nameID(StringIndexer::get(name_)) {}
 
-shaders::TextureInfo::TextureInfo(std::size_t index_,
-                                  std::string_view name_) :
-    index(index_),
-    name(name_),
-    nameID(StringIndexer::get(name_))
-{
-}
+shaders::TextureInfo::TextureInfo(std::size_t index_, std::string_view name_)
+    : index(index_),
+      name(name_),
+      nameID(StringIndexer::get(name_)) {}
 
 namespace mtl {
 namespace {
