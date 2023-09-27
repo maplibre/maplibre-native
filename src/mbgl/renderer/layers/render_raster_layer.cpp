@@ -341,8 +341,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         [this](const gfx::UniqueDrawableBuilder& builder, gfx::Drawable* drawable, const RasterBucket& bucket) {
             // The bucket only fills in geometry for masked tiles,
             // otherwise the standard tile extent geometry should be used.
-            const bool shared = (!bucket.sharedVertices->empty() &&
-                                 !bucket.sharedTriangles->empty() &&
+            const bool shared = (!bucket.sharedVertices->empty() && !bucket.sharedTriangles->empty() &&
                                  !bucket.segments.empty());
             const auto& vertices = shared ? bucket.sharedVertices : staticDataVertices;
             const auto& indices = shared ? bucket.sharedTriangles : staticDataIndices;
@@ -471,8 +470,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 if (geometryChanged) {
                     removeTile(renderPass, tileID);
                     cleared = true;
-                }
-                else if (0 < updated) {
+                } else if (0 < updated) {
                     // If we modified drawables without removing them, we're done with this tile.
                     continue;
                 }
