@@ -1,6 +1,7 @@
 #include <mbgl/mtl/buffer_resource.hpp>
 
 #include <Metal/MTLDevice.hpp>
+#include <algorithm>
 
 namespace mbgl {
 namespace mtl {
