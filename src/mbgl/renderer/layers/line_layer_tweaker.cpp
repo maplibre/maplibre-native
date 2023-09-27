@@ -149,7 +149,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
-        if (!drawable.getTileID() || !shader) {
+        if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
             return;
         }
 

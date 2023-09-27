@@ -85,13 +85,15 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
+
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.addOrReplace(idHeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
-        if (!drawable.getTileID()) {
-            return;
-        }
-        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(tileID,

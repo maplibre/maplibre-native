@@ -102,14 +102,14 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
-
-        if (!drawable.getTileID()) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
 
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();

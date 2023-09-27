@@ -29,6 +29,7 @@
 #include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 #include <mbgl/gfx/collision_drawable_data.hpp>
@@ -379,11 +380,10 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup && layerGroup->getLayerTweaker()) {
-#if MLN_RENDER_BACKEND_METAL
-        layerGroup->getLayerTweaker()->setPropertiesAsUniforms(propertiesAsUniforms);
-#endif // MLN_RENDER_BACKEND_METAL
-        layerGroup->getLayerTweaker()->updateProperties(evaluatedProperties);
+    // The symbol tweaker supports updating properties.
+    // When the style changes, it will be replaced in `RenderLayer::layerChanged`
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -970,16 +970,19 @@ void RenderSymbolLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     changeLayerIndex(collisionTileLayerGroup, newLayerIndex, changes);
 }
 
-void RenderSymbolLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+std::size_t RenderSymbolLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    const auto oldValue = stats.drawablesRemoved;
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
         stats.drawablesRemoved += tileGroup->removeDrawables(renderPass, tileID).size();
     }
     if (collisionTileLayerGroup) {
         stats.drawablesRemoved += collisionTileLayerGroup->removeDrawables(renderPass, tileID).size();
     }
+    return stats.drawablesRemoved - oldValue;
 }
 
-void RenderSymbolLayer::removeAllDrawables() {
+std::size_t RenderSymbolLayer::removeAllDrawables() {
+    const auto oldValue = stats.drawablesRemoved;
     if (layerGroup) {
         stats.drawablesRemoved += layerGroup->getDrawableCount();
         layerGroup->clearDrawables();
@@ -988,12 +991,13 @@ void RenderSymbolLayer::removeAllDrawables() {
         stats.drawablesRemoved += collisionTileLayerGroup->getDrawableCount();
         collisionTileLayerGroup->clearDrawables();
     }
+    return stats.drawablesRemoved - oldValue;
 }
 
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& updateParameters,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -1004,23 +1008,26 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            tweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
-#if MLN_RENDER_BACKEND_METAL
-            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-#endif // MLN_RENDER_BACKEND_METAL
-            layerGroup_->setLayerTweaker(tweaker);
             setLayerGroup(std::move(layerGroup_), changes);
         }
     }
+
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
+        layerGroup->addLayerTweaker(layerTweaker);
+    }
+    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     const auto& getCollisionTileLayerGroup = [&] {
         if (!collisionTileLayerGroup) {
             if ((collisionTileLayerGroup = context.createTileLayerGroup(
                      layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
-                collisionTileLayerGroup->setLayerTweaker(
-                    std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties));
                 activateLayerGroup(collisionTileLayerGroup, true, changes);
             }
+        }
+        if (!collisionLayerTweaker) {
+            collisionLayerTweaker = std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties);
+            collisionTileLayerGroup->addLayerTweaker(collisionLayerTweaker);
         }
         return collisionTileLayerGroup;
     };
@@ -1168,6 +1175,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             // add drawables to layer group
             for (auto& drawable : collisionBuilder->clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(collisionLayerTweaker);
+
                 auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
                 drawable->setData(std::move(drawData));
                 group->addDrawable(passes, tileID, std::move(drawable));
@@ -1181,6 +1190,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                if (drawable.getLayerTweaker() != layerTweaker) {
+                    // This drawable was produced on a previous style/bucket, and should not be updated.
+                    return;
+                }
+
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
                 updateTileDrawable(
                     drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO);
@@ -1264,14 +1278,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = buffer.vertices().elements();
 
         gfx::VertexAttributeArray attribs;
-        const auto uniformProps = updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs);
-
-#if MLN_RENDER_BACKEND_METAL
-        propertiesAsUniforms = uniformProps;
-        if (tweaker) {
-            tweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+        const auto propertiesAsUniforms = updateTileAttributes(
+            buffer, isText, bucketPaintProperties, evaluated, attribs);
+        if (layerTweaker) {
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
-#endif // MLN_RENDER_BACKEND_METAL
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1340,8 +1351,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 if (!shaderGroup) {
                     return;
                 }
-                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    shaderGroup->getOrCreateShader(context, uniformProps, StringIndexer::get(idPosOffsetAttribName)));
+                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(
+                    context, propertiesAsUniforms, StringIndexer::get(idPosOffsetAttribName)));
                 if (!shader) {
                     return;
                 }
@@ -1359,6 +1370,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(layerTweaker);
 
                     auto drawData = std::make_unique<gfx::SymbolDrawableData>(
                         /*.isHalo=*/isHalo,
