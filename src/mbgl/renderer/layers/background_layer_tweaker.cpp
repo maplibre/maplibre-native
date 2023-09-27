@@ -54,6 +54,9 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
     std::optional<uint32_t> samplerLocation{};
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
 
         // We assume that drawables don't change between pattern and non-pattern.
         const auto& shader = drawable.getShader();

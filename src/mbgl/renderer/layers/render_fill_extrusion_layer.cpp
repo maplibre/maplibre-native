@@ -26,6 +26,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif // MLN_DRAWABLE_RENDERER
@@ -75,7 +76,8 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
 
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
-        layerGroup->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties));
+        auto newTweaker = std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -275,7 +277,7 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
-                                      const std::shared_ptr<UpdateParameters>&,
+                                      const std::shared_ptr<UpdateParameters>& updateParameters,
                                       const RenderTree& /*renderTree*/,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -286,10 +288,18 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     // Set up a layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
-            layerGroup_->setLayerTweaker(std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties));
             setLayerGroup(std::move(layerGroup_), changes);
+        } else {
+            return;
         }
     }
+
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties);
+        layerGroup->addLayerTweaker(layerTweaker);
+    }
+
+    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!fillExtrusionGroup) {
         fillExtrusionGroup = shaders.getShaderGroup("FillExtrusionShader");
@@ -388,6 +398,11 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         if (tileLayerGroup->getDrawableCount(drawPass, tileID) > 0) {
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
+                if (drawable.getLayerTweaker() != layerTweaker) {
+                    // This drawable was produced on a previous style/bucket, and should not be updated.
+                    return;
+                }
+
                 auto& uniforms = drawable.mutableUniformBuffers();
                 uniforms.createOrUpdate(
                     FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);
@@ -398,18 +413,23 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         gfx::VertexAttributeArray vertexAttrs;
-        const auto uniformProps = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
-                                                                            FillExtrusionColor,
-                                                                            FillExtrusionHeight,
-                                                                            FillExtrusionPattern>(binders, evaluated);
+        const auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
+                                                                                    FillExtrusionColor,
+                                                                                    FillExtrusionHeight,
+                                                                                    FillExtrusionPattern>(binders,
+                                                                                                          evaluated);
 
         if (!shaderGroup) {
             continue;
         }
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-            shaderGroup->getOrCreateShader(context, uniformProps));
+            shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
         if (!shader) {
             continue;
+        }
+
+        if (layerTweaker) {
+            layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
         }
 
         // The non-pattern path in `render()` only uses two-pass rendering if there's translucency.
@@ -501,6 +521,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(layerTweaker);
 
                 auto& uniforms = drawable->mutableUniformBuffers();
                 uniforms.createOrUpdate(

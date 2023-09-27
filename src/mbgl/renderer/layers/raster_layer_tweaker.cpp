@@ -25,6 +25,10 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!checkTweakDrawable(drawable)) {
+            return;
+        }
+
         const auto spinWeights = [](float spin) -> std::array<float, 4> {
             spin = util::deg2radf(spin);
             const float s = std::sin(spin);
