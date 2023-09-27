@@ -11,6 +11,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
+#include <mbgl/util/logging.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layers/raster_layer_tweaker.hpp>
@@ -333,13 +334,25 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
-    // Build vertex attributes and apply them to a drawable or a builder
+    // Build vertex attributes and apply them to a drawable or a builder.
+    // Populates a drawable xor a drawable builder for creates and updates, respectively.
+    // Returns false if the drawable must be re-created.
     const auto buildVertexData =
         [this](const gfx::UniqueDrawableBuilder& builder, gfx::Drawable* drawable, const RasterBucket& bucket) {
-            const bool shared = (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty());
+            // The bucket only fills in geometry for masked tiles,
+            // otherwise the standard tile extent geometry should be used.
+            const bool shared = (!bucket.sharedVertices->empty() &&
+                                 !bucket.sharedTriangles->empty() &&
+                                 !bucket.segments.empty());
             const auto& vertices = shared ? bucket.sharedVertices : staticDataVertices;
             const auto& indices = shared ? bucket.sharedTriangles : staticDataIndices;
             const auto* segments = shared ? &bucket.segments : staticDataSegments.get();
+
+            // The bucket may later add, remove, or change masking.  In that case, the tile's
+            // shared data and segments are not updated, and it needs to be re-created.
+            if (drawable && (bucket.sharedVertices->getDirty() || bucket.sharedTriangles->getDirty())) {
+                return false;
+            }
 
             gfx::VertexAttributeArray vertexAttrs;
             if (auto& attr = vertexAttrs.add(idPosAttribName)) {
@@ -358,6 +371,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
+            assert(!!drawable ^ !!builder);
             if (drawable) {
                 drawable->setVertexAttributes(std::move(vertexAttrs));
             } else if (builder) {
@@ -365,6 +379,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
                 builder->setSegments(gfx::Triangles(), indices, segments->data(), segments->size());
             }
+            return true;
         };
 
     gfx::UniqueDrawableBuilder builder;
@@ -402,16 +417,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     } else if (renderTiles) {
-        // Update existing drawables, returns the number of drawables found for the tile
-        const auto updateTileDrawables = [&](auto* tileLayerGroup, const auto& tileID, const RasterBucket& bucket) {
-            return tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                if (drawable.getLayerTweaker() == layerTweaker) {
-                    gfx::UniqueDrawableBuilder none;
-                    buildVertexData(none, &drawable, bucket);
-                }
-            });
-        };
-
         // Remove existing drawables that are no longer in the cover set
         if (layerGroup) {
             stats.drawablesRemoved += layerGroup->removeDrawablesIf(
@@ -452,9 +457,25 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 cleared = true;
             }
 
-            // If there are any drawables left for this tile, update them.
-            if (!cleared && 0 < updateTileDrawables(tileLayerGroup, tileID, bucket)) {
-                continue;
+            if (!cleared) {
+                // Update existing drawables
+                bool geometryChanged = false;
+                const auto updated = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                    gfx::UniqueDrawableBuilder none;
+                    if (!geometryChanged && !buildVertexData(none, &drawable, bucket)) {
+                        // Masking changed, need to rebuild this tile
+                        geometryChanged = true;
+                    }
+                });
+
+                if (geometryChanged) {
+                    removeTile(renderPass, tileID);
+                    cleared = true;
+                }
+                else if (0 < updated) {
+                    // If we modified drawables without removing them, we're done with this tile.
+                    continue;
+                }
             }
 
             // Otherwise, create new ones.

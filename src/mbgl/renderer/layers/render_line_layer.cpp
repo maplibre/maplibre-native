@@ -469,6 +469,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
+        if (!bucket.sharedTriangles->elements()) {
+            removeTile(renderPass, tileID);
+            continue;
+        }
+
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);

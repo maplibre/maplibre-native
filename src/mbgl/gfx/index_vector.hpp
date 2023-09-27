@@ -41,12 +41,14 @@ public:
     bool isReleased() const { return released; }
 
     void extend(std::size_t n, const uint16_t val) {
+        assert(!released);
         v.resize(v.size() + n, val);
         dirty = true;
     }
 
     uint16_t& at(std::size_t n) {
         assert(n < v.size());
+        assert(!released);
         dirty = true;
         return v.at(n);
     }
@@ -64,8 +66,10 @@ public:
     void clear() {
         dirty = true;
         v.clear();
+        buffer.reset();
     }
 
+    /// Indicate that this shared index vector will no longer be updated.
     void release() {
         // If we've already created a buffer, we don't need the raw data any more.
         if (buffer) {
@@ -94,6 +98,7 @@ public:
     template <class... Args>
     void emplace_back(Args&&... args) {
         static_assert(sizeof...(args) == groupSize, "wrong buffer element count");
+        assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
     }
 };
