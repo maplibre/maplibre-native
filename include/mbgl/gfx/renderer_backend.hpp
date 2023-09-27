@@ -62,7 +62,7 @@ protected:
     friend class BackendScope;
 };
 
-MBGL_CONSTEXPR bool operator==(const RendererBackend& a, const RendererBackend& b) {
+constexpr bool operator==(const RendererBackend& a, const RendererBackend& b) {
     return &a == &b;
 }
 
