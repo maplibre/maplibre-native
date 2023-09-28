@@ -314,21 +314,28 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, const RasterBucket& bucket) {
+    const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, RasterBucket& bucket) {
         if (bucket.image && (rasterSampler0 || rasterSampler1)) {
-            if (auto tex = context.createTexture2D()) {
+            
+            if (!bucket.texture2d) {
+                if (auto tex = context.createTexture2D()) {
+                    tex->setImage(bucket.image);
+                    bucket.texture2d = std::move(tex);
+                }
+            }
+
+            if (bucket.texture2d) {
                 const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
                 const bool nearest = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest;
                 const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
 
-                tex->setImage(bucket.image);
-                tex->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                bucket.texture2d->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
                 if (rasterSampler0) {
-                    builder->setTexture(tex, *rasterSampler0);
+                    builder->setTexture(bucket.texture2d, *rasterSampler0);
                 }
                 if (rasterSampler1) {
-                    builder->setTexture(std::move(tex), *rasterSampler1);
+                    builder->setTexture(bucket.texture2d, *rasterSampler1);
                 }
             }
         }
@@ -433,14 +440,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
 
-            const auto* bucket_ = tile.getBucket(*baseImpl);
+            auto* bucket_ = tile.getBucket(*baseImpl);
             if (!bucket_ || !bucket_->hasData()) {
                 removeTile(renderPass, tileID);
                 continue;
             }
 
             bool cleared = false;
-            const auto& bucket = static_cast<const RasterBucket&>(*bucket_);
+            auto& bucket = static_cast<RasterBucket&>(*bucket_);
 
             // If the bucket data has changed, rebuild the drawables.
             const bool bucketSharedData = (!bucket.vertices.empty() && !bucket.indices.empty() &&

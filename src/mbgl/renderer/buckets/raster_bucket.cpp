@@ -52,6 +52,7 @@ void RasterBucket::clear() {
 void RasterBucket::setImage(std::shared_ptr<PremultipliedImage> image_) {
     image = std::move(image_);
     texture = {};
+    texture2d.reset();
     uploaded = false;
 }
 
