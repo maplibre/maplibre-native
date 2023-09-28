@@ -66,14 +66,13 @@ public:
     void clear() {
         dirty = true;
         v.clear();
-        buffer.reset();
     }
 
     /// Indicate that this shared index vector will no longer be updated.
     void release() {
         // If we've already created a buffer, we don't need the raw data any more.
         if (buffer) {
-            clear();
+            v.clear();
         }
         released = true;
     }
