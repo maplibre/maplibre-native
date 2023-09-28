@@ -70,7 +70,7 @@ shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint6
 void LayerTweaker::setPropertiesAsUniforms(std::vector<std::string> props) {
     if (props != propertiesAsUniforms) {
         propertiesAsUniforms = std::move(props);
-        propertiesChanged = true;
+        permutationUpdated = true;
     }
 }
 #endif
@@ -93,7 +93,7 @@ AttributeSource LayerTweaker::getAttributeSource(const std::string_view& attribN
 void LayerTweaker::enableOverdrawInspector(bool value) {
     if (overdrawInspector != value) {
         overdrawInspector = value;
-        propertiesChanged = true;
+        permutationUpdated = true;
     }
 }
 

@@ -90,7 +90,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const SymbolPermutationUBO permutationUBO = {
             /* .fill_color = */ {/*.source=*/getAttributeSource("a_fill_color"), /*.expression=*/{}},
             /* .halo_color = */ {/*.source=*/getAttributeSource("a_halo_color"), /*.expression=*/{}},
@@ -108,7 +108,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
 
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
@@ -131,7 +131,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
 
-        if (isText && (textPaintBuffer || textPropertiesUpdated)) {
+        if (isText && (!textPaintBuffer || textPropertiesUpdated)) {
             const auto props = buildPaintUBO(true, evaluated);
             textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
             textPropertiesUpdated = false;
