@@ -316,7 +316,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, RasterBucket& bucket) {
         if (bucket.image && (rasterSampler0 || rasterSampler1)) {
-            
             if (!bucket.texture2d) {
                 if (auto tex = context.createTexture2D()) {
                     tex->setImage(bucket.image);
@@ -329,7 +328,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 const bool nearest = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest;
                 const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
 
-                bucket.texture2d->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                bucket.texture2d->setSamplerConfiguration(
+                    {filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
                 if (rasterSampler0) {
                     builder->setTexture(bucket.texture2d, *rasterSampler0);
