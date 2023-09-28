@@ -1,5 +1,6 @@
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 
+#include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/style/types.hpp>
 
@@ -67,7 +68,7 @@ struct DrawableBuilder::Impl::TriangleElement {
     uint16_t a, b, c;
 };
 
-void DrawableBuilder::Impl::addPolyline(const GeometryCoordinates& coordinates, const PolylineOptions& options) {
+void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder, const GeometryCoordinates& coordinates, const PolylineOptions& options) {
     const std::size_t len = [&coordinates] {
         std::size_t l = coordinates.size();
         // If the line has duplicate vertices at the end, adjust length to remove them.
@@ -448,24 +449,24 @@ void DrawableBuilder::Impl::addPolyline(const GeometryCoordinates& coordinates, 
         startOfLine = false;
     }
 
+    // add segment(s) and indices
     const std::size_t endVertex = vertices.elements();
     const std::size_t vertexCount = endVertex - startVertex;
 
-    // TODO: add segment(s) and indices
-    //    if (segments.empty() || segments.back().vertexLength + vertexCount > std::numeric_limits<uint16_t>::max()) {
-    //        segments.emplace_back(startVertex, triangles.elements());
-    //    }
+    if (segments.empty() || segments.back()->getSegment().vertexLength + vertexCount > std::numeric_limits<uint16_t>::max()) {
+        segments.emplace_back(builder.createSegment(gfx::Triangles(), SegmentBase(startVertex, buildIndexes.size())));
+    }
 
-    //    auto& segment = segments.back();
-    //    assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-    //    const auto index = static_cast<uint16_t>(segment.vertexLength);
+    auto& segment = segments.back()->getSegment();
+    assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
+    const auto index = static_cast<uint16_t>(segment.vertexLength);
 
-    //    for (const auto& triangle : triangleStore) {
-    //        triangles.emplace_back(index + triangle.a, index + triangle.b, index + triangle.c);
-    //    }
-    //
-    //    segment.vertexLength += vertexCount;
-    //    segment.indexLength += triangleStore.size() * 3;
+    for (const auto& triangle : triangleStore) {
+        buildIndexes.insert(buildIndexes.end(), {index + triangle.a, index + triangle.b, index + triangle.c});
+    }
+
+    segment.vertexLength += vertexCount;
+    segment.indexLength += triangleStore.size() * 3;
 }
 
 struct LineLayoutVertex {

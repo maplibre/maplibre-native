@@ -44,7 +44,7 @@ public:
         uint32_t overscaling{1}; // TODO: what is this???
     };
 
-    void addPolyline(const GeometryCoordinates& coordinates, const PolylineOptions& options);
+    void addPolyline(gfx::DrawableBuilder& builder, const GeometryCoordinates& coordinates, const PolylineOptions& options);
 
 private:
     class TriangleElement;
