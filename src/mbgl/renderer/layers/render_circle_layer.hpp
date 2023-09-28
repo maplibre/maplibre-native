@@ -49,10 +49,6 @@ private:
     void render(PaintParameters&) override;
 #endif // MLN_LEGACY_RENDERER
 
-#if MLN_DRAWABLE_RENDERER
-    void updateLayerTweaker();
-#endif // MLN_DRAWABLE_RENDERER
-
 private:
     // Paint properties
     style::CirclePaintProperties::Unevaluated unevaluated;
@@ -64,13 +60,6 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr circleShaderGroup;
-
-    CircleLayerTweakerPtr tweaker;
-#if MLN_RENDER_BACKEND_METAL
-    std::vector<std::string> propertiesAsUniforms;
-#endif // MLN_RENDER_BACKEND_METAL
-
-    bool overdrawInspector = false;
 #endif
 };
 

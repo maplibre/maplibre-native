@@ -1020,6 +1020,23 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/mtl/upload_pass.cpp",
     "src/mbgl/mtl/vertex_attribute.cpp",
     "src/mbgl/shaders/mtl/shader_program.cpp",
+    "src/mbgl/shaders/mtl/background.cpp",
+    "src/mbgl/shaders/mtl/background_pattern.cpp",
+    "src/mbgl/shaders/mtl/circle.cpp",
+    "src/mbgl/shaders/mtl/clipping_mask.cpp",
+    "src/mbgl/shaders/mtl/fill.cpp",
+    "src/mbgl/shaders/mtl/fill_extrusion.cpp",
+    "src/mbgl/shaders/mtl/fill_extrusion_pattern.cpp",
+    "src/mbgl/shaders/mtl/heatmap.cpp",
+    "src/mbgl/shaders/mtl/heatmap_texture.cpp",
+    "src/mbgl/shaders/mtl/hillshade.cpp",
+    "src/mbgl/shaders/mtl/hillshade_prepare.cpp",
+    "src/mbgl/shaders/mtl/line.cpp",
+    "src/mbgl/shaders/mtl/line_gradient.cpp",
+    "src/mbgl/shaders/mtl/raster.cpp",
+    "src/mbgl/shaders/mtl/symbol_icon.cpp",
+    "src/mbgl/shaders/mtl/symbol_sdf.cpp",
+    "src/mbgl/shaders/mtl/symbol_text_and_icon.cpp",
 ]
 
 MLN_DRAWABLES_MTL_HEADERS = [
