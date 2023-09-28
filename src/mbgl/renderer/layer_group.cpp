@@ -2,8 +2,10 @@
 
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/drawable_tweaker.hpp>
+#include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 
 #include <set>
 
@@ -13,6 +15,17 @@ void LayerGroupBase::addDrawable(gfx::UniqueDrawable& drawable) {
     // init their tweakers
     for (const auto& tweaker : drawable->getTweakers()) {
         tweaker->init(*drawable);
+    }
+}
+
+void LayerGroupBase::runTweakers(const RenderTree& renderTree, PaintParameters& parameters) {
+    for (auto it = layerTweakers.begin(); it != layerTweakers.end();) {
+        if (auto tweaker = it->lock()) {
+            tweaker->execute(*this, renderTree, parameters);
+            ++it;
+        } else {
+            it = layerTweakers.erase(it);
+        }
     }
 }
 

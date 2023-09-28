@@ -43,6 +43,7 @@ void DrawableGLBuilder::init() {
     impl->buildIndexes.clear();
     impl->segments.clear();
     impl->vertices.clear();
+    textures.clear();
 }
 
 } // namespace gl

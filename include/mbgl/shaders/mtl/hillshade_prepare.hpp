@@ -14,16 +14,10 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Metal> 
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Short2, 1, "a_texture_pos"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(2, true, true, HillshadePrepareDrawableUBO),
-    };
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo, 2> attributes;
+    static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<TextureInfo, 1> textures;
+
     static constexpr auto source = R"(
 
 struct VertexStage {

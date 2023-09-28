@@ -55,12 +55,14 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        drawable.mutableUniformBuffers().addOrReplace(idHillshadeEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
-
-        if (!drawable.getTileID()) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
+
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
+        drawable.mutableUniformBuffers().addOrReplace(idHillshadeEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+
         const auto matrix = getTileMatrix(
             tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, true);
         HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),

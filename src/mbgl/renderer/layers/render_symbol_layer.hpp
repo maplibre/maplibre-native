@@ -118,10 +118,10 @@ protected:
     void layerRemoved(UniqueChangeRequestVec&) override;
 
     /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&) override;
+    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
-    void removeAllDrawables() override;
+    std::size_t removeAllDrawables() override;
 #endif // MLN_DRAWABLE_RENDERER
 
 private:
@@ -151,8 +151,6 @@ private:
 #endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
-    SymbolLayerTweakerPtr tweaker;
-
     gfx::ShaderGroupPtr symbolIconGroup;
     gfx::ShaderGroupPtr symbolSDFGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
@@ -160,11 +158,9 @@ private:
     gfx::ShaderGroupPtr collisionBoxGroup;
     gfx::ShaderGroupPtr collisionCircleGroup;
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
-#endif // MLN_DRAWABLE_RENDERER
 
-#if MLN_RENDER_BACKEND_METAL
-    std::vector<std::string> propertiesAsUniforms;
-#endif // MLN_RENDER_BACKEND_METAL
+    LayerTweakerPtr collisionLayerTweaker;
+#endif // MLN_DRAWABLE_RENDERER
 };
 
 } // namespace mbgl
