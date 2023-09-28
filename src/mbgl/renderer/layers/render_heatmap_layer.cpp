@@ -377,7 +377,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         const float zoom = static_cast<float>(state.getZoom());
 
         gfx::UniformBufferPtr interpolateBuffer;
-        const auto getInterpolateBuffer = [&](){
+        const auto getInterpolateBuffer = [&]() {
             if (!interpolateBuffer) {
                 const HeatmapInterpolateUBO interpolateUBO = {
                     /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
@@ -403,7 +403,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             // We assume vertex attributes don't change, and so don't update them to avoid re-uploading
-            //drawable.setVertexAttributes(heatmapVertexAttrs);
+            // drawable.setVertexAttributes(heatmapVertexAttrs);
 
             auto& uniforms = drawable.mutableUniformBuffers();
 
