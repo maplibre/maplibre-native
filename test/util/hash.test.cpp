@@ -12,7 +12,6 @@
 using namespace mbgl;
 
 TEST(OrderIndependentHash, Permutations) {
-    
     // Try collections of up to this many elements
     constexpr int maxSize = 6;
     // Try this many different sets of values for each size
@@ -20,7 +19,7 @@ TEST(OrderIndependentHash, Permutations) {
     // Use values up to this large
     constexpr size_t maxVal = 10;
 
-    std::seed_seq seed { 0xf00dLL };
+    std::seed_seq seed{0xf00dLL};
     std::default_random_engine engine(seed);
     std::uniform_int_distribution<size_t> distribution(0, maxVal);
 

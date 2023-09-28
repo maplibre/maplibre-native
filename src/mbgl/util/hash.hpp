@@ -21,8 +21,8 @@ std::size_t hash(Args&&... args) {
 }
 
 namespace detail {
-    template <typename TIter>
-    using TIterVal = std::enable_if_t<std::is_integral<typename TIter::value_type>::value,typename TIter::value_type>;
+template <typename TIter>
+using TIterVal = std::enable_if_t<std::is_integral<typename TIter::value_type>::value, typename TIter::value_type>;
 } // namespace detail
 
 /// Generate a hash key from a collection of integer values which doesn't depend on their order.
