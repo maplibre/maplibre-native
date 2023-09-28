@@ -68,7 +68,9 @@ struct DrawableBuilder::Impl::TriangleElement {
     uint16_t a, b, c;
 };
 
-void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder, const GeometryCoordinates& coordinates, const PolylineOptions& options) {
+void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
+                                        const GeometryCoordinates& coordinates,
+                                        const PolylineOptions& options) {
     const std::size_t len = [&coordinates] {
         std::size_t l = coordinates.size();
         // If the line has duplicate vertices at the end, adjust length to remove them.
@@ -453,7 +455,8 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder, const Geo
     const std::size_t endVertex = vertices.elements();
     const std::size_t vertexCount = endVertex - startVertex;
 
-    if (segments.empty() || segments.back()->getSegment().vertexLength + vertexCount > std::numeric_limits<uint16_t>::max()) {
+    if (segments.empty() ||
+        segments.back()->getSegment().vertexLength + vertexCount > std::numeric_limits<uint16_t>::max()) {
         segments.emplace_back(builder.createSegment(gfx::Triangles(), SegmentBase(startVertex, buildIndexes.size())));
     }
 
