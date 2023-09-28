@@ -6,9 +6,12 @@
 #include <mutex>
 #include <shared_mutex>
 #include <unordered_map>
-#include <vector>
+#include <unordered_set>
 
 namespace mbgl {
+
+using StringIdentity = std::size_t;
+
 namespace gfx {
 
 class Context;
@@ -138,12 +141,13 @@ public:
 
     /// @brief Get a shader from the group by its set of data driven properties as uniforms.
     /// if no shader is found, create and register the shader.
-    /// @param propertiesAsUniforms Vector of data driven properties as uniforms.
+    /// @param propertiesAsUniforms Set of data driven properties as uniforms.
     /// @param firstAttribName Name of the first attribute
     /// @return A `gfx::ShaderPtr`
-    virtual gfx::ShaderPtr getOrCreateShader(gfx::Context&,
-                                             [[maybe_unused]] const std::vector<std::string>& propertiesAsUniforms,
-                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
+    virtual gfx::ShaderPtr getOrCreateShader(
+        gfx::Context&,
+        [[maybe_unused]] const std::unordered_set<StringIdentity>& propertiesAsUniforms,
+        [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
     }
 

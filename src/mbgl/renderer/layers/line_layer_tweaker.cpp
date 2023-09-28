@@ -112,19 +112,14 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
     };
 
 #if MLN_RENDER_BACKEND_METAL
-    using LineShaderClass = shaders::ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>;
     if (propertiesChanged) {
-        const auto source = [this](const std::string_view& attrName) {
-            return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-        };
-
         const LinePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/source(LineShaderClass::attributes[2].name), /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/source(LineShaderClass::attributes[3].name), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/source(LineShaderClass::attributes[4].name), /*.expression=*/{}},
-            /* .gapwidth = */ {/*.source=*/source(LineShaderClass::attributes[5].name), /*.expression=*/{}},
-            /* .offset = */ {/*.source=*/source(LineShaderClass::attributes[6].name), /*.expression=*/{}},
-            /* .width = */ {/*.source=*/source(LineShaderClass::attributes[7].name), /*.expression=*/{}},
+            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(2), /*.expression=*/{}},
+            /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(3), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(4), /*.expression=*/{}},
+            /* .gapwidth = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(5), /*.expression=*/{}},
+            /* .offset = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(6), /*.expression=*/{}},
+            /* .width = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(7), /*.expression=*/{}},
             /* .floorwidth = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
             /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
             /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
@@ -149,7 +144,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
-        if (!drawable.getTileID() || !shader) {
+        if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
             return;
         }
 

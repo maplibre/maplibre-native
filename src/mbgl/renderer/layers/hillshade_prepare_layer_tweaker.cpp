@@ -42,7 +42,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID() || !drawable.getData()) {
+        if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) {
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
@@ -52,7 +52,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
         matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, -1, 1);
         matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
 
-        HillshadePrepareDrawableUBO drawableUBO = {
+        const HillshadePrepareDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .unpack = */ getUnpackVector(drawableData.encoding),
             /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},

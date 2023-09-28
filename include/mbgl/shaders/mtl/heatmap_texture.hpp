@@ -14,16 +14,10 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(1, true, true, HeatmapTextureDrawableUBO),
-    };
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-        {1, "u_color_ramp"},
-    };
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<TextureInfo, 2> textures;
+
     static constexpr auto source = R"(
 
 struct VertexStage {
