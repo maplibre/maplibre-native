@@ -70,7 +70,7 @@ struct DrawableBuilder::Impl::TriangleElement {
 
 void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
                                         const GeometryCoordinates& coordinates,
-                                        const PolylineOptions& options) {
+                                        const DrawableBuilder::PolylineOptions& options) {
     const std::size_t len = [&coordinates] {
         std::size_t l = coordinates.size();
         // If the line has duplicate vertices at the end, adjust length to remove them.
@@ -472,13 +472,8 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
     segment.indexLength += triangleStore.size() * 3;
 }
 
-struct LineLayoutVertex {
-    std::array<int16_t, 2> a1;
-    std::array<uint8_t, 4> a2;
-};
-
-static LineLayoutVertex layoutVertex(
-    Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0) {
+DrawableBuilder::Impl::LineLayoutVertex DrawableBuilder::Impl::layoutVertex(
+    Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar /*= 0*/) {
     /*
      * Scale the extrusion vector so that the normal length is this value.
      * Contains the "texture" normals (-1..1). This is distinct from the extrude
@@ -509,14 +504,6 @@ static LineLayoutVertex layoutVertex(
           static_cast<uint8_t>(linesofar >> 6)}}};
 }
 
-template <typename T>
-void emplace_back(std::vector<uint8_t>& v, std::size_t& size, T data) {
-    uint8_t* begin = reinterpret_cast<uint8_t*>(&data);
-    uint8_t* end = begin + sizeof(data);
-    v.insert(v.end(), begin, end);
-    ++size;
-}
-
 void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCoordinate,
                                              double& distance,
                                              const Point<double>& normal,
@@ -530,8 +517,7 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
     double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
 
     if (endLeft) extrude = extrude - (util::perp(normal) * endLeft);
-    emplace_back(rawVertices,
-                 rawVerticesCount,
+    polylineVertices.emplace_back(
                  layoutVertex(currentCoordinate,
                               extrude,
                               round,
@@ -547,8 +533,7 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
 
     extrude = normal * -1.0;
     if (endRight) extrude = extrude - (util::perp(normal) * endRight);
-    emplace_back(rawVertices,
-                 rawVerticesCount,
+    polylineVertices.emplace_back(
                  layoutVertex(currentCoordinate,
                               extrude,
                               round,
@@ -585,8 +570,7 @@ void DrawableBuilder::Impl::addPieSliceVertex(const GeometryCoordinate& currentV
         distance = lineDistances->scaleToMaxLineDistance(distance);
     }
 
-    emplace_back(rawVertices,
-                 rawVerticesCount,
+    polylineVertices.emplace_back(
                  layoutVertex(currentVertex,
                               flippedExtrude,
                               false,
@@ -603,6 +587,37 @@ void DrawableBuilder::Impl::addPieSliceVertex(const GeometryCoordinate& currentV
     } else {
         e1 = e3;
     }
+}
+
+void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
+
+    // setup vertex attributes
+    static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal");
+    static const StringIdentity idDataAttribName = StringIndexer::get("a_data");
+    
+    builder.setVertexAttrNameId(idVertexAttribName);
+
+    gfx::VertexAttributeArray vertexAttrs;
+    using VertexVector = gfx::VertexVector<LineLayoutVertex>;
+    std::shared_ptr<VertexVector> verts = std::make_shared<VertexVector>(polylineVertices);
+
+    if (const auto& attr = vertexAttrs.add(idVertexAttribName)) {
+        attr->setSharedRawData(verts,
+                               offsetof(LineLayoutVertex, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(LineLayoutVertex),
+                               gfx::AttributeDataType::Short2);
+    }
+
+    if (const auto& attr = vertexAttrs.add(idDataAttribName)) {
+        attr->setSharedRawData(verts,
+                               offsetof(LineLayoutVertex, a2),
+                               /*vertexOffset=*/0,
+                               sizeof(LineLayoutVertex),
+                               gfx::AttributeDataType::UByte4);
+    }
+
+    builder.setVertexAttributes(std::move(vertexAttrs));
 }
 
 } // namespace gfx

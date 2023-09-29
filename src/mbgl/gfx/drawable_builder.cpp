@@ -6,6 +6,7 @@
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/gfx/gfx_types.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -45,6 +46,12 @@ UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 
 void DrawableBuilder::flush() {
     if (curVertexCount()) {
+        
+        if (Mode::Polylines == mode) {
+            // setup for polylines
+            impl->setupForPolylines(*this);
+        }
+        
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
         draw->setEnabled(enabled);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
@@ -68,6 +75,9 @@ void DrawableBuilder::flush() {
         }
 
         init();
+        
+        // reset mode
+        mode = Mode::Custom;
     }
     if (currentDrawable) {
         drawables.emplace_back(std::move(currentDrawable));
@@ -101,6 +111,10 @@ void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture,
 }
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+    // check and set the current mode
+    if(!checkAndSetMode(Mode::Primitives))
+        return;
+
     const auto n = static_cast<uint16_t>(impl->vertices.elements());
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
     impl->vertices.emplace_back(Impl::VT({{{x1, y1}}}));
@@ -117,6 +131,10 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 }
 
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
+    // check and set the current mode
+    if(!checkAndSetMode(Mode::Primitives))
+        return;
+
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
     impl->buildIndexes.insert(impl->buildIndexes.end(),
@@ -129,6 +147,10 @@ void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
 }
 
 void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
+    // check and set the current mode
+    if(!checkAndSetMode(Mode::Primitives))
+        return;
+    
     addTriangle(x0, y0, x1, y0, x0, y1);
     appendTriangle(x1, y1);
 }
@@ -252,11 +274,27 @@ void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
 }
 
 std::size_t DrawableBuilder::curVertexCount() const {
-    return impl->rawVerticesCount ? impl->rawVerticesCount : impl->vertices.elements();
+    return std::max(impl->rawVerticesCount, std::max(impl->vertices.elements(), impl->polylineVertices.elements()));
 }
 
-void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates) {
-    impl->addPolyline(*this, coordinates, Impl::PolylineOptions());
+void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates, const PolylineOptions& options) {
+    // mark the current mode
+    if(!checkAndSetMode(Mode::Polylines))
+        return;
+    
+    // append polyline
+    impl->addPolyline(*this, coordinates, options);
+}
+
+bool DrawableBuilder::checkAndSetMode(Mode target) {
+    if (target != mode && curVertexCount()) {
+        // the builder is building in a different mode
+        assert(false);
+        // TODO: throw?
+        return false;
+    }
+    mode = target;
+    return true;
 }
 
 } // namespace gfx

@@ -4,6 +4,7 @@
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/util/string_indexer.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/style/types.hpp>
 
 #include <array>
 #include <memory>
@@ -31,6 +32,23 @@ using Texture2DPtr = std::shared_ptr<Texture2D>;
 class DrawableBuilder {
 protected:
     DrawableBuilder(std::string name);
+
+public:
+    enum class Mode {
+        Primitives, ///< building primitive drawables. Not implemented
+        Polylines,  ///< building drawables for thick polylines
+        Custom      ///< building custom drawables.
+    };
+
+    struct PolylineOptions {
+        FeatureType type{FeatureType::LineString};
+        style::LineJoinType joinType{style::LineJoinType::Miter};
+        float miterLimit{2.f};
+        style::LineCapType beginCap{style::LineCapType::Butt};
+        style::LineCapType endCap{style::LineCapType::Butt};
+        float roundLimit{1.f};
+        uint32_t overscaling{1}; // TODO: what is this???
+    };
 
 public:
     /// Destructor
@@ -197,7 +215,7 @@ public:
     virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
 
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
-    void addPolyline(const GeometryCoordinates& coordinates);
+    void addPolyline(const GeometryCoordinates& coordinates, const PolylineOptions&);
 
 protected:
     std::size_t curVertexCount() const;
@@ -207,8 +225,11 @@ protected:
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
+    
+    bool checkAndSetMode(Mode);
 
 protected:
+    Mode mode {Mode::Custom};
     std::string name;
     std::string drawableName;
     StringIdentity vertexAttrNameId;
