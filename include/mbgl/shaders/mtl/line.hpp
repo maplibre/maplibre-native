@@ -350,7 +350,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 )";
 };
 
-
 template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineSDFShader";
@@ -534,8 +533,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 };
 
 //
-//template <>
-//struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
+// template <>
+// struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
 //    static constexpr auto name = "LineGradientShader";
 //    static constexpr auto vertexMainFunction = "vertexMain";
 //    static constexpr auto fragmentMainFunction = "fragmentMain";
@@ -562,7 +561,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //
 //    static constexpr auto source = R"(
 //
-//struct VertexStage {
+// struct VertexStage {
 //    short2 pos_normal [[attribute(0)]];
 //    uchar4 data [[attribute(1)]];
 //    float2 blur [[attribute(2)]];
@@ -572,7 +571,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //    float2 width [[attribute(6)]];
 //};
 //
-//struct FragmentStage {
+// struct FragmentStage {
 //    float4 position [[position, invariant]];
 //    float2 width2;
 //    float2 normal;
@@ -584,7 +583,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //
 //
 //
-//FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+// FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 //                                device const LineGradientUBO& line [[buffer(7)]],
 //                                device const LineGradientPropertiesUBO& props [[buffer(8)]],
 //                                device const LineGradientInterpolationUBO& interp [[buffer(9)]],
@@ -594,8 +593,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //    const auto blur     = valueFor(permutation.blur,     props.blur,     vertx.blur,     interp.blur_t,     expr);
 //    const auto opacity  = valueFor(permutation.opacity,  props.opacity,  vertx.opacity,  interp.opacity_t,  expr);
 //    const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
-//    const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
-//    const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
+//    const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) *
+//    -1; const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
 //
 //    // the distance over which the line edge fades out.
 //    // Retina devices need a smaller distance to avoid aliasing.
@@ -615,7 +614,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //
 //    const float halfwidth = width / 2.0;
 //    const float inset = gapwidth + (gapwidth > 0.0 ? ANTIALIASING : 0.0);
-//    const float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
+//    const float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) + (halfwidth == 0.0 ? 0.0 :
+//    ANTIALIASING);
 //
 //    // Scale the extrusion vector down to a normal and then up by the line width of this vertex.
 //    const float2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
@@ -646,7 +646,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //    };
 //}
 //
-//half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+// half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //                            device const LineSDFUBO& line [[buffer(9)]],
 //                            device const LinePermutationUBO& permutation [[buffer(12)]],
 //                            texture2d<float, access::sample> image0 [[texture(0)]],
