@@ -225,11 +225,11 @@ protected:
 
     /// Setup the SDK-specific aspects after all the values are present
     virtual void init() = 0;
-    
+
     bool checkAndSetMode(Mode);
 
 protected:
-    Mode mode {Mode::Custom};
+    Mode mode{Mode::Custom};
     std::string name;
     std::string drawableName;
     StringIdentity vertexAttrNameId;

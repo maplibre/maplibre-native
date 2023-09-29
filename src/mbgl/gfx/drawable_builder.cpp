@@ -46,12 +46,11 @@ UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 
 void DrawableBuilder::flush() {
     if (curVertexCount()) {
-        
         if (Mode::Polylines == mode) {
             // setup for polylines
             impl->setupForPolylines(*this);
         }
-        
+
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
         draw->setEnabled(enabled);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
@@ -75,7 +74,7 @@ void DrawableBuilder::flush() {
         }
 
         init();
-        
+
         // reset mode
         mode = Mode::Custom;
     }
@@ -112,8 +111,7 @@ void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture,
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
     // check and set the current mode
-    if(!checkAndSetMode(Mode::Primitives))
-        return;
+    if (!checkAndSetMode(Mode::Primitives)) return;
 
     const auto n = static_cast<uint16_t>(impl->vertices.elements());
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
@@ -132,8 +130,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     // check and set the current mode
-    if(!checkAndSetMode(Mode::Primitives))
-        return;
+    if (!checkAndSetMode(Mode::Primitives)) return;
 
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
@@ -148,9 +145,8 @@ void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
 
 void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     // check and set the current mode
-    if(!checkAndSetMode(Mode::Primitives))
-        return;
-    
+    if (!checkAndSetMode(Mode::Primitives)) return;
+
     addTriangle(x0, y0, x1, y0, x0, y1);
     appendTriangle(x1, y1);
 }
@@ -279,9 +275,8 @@ std::size_t DrawableBuilder::curVertexCount() const {
 
 void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates, const PolylineOptions& options) {
     // mark the current mode
-    if(!checkAndSetMode(Mode::Polylines))
-        return;
-    
+    if (!checkAndSetMode(Mode::Polylines)) return;
+
     // append polyline
     impl->addPolyline(*this, coordinates, options);
 }
