@@ -86,7 +86,7 @@ void RenderLayer::replaceTweaker(LayerTweakerPtr& curTweaker,
 
             group->visitDrawables([&](gfx::Drawable& drawable) {
                 if (drawable.getLayerTweaker() == prevTweaker) {
-                    drawable.setLayerTweaker(curTweaker);
+                    drawable.setLayerTweaker(newTweaker);
                 }
             });
         }

@@ -44,7 +44,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
     using ShaderClass = shaders::ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const auto source = [this](const std::string_view& attrName) {
             return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
         };
@@ -66,7 +66,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
 
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);

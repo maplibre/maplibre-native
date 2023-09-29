@@ -512,6 +512,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         colorBuilder->setVertexAttributes(std::move(vertexAttrs));
 
         const auto finish = [&](gfx::DrawableBuilder& builder) {
+            if (!bucket.sharedTriangles->elements()) {
+                return;
+            }
             builder.setSegments(gfx::Triangles(),
                                 bucket.sharedTriangles,
                                 bucket.triangleSegments.data(),

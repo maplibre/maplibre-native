@@ -57,16 +57,20 @@ public:
 
     template <typename Arg>
     void emplace_back(Arg&& vertex) {
+        assert(!released);
         v.emplace_back(std::forward<Arg>(vertex));
+        dirty = true;
     }
 
     void extend(std::size_t n, const Vertex& val) {
+        assert(!released);
         v.resize(v.size() + n, val);
         dirty = true;
     }
 
     Vertex& at(std::size_t n) {
         assert(n < v.size());
+        assert(!released);
         dirty = true;
         return v.at(n);
     }
@@ -86,10 +90,11 @@ public:
         v.clear();
     }
 
+    /// Indicate that this shared vertex vector instance will no longer be updated.
     void release() {
         // If we've already created a buffer, we don't need the raw data any more.
         if (buffer) {
-            clear();
+            v.clear();
         }
         released = true;
     }

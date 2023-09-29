@@ -93,9 +93,12 @@ protected:
     std::vector<std::string> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
 
+    // Indicates that the evaluated properties have changed
     bool propertiesUpdated = true;
 
-    bool propertiesChanged = true;
+    // Indicates that the properties-as-uniforms has changed
+    bool permutationUpdated = true;
+
     bool overdrawInspector = false;
 };
 
