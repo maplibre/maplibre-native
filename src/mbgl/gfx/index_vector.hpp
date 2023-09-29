@@ -31,7 +31,8 @@ public:
           buffer(std::move(other.buffer)),
 #endif // MLN_DRAWABLE_RENDERER
           dirty(other.dirty),
-          released(other.released) {}
+          released(other.released) {
+    }
     virtual ~IndexVectorBase() = default;
 
 #if MLN_DRAWABLE_RENDERER

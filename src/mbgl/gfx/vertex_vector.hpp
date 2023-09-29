@@ -17,12 +17,13 @@ public:
     VertexVectorBase() = default;
     VertexVectorBase(const VertexVectorBase&) {} // buffer is not copied
     VertexVectorBase(VertexVectorBase&& other)
-        : 
+        :
 #if MLN_DRAWABLE_RENDERER
-    buffer(std::move(other.buffer)),
+          buffer(std::move(other.buffer)),
 #endif // MLN_DRAWABLE_RENDERER
           dirty(other.dirty),
-          released(other.released) {}
+          released(other.released) {
+    }
     virtual ~VertexVectorBase() = default;
 
     virtual const void* getRawData() const = 0;
