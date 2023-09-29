@@ -9,9 +9,15 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 
+#include <memory>
 #include <optional>
 
 namespace mbgl {
+
+namespace gfx {
+class Texture2D;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
+} // namespace gfx
 
 class RasterBucket final : public Bucket {
 public:
