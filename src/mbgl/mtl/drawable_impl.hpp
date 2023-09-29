@@ -8,6 +8,7 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
@@ -55,6 +56,15 @@ public:
     StringIdentity idVertexAttrName = StringIndexer::get("a_pos");
 
     gfx::UniqueVertexBufferResource noBindingBuffer;
+    
+    gfx::AttributeBindingArray attributeBindings;
+
+    MTLRenderPipelineStatePtr pipelineState;
+
+    std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
+
+    MTLDepthStencilStatePtr depthStencilState;
+    gfx::StencilMode previousStencilMode;
 };
 
 struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {
