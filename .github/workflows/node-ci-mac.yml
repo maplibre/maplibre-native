@@ -11,17 +11,17 @@ on:
     branches:
       - opengl-2
     tags:
-      - 'node-*'
+      - "node-*"
     paths:
       - CMakeLists.txt
       - "platform/default/**"
-      - 'platform/node/**'
-      - 'platform/windows/**'
-      - 'platform/darwin/**'
-      - 'platform/macos/**'
-      - 'platform/ios/platform/darwin/**'
-      - 'platform/ios/platform/macos/**'
-      - ".github/workflows/node-ci.yml"
+      - "platform/node/**"
+      - "platform/windows/**"
+      - "platform/darwin/**"
+      - "platform/macos/**"
+      - "platform/ios/platform/darwin/**"
+      - "platform/ios/platform/macos/**"
+      - ".github/workflows/node-ci-mac.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
@@ -40,13 +40,13 @@ on:
     paths:
       - CMakeLists.txt
       - "platform/default/**"
-      - 'platform/node/**'
-      - 'platform/windows/**'
-      - 'platform/darwin/**'
-      - 'platform/macos/**'
-      - 'platform/ios/platform/darwin/**'
-      - 'platform/ios/platform/macos/**'
-      - ".github/workflows/node-ci.yml"
+      - "platform/node/**"
+      - "platform/windows/**"
+      - "platform/darwin/**"
+      - "platform/macos/**"
+      - "platform/ios/platform/darwin/**"
+      - "platform/ios/platform/macos/**"
+      - ".github/workflows/node-ci-mac.yml"
       - "bin/**"
       - "expression-test/**"
       - "include/**"
@@ -73,11 +73,11 @@ jobs:
         include:
           - runs-on: macos-12
             arch: x86_64
-          - runs-on: macos-12-arm
+          - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
     continue-on-error: true
     env:
-      BUILDTYPE: 'Release'
+      BUILDTYPE: "Release"
 
     defaults:
       run:
@@ -162,7 +162,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: hendrikmuhs/ccache-action@v1
         with:
-          variant: 'sccache'
+          variant: "sccache"
           key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
@@ -261,4 +261,3 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
-          
