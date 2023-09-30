@@ -14,8 +14,8 @@ RasterBucket::RasterBucket(std::shared_ptr<PremultipliedImage> image_)
     : image(std::move(image_)) {}
 
 RasterBucket::~RasterBucket() {
-    vertices.release();
-    indices.release();
+    clear();
+    setImage({});
 }
 
 void RasterBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
