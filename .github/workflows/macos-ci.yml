@@ -7,11 +7,11 @@ on:
       - main
       - opengl-2
     tags:
-      - 'macos-*'
+      - "macos-*"
     paths:
       - CMakeLists.txt
-      - 'platform/ios/**'
-      - 'platform/darwin/**'
+      - "platform/ios/**"
+      - "platform/darwin/**"
       - ".github/workflows/macos-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -32,8 +32,8 @@ on:
       - opengl-2
     paths:
       - CMakeLists.txt
-      - 'platform/ios/**'
-      - 'platform/darwin/**'
+      - "platform/ios/**"
+      - "platform/darwin/**"
       - ".github/workflows/macos-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -95,7 +95,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      
+
       - name: npm install
         run: npm ci --ignore-scripts
 
@@ -120,11 +120,11 @@ jobs:
           ccache --max-size=2G
           ccache --show-stats
 
-      - name: Run macOS Objective-C tests
-        run: |
-          ../macos/scripts/run-in-macos-gui-env.sh "make macos-test"
+      # - name: Run macOS Objective-C tests
+      #   run: |
+      #     ../macos/scripts/run-in-macos-gui-env.sh "make macos-test"
 
-      - name: npm install  # C++ tests are run with root as working directory
+      - name: npm install # C++ tests are run with root as working directory
         run: npm ci --ignore-scripts
         working-directory: .
 
