@@ -33,6 +33,8 @@ else()
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Threads REQUIRED)
+
     option(MLN_QT_WITH_INTERNAL_ICU "Build MapLibre GL Qt bindings with internal ICU" OFF)
     if(NOT MLN_QT_WITH_INTERNAL_ICU)
        find_package(ICU COMPONENTS uc REQUIRED)
@@ -134,6 +136,7 @@ endif()
 target_link_libraries(
     mbgl-core
     PRIVATE
+        $<$<PLATFORM_ID:Linux>:${CMAKE_THREAD_LIBS_INIT}>
         $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
@@ -356,37 +359,22 @@ if(NOT MLN_QT_LIBRARY_ONLY)
 
     target_compile_definitions(
         mbgl-test-runner
-        PRIVATE WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
+        PRIVATE
+            WORK_DIRECTORY=${PROJECT_SOURCE_DIR}
+            $<$<PLATFORM_ID:Windows>:MBGL_BUILDING_LIB>
     )
-
-    if(WIN32)
-        target_compile_definitions(
-            mbgl-test-runner
-            PRIVATE MBGL_BUILDING_LIB
-        )
-    endif()
 
     target_link_libraries(
         mbgl-test-runner
         PRIVATE
             Qt${QT_VERSION_MAJOR}::Gui
             mbgl-compiler-options
-            $<$<NOT:$<BOOL:MSVC>>:pthread>
     )
 
     if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
         target_link_libraries(
             mbgl-test-runner
             PRIVATE -Wl,-force_load mbgl-test
-        )
-    elseif(MSVC)
-        target_link_options(
-            mbgl-test-runner
-            PRIVATE /WHOLEARCHIVE:mbgl-test.lib
-        )
-        target_link_libraries(
-            mbgl-test-runner
-            PRIVATE mbgl-test
         )
     else()
         target_link_libraries(

@@ -197,8 +197,7 @@ jobs:
             -DCMAKE_OSX_DEPLOYMENT_TARGET="${DEPLOYMENT_TARGET}" \
             -DCMAKE_OSX_ARCHITECTURES="${DEPLOYMENT_ARCH}" \
             -DMLN_WITH_QT=ON \
-            -DMLN_QT_DEPLOYMENT=ON \
-            -DMLN_QT_LIBRARY_ONLY=ON
+            -DMLN_QT_DEPLOYMENT=ON
           ninja
           ninja install
 
@@ -224,8 +223,7 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache.exe" \
             -DCMAKE_INSTALL_PREFIX="../install" \
             -DMLN_WITH_QT=ON \
-            -DMLN_QT_DEPLOYMENT=ON \
-            -DMLN_QT_LIBRARY_ONLY=ON
+            -DMLN_QT_DEPLOYMENT=ON
           ninja.exe
           ninja.exe install
 
