@@ -269,7 +269,8 @@ jobs:
             -DCMAKE_INSTALL_PREFIX="../install" \
             -DMLN_WITH_QT=ON \
             -DMLN_QT_DEPLOYMENT=ON \
-            -DMLN_QT_WITH_INTERNAL_ICU=ON
+            -DMLN_QT_WITH_INTERNAL_ICU=ON \
+            -DMLN_QT_WITH_INTERNAL_SQLITE=ON
           ninja
           ninja install
 
