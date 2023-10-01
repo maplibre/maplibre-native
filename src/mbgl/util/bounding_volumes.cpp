@@ -211,13 +211,15 @@ IntersectionResult Frustum::intersects(const AABB& aabb) const {
 
     bool fullyInside = true;
 
+    const auto epsilon = 1e-10;
+
     for (const vec4& plane : planes) {
         size_t pointsInside = 0;
 
-        pointsInside += vec4Dot(plane, aabbPoints[0]) >= 0.0;
-        pointsInside += vec4Dot(plane, aabbPoints[1]) >= 0.0;
-        pointsInside += vec4Dot(plane, aabbPoints[2]) >= 0.0;
-        pointsInside += vec4Dot(plane, aabbPoints[3]) >= 0.0;
+        pointsInside += vec4Dot(plane, aabbPoints[0]) >= -epsilon;
+        pointsInside += vec4Dot(plane, aabbPoints[1]) >= -epsilon;
+        pointsInside += vec4Dot(plane, aabbPoints[2]) >= -epsilon;
+        pointsInside += vec4Dot(plane, aabbPoints[3]) >= -epsilon;
 
         if (!pointsInside) {
             // Separating axis found, no intersection
