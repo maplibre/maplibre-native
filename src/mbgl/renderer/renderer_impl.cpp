@@ -397,15 +397,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_DRAWABLE_RENDERER
 #pragma message("Temporary code!!")
     // Draw a custom overlay
-    if(1)
-    {
+    if (1) {
         // setup
-        const OverscaledTileID tile {6, 19, 23};
+        const OverscaledTileID tile{6, 19, 23};
         const float zoom = tile.overscaledZ;
         const UnwrappedTileID tileID = tile.toUnwrapped();
         const auto matrix = LayerTweaker::getTileMatrix(
-                                                        tileID, renderTree, parameters.state, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false);
-        
+            tileID, renderTree, parameters.state, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false);
+
         auto createLineBuilder = [&](const std::string& name,
                                      gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
             std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
@@ -428,30 +427,29 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             /*device_pixel_ratio = */ parameters.pixelRatio};
 
         static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO");
-        const shaders::LinePropertiesUBO linePropertiesUBO{
-            /*color =*/Color::red(),
-            /*blur =*/0.f,
-            /*opacity =*/1.f,
-            /*gapwidth =*/0.f,
-            /*offset =*/0.f,
-            /*width =*/8.f,
-            0,
-            0,
-            0};
-        
-        static const StringIdentity idLineInterpolationUBOName = StringIndexer::get("LineInterpolationUBO");
-        const shaders::LineInterpolationUBO lineInterpolationUBO{
-            /*color_t =*/0.f,
-            /*blur_t =*/0.f,
-            /*opacity_t =*/0.f,
-            /*gapwidth_t =*/0.f,
-            /*offset_t =*/0.f,
-            /*width_t =*/0.f,
-            0,
-            0};
+        const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/Color::red(),
+                                                           /*blur =*/0.f,
+                                                           /*opacity =*/1.f,
+                                                           /*gapwidth =*/0.f,
+                                                           /*offset =*/0.f,
+                                                           /*width =*/8.f,
+                                                           0,
+                                                           0,
+                                                           0};
 
-        gfx::ShaderGroupPtr lineShaderGroup = staticData->shaders->getShaderGroup("LineShader");;
-        const std::unordered_set<StringIdentity> propertiesAsUniforms {
+        static const StringIdentity idLineInterpolationUBOName = StringIndexer::get("LineInterpolationUBO");
+        const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
+                                                                 /*blur_t =*/0.f,
+                                                                 /*opacity_t =*/0.f,
+                                                                 /*gapwidth_t =*/0.f,
+                                                                 /*offset_t =*/0.f,
+                                                                 /*width_t =*/0.f,
+                                                                 0,
+                                                                 0};
+
+        gfx::ShaderGroupPtr lineShaderGroup = staticData->shaders->getShaderGroup("LineShader");
+        ;
+        const std::unordered_set<StringIdentity> propertiesAsUniforms{
             StringIndexer::get("a_color"),
             StringIndexer::get("a_blur"),
             StringIndexer::get("a_opacity"),
@@ -459,23 +457,23 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             StringIndexer::get("a_offset"),
             StringIndexer::get("a_width"),
         };
-        
+
         auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         auto builder = createLineBuilder("thick-lines", shader);
-        
+
         auto layerGroup_ = context.createTileLayerGroup(0, /*initialCapacity=*/1, "tlg");
         auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup_.get());
-        
+
         // add polylines
-        const auto size {util::EXTENT};
-        GeometryCoordinates geom {{0, 0}, {size, 0}, {size / 2, size / 2}};
-        
+        const auto size{util::EXTENT};
+        GeometryCoordinates geom{{0, 0}, {size, 0}, {size / 2, size / 2}};
+
         gfx::DrawableBuilder::PolylineOptions options;
         options.beginCap = style::LineCapType::Round;
         options.endCap = style::LineCapType::Round;
         options.joinType = style::LineJoinType::Round;
         builder->addPolyline(geom, options);
-        
+
         // finish
         builder->flush();
         for (auto& drawable : builder->clearDrawables()) {
@@ -488,7 +486,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
             tileLayerGroup->addDrawable(RenderPass::Translucent, tile, std::move(drawable));
         }
-        
+
         // upload
         {
             const auto uploadPass = parameters.encoder->createUploadPass("custom-upload",

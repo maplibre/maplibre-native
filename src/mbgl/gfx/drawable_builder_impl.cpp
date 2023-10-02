@@ -517,13 +517,12 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
     double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
 
     if (endLeft) extrude = extrude - (util::perp(normal) * endLeft);
-    polylineVertices.emplace_back(
-                 layoutVertex(currentCoordinate,
-                              extrude,
-                              round,
-                              false,
-                              static_cast<int8_t>(endLeft),
-                              static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
+    polylineVertices.emplace_back(layoutVertex(currentCoordinate,
+                                               extrude,
+                                               round,
+                                               false,
+                                               static_cast<int8_t>(endLeft),
+                                               static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
     e3 = polylineVertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -533,13 +532,12 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
 
     extrude = normal * -1.0;
     if (endRight) extrude = extrude - (util::perp(normal) * endRight);
-    polylineVertices.emplace_back(
-                 layoutVertex(currentCoordinate,
-                              extrude,
-                              round,
-                              true,
-                              static_cast<int8_t>(-endRight),
-                              static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
+    polylineVertices.emplace_back(layoutVertex(currentCoordinate,
+                                               extrude,
+                                               round,
+                                               true,
+                                               static_cast<int8_t>(-endRight),
+                                               static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
     e3 = polylineVertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -570,13 +568,8 @@ void DrawableBuilder::Impl::addPieSliceVertex(const GeometryCoordinate& currentV
         distance = lineDistances->scaleToMaxLineDistance(distance);
     }
 
-    polylineVertices.emplace_back(
-                 layoutVertex(currentVertex,
-                              flippedExtrude,
-                              false,
-                              lineTurnsLeft,
-                              0,
-                              static_cast<int32_t>(distance * LINE_DISTANCE_SCALE)));
+    polylineVertices.emplace_back(layoutVertex(
+        currentVertex, flippedExtrude, false, lineTurnsLeft, 0, static_cast<int32_t>(distance * LINE_DISTANCE_SCALE)));
     e3 = polylineVertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
@@ -619,9 +612,8 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
     }
 
     builder.setVertexAttributes(std::move(vertexAttrs));
-    
-    sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(buildIndexes));
 
+    sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(buildIndexes));
 }
 
 } // namespace gfx
