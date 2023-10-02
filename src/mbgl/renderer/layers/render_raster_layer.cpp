@@ -53,7 +53,10 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    updateLayerTweaker();
+    if (layerGroup) {
+        auto newTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup, imageLayerGroup});
+    }
 #endif
 }
 
@@ -247,19 +250,6 @@ static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_textu
 static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
 static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
 
-void RenderRasterLayer::updateLayerTweaker() {
-    if (layerGroup || imageLayerGroup) {
-        tweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
-        tweaker->enableOverdrawInspector(overdrawInspector);
-        if (layerGroup) {
-            layerGroup->setLayerTweaker(tweaker);
-        }
-        if (imageLayerGroup) {
-            imageLayerGroup->setLayerTweaker(tweaker);
-        }
-    }
-}
-
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -278,22 +268,28 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    auto renderPass = RenderPass::Translucent;
+    constexpr auto renderPass = RenderPass::Translucent;
 
     if (!rasterShader) {
         rasterShader = context.getGenericShader(shaders, "RasterShader");
         if (!rasterShader) {
             return;
         }
+        rasterSampler0 = rasterShader->getSamplerLocation(idTexImage0Name);
+        rasterSampler1 = rasterShader->getSamplerLocation(idTexImage1Name);
     }
 
-    const bool overdraw = !!(updateParameters->debugOptions & MapDebugOptions::Overdraw);
-    if (overdrawInspector != overdraw) {
-        overdrawInspector = overdraw;
-        if (tweaker) {
-            tweaker->enableOverdrawInspector(overdrawInspector);
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<RasterLayerTweaker>(getID(), evaluatedProperties);
+
+        if (layerGroup) {
+            layerGroup->addLayerTweaker(layerTweaker);
+        }
+        if (imageLayerGroup) {
+            imageLayerGroup->addLayerTweaker(layerTweaker);
         }
     }
+    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!staticDataVertices) {
         staticDataVertices = std::make_shared<RasterVertexVector>(RenderStaticData::rasterVertices());
@@ -305,61 +301,47 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         staticDataSegments = std::make_shared<RasterSegmentVector>(RenderStaticData::rasterSegments());
     }
 
-    const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
-    RasterProgram::Binders paintAttributeData{evaluated, 0};
-
-    const gfx::TextureFilterType filter = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest
-                                              ? gfx::TextureFilterType::Nearest
-                                              : gfx::TextureFilterType::Linear;
-
-    auto createBuilder = [&context, &renderPass, this]() -> std::unique_ptr<gfx::DrawableBuilder> {
-        std::unique_ptr<gfx::DrawableBuilder> builder{context.createDrawableBuilder("raster")};
+    const auto createBuilder = [&] {
+        auto builder = context.createDrawableBuilder("raster");
         builder->setShader(rasterShader);
         builder->setRenderPass(renderPass);
         builder->setSubLayerIndex(0);
-        builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                 : gfx::DepthMaskType::ReadOnly);
+        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrNameId(idPosAttribName);
-
         return builder;
     };
 
-    auto setTextures = [&context, &filter, this](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                                 const RasterBucket& bucket) {
-        // textures
-        auto location0 = rasterShader->getSamplerLocation(idTexImage0Name);
-        if (location0.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex0 = context.createTexture2D();
-            tex0->setImage(bucket.image);
-            tex0->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex0, location0.value());
-        }
-        auto location1 = rasterShader->getSamplerLocation(idTexImage1Name);
-        if (location1.has_value()) {
-            std::shared_ptr<gfx::Texture2D> tex1 = context.createTexture2D();
-            tex1->setImage(bucket.image);
-            tex1->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            builder->setTexture(tex1, location1.value());
+    const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, const RasterBucket& bucket) {
+        if (bucket.image && (rasterSampler0 || rasterSampler1)) {
+            if (auto tex = context.createTexture2D()) {
+                const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
+                const bool nearest = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest;
+                const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
+
+                tex->setImage(bucket.image);
+                tex->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+
+                if (rasterSampler0) {
+                    builder->setTexture(tex, *rasterSampler0);
+                }
+                if (rasterSampler1) {
+                    builder->setTexture(std::move(tex), *rasterSampler1);
+                }
+            }
         }
     };
 
-    auto buildVertexData = [this](std::unique_ptr<gfx::DrawableBuilder>& builder, const RasterBucket& bucket) {
-        RasterVertexVectorPtr vertices = staticDataVertices;
-        TriangleIndexVectorPtr indices = staticDataIndices;
-        const RasterSegmentVector* segments = staticDataSegments.get();
+    // Build vertex attributes and apply them to a drawable or a builder
+    const auto buildVertexData =
+        [this](const gfx::UniqueDrawableBuilder& builder, gfx::Drawable* drawable, const RasterBucket& bucket) {
+            const bool shared = (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty());
+            const auto& vertices = shared ? bucket.sharedVertices : staticDataVertices;
+            const auto& indices = shared ? bucket.sharedTriangles : staticDataIndices;
+            const auto* segments = shared ? &bucket.segments : staticDataSegments.get();
 
-        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
-            vertices = bucket.sharedVertices;
-            indices = bucket.sharedTriangles;
-            segments = &bucket.segments;
-        }
-
-        // attributes
-        {
             gfx::VertexAttributeArray vertexAttrs;
-
             if (auto& attr = vertexAttrs.add(idPosAttribName)) {
                 attr->setSharedRawData(vertices,
                                        offsetof(RasterLayoutVertex, a1),
@@ -376,76 +358,74 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
-            builder->setVertexAttributes(std::move(vertexAttrs));
+            if (drawable) {
+                drawable->setVertexAttributes(std::move(vertexAttrs));
+            } else if (builder) {
+                builder->setVertexAttributes(std::move(vertexAttrs));
+                builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
+                builder->setSegments(gfx::Triangles(), indices, segments->data(), segments->size());
+            }
+        };
+
+    gfx::UniqueDrawableBuilder builder;
+    if (imageData) {
+        // TODO: Can we avoid rebuilding drawables each time in this case as well?
+        if (imageLayerGroup) {
+            stats.drawablesRemoved += imageLayerGroup->clearDrawables();
         }
 
-        builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
-        builder->setSegments(gfx::Triangles(), indices, segments->data(), segments->size());
-    };
-
-    auto buildDrawables = [&setTextures, &buildVertexData](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                                           const RasterBucket& bucket) {
-        buildVertexData(builder, bucket);
-        setTextures(builder, bucket);
-    };
-
-    auto updateTileDrawables = [&](std::unique_ptr<gfx::DrawableBuilder>& builder,
-                                   auto* tileLayerGroup,
-                                   const auto& tileID,
-                                   const RasterBucket& bucket) {
-        // TODO: check for oportunity to skip
-
-        buildVertexData(builder, bucket);
-        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            for (auto& tex : drawable.getTextures()) {
-                builder->setTexture(tex.second, tex.first);
-            }
-        });
-    };
-
-    if (imageData) {
         RasterBucket& bucket = *imageData->bucket;
         if (!bucket.vertices.empty()) {
-            if (imageLayerGroup) {
-                stats.drawablesRemoved += imageLayerGroup->clearDrawables();
-            } else {
+            if (!imageLayerGroup) {
                 // Set up a layer group
                 imageLayerGroup = context.createLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+                imageLayerGroup->addLayerTweaker(layerTweaker);
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
-                updateLayerTweaker();
             }
 
-            auto builder = createBuilder();
+            // Create a drawable for each transformation
+            // TODO: Share textures
+            builder = createBuilder();
             for (const auto& matrix_ : imageData->matrices) {
-                buildDrawables(builder, bucket);
+                buildVertexData(builder, /*drawable=*/nullptr, bucket);
+                setTextures(builder, bucket);
 
                 // finish
                 builder->flush();
 
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
+                    drawable->setLayerTweaker(layerTweaker);
                     imageLayerGroup->addDrawable(std::move(drawable));
                     ++stats.drawablesAdded;
                 }
             }
         }
     } else if (renderTiles) {
-        if (layerGroup) {
-            stats.drawablesRemoved += layerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-                // Has this tile dropped out of the cover set?
-                return drawable.getTileID() && !hasRenderTile(*drawable.getTileID());
+        // Update existing drawables, returns the number of drawables found for the tile
+        const auto updateTileDrawables = [&](auto* tileLayerGroup, const auto& tileID, const RasterBucket& bucket) {
+            return tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                if (drawable.getLayerTweaker() == layerTweaker) {
+                    gfx::UniqueDrawableBuilder none;
+                    buildVertexData(none, &drawable, bucket);
+                }
             });
+        };
+
+        // Remove existing drawables that are no longer in the cover set
+        if (layerGroup) {
+            stats.drawablesRemoved += layerGroup->removeDrawablesIf(
+                [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
         } else {
             // Set up a tile layer group
             if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+                layerGroup_->addLayerTweaker(layerTweaker);
                 setLayerGroup(std::move(layerGroup_), changes);
-                updateLayerTweaker();
             }
         }
 
         auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
-        auto builder = createBuilder();
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
 
@@ -455,30 +435,44 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
 
+            bool cleared = false;
             const auto& bucket = static_cast<const RasterBucket&>(*bucket_);
 
-            const auto prevBucketID = getRenderTileBucketID(tileID);
-            if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
-                // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            // If the bucket data has changed, rebuild the drawables.
+            const bool bucketSharedData = (!bucket.vertices.empty() && !bucket.indices.empty() &&
+                                           !bucket.segments.empty());
+            const bool bucketDirty = bucketSharedData && (bucket.vertices.getDirty() || bucket.indices.getDirty());
+            if (bucketDirty) {
+                // Note, vertex/index dirty flags will be reset when those buffers are uploaded.
                 removeTile(renderPass, tileID);
+                cleared = true;
+            } else if (setRenderTileBucketID(tileID, bucket.getID())) {
+                // Bucket ID changed, we need to rebuild the drawables
+                removeTile(renderPass, tileID);
+                cleared = true;
             }
-            setRenderTileBucketID(tileID, bucket.getID());
 
-            if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-                // re-create drawable geometry and pass texture
-                updateTileDrawables(builder, tileLayerGroup, tileID, bucket);
+            // If there are any drawables left for this tile, update them.
+            if (!cleared && 0 < updateTileDrawables(tileLayerGroup, tileID, bucket)) {
+                continue;
+            }
 
-                // erase current drawable
-                removeTile(renderPass, tileID);
-            } else if (bucket.image) {
-                // build new drawable for this tile
-                buildDrawables(builder, bucket);
+            // Otherwise, create new ones.
+            if (!builder) {
+                builder = createBuilder();
+            }
+
+            if (bucket.image && builder->getTextures().size() == 0) {
+                setTextures(builder, bucket);
             };
+
+            buildVertexData(builder, /*drawable=*/nullptr, bucket);
 
             // finish
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setLayerTweaker(layerTweaker);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }

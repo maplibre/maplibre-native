@@ -44,7 +44,7 @@ jobs:
             "!**/*.md"]
 
   android-build:
-    runs-on: MapLibre_Native_Large_Runner
+    runs-on: MapLibre_Native_Linux_16_core
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -57,21 +57,6 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
-      - name: Update Apt Package Cache
-        run: sudo apt-get update
-        working-directory: .
-
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: false
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive

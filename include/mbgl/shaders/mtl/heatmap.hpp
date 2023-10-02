@@ -14,19 +14,9 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Float2, 1, "a_weight"},
-        {2, gfx::AttributeDataType::Float2, 1, "a_radius"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(3, true, false, HeatmapDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, HeatmapEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, HeatmapInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, HeatmapPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 

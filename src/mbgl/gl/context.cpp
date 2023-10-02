@@ -489,12 +489,11 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
-    std::vector<std::string> emptyProperties(0);
     auto shaderGroup = shaders.getShaderGroup(name);
     if (!shaderGroup) {
         return nullptr;
     }
-    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, emptyProperties));
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, {}));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {

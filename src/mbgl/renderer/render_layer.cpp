@@ -70,11 +70,41 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
 }
 
 #if MLN_DRAWABLE_RENDERER
+void RenderLayer::replaceTweaker(LayerTweakerPtr& curTweaker,
+                                 LayerTweakerPtr newTweaker,
+                                 const std::vector<LayerGroupBasePtr>& layerGroups) {
+    const auto prevTweaker = curTweaker;
+
+    // We need to re-create the tweaker because it doesn't yet support modifying evaluated
+    // properties, but we don't want to stop updating drawables (as in the `layerChanged` case)
+    // so we need to update the tweaker reference on the outstanding drawables so that they
+    // pass the check in `updateExisting`.
+    // TODO: Once the tweaker doesn't need to be re-created on each property evaluation, this won't be needed.
+    for (const auto& group : layerGroups) {
+        if (group) {
+            group->addLayerTweaker(newTweaker);
+
+            group->visitDrawables([&](gfx::Drawable& drawable) {
+                if (drawable.getLayerTweaker() == prevTweaker) {
+                    drawable.setLayerTweaker(curTweaker);
+                }
+            });
+        }
+    }
+
+    curTweaker = std::move(newTweaker);
+}
+
 void RenderLayer::layerChanged(const TransitionParameters&,
                                const Immutable<style::Layer::Impl>&,
                                UniqueChangeRequestVec&) {
     // When a layer changes, the bucket won't be replaced until the new source(s) load.
     // If we remove the drawables here, they will just be re-created based on the current data.
+
+    // Detach the layer tweaker, if any.  This keeps the existing tiles up-to-date with the
+    // most recent evaluated properties, while a new one will be created along with new drawables
+    // when tiles are loaded and new buckets are available.
+    layerTweaker.reset();
 }
 
 void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
@@ -136,17 +166,23 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
 }
 
 #if MLN_DRAWABLE_RENDERER
-void RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
-        stats.drawablesRemoved += tileGroup->removeDrawables(renderPass, tileID).size();
+        const auto n = tileGroup->removeDrawables(renderPass, tileID).size();
+        stats.drawablesRemoved += n;
+        return n;
     }
+    return 0;
 }
 
-void RenderLayer::removeAllDrawables() {
+std::size_t RenderLayer::removeAllDrawables() {
     if (layerGroup) {
-        stats.drawablesRemoved += layerGroup->getDrawableCount();
+        const auto count = layerGroup->getDrawableCount();
+        stats.drawablesRemoved += count;
         layerGroup->clearDrawables();
+        return count;
     }
+    return 0;
 }
 
 void RenderLayer::updateRenderTileIDs() {

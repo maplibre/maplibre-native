@@ -145,6 +145,9 @@ public:
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
 
+    /// Direct access to the current texture set
+    const gfx::Drawable::Textures& getTextures() const { return textures; }
+
     /// Add a tweaker to emitted drawable
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
 
@@ -224,6 +227,8 @@ protected:
     struct Impl;
     std::unique_ptr<Impl> impl;
 };
+
+using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 
 } // namespace gfx
 } // namespace mbgl
