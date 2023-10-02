@@ -105,7 +105,7 @@ public:
         return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init());
     }
 
-    MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
+    const MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const override {
         assert(renderPassDescriptor);
         return renderPassDescriptor;
     }

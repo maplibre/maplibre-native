@@ -38,7 +38,7 @@ public:
         return offscreenTexture->getResource<RenderableResource>().getUploadPassDescriptor();
     }
 
-    MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
+    const MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const override {
         return offscreenTexture->getResource<RenderableResource>().getRenderPassDescriptor();
     }
 
