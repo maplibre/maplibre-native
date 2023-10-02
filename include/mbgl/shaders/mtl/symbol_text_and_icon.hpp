@@ -118,7 +118,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
     const float4 projected_pos = drawable.label_plane_matrix * float4(vertx.projected_pos.xy, 0.0, 1.0);
-    const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
+    const float2 pos_rot = a_offset / 32.0 * fontScale;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
     const float gamma_scale = position.w;
@@ -155,7 +155,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     if (in.data1.w == ICON) {
         const float2 tex_icon = in.data0.zw;
-        const float alpha = opacity * fade_opacity;
+        const float alpha = in.opacity * fade_opacity;
         return half4(icon_image.sample(icon_sampler, tex_icon) * alpha);
     }
 

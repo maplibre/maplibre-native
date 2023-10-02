@@ -19,7 +19,7 @@ public:
 
 #if MLN_RENDER_BACKEND_METAL
     static constexpr Type DefaultType = Type::Metal;
-#else // assume MLN_RENDER_BACKEND_METAL
+#else // assume MLN_RENDER_BACKEND_OPENGL
     static constexpr Type DefaultType = Type::OpenGL;
 #endif
 
@@ -33,7 +33,11 @@ public:
 
     template <typename T, typename... Args>
     static std::unique_ptr<T> Create(Args... args) {
+#if MLN_RENDER_BACKEND_METAL
+        return Create<Type::Metal, T, Args...>(std::forward<Args>(args)...);
+#else // assume MLN_RENDER_BACKEND_OPENGL
         return Create<Type::OpenGL, T, Args...>(std::forward<Args>(args)...);
+#endif
     }
 
 private:
