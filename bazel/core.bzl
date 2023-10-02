@@ -1023,6 +1023,8 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/shaders/mtl/background.cpp",
     "src/mbgl/shaders/mtl/background_pattern.cpp",
     "src/mbgl/shaders/mtl/circle.cpp",
+    "src/mbgl/shaders/mtl/collision_box.cpp",
+    "src/mbgl/shaders/mtl/collision_circle.cpp",
     "src/mbgl/shaders/mtl/clipping_mask.cpp",
     "src/mbgl/shaders/mtl/fill.cpp",
     "src/mbgl/shaders/mtl/fill_extrusion.cpp",

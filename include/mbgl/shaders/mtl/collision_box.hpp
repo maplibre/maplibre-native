@@ -14,17 +14,9 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Short2, 1, "a_anchor_pos"},
-        {2, gfx::AttributeDataType::Short2, 1, "a_extrude"},
-        {3, gfx::AttributeDataType::UByte2, 1, "a_placed"},
-        {4, gfx::AttributeDataType::Float2, 1, "a_shift"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(5, true, true, CollisionBoxUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 

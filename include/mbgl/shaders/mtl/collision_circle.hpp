@@ -14,16 +14,9 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Short2, 1, "a_anchor_pos"},
-        {2, gfx::AttributeDataType::Short2, 1, "a_extrude"},
-        {3, gfx::AttributeDataType::UByte2, 1, "a_placed"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, CollisionCircleUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 
