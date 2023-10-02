@@ -224,7 +224,7 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        val symbol = KSymbol(LatLng())
+        val symbol = Symbol(LatLng())
         symbolManager.add(symbol)
         Assert.assertSame(symbol, symbolManager.annotations.values.first())
     }
@@ -244,7 +244,7 @@ class SymbolManagerTest {
         listOf(
             LatLng(),
             LatLng(1.0, 1.0)
-        ).map { KSymbol(it) }.forEach { symbolManager.add(it) }
+        ).map { Symbol(it) }.forEach { symbolManager.add(it) }
         Assert.assertTrue("Amount of annotations should match", symbolManager.annotations.size == 2)
     }
 
@@ -260,7 +260,7 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        val symbol = KSymbol(LatLng())
+        val symbol = Symbol(LatLng())
         symbolManager.add(symbol)
         Assert.assertEquals(
             "After adding a symbol, one symbol should be present",
@@ -288,7 +288,7 @@ class SymbolManagerTest {
             draggableAnnotationController
         )
         val latLng = LatLng(12.0, 34.0)
-        val symbol = KSymbol(latLng)
+        val symbol = Symbol(latLng)
         Assert.assertEquals(symbol.position, latLng)
         Assert.assertEquals(symbol.geometry, Point.fromLngLat(34.0, 12.0))
     }
@@ -306,7 +306,7 @@ class SymbolManagerTest {
             draggableAnnotationController
         )
         (0 until 10).map {
-            KSymbol(LatLng()).also { symbolManager.add(it) }
+            Symbol(LatLng()).also { symbolManager.add(it) }
         }.forEachIndexed { index, symbol ->
             Assert.assertEquals(
                 "Symbol ID should be generated and assigned automatically, starting with -1",
@@ -328,7 +328,7 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        val symbol = KSymbol(LatLng())
+        val symbol = Symbol(LatLng())
         symbolManager.add(symbol)
         Assert.assertFalse(symbol.draggable)
         symbol.draggable = true
@@ -357,7 +357,7 @@ class SymbolManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng()).apply {
+            val symbol = Symbol(LatLng()).apply {
                 zLayer = 2
             }
             symbolManager.add(symbol)
@@ -386,7 +386,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(iconSize(get("icon-size"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 Icon(Mockito.mock(Bitmap::class.java), size = 2f)
             )
@@ -414,7 +414,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(iconImage(get("icon-image"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 Icon(Mockito.mock(Bitmap::class.java))
             )
@@ -442,7 +442,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(iconRotate(get("icon-rotate"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 Icon(Mockito.mock(Bitmap::class.java), rotate = 2f)
             )
@@ -471,7 +471,7 @@ class SymbolManagerTest {
         )
         for (i in 0 until 2) {
             val symbol =
-                KSymbol(
+                Symbol(
                     LatLng(),
                     Icon(
                         Mockito.mock(Bitmap::class.java),
@@ -502,7 +502,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(iconAnchor(get("icon-anchor"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 Icon(Mockito.mock(Bitmap::class.java), anchor = Anchor.LEFT)
             )
@@ -530,7 +530,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textField(get("text-field"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text"))
+            val symbol = Symbol(LatLng(), text = Text("text"))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -555,7 +555,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textFont(get("text-font"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", font = listOf("Open Sans Regular")))
+            val symbol = Symbol(LatLng(), text = Text("text", font = listOf("Open Sans Regular")))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -580,7 +580,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textSize(get("text-size"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", size = 2f))
+            val symbol = Symbol(LatLng(), text = Text("text", size = 2f))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -605,7 +605,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textMaxWidth(get("text-max-width"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", maxWidth = 2f))
+            val symbol = Symbol(LatLng(), text = Text("text", maxWidth = 2f))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -632,7 +632,7 @@ class SymbolManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", letterSpacing = 2f))
+            val symbol = Symbol(LatLng(), text = Text("text", letterSpacing = 2f))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -659,7 +659,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textJustify(get("text-justify"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", justify = Text.Justify.AUTO))
+            val symbol = Symbol(LatLng(), text = Text("text", justify = Text.Justify.AUTO))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -686,7 +686,7 @@ class SymbolManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", offset = Text.RadialOffset(2f)))
+            val symbol = Symbol(LatLng(), text = Text("text", offset = Text.RadialOffset(2f)))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -713,7 +713,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textAnchor(get("text-anchor"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", anchor = Anchor.LEFT))
+            val symbol = Symbol(LatLng(), text = Text("text", anchor = Anchor.LEFT))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -738,7 +738,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textRotate(get("text-rotate"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", rotate = 2f))
+            val symbol = Symbol(LatLng(), text = Text("text", rotate = 2f))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -763,7 +763,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textTransform(get("text-transform"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 text = Text("text", transform = Text.Transform.LOWERCASE)
             )
@@ -791,7 +791,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textOffset(get("text-offset"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 text = Text("text", offset = Text.AbsoluteOffset(PointF(1f, 0f)))
             )
@@ -819,7 +819,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(iconOpacity(get("icon-opacity"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), Icon(Mockito.mock(Bitmap::class.java), opacity = 0.5f))
+            val symbol = Symbol(LatLng(), Icon(Mockito.mock(Bitmap::class.java), opacity = 0.5f))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -845,7 +845,7 @@ class SymbolManagerTest {
         )
         for (i in 0 until 2) {
             val symbol =
-                KSymbol(
+                Symbol(
                     LatLng(),
                     SdfIcon(
                         Mockito.mock(Bitmap::class.java),
@@ -878,7 +878,7 @@ class SymbolManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 SdfIcon(
                     Mockito.mock(Bitmap::class.java),
@@ -914,7 +914,7 @@ class SymbolManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 SdfIcon(
                     Mockito.mock(Bitmap::class.java),
@@ -948,7 +948,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(iconHaloBlur(get("icon-halo-blur"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(
+            val symbol = Symbol(
                 LatLng(),
                 SdfIcon(
                     Mockito.mock(Bitmap::class.java),
@@ -980,7 +980,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textOpacity(get("text-opacity"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", opacity = 0.5f))
+            val symbol = Symbol(LatLng(), text = Text("text", opacity = 0.5f))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -1005,7 +1005,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textColor(get("text-color"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", color = Color.CYAN))
+            val symbol = Symbol(LatLng(), text = Text("text", color = Color.CYAN))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -1032,7 +1032,7 @@ class SymbolManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", halo = Halo(2f, Color.GREEN)))
+            val symbol = Symbol(LatLng(), text = Text("text", halo = Halo(2f, Color.GREEN)))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -1061,7 +1061,7 @@ class SymbolManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", halo = Halo(2f, Color.GREEN)))
+            val symbol = Symbol(LatLng(), text = Text("text", halo = Halo(2f, Color.GREEN)))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -1088,7 +1088,7 @@ class SymbolManagerTest {
             ArgumentMatchers.argThat(PropertyValueMatcher(textHaloBlur(get("text-halo-blur"))))
         )
         for (i in 0 until 2) {
-            val symbol = KSymbol(LatLng(), text = Text("text", halo = Halo(2f, Color.GREEN, blur = 0.5f)))
+            val symbol = Symbol(LatLng(), text = Text("text", halo = Halo(2f, Color.GREEN, blur = 0.5f)))
             symbolManager.add(symbol)
             symbolManager.updateSourceNow()
             Mockito.verify(symbolLayer, Mockito.times(1)).setProperties(
@@ -1121,7 +1121,7 @@ class SymbolManagerTest {
     @Test
     fun testClickListener() {
         val listener = object : OnSymbolClickListener {
-            override fun onAnnotationClick(t: KSymbol) = false
+            override fun onAnnotationClick(t: Symbol) = false
         }
         symbolManager = SymbolManager(
             mapView,
@@ -1143,7 +1143,7 @@ class SymbolManagerTest {
     @Test
     fun testLongClickListener() {
         val listener = object : OnSymbolLongClickListener {
-            override fun onAnnotationLongClick(t: KSymbol) = false
+            override fun onAnnotationLongClick(t: Symbol) = false
         }
         symbolManager = SymbolManager(
             mapView,
@@ -1165,9 +1165,9 @@ class SymbolManagerTest {
     @Test
     fun testDragListener() {
         val listener = object : OnSymbolDragListener {
-            override fun onAnnotationDragStarted(annotation: KSymbol) = Unit
-            override fun onAnnotationDrag(annotation: KSymbol) = Unit
-            override fun onAnnotationDragFinished(annotation: KSymbol) = Unit
+            override fun onAnnotationDragStarted(annotation: Symbol) = Unit
+            override fun onAnnotationDrag(annotation: Symbol) = Unit
+            override fun onAnnotationDragFinished(annotation: Symbol) = Unit
         }
         symbolManager = SymbolManager(
             mapView,
@@ -1198,7 +1198,7 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        val symbol = KSymbol(LatLng()).apply {
+        val symbol = Symbol(LatLng()).apply {
             data = JsonPrimitive("hello")
         }
         symbolManager.add(symbol)
@@ -1217,7 +1217,7 @@ class SymbolManagerTest {
             null,
             draggableAnnotationController
         )
-        val symbol = KSymbol(LatLng())
+        val symbol = Symbol(LatLng())
         symbolManager.add(symbol)
         Assert.assertEquals(1, symbolManager.annotations.size)
         symbolManager.deleteAll()

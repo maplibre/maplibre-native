@@ -187,7 +187,7 @@ class CircleManagerTest {
             null,
             draggableAnnotationController
         )
-        val circle = KCircle(LatLng())
+        val circle = Circle(LatLng())
         circleManager.add(circle)
         Assert.assertSame(circle, circleManager.annotations.values.first())
     }
@@ -207,7 +207,7 @@ class CircleManagerTest {
         listOf(
             LatLng(),
                     LatLng(1.0, 1.0)
-        ).map { KCircle(it) }.forEach { circleManager.add(it) }
+        ).map { Circle(it) }.forEach { circleManager.add(it) }
         Assert.assertTrue("Amount of annotations should match", circleManager.annotations.size == 2)
     }
 
@@ -223,7 +223,7 @@ class CircleManagerTest {
             null,
             draggableAnnotationController
         )
-        val circle = KCircle(LatLng())
+        val circle = Circle(LatLng())
         circleManager.add(circle)
         Assert.assertEquals(
             "After adding a circle, one circle should be present",
@@ -251,7 +251,7 @@ class CircleManagerTest {
             draggableAnnotationController
         )
         val latLng = LatLng(12.0, 34.0)
-        val circle = KCircle(latLng)
+        val circle = Circle(latLng)
         circleManager.add(circle)
         Assert.assertEquals(circle.center, latLng)
         Assert.assertEquals(circle.geometry, Point.fromLngLat(34.0, 12.0))
@@ -269,7 +269,7 @@ class CircleManagerTest {
             null,
             draggableAnnotationController
         )
-        val circle = KCircle(LatLng())
+        val circle = Circle(LatLng())
         circleManager.add(circle)
         Assert.assertFalse(circle.draggable)
         circle.draggable = true
@@ -298,7 +298,7 @@ class CircleManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val circle = KCircle(LatLng()).apply {
+            val circle = Circle(LatLng()).apply {
                 radius = 2f
             }
             circleManager.add(circle)
@@ -333,7 +333,7 @@ class CircleManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val circle = KCircle(LatLng()).apply {
+            val circle = Circle(LatLng()).apply {
                 color = Color.RED
             }
             circleManager.add(circle)
@@ -368,7 +368,7 @@ class CircleManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val circle = KCircle(LatLng()).apply {
+            val circle = Circle(LatLng()).apply {
                 blur = 2f
             }
             circleManager.add(circle)
@@ -403,7 +403,7 @@ class CircleManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val circle = KCircle(LatLng()).apply {
+            val circle = Circle(LatLng()).apply {
                 opacity = 0.5f
             }
             circleManager.add(circle)
@@ -438,7 +438,7 @@ class CircleManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val circle = KCircle(LatLng(), stroke = KCircle.Stroke(width = 2f))
+            val circle = Circle(LatLng(), stroke = Circle.Stroke(width = 2f))
             circleManager.add(circle)
             circleManager.updateSourceNow()
             Mockito.verify(circleLayer, Mockito.times(1)).setProperties(
@@ -471,7 +471,7 @@ class CircleManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val circle = KCircle(LatLng(), stroke = KCircle.Stroke(width = 2f, color = Color.CYAN))
+            val circle = Circle(LatLng(), stroke = Circle.Stroke(width = 2f, color = Color.CYAN))
             circleManager.add(circle)
             circleManager.updateSourceNow()
             Mockito.verify(circleLayer, Mockito.times(1)).setProperties(
@@ -504,7 +504,7 @@ class CircleManagerTest {
             )
         )
         for (i in 0 until 2) {
-            val circle = KCircle(LatLng(), stroke = KCircle.Stroke(width = 2f, opacity = 0.5f))
+            val circle = Circle(LatLng(), stroke = Circle.Stroke(width = 2f, opacity = 0.5f))
             circleManager.add(circle)
             circleManager.updateSourceNow()
             Mockito.verify(circleLayer, Mockito.times(1)).setProperties(
@@ -541,7 +541,7 @@ class CircleManagerTest {
     @Test
     fun testClickListener() {
         val listener = object : OnCircleClickListener {
-            override fun onAnnotationClick(t: KCircle): Boolean = false
+            override fun onAnnotationClick(t: Circle): Boolean = false
 
         }
         circleManager = CircleManager(
@@ -564,7 +564,7 @@ class CircleManagerTest {
     @Test
     fun testLongClickListener() {
         val listener = object : OnCircleLongClickListener {
-            override fun onAnnotationLongClick(t: KCircle): Boolean = false
+            override fun onAnnotationLongClick(t: Circle): Boolean = false
         }
         circleManager = CircleManager(
             mapView,
@@ -586,9 +586,9 @@ class CircleManagerTest {
     @Test
     fun testDragListener() {
         val listener = object : OnCircleDragListener {
-            override fun onAnnotationDragStarted(annotation: KCircle) = Unit
-            override fun onAnnotationDrag(annotation: KCircle) = Unit
-            override fun onAnnotationDragFinished(annotation: KCircle) = Unit
+            override fun onAnnotationDragStarted(annotation: Circle) = Unit
+            override fun onAnnotationDrag(annotation: Circle) = Unit
+            override fun onAnnotationDragFinished(annotation: Circle) = Unit
         }
         circleManager = CircleManager(
             mapView,
@@ -619,7 +619,7 @@ class CircleManagerTest {
             null,
             draggableAnnotationController
         )
-        val circle = KCircle(LatLng()).apply {
+        val circle = Circle(LatLng()).apply {
             data = JsonPrimitive("hello")
         }
         circleManager.add(circle)
@@ -638,7 +638,7 @@ class CircleManagerTest {
             null,
             draggableAnnotationController
         )
-        val circle = KCircle(LatLng())
+        val circle = Circle(LatLng())
         circleManager.add(circle)
         Assert.assertEquals(1, circleManager.annotations.size)
         circleManager.deleteAll()

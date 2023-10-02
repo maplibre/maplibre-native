@@ -4,7 +4,7 @@ import android.graphics.Color
 import android.graphics.PointF
 import androidx.annotation.ColorInt
 import com.google.gson.JsonElement
-import org.maplibre.android.annotations.KCircle
+import org.maplibre.android.annotations.Circle
 
 class Defaults {
     companion object {
@@ -53,7 +53,7 @@ class Defaults {
         val CIRCLE_COLOR: Int = Color.BLACK
         val CIRCLE_BLUR: Float? = null
         val CIRCLE_OPACITY: Float = 1f
-        val CIRCLE_STROKE: KCircle.Stroke? = null
+        val CIRCLE_STROKE: Circle.Stroke? = null
 
         val CIRCLE_STROKE_COLOR: Int = Color.BLACK
         val CIRCLE_STROKE_OPACITY: Float = 1f

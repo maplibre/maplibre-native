@@ -31,9 +31,9 @@ interface OnAnnotationDragListener<T : KAnnotation<*>> {
 /**
  * Interface definition for a callback to be invoked when a symbol is dragged.
  */
-typealias OnSymbolDragListener = OnAnnotationDragListener<KSymbol>
+typealias OnSymbolDragListener = OnAnnotationDragListener<Symbol>
 
 /**
  * Interface definition for a callback to be invoked when a circle is dragged.
  */
-typealias OnCircleDragListener = OnAnnotationDragListener<KCircle>
+typealias OnCircleDragListener = OnAnnotationDragListener<Circle>

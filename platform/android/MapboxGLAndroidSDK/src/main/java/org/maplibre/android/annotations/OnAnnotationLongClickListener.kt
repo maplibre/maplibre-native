@@ -19,9 +19,9 @@ interface OnAnnotationLongClickListener<T : KAnnotation<*>> {
 /**
  * Interface definition for a callback to be invoked when a symbol has been long clicked.
  */
-typealias OnSymbolLongClickListener = OnAnnotationLongClickListener<KSymbol>
+typealias OnSymbolLongClickListener = OnAnnotationLongClickListener<Symbol>
 
 /**
  * Interface definition for a callback to be invoked when a circle has been long clicked.
  */
-typealias OnCircleLongClickListener = OnAnnotationLongClickListener<KCircle>
+typealias OnCircleLongClickListener = OnAnnotationLongClickListener<Circle>

@@ -10,7 +10,7 @@ import org.maplibre.android.constants.GeometryConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Projection
 
-class KCircle(
+class Circle(
     center: LatLng,
     radius: Float = Defaults.CIRCLE_RADIUS,
     @ColorInt color: Int = Defaults.CIRCLE_COLOR,
@@ -102,7 +102,7 @@ class KCircle(
 
         val flattenedValues: List<PairWithDefault>
             get() = listOf(
-                PROPERTY_CIRCLE_STROKE_WIDTH to width default null,
+                PROPERTY_CIRCLE_STROKE_WIDTH to width default Unit,
                 PROPERTY_CIRCLE_STROKE_COLOR to color.asColorString()
                         default Defaults.CIRCLE_STROKE_COLOR.asColorString(),
                 PROPERTY_CIRCLE_STROKE_OPACITY to opacity default Defaults.CIRCLE_STROKE_OPACITY

@@ -3,7 +3,7 @@ package org.maplibre.android.annotations.data
 import android.graphics.PointF
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
-import org.maplibre.android.annotations.KSymbol
+import org.maplibre.android.annotations.Symbol
 import org.maplibre.android.annotations.PairWithDefault
 import org.maplibre.android.annotations.asColorString
 import org.maplibre.android.annotations.default
@@ -62,33 +62,33 @@ class Text(
 
     val flattenedValues: List<PairWithDefault>
         get() = listOf(
-            KSymbol.PROPERTY_TEXT_FIELD to string default Unit,
-            KSymbol.PROPERTY_TEXT_FONT to font default Defaults.TEXT_FONT,
-            KSymbol.PROPERTY_TEXT_SIZE to size default Defaults.TEXT_SIZE,
-            KSymbol.PROPERTY_TEXT_MAX_WIDTH to maxWidth default Defaults.TEXT_MAX_WIDTH,
-            KSymbol.PROPERTY_TEXT_LETTER_SPACING to letterSpacing default Defaults.TEXT_LETTER_SPACING,
-            KSymbol.PROPERTY_TEXT_JUSTIFY to justify.toString() default Defaults.TEXT_JUSTIFY.toString(),
-            KSymbol.PROPERTY_TEXT_RADIAL_OFFSET to offset?.let {
+            Symbol.PROPERTY_TEXT_FIELD to string default Unit,
+            Symbol.PROPERTY_TEXT_FONT to font default Defaults.TEXT_FONT,
+            Symbol.PROPERTY_TEXT_SIZE to size default Defaults.TEXT_SIZE,
+            Symbol.PROPERTY_TEXT_MAX_WIDTH to maxWidth default Defaults.TEXT_MAX_WIDTH,
+            Symbol.PROPERTY_TEXT_LETTER_SPACING to letterSpacing default Defaults.TEXT_LETTER_SPACING,
+            Symbol.PROPERTY_TEXT_JUSTIFY to justify.toString() default Defaults.TEXT_JUSTIFY.toString(),
+            Symbol.PROPERTY_TEXT_RADIAL_OFFSET to offset?.let {
                 if (it is RadialOffset) {
                     it.offset
                 } else {
                     null
                 }
             } default Unit,
-            KSymbol.PROPERTY_TEXT_ANCHOR to anchor.toString() default Defaults.TEXT_ANCHOR.toString(),
-            KSymbol.PROPERTY_TEXT_ROTATE to rotate default Defaults.TEXT_ROTATE,
-            KSymbol.PROPERTY_TEXT_TRANSFORM to transform.toString() default Defaults.TEXT_TRANSFORM.toString(),
-            KSymbol.PROPERTY_TEXT_OFFSET to offset?.let {
+            Symbol.PROPERTY_TEXT_ANCHOR to anchor.toString() default Defaults.TEXT_ANCHOR.toString(),
+            Symbol.PROPERTY_TEXT_ROTATE to rotate default Defaults.TEXT_ROTATE,
+            Symbol.PROPERTY_TEXT_TRANSFORM to transform.toString() default Defaults.TEXT_TRANSFORM.toString(),
+            Symbol.PROPERTY_TEXT_OFFSET to offset?.let {
                 if (it is AbsoluteOffset) {
                     it.offset.toArray()
                 } else {
                     null
                 }
             } default Unit,
-            KSymbol.PROPERTY_TEXT_OPACITY to opacity default Defaults.TEXT_OPACITY,
-            KSymbol.PROPERTY_TEXT_COLOR to color.asColorString() default Defaults.TEXT_COLOR.asColorString(),
-            KSymbol.PROPERTY_TEXT_HALO_COLOR to halo?.color default Defaults.TEXT_HALO?.color,
-            KSymbol.PROPERTY_TEXT_HALO_WIDTH to halo?.width default Defaults.TEXT_HALO?.width,
-            KSymbol.PROPERTY_TEXT_HALO_BLUR to halo?.blur default Defaults.TEXT_HALO?.blur
+            Symbol.PROPERTY_TEXT_OPACITY to opacity default Defaults.TEXT_OPACITY,
+            Symbol.PROPERTY_TEXT_COLOR to color.asColorString() default Defaults.TEXT_COLOR.asColorString(),
+            Symbol.PROPERTY_TEXT_HALO_COLOR to halo?.color default Defaults.TEXT_HALO?.color,
+            Symbol.PROPERTY_TEXT_HALO_WIDTH to halo?.width default Defaults.TEXT_HALO?.width,
+            Symbol.PROPERTY_TEXT_HALO_BLUR to halo?.blur default Defaults.TEXT_HALO?.blur
         )
 }

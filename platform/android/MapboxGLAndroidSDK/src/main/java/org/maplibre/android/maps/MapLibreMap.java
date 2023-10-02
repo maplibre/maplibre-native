@@ -26,7 +26,7 @@ import org.maplibre.android.MapStrictMode;
 import org.maplibre.android.annotations.Annotation;
 import org.maplibre.android.annotations.BaseMarkerOptions;
 import org.maplibre.android.annotations.KAnnotation;
-import org.maplibre.android.annotations.KSymbol;
+import org.maplibre.android.annotations.Symbol;
 import org.maplibre.android.annotations.Marker;
 import org.maplibre.android.annotations.MarkerOptions;
 import org.maplibre.android.annotations.Polygon;
@@ -996,7 +996,7 @@ public final class MapLibreMap {
   // Annotations
   //
 
-  public void addSymbol(@NonNull KSymbol symbol) {
+  public void addSymbol(@NonNull Symbol symbol) {
     symbol.attach(this, nextId++);
     annotationContainer.add(symbol);
   }

@@ -13,9 +13,7 @@ import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.MenuItemCompat
-import androidx.core.view.postDelayed
-import org.maplibre.android.annotations.KSymbol
-import org.maplibre.android.annotations.MarkerOptions
+import org.maplibre.android.annotations.Symbol
 import org.maplibre.android.annotations.data.Icon
 import org.maplibre.android.annotations.data.Text
 import org.maplibre.android.geometry.LatLng
@@ -28,7 +26,6 @@ import org.maplibre.android.testapp.utils.GeoParseUtil
 import timber.log.Timber
 import java.io.IOException
 import java.lang.ref.WeakReference
-import java.text.DecimalFormat
 import java.util.*
 
 /**
@@ -103,7 +100,7 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
             randomIndex = random.nextInt(locations!!.size)
             val latLng = locations!![randomIndex]
             maplibreMap.addSymbol(
-                KSymbol(
+                Symbol(
                     position = latLng,
                     text = Text(i.toString(), color = Color.WHITE),
                     icon = icon

@@ -31,7 +31,7 @@ class CircleManager @UiThread internal constructor(
         mapView,
         maplibreMap
     )
-) : AnnotationManager<CircleLayer, KCircle>(
+) : AnnotationManager<CircleLayer, Circle>(
     mapView,
     maplibreMap,
     style,
@@ -61,33 +61,33 @@ class CircleManager @UiThread internal constructor(
     )
 
     override fun generateDataDrivenPropertyExpression(property: String): PropertyValue<Expression> = when (property) {
-        KCircle.PROPERTY_CIRCLE_RADIUS -> PropertyFactory.circleRadius(
-            Expression.get(KCircle.PROPERTY_CIRCLE_RADIUS)
+        Circle.PROPERTY_CIRCLE_RADIUS -> PropertyFactory.circleRadius(
+            Expression.get(Circle.PROPERTY_CIRCLE_RADIUS)
         )
 
-        KCircle.PROPERTY_CIRCLE_COLOR -> PropertyFactory.circleColor(
-            Expression.get(KCircle.PROPERTY_CIRCLE_COLOR)
+        Circle.PROPERTY_CIRCLE_COLOR -> PropertyFactory.circleColor(
+            Expression.get(Circle.PROPERTY_CIRCLE_COLOR)
         )
 
-        KCircle.PROPERTY_CIRCLE_BLUR -> PropertyFactory.circleBlur(
-            Expression.get(KCircle.PROPERTY_CIRCLE_BLUR)
+        Circle.PROPERTY_CIRCLE_BLUR -> PropertyFactory.circleBlur(
+            Expression.get(Circle.PROPERTY_CIRCLE_BLUR)
         )
 
-        KCircle.PROPERTY_CIRCLE_OPACITY -> PropertyFactory.circleOpacity(
-            Expression.get(KCircle.PROPERTY_CIRCLE_OPACITY)
+        Circle.PROPERTY_CIRCLE_OPACITY -> PropertyFactory.circleOpacity(
+            Expression.get(Circle.PROPERTY_CIRCLE_OPACITY)
         )
 
-        KCircle.PROPERTY_CIRCLE_STROKE_WIDTH -> PropertyFactory.circleStrokeWidth(
-            Expression.get(KCircle.PROPERTY_CIRCLE_STROKE_WIDTH)
+        Circle.PROPERTY_CIRCLE_STROKE_WIDTH -> PropertyFactory.circleStrokeWidth(
+            Expression.get(Circle.PROPERTY_CIRCLE_STROKE_WIDTH)
 
         )
 
-        KCircle.PROPERTY_CIRCLE_STROKE_COLOR -> PropertyFactory.circleStrokeColor(
-            Expression.get(KCircle.PROPERTY_CIRCLE_STROKE_COLOR)
+        Circle.PROPERTY_CIRCLE_STROKE_COLOR -> PropertyFactory.circleStrokeColor(
+            Expression.get(Circle.PROPERTY_CIRCLE_STROKE_COLOR)
         )
 
-        KCircle.PROPERTY_CIRCLE_STROKE_OPACITY -> PropertyFactory.circleStrokeOpacity(
-            Expression.get(KCircle.PROPERTY_CIRCLE_STROKE_OPACITY)
+        Circle.PROPERTY_CIRCLE_STROKE_OPACITY -> PropertyFactory.circleStrokeOpacity(
+            Expression.get(Circle.PROPERTY_CIRCLE_STROKE_OPACITY)
         )
 
         else -> throw IllegalArgumentException(
