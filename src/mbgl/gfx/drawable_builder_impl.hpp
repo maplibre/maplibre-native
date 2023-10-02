@@ -19,10 +19,10 @@ class DrawableBuilder::Impl {
 public:
     using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t, 2>>;
     gfx::VertexVector<VT> vertices;
-    
+
     std::vector<uint8_t> rawVertices;
     std::size_t rawVerticesCount = 0;
-    
+
     struct LineLayoutVertex {
         std::array<int16_t, 2> a1;
         std::array<uint8_t, 4> a2;
@@ -42,7 +42,7 @@ public:
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
                      const DrawableBuilder::PolylineOptions& options);
-    
+
     void setupForPolylines(gfx::DrawableBuilder& builder);
 
 private:
@@ -68,7 +68,8 @@ private:
                            std::size_t startVertex,
                            std::vector<TriangleElement>& triangleStore,
                            std::optional<Distances> lineDistances);
-    LineLayoutVertex layoutVertex(Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0);
+    LineLayoutVertex layoutVertex(
+        Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0);
 };
 
 } // namespace gfx

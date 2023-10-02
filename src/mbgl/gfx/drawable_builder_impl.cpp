@@ -590,11 +590,10 @@ void DrawableBuilder::Impl::addPieSliceVertex(const GeometryCoordinate& currentV
 }
 
 void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
-
     // setup vertex attributes
     static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal");
     static const StringIdentity idDataAttribName = StringIndexer::get("a_data");
-    
+
     builder.setVertexAttrNameId(idVertexAttribName);
 
     builder.setRawVertices({}, polylineVertices.elements(), gfx::AttributeDataType::Short2);
