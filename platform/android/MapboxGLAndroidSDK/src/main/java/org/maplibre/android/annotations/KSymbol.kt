@@ -87,6 +87,5 @@ class KSymbol(
         internal const val PROPERTY_TEXT_HALO_COLOR = "text-halo-color"
         internal const val PROPERTY_TEXT_HALO_WIDTH = "text-halo-width"
         internal const val PROPERTY_TEXT_HALO_BLUR = "text-halo-blur"
-        internal const val PROPERTY_IS_DRAGGABLE = "is-draggable"
     }
 }

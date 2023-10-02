@@ -4,6 +4,7 @@ import androidx.annotation.UiThread
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import kotlin.reflect.KClass
 
 /**
  * Has logic for spawning annotation managers for its collection of annotations.
@@ -46,12 +47,13 @@ class KAnnotationContainer(
         if (annotation is KSymbol) annotation.icon?.let { style?.addImage(it.image.toString(), it.image) }
     }
 
-    private fun addToManager(annotation: KAnnotation<*>) {
-        val manager = managers.getOrCreate(annotation.key())
-        when (annotation) {
-            is KSymbol -> (manager as SymbolManager?)?.add(annotation)
+    private fun addToManager(annotation: KAnnotation<*>) =
+        managers.getOrCreate(annotation.key())?.let { manager ->
+            when (annotation) {
+                is KSymbol -> (manager as SymbolManager).add(annotation)
+                is KCircle -> (manager as CircleManager).add(annotation)
+            }
         }
-    }
 
     @UiThread
     fun remove(annotation: KAnnotation<*>) {
@@ -60,7 +62,8 @@ class KAnnotationContainer(
 
             managers[annotation.key()]?.let { manager ->
                 when (annotation) {
-                    is KSymbol -> (manager as SymbolManager).add(annotation)
+                    is KSymbol -> (manager as SymbolManager).delete(annotation)
+                    is KCircle -> (manager as CircleManager).delete(annotation)
                 }
             }
 
@@ -82,13 +85,19 @@ class KAnnotationContainer(
     private fun groupAnnotations(): Map<Key, List<KAnnotation<*>>> =
         annotationList.groupBy { it.key() }
 
-    private data class Key(private val type: Class<in KAnnotation<*>>) // TODO will be expanded in the future
+    private data class Key(val type: KClass<out KAnnotation<*>>) // TODO will be expanded in the future
 
-    private fun KAnnotation<*>.key() = Key(this.javaClass)
+    private fun KAnnotation<*>.key() = Key(this::class)
 
     private fun MutableMap<Key, AnnotationManager<*, *>>.getOrCreate(key: Key): AnnotationManager<*, *>? =
         get(key) ?: style?.let {
-            SymbolManager(mapView, mapLibreMap, it)
+            when (key.type) {
+                KSymbol::class -> SymbolManager(mapView, mapLibreMap, it)
+                KCircle::class -> CircleManager(mapView, mapLibreMap, it)
+                else -> throw IllegalArgumentException(
+                    "Impossible key! This should never occur because KAnnotation is a sealed class."
+                )
+            }
         }?.also { put(key, it) }
 
 }

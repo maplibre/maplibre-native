@@ -238,7 +238,7 @@ class SymbolManager @UiThread internal constructor(
         super.removeLongClickListener(v)
     }
 
-// Property accessors
+    // Property accessors
     /**
      * Label placement relative to its geometry.
      */

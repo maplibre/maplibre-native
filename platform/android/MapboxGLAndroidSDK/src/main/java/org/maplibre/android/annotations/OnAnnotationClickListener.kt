@@ -20,3 +20,8 @@ interface OnAnnotationClickListener<T : KAnnotation<*>> {
  * Interface definition for a callback to be invoked when a symbol has been clicked.
  */
 typealias OnSymbolClickListener = OnAnnotationClickListener<KSymbol>
+
+/**
+ * Interface definition for a callback to be invoked when a circle has been clicked.
+ */
+typealias OnCircleClickListener = OnAnnotationClickListener<KCircle>
