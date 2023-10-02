@@ -11,7 +11,7 @@ class Texture2D;
 
 class OffscreenTexture final : public gfx::OffscreenTexture {
 public:
-    OffscreenTexture(Context&, Size size, gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
+    OffscreenTexture(Context&, Size size, gfx::TextureChannelDataType type, bool depth, bool stencil);
 
     bool isRenderable() override;
 

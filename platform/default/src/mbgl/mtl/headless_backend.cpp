@@ -17,7 +17,7 @@ public:
     HeadlessRenderableResource(HeadlessBackend& backend_, mtl::Context& context_, Size size)
         : backend(backend_),
           context(context_) {
-        offscreenTexture = context.createOffscreenTexture(size, gfx::TextureChannelDataType::UnsignedByte);
+        offscreenTexture = context.createOffscreenTexture(size, gfx::TextureChannelDataType::UnsignedByte, true, true);
     }
 
     ~HeadlessRenderableResource() noexcept override = default;
