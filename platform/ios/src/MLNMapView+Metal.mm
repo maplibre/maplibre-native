@@ -67,8 +67,12 @@ public:
         return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init());
     }
 
-    mbgl::mtl::MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
-        return NS::RetainPtr((__bridge MTL::RenderPassDescriptor*)mtlView.currentRenderPassDescriptor);
+    const mbgl::mtl::MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const override {
+        if (!cachedRenderPassDescriptor) {
+            auto* mtlDesc = mtlView.currentRenderPassDescriptor;
+            cachedRenderPassDescriptor = NS::RetainPtr((__bridge MTL::RenderPassDescriptor*)mtlDesc);
+        }
+        return cachedRenderPassDescriptor;
     }
 
     void swap() override {
@@ -82,6 +86,8 @@ public:
 
         commandBuffer = nil;
         commandBufferPtr.reset();
+
+        cachedRenderPassDescriptor.reset();
     }
 
     mbgl::Size framebufferSize() {
@@ -93,6 +99,7 @@ public:
 private:
     MLNMapViewMetalImpl& backend;
     mbgl::mtl::MTLCommandBufferPtr commandBufferPtr;
+    mutable mbgl::mtl::MTLRenderPassDescriptorPtr cachedRenderPassDescriptor;
 
 public:
     MLNMapViewImplDelegate* delegate = nil;

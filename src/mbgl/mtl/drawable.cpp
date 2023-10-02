@@ -123,12 +123,32 @@ MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
 } // namespace
 
 void Drawable::setColorMode(const gfx::ColorMode& value) {
-    pipelineState.reset();
+    impl->pipelineState.reset();
     gfx::Drawable::setColorMode(value);
 }
 
+void Drawable::setEnableStencil(bool value) {
+    gfx::Drawable::setEnableStencil(value);
+    impl->depthStencilState.reset();
+}
+
+void Drawable::setEnableDepth(bool value) {
+    gfx::Drawable::setEnableDepth(value);
+    impl->depthStencilState.reset();
+}
+
+void Drawable::setSubLayerIndex(int32_t value) {
+    gfx::Drawable::setSubLayerIndex(value);
+    impl->depthStencilState.reset();
+}
+
+void Drawable::setDepthType(gfx::DepthMaskType value) {
+    gfx::Drawable::setDepthType(value);
+    impl->depthStencilState.reset();
+}
+
 void Drawable::setShader(gfx::ShaderProgramBasePtr value) {
-    pipelineState.reset();
+    impl->pipelineState.reset();
     gfx::Drawable::setShader(value);
 }
 
@@ -151,36 +171,18 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    if (renderPassDescriptor.has_value() && renderPass.getDescriptor() != renderPassDescriptor.value()) {
-        pipelineState.reset();
+    const auto& descriptor = renderPass.getDescriptor();
+    if (impl->renderPassDescriptor && descriptor != *impl->renderPassDescriptor) {
+        impl->pipelineState.reset();
     }
-    renderPassDescriptor.emplace(gfx::RenderPassDescriptor{renderPass.getDescriptor().renderable,
-                                                           renderPass.getDescriptor().clearColor,
-                                                           renderPass.getDescriptor().clearDepth,
-                                                           renderPass.getDescriptor().clearStencil});
+    impl->renderPassDescriptor.emplace(gfx::RenderPassDescriptor{
+        descriptor.renderable, descriptor.clearColor, descriptor.clearDepth, descriptor.clearStencil});
 
     const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
-
-    /*
-     context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
-                                    : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
-
-     // force disable depth test for debugging
-     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
-
-     // For 3D mode, stenciling is handled by the layer group
-     if (!is3D) {
-         context.setStencilMode(makeStencilMode(parameters));
-     }
-
-     context.setColorMode(getColorMode());
-     context.setCullFaceMode(getCullFaceMode());
-
-     */
 
     bindAttributes(renderPass);
     bindUniformBuffers(renderPass);
@@ -207,11 +209,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     encoder->setCullMode(cullMode.enabled ? mapCullMode(cullMode.side) : MTL::CullModeNone);
     encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
-    if (!pipelineState) {
-        pipelineState = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode());
+    if (!impl->pipelineState) {
+        impl->pipelineState = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode());
     }
-    if (pipelineState) {
-        encoder->setRenderPipelineState(pipelineState.get());
+    if (impl->pipelineState) {
+        encoder->setRenderPipelineState(impl->pipelineState.get());
     } else {
         assert(!"Failed to create render pipeline state");
         return;
@@ -219,12 +221,30 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // For 3D mode, stenciling is handled by the layer group
     if (!is3D) {
-        const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
-        const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
-                                               : gfx::StencilMode::disabled();
-        if (auto depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderPass)) {
-            encoder->setDepthStencilState(depthStencilState.get());
-            encoder->setStencilReferenceValue(stencilMode.ref);
+        std::optional<gfx::StencilMode> newStencilMode;
+
+        // If we have a stencil state, we may be able to reuse it, if the tile masks haven't changed.
+        // We assume that only the reference value needs to be compared.
+        if (impl->depthStencilState && enableStencil) {
+            newStencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
+            if (newStencilMode->ref != impl->previousStencilMode.ref) {
+                // No, need to rebuild it
+                impl->depthStencilState.reset();
+            }
+        }
+        if (!impl->depthStencilState) {
+            if (enableStencil && !newStencilMode) {
+                newStencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
+            }
+            const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
+                                                   : gfx::StencilMode::disabled();
+            impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderPass);
+            impl->previousStencilMode = *newStencilMode;
+        }
+        if (impl->depthStencilState) {
+            encoder->setDepthStencilState(impl->depthStencilState.get());
+            encoder->setStencilReferenceValue(impl->previousStencilMode.ref);
         }
     }
 
@@ -266,7 +286,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             assert(mlSegment.indexOffset + mlSegment.indexLength <= indexBufferLength);
             assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
 
-            for (const auto& binding : attributeBindings) {
+            for (const auto& binding : impl->attributeBindings) {
                 if (binding) {
                     if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
                         assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
@@ -348,7 +368,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     const auto& encoder = renderPass.getMetalEncoder();
 
     NS::UInteger attributeIndex = 0;
-    for (const auto& binding : attributeBindings) {
+    for (const auto& binding : impl->attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
@@ -363,7 +383,7 @@ void Drawable::unbindAttributes(const RenderPass& renderPass) const {
     const auto& encoder = renderPass.getMetalEncoder();
 
     NS::UInteger attributeIndex = 0;
-    for (const auto& binding : attributeBindings) {
+    for (const auto& binding : impl->attributeBindings) {
         encoder->setVertexBuffer(nullptr, /*offset=*/0, attributeIndex);
         attributeIndex += 1;
     }
@@ -558,14 +578,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->vertexAttributes.visitAttributes(
             [](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
-        if (attributeBindings != attributeBindings_) {
-            attributeBindings = attributeBindings_;
+        if (impl->attributeBindings != attributeBindings_) {
+            impl->attributeBindings = attributeBindings_;
 
             // Create a layout descriptor for each attribute
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
 
             NS::UInteger index = 0;
-            for (auto& binding : attributeBindings) {
+            for (auto& binding : impl->attributeBindings) {
                 if (!binding) {
                     assert("Missing attribute binding");
                     continue;
@@ -595,7 +615,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
             }
 
             impl->vertexDesc = std::move(vertDesc);
-            pipelineState.reset();
+            impl->pipelineState.reset();
         }
     }
 
