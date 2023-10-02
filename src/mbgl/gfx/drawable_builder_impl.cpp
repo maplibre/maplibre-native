@@ -144,7 +144,7 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
         nextNormal = util::perp(util::unit(convertPoint<double>(firstCoordinate - *currentCoordinate)));
     }
 
-    const std::size_t startVertex = vertices.elements();
+    const std::size_t startVertex = polylineVertices.elements();
     std::vector<TriangleElement> triangleStore;
 
     for (std::size_t i = first; i < len; ++i) {
@@ -452,7 +452,7 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
     }
 
     // add segment(s) and indices
-    const std::size_t endVertex = vertices.elements();
+    const std::size_t endVertex = polylineVertices.elements();
     const std::size_t vertexCount = endVertex - startVertex;
 
     if (segments.empty() ||
@@ -524,7 +524,7 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
                               false,
                               static_cast<int8_t>(endLeft),
                               static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
-    e3 = rawVerticesCount - 1 - startVertex;
+    e3 = polylineVertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
     }
@@ -540,7 +540,7 @@ void DrawableBuilder::Impl::addCurrentVertex(const GeometryCoordinate& currentCo
                               true,
                               static_cast<int8_t>(-endRight),
                               static_cast<int32_t>(scaledDistance * LINE_DISTANCE_SCALE)));
-    e3 = rawVerticesCount - 1 - startVertex;
+    e3 = polylineVertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
     }
@@ -577,7 +577,7 @@ void DrawableBuilder::Impl::addPieSliceVertex(const GeometryCoordinate& currentV
                               lineTurnsLeft,
                               0,
                               static_cast<int32_t>(distance * LINE_DISTANCE_SCALE)));
-    e3 = rawVerticesCount - 1 - startVertex;
+    e3 = polylineVertices.elements() - 1 - startVertex;
     if (e1 >= 0 && e2 >= 0) {
         triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
     }
@@ -596,6 +596,8 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
     static const StringIdentity idDataAttribName = StringIndexer::get("a_data");
     
     builder.setVertexAttrNameId(idVertexAttribName);
+
+    builder.setRawVertices({}, polylineVertices.elements(), gfx::AttributeDataType::Short2);
 
     gfx::VertexAttributeArray vertexAttrs;
     using VertexVector = gfx::VertexVector<LineLayoutVertex>;
@@ -618,6 +620,9 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
     }
 
     builder.setVertexAttributes(std::move(vertexAttrs));
+    
+    sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(buildIndexes));
+
 }
 
 } // namespace gfx
