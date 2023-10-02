@@ -397,6 +397,7 @@ platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(const gfx::TexturePixel
                 default:
                     break;
             }
+            break;
         }
         case gfx::TextureChannelDataType::Float: {
             switch (value) {
@@ -405,6 +406,7 @@ platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(const gfx::TexturePixel
                 default:
                     break;
             }
+            break;
         }
     }
 

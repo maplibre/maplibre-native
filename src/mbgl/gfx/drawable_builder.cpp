@@ -175,14 +175,14 @@ void DrawableBuilder::setRawVertices(std::vector<uint8_t>&& data, std::size_t co
     impl->rawVerticesType = type;
 }
 
-void DrawableBuilder::setSegments(const gfx::DrawMode mode,
+void DrawableBuilder::setSegments(const gfx::DrawMode drawMode,
                                   std::vector<uint16_t> indexes,
                                   const SegmentBase* segments,
                                   const std::size_t segmentCount) {
-    setSegments(mode, std::make_shared<gfx::IndexVectorBase>(std::move(indexes)), segments, segmentCount);
+    setSegments(drawMode, std::make_shared<gfx::IndexVectorBase>(std::move(indexes)), segments, segmentCount);
 }
 
-void DrawableBuilder::setSegments(const gfx::DrawMode mode,
+void DrawableBuilder::setSegments(const gfx::DrawMode drawMode,
                                   gfx::IndexVectorBasePtr indexes,
                                   const SegmentBase* segments,
                                   const std::size_t segmentCount) {
@@ -194,9 +194,9 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
     for (std::size_t i = 0; i < segmentCount; ++i) {
         const auto& seg = segments[i];
 #if !defined(NDEBUG)
-        if (mode.type == DrawModeType::Triangles) {
+        if (drawMode.type == DrawModeType::Triangles) {
             assert(seg.indexLength % 3 == 0);
-        } else if (mode.type == DrawModeType::Lines) {
+        } else if (drawMode.type == DrawModeType::Lines) {
             assert(seg.indexLength % 2 == 0);
         }
         const auto vertexCount = curVertexCount();
@@ -217,7 +217,7 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
             seg.indexLength,
             seg.sortKey,
         };
-        impl->segments.emplace_back(createSegment(mode, std::move(segCopy)));
+        impl->segments.emplace_back(createSegment(drawMode, std::move(segCopy)));
     }
 }
 

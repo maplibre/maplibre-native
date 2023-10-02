@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/style/layers/custom_layer_impl.hpp>
+#include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 
 namespace mbgl {
 
-class RenderCustomLayer final : public RenderLayer {
+class RenderCustomDrawableLayer final : public RenderLayer {
 public:
-    explicit RenderCustomLayer(Immutable<style::CustomLayer::Impl>);
-    ~RenderCustomLayer() override;
+    explicit RenderCustomDrawableLayer(Immutable<style::CustomDrawableLayer::Impl>);
+    ~RenderCustomDrawableLayer() override;
 
 #if MLN_DRAWABLE_RENDERER
     /// Generate any changes needed by the layer
@@ -33,7 +33,7 @@ private:
 #endif
 
     bool contextDestroyed = false;
-    std::shared_ptr<style::CustomLayerHost> host;
+    std::shared_ptr<style::CustomDrawableLayerHost> host;
 };
 
 } // namespace mbgl

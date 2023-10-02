@@ -1,29 +1,18 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/style/layers/custom_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_custom_layer.hpp>
+#include <mbgl/style/layers/custom_drawable_layer.hpp>
+#include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
+#include <mbgl/renderer/layers/render_custom_drawable_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
-#if MLN_LEGACY_RENDERER
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
-#endif
-
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
-
-#if !MLN_LEGACY_RENDERER
-// TODO: platform agnostic error checks
-#define MBGL_CHECK_ERROR(cmd) (cmd)
-#endif
 #endif
 
 namespace mbgl {
@@ -32,94 +21,50 @@ using namespace style;
 
 namespace {
 
-inline const CustomLayer::Impl& impl(const Immutable<style::Layer::Impl>& impl) {
-    assert(impl->getTypeInfo() == CustomLayer::Impl::staticTypeInfo());
-    return static_cast<const CustomLayer::Impl&>(*impl);
+inline const CustomDrawableLayer::Impl& impl(const Immutable<style::Layer::Impl>& impl) {
+    assert(impl->getTypeInfo() == CustomDrawableLayer::Impl::staticTypeInfo());
+    return static_cast<const CustomDrawableLayer::Impl&>(*impl);
 }
 
 } // namespace
 
-RenderCustomLayer::RenderCustomLayer(Immutable<style::CustomLayer::Impl> _impl)
-    : RenderLayer(makeMutable<CustomLayerProperties>(std::move(_impl))),
+RenderCustomDrawableLayer::RenderCustomDrawableLayer(Immutable<style::CustomDrawableLayer::Impl> _impl)
+    : RenderLayer(makeMutable<CustomDrawableLayerProperties>(std::move(_impl))),
       host(impl(baseImpl).host) {
     assert(gfx::BackendScope::exists());
-    MBGL_CHECK_ERROR(host->initialize());
+    host->initialize();
 }
 
-RenderCustomLayer::~RenderCustomLayer() {
+RenderCustomDrawableLayer::~RenderCustomDrawableLayer() {
     assert(gfx::BackendScope::exists());
-    if (contextDestroyed) {
-        host->contextLost();
-    } else {
-        MBGL_CHECK_ERROR(host->deinitialize());
-    }
+    host->deinitialize();
 }
 
-void RenderCustomLayer::evaluate(const PropertyEvaluationParameters&) {
+void RenderCustomDrawableLayer::evaluate(const PropertyEvaluationParameters&) {
     passes = RenderPass::Translucent;
     // It is fine to not update `evaluatedProperties`, as `baseImpl` should never be updated for this layer.
 }
 
-bool RenderCustomLayer::hasTransition() const {
+bool RenderCustomDrawableLayer::hasTransition() const {
     return false;
 }
-bool RenderCustomLayer::hasCrossfade() const {
+bool RenderCustomDrawableLayer::hasCrossfade() const {
     return false;
 }
 
-void RenderCustomLayer::markContextDestroyed() {
+void RenderCustomDrawableLayer::markContextDestroyed() {
     contextDestroyed = true;
 }
 
-void RenderCustomLayer::prepare(const LayerPrepareParameters&) {}
+void RenderCustomDrawableLayer::prepare(const LayerPrepareParameters&) {}
 
 #if MLN_LEGACY_RENDERER
-void RenderCustomLayer::render(PaintParameters& paintParameters) {
-    if (host != impl(baseImpl).host) {
-        // If the context changed, deinitialize the previous one before initializing the new one.
-        if (host && !contextDestroyed) {
-            MBGL_CHECK_ERROR(host->deinitialize());
-        }
-        host = impl(baseImpl).host;
-        MBGL_CHECK_ERROR(host->initialize());
-    }
-
-    // TODO: remove cast
-    auto& glContext = static_cast<gl::Context&>(paintParameters.context);
-    const TransformState& state = paintParameters.state;
-
-    // Reset GL state to a known state so the CustomLayer always has a clean slate.
-    glContext.bindVertexArray = 0;
-    glContext.setDepthMode(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly));
-    glContext.setStencilMode(gfx::StencilMode::disabled());
-    glContext.setColorMode(paintParameters.colorModeForRenderPass());
-    glContext.setCullFaceMode(gfx::CullFaceMode::disabled());
-
-    CustomLayerRenderParameters parameters;
-
-    parameters.width = state.getSize().width;
-    parameters.height = state.getSize().height;
-    parameters.latitude = state.getLatLng().latitude();
-    parameters.longitude = state.getLatLng().longitude();
-    parameters.zoom = state.getZoom();
-    parameters.bearing = util::rad2deg(-state.getBearing());
-    parameters.pitch = state.getPitch();
-    parameters.fieldOfView = state.getFieldOfView();
-    mat4 projMatrix;
-    state.getProjMatrix(projMatrix);
-    parameters.projectionMatrix = projMatrix;
-
-    MBGL_CHECK_ERROR(host->render(parameters));
-
-    // Reset the view back to our original one, just in case the CustomLayer
-    // changed the viewport or Framebuffer.
-    paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
-    glContext.setDirtyState();
+void RenderCustomDrawableLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
 #if MLN_DRAWABLE_RENDERER
-void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
+void RenderCustomDrawableLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                [[maybe_unused]] const TransformState& state,
                                const std::shared_ptr<UpdateParameters>&,
@@ -134,39 +79,39 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
         }
     }
 
-    auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
+    // auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
 
     // check if host changed and update
     bool hostChanged = (host != impl(baseImpl).host);
     if (hostChanged) {
-        // If the context changed, deinitialize the previous one before initializing the new one.
-        if (host && !contextDestroyed) {
-            MBGL_CHECK_ERROR(host->deinitialize());
+        // deinitialize the previous one before initializing the new one.
+        if (host) {
+            host->deinitialize();
         }
         host = impl(baseImpl).host;
-        MBGL_CHECK_ERROR(host->initialize());
+        host->initialize();
     }
 
-    // create drawable
-    if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
-        localLayerGroup->clearDrawables();
+    // // create drawable
+    // if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
+    //     localLayerGroup->clearDrawables();
 
-        // create tweaker
-        auto tweaker = std::make_shared<gfx::DrawableCustomLayerHostTweaker>(host);
+    //     // create tweaker
+    //     auto tweaker = std::make_shared<gfx::DrawableCustomLayerHostTweaker>(host);
 
-        // create empty drawable using a builder
-        std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(getID());
-        auto& drawable = builder->getCurrentDrawable(true);
-        drawable->setIsCustom(true);
-        drawable->setRenderPass(RenderPass::Translucent);
+    //     // create empty drawable using a builder
+    //     std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(getID());
+    //     auto& drawable = builder->getCurrentDrawable(true);
+    //     drawable->setIsCustom(true);
+    //     drawable->setRenderPass(RenderPass::Translucent);
 
-        // assign tweaker to drawable
-        drawable->addTweaker(tweaker);
+    //     // assign tweaker to drawable
+    //     drawable->addTweaker(tweaker);
 
-        // add drawable to layer group
-        localLayerGroup->addDrawable(std::move(drawable));
-        ++stats.drawablesAdded;
-    }
+    //     // add drawable to layer group
+    //     localLayerGroup->addDrawable(std::move(drawable));
+    //     ++stats.drawablesAdded;
+    // }
 }
 #endif
 

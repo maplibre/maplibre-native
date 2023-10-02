@@ -5,18 +5,18 @@
 
 namespace mbgl {
 
-const style::LayerTypeInfo* CustomLayerFactory::getTypeInfo() const noexcept {
-    return style::CustomLayer::Impl::staticTypeInfo();
+const style::LayerTypeInfo* CustomDrawableLayerFactory::getTypeInfo() const noexcept {
+    return style::CustomDrawableLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> CustomLayerFactory::createLayer(const std::string&,
+std::unique_ptr<style::Layer> CustomDrawableLayerFactory::createLayer(const std::string&,
                                                               const style::conversion::Convertible&) noexcept {
     assert(false);
     return nullptr;
 }
 
-std::unique_ptr<RenderLayer> CustomLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
-    return std::make_unique<RenderCustomLayer>(staticImmutableCast<style::CustomLayer::Impl>(impl));
+std::unique_ptr<RenderLayer> CustomDrawableLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
+    return std::make_unique<RenderCustomDrawableLayer>(staticImmutableCast<style::CustomDrawableLayer::Impl>(impl));
 }
 
 } // namespace mbgl

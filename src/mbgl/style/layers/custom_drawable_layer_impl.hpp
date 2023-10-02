@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/style/layers/custom_layer.hpp>
+#include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/layer_properties.hpp>
 
@@ -12,21 +12,21 @@ class TransformState;
 
 namespace style {
 
-class CustomLayer::Impl : public Layer::Impl {
+class CustomDrawableLayer::Impl : public Layer::Impl {
 public:
-    Impl(const std::string& id, std::unique_ptr<CustomLayerHost> host);
+    Impl(const std::string& id, std::unique_ptr<CustomDrawableLayerHost> host);
 
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
-    std::shared_ptr<CustomLayerHost> host;
+    std::shared_ptr<CustomDrawableLayerHost> host;
 
     DECLARE_LAYER_TYPE_INFO;
 };
 
-class CustomLayerProperties final : public LayerProperties {
+class CustomDrawableLayerProperties final : public LayerProperties {
 public:
-    explicit CustomLayerProperties(Immutable<CustomLayer::Impl> impl)
+    explicit CustomDrawableLayerProperties(Immutable<CustomDrawableLayer::Impl> impl)
         : LayerProperties(std::move(impl)) {}
 };
 

@@ -462,10 +462,10 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
 
     auto& segment = segments.back()->getSegment();
     assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-    const auto index = static_cast<uint16_t>(segment.vertexLength);
+    const uint16_t index = static_cast<uint16_t>(segment.vertexLength);
 
     for (const auto& triangle : triangleStore) {
-        buildIndexes.insert(buildIndexes.end(), {index + triangle.a, index + triangle.b, index + triangle.c});
+        buildIndexes.insert(buildIndexes.end(), {static_cast<uint16_t>(index + triangle.a), static_cast<uint16_t>(index + triangle.b), static_cast<uint16_t>(index + triangle.c)});
     }
 
     segment.vertexLength += vertexCount;
@@ -591,11 +591,11 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
 
     builder.setRawVertices({}, polylineVertices.elements(), gfx::AttributeDataType::Short2);
 
-    gfx::VertexAttributeArray vertexAttrs;
+    gfx::VertexAttributeArray attrs;
     using VertexVector = gfx::VertexVector<LineLayoutVertex>;
     std::shared_ptr<VertexVector> verts = std::make_shared<VertexVector>(polylineVertices);
 
-    if (const auto& attr = vertexAttrs.add(idVertexAttribName)) {
+    if (const auto& attr = attrs.add(idVertexAttribName)) {
         attr->setSharedRawData(verts,
                                offsetof(LineLayoutVertex, a1),
                                /*vertexOffset=*/0,
@@ -603,7 +603,7 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
                                gfx::AttributeDataType::Short2);
     }
 
-    if (const auto& attr = vertexAttrs.add(idDataAttribName)) {
+    if (const auto& attr = attrs.add(idDataAttribName)) {
         attr->setSharedRawData(verts,
                                offsetof(LineLayoutVertex, a2),
                                /*vertexOffset=*/0,
@@ -611,7 +611,7 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
                                gfx::AttributeDataType::UByte4);
     }
 
-    builder.setVertexAttributes(std::move(vertexAttrs));
+    builder.setVertexAttributes(std::move(attrs));
 
     sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(buildIndexes));
 }
