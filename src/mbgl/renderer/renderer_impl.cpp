@@ -506,10 +506,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Ends the RenderPass
     parameters.renderPass.reset();
-    const bool isMapModeContinuous = renderTreeParameters.mapMode == MapMode::Continuous;
-    if (isMapModeContinuous) {
-        parameters.encoder->present(parameters.backend.getDefaultRenderable());
-    }
+    parameters.encoder->present(parameters.backend.getDefaultRenderable());
 
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
