@@ -157,6 +157,22 @@ void PaintParameters::clearTileClippingMasks() {
     }
 }
 
+namespace {
+const auto clipMaskStencilMode = gfx::StencilMode{
+    /*.test=*/gfx::StencilMode::Always(),
+    /*.ref=*/0,
+    /*.mask=*/0b11111111,
+    /*.fail=*/gfx::StencilOpType::Keep,
+    /*.depthFail=*/gfx::StencilOpType::Keep,
+    /*.pass=*/gfx::StencilOpType::Replace,
+};
+const auto clipMaskDepthMode = gfx::DepthMode{
+    .func = gfx::DepthFunctionType::Always,
+    .mask = gfx::DepthMaskType::ReadOnly,
+    .range = {0, 1},
+};
+} // namespace
+
 template <typename TIter>
 void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&& f, bool clear) {
     if (tileIDsIdentical(beg, end, f, tileClippingMaskIDs)) {
@@ -238,32 +254,13 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         // gfx::CullFaceMode::disabled();
         encoder->setCullMode(MTL::CullModeNone);
 
-        auto stencilDescriptor = NS::TransferPtr(MTL::StencilDescriptor::alloc()->init());
-        if (!stencilDescriptor) {
+        if (auto depthStencilState = mtlContext.makeDepthStencilState(
+                clipMaskDepthMode, clipMaskStencilMode, mtlRenderPass)) {
+            encoder->setDepthStencilState(depthStencilState.get());
+        } else {
+            assert(!"Failed to create depth-stencil state");
             return;
         }
-        stencilDescriptor->setStencilCompareFunction(MTL::CompareFunction::CompareFunctionAlways);
-        stencilDescriptor->setStencilFailureOperation(MTL::StencilOperation::StencilOperationKeep);
-        stencilDescriptor->setDepthFailureOperation(MTL::StencilOperation::StencilOperationKeep);
-        stencilDescriptor->setDepthStencilPassOperation(MTL::StencilOperation::StencilOperationReplace);
-        stencilDescriptor->setReadMask(0);
-        stencilDescriptor->setWriteMask(0b11111111);
-
-        auto depthStencilDescriptor = NS::TransferPtr(MTL::DepthStencilDescriptor::alloc()->init());
-        if (!depthStencilDescriptor) {
-            return;
-        }
-        depthStencilDescriptor->setDepthCompareFunction(MTL::CompareFunction::CompareFunctionAlways);
-        depthStencilDescriptor->setDepthWriteEnabled(false);
-        depthStencilDescriptor->setFrontFaceStencil(stencilDescriptor.get());
-        depthStencilDescriptor->setBackFaceStencil(stencilDescriptor.get());
-
-        auto& device = mtlContext.getBackend().getDevice();
-        auto depthStencilState = NS::TransferPtr(device->newDepthStencilState(depthStencilDescriptor.get()));
-        if (!depthStencilState) {
-            return;
-        }
-        encoder->setDepthStencilState(depthStencilState.get());
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
