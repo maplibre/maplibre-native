@@ -5,6 +5,10 @@ layout (std140) uniform HillshadeDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_latrange;
     highp vec2 u_light;
+    lowp float pad0_;
+    lowp float pad1_;
+    lowp float pad2_;
+    lowp float pad3_;
 };
 
 out vec2 v_pos;

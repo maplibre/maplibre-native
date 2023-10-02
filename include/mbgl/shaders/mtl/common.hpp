@@ -1,8 +1,5 @@
 #pragma once
 
-#define MLN_MTL_UNIFORM_BLOCK(idx, vert, frag, struc) \
-    { idx, vert, frag, sizeof(struc), MLN_STRINGIZE(struc) }
-
 namespace mbgl {
 namespace shaders {
 
@@ -25,6 +22,10 @@ using namespace metal;
 // This function provides GL-compatible modulus for porting GLSL shaders.
 template <typename T1, typename T2>
 inline auto glMod(T1 x, T2 y) { return x - y * metal::floor(x/y); }
+
+float radians(float degrees) {
+    return M_PI_F * degrees / 180.0;
+}
 
 enum class AttributeSource : int32_t {
     Constant,

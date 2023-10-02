@@ -33,6 +33,10 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!checkTweakDrawable(drawable)) {
+            return;
+        }
+
         const auto& size = parameters.staticData.backendSize;
         mat4 viewportMat;
         matrix::ortho(viewportMat, 0, size.width, size.height, 0, -1, 1);

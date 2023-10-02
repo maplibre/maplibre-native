@@ -22,32 +22,20 @@ public:
     ~ShaderGroup() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
-                                     const std::vector<std::string>& propertiesAsUniforms,
+                                     const std::unordered_set<StringIdentity>& propertiesAsUniforms,
                                      std::string_view /*firstAttribName*/) override {
         constexpr auto& name = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::name;
         constexpr auto& source = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::source;
         constexpr auto& vertMain = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::vertexMainFunction;
         constexpr auto& fragMain = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::fragmentMainFunction;
 
-        uint32_t key = 0;
-        assert(propertiesAsUniforms.size() < 32);
-        std::unordered_map<std::string, std::string> additionalDefines(propertiesAsUniforms.size());
-        for (unsigned int i = 0; i < propertiesAsUniforms.size(); i++) {
-            if (!propertiesAsUniforms[i].empty()) {
-                key |= 1U << i;
-                auto name = std::string("HAS_UNIFORM_u_") + propertiesAsUniforms[i];
-                additionalDefines.insert(std::make_pair(std::move(name), "1"));
-            }
-        }
-
-        const std::string shaderName = std::string(name); // + "#" + std::to_string(key);
+        const std::string shaderName = std::string(name);
         const auto shaderSource = std::string(shaders::prelude) + source;
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {
             auto& context = static_cast<Context&>(gfxContext);
-            shader = context.createProgram(
-                shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
+            shader = context.createProgram(shaderName, shaderSource, vertMain, fragMain, programParameters, {});
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);

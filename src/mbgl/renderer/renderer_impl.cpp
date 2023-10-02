@@ -152,11 +152,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif
 
         // Tweakers are run in the upload pass so they can set up uniforms.
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            if (layerGroup.getLayerTweaker()) {
-                layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
-            }
-        });
+        orchestrator.visitLayerGroups(
+            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
     }
 
     // Update the debug layer groups
@@ -395,10 +392,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Ends the RenderPass
     parameters.renderPass.reset();
-    const bool isMapModeContinuous = renderTreeParameters.mapMode == MapMode::Continuous;
-    if (isMapModeContinuous) {
-        parameters.encoder->present(parameters.backend.getDefaultRenderable());
-    }
+    parameters.encoder->present(parameters.backend.getDefaultRenderable());
 
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
