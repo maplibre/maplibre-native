@@ -24,9 +24,7 @@ public:
 
     void bind() override { offscreenTexture->getResource<RenderableResource>().bind(); }
 
-    void swap() override {
-        offscreenTexture->getResource<RenderableResource>().swap();
-    }
+    void swap() override { offscreenTexture->getResource<RenderableResource>().swap(); }
 
     PremultipliedImage readStillImage() { return offscreenTexture->readStillImage(); }
 
