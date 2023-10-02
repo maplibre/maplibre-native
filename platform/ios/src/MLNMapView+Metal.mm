@@ -99,7 +99,6 @@ public:
     MTKView *mtlView = nil;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
-    NSDate *start;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
     // after the activation count drops to 0.
