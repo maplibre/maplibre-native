@@ -189,7 +189,10 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const 
 
 void Context::setDirtyState() {}
 
-std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type, bool depth, bool stencil) {
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
+                                                                       gfx::TextureChannelDataType type,
+                                                                       bool depth,
+                                                                       bool stencil) {
     return std::make_unique<OffscreenTexture>(*this, size, type, depth, stencil);
 }
 

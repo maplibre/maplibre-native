@@ -11,7 +11,8 @@ namespace mtl {
 
 class OffscreenTextureResource final : public RenderableResource {
 public:
-    OffscreenTextureResource(Context& context_, const Size size_, const gfx::TextureChannelDataType type_, bool depth, bool stencil)
+    OffscreenTextureResource(
+        Context& context_, const Size size_, const gfx::TextureChannelDataType type_, bool depth, bool stencil)
         : context(context_),
           size(size_),
           type(type_) {
@@ -23,26 +24,26 @@ public:
             {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         static_cast<Texture2D*>(colorTexture.get())
             ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
-              
-          if (depth) {
-              depthTexture = context.createTexture2D();
-              depthTexture->setSize(size);
-              depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
-              depthTexture->setSamplerConfiguration(
-                  {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-              static_cast<Texture2D*>(depthTexture.get())
+
+        if (depth) {
+            depthTexture = context.createTexture2D();
+            depthTexture->setSize(size);
+            depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
+            depthTexture->setSamplerConfiguration(
+                {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            static_cast<Texture2D*>(depthTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
-          }
-              
-          if (stencil) {
-              stencilTexture = context.createTexture2D();
-              stencilTexture->setSize(size);
-              stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
-              stencilTexture->setSamplerConfiguration(
-                  {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-              static_cast<Texture2D*>(stencilTexture.get())
+        }
+
+        if (stencil) {
+            stencilTexture = context.createTexture2D();
+            stencilTexture->setSize(size);
+            stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
+            stencilTexture->setSamplerConfiguration(
+                {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            static_cast<Texture2D*>(stencilTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
-          }
+        }
     }
 
     ~OffscreenTextureResource() noexcept override = default;
@@ -51,12 +52,12 @@ public:
         assert(context.getBackend().getCommandQueue());
         commandBuffer = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
         colorTexture->create();
-        
+
         renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
         if (auto* colorTarget = renderPassDescriptor->colorAttachments()->object(0)) {
             colorTarget->setTexture(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
         }
-        
+
         if (depthTexture) {
             depthTexture->create();
             if (auto* depthTarget = renderPassDescriptor->depthAttachment()) {
@@ -81,7 +82,7 @@ public:
 
     PremultipliedImage readStillImage() {
         assert(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
-        
+
         auto data = std::make_unique<uint8_t[]>(colorTexture->getDataSize());
         MTL::Region region = MTL::Region::Make2D(0, 0, size.width, size.height);
         NS::UInteger bytesPerRow = size.width * colorTexture->getPixelStride();
@@ -120,7 +121,8 @@ private:
     MTLRenderPassDescriptorPtr renderPassDescriptor;
 };
 
-OffscreenTexture::OffscreenTexture(Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
+OffscreenTexture::OffscreenTexture(
+    Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
     : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {}
 
 bool OffscreenTexture::isRenderable() {
