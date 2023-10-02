@@ -158,20 +158,20 @@ void PaintParameters::clearTileClippingMasks() {
 }
 
 namespace {
-const auto clipMaskStencilMode = gfx::StencilMode {
-    /*.test=*/ gfx::StencilMode::Always(),
-    /*.ref=*/ 0,
-    /*.mask=*/ 0b11111111,
-    /*.fail=*/ gfx::StencilOpType::Keep,
-    /*.depthFail=*/ gfx::StencilOpType::Keep,
-    /*.pass=*/ gfx::StencilOpType::Replace,
+const auto clipMaskStencilMode = gfx::StencilMode{
+    /*.test=*/gfx::StencilMode::Always(),
+    /*.ref=*/0,
+    /*.mask=*/0b11111111,
+    /*.fail=*/gfx::StencilOpType::Keep,
+    /*.depthFail=*/gfx::StencilOpType::Keep,
+    /*.pass=*/gfx::StencilOpType::Replace,
 };
-const auto clipMaskDepthMode = gfx::DepthMode {
+const auto clipMaskDepthMode = gfx::DepthMode{
     .func = gfx::DepthFunctionType::Always,
     .mask = gfx::DepthMaskType::ReadOnly,
-    .range = {0,1},
+    .range = {0, 1},
 };
-}
+} // namespace
 
 template <typename TIter>
 void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&& f, bool clear) {
@@ -254,7 +254,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         // gfx::CullFaceMode::disabled();
         encoder->setCullMode(MTL::CullModeNone);
 
-        if (auto depthStencilState = mtlContext.makeDepthStencilState(clipMaskDepthMode, clipMaskStencilMode, mtlRenderPass)) {
+        if (auto depthStencilState = mtlContext.makeDepthStencilState(
+                clipMaskDepthMode, clipMaskStencilMode, mtlRenderPass)) {
             encoder->setDepthStencilState(depthStencilState.get());
         } else {
             assert(!"Failed to create depth-stencil state");

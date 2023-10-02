@@ -38,8 +38,6 @@ public:
         commandBuffer->commit();
         commandBuffer->waitUntilCompleted();
         commandBuffer.reset();
-
-        cachedRenderPassDescriptor.reset();
     }
 
     PremultipliedImage readStillImage() {
@@ -61,14 +59,12 @@ public:
         return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init());
     }
 
-    const MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const override {
-        if (!cachedRenderPassDescriptor) {
-            cachedRenderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
-            if (auto* colorTarget = cachedRenderPassDescriptor->colorAttachments()->object(0)) {
-                colorTarget->setTexture(static_cast<Texture2D*>(texture.get())->getMetalTexture());
-            }
+    MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
+        auto renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
+        if (auto* colorTarget = renderPassDescriptor->colorAttachments()->object(0)) {
+            colorTarget->setTexture(static_cast<Texture2D*>(texture.get())->getMetalTexture());
         }
-        return cachedRenderPassDescriptor;
+        return renderPassDescriptor;
     }
 
 private:
@@ -77,7 +73,6 @@ private:
     const gfx::TextureChannelDataType type;
     gfx::Texture2DPtr texture;
     MTLCommandBufferPtr commandBuffer;
-    mutable MTLRenderPassDescriptorPtr cachedRenderPassDescriptor;
 };
 
 OffscreenTexture::OffscreenTexture(Context& context, const Size size_, const gfx::TextureChannelDataType type)

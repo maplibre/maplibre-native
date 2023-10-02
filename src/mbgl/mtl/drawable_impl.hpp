@@ -56,7 +56,7 @@ public:
     StringIdentity idVertexAttrName = StringIndexer::get("a_pos");
 
     gfx::UniqueVertexBufferResource noBindingBuffer;
-    
+
     gfx::AttributeBindingArray attributeBindings;
 
     MTLRenderPipelineStatePtr pipelineState;
