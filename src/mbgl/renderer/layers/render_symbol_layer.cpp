@@ -32,7 +32,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
-#include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -749,13 +748,13 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
-static const StringIdentity idDataAttibName = StringIndexer::get("a_data");
-static const StringIdentity idPosOffsetAttribName = StringIndexer::get("a_pos_offset");
-static const StringIdentity idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
-static const StringIdentity idProjPosAttribName = StringIndexer::get("a_projected_pos");
-static const StringIdentity idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
-static const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-static const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
+const StringIdentity idDataAttibName = StringIndexer::get("a_data");
+const StringIdentity idPosOffsetAttribName = StringIndexer::get("a_pos_offset");
+const StringIdentity idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
+const StringIdentity idProjPosAttribName = StringIndexer::get("a_projected_pos");
+const StringIdentity idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
+const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
+const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
 
 std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer,
                                               const bool isText,
@@ -863,11 +862,11 @@ void updateTileDrawable(gfx::Drawable& drawable,
     drawable.setVertexAttributes(std::move(attribs));
 }
 
-static const StringIdentity idCollisionPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idCollisionAnchorPosAttribName = StringIndexer::get("a_anchor_pos");
-static const StringIdentity idCollisionExtrudeAttribName = StringIndexer::get("a_extrude");
-static const StringIdentity idCollisionPlacedAttribName = StringIndexer::get("a_placed");
-static const StringIdentity idCollisionShiftAttribName = StringIndexer::get("a_shift");
+const StringIdentity idCollisionPosAttribName = StringIndexer::get("a_pos");
+const StringIdentity idCollisionAnchorPosAttribName = StringIndexer::get("a_anchor_pos");
+const StringIdentity idCollisionExtrudeAttribName = StringIndexer::get("a_extrude");
+const StringIdentity idCollisionPlacedAttribName = StringIndexer::get("a_placed");
+const StringIdentity idCollisionShiftAttribName = StringIndexer::get("a_shift");
 
 gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer, bool staticCopy) {
     gfx::VertexAttributeArray vertexAttrs;

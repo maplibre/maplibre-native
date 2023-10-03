@@ -47,8 +47,8 @@ inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
 
 #if MLN_DRAWABLE_RENDERER
 
-static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal");
-static const StringIdentity idDataAttribName = StringIndexer::get("a_data");
+const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal");
+const StringIdentity idDataAttribName = StringIndexer::get("a_data");
 
 #endif // MLN_DRAWABLE_RENDERER
 
