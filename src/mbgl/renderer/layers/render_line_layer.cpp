@@ -83,6 +83,12 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+
+        // propertiesAsUniforms isn't recalculated every update, so carry it over
+        if (layerTweaker) {
+            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
+        }
+
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif
@@ -566,6 +572,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             else if (shaderUniforms.get(idLineSDFInterpolationUBOName)) {
                 drawableUniforms.createOrUpdate(idLineSDFInterpolationUBOName, &lineSDFInterpolationUBO, context);
             }
+
+            // TODO: vertex attributes or `propertiesAsUniforms` updated, is that needed?
         });
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
