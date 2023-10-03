@@ -10,7 +10,7 @@ import org.maplibre.android.constants.GeometryConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Projection
 
-class Circle(
+class Circle @JvmOverloads constructor(
     center: LatLng,
     radius: Float = Defaults.CIRCLE_RADIUS,
     @ColorInt color: Int = Defaults.CIRCLE_COLOR,

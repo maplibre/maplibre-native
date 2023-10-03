@@ -11,7 +11,7 @@ import org.maplibre.android.constants.GeometryConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Projection
 
-class Symbol(
+class Symbol @JvmOverloads constructor(
     position: LatLng,
     icon: Icon? = Defaults.SYMBOL_ICON,
     text: Text? = Defaults.SYMBOL_TEXT

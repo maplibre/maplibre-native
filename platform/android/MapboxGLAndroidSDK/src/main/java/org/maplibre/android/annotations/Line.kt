@@ -12,7 +12,7 @@ import org.maplibre.android.constants.GeometryConstants.MIN_MERCATOR_LATITUDE
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Projection
 
-class Line(
+class Line @JvmOverloads constructor(
     path: List<LatLng>,
     join: Join = Defaults.LINE_JOIN,
     opacity: Float = Defaults.LINE_OPACITY,

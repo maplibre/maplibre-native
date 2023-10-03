@@ -12,7 +12,7 @@ import org.maplibre.android.constants.GeometryConstants.MIN_MERCATOR_LATITUDE
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Projection
 
-class Fill(
+class Fill @JvmOverloads constructor(
     paths: List<List<LatLng>>,
     opacity: Float = Defaults.FILL_OPACITY,
     @ColorInt color: Int = Defaults.FILL_COLOR,
