@@ -80,6 +80,7 @@ class Line(
 
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
+            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_LINE_JOIN to join.toString().lowercase() default Defaults.LINE_JOIN.toString().lowercase(),
             PROPERTY_LINE_OPACITY to opacity default Defaults.LINE_OPACITY,
             PROPERTY_LINE_COLOR to color.asColorString() default Defaults.LINE_COLOR,

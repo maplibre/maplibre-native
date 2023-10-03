@@ -542,7 +542,6 @@ class CircleManagerTest {
     fun testClickListener() {
         val listener = object : OnCircleClickListener {
             override fun onAnnotationClick(t: Circle): Boolean = false
-
         }
         circleManager = CircleManager(
             mapView,

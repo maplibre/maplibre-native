@@ -31,3 +31,7 @@ typealias OnCircleClickListener = OnAnnotationClickListener<Circle>
  */
 typealias OnLineClickListener = OnAnnotationClickListener<Line>
 
+/**
+ * Interface definition for a callback to be invoked when a fill has been clicked.
+ */
+typealias OnFillClickListener = OnAnnotationClickListener<Fill>

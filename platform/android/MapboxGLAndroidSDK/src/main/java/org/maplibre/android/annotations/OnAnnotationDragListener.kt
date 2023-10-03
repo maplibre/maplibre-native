@@ -42,3 +42,8 @@ typealias OnCircleDragListener = OnAnnotationDragListener<Circle>
  * Interface definition for a callback to be invoked when a line is dragged.
  */
 typealias OnLineDragListener = OnAnnotationDragListener<Line>
+
+/**
+ * Interface definition for a callback to be invoked when a fill is dragged.
+ */
+typealias OnFillDragListener = OnAnnotationDragListener<Fill>

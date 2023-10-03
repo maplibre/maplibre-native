@@ -69,5 +69,11 @@ class Defaults {
         val LINE_OFFSET: Float = 0f
         val LINE_BLUR: Float? = null
         val LINE_PATTERN: Bitmap? = null
+
+        val FILL_OPACITY: Float = 1f
+        @ColorInt
+        val FILL_COLOR: Int = Color.BLACK
+        val FILL_OUTLINE_COLOR: Int? = null
+        val FILL_PATTERN: Bitmap? = null
     }
 }

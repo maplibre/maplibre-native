@@ -55,6 +55,7 @@ class Circle(
 
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
+            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_CIRCLE_SORT_KEY to zLayer default Defaults.Z_LAYER,
             PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_CIRCLE_RADIUS to radius default Defaults.CIRCLE_RADIUS,

@@ -30,3 +30,8 @@ typealias OnCircleLongClickListener = OnAnnotationLongClickListener<Circle>
  * Interface definition for a callback to be invoked when a line has been long clicked.
  */
 typealias OnLineLongClickListener = OnAnnotationLongClickListener<Line>
+
+/**
+ * Interface definition for a callback to be invoked when a fill has been long clicked.
+ */
+typealias OnFillLongClickListener = OnAnnotationLongClickListener<Fill>
