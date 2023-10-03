@@ -608,6 +608,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 fillBuilder->setShader(fillShader);
                 if (outlineBuilder) {
                     fillBuilder->setVertexAttributes(vertexAttrs);
+                    outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
                 } else {
                     fillBuilder->setVertexAttributes(std::move(vertexAttrs));
                 }
@@ -620,7 +621,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
             if (outlineBuilder && bucket.sharedLines->elements()) {
                 outlineBuilder->setShader(outlineShader);
-                outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
