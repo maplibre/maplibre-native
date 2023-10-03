@@ -14,6 +14,9 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
+    static constexpr std::int32_t a_color_index = 1;
+    static constexpr std::int32_t a_opacity_index = 2;
+
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 0> textures;
@@ -47,10 +50,13 @@ struct alignas(16) FillInterpolateUBO {
 };
 
 struct alignas(16) FillPermutationUBO {
-    Attribute color;
-    Attribute opacity;
-    bool overdrawInspector;
+    /*   0 */ ColorAttribute color;
+    /* 352 */ Attribute opacity;
+    /* 360 */ int32_t /*bool*/ overdrawInspector;
+    /* 364 */ float pad1;
+    /* 368 */
 };
+static_assert(sizeof(FillPermutationUBO) == 23 * 16, "unexpected padding");
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillDrawableUBO& drawable [[buffer(3)]],

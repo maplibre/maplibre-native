@@ -19,6 +19,8 @@ namespace expression {
 
 class Expression;
 
+bool isConstant(const Expression&);
+
 struct ParsingError {
     std::string message;
     std::string key;

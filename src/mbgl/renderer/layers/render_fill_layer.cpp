@@ -330,7 +330,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
+        auto fillTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
+        fillTweaker->buildAttributeExpressions(unevaluated);
+        layerTweaker = std::move(fillTweaker);
         layerGroup->addLayerTweaker(layerTweaker);
     }
     layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));

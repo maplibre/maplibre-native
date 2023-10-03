@@ -1,9 +1,10 @@
 #pragma once
 
+#include <mbgl/layout/pattern_layout.hpp>
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
-#include <mbgl/layout/pattern_layout.hpp>
 
 #include <memory>
 
@@ -14,6 +15,8 @@ class FillProgram;
 class FillPatternProgram;
 class FillOutlineProgram;
 class FillOutlinePatternProgram;
+
+using StringIdentity = std::size_t;
 
 #if MLN_DRAWABLE_RENDERER
 class FillLayerTweaker;

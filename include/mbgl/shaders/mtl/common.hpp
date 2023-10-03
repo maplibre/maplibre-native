@@ -33,12 +33,59 @@ enum class AttributeSource : int32_t {
     Computed,
 };
 
-struct Expression {};
+enum class ExpressionFunction : int32_t {
+    Linear,
+    Exponential,
+};
+
+struct Expression {
+    /* 0 */ ExpressionFunction function;
+    /* 4 */
+};
+static_assert(sizeof(Expression) == 4, "unexpected padding");
 
 struct Attribute {
     AttributeSource source;
     Expression expression;
 };
+
+constant constexpr int ExprMaxStops = 16;
+struct Expression2 {
+    /*   0 */ float zooms[ExprMaxStops];
+    /*  64 */ float values[ExprMaxStops];
+    /* 128 */ ExpressionFunction function;
+    /* 132 */ int32_t stopCount;
+    /* 136 */
+};
+static_assert(sizeof(Expression2) == 136, "unexpected padding");
+
+struct ColorExpression {
+    /*   0 */ float zooms[ExprMaxStops];
+    /*  64 */ float4 values[ExprMaxStops];
+    /* 320 */ ExpressionFunction function;
+    /* 324 */ uint32_t stopCount;
+    /* 328 */ uint32_t useIntegerZoom;
+    /* 332 */ uint32_t pad;
+    /* 336 */
+};
+static_assert(sizeof(ColorExpression) == 21 * 16, "unexpected padding");
+
+
+struct Attribute2 {
+    /*   0 */ Expression2 expression;
+    /* 136 */ AttributeSource source;
+    /* 140 */
+};
+static_assert(sizeof(Attribute2) == 140, "unexpected padding");
+
+struct ColorAttribute {
+    /*   0 */ ColorExpression expression;
+    /* 336 */ AttributeSource source;
+    /* 340 */ uint32_t pad1, pad2, pad3;
+    /* 352 */
+};
+static_assert(sizeof(ColorAttribute) == 22 * 16, "unexpected padding");
+
 
 struct alignas(16) ExpressionInputsUBO {
     // These can use uint64_t in later versions of Metal
@@ -46,8 +93,9 @@ struct alignas(16) ExpressionInputsUBO {
     /*  4 */ uint32_t time_hi;
     /*  8 */ uint32_t frame_lo; // Current frame count
     /* 12 */ uint32_t frame_hi;
-    /* 16 */ float zoom;     // Current zoom level
-    /* 20 */ float pad1, pad2, pad3;
+    /* 16 */ float zoom;      /// Current zoom level
+    /* 20 */ float zoom_frac; /// double precision zoom
+    /* 24 */ float pad1, pad2;
     /* 32 */
 };
 
@@ -115,6 +163,37 @@ float4 colorFor(device const Attribute& attrib,
         case AttributeSource::Constant: return constValue;
     }
 }
+
+float4 colorFor(device const ColorAttribute& attrib,
+                device const float4& constValue,
+                thread const float2& vertexValue,
+                device const ExpressionInputsUBO& inputs) {
+    switch (attrib.source) {
+        case AttributeSource::PerVertex:
+            return decode_color(float2(vertexValue[0], vertexValue[1]));
+        case AttributeSource::Computed: {
+            device const auto& expr = attrib.expression;
+            const float curZoom = expr.useIntegerZoom ? round(inputs.zoom) : inputs.zoom;
+            // Find the first zoom greater than the current value
+            for (uint32_t i = 0; i < expr.stopCount; ++i) {
+                if (curZoom < expr.zooms[i]) {
+                    // Use the first value if it's less than the first one
+                    if (i == 0) {
+                        return expr.values[0];
+                    }
+                    // Interpolate
+                    const auto t = (curZoom - expr.zooms[i - 1]) / (expr.zooms[i] - expr.zooms[i - 1]);
+                    return expr.values[i - 1] + t * (expr.values[i] - expr.values[i - 1]);
+                }
+            }
+            return expr.stopCount ? expr.values[expr.stopCount - 1] : float4(0);
+        }
+        default:
+        case AttributeSource::Constant:
+            return constValue;
+    }
+}
+
 
 struct alignas(16) LineUBO {
     float4x4 matrix;

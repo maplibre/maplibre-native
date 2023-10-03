@@ -14,7 +14,12 @@ namespace style {
 
 class PropertyExpressionBase {
 public:
-    explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>);
+    using Expression = expression::Expression;
+    using Interpolate = expression::Interpolate;
+    using Step = expression::Step;
+    using UniqueExpression = std::unique_ptr<Expression>;
+
+    explicit PropertyExpressionBase(UniqueExpression);
 
     bool isZoomConstant() const noexcept;
     bool isFeatureConstant() const noexcept;
@@ -22,6 +27,11 @@ public:
     float interpolationFactor(const Range<float>&, float) const noexcept;
     Range<float> getCoveringStops(float, float) const noexcept;
     const expression::Expression& getExpression() const noexcept;
+
+    const Step* getZoomSteps() const { return zoomCurve.is<const Step*>() ? zoomCurve.get<const Step*>() : nullptr; }
+    const Interpolate* getZoomInterplation() const {
+        return zoomCurve.is<const Interpolate*>() ? zoomCurve.get<const Interpolate*>() : nullptr;
+    }
 
     /// Can be used for aggregating property expressions from multiple
     /// properties(layers) into single match / case expression. Method may

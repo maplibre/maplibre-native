@@ -28,14 +28,13 @@ struct alignas(16) FillInterpolateUBO {
 static_assert(sizeof(FillInterpolateUBO) % 16 == 0);
 
 struct alignas(16) FillPermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute opacity;
-    /* 16 */ bool overdrawInspector;
-    /* 17 */ bool pad1, pad2, pad3;
-    /* 20 */ float pad4, pad5, pad6;
-    /* 32 */
+    /*   0 */ ColorAttribute color;
+    /* 352 */ Attribute opacity;
+    /* 360 */ int32_t /*bool*/ overdrawInspector;
+    /* 364 */ float pad1;
+    /* 368 */
 };
-static_assert(sizeof(FillPermutationUBO) == 2 * 16);
+static_assert(sizeof(FillPermutationUBO) == 23 * 16);
 
 //
 // Fill outline
