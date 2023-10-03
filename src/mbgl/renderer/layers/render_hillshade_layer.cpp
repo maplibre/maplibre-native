@@ -501,7 +501,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             std::vector<std::unique_ptr<gfx::Drawable::DrawSegment>> drawSegments;
             drawSegments.reserve(segments->size());
             for (std::size_t i = 0; i < segments->size(); ++i) {
-                const auto& seg = segments->data()[i];
+                const auto& seg = segments[i];
                 auto segCopy = SegmentBase{
                     // no copy constructor
                     seg.vertexOffset,
