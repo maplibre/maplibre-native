@@ -24,7 +24,7 @@ class Fill @JvmOverloads constructor(
     var paths: List<List<LatLng>> = paths
         set(value) {
             field = value
-            Polygon.fromLngLats(value.map { it.map { Point.fromLngLat(it.longitude, it.latitude) } })
+            geometry = Polygon.fromLngLats(value.map { it.map { Point.fromLngLat(it.longitude, it.latitude) } })
             updateThis()
         }
     var opacity: Float = opacity
