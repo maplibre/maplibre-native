@@ -99,7 +99,7 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
         for (i in 0 until amount) {
             randomIndex = random.nextInt(locations!!.size)
             val latLng = locations!![randomIndex]
-            maplibreMap.addSymbol(
+            maplibreMap.addAnnotation(
                 Symbol(
                     position = latLng,
                     text = Text(i.toString(), color = Color.WHITE),

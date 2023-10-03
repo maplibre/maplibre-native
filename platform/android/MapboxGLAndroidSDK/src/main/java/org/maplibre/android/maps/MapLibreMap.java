@@ -25,8 +25,10 @@ import com.mapbox.geojson.Geometry;
 import org.maplibre.android.MapStrictMode;
 import org.maplibre.android.annotations.Annotation;
 import org.maplibre.android.annotations.BaseMarkerOptions;
+import org.maplibre.android.annotations.Circle;
+import org.maplibre.android.annotations.Fill;
 import org.maplibre.android.annotations.KAnnotation;
-import org.maplibre.android.annotations.Symbol;
+import org.maplibre.android.annotations.Line;
 import org.maplibre.android.annotations.Marker;
 import org.maplibre.android.annotations.MarkerOptions;
 import org.maplibre.android.annotations.Polygon;
@@ -34,6 +36,7 @@ import org.maplibre.android.annotations.PolygonOptions;
 import org.maplibre.android.annotations.Polyline;
 import org.maplibre.android.annotations.PolylineOptions;
 import org.maplibre.android.annotations.KAnnotationContainer;
+import org.maplibre.android.annotations.Symbol;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.camera.CameraUpdate;
 import org.maplibre.android.camera.CameraUpdateFactory;
@@ -996,9 +999,35 @@ public final class MapLibreMap {
   // Annotations
   //
 
-  public void addSymbol(@NonNull Symbol symbol) {
-    symbol.attach(this, nextId++);
-    annotationContainer.add(symbol);
+  /* To make the types of annotations more discoverable, we have implemented the same method
+   * four times for all of the subtypes of Annotation.
+   */
+
+  public void addAnnotation(@NonNull Symbol annotation) {
+    annotation.attach(this, nextId++);
+    annotationContainer.add(annotation);
+  }
+
+  public void addAnnotation(@NonNull Circle annotation) {
+    annotation.attach(this, nextId++);
+    annotationContainer.add(annotation);
+  }
+
+  public void addAnnotation(@NonNull Line annotation) {
+    annotation.attach(this, nextId++);
+    annotationContainer.add(annotation);
+  }
+
+  public void addAnnotation(@NonNull Fill annotation) {
+    annotation.attach(this, nextId++);
+    annotationContainer.add(annotation);
+  }
+
+  public void addAnnotations(@NonNull KAnnotation... annotations) {
+    for (KAnnotation annotation : annotations) {
+      annotation.attach(this, nextId++);
+      annotationContainer.add(annotation);
+    }
   }
 
   public void updateAnnotations() {
@@ -1011,6 +1040,10 @@ public final class MapLibreMap {
    */
   public void updateAnnotation(@NonNull KAnnotation annotation) {
     annotationContainer.update(annotation);
+  }
+
+  public void removeAnnotation(@NonNull KAnnotation annotation) {
+    annotationContainer.remove(annotation);
   }
 
   /**
@@ -1269,6 +1302,7 @@ public final class MapLibreMap {
   @Deprecated
   public void removeAnnotations() {
     annotationManager.removeAnnotations();
+    annotationContainer.clear();
   }
 
   /**
