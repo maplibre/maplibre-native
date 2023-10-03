@@ -1046,6 +1046,12 @@ public final class MapLibreMap {
     annotationContainer.remove(annotation);
   }
 
+  public void removeAnnotations(@NonNull KAnnotation... annotations) {
+    for (KAnnotation annotation : annotations) {
+      annotationContainer.remove(annotation);
+    }
+  }
+
   /**
    * <p>
    * Adds a marker to this map.

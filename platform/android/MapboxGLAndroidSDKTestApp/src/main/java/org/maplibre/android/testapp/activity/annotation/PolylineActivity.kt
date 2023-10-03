@@ -7,15 +7,13 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.annotations.Polyline
-import org.maplibre.android.annotations.PolylineOptions
+import org.maplibre.android.annotations.Line
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
-import java.util.*
 
 /**
  * Test activity showcasing the Polyline annotations API.
@@ -25,8 +23,7 @@ import java.util.*
  *
  */
 class PolylineActivity : AppCompatActivity() {
-    private var polylines: MutableList<Polyline>? = null
-    private var polylineOptions: ArrayList<PolylineOptions?>? = ArrayList()
+    private var polylines: MutableList<Line> = mutableListOf()
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var fullAlpha = true
@@ -36,76 +33,58 @@ class PolylineActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_polyline)
-        if (savedInstanceState != null) {
-            polylineOptions = savedInstanceState.getParcelableArrayList(STATE_POLYLINE_OPTIONS)
-        } else {
-            polylineOptions!!.addAll(allPolylines)
-        }
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 this@PolylineActivity.maplibreMap = maplibreMap
                 maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
-                maplibreMap.setOnPolylineClickListener { polyline: Polyline ->
+                /*maplibreMap.setOnPolylineClickListener { polyline: Polyline ->
                     Toast.makeText(
                         this@PolylineActivity,
                         "You clicked on polyline with id = " + polyline.id,
                         Toast.LENGTH_SHORT
                     ).show()
-                }
-                polylines = maplibreMap.addPolylines(polylineOptions!!)
+                }*/
+                maplibreMap.addAnnotations(*polylines.toTypedArray())
             }
         )
         val fab = findViewById<View>(R.id.fab)
         fab?.setOnClickListener { view: View? ->
             if (maplibreMap != null) {
-                if (polylines != null && polylines!!.size > 0) {
-                    if (polylines!!.size == 1) {
+                if (polylines != null && polylines.size > 0) {
+                    if (polylines.size == 1) {
                         // test for removing annotation
-                        maplibreMap.removeAnnotation(polylines!![0])
+                        maplibreMap.removeAnnotation(polylines[0])
                     } else {
                         // test for removing annotations
-                        maplibreMap.removeAnnotations(polylines!!)
+                        maplibreMap.removeAnnotations(*polylines.toTypedArray())
                     }
                 }
-                polylineOptions!!.clear()
-                polylineOptions!!.addAll(randomLine)
-                polylines = maplibreMap.addPolylines(polylineOptions!!)
-            }
-        }
-    }
-
-    private val allPolylines: List<PolylineOptions?>
-        private get() {
-            val options: MutableList<PolylineOptions?> = ArrayList()
-            options.add(generatePolyline(ANDORRA, LUXEMBOURG, "#F44336"))
-            options.add(generatePolyline(ANDORRA, MONACO, "#FF5722"))
-            options.add(generatePolyline(MONACO, VATICAN_CITY, "#673AB7"))
-            options.add(generatePolyline(VATICAN_CITY, SAN_MARINO, "#009688"))
-            options.add(generatePolyline(SAN_MARINO, LIECHTENSTEIN, "#795548"))
-            options.add(generatePolyline(LIECHTENSTEIN, LUXEMBOURG, "#3F51B5"))
-            return options
-        }
-
-    private fun generatePolyline(start: LatLng, end: LatLng, color: String): PolylineOptions {
-        val line = PolylineOptions()
-        line.add(start)
-        line.add(end)
-        line.color(Color.parseColor(color))
-        return line
-    }
-
-    val randomLine: List<PolylineOptions?>
-        get() {
-            val randomLines = allPolylines
-            Collections.shuffle(randomLines)
-            return object : ArrayList<PolylineOptions?>() {
-                init {
-                    add(randomLines[0])
+                polylines.clear()
+                randomLine.let {
+                    polylines.add(it)
+                    maplibreMap.addAnnotation(it)
                 }
             }
         }
+    }
+
+    private val allPolylines: List<Line>
+        private get() = listOf(
+            generatePolyline(ANDORRA, LUXEMBOURG, "#F44336"),
+            generatePolyline(ANDORRA, MONACO, "#FF5722"),
+            generatePolyline(MONACO, VATICAN_CITY, "#673AB7"),
+            generatePolyline(VATICAN_CITY, SAN_MARINO, "#009688"),
+            generatePolyline(SAN_MARINO, LIECHTENSTEIN, "#795548"),
+            generatePolyline(LIECHTENSTEIN, LUXEMBOURG, "#3F51B5")
+        )
+
+    private fun generatePolyline(start: LatLng, end: LatLng, color: String): Line =
+        Line(listOf(start, end), color = Color.parseColor(color))
+
+    val randomLine: Line
+        get() = allPolylines.random()
 
     override fun onStart() {
         super.onStart()
@@ -130,7 +109,6 @@ class PolylineActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
-        outState.putParcelableArrayList(STATE_POLYLINE_OPTIONS, polylineOptions)
     }
 
     override fun onDestroy() {
@@ -149,43 +127,42 @@ class PolylineActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (polylines!!.size <= 0) {
+        if (polylines.size <= 0) {
             Toast.makeText(this@PolylineActivity, "No polylines on map", Toast.LENGTH_LONG).show()
             return super.onOptionsItemSelected(item)
         }
         return when (item.itemId) {
             R.id.action_id_remove -> {
                 // test to remove all annotations
-                polylineOptions!!.clear()
                 maplibreMap.clear()
-                polylines!!.clear()
+                polylines.clear()
                 true
             }
             R.id.action_id_alpha -> {
                 fullAlpha = !fullAlpha
-                for (p in polylines!!) {
-                    p.alpha = if (fullAlpha) FULL_ALPHA else PARTIAL_ALPHA
+                for (p in polylines) {
+                    p.opacity = if (fullAlpha) FULL_ALPHA else PARTIAL_ALPHA
                 }
                 true
             }
             R.id.action_id_color -> {
                 color = !color
-                for (p in polylines!!) {
+                for (p in polylines) {
                     p.color = if (color) Color.RED else Color.BLUE
                 }
                 true
             }
             R.id.action_id_width -> {
                 width = !width
-                for (p in polylines!!) {
+                for (p in polylines) {
                     p.width = if (width) 3.0f else 5.0f
                 }
                 true
             }
             R.id.action_id_visible -> {
                 showPolylines = !showPolylines
-                for (p in polylines!!) {
-                    p.alpha =
+                for (p in polylines) {
+                    p.opacity =
                         if (showPolylines) (if (fullAlpha) FULL_ALPHA else PARTIAL_ALPHA) else NO_ALPHA
                 }
                 true
@@ -195,7 +172,6 @@ class PolylineActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val STATE_POLYLINE_OPTIONS = "polylineOptions"
         private val ANDORRA = LatLng(42.505777, 1.52529)
         private val LUXEMBOURG = LatLng(49.815273, 6.129583)
         private val MONACO = LatLng(43.738418, 7.424616)
