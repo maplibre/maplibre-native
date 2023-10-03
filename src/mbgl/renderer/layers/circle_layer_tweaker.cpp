@@ -61,7 +61,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
     using ShaderClass = shaders::ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const auto source = [this](const std::string_view& attrName) {
             return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
         };
@@ -86,7 +86,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
 
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
@@ -114,15 +114,15 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idCirclePaintParamsUBOName, paintParamsUniformBuffer);
-        uniforms.addOrReplace(idCircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
-
-        if (!drawable.getTileID()) {
-            assert(!"Circles only render with tiles");
+        assert(drawable.getTileID() || !"Circles only render with tiles");
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(idCirclePaintParamsUBOName, paintParamsUniformBuffer);
+        uniforms.addOrReplace(idCircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         const auto& translation = evaluated.get<CircleTranslate>();
         const auto anchor = evaluated.get<CircleTranslateAnchor>();

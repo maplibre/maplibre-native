@@ -93,7 +93,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
-        if (propertiesChanged || !fillPermutationUniformBuffer) {
+        if (permutationUpdated || !fillPermutationUniformBuffer) {
             const FillPermutationUBO permutationUBO = {
                 /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
@@ -132,7 +132,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>;
-        if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
+        if (permutationUpdated || !fillOutlinePermutationUniformBuffer) {
             const FillOutlinePermutationUBO permutationUBO = {
                 /* .outline_color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
@@ -173,7 +173,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
-        if (propertiesChanged || !fillPatternPermutationUniformBuffer) {
+        if (permutationUpdated || !fillPatternPermutationUniformBuffer) {
             const FillPatternPermutationUBO permutationUBO = {
                 /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
@@ -212,7 +212,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
         using ShaderClass = ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>;
-        if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
+        if (permutationUpdated || !fillOutlinePatternPermutationUniformBuffer) {
             const FillOutlinePatternPermutationUBO permutationUBO = {
                 /* .pattern_from = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
                 /* .pattern_to = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
@@ -255,6 +255,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
+
         auto& uniforms = drawable.mutableUniformBuffers();
         // auto& drawableType = drawable.getShader()->typeName();
 
@@ -286,9 +290,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
                     textureSize = tex->getSize();
                 }
             }
-        }
-        if (!drawable.getTileID()) {
-            return;
         }
 
         if (uniforms.get(idFillInterpolateUBOName)) {
@@ -361,7 +362,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif // MLN_RENDER_BACKEND_METAL
     });
 
-    propertiesChanged = false;
+    permutationUpdated = false;
 }
 
 } // namespace mbgl

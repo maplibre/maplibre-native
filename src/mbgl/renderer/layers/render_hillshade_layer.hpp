@@ -70,13 +70,13 @@ private:
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr hillshadePrepareShader;
     gfx::ShaderProgramBasePtr hillshadeShader;
+    std::optional<int> hillshadeImageLocation;
     std::vector<RenderTargetPtr> activatedRenderTargets;
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
 
-    HillshadeLayerTweakerPtr tweaker;
-    bool overdrawInspector = false;
+    LayerTweakerPtr prepareLayerTweaker;
 #endif
 };
 

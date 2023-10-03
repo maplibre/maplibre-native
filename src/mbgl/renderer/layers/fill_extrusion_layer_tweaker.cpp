@@ -77,7 +77,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 
 #if MLN_RENDER_BACKEND_METAL
     const auto zoom = parameters.state.getZoom();
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const FillExtrusionPermutationUBO permutationUBO = {
             /* .color = */ {/*.source=*/getAttributeSource("a_color"), /*.expression=*/{}},
             /* .base = */ {/*.source=*/getAttributeSource("a_base"), /*.expression=*/{}},
@@ -93,7 +93,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         } else {
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
@@ -102,14 +102,14 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
-
-        if (!drawable.getTileID()) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
 
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();

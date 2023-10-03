@@ -9,9 +9,15 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 
+#include <memory>
 #include <optional>
 
 namespace mbgl {
+
+namespace gfx {
+class Texture2D;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
+} // namespace gfx
 
 class RasterBucket final : public Bucket {
 public:
@@ -28,6 +34,7 @@ public:
 
     std::shared_ptr<PremultipliedImage> image;
     std::optional<gfx::Texture> texture;
+    gfx::Texture2DPtr texture2d;
     TileMask mask{{0, 0, 0}};
 
     // Bucket specific vertices are used for Image Sources only

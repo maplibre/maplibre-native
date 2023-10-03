@@ -377,9 +377,11 @@ void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
             if (!uniformBuffer) {
                 using namespace std::string_literals;
+                const auto tileID = getTileID() ? util::toString(*getTileID()) : "<no tile>";
+                const auto tileLabel = util::toString(getID()) + "/" + getName() + "/" + tileID;
                 Log::Error(Event::General,
-                           "Drawable::bindUniformBuffers: UBO "s + StringIndexer::get(element.first) +
-                               " not found. skipping.");
+                           "bindUniformBuffers: UBO "s + StringIndexer::get(element.first) + " not found on " +
+                               tileLabel + ". skipping.");
                 assert(false);
                 continue;
             }
@@ -518,7 +520,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& context = static_cast<Context&>(contextBase);
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
-    if (!impl->indexes || !impl->indexes->bytes()) {
+    // We need either raw index data or a buffer already created from them.
+    // We can have a buffer and no indexes, but only if it's not marked dirty.
+    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || impl->indexes->getDirty()))) {
         assert(!"Missing index data");
         return;
     }

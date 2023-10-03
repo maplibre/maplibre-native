@@ -19,6 +19,12 @@ LayerTweaker::LayerTweaker(std::string id_, Immutable<style::LayerProperties> pr
     : id(std::move(id_)),
       evaluatedProperties(std::move(properties)) {}
 
+bool LayerTweaker::checkTweakDrawable(const gfx::Drawable& drawable) const {
+    // Apply to a drawable if it references us, or if doesn't reference anything.
+    const auto& tweaker = drawable.getLayerTweaker();
+    return !tweaker || tweaker.get() == this;
+}
+
 mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  const RenderTree& renderTree,
                                  const TransformState& state,
@@ -60,12 +66,15 @@ shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint6
             0};
 }
 
+#if !MLN_RENDER_BACKEND_OPENGL
 void LayerTweaker::setPropertiesAsUniforms(std::vector<std::string> props) {
     if (props != propertiesAsUniforms) {
         propertiesAsUniforms = std::move(props);
-        propertiesChanged = true;
+        permutationUpdated = true;
     }
 }
+#endif
+
 bool LayerTweaker::hasPropertyAsUniform(const std::string_view attrName) const {
     // `attrName` is expected to have the "a_" prefix, while the values in `propertiesAsUniforms`
     // do not.  Search for the former within the latter without allocating temporary strings.
@@ -84,7 +93,7 @@ AttributeSource LayerTweaker::getAttributeSource(const std::string_view& attribN
 void LayerTweaker::enableOverdrawInspector(bool value) {
     if (overdrawInspector != value) {
         overdrawInspector = value;
-        propertiesChanged = true;
+        permutationUpdated = true;
     }
 }
 
