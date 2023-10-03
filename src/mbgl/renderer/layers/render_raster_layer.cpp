@@ -476,7 +476,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
                 if (geometryChanged) {
                     removeTile(renderPass, tileID);
-                    cleared = true;
+                    // cleared = true;
                 } else if (0 < updated) {
                     // If we modified drawables without removing them, we're done with this tile.
                     continue;
