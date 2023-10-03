@@ -25,3 +25,8 @@ typealias OnSymbolLongClickListener = OnAnnotationLongClickListener<Symbol>
  * Interface definition for a callback to be invoked when a circle has been long clicked.
  */
 typealias OnCircleLongClickListener = OnAnnotationLongClickListener<Circle>
+
+/**
+ * Interface definition for a callback to be invoked when a line has been long clicked.
+ */
+typealias OnLineLongClickListener = OnAnnotationLongClickListener<Line>

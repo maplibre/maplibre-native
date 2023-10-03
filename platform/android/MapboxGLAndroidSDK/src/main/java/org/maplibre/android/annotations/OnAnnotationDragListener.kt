@@ -37,3 +37,8 @@ typealias OnSymbolDragListener = OnAnnotationDragListener<Symbol>
  * Interface definition for a callback to be invoked when a circle is dragged.
  */
 typealias OnCircleDragListener = OnAnnotationDragListener<Circle>
+
+/**
+ * Interface definition for a callback to be invoked when a line is dragged.
+ */
+typealias OnLineDragListener = OnAnnotationDragListener<Line>

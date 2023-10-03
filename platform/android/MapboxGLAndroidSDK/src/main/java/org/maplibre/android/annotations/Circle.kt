@@ -22,6 +22,7 @@ class Circle(
     var center: LatLng = center
         set(value) {
             field = value
+            geometry = Point.fromLngLat(value.longitude, value.latitude)
             updateThis()
         }
     var radius: Float = radius
@@ -65,7 +66,7 @@ class Circle(
     init {
         if (blur != null && blur <= 0) {
             throw IllegalArgumentException(
-                "A blur of $blur has been provided for a Halo object. This means that no blur is to be used. " +
+                "A blur of $blur has been provided for a Circle object. This means that no blur is to be used. " +
                         "Please use `null` to indicate that `blur` is not used."
             )
         }

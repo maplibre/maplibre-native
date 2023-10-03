@@ -29,6 +29,7 @@ class KAnnotationContainer(
         annotationList.add(annotation)
         addToManager(annotation)
         if (annotation is Symbol) annotation.icon?.let { style?.addImage(it.image.toString(), it.image) }
+        if (annotation is Line) annotation.pattern?.let { style?.addImage(it.toString(), it) }
     }
 
     @UiThread
@@ -42,9 +43,11 @@ class KAnnotationContainer(
         }
     }
 
+    @UiThread
     fun update(annotation: KAnnotation<*>) {
         managers[annotation.key()]?.updateSource()
         if (annotation is Symbol) annotation.icon?.let { style?.addImage(it.image.toString(), it.image) }
+        if (annotation is Line) annotation.pattern?.let { style?.addImage(it.toString(), it) }
     }
 
     private fun addToManager(annotation: KAnnotation<*>) =
@@ -52,6 +55,7 @@ class KAnnotationContainer(
             when (annotation) {
                 is Symbol -> (manager as SymbolManager).add(annotation)
                 is Circle -> (manager as CircleManager).add(annotation)
+                is Line -> (manager as LineManager).add(annotation)
             }
         }
 
@@ -64,6 +68,7 @@ class KAnnotationContainer(
                 when (annotation) {
                     is Symbol -> (manager as SymbolManager).delete(annotation)
                     is Circle -> (manager as CircleManager).delete(annotation)
+                    is Line -> (manager as LineManager).delete(annotation)
                 }
             }
 
@@ -94,6 +99,7 @@ class KAnnotationContainer(
             when (key.type) {
                 Symbol::class -> SymbolManager(mapView, mapLibreMap, it)
                 Circle::class -> CircleManager(mapView, mapLibreMap, it)
+                Line::class -> LineManager(mapView, mapLibreMap, it)
                 else -> throw IllegalArgumentException(
                     "Impossible key! This should never occur because KAnnotation is a sealed class."
                 )

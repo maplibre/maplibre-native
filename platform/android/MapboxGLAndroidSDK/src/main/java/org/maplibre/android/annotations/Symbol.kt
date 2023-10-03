@@ -19,6 +19,7 @@ class Symbol(
     var position: LatLng = position
         set(value) {
             field = value
+            geometry = Point.fromLngLat(value.longitude, value.latitude)
             updateThis()
         }
     var icon: Icon? = icon
