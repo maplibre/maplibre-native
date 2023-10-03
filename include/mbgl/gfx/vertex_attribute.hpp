@@ -238,8 +238,9 @@ public:
     const gfx::UniqueVertexBufferResource& getBuffer() const { return buffer; }
     void setBuffer(gfx::UniqueVertexBufferResource&& value) { buffer = std::move(value); }
 
-protected:
     VertexAttribute& operator=(const VertexAttribute&) = delete;
+
+protected:
     VertexAttribute& operator=(VertexAttribute&& other) {
         index = other.index;
         dataType = other.dataType;
