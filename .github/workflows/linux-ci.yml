@@ -48,6 +48,10 @@ jobs:
         renderer: [legacy, drawable]
     runs-on: MapLibre_Native_Large_Runner
     steps:
+      - run: | 
+          echo ${{ vars.TEST_VAR }}
+          exit 1
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
