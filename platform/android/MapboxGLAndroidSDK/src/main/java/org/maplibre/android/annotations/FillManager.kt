@@ -43,6 +43,10 @@ class FillManager @UiThread internal constructor(
 ) {
 
     override fun generateDataDrivenPropertyExpression(property: String): PropertyValue<Expression> = when (property) {
+        Fill.PROPERTY_FILL_SORT_KEY -> PropertyFactory.fillSortKey(
+            Expression.get(Fill.PROPERTY_FILL_SORT_KEY)
+        )
+
         Fill.PROPERTY_FILL_OPACITY -> PropertyFactory.fillOpacity(
             Expression.get(Fill.PROPERTY_FILL_OPACITY)
         )

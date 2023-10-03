@@ -28,6 +28,7 @@ import org.maplibre.android.style.layers.PropertyFactory.lineJoin
 import org.maplibre.android.style.layers.PropertyFactory.lineOffset
 import org.maplibre.android.style.layers.PropertyFactory.lineOpacity
 import org.maplibre.android.style.layers.PropertyFactory.linePattern
+import org.maplibre.android.style.layers.PropertyFactory.lineSortKey
 import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
@@ -358,6 +359,37 @@ class LineManagerTest {
         Assert.assertTrue(line.draggable)
         line.draggable = false
         Assert.assertFalse(line.draggable)
+    }
+
+    @Test
+    fun testLineSortKeyLayerProperty() {
+        lineManager = LineManager(
+            mapView,
+            maplibreMap,
+            style,
+            coreElementProvider,
+            null,
+            null,
+            null,
+            draggableAnnotationController
+        )
+        Mockito.verify(lineLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(lineSortKey(get("line-sort-key"))))
+        )
+        val latLngs = listOf(
+            LatLng(),
+            LatLng(1.0, 1.0)
+        )
+        for (i in 0 until 2) {
+            val line = Line(latLngs).apply {
+                zLayer = 2
+            }
+            lineManager.add(line)
+            lineManager.updateSourceNow()
+            Mockito.verify(lineLayer, Mockito.times(1)).setProperties(
+                ArgumentMatchers.argThat(PropertyValueMatcher(lineSortKey(get("line-sort-key"))))
+            )
+        }
     }
 
     @Test

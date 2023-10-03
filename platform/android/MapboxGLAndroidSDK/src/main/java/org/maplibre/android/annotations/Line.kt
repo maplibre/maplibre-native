@@ -81,6 +81,7 @@ class Line @JvmOverloads constructor(
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
             PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
+            PROPERTY_LINE_SORT_KEY to zLayer default Defaults.Z_LAYER,
             PROPERTY_LINE_JOIN to join.toString().lowercase() default Defaults.LINE_JOIN.toString().lowercase(),
             PROPERTY_LINE_OPACITY to opacity default Defaults.LINE_OPACITY,
             PROPERTY_LINE_COLOR to color.asColorString() default Defaults.LINE_COLOR,
@@ -131,13 +132,14 @@ class Line @JvmOverloads constructor(
     }
 
     companion object {
-        const val PROPERTY_LINE_JOIN = "line-join"
-        const val PROPERTY_LINE_OPACITY = "line-opacity"
-        const val PROPERTY_LINE_COLOR = "line-color"
-        const val PROPERTY_LINE_WIDTH = "line-width"
-        const val PROPERTY_LINE_GAP_WIDTH = "line-gap-width"
-        const val PROPERTY_LINE_OFFSET = "line-offset"
-        const val PROPERTY_LINE_BLUR = "line-blur"
-        const val PROPERTY_LINE_PATTERN = "line-pattern"
+        internal const val PROPERTY_LINE_SORT_KEY = "line-sort-key"
+        internal const val PROPERTY_LINE_JOIN = "line-join"
+        internal const val PROPERTY_LINE_OPACITY = "line-opacity"
+        internal const val PROPERTY_LINE_COLOR = "line-color"
+        internal const val PROPERTY_LINE_WIDTH = "line-width"
+        internal const val PROPERTY_LINE_GAP_WIDTH = "line-gap-width"
+        internal const val PROPERTY_LINE_OFFSET = "line-offset"
+        internal const val PROPERTY_LINE_BLUR = "line-blur"
+        internal const val PROPERTY_LINE_PATTERN = "line-pattern"
     }
 }

@@ -58,6 +58,10 @@ class LineManager @UiThread internal constructor(
     )
 
     override fun generateDataDrivenPropertyExpression(property: String): PropertyValue<Expression> = when (property) {
+        Line.PROPERTY_LINE_SORT_KEY -> PropertyFactory.lineSortKey(
+            Expression.get(Line.PROPERTY_LINE_SORT_KEY)
+        )
+
         Line.PROPERTY_LINE_JOIN -> PropertyFactory.lineJoin(
             Expression.get(Line.PROPERTY_LINE_JOIN)
         )

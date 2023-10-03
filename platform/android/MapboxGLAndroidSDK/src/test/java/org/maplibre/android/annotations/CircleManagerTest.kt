@@ -279,6 +279,41 @@ class CircleManagerTest {
     }
 
     @Test
+    fun testCircleSortKeyLayerProperty() {
+        circleManager = CircleManager(
+            mapView,
+            maplibreMap,
+            style,
+            coreElementProvider,
+            null,
+            null,
+            null,
+            draggableAnnotationController
+        )
+        Mockito.verify(circleLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(
+                PropertyValueMatcher(
+                    PropertyFactory.circleSortKey(Expression.get("circle-sort-key"))
+                )
+            )
+        )
+        for (i in 0 until 2) {
+            val circle = Circle(LatLng()).apply {
+                zLayer = 2
+            }
+            circleManager.add(circle)
+            circleManager.updateSourceNow()
+            Mockito.verify(circleLayer, Mockito.times(1)).setProperties(
+                ArgumentMatchers.argThat(
+                    PropertyValueMatcher(
+                        PropertyFactory.circleSortKey(Expression.get("circle-sort-key"))
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
     fun testCircleRadiusLayerProperty() {
         circleManager = CircleManager(
             mapView,

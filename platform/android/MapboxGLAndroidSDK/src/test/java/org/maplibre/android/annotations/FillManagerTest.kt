@@ -22,6 +22,7 @@ import org.maplibre.android.style.layers.PropertyFactory.fillColor
 import org.maplibre.android.style.layers.PropertyFactory.fillOpacity
 import org.maplibre.android.style.layers.PropertyFactory.fillOutlineColor
 import org.maplibre.android.style.layers.PropertyFactory.fillPattern
+import org.maplibre.android.style.layers.PropertyFactory.fillSortKey
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.mockito.ArgumentCaptor
@@ -376,6 +377,39 @@ class FillManagerTest {
         Assert.assertTrue(fill.draggable)
         fill.draggable = false
         Assert.assertFalse(fill.draggable)
+    }
+
+    @Test
+    fun testFillSortKeyLayerProperty() {
+        fillManager = FillManager(
+            mapView,
+            maplibreMap,
+            style,
+            coreElementProvider,
+            null,
+            null,
+            null,
+            draggableAnnotationController
+        )
+        Mockito.verify(fillLayer, Mockito.times(0)).setProperties(
+            ArgumentMatchers.argThat(PropertyValueMatcher(fillSortKey(get("fill-sort-key"))))
+        )
+        val innerLatLngs: List<LatLng> = listOf(
+            LatLng(),
+            LatLng(1.0, 1.0),
+            LatLng(-1.0, -1.0)
+        )
+        val latLngs: List<List<LatLng>> = listOf(innerLatLngs)
+        for (i in 0 until 2) {
+            val fill = Fill(latLngs).apply {
+                zLayer = 2
+            }
+            fillManager.add(fill)
+            fillManager.updateSourceNow()
+            Mockito.verify(fillLayer, Mockito.times(1)).setProperties(
+                ArgumentMatchers.argThat(PropertyValueMatcher(fillSortKey(get("fill-sort-key"))))
+            )
+        }
     }
 
     @Test

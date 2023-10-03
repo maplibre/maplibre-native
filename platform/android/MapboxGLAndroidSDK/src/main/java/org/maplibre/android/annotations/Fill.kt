@@ -52,6 +52,7 @@ class Fill @JvmOverloads constructor(
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
             PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
+            PROPERTY_FILL_SORT_KEY to zLayer default Defaults.Z_LAYER,
             PROPERTY_FILL_OPACITY to opacity default Defaults.FILL_OPACITY,
             PROPERTY_FILL_COLOR to color.asColorString() default Defaults.FILL_COLOR.asColorString(),
             PROPERTY_FILL_OUTLINE_COLOR to outlineColor?.asColorString()
@@ -87,9 +88,10 @@ class Fill @JvmOverloads constructor(
     }
 
     companion object {
-        const val PROPERTY_FILL_OPACITY = "fill-opacity"
-        const val PROPERTY_FILL_COLOR = "fill-color"
-        const val PROPERTY_FILL_OUTLINE_COLOR = "fill-outline-color"
-        const val PROPERTY_FILL_PATTERN = "fill-pattern"
+        internal const val PROPERTY_FILL_SORT_KEY = "fill-sort-key"
+        internal const val PROPERTY_FILL_OPACITY = "fill-opacity"
+        internal const val PROPERTY_FILL_COLOR = "fill-color"
+        internal const val PROPERTY_FILL_OUTLINE_COLOR = "fill-outline-color"
+        internal const val PROPERTY_FILL_PATTERN = "fill-pattern"
     }
 }

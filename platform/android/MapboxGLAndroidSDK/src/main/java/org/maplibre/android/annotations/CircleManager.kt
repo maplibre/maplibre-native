@@ -61,6 +61,10 @@ class CircleManager @UiThread internal constructor(
     )
 
     override fun generateDataDrivenPropertyExpression(property: String): PropertyValue<Expression> = when (property) {
+        Circle.PROPERTY_CIRCLE_SORT_KEY -> PropertyFactory.circleSortKey(
+            Expression.get(Circle.PROPERTY_CIRCLE_SORT_KEY)
+        )
+
         Circle.PROPERTY_CIRCLE_RADIUS -> PropertyFactory.circleRadius(
             Expression.get(Circle.PROPERTY_CIRCLE_RADIUS)
         )
