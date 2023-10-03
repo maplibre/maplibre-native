@@ -101,18 +101,18 @@ jobs:
 
       # unit tests
 
-      - run: chmod +x ./mbgl-test-runner
+      - run: chmod +x build/mbgl-test-runner
 
       - name: Run C++ tests
-        run: xvfb-run -a ./mbgl-test-runner
+        run: xvfb-run -a build/mbgl-test-runner
 
       # render tests
 
-      - run: chmod +x ./mbgl-render-test-runner
+      - run: chmod +x build/mbgl-render-test-runner
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -124,10 +124,10 @@ jobs:
       
       # expression tests
 
-      - run: chmod +x ./mbgl-expression-test
+      - run: chmod +x build/mbgl-expression-test
 
       - name: Run expression test
-        run: ./mbgl-expression-test
+        run: build/mbgl-expression-test
 
   linux-coverage:
     runs-on: ubuntu-22.04
