@@ -187,6 +187,7 @@ std::size_t RenderLayer::removeAllDrawables() {
 
 void RenderLayer::updateRenderTileIDs() {
     const auto oldMap = renderTileIDs;
+    renderTileIDs.clear();
     if (renderTiles) {
         renderTileIDs.reserve(renderTiles->size());
         for (const auto& tile : *renderTiles) {
