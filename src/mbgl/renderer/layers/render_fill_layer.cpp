@@ -46,15 +46,14 @@ constexpr auto FillOutlineShaderName = "FillOutlineShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
-static const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
-static const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO");
-static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
-static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get(
-    "FillOutlinePatternInterpolateUBO");
-static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
+const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
+const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO");
+const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
+const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get("FillOutlinePatternInterpolateUBO");
+const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
 
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idIconTextureName = StringIndexer::get("u_image");
+const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
+const StringIdentity idIconTextureName = StringIndexer::get("u_image");
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
@@ -704,6 +703,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 patternBuilder->setRenderPass(renderPass);
                 if (outlinePatternBuilder) {
                     patternBuilder->setVertexAttributes(vertexAttrs);
+                    outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 } else {
                     patternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 }
@@ -722,7 +722,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (outlinePatternBuilder && bucket.sharedLines->elements()) {
                 outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
-                outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
