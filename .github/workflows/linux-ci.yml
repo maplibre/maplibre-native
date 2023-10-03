@@ -124,10 +124,10 @@ jobs:
       
       # expression tests
 
-      - run: chmod +x build/mbgl-expression-test
+      - run: chmod +x build/expression-test/mbgl-expression-test
 
       - name: Run expression test
-        run: build/mbgl-expression-test
+        run: build/expression-test/mbgl-expression-test
 
   linux-coverage:
     runs-on: ubuntu-22.04
