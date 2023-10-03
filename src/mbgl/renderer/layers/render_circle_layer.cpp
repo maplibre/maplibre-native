@@ -21,7 +21,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/util/string_indexer.hpp>
 #endif
 
@@ -272,8 +271,8 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-static const StringIdentity idCircleInterpolateUBOName = StringIndexer::get("CircleInterpolateUBO");
-static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
+const StringIdentity idCircleInterpolateUBOName = StringIndexer::get("CircleInterpolateUBO");
+const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
 
 } // namespace
 
