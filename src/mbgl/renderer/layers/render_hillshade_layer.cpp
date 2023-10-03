@@ -500,8 +500,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             // Rebuild segments, since they're not shared.
             std::vector<std::unique_ptr<gfx::Drawable::DrawSegment>> drawSegments;
             drawSegments.reserve(segments->size());
-            for (std::size_t i = 0; i < segments->size(); ++i) {
-                const auto& seg = segments[i];
+            for (const auto& seg : *segments) {
                 auto segCopy = SegmentBase{
                     // no copy constructor
                     seg.vertexOffset,
