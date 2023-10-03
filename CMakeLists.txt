@@ -57,6 +57,10 @@ add_library(
 
 set(UBSAN_BLACKLIST ${PROJECT_SOURCE_DIR}/scripts/ubsan.blacklist)
 
+if (MLN_DRAWABLE_RENDERER)
+    set(MLN_LEGACY_RENDERER OFF)
+endif()
+
 target_compile_options(
     mbgl-compiler-options
     INTERFACE
