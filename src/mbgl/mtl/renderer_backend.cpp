@@ -15,6 +15,8 @@
 #include <mbgl/shaders/mtl/background_pattern.hpp>
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
+#include <mbgl/shaders/mtl/collision_box.hpp>
+#include <mbgl/shaders/mtl/collision_circle.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
 #include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
@@ -124,6 +126,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::BackgroundPatternShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::ClippingMaskProgram,
+                  shaders::BuiltIn::CollisionBoxShader,
+                  shaders::BuiltIn::CollisionCircleShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
                   shaders::BuiltIn::FillOutlinePatternShader,

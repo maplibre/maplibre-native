@@ -43,15 +43,10 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    using ShaderClass = shaders::ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
     if (permutationUpdated) {
-        const auto source = [this](const std::string_view& attrName) {
-            return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-        };
-
         const HeatmapPermutationUBO permutationUBO = {
-            /* .weight = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-            /* .radius = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+            /* .weight = */ {/*.source=*/getAttributeSource<BuiltIn::HeatmapShader>(1), /*.expression=*/{}},
+            /* .radius = */ {/*.source=*/getAttributeSource<BuiltIn::HeatmapShader>(2), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad1/2/3 = */ 0,
             0,

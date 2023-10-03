@@ -14,32 +14,9 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        // always attributes
-        {0, gfx::AttributeDataType::Short4, 1, "a_pos_offset"},
-        {1, gfx::AttributeDataType::UShort4, 1, "a_data"},
-        {2, gfx::AttributeDataType::Float3, 1, "a_projected_pos"},
-        {3, gfx::AttributeDataType::Float, 1, "a_fade_opacity"},
-
-        // sometimes uniforms
-        {4, gfx::AttributeDataType::Float4, 1, "a_fill_color"},
-        {5, gfx::AttributeDataType::Float4, 1, "a_halo_color"},
-        {6, gfx::AttributeDataType::Float, 1, "a_opacity"},
-        {7, gfx::AttributeDataType::Float, 1, "a_halo_width"},
-        {8, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(9, true, true, SymbolDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, false, SymbolDrawablePaintUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, true, SymbolDrawableTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(12, true, false, SymbolDrawableInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(13, true, true, SymbolPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(14, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {
-        {0, "u_texture"},
-        {1, "u_texture_icon"},
-    };
+    static const std::array<AttributeInfo, 9> attributes;
+    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto source = R"(
 #define SDF 1.0
@@ -141,7 +118,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
     const float4 projected_pos = drawable.label_plane_matrix * float4(vertx.projected_pos.xy, 0.0, 1.0);
-    const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
+    const float2 pos_rot = a_offset / 32.0 * fontScale;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
     const float gamma_scale = position.w;
@@ -178,7 +155,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     if (in.data1.w == ICON) {
         const float2 tex_icon = in.data0.zw;
-        const float alpha = opacity * fade_opacity;
+        const float alpha = in.opacity * fade_opacity;
         return half4(icon_image.sample(icon_sampler, tex_icon) * alpha);
     }
 

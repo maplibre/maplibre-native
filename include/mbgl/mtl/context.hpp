@@ -78,6 +78,8 @@ public:
 
     void setDirtyState() override;
 
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
+
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
