@@ -41,28 +41,28 @@ using StringIdentity = std::size_t;
 class LayerTweaker {
 protected:
     LayerTweaker(std::string id, Immutable<style::LayerProperties> properties);
-    
+
 public:
     LayerTweaker() = delete;
     virtual ~LayerTweaker() = default;
-    
+
     const std::string& getID() const { return id; }
-    
+
 #if MLN_RENDER_BACKEND_METAL
     /// Build the common expression inupts UBO
     static shaders::ExpressionInputsUBO buildExpressionUBO(double zoom, uint64_t frameCount);
-    
+
     /// @brief Check whether a property name exists within the previously set collection.
     bool hasPropertyAsUniform(StringIdentity) const;
     shaders::AttributeSource getAttributeSource(StringIdentity) const;
-    
+
     template <shaders::BuiltIn ShaderType>
     shaders::AttributeSource getAttributeSource(size_t index) {
         using ShaderClass = shaders::ShaderSource<ShaderType, gfx::Backend::Type::Metal>;
         return getAttributeSource(ShaderClass::attributes[index].nameID);
     }
 #endif // MLN_RENDER_BACKEND_METAL
-    
+
     /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
     /// attributes.
     /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
