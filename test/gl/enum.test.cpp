@@ -21,11 +21,14 @@ TEST(GL, DrawModeType) {
 
 namespace {
 template <typename T>
-auto enumIdentity(T x) { return  Enum<T>::from(Enum<T>::to(x)); }
+auto enumIdentity(T x) {
+    return Enum<T>::from(Enum<T>::to(x));
 }
+} // namespace
 
 TEST(GL, ColorBlendEquationType) {
-    //const auto identity = [](auto x){ return  Enum<ColorBlendEquationType>::from(Enum<ColorBlendEquationType>::to(x)); };
+    // const auto identity = [](auto x){ return Enum<ColorBlendEquationType>::from(Enum<ColorBlendEquationType>::to(x));
+    // };
     ASSERT_EQ(ColorBlendEquationType::Add, enumIdentity(ColorBlendEquationType::Add));
     ASSERT_EQ(ColorBlendEquationType::Subtract, enumIdentity(ColorBlendEquationType::Subtract));
     ASSERT_EQ(ColorBlendEquationType::ReverseSubtract, enumIdentity(ColorBlendEquationType::ReverseSubtract));
@@ -50,7 +53,7 @@ TEST(GL, ColorBlendFactorType) {
     ASSERT_EQ(ColorBlendFactorType::ConstantAlpha, enumIdentity(ColorBlendFactorType::ConstantAlpha));
     ASSERT_EQ(ColorBlendFactorType::OneMinusConstantAlpha, enumIdentity(ColorBlendFactorType::OneMinusConstantAlpha));
     ASSERT_EQ(ColorBlendFactorType::SrcAlphaSaturate, enumIdentity(ColorBlendFactorType::SrcAlphaSaturate));
-    
+
     ASSERT_EQ(GL_INVALID_ENUM, Enum<ColorBlendFactorType>::to(static_cast<ColorBlendFactorType>(-1)));
     ASSERT_EQ(ColorBlendFactorType{}, Enum<ColorBlendFactorType>::from(GL_RGBA8));
 }
@@ -64,7 +67,7 @@ TEST(GL, DepthFunctionType) {
     ASSERT_EQ(DepthFunctionType::NotEqual, enumIdentity(DepthFunctionType::NotEqual));
     ASSERT_EQ(DepthFunctionType::GreaterEqual, enumIdentity(DepthFunctionType::GreaterEqual));
     ASSERT_EQ(DepthFunctionType::Always, enumIdentity(DepthFunctionType::Always));
-    
+
     ASSERT_EQ(GL_INVALID_ENUM, Enum<DepthFunctionType>::to(static_cast<DepthFunctionType>(-1)));
     ASSERT_EQ(DepthFunctionType{}, Enum<DepthFunctionType>::from(GL_RGBA8));
 }

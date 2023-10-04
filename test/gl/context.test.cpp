@@ -122,4 +122,3 @@ TEST(GLContextMode, Shared) {
 
     test::checkImage("test/fixtures/shared_context", frontend.render(map).image, 0.5, 0.1);
 }
-
