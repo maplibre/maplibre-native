@@ -8,12 +8,12 @@ namespace style {
 
 namespace {
 const LayerTypeInfo typeInfoCustomDrawable{"custom-drawable",
-                                   LayerTypeInfo::Source::NotRequired,
-                                   LayerTypeInfo::Pass3D::NotRequired,
-                                   LayerTypeInfo::Layout::NotRequired,
-                                   LayerTypeInfo::FadingTiles::NotRequired,
-                                   LayerTypeInfo::CrossTileIndex::NotRequired,
-                                   LayerTypeInfo::TileKind::NotRequired};
+                                           LayerTypeInfo::Source::NotRequired,
+                                           LayerTypeInfo::Pass3D::NotRequired,
+                                           LayerTypeInfo::Layout::NotRequired,
+                                           LayerTypeInfo::FadingTiles::NotRequired,
+                                           LayerTypeInfo::CrossTileIndex::NotRequired,
+                                           LayerTypeInfo::TileKind::NotRequired};
 } // namespace
 
 CustomDrawableLayer::CustomDrawableLayer(const std::string& layerID, std::unique_ptr<CustomDrawableLayerHost> host)

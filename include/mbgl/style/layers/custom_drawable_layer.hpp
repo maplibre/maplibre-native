@@ -8,7 +8,7 @@ namespace mbgl {
 namespace style {
 
 class CustomDrawableLayerHost {
-public: 
+public:
     struct PaintParameters {
         double width;
         double height;

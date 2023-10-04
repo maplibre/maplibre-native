@@ -22,23 +22,22 @@ using namespace mbgl::style;
 
 class TestLayer : public mbgl::style::CustomDrawableLayerHost {
 public:
-    void initialize() override {
-    }
+    void initialize() override {}
 
-    void upload() override {        
-        if(layerGroup) {
+    void upload() override {
+        if (layerGroup) {
             layerGroup->render(orchestrator, parameters);
         }
     }
 
     void draw(const PaintParameters&) override {
-        if(layerGroup) {
+        if (layerGroup) {
             layerGroup->render(orchestrator, parameters);
         }
     }
 
     void update() override {
-        if(layerGroup && layerGroup->getDrawableCount()) {
+        if (layerGroup && layerGroup->getDrawableCount()) {
             return;
         }
 
@@ -129,12 +128,10 @@ public:
             uniforms.createOrUpdate(idLineInterpolationUBOName, &lineInterpolationUBO, context);
 
             tileLayerGroup->addDrawable(RenderPass::Translucent, tile, std::move(drawable));
-        }        
+        }
     }
 
-    void deinitialize() override {
-        layerGroup->reset();
-    }
+    void deinitialize() override { layerGroup->reset(); }
 
 private:
     gfx::TileLayerGroupPtr layerGroup;
