@@ -37,12 +37,13 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
     // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
-    const auto& projMatrix = aligned
-                                 ? parameters.transformParams.alignedProjMatrix
-                                 : (nearClipped ? parameters.transformParams.nearClippedProjMatrix : parameters.transformParams.projMatrix);
+    const auto& projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
+                                     : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
+                                                    : parameters.transformParams.projMatrix);
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);
 
-    return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
+    return RenderTile::translateVtxMatrix(
+        tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
 }
 
 void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {

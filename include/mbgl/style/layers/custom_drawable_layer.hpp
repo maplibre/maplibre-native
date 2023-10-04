@@ -19,7 +19,7 @@ public:
 
     virtual void initialize() = 0;
 
-    virtual void update(RenderLayer& proxyLayer, 
+    virtual void update(RenderLayer& proxyLayer,
                         gfx::ShaderRegistry& shaders,
                         gfx::Context& context,
                         const TransformState& state,

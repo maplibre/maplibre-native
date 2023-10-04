@@ -24,8 +24,7 @@ using namespace shaders;
 const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = StringIndexer::get(CollisionCircleUBOName);
 const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = StringIndexer::get(CollisionBoxUBOName);
 
-void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                    const PaintParameters& parameters) {
+void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {
         return;
     }
@@ -50,8 +49,7 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto anchor = data.translateAnchor;
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
 
         // extrude scale
         const auto pixelRatio = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));

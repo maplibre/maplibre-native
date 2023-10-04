@@ -32,8 +32,7 @@ std::array<float, 2> getLight(const PaintParameters& parameters,
     return {{evaluated.get<HillshadeExaggeration>(), azimuthal}};
 }
 
-void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                    const PaintParameters& parameters) {
+void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {

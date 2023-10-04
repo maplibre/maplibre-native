@@ -25,8 +25,7 @@ static const StringIdentity idHeatmapEvaluatedPropsUBOName = StringIndexer::get(
 static const StringIdentity idHeatmapPermutationUBOName = StringIndexer::get("HeatmapPermutationUBO");
 static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
 
-void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                  const PaintParameters& parameters) {
+void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 

@@ -39,8 +39,7 @@ const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName 
 const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = StringIndexer::get(
     "FillExtrusionInterpolateUBO");
 
-void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                        const PaintParameters& parameters) {
+void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& props = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
@@ -118,8 +117,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = true;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);

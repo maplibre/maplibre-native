@@ -72,8 +72,7 @@ const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = Stri
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get(
     "SymbolDrawableInterpolateUBO");
 
-void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                 const PaintParameters& parameters) {
+void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& state = parameters.state;
     const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
@@ -147,8 +146,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(zoom);

@@ -60,8 +60,7 @@ static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("Expr
 static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 using namespace shaders;
 
-void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
-                               const PaintParameters& parameters) {
+void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
@@ -240,8 +239,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
         // from FillPatternProgram::layoutUniformValues
         const auto tileRatio = 1.0f / tileID.pixelsToTileUnits(1.0f, intZoom);
