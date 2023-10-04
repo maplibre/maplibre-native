@@ -112,7 +112,7 @@ jobs:
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
