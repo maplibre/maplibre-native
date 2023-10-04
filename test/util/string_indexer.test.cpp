@@ -6,6 +6,10 @@
 
 using namespace mbgl;
 
+TEST(StringIndexer, SingletonStringIndexer) {
+    EXPECT_GE(stringIndexer().size(), 0);
+}
+
 TEST(StringIndexer, AddStrings) {
     StringIndexer strIndexer;
     EXPECT_EQ(strIndexer.size(), 0);

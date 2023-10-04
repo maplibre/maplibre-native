@@ -67,14 +67,6 @@ std::string StringIndexer::get(const StringIdentity id) {
     return id < identityToString.size() ? (buffer.data() + identityToString[id]) : empty;
 }
 
-void StringIndexer::clear() {
-    std::unique_lock<std::shared_mutex> writerLock(sharedMutex);
-
-    stringToIdentity.clear();
-    identityToString.clear();
-    buffer.clear();
-}
-
 size_t StringIndexer::size() {
     std::shared_lock<std::shared_mutex> readerLock(sharedMutex);
 

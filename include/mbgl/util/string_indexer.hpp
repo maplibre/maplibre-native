@@ -26,8 +26,6 @@ public:
 
     std::string get(const StringIdentity id);
 
-    void clear();
-
     size_t size();
 
 protected:
