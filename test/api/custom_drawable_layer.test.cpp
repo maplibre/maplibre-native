@@ -132,10 +132,10 @@ public:
     }
 
     void deinitialize() override {
-        // layerGroup->reset(); 
+        // layerGroup->reset();
     }
 
-// private:
+    // private:
     // gfx::TileLayerGroupPtr layerGroup;
 };
 

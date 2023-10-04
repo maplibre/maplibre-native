@@ -59,17 +59,16 @@ void RenderCustomDrawableLayer::markContextDestroyed() {
 void RenderCustomDrawableLayer::prepare(const LayerPrepareParameters&) {}
 
 #if MLN_LEGACY_RENDERER
-void RenderCustomDrawableLayer::render(PaintParameters& paintParameters) {
-}
+void RenderCustomDrawableLayer::render(PaintParameters& paintParameters) {}
 #endif
 
 #if MLN_DRAWABLE_RENDERER
 void RenderCustomDrawableLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
-                               gfx::Context& context,
-                               [[maybe_unused]] const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>&,
-                               [[maybe_unused]] const RenderTree& renderTree,
-                               [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                                       gfx::Context& context,
+                                       [[maybe_unused]] const TransformState& state,
+                                       const std::shared_ptr<UpdateParameters>&,
+                                       [[maybe_unused]] const RenderTree& renderTree,
+                                       [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
 
     // create layer group

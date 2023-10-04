@@ -465,7 +465,10 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
     const uint16_t index = static_cast<uint16_t>(segment.vertexLength);
 
     for (const auto& triangle : triangleStore) {
-        buildIndexes.insert(buildIndexes.end(), {static_cast<uint16_t>(index + triangle.a), static_cast<uint16_t>(index + triangle.b), static_cast<uint16_t>(index + triangle.c)});
+        buildIndexes.insert(buildIndexes.end(),
+                            {static_cast<uint16_t>(index + triangle.a),
+                             static_cast<uint16_t>(index + triangle.b),
+                             static_cast<uint16_t>(index + triangle.c)});
     }
 
     segment.vertexLength += vertexCount;

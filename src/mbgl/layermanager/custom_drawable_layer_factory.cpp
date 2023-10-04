@@ -10,12 +10,13 @@ const style::LayerTypeInfo* CustomDrawableLayerFactory::getTypeInfo() const noex
 }
 
 std::unique_ptr<style::Layer> CustomDrawableLayerFactory::createLayer(const std::string&,
-                                                              const style::conversion::Convertible&) noexcept {
+                                                                      const style::conversion::Convertible&) noexcept {
     assert(false);
     return nullptr;
 }
 
-std::unique_ptr<RenderLayer> CustomDrawableLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
+std::unique_ptr<RenderLayer> CustomDrawableLayerFactory::createRenderLayer(
+    Immutable<style::Layer::Impl> impl) noexcept {
     return std::make_unique<RenderCustomDrawableLayer>(staticImmutableCast<style::CustomDrawableLayer::Impl>(impl));
 }
 
