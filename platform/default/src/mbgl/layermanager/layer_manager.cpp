@@ -70,7 +70,7 @@ LayerManagerDefault::LayerManagerDefault() {
     addLayerType(std::make_unique<LocationIndicatorLayerFactory>());
 #endif
 #endif
-#if !defined(MBGL_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
+#if !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
     addLayerType(std::make_unique<CustomDrawableLayerFactory>());
 #endif
 }

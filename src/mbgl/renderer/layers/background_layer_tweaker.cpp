@@ -23,7 +23,7 @@ static const StringIdentity idBackgroundDrawableUBOName = StringIndexer::get("Ba
 static const StringIdentity idBackgroundLayerUBOName = StringIndexer::get("BackgroundLayerUBO");
 static const StringIdentity idTexUniformName = StringIndexer::get("u_image");
 
-void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTree&, const PaintParameters& parameters) {
+void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& state = parameters.state;
     auto& context = parameters.context;
 

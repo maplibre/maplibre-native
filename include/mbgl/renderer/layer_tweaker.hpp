@@ -69,7 +69,7 @@ public:
 
     void enableOverdrawInspector(bool);
 
-    virtual void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) = 0;
+    virtual void execute(LayerGroupBase&, const PaintParameters&) = 0;
 
     void updateProperties(Immutable<style::LayerProperties>);
 
@@ -82,8 +82,7 @@ public:
     /// @param nearClipped If true, the near plane is moved further to enhance depth buffer precision.
     /// @param inViewportPixelUnits If false, the translation is scaled based on the current zoom.
     static mat4 getTileMatrix(const UnwrappedTileID&,
-                              const RenderTree&,
-                              const TransformState&,
+                              const PaintParameters&,
                               const std::array<float, 2>& translation,
                               style::TranslateAnchorType,
                               bool nearClipped,

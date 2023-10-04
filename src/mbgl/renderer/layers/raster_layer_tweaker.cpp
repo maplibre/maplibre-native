@@ -20,7 +20,6 @@ using namespace shaders;
 static const StringIdentity idRasterDrawableUBOName = StringIndexer::get("RasterDrawableUBO");
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
-                                 [[maybe_unused]] const RenderTree& renderTree,
                                  [[maybe_unused]] const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
 

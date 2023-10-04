@@ -26,7 +26,6 @@ static const StringIdentity idHeatmapPermutationUBOName = StringIndexer::get("He
 static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                  const RenderTree& renderTree,
                                   const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
@@ -91,13 +90,8 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID,
-                                          renderTree,
-                                          parameters.state,
-                                          {0.f, 0.f},
-                                          TranslateAnchorType::Viewport,
-                                          nearClipped,
-                                          inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits);
         const HeatmapDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),

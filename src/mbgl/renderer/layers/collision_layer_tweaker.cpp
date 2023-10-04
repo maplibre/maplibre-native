@@ -25,14 +25,12 @@ const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = StringInd
 const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = StringIndexer::get(CollisionBoxUBOName);
 
 void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                    const RenderTree& renderTree,
                                     const PaintParameters& parameters) {
     if (layerGroup.empty()) {
         return;
     }
 
     auto& context = parameters.context;
-    const auto& state = parameters.state;
 
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
@@ -53,7 +51,7 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(
-            tileID, renderTree, state, translate, anchor, nearClipped, inViewportPixelUnits);
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
 
         // extrude scale
         const auto pixelRatio = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));

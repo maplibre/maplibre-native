@@ -61,7 +61,6 @@ static const StringIdentity idTexImageName = StringIndexer::get("u_image");
 using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
-                               const RenderTree& renderTree,
                                const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& props = static_cast<const FillLayerProperties&>(*evaluatedProperties);
@@ -242,7 +241,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
         const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
         // from FillPatternProgram::layoutUniformValues
         const auto tileRatio = 1.0f / tileID.pixelsToTileUnits(1.0f, intZoom);

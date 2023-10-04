@@ -30,7 +30,6 @@ static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("Expr
 static const StringIdentity idCirclePermutationUBOName = StringIndexer::get("CirclePermutationUBO");
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                 const RenderTree& renderTree,
                                  const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
@@ -124,7 +123,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
         const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom));
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}

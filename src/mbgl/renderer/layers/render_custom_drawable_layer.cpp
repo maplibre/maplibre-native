@@ -63,22 +63,13 @@ void RenderCustomDrawableLayer::render(PaintParameters& paintParameters) {}
 #endif
 
 #if MLN_DRAWABLE_RENDERER
-void RenderCustomDrawableLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
+void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::Context& context,
-                                       [[maybe_unused]] const TransformState& state,
-                                       const std::shared_ptr<UpdateParameters>&,
-                                       [[maybe_unused]] const RenderTree& renderTree,
-                                       [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                                       const TransformState& state,
+                                       const std::shared_ptr<UpdateParameters>& updateParameters,
+                                       const RenderTree& renderTree,
+                                       UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-
-    // create layer group
-    if (!layerGroup) {
-        if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
-            setLayerGroup(std::move(layerGroup_), changes);
-        }
-    }
-
-    // auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
 
     // check if host changed and update
     bool hostChanged = (host != impl(baseImpl).host);
@@ -91,26 +82,10 @@ void RenderCustomDrawableLayer::update([[maybe_unused]] gfx::ShaderRegistry& sha
         host->initialize();
     }
 
-    // // create drawable
-    // if (localLayerGroup->getDrawableCount() == 0 || hostChanged) {
-    //     localLayerGroup->clearDrawables();
-
-    //     // create tweaker
-    //     auto tweaker = std::make_shared<gfx::DrawableCustomLayerHostTweaker>(host);
-
-    //     // create empty drawable using a builder
-    //     std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(getID());
-    //     auto& drawable = builder->getCurrentDrawable(true);
-    //     drawable->setIsCustom(true);
-    //     drawable->setRenderPass(RenderPass::Translucent);
-
-    //     // assign tweaker to drawable
-    //     drawable->addTweaker(tweaker);
-
-    //     // add drawable to layer group
-    //     localLayerGroup->addDrawable(std::move(drawable));
-    //     ++stats.drawablesAdded;
-    // }
+    // delegate the call to the custom layer
+    if (host) {
+        host->update(*this, shaders, context, state, updateParameters, renderTree, changes);
+    }
 }
 #endif
 

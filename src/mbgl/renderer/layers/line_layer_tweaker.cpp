@@ -38,7 +38,6 @@ static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("Expr
 static const StringIdentity idLinePermutationUBOName = StringIndexer::get("LinePermutationUBO");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
-                               const RenderTree& renderTree,
                                const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
@@ -156,7 +155,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         auto& uniforms = drawable.mutableUniformBuffers();
 
         const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
         const LineType type = static_cast<LineType>(drawable.getType());
 

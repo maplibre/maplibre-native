@@ -18,7 +18,7 @@ public:
 public:
     ~SymbolLayerTweaker() override = default;
 
-    void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
+    void execute(LayerGroupBase&, const PaintParameters&) override;
 
     static const StringIdentity idSymbolDrawableUBOName;
     static const StringIdentity idSymbolDynamicUBOName;

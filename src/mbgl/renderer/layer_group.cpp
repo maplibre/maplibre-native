@@ -18,10 +18,10 @@ void LayerGroupBase::addDrawable(gfx::UniqueDrawable& drawable) {
     }
 }
 
-void LayerGroupBase::runTweakers(const RenderTree& renderTree, PaintParameters& parameters) {
+void LayerGroupBase::runTweakers(const RenderTree&, PaintParameters& parameters) {
     for (auto it = layerTweakers.begin(); it != layerTweakers.end();) {
         if (auto tweaker = it->lock()) {
-            tweaker->execute(*this, renderTree, parameters);
+            tweaker->execute(*this, parameters);
             ++it;
         } else {
             it = layerTweakers.erase(it);
