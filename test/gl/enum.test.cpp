@@ -148,6 +148,7 @@ TEST(GL, TexturePixelType) {
 TEST(GL, TextureChannelDataType) {
     ASSERT_EQ(TextureChannelDataType::UnsignedByte, enumIdentity(TextureChannelDataType::UnsignedByte));
     ASSERT_EQ(TextureChannelDataType::HalfFloat, enumIdentity(TextureChannelDataType::HalfFloat));
+    ASSERT_EQ(TextureChannelDataType::Float, enumIdentity(TextureChannelDataType::Float));
 
     ASSERT_EQ(GL_INVALID_ENUM, Enum<TextureChannelDataType>::to(static_cast<TextureChannelDataType>(-1)));
     ASSERT_EQ(TextureChannelDataType{}, Enum<TextureChannelDataType>::from(GL_RGBA8));
@@ -160,4 +161,13 @@ TEST(GL, RenderbufferPixelType) {
 
     ASSERT_EQ(GL_INVALID_ENUM, Enum<RenderbufferPixelType>::to(static_cast<RenderbufferPixelType>(-1)));
     ASSERT_EQ(RenderbufferPixelType{}, Enum<RenderbufferPixelType>::from(GL_RGBA8));
+}
+
+TEST(GL, sizedFor) {
+    ASSERT_EQ(GL_RGBA, Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::RGBA, TextureChannelDataType::UnsignedByte));
+    ASSERT_EQ(GL_RGBA16F, Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::RGBA, TextureChannelDataType::HalfFloat));
+    ASSERT_EQ(GL_INVALID_ENUM, Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::Alpha, TextureChannelDataType::HalfFloat));
+    ASSERT_EQ(GL_RGBA32F, Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::RGBA, TextureChannelDataType::Float));
+    ASSERT_EQ(GL_INVALID_ENUM, Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::Alpha, TextureChannelDataType::Float));
+    ASSERT_EQ(GL_INVALID_ENUM, Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::RGBA, static_cast<TextureChannelDataType>(-1)));
 }
