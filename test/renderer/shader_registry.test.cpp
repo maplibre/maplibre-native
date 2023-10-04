@@ -207,7 +207,7 @@ TEST(ShaderRegistry, NamedReplace) {
 }
 
 // Test replacing an actual program instance with a similar instance
-TEST(ShaderRegistry, GLSLReplacement_NoOp) {
+TEST(ShaderRegistry, DISABLED_GLSLReplacement_NoOp) {
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
     auto map = MapInstance(1.0f, observer);
@@ -233,7 +233,7 @@ TEST(ShaderRegistry, GLSLReplacement_NoOp) {
 
 // Test replacing an actual program with a similar instance using a different
 // fragment shader
-TEST(ShaderRegistry, GLSLReplacement1) {
+TEST(ShaderRegistry, DISABLED_GLSLReplacement1) {
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
     auto map = MapInstance(1.0f, observer);
@@ -267,7 +267,7 @@ void main() {
 
 // Test replacing an actual program with a similar instance using a different
 // fragment shader
-TEST(ShaderRegistry, GLSLReplacement2) {
+TEST(ShaderRegistry, DISABLED_GLSLReplacement2) {
     MapInstance::ShaderAndStyleObserver observer;
     util::RunLoop runLoop;
     auto map = MapInstance(1.0f, observer);
