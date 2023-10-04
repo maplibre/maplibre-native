@@ -299,9 +299,9 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+static const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
+static const StringIdentity idTexturePosAttribName = stringIndexer().get("a_texture_pos");
+static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,

@@ -31,8 +31,8 @@ static_assert(sizeof(CollisionUBO) == 20 * 4);
 
 } // namespace
 
-const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = StringIndexer::get(CollisionCircleUBOName);
-const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = StringIndexer::get(CollisionBoxUBOName);
+const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = stringIndexer().get(CollisionCircleUBOName);
+const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = stringIndexer().get(CollisionBoxUBOName);
 
 void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                     const RenderTree& renderTree,

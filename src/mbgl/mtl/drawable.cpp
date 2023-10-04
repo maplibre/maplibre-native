@@ -311,7 +311,7 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
             using namespace std::string_literals;
             Log::Warning(
                 Event::General,
-                "Vertex attribute type mismatch: "s + name + " / " + StringIndexer::get(impl->idVertexAttrName));
+                "Vertex attribute type mismatch: "s + name + " / " + stringIndexer().get(impl->idVertexAttrName));
             assert(false);
         }
     }
@@ -380,7 +380,7 @@ void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {
                 const auto tileID = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 const auto tileLabel = util::toString(getID()) + "/" + getName() + "/" + tileID;
                 Log::Error(Event::General,
-                           "bindUniformBuffers: UBO "s + StringIndexer::get(element.first) + " not found on " +
+                           "bindUniformBuffers: UBO "s + stringIndexer().get(element.first) + " not found on " +
                                tileLabel + ". skipping.");
                 assert(false);
                 continue;

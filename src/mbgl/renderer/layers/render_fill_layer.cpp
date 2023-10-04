@@ -46,14 +46,14 @@ constexpr auto FillOutlineShaderName = "FillOutlineShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
-const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
-const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO");
-const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
-const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get("FillOutlinePatternInterpolateUBO");
-const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
+const StringIdentity idFillOutlineInterpolateUBOName = stringIndexer().get("FillOutlineInterpolateUBO");
+const StringIdentity idFillPatternInterpolateUBOName = stringIndexer().get("FillPatternInterpolateUBO");
+const StringIdentity idFillPatternTilePropsUBOName = stringIndexer().get("FillPatternTilePropsUBO");
+const StringIdentity idFillOutlinePatternInterpolateUBOName = stringIndexer().get("FillOutlinePatternInterpolateUBO");
+const StringIdentity idFillOutlinePatternTilePropsUBOName = stringIndexer().get("FillOutlinePatternTilePropsUBO");
 
-const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-const StringIdentity idIconTextureName = StringIndexer::get("u_image");
+const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
+const StringIdentity idIconTextureName = stringIndexer().get("u_image");
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {

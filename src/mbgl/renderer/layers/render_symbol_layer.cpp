@@ -748,13 +748,13 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
-const StringIdentity idDataAttibName = StringIndexer::get("a_data");
-const StringIdentity idPosOffsetAttribName = StringIndexer::get("a_pos_offset");
-const StringIdentity idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
-const StringIdentity idProjPosAttribName = StringIndexer::get("a_projected_pos");
-const StringIdentity idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
-const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
+const StringIdentity idDataAttibName = stringIndexer().get("a_data");
+const StringIdentity idPosOffsetAttribName = stringIndexer().get("a_pos_offset");
+const StringIdentity idPixOffsetAttribName = stringIndexer().get("a_pixeloffset");
+const StringIdentity idProjPosAttribName = stringIndexer().get("a_projected_pos");
+const StringIdentity idFadeOpacityAttribName = stringIndexer().get("a_fade_opacity");
+const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
+const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
 
 std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer,
                                               const bool isText,
@@ -862,11 +862,11 @@ void updateTileDrawable(gfx::Drawable& drawable,
     drawable.setVertexAttributes(std::move(attribs));
 }
 
-const StringIdentity idCollisionPosAttribName = StringIndexer::get("a_pos");
-const StringIdentity idCollisionAnchorPosAttribName = StringIndexer::get("a_anchor_pos");
-const StringIdentity idCollisionExtrudeAttribName = StringIndexer::get("a_extrude");
-const StringIdentity idCollisionPlacedAttribName = StringIndexer::get("a_placed");
-const StringIdentity idCollisionShiftAttribName = StringIndexer::get("a_shift");
+const StringIdentity idCollisionPosAttribName = stringIndexer().get("a_pos");
+const StringIdentity idCollisionAnchorPosAttribName = stringIndexer().get("a_anchor_pos");
+const StringIdentity idCollisionExtrudeAttribName = stringIndexer().get("a_extrude");
+const StringIdentity idCollisionPlacedAttribName = stringIndexer().get("a_placed");
+const StringIdentity idCollisionShiftAttribName = stringIndexer().get("a_shift");
 
 gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer, bool staticCopy) {
     gfx::VertexAttributeArray vertexAttrs;
@@ -1139,7 +1139,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
                 if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                         collisionBoxGroup->getOrCreateShader(
-                            context, {}, StringIndexer::get(idCollisionPosAttribName)))) {
+                            context, {}, stringIndexer().get(idCollisionPosAttribName)))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector(), staticVertexAndAttributes);
@@ -1157,7 +1157,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
                 if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                         collisionCircleGroup->getOrCreateShader(
-                            context, {}, StringIndexer::get(idCollisionPosAttribName)))) {
+                            context, {}, stringIndexer().get(idCollisionPosAttribName)))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector(), staticVertexAndAttributes);
@@ -1355,7 +1355,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     return;
                 }
                 const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(
-                    context, propertiesAsUniforms, StringIndexer::get(idPosOffsetAttribName)));
+                    context, propertiesAsUniforms, stringIndexer().get(idPosOffsetAttribName)));
                 if (!shader) {
                     return;
                 }

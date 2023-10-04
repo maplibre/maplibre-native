@@ -271,8 +271,8 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-const StringIdentity idCircleInterpolateUBOName = StringIndexer::get("CircleInterpolateUBO");
-const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
+const StringIdentity idCircleInterpolateUBOName = stringIndexer().get("CircleInterpolateUBO");
+const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 
 } // namespace
 

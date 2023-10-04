@@ -19,10 +19,7 @@ StringIndexer::StringIndexer() {
 
 StringIdentity StringIndexer::get(std::string_view string) {
     {
-        std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
-
-        const auto& stringToIdentity = instance().stringToIdentity;
-        [[maybe_unused]] const auto& identityToString = instance().identityToString;
+        std::shared_lock<std::shared_mutex> readerLock(sharedMutex);
         assert(stringToIdentity.size() == identityToString.size());
 
         if (const auto it = stringToIdentity.find(string); it != stringToIdentity.end()) {
@@ -31,15 +28,11 @@ StringIdentity StringIndexer::get(std::string_view string) {
     }
 
     {
-        std::unique_lock<std::shared_mutex> writerLock(instance().sharedMutex);
-
-        auto& stringToIdentity = instance().stringToIdentity;
-        auto& identityToString = instance().identityToString;
+        std::unique_lock<std::shared_mutex> writerLock(sharedMutex);
         assert(stringToIdentity.size() == identityToString.size());
 
         if (const auto it = stringToIdentity.find(string); it == stringToIdentity.end()) {
             // this writer to insert
-            auto& buffer = instance().buffer;
             const auto previousCapacity = buffer.capacity();
 
             const StringIdentity id = identityToString.size();
@@ -67,30 +60,32 @@ StringIdentity StringIndexer::get(std::string_view string) {
 }
 
 std::string StringIndexer::get(const StringIdentity id) {
-    std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
+    std::shared_lock<std::shared_mutex> readerLock(sharedMutex);
 
-    const auto& identityToString = instance().identityToString;
     assert(id < identityToString.size());
 
-    return id < identityToString.size() ? (instance().buffer.data() + identityToString[id]) : empty;
+    return id < identityToString.size() ? (buffer.data() + identityToString[id]) : empty;
 }
 
 void StringIndexer::clear() {
-    std::unique_lock<std::shared_mutex> writerLock(instance().sharedMutex);
+    std::unique_lock<std::shared_mutex> writerLock(sharedMutex);
 
-    instance().stringToIdentity.clear();
-    instance().identityToString.clear();
-    instance().buffer.clear();
+    stringToIdentity.clear();
+    identityToString.clear();
+    buffer.clear();
 }
 
 size_t StringIndexer::size() {
-    std::shared_lock<std::shared_mutex> readerLock(instance().sharedMutex);
+    std::shared_lock<std::shared_mutex> readerLock(sharedMutex);
 
-    [[maybe_unused]] auto& stringToIdentity = instance().stringToIdentity;
-    auto& identityToString = instance().identityToString;
     assert(stringToIdentity.size() == identityToString.size());
 
     return identityToString.size();
+}
+
+StringIndexer& stringIndexer() {
+    static StringIndexer inst;
+    return inst;
 }
 
 } // namespace mbgl

@@ -22,12 +22,12 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idCircleDrawableUBOName = StringIndexer::get("CircleDrawableUBO");
-static const StringIdentity idCirclePaintParamsUBOName = StringIndexer::get("CirclePaintParamsUBO");
-static const StringIdentity idCircleEvaluatedPropsUBOName = StringIndexer::get("CircleEvaluatedPropsUBO");
+static const StringIdentity idCircleDrawableUBOName = stringIndexer().get("CircleDrawableUBO");
+static const StringIdentity idCirclePaintParamsUBOName = stringIndexer().get("CirclePaintParamsUBO");
+static const StringIdentity idCircleEvaluatedPropsUBOName = stringIndexer().get("CircleEvaluatedPropsUBO");
 
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-static const StringIdentity idCirclePermutationUBOName = StringIndexer::get("CirclePermutationUBO");
+static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+static const StringIdentity idCirclePermutationUBOName = stringIndexer().get("CirclePermutationUBO");
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
                                  const RenderTree& renderTree,

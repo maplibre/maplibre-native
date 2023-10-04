@@ -384,7 +384,7 @@ public:
                             auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
                             if (!attributeNameID) {
                                 static const std::string attributePrefix = "a_";
-                                attributeNameID = StringIndexer::get(attributePrefix + attributeName.data());
+                                attributeNameID = stringIndexer().get(attributePrefix + attributeName.data());
                             }
 
                             if (auto& attr = getOrAdd(*attributeNameID)) {
