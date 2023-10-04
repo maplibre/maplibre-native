@@ -3,6 +3,7 @@
 #include <mbgl/layermanager/background_layer_factory.hpp>
 #include <mbgl/layermanager/circle_layer_factory.hpp>
 #include <mbgl/layermanager/custom_layer_factory.hpp>
+#include <mbgl/layermanager/custom_drawable_layer_factory.hpp>
 #include <mbgl/layermanager/fill_extrusion_layer_factory.hpp>
 #include <mbgl/layermanager/fill_layer_factory.hpp>
 #include <mbgl/layermanager/heatmap_layer_factory.hpp>
@@ -68,6 +69,9 @@ LayerManagerDefault::LayerManagerDefault() {
 #if !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
     addLayerType(std::make_unique<LocationIndicatorLayerFactory>());
 #endif
+#endif
+#if !defined(MBGL_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
+    addLayerType(std::make_unique<CustomDrawableLayerFactory>());
 #endif
 }
 
