@@ -327,6 +327,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -378,15 +379,16 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
+        propertiesAsUniforms.clear();
         gfx::VertexAttributeArray circleVertexAttrs;
-        auto propertiesAsUniforms = circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
-                                                                                    CircleRadius,
-                                                                                    CircleBlur,
-                                                                                    CircleOpacity,
-                                                                                    CircleStrokeColor,
-                                                                                    CircleStrokeWidth,
-                                                                                    CircleStrokeOpacity>(
-            paintPropertyBinders, evaluated);
+        circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
+                                                        CircleRadius,
+                                                        CircleBlur,
+                                                        CircleOpacity,
+                                                        CircleStrokeColor,
+                                                        CircleStrokeWidth,
+                                                        CircleStrokeOpacity>(
+            paintPropertyBinders, evaluated, propertiesAsUniforms);
 
         if (!circleShaderGroup) {
             continue;
@@ -397,7 +399,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
         if (const auto& attr = circleVertexAttrs.add(idVertexAttribName)) {

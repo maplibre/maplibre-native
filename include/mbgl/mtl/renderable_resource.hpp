@@ -23,7 +23,7 @@ public:
     virtual const mbgl::mtl::RendererBackend& getBackend() const = 0;
     virtual const mbgl::mtl::MTLCommandBufferPtr& getCommandBuffer() const = 0;
     virtual mbgl::mtl::MTLBlitPassDescriptorPtr getUploadPassDescriptor() const = 0;
-    virtual mbgl::mtl::MTLRenderPassDescriptorPtr getRenderPassDescriptor() const = 0;
+    virtual const mbgl::mtl::MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const = 0;
 };
 
 } // namespace mtl

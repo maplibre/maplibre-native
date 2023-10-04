@@ -749,19 +749,21 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
-static const StringIdentity idDataAttibName = StringIndexer::get("a_data");
-static const StringIdentity idPosOffsetAttribName = StringIndexer::get("a_pos_offset");
-static const StringIdentity idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
-static const StringIdentity idProjPosAttribName = StringIndexer::get("a_projected_pos");
-static const StringIdentity idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
-static const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-static const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
+static const auto idDataAttibName = StringIndexer::get("a_data");
+static const auto posOffsetAttribName = "a_pos_offset";
+static const auto idPosOffsetAttribName = StringIndexer::get(posOffsetAttribName);
+static const auto idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
+static const auto idProjPosAttribName = StringIndexer::get("a_projected_pos");
+static const auto idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
+static const auto idTexUniformName = StringIndexer::get("u_texture");
+static const auto idTexIconUniformName = StringIndexer::get("u_texture_icon");
 
-std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer,
-                                              const bool isText,
-                                              const SymbolBucket::PaintProperties& paintProps,
-                                              const SymbolPaintProperties::PossiblyEvaluated& evaluated,
-                                              gfx::VertexAttributeArray& attribs) {
+void updateTileAttributes(const SymbolBucket::Buffer& buffer,
+                          const bool isText,
+                          const SymbolBucket::PaintProperties& paintProps,
+                          const SymbolPaintProperties::PossiblyEvaluated& evaluated,
+                          gfx::VertexAttributeArray& attribs,
+                          std::unordered_set<StringIdentity>& propertiesAsUniforms) {
     if (const auto& attr = attribs.getOrAdd(idPosOffsetAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -801,13 +803,13 @@ std::vector<std::string> updateTileAttributes(const SymbolBucket::Buffer& buffer
                                gfx::AttributeDataType::Float);
     }
 
-    return isText
-               ? attribs
-                     .readDataDrivenPaintProperties<TextOpacity, TextColor, TextHaloColor, TextHaloWidth, TextHaloBlur>(
-                         paintProps.textBinders, evaluated)
-               : attribs
-                     .readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
-                         paintProps.iconBinders, evaluated);
+    if (isText) {
+        attribs.readDataDrivenPaintProperties<TextOpacity, TextColor, TextHaloColor, TextHaloWidth, TextHaloBlur>(
+            paintProps.textBinders, evaluated, propertiesAsUniforms);
+    } else {
+        attribs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
+            paintProps.iconBinders, evaluated, propertiesAsUniforms);
+    }
 }
 
 void updateTileDrawable(gfx::Drawable& drawable,
@@ -817,7 +819,8 @@ void updateTileDrawable(gfx::Drawable& drawable,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                         const TransformState& state,
                         gfx::UniformBufferPtr& textInterpUBO,
-                        gfx::UniformBufferPtr& iconInterpUBO) {
+                        gfx::UniformBufferPtr& iconInterpUBO,
+                        std::unordered_set<StringIdentity>& propertiesAsUniforms) {
     if (!drawable.getData()) {
         return;
     }
@@ -859,7 +862,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // See `Placement::updateBucketDynamicVertices`
 
     gfx::VertexAttributeArray attribs;
-    updateTileAttributes(buffer, isText, paintProps, evaluated, attribs);
+    updateTileAttributes(buffer, isText, paintProps, evaluated, attribs, propertiesAsUniforms);
     drawable.setVertexAttributes(std::move(attribs));
 }
 
@@ -1086,6 +1089,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     collisionBuilder->setColorMode(gfx::ColorMode::alphaBlended());
     collisionBuilder->setVertexAttrNameId(idCollisionPosAttribName);
 
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -1196,8 +1200,16 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 }
 
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-                updateTileDrawable(
-                    drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO);
+                propertiesAsUniforms.clear();
+                updateTileDrawable(drawable,
+                                   context,
+                                   bucket,
+                                   bucketPaintProperties,
+                                   evaluated,
+                                   state,
+                                   textInterpUBO,
+                                   iconInterpUBO,
+                                   propertiesAsUniforms);
             });
 
             // re-create collision drawables
@@ -1281,9 +1293,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto vertexCount = buffer.vertices().elements();
 
+        propertiesAsUniforms.clear();
         gfx::VertexAttributeArray attribs;
-        const auto propertiesAsUniforms = updateTileAttributes(
-            buffer, isText, bucketPaintProperties, evaluated, attribs);
+        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs, propertiesAsUniforms);
         if (layerTweaker) {
             layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
@@ -1355,8 +1367,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 if (!shaderGroup) {
                     return;
                 }
-                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(
-                    context, propertiesAsUniforms, StringIndexer::get(idPosOffsetAttribName)));
+                const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                    shaderGroup->getOrCreateShader(context, propertiesAsUniforms, posOffsetAttribName));
                 if (!shader) {
                     return;
                 }

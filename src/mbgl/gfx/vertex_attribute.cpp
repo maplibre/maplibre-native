@@ -17,7 +17,8 @@ std::size_t VertexAttribute::getCount() const {
     return sharedRawData ? sharedRawData->getRawCount() : items.size();
 }
 
-std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref = nullptr;
+const std::unique_ptr<VertexAttribute> VertexAttributeArray::nullref;
+const std::string VertexAttributeArray::attributePrefix = "a_";
 
 VertexAttributeArray::VertexAttributeArray(VertexAttributeArray&& other)
     : attrs(std::move(other.attrs)) {}

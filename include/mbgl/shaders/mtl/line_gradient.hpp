@@ -14,25 +14,9 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos_normal"},
-        {1, gfx::AttributeDataType::UByte4, 1, "a_data"},
-        {2, gfx::AttributeDataType::Float2, 1, "a_blur"},
-        {3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-        {4, gfx::AttributeDataType::Float2, 1, "a_gapwidth"},
-        {5, gfx::AttributeDataType::Float2, 1, "a_offset"},
-        {6, gfx::AttributeDataType::Float2, 1, "a_width"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(7, true, true, LineGradientUBO),
-        MLN_MTL_UNIFORM_BLOCK(8, true, false, LineGradientPropertiesUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, LineGradientInterpolationUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, true, LinePermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo, 7> attributes;
+    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {

@@ -83,6 +83,12 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+
+        // propertiesAsUniforms isn't recalculated every update, so carry it over
+        if (layerTweaker) {
+            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
+        }
+
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif
@@ -459,6 +465,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
     };
 
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -565,6 +572,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             else if (shaderUniforms.get(idLineSDFInterpolationUBOName)) {
                 drawableUniforms.createOrUpdate(idLineSDFInterpolationUBOName, &lineSDFInterpolationUBO, context);
             }
+
+            // TODO: vertex attributes or `propertiesAsUniforms` updated, is that needed?
         });
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
@@ -572,27 +581,29 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (!evaluated.get<LineDasharray>().from.empty()) {
-            // dash array line (SDF)
-            gfx::VertexAttributeArray vertexAttrs;
-            auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
-                                                                                  LineBlur,
-                                                                                  LineOpacity,
-                                                                                  LineGapWidth,
-                                                                                  LineOffset,
-                                                                                  LineWidth,
-                                                                                  LineFloorWidth>(paintPropertyBinders,
-                                                                                                  evaluated);
-
             if (!lineSDFShaderGroup) {
                 continue;
             }
+
+            // dash array line (SDF)
+            propertiesAsUniforms.clear();
+            gfx::VertexAttributeArray vertexAttrs;
+            vertexAttrs.readDataDrivenPaintProperties<LineColor,
+                                                      LineBlur,
+                                                      LineOpacity,
+                                                      LineGapWidth,
+                                                      LineOffset,
+                                                      LineWidth,
+                                                      LineFloorWidth>(
+                paintPropertyBinders, evaluated, propertiesAsUniforms);
+
             auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
             }
 
             if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("lineSDF", std::move(shader));
@@ -617,27 +628,26 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 ++stats.drawablesAdded;
             }
         } else if (!unevaluated.get<LinePattern>().isUndefined()) {
-            // pattern line
-            gfx::VertexAttributeArray vertexAttrs;
-            paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
-            auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineBlur,
-                                                                                  LineOpacity,
-                                                                                  LineOffset,
-                                                                                  LineGapWidth,
-                                                                                  LineWidth,
-                                                                                  LinePattern>(paintPropertyBinders,
-                                                                                               evaluated);
-
             if (!linePatternShaderGroup) {
                 continue;
             }
+
+            // pattern line
+            paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
+
+            propertiesAsUniforms.clear();
+            gfx::VertexAttributeArray vertexAttrs;
+            vertexAttrs
+                .readDataDrivenPaintProperties<LineBlur, LineOpacity, LineOffset, LineGapWidth, LineWidth, LinePattern>(
+                    paintPropertyBinders, evaluated, propertiesAsUniforms);
+
             auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
             }
 
             if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("linePattern", std::move(shader));
@@ -678,22 +688,23 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
         } else if (!unevaluated.get<LineGradient>().getValue().isUndefined()) {
-            // gradient line
-            gfx::VertexAttributeArray vertexAttrs;
-            auto propertiesAsUniforms =
-                vertexAttrs.readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
-                    paintPropertyBinders, evaluated);
-
             if (!lineGradientShaderGroup) {
                 continue;
             }
+
+            // gradient line
+            propertiesAsUniforms.clear();
+            gfx::VertexAttributeArray vertexAttrs;
+            vertexAttrs.readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
+                paintPropertyBinders, evaluated, propertiesAsUniforms);
+
             auto shader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
             }
 
             if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("lineGradient", std::move(shader));
@@ -731,33 +742,25 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     }
                 }
             }
-
         } else {
-            // simple line
-            gfx::VertexAttributeArray vertexAttrs;
-            const auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<LineColor,
-                                                                                        LineBlur,
-                                                                                        LineOpacity,
-                                                                                        LineGapWidth,
-                                                                                        LineOffset,
-                                                                                        LineWidth>(paintPropertyBinders,
-                                                                                                   evaluated);
-
-            assert(6 == propertiesAsUniforms.size());
-            assert(vertexAttrs.size() == (size_t)std::count_if(propertiesAsUniforms.begin(),
-                                                               propertiesAsUniforms.end(),
-                                                               [](const auto& s) { return s.empty(); }));
-
             if (!lineShaderGroup) {
                 continue;
             }
+
+            // simple line
+            propertiesAsUniforms.clear();
+            gfx::VertexAttributeArray vertexAttrs;
+            vertexAttrs
+                .readDataDrivenPaintProperties<LineColor, LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
+                    paintPropertyBinders, evaluated, propertiesAsUniforms);
+
             auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
             }
 
             if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("line", std::move(shader));
