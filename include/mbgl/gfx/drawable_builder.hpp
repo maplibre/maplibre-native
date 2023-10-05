@@ -249,7 +249,7 @@ protected:
     gfx::Drawable::Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
 
-    struct Impl;
+    class Impl;
     std::unique_ptr<Impl> impl;
 };
 

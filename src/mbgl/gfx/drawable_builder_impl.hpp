@@ -46,8 +46,8 @@ public:
     void setupForPolylines(gfx::DrawableBuilder& builder);
 
 private:
-    class TriangleElement;
-    class Distances;
+    struct TriangleElement;
+    struct Distances;
 
     std::ptrdiff_t e1;
     std::ptrdiff_t e2;
