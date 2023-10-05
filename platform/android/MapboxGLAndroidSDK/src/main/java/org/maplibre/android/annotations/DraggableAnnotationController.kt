@@ -110,6 +110,7 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
                 .toFloat()
         )
         if (geometryUpdate) {
+            (drag.annotation.dragListener as OnAnnotationDragListener<T>?)?.onAnnotationDrag(drag.annotation)
             for (dragListener in drag.annotationManager.getDragListeners()) {
                 dragListener.onAnnotationDrag(drag.annotation)
             }
@@ -127,6 +128,7 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
     @VisibleForTesting
     internal fun <T : KAnnotation<*>> startDragging(dragPair: DragPair<T>): Boolean {
         if (dragPair.annotation.draggable) {
+            (dragPair.annotation.dragListener as OnAnnotationDragListener<T>?)?.onAnnotationDragStarted(dragPair.annotation)
             for (dragListener in dragPair.annotationManager.getDragListeners()) {
                 dragListener.onAnnotationDragStarted(dragPair.annotation)
             }
@@ -139,6 +141,7 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
     @VisibleForTesting
     internal fun <T : KAnnotation<*>> stopDragging(dragPair: DragPair<T>?) {
         if (dragPair != null) {
+            (dragPair.annotation.dragListener as OnAnnotationDragListener<T>?)?.onAnnotationDragFinished(dragPair.annotation)
             for (d in dragPair.annotationManager.getDragListeners()) {
                 d.onAnnotationDragFinished(dragPair.annotation)
             }
