@@ -14,9 +14,9 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {};
-    static constexpr UniformBlockInfo uniforms[] = {};
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo, 0> attributes;
+    static const std::array<UniformBlockInfo, 0> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 )";

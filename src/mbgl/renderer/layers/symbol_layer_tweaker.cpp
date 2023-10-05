@@ -19,6 +19,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/symbol_icon.hpp>
+#include <mbgl/shaders/mtl/symbol_sdf.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -92,11 +93,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
 #if MLN_RENDER_BACKEND_METAL
     if (permutationUpdated) {
         const SymbolPermutationUBO permutationUBO = {
-            /* .fill_color = */ {/*.source=*/getAttributeSource("a_fill_color"), /*.expression=*/{}},
-            /* .halo_color = */ {/*.source=*/getAttributeSource("a_halo_color"), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource("a_opacity"), /*.expression=*/{}},
-            /* .halo_width = */ {/*.source=*/getAttributeSource("a_halo_width"), /*.expression=*/{}},
-            /* .halo_blur = */ {/*.source=*/getAttributeSource("a_halo_blur"), /*.expression=*/{}},
+            /* .fill_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(5), /*.expression=*/{}},
+            /* .halo_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(6), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(7), /*.expression=*/{}},
+            /* .halo_width = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(8), /*.expression=*/{}},
+            /* .halo_blur = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(9), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,

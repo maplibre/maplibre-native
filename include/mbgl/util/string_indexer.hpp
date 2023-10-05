@@ -11,7 +11,7 @@
 
 namespace mbgl {
 
-using StringIdentity = size_t;
+using StringIdentity = std::size_t;
 
 class StringIndexer {
 public:

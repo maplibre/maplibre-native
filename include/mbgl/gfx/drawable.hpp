@@ -134,7 +134,7 @@ public:
     bool getEnableStencil() const { return enableStencil; }
 
     /// Set stencil usage
-    void setEnableStencil(bool value) { enableStencil = value; }
+    virtual void setEnableStencil(bool value) { enableStencil = value; }
 
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
@@ -142,19 +142,19 @@ public:
 
     /// Whether to enable depth testing
     bool getEnableDepth() { return enableDepth; }
-    void setEnableDepth(bool value) { enableDepth = value; }
+    virtual void setEnableDepth(bool value) { enableDepth = value; }
 
     /// Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
 
     /// Set sub-layer index
-    void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
+    virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
     /// Set depth type
-    void setDepthType(DepthMaskType value) { depthType = value; }
+    virtual void setDepthType(DepthMaskType value) { depthType = value; }
 
     /// Uses 3D depth mode
     bool getIs3D() const { return is3D; }

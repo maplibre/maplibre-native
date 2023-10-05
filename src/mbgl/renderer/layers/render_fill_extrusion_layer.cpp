@@ -341,6 +341,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -412,16 +413,17 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        gfx::VertexAttributeArray vertexAttrs;
-        const auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
-                                                                                    FillExtrusionColor,
-                                                                                    FillExtrusionHeight,
-                                                                                    FillExtrusionPattern>(binders,
-                                                                                                          evaluated);
-
         if (!shaderGroup) {
             continue;
         }
+
+        gfx::VertexAttributeArray vertexAttrs;
+        propertiesAsUniforms.clear();
+        vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
+                                                  FillExtrusionColor,
+                                                  FillExtrusionHeight,
+                                                  FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
+
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
         if (!shader) {
@@ -429,7 +431,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
         // The non-pattern path in `render()` only uses two-pass rendering if there's translucency.

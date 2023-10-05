@@ -60,20 +60,15 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    using ShaderClass = shaders::ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
     if (permutationUpdated) {
-        const auto source = [this](const std::string_view& attrName) {
-            return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-        };
-
         const CirclePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-            /* .radius = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/source(ShaderClass::attributes[3].name), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/source(ShaderClass::attributes[4].name), /*.expression=*/{}},
-            /* .stroke_color = */ {/*.source=*/source(ShaderClass::attributes[5].name), /*.expression=*/{}},
-            /* .stroke_width = */ {/*.source=*/source(ShaderClass::attributes[6].name), /*.expression=*/{}},
-            /* .stroke_opacity = */ {/*.source=*/source(ShaderClass::attributes[7].name), /*.expression=*/{}},
+            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(1), /*.expression=*/{}},
+            /* .radius = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(2), /*.expression=*/{}},
+            /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(3), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(4), /*.expression=*/{}},
+            /* .stroke_color = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(5), /*.expression=*/{}},
+            /* .stroke_width = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(6), /*.expression=*/{}},
+            /* .stroke_opacity = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(7), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,

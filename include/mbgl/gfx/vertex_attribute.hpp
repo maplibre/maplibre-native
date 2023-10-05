@@ -11,6 +11,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -365,9 +366,15 @@ public:
     }
 
     /// Specialized DataDrivenPaintProperty reader
+    /// @param binders Property binders for the target shader
+    /// @param evaluated Evaluated properties
+    /// @param propertiesAsUniforms [out] A set of string identities for the properties which will be constant, not
+    /// attributes.
+    /// @details The property name IDs refer to the "a\_" prefixed values to match the shader definitions.
     template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
-    std::vector<std::string> readDataDrivenPaintProperties(const Binders& binders, const Evaluated& evaluated) {
-        std::vector<std::string> propertiesAsUniforms;
+    void readDataDrivenPaintProperties(const Binders& binders,
+                                       const Evaluated& evaluated,
+                                       std::unordered_set<StringIdentity>& propertiesAsUniforms) {
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (
             [&](const auto& attributeNames) {
@@ -378,15 +385,14 @@ public:
                         using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
                         using InterpType = ZoomInterpolatedAttributeType<Type>;
 
+                        auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
+                        if (!attributeNameID) {
+                            attributeNameID = stringIndexer().get(attributePrefix + attributeName.data());
+                        }
+
                         const auto vertexCount = binder->getVertexCount();
                         const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
                         if (vertexCount > 0 && !isConstant) {
-                            auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
-                            if (!attributeNameID) {
-                                static const std::string attributePrefix = "a_";
-                                attributeNameID = stringIndexer().get(attributePrefix + attributeName.data());
-                            }
-
                             if (auto& attr = getOrAdd(*attributeNameID)) {
                                 if (const auto& sharedVector = binder->getSharedVertexVector()) {
                                     const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
@@ -403,15 +409,13 @@ public:
                                     }
                                 }
                             }
-                            propertiesAsUniforms.emplace_back(std::string());
                         } else {
-                            propertiesAsUniforms.emplace_back(attributeName);
+                            propertiesAsUniforms.emplace(*attributeNameID);
                         }
                     }
                 }
             }(DataDrivenPaintProperty::AttributeNames),
             ...);
-        return propertiesAsUniforms;
     }
 
     /// Copy another collection into this one
@@ -436,7 +440,8 @@ protected:
 
 protected:
     AttributeMap attrs;
-    static std::unique_ptr<VertexAttribute> nullref;
+    static const std::unique_ptr<VertexAttribute> nullref;
+    static const std::string attributePrefix;
 };
 
 } // namespace gfx
