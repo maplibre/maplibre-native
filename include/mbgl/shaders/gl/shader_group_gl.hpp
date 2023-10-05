@@ -42,7 +42,7 @@ public:
         additionalDefines.reserve(propertiesAsUniforms.size() * 48);
         for (const auto nameID : propertiesAsUniforms) {
             // We expect the names to be prefixed by "a_", but we need just the base here.
-            const auto prefixedAttrName = StringIndexer::get(nameID);
+            const auto prefixedAttrName = stringIndexer().get(nameID);
             const auto* prefix = prefixedAttrName.data();
             if (prefix[0] == 'a' && prefix[1] == '_') {
                 prefix += 2;

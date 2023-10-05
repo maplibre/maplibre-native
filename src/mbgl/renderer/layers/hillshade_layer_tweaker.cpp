@@ -15,8 +15,8 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHillshadeDrawableUBOName = StringIndexer::get("HillshadeDrawableUBO");
-static const StringIdentity idHillshadeEvaluatedPropsUBOName = StringIndexer::get("HillshadeEvaluatedPropsUBO");
+static const StringIdentity idHillshadeDrawableUBOName = stringIndexer().get("HillshadeDrawableUBO");
+static const StringIdentity idHillshadeEvaluatedPropsUBOName = stringIndexer().get("HillshadeEvaluatedPropsUBO");
 
 std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
     const LatLng latlng0 = LatLng(id);

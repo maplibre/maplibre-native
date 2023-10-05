@@ -65,7 +65,9 @@ public:
 
     /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
     /// attributes.
+    /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
     void setPropertiesAsUniforms(const std::unordered_set<StringIdentity>&);
+    const std::unordered_set<StringIdentity>& getPropertiesAsUniforms() const;
 
     void enableOverdrawInspector(bool);
 
@@ -99,9 +101,12 @@ protected:
     std::unordered_set<StringIdentity> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
 
+    // Indicates that the evaluated properties have changed
     bool propertiesUpdated = true;
 
-    bool propertiesChanged = true;
+    // Indicates that the properties-as-uniforms has changed
+    bool permutationUpdated = true;
+
     bool overdrawInspector = false;
 };
 

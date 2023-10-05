@@ -14,7 +14,7 @@ repos:
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-  rev: v1.6.25.9
+  rev: v1.6.26.11
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]

@@ -13,7 +13,7 @@ namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
-      vertexAttrNameId(StringIndexer::get("a_pos")),
+      vertexAttrNameId(stringIndexer().get("a_pos")),
       renderPass(mbgl::RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 

@@ -157,6 +157,7 @@ void PaintParameters::clearTileClippingMasks() {
     }
 }
 
+#if MLN_RENDER_BACKEND_METAL
 namespace {
 const auto clipMaskStencilMode = gfx::StencilMode{
     /*.test=*/gfx::StencilMode::Always(),
@@ -167,11 +168,12 @@ const auto clipMaskStencilMode = gfx::StencilMode{
     /*.pass=*/gfx::StencilOpType::Replace,
 };
 const auto clipMaskDepthMode = gfx::DepthMode{
-    .func = gfx::DepthFunctionType::Always,
-    .mask = gfx::DepthMaskType::ReadOnly,
-    .range = {0, 1},
+    /*.func=*/gfx::DepthFunctionType::Always,
+    /*.mask=*/gfx::DepthMaskType::ReadOnly,
+    /*.range=*/{0, 1},
 };
 } // namespace
+#endif // MLN_RENDER_BACKEND_METAL
 
 template <typename TIter>
 void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&& f, bool clear) {

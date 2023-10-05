@@ -22,12 +22,12 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idCircleDrawableUBOName = StringIndexer::get("CircleDrawableUBO");
-static const StringIdentity idCirclePaintParamsUBOName = StringIndexer::get("CirclePaintParamsUBO");
-static const StringIdentity idCircleEvaluatedPropsUBOName = StringIndexer::get("CircleEvaluatedPropsUBO");
+static const StringIdentity idCircleDrawableUBOName = stringIndexer().get("CircleDrawableUBO");
+static const StringIdentity idCirclePaintParamsUBOName = stringIndexer().get("CirclePaintParamsUBO");
+static const StringIdentity idCircleEvaluatedPropsUBOName = stringIndexer().get("CircleEvaluatedPropsUBO");
 
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-static const StringIdentity idCirclePermutationUBOName = StringIndexer::get("CirclePermutationUBO");
+static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+static const StringIdentity idCirclePermutationUBOName = stringIndexer().get("CirclePermutationUBO");
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -58,7 +58,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const CirclePermutationUBO permutationUBO = {
             /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(1), /*.expression=*/{}},
             /* .radius = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(2), /*.expression=*/{}},
@@ -79,7 +79,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
 
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);

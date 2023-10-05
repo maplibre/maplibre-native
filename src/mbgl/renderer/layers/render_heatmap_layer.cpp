@@ -280,10 +280,10 @@ namespace {
 
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-static const StringIdentity idHeatmapInterpolateUBOName = StringIndexer::get("HeatmapInterpolateUBO");
-static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
-static const StringIdentity idTexColorRampName = StringIndexer::get("u_color_ramp");
+const StringIdentity idHeatmapInterpolateUBOName = stringIndexer().get("HeatmapInterpolateUBO");
+const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
+const StringIdentity idTexImageName = stringIndexer().get("u_image");
+const StringIdentity idTexColorRampName = stringIndexer().get("u_color_ramp");
 
 } // namespace
 
@@ -376,35 +376,51 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         const float zoom = static_cast<float>(state.getZoom());
-        const HeatmapInterpolateUBO interpolateUBO = {
-            /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
-            /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
-            /* .padding = */ {0}};
 
-        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+        gfx::UniformBufferPtr interpolateBuffer;
+        const auto getInterpolateBuffer = [&]() {
+            if (!interpolateBuffer) {
+                const HeatmapInterpolateUBO interpolateUBO = {
+                    /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
+                    /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
+                    /* .padding = */ {0}};
+                interpolateBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
             }
-            drawable.mutableUniformBuffers().createOrUpdate(idHeatmapInterpolateUBOName, &interpolateUBO, context);
-        });
-
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
-            continue;
-        }
+            return interpolateBuffer;
+        };
 
         gfx::VertexAttributeArray heatmapVertexAttrs;
         propertiesAsUniforms.clear();
         heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
             paintPropertyBinders, evaluated, propertiesAsUniforms);
 
-        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
-        if (!heatmapShader) {
+        if (layerTweaker) {
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+        }
+
+        const auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return;
+            }
+
+            // We assume vertex attributes don't change, and so don't update them to avoid re-uploading
+            // drawable.setVertexAttributes(heatmapVertexAttrs);
+
+            auto& uniforms = drawable.mutableUniformBuffers();
+
+            if (auto buffer = getInterpolateBuffer()) {
+                uniforms.addOrReplace(idHeatmapInterpolateUBOName, std::move(buffer));
+            }
+        });
+
+        if (updatedCount > 0) {
             continue;
         }
 
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
+        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        if (!heatmapShader) {
+            continue;
         }
 
         if (const auto& attr = heatmapVertexAttrs.add(idVertexAttribName)) {
@@ -433,7 +449,11 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
 
-            drawable->mutableUniformBuffers().createOrUpdate(idHeatmapInterpolateUBOName, &interpolateUBO, context);
+            auto& uniforms = drawable->mutableUniformBuffers();
+
+            if (auto buffer = getInterpolateBuffer()) {
+                uniforms.addOrReplace(idHeatmapInterpolateUBOName, std::move(buffer));
+            }
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

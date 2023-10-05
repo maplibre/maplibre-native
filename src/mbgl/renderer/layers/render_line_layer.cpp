@@ -47,8 +47,8 @@ inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
 
 #if MLN_DRAWABLE_RENDERER
 
-static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos_normal");
-static const StringIdentity idDataAttribName = StringIndexer::get("a_data");
+const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
+const StringIdentity idDataAttribName = stringIndexer().get("a_data");
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -83,6 +83,12 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+
+        // propertiesAsUniforms isn't recalculated every update, so carry it over
+        if (layerTweaker) {
+            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
+        }
+
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif
@@ -351,15 +357,15 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 
 #if MLN_DRAWABLE_RENDERER
 /// Property interpolation UBOs
-static const StringIdentity idLineInterpolationUBOName = StringIndexer::get("LineInterpolationUBO");
-static const StringIdentity idLineGradientInterpolationUBOName = StringIndexer::get("LineGradientInterpolationUBO");
-static const StringIdentity idLinePatternInterpolationUBOName = StringIndexer::get("LinePatternInterpolationUBO");
-static const StringIdentity idLineSDFInterpolationUBOName = StringIndexer::get("LineSDFInterpolationUBO");
+static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
+static const StringIdentity idLineGradientInterpolationUBOName = stringIndexer().get("LineGradientInterpolationUBO");
+static const StringIdentity idLinePatternInterpolationUBOName = stringIndexer().get("LinePatternInterpolationUBO");
+static const StringIdentity idLineSDFInterpolationUBOName = stringIndexer().get("LineSDFInterpolationUBO");
 
 /// Evaluated properties that depend on the tile
-static const StringIdentity idLinePatternTilePropertiesUBOName = StringIndexer::get("LinePatternTilePropertiesUBO");
+static const StringIdentity idLinePatternTilePropertiesUBOName = stringIndexer().get("LinePatternTilePropertiesUBO");
 
-static const StringIdentity idLineImageUniformName = StringIndexer::get("u_image");
+static const StringIdentity idLineImageUniformName = stringIndexer().get("u_image");
 
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
@@ -470,6 +476,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
+        if (!bucket.sharedTriangles->elements()) {
+            removeTile(renderPass, tileID);
+            continue;
+        }
+
         const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
@@ -561,6 +572,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             else if (shaderUniforms.get(idLineSDFInterpolationUBOName)) {
                 drawableUniforms.createOrUpdate(idLineSDFInterpolationUBOName, &lineSDFInterpolationUBO, context);
             }
+
+            // TODO: vertex attributes or `propertiesAsUniforms` updated, is that needed?
         });
 
         if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {

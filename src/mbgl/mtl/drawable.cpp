@@ -331,7 +331,7 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
             using namespace std::string_literals;
             Log::Warning(
                 Event::General,
-                "Vertex attribute type mismatch: "s + name + " / " + StringIndexer::get(impl->idVertexAttrName));
+                "Vertex attribute type mismatch: "s + name + " / " + stringIndexer().get(impl->idVertexAttrName));
             assert(false);
         }
     }
@@ -400,7 +400,7 @@ void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {
                 const auto tileID = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 const auto tileLabel = util::toString(getID()) + "/" + getName() + "/" + tileID;
                 Log::Error(Event::General,
-                           "bindUniformBuffers: UBO "s + StringIndexer::get(element.first) + " not found on " +
+                           "bindUniformBuffers: UBO "s + stringIndexer().get(element.first) + " not found on " +
                                tileLabel + ". skipping.");
                 assert(false);
                 continue;
@@ -540,7 +540,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& context = static_cast<Context&>(contextBase);
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
-    if (!impl->indexes || !impl->indexes->bytes()) {
+    // We need either raw index data or a buffer already created from them.
+    // We can have a buffer and no indexes, but only if it's not marked dirty.
+    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || impl->indexes->getDirty()))) {
         assert(!"Missing index data");
         return;
     }

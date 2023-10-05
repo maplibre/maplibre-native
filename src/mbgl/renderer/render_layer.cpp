@@ -86,7 +86,7 @@ void RenderLayer::replaceTweaker(LayerTweakerPtr& curTweaker,
 
             group->visitDrawables([&](gfx::Drawable& drawable) {
                 if (drawable.getLayerTweaker() == prevTweaker) {
-                    drawable.setLayerTweaker(curTweaker);
+                    drawable.setLayerTweaker(newTweaker);
                 }
             });
         }
@@ -187,6 +187,7 @@ std::size_t RenderLayer::removeAllDrawables() {
 
 void RenderLayer::updateRenderTileIDs() {
     const auto oldMap = std::move(renderTileIDs);
+    renderTileIDs = std::unordered_map<OverscaledTileID, util::SimpleIdentity>{};
     if (renderTiles) {
         renderTileIDs.reserve(renderTiles->size());
         for (const auto& tile : *renderTiles) {

@@ -31,7 +31,7 @@ shaders::AttributeInfo::AttributeInfo(std::size_t index_,
       dataType(dataType_),
       count(count_),
       name(name_),
-      nameID(StringIndexer::get(name_)) {}
+      nameID(stringIndexer().get(name_)) {}
 
 shaders::UniformBlockInfo::UniformBlockInfo(
     std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::string_view name_)
@@ -40,12 +40,12 @@ shaders::UniformBlockInfo::UniformBlockInfo(
       fragment(fragment_),
       size(size_),
       name(name_),
-      nameID(StringIndexer::get(name_)) {}
+      nameID(stringIndexer().get(name_)) {}
 
 shaders::TextureInfo::TextureInfo(std::size_t index_, std::string_view name_)
     : index(index_),
       name(name_),
-      nameID(StringIndexer::get(name_)) {}
+      nameID(stringIndexer().get(name_)) {}
 
 namespace mtl {
 namespace {
@@ -206,7 +206,7 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
         [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    vertexAttributes.add(StringIndexer::get(info.name), index, info.dataType, info.count);
+    vertexAttributes.add(stringIndexer().get(info.name), index, info.dataType, info.count);
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
@@ -217,7 +217,7 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
         [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    if (const auto& block_ = uniformBlocks.add(StringIndexer::get(info.name), index, info.size)) {
+    if (const auto& block_ = uniformBlocks.add(stringIndexer().get(info.name), index, info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);
@@ -225,7 +225,7 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
 }
 
 void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
-    textureBindings[StringIndexer::get(info.name.data())] = info.index;
+    textureBindings[stringIndexer().get(info.name.data())] = info.index;
 }
 
 } // namespace mtl

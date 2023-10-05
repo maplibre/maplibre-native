@@ -11,6 +11,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
+#include <mbgl/util/logging.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layers/raster_layer_tweaker.hpp>
@@ -245,10 +246,10 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     changeLayerIndex(imageLayerGroup, newLayerIndex, changes);
 }
 
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
-static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
-static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
+static const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
+static const StringIdentity idTexturePosAttribName = stringIndexer().get("a_texture_pos");
+static const StringIdentity idTexImage0Name = stringIndexer().get("u_image0");
+static const StringIdentity idTexImage1Name = stringIndexer().get("u_image1");
 
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
@@ -313,33 +314,51 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         return builder;
     };
 
-    const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, const RasterBucket& bucket) {
+    const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, RasterBucket& bucket) {
         if (bucket.image && (rasterSampler0 || rasterSampler1)) {
-            if (auto tex = context.createTexture2D()) {
+            if (!bucket.texture2d) {
+                if (auto tex = context.createTexture2D()) {
+                    tex->setImage(bucket.image);
+                    bucket.texture2d = std::move(tex);
+                }
+            }
+
+            if (bucket.texture2d) {
                 const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
                 const bool nearest = evaluated.get<RasterResampling>() == RasterResamplingType::Nearest;
                 const auto filter = nearest ? gfx::TextureFilterType::Nearest : gfx::TextureFilterType::Linear;
 
-                tex->setImage(bucket.image);
-                tex->setSamplerConfiguration({filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                bucket.texture2d->setSamplerConfiguration(
+                    {filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
                 if (rasterSampler0) {
-                    builder->setTexture(tex, *rasterSampler0);
+                    builder->setTexture(bucket.texture2d, *rasterSampler0);
                 }
                 if (rasterSampler1) {
-                    builder->setTexture(std::move(tex), *rasterSampler1);
+                    builder->setTexture(bucket.texture2d, *rasterSampler1);
                 }
             }
         }
     };
 
-    // Build vertex attributes and apply them to a drawable or a builder
+    // Build vertex attributes and apply them to a drawable or a builder.
+    // Populates a drawable xor a drawable builder for creates and updates, respectively.
+    // Returns false if the drawable must be re-created.
     const auto buildVertexData =
         [this](const gfx::UniqueDrawableBuilder& builder, gfx::Drawable* drawable, const RasterBucket& bucket) {
-            const bool shared = (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty());
+            // The bucket only fills in geometry for masked tiles,
+            // otherwise the standard tile extent geometry should be used.
+            const bool shared = (!bucket.sharedVertices->empty() && !bucket.sharedTriangles->empty() &&
+                                 !bucket.segments.empty());
             const auto& vertices = shared ? bucket.sharedVertices : staticDataVertices;
             const auto& indices = shared ? bucket.sharedTriangles : staticDataIndices;
             const auto* segments = shared ? &bucket.segments : staticDataSegments.get();
+
+            // The bucket may later add, remove, or change masking.  In that case, the tile's
+            // shared data and segments are not updated, and it needs to be re-created.
+            if (drawable && (bucket.sharedVertices->getDirty() || bucket.sharedTriangles->getDirty())) {
+                return false;
+            }
 
             gfx::VertexAttributeArray vertexAttrs;
             if (auto& attr = vertexAttrs.add(idPosAttribName)) {
@@ -358,6 +377,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
+            assert(!!drawable ^ !!builder);
             if (drawable) {
                 drawable->setVertexAttributes(std::move(vertexAttrs));
             } else if (builder) {
@@ -365,6 +385,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
                 builder->setSegments(gfx::Triangles(), indices, segments->data(), segments->size());
             }
+            return true;
         };
 
     gfx::UniqueDrawableBuilder builder;
@@ -402,16 +423,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     } else if (renderTiles) {
-        // Update existing drawables, returns the number of drawables found for the tile
-        const auto updateTileDrawables = [&](auto* tileLayerGroup, const auto& tileID, const RasterBucket& bucket) {
-            return tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
-                if (drawable.getLayerTweaker() == layerTweaker) {
-                    gfx::UniqueDrawableBuilder none;
-                    buildVertexData(none, &drawable, bucket);
-                }
-            });
-        };
-
         // Remove existing drawables that are no longer in the cover set
         if (layerGroup) {
             stats.drawablesRemoved += layerGroup->removeDrawablesIf(
@@ -429,14 +440,14 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         for (const RenderTile& tile : *renderTiles) {
             const auto& tileID = tile.getOverscaledTileID();
 
-            const auto* bucket_ = tile.getBucket(*baseImpl);
+            auto* bucket_ = tile.getBucket(*baseImpl);
             if (!bucket_ || !bucket_->hasData()) {
                 removeTile(renderPass, tileID);
                 continue;
             }
 
             bool cleared = false;
-            const auto& bucket = static_cast<const RasterBucket&>(*bucket_);
+            auto& bucket = static_cast<RasterBucket&>(*bucket_);
 
             // If the bucket data has changed, rebuild the drawables.
             const bool bucketSharedData = (!bucket.vertices.empty() && !bucket.indices.empty() &&
@@ -452,9 +463,24 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 cleared = true;
             }
 
-            // If there are any drawables left for this tile, update them.
-            if (!cleared && 0 < updateTileDrawables(tileLayerGroup, tileID, bucket)) {
-                continue;
+            if (!cleared) {
+                // Update existing drawables
+                bool geometryChanged = false;
+                const auto updated = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                    gfx::UniqueDrawableBuilder none;
+                    if (!geometryChanged && !buildVertexData(none, &drawable, bucket)) {
+                        // Masking changed, need to rebuild this tile
+                        geometryChanged = true;
+                    }
+                });
+
+                if (geometryChanged) {
+                    removeTile(renderPass, tileID);
+                    // cleared = true;
+                } else if (0 < updated) {
+                    // If we modified drawables without removing them, we're done with this tile.
+                    continue;
+                }
             }
 
             // Otherwise, create new ones.

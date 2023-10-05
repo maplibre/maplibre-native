@@ -32,7 +32,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
-#include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -749,14 +748,14 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
-static const auto idDataAttibName = StringIndexer::get("a_data");
-static const auto posOffsetAttribName = "a_pos_offset";
-static const auto idPosOffsetAttribName = StringIndexer::get(posOffsetAttribName);
-static const auto idPixOffsetAttribName = StringIndexer::get("a_pixeloffset");
-static const auto idProjPosAttribName = StringIndexer::get("a_projected_pos");
-static const auto idFadeOpacityAttribName = StringIndexer::get("a_fade_opacity");
-static const auto idTexUniformName = StringIndexer::get("u_texture");
-static const auto idTexIconUniformName = StringIndexer::get("u_texture_icon");
+const auto idDataAttibName = stringIndexer().get("a_data");
+const auto posOffsetAttribName = "a_pos_offset";
+const auto idPosOffsetAttribName = stringIndexer().get(posOffsetAttribName);
+const auto idPixOffsetAttribName = stringIndexer().get("a_pixeloffset");
+const auto idProjPosAttribName = stringIndexer().get("a_projected_pos");
+const auto idFadeOpacityAttribName = stringIndexer().get("a_fade_opacity");
+const auto idTexUniformName = stringIndexer().get("u_texture");
+const auto idTexIconUniformName = stringIndexer().get("u_texture_icon");
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const bool isText,
@@ -866,11 +865,11 @@ void updateTileDrawable(gfx::Drawable& drawable,
     drawable.setVertexAttributes(std::move(attribs));
 }
 
-static const StringIdentity idCollisionPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idCollisionAnchorPosAttribName = StringIndexer::get("a_anchor_pos");
-static const StringIdentity idCollisionExtrudeAttribName = StringIndexer::get("a_extrude");
-static const StringIdentity idCollisionPlacedAttribName = StringIndexer::get("a_placed");
-static const StringIdentity idCollisionShiftAttribName = StringIndexer::get("a_shift");
+const StringIdentity idCollisionPosAttribName = stringIndexer().get("a_pos");
+const StringIdentity idCollisionAnchorPosAttribName = stringIndexer().get("a_anchor_pos");
+const StringIdentity idCollisionExtrudeAttribName = stringIndexer().get("a_extrude");
+const StringIdentity idCollisionPlacedAttribName = stringIndexer().get("a_placed");
+const StringIdentity idCollisionShiftAttribName = stringIndexer().get("a_shift");
 
 gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer, bool staticCopy) {
     gfx::VertexAttributeArray vertexAttrs;
@@ -1144,7 +1143,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
                 if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                         collisionBoxGroup->getOrCreateShader(
-                            context, {}, StringIndexer::get(idCollisionPosAttribName)))) {
+                            context, {}, stringIndexer().get(idCollisionPosAttribName)))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector(), staticVertexAndAttributes);
@@ -1162,7 +1161,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
                 if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                         collisionCircleGroup->getOrCreateShader(
-                            context, {}, StringIndexer::get(idCollisionPosAttribName)))) {
+                            context, {}, stringIndexer().get(idCollisionPosAttribName)))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector(), staticVertexAndAttributes);
@@ -1272,6 +1271,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto tileID = tile.id.overscaleTo(renderable.overscaledZ);
         const auto& bucket = static_cast<const SymbolBucket&>(*renderable.renderData.bucket);
         const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
+
+        if (!buffer.sharedTriangles->elements()) {
+            continue;
+        }
 
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
