@@ -38,8 +38,7 @@ class Symbol @JvmOverloads constructor(
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOfNotNull(icon?.flattenedValues, text?.flattenedValues).flatten() +
             listOf(
-                PROPERTY_SYMBOL_SORT_KEY to zLayer default Defaults.Z_LAYER,
-                PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE
+                PROPERTY_SYMBOL_SORT_KEY to zLayer default Defaults.Z_LAYER
             )
 
     override fun getOffsetGeometry(

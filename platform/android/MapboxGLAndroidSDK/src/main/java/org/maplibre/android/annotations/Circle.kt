@@ -55,9 +55,7 @@ class Circle @JvmOverloads constructor(
 
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
-            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_CIRCLE_SORT_KEY to zLayer default Defaults.Z_LAYER,
-            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_CIRCLE_RADIUS to radius default Defaults.CIRCLE_RADIUS,
             PROPERTY_CIRCLE_COLOR to color.asColorString() default Defaults.CIRCLE_COLOR.asColorString(),
             PROPERTY_CIRCLE_BLUR to blur default Defaults.CIRCLE_BLUR,

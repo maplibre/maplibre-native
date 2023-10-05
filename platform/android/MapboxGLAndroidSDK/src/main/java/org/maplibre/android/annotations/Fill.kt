@@ -51,7 +51,6 @@ class Fill @JvmOverloads constructor(
     override var geometry: Polygon = Polygon.fromLngLats(paths.map { it.map { Point.fromLngLat(it.longitude, it.latitude) } })
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
-            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_FILL_SORT_KEY to zLayer default Defaults.Z_LAYER,
             PROPERTY_FILL_OPACITY to opacity default Defaults.FILL_OPACITY,
             PROPERTY_FILL_COLOR to color.asColorString() default Defaults.FILL_COLOR.asColorString(),

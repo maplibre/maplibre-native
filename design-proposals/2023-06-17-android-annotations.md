@@ -41,7 +41,7 @@ Here we can observe a negative leak of internal implementation details – that 
 
 This proposal facilitates exactly the second, easier version →(G5 **learnability**) →(G6 **ease**), without compromising the ability to build upon our `*Manager` classes →(G2 **frictionless migration**) →(G4 **power**).
 
-Users should be able to set click, drag and long-click listeners directly on annotations and not only on managers. Any manager listeners that consume the event should have priority.
+Users should be able to set click, drag and long-click listeners directly on annotations and not only on managers. Any annotation listeners that consume the event should have priority.
 
 A second advantage is that the user need not worry about multiple managers for different types of objects. For instance, when adding a polygon as well as a marker, they would need to handle a `SymbolManger` as well as a `FillManager`.
 

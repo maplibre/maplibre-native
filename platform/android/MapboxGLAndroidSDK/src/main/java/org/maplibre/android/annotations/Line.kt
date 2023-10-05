@@ -80,7 +80,6 @@ class Line @JvmOverloads constructor(
 
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
-            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_LINE_SORT_KEY to zLayer default Defaults.Z_LAYER,
             PROPERTY_LINE_JOIN to join.toString().lowercase() default Defaults.LINE_JOIN.toString().lowercase(),
             PROPERTY_LINE_OPACITY to opacity default Defaults.LINE_OPACITY,

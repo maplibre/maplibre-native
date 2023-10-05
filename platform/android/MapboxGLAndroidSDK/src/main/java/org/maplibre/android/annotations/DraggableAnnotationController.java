@@ -55,12 +55,12 @@ final class DraggableAnnotationController {
   @Nullable
   private AnnotationManager draggedAnnotationManager;
 
-  @SuppressLint("ClickableViewAccessibility")
   DraggableAnnotationController(MapView mapView, MapLibreMap maplibreMap) {
     this(mapView, maplibreMap, new AndroidGesturesManager(mapView.getContext(), false),
       mapView.getScrollX(), mapView.getScrollY(), mapView.getMeasuredWidth(), mapView.getMeasuredHeight());
   }
 
+  @SuppressLint("ClickableViewAccessibility")
   @VisibleForTesting
   public DraggableAnnotationController(MapView mapView, MapLibreMap maplibreMap,
                                        final AndroidGesturesManager androidGesturesManager,

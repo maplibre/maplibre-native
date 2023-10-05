@@ -99,8 +99,4 @@ sealed class KAnnotation<T : Geometry>(
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
     ): Geometry?
-
-    companion object {
-        internal const val PROPERTY_IS_DRAGGABLE = "is-draggable"
-    }
 }
