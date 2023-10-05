@@ -53,7 +53,7 @@ public:
     gfx::StencilMode stencilMode;
     gfx::CullFaceMode cullFaceMode;
     // GLfloat pointSize = 0.0f;
-    StringIdentity idVertexAttrName = StringIndexer::get("a_pos");
+    StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
 
     gfx::UniqueVertexBufferResource noBindingBuffer;
 

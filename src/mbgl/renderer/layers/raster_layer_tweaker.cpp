@@ -17,7 +17,7 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idRasterDrawableUBOName = StringIndexer::get("RasterDrawableUBO");
+static const StringIdentity idRasterDrawableUBOName = stringIndexer().get("RasterDrawableUBO");
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const RenderTree& renderTree,

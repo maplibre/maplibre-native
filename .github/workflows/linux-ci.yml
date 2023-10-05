@@ -39,11 +39,11 @@ jobs:
             ".bazelrc",
             ".bazelversion"]
 
-  linux-build:
+  linux-build-and-test:
     if: needs.pre_job.outputs.should_skip != 'true'
     needs: pre_job
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         renderer: [legacy, drawable]
     runs-on: MapLibre_Native_Linux_16_core
@@ -77,12 +77,13 @@ jobs:
             libjpeg-dev \
             libpng-dev \
             libglfw3-dev \
-            libwebp-dev
+            libwebp-dev \
+            libopengl0
 
-      - if: ${{ matrix.renderer }} == "drawable"
+      - if: matrix.renderer == 'drawable'
         run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
 
-      - if: ${{ matrix.renderer }} == "legacy"
+      - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
 
       - name: Build MapLibre Native Core
@@ -98,95 +99,20 @@ jobs:
         with:
           category: "/language:cpp"
 
-      - name: Archive mbgl-test-runner
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-test-runner
-          path: build/mbgl-test-runner
-          retention-days: 1
+      # unit tests
 
-      - name: Archive mbgl-render-test-runner
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-render-test-runner
-          path: build/mbgl-render-test-runner
-          retention-days: 1
-
-      - name: Archive mbgl-expression-test
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-expression-test
-          path: build/expression-test/mbgl-expression-test
-          retention-days: 1
-
-  linux-test:
-    if: needs.pre_job.outputs.should_skip != 'true'
-    needs:
-      - pre_job
-      - linux-build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
-
-      - name: Download mbgl-test-runner
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-test-runner
-
-      - run: chmod +x ./mbgl-test-runner
+      - run: chmod +x build/mbgl-test-runner
 
       - name: Run C++ tests
-        run: xvfb-run -a ./mbgl-test-runner
+        run: xvfb-run -a build/mbgl-test-runner
 
-  linux-expression-test:
-    if: needs.pre_job.outputs.should_skip != 'true'
-    needs:
-      - pre_job
-      - linux-build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download mbgl-expression-test
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-expression-test
+      # render tests
 
-      - run: chmod +x ./mbgl-expression-test
-
-      - name: Run expression test
-        run: ./mbgl-expression-test
-
-  linux-render-test:
-    if: needs.pre_job.outputs.should_skip != 'true'
-    needs:
-      - pre_job
-      - linux-build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
-
-      - uses: actions/checkout@v4
-
-      - name: Download mbgl-render-test-runner
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-render-test-runner
-
-      - run: chmod +x ./mbgl-render-test-runner
+      - run: chmod +x build/mbgl-render-test-runner
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -195,6 +121,13 @@ jobs:
           name: render-test-result
           path: |
             metrics/linux-gcc8-release-style.html
+      
+      # expression tests
+
+      - run: chmod +x build/expression-test/mbgl-expression-test
+
+      - name: Run expression test
+        run: build/expression-test/mbgl-expression-test
 
   linux-coverage:
     runs-on: ubuntu-22.04
@@ -254,11 +187,9 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - pre_job
-      - linux-build
-      - linux-test
-      - linux-render-test
+      - linux-build-and-test
       - linux-coverage
     steps:
       - name: Mark result as failed
-        if: needs.linux-build.result != 'success' || needs.linux-test.result != 'success' || needs.linux-render-test.result != 'success' || needs.linux-coverage.result != 'success'
+        if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
         run: exit 1

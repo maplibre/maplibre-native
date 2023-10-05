@@ -24,40 +24,41 @@ namespace mbgl {
 
 using namespace style;
 
-static const StringIdentity idFillDrawableUBOName = StringIndexer::get("FillDrawableUBO");
-static const StringIdentity idFillDrawablePropsUBOName = StringIndexer::get("FillDrawablePropsUBO");
-static const StringIdentity idFillEvaluatedPropsUBOName = StringIndexer::get("FillEvaluatedPropsUBO");
-static const StringIdentity idFillPermutationUBOName = StringIndexer::get("FillPermutationUBO");
+static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
+static const StringIdentity idFillDrawablePropsUBOName = stringIndexer().get("FillDrawablePropsUBO");
+static const StringIdentity idFillEvaluatedPropsUBOName = stringIndexer().get("FillEvaluatedPropsUBO");
+static const StringIdentity idFillPermutationUBOName = stringIndexer().get("FillPermutationUBO");
 
-const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = StringIndexer::get("FillDrawableTilePropsUBO");
-const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = StringIndexer::get("FillInterpolateUBO");
-const StringIdentity FillLayerTweaker::idFillOutlineInterpolateUBOName = StringIndexer::get(
+const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = stringIndexer().get("FillDrawableTilePropsUBO");
+const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = stringIndexer().get("FillInterpolateUBO");
+const StringIdentity FillLayerTweaker::idFillOutlineInterpolateUBOName = stringIndexer().get(
     "FillOutlineInterpolateUBO");
 
-static const StringIdentity idFillOutlineDrawableUBOName = StringIndexer::get("FillOutlineDrawableUBO");
-static const StringIdentity idFillOutlineEvaluatedPropsUBOName = StringIndexer::get("FillOutlineEvaluatedPropsUBO");
-static const StringIdentity idFillOutlinePermutationUBOName = StringIndexer::get("FillOutlinePermutationUBO");
+static const StringIdentity idFillOutlineDrawableUBOName = stringIndexer().get("FillOutlineDrawableUBO");
+static const StringIdentity idFillOutlineEvaluatedPropsUBOName = stringIndexer().get("FillOutlineEvaluatedPropsUBO");
+static const StringIdentity idFillOutlinePermutationUBOName = stringIndexer().get("FillOutlinePermutationUBO");
 
-static const StringIdentity idFillOutlineInterpolateUBOName = StringIndexer::get("FillOutlineInterpolateUBO");
+static const StringIdentity idFillOutlineInterpolateUBOName = stringIndexer().get("FillOutlineInterpolateUBO");
 
-static const StringIdentity idFillPatternDrawableUBOName = StringIndexer::get("FillPatternDrawableUBO");
-static const StringIdentity idFillPatternPermutationUBOName = StringIndexer::get("FillPatternPermutationUBO");
-static const StringIdentity idFillPatternInterpolateUBOName = StringIndexer::get("FillPatternInterpolateUBO");
-static const StringIdentity idFillPatternEvaluatedPropsUBOName = StringIndexer::get("FillPatternEvaluatedPropsUBO");
-static const StringIdentity idFillPatternTilePropsUBOName = StringIndexer::get("FillPatternTilePropsUBO");
+static const StringIdentity idFillPatternDrawableUBOName = stringIndexer().get("FillPatternDrawableUBO");
+static const StringIdentity idFillPatternPermutationUBOName = stringIndexer().get("FillPatternPermutationUBO");
+static const StringIdentity idFillPatternInterpolateUBOName = stringIndexer().get("FillPatternInterpolateUBO");
+static const StringIdentity idFillPatternEvaluatedPropsUBOName = stringIndexer().get("FillPatternEvaluatedPropsUBO");
+static const StringIdentity idFillPatternTilePropsUBOName = stringIndexer().get("FillPatternTilePropsUBO");
 
-static const StringIdentity idFillOutlinePatternDrawableUBOName = StringIndexer::get("FillOutlinePatternDrawableUBO");
-static const StringIdentity idFillOutlinePatternPermutationUBOName = StringIndexer::get(
+static const StringIdentity idFillOutlinePatternDrawableUBOName = stringIndexer().get("FillOutlinePatternDrawableUBO");
+static const StringIdentity idFillOutlinePatternPermutationUBOName = stringIndexer().get(
     "FillOutlinePatternPermutationUBO");
-static const StringIdentity idFillOutlinePatternInterpolateUBOName = StringIndexer::get(
+static const StringIdentity idFillOutlinePatternInterpolateUBOName = stringIndexer().get(
     "FillOutlinePatternInterpolateUBO");
-static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = StringIndexer::get(
+static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = stringIndexer().get(
     "FillOutlinePatternEvaluatedPropsUBO");
-static const StringIdentity idFillOutlinePatternTilePropsUBOName = StringIndexer::get("FillOutlinePatternTilePropsUBO");
+static const StringIdentity idFillOutlinePatternTilePropsUBOName = stringIndexer().get(
+    "FillOutlinePatternTilePropsUBO");
 
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
 
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
