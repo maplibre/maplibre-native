@@ -1,7 +1,6 @@
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/storage/resource_options.hpp>
@@ -11,6 +10,9 @@
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/run_loop.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+
+#include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_tweaker.hpp>
@@ -214,3 +216,5 @@ TEST(CustomDrawableLayer, Basic) {
     // render and test
     test::checkImage("test/fixtures/custom_drawable_layer/basic", frontend.render(map).image, 0.0006, 0.1);
 }
+
+#endif // MLN_DRAWABLE_RENDERER
