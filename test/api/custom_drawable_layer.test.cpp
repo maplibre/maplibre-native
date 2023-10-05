@@ -27,34 +27,10 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/util/string_indexer.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/mat4.hpp>
 
 using namespace mbgl;
 using namespace mbgl::style;
 
-namespace {
-mat4 getTileMatrix(const UnwrappedTileID& tileID,
-                   const PaintParameters& parameters,
-                   const std::array<float, 2>& translation,
-                   style::TranslateAnchorType anchor,
-                   bool nearClipped,
-                   bool inViewportPixelUnits,
-                   bool aligned) {
-    // from RenderTile::prepare
-    mat4 tileMatrix;
-    parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
-
-    const auto& transformParams = parameters.transformParams;
-    // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
-    const auto& projMatrix = aligned
-                                 ? transformParams.alignedProjMatrix
-                                 : (nearClipped ? transformParams.nearClippedProjMatrix : transformParams.projMatrix);
-    matrix::multiply(tileMatrix, projMatrix, tileMatrix);
-
-    return RenderTile::translateVtxMatrix(
-        tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
-}
-} // namespace
 class TestDrawableTweaker : public gfx::DrawableTweaker {
 public:
     TestDrawableTweaker() {}
@@ -72,7 +48,7 @@ public:
         mat4 tileMatrix;
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
-        const auto matrix = getTileMatrix(
+        const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
         static const StringIdentity idLineUBOName = StringIndexer::get("LineUBO");
@@ -83,7 +59,7 @@ public:
             /*device_pixel_ratio = */ parameters.pixelRatio};
 
         static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO");
-        const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/Color::red(),
+        const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/Color(1.f, 0.f, 1.f, 1.f),
                                                            /*blur =*/0.f,
                                                            /*opacity =*/1.f,
                                                            /*gapwidth =*/0.f,
@@ -109,7 +85,7 @@ public:
     };
 };
 
-class TestLayer : public mbgl::style::CustomDrawableLayerHost {
+class TestDrawableLayer : public mbgl::style::CustomDrawableLayerHost {
 public:
     void initialize() override {}
 
@@ -146,7 +122,7 @@ public:
         if (layerGroup->getDrawableCount()) return;
 
         // create drawable(s)
-        const OverscaledTileID tileID{10, 163, 395};
+        const OverscaledTileID tileID{11, 327, 791};
 
         auto createLineBuilder = [&](const std::string& name,
                                      gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
@@ -176,12 +152,11 @@ public:
         auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         auto builder = createLineBuilder("thick-lines", shader);
 
-        auto layerGroup_ = context.createTileLayerGroup(0, /*initialCapacity=*/1, "tlg");
-        auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup_.get());
+        auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
         // add polylines
         const auto size{util::EXTENT};
-        GeometryCoordinates geom{{0, 0}, {size, 0}, {size / 2, size / 2}};
+        GeometryCoordinates geom{{0, 0}, {size, 0}, {0, size}, {size, size}, {size / 3, size / 3}};
 
         gfx::DrawableBuilder::PolylineOptions options;
         options.beginCap = style::LineCapType::Round;
@@ -219,14 +194,21 @@ TEST(CustomDrawableLayer, Basic) {
             MapObserver::nullObserver(),
             MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
             ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
+    
+    // load style
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
-    map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
-    map.getStyle().addLayer(std::make_unique<CustomDrawableLayer>("custom-drawable", std::make_unique<TestLayer>()));
+    map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.4426032}).withZoom(10.0));
 
+    // add fill layer
     auto layer = std::make_unique<FillLayer>("landcover", "mapbox");
     layer->setSourceLayer("landcover");
     layer->setFillColor(Color{1.0, 1.0, 0.0, 1.0});
     map.getStyle().addLayer(std::move(layer));
 
+    // add custom drawable layer
+    map.getStyle().addLayer(
+        std::make_unique<CustomDrawableLayer>("custom-drawable", std::make_unique<TestDrawableLayer>()));
+
+    // render and test
     test::checkImage("test/fixtures/custom_drawable_layer/basic", frontend.render(map).image, 0.0006, 0.1);
 }
