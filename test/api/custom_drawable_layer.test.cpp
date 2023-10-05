@@ -128,18 +128,12 @@ public:
      * @param renderTree
      * @param changes
      */
-    void update(RenderLayer& proxyLayer,
-                gfx::ShaderRegistry& shaders,
-                gfx::Context& context,
-                [[maybe_unused]] const TransformState& state,
-                [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
-                [[maybe_unused]] const RenderTree& renderTree,
-                UniqueChangeRequestVec& changes) override {
+    void update(RenderLayer& proxyLayer, const Parameters& parameters) override {
         // Set up a layer group
         if (!layerGroup) {
-            if (auto layerGroup_ = context.createTileLayerGroup(
+            if (auto layerGroup_ = parameters.context.createTileLayerGroup(
                     /*layerIndex*/ proxyLayer.getLayerIndex(), /*initialCapacity=*/2, proxyLayer.getID())) {
-                changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
+                parameters.changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
                 layerGroup = std::move(layerGroup_);
             }
         }
@@ -154,7 +148,7 @@ public:
 
         auto createLineBuilder = [&](const std::string& name,
                                      gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
-            std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
+            std::unique_ptr<gfx::DrawableBuilder> builder = parameters.context.createDrawableBuilder(name);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setSubLayerIndex(0);
             builder->setEnableDepth(false);
@@ -166,7 +160,7 @@ public:
             return builder;
         };
 
-        gfx::ShaderGroupPtr lineShaderGroup = shaders.getShaderGroup("LineShader");
+        gfx::ShaderGroupPtr lineShaderGroup = parameters.shaders.getShaderGroup("LineShader");
 
         const std::unordered_set<StringIdentity> propertiesAsUniforms{
             stringIndexer().get("a_color"),
@@ -177,7 +171,7 @@ public:
             stringIndexer().get("a_width"),
         };
 
-        auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        auto shader = lineShaderGroup->getOrCreateShader(parameters.context, propertiesAsUniforms);
         auto builder = createLineBuilder("thick-lines", shader);
 
         auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());

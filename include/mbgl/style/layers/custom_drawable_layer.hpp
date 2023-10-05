@@ -15,17 +15,21 @@ namespace style {
 
 class CustomDrawableLayerHost {
 public:
+    struct Parameters {
+        gfx::ShaderRegistry &shaders;
+        gfx::Context &context;
+        const TransformState &state;
+        const std::shared_ptr<UpdateParameters> &updateParameters;
+        const RenderTree &renderTree;
+        UniqueChangeRequestVec &changes;
+    };
+
+public:
     virtual ~CustomDrawableLayerHost() = default;
 
     virtual void initialize() = 0;
 
-    virtual void update(RenderLayer& proxyLayer,
-                        gfx::ShaderRegistry& shaders,
-                        gfx::Context& context,
-                        const TransformState& state,
-                        const std::shared_ptr<UpdateParameters>&,
-                        const RenderTree& renderTree,
-                        UniqueChangeRequestVec& changes) = 0;
+    virtual void update(RenderLayer& proxyLayer, const Parameters& parameters) = 0;
 
     virtual void deinitialize() = 0;
 };
