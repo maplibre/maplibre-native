@@ -41,12 +41,12 @@ class Symbol @JvmOverloads constructor(
                 PROPERTY_SYMBOL_SORT_KEY to zLayer default Defaults.Z_LAYER
             )
 
-    override fun getOffsetGeometry(
+    override fun offsetGeometry(
         projection: Projection,
         moveDistancesObject: MoveDistancesObject,
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
-    ): Geometry? {
+    ): Boolean {
         val pointF = PointF(
             moveDistancesObject.currentX - touchAreaShiftX,
             moveDistancesObject.currentY - touchAreaShiftY
@@ -56,7 +56,11 @@ class Symbol @JvmOverloads constructor(
             null
         } else {
             Point.fromLngLat(latLng.longitude, latLng.latitude)
-        }
+        }?.let {
+            geometry = it
+            updateThis()
+            true
+        } ?: false
     }
 
     companion object {

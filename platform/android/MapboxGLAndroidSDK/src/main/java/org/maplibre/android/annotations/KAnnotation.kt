@@ -93,10 +93,16 @@ sealed class KAnnotation<T : Geometry>(
         }
     }
 
-    abstract fun getOffsetGeometry(
+    /**
+     * Applies the given offset to the internal geometry, and applies this new Geometry to the annotation
+     * itself. Afterwards, the annotation updates.
+     *
+     * @return True iff the geometry update was applied successfully.
+     */
+    internal abstract fun offsetGeometry(
         projection: Projection,
         moveDistancesObject: MoveDistancesObject,
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
-    ): Geometry?
+    ): Boolean
 }

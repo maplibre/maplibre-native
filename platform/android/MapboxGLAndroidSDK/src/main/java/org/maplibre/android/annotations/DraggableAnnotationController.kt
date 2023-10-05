@@ -9,6 +9,7 @@ import androidx.annotation.VisibleForTesting
 import com.mapbox.android.gestures.AndroidGesturesManager
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.android.gestures.MoveGestureDetector.OnMoveGestureListener
+import com.mapbox.geojson.Geometry
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 
@@ -21,7 +22,7 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
     touchAreaShiftY: Int,
     touchAreaMaxX: Int,
     touchAreaMaxY: Int
-) {
+) : OnMoveGestureListener {
     private var mapView: MapView?
     private var maplibreMap: MapLibreMap?
     private val annotationManagers: MutableList<AnnotationManager<*, *>> = ArrayList()
@@ -29,8 +30,7 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
     private val touchAreaShiftY: Int
     private val touchAreaMaxX: Int
     private val touchAreaMaxY: Int
-    private var draggedAnnotation: KAnnotation<*>? = null
-    private var draggedAnnotationManager: AnnotationManager<*, *>? = null
+    private var dragPair: DragPair<*>? = null
 
     constructor(mapView: MapView, maplibreMap: MapLibreMap?) : this(
         mapView, maplibreMap, AndroidGesturesManager(mapView.context, false),
@@ -44,12 +44,12 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
         this.touchAreaShiftY = touchAreaShiftY
         this.touchAreaMaxX = touchAreaMaxX
         this.touchAreaMaxY = touchAreaMaxY
-        androidGesturesManager.setMoveGestureListener(AnnotationMoveGestureListener())
+        androidGesturesManager.setMoveGestureListener(this)
         mapView.setOnTouchListener { v: View?, event: MotionEvent? ->
             // Using active gesture manager
-            val oldAnnotation = draggedAnnotation
+            val oldPair = dragPair
             androidGesturesManager.onTouchEvent(event)
-            draggedAnnotation != null || oldAnnotation != null
+            dragPair != null || oldPair != null
         }
     }
 
@@ -64,105 +64,97 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
         }
     }
 
-    fun onAnnotationDeleted(annotation: KAnnotation<*>) {
-        if (annotation === draggedAnnotation) {
-            stopDragging(draggedAnnotation, draggedAnnotationManager)
+    fun <T : KAnnotation<*>> onAnnotationDeleted(annotation: T) {
+        val dragPair = dragPair
+        if (annotation === dragPair?.annotation) {
+            stopDragging(dragPair)
         }
     }
 
-    fun onMoveBegin(detector: MoveGestureDetector): Boolean {
-        for (annotationManager in annotationManagers) {
-            if (detector.pointersCount == 1) {
-                val annotation = annotationManager.queryMapForFeatures(detector.focalPoint)
-                if (annotation != null && startDragging(annotation, annotationManager)) {
-                    return true
-                }
+    override fun onMoveBegin(detector: MoveGestureDetector): Boolean = annotationManagers.any { onMoveBegin(detector, it) }
+
+    private fun <T : KAnnotation<*>> onMoveBegin(
+        detector: MoveGestureDetector, annotationManager: AnnotationManager<*, T>
+    ): Boolean {
+        if (detector.pointersCount == 1) {
+            annotationManager.queryMapForFeatures(detector.focalPoint)?.let { annotation ->
+                return startDragging(
+                    DragPair(annotation, annotationManager)
+                )
             }
         }
         return false
     }
 
-    fun onMove(detector: MoveGestureDetector): Boolean {
-        if (draggedAnnotation != null && (detector.pointersCount > 1 || !draggedAnnotation!!.draggable)) {
+    override fun onMove(detector: MoveGestureDetector, distanceX: Float, distanceY: Float): Boolean =
+        dragPair?.let { onMove(detector, it) } ?: false
+
+    private fun <T : KAnnotation<*>> onMove(detector: MoveGestureDetector, drag: DragPair<T>): Boolean {
+        if (detector.pointersCount > 1 || !drag.annotation.draggable) {
             // Stopping the drag when we don't work with a simple, on-pointer move anymore
-            stopDragging(draggedAnnotation, draggedAnnotationManager)
+            stopDragging(drag)
             return true
         }
 
         // Updating symbol's position
-        if (draggedAnnotation != null) {
-            val moveObject = detector.getMoveObject(0)
-            val x = moveObject.currentX - touchAreaShiftX
-            val y = moveObject.currentY - touchAreaShiftY
-            val pointF = PointF(x, y)
-            if (pointF.x < 0 || pointF.y < 0 || pointF.x > touchAreaMaxX || pointF.y > touchAreaMaxY) {
-                stopDragging(draggedAnnotation, draggedAnnotationManager)
-                return true
+        val moveObject = detector.getMoveObject(0)
+        val x = moveObject.currentX - touchAreaShiftX
+        val y = moveObject.currentY - touchAreaShiftY
+        val pointF = PointF(x, y)
+        if (pointF.x < 0 || pointF.y < 0 || pointF.x > touchAreaMaxX || pointF.y > touchAreaMaxY) {
+            stopDragging(drag)
+            return true
+        }
+        val geometryUpdate = drag.annotation.offsetGeometry(
+            maplibreMap!!.projection, moveObject, touchAreaShiftX.toFloat(), touchAreaShiftY
+                .toFloat()
+        )
+        if (geometryUpdate) {
+            for (dragListener in drag.annotationManager.getDragListeners()) {
+                dragListener.onAnnotationDrag(drag.annotation)
             }
-            val shiftedGeometry = draggedAnnotation!!.getOffsetGeometry(
-                maplibreMap!!.projection, moveObject, touchAreaShiftX.toFloat(), touchAreaShiftY
-                    .toFloat()
-            )
-            if (shiftedGeometry != null) {
-                draggedAnnotation!!.geometry = shiftedGeometry
-                draggedAnnotationManager!!.updateSource()
-                for (d in draggedAnnotationManager!!.getDragListeners()) {
-                    d.onAnnotationDrag(draggedAnnotation)
-                }
-                return true
-            }
+            return true
         }
         return false
+
     }
 
-    fun onMoveEnd() {
+    override fun onMoveEnd(detector: MoveGestureDetector, velocityX: Float, velocityY: Float) {
         // Stopping the drag when move ends
-        stopDragging(draggedAnnotation, draggedAnnotationManager)
+        stopDragging(dragPair)
     }
 
-    fun startDragging(annotation: KAnnotation<*>, annotationManager: AnnotationManager<*, *>): Boolean {
-        if (annotation.draggable) {
-            for (d in annotationManager.getDragListeners()) {
-                d.onAnnotationDragStarted(annotation)
+    private fun <T : KAnnotation<*>> startDragging(dragPair: DragPair<T>): Boolean {
+        if (dragPair.annotation.draggable) {
+            for (dragListener in dragPair.annotationManager.getDragListeners()) {
+                dragListener.onAnnotationDragStarted(dragPair.annotation)
             }
-            draggedAnnotation = annotation
-            draggedAnnotationManager = annotationManager
+            this.dragPair = dragPair
             return true
         }
         return false
     }
 
-    fun stopDragging(annotation: KAnnotation<*>?, annotationManager: AnnotationManager<*, *>?) {
-        if (annotation != null && annotationManager != null) {
-            for (d in annotationManager.getDragListeners()) {
-                d.onAnnotationDragFinished(annotation)
+    private fun <T : KAnnotation<*>> stopDragging(dragPair: DragPair<T>?) {
+        if (dragPair != null) {
+            for (d in dragPair.annotationManager.getDragListeners()) {
+                d.onAnnotationDragFinished(dragPair.annotation)
             }
         }
-        draggedAnnotation = null
-        draggedAnnotationManager = null
-    }
-
-    private inner class AnnotationMoveGestureListener : OnMoveGestureListener {
-        override fun onMoveBegin(detector: MoveGestureDetector): Boolean {
-            return this@DraggableAnnotationController.onMoveBegin(detector)
-        }
-
-        override fun onMove(detector: MoveGestureDetector, distanceX: Float, distanceY: Float): Boolean {
-            return this@DraggableAnnotationController.onMove(detector)
-        }
-
-        override fun onMoveEnd(detector: MoveGestureDetector, velocityX: Float, velocityY: Float) {
-            this@DraggableAnnotationController.onMoveEnd()
-        }
+        this.dragPair = null
     }
 
     companion object {
         private var INSTANCE: DraggableAnnotationController? = null
-        fun getInstance(mapView: MapView, maplibreMap: MapLibreMap): DraggableAnnotationController? {
-            if (INSTANCE == null || INSTANCE!!.mapView !== mapView || INSTANCE!!.maplibreMap != maplibreMap) {
-                INSTANCE = DraggableAnnotationController(mapView, maplibreMap)
+
+        fun getInstance(mapView: MapView, maplibreMap: MapLibreMap): DraggableAnnotationController = INSTANCE.let {
+            if (it == null || it.mapView !== mapView || it.maplibreMap != maplibreMap) {
+                DraggableAnnotationController(mapView, maplibreMap).also { newInstance ->
+                    INSTANCE = newInstance
+                }
+            } else {
+                it
             }
-            return INSTANCE
         }
 
         private fun clearInstance() {
@@ -173,4 +165,10 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
             }
         }
     }
+
+    private data class DragPair<T : KAnnotation<*>>(
+        val annotation: T,
+        val annotationManager: AnnotationManager<*, T>
+    )
+
 }

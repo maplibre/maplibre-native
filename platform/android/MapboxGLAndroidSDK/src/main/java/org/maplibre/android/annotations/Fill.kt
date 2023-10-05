@@ -59,12 +59,12 @@ class Fill @JvmOverloads constructor(
             PROPERTY_FILL_PATTERN to pattern default Defaults.FILL_PATTERN
         )
 
-    override fun getOffsetGeometry(
+    override fun offsetGeometry(
         projection: Projection,
         moveDistancesObject: MoveDistancesObject,
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
-    ): Geometry? =
+    ): Boolean =
         geometry.coordinates().map { innerList ->
             innerList.map {
                 val pointF = projection.toScreenLocation(LatLng(it.latitude(), it.longitude())).apply {
@@ -74,11 +74,15 @@ class Fill @JvmOverloads constructor(
 
                 val latLng = projection.fromScreenLocation(pointF)
                 if (latLng.latitude > MAX_MERCATOR_LATITUDE || latLng.latitude < MIN_MERCATOR_LATITUDE) {
-                    return null
+                    return false
                 }
                 Point.fromLngLat(latLng.longitude, latLng.latitude)
             }
-        }.let { Polygon.fromLngLats(it) }
+        }.let { Polygon.fromLngLats(it) }?.let {
+                geometry = it
+                updateThis()
+                true
+            } ?: false
 
     init {
         if (opacity > 1f || opacity < 0f) {

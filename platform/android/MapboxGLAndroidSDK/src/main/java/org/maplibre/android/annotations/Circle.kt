@@ -71,12 +71,12 @@ class Circle @JvmOverloads constructor(
         }
     }
 
-    override fun getOffsetGeometry(
+    override fun offsetGeometry(
         projection: Projection,
         moveDistancesObject: MoveDistancesObject,
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
-    ): Geometry? {
+    ): Boolean {
         val pointF = PointF(
             moveDistancesObject.currentX - touchAreaShiftX,
             moveDistancesObject.currentY - touchAreaShiftY
@@ -86,7 +86,11 @@ class Circle @JvmOverloads constructor(
             null
         } else {
             Point.fromLngLat(latLng.longitude, latLng.latitude)
-        }
+        }?.let {
+            geometry = it
+            updateThis()
+            true
+        } ?: false
     }
 
     data class Stroke(
