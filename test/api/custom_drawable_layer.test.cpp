@@ -51,14 +51,14 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
-        static const StringIdentity idLineUBOName = StringIndexer::get("LineUBO");
+        static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
         const shaders::LineUBO lineUBO{
             /*matrix = */ util::cast<float>(matrix),
             /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
             /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
             /*device_pixel_ratio = */ parameters.pixelRatio};
 
-        static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO");
+        static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
         const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/Color(1.f, 0.f, 1.f, 1.f),
                                                            /*blur =*/0.f,
                                                            /*opacity =*/1.f,
@@ -69,7 +69,7 @@ public:
                                                            0,
                                                            0};
 
-        static const StringIdentity idLineInterpolationUBOName = StringIndexer::get("LineInterpolationUBO");
+        static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
         const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
                                                                  /*blur_t =*/0.f,
                                                                  /*opacity_t =*/0.f,
@@ -141,12 +141,12 @@ public:
         gfx::ShaderGroupPtr lineShaderGroup = shaders.getShaderGroup("LineShader");
 
         const std::unordered_set<StringIdentity> propertiesAsUniforms{
-            StringIndexer::get("a_color"),
-            StringIndexer::get("a_blur"),
-            StringIndexer::get("a_opacity"),
-            StringIndexer::get("a_gapwidth"),
-            StringIndexer::get("a_offset"),
-            StringIndexer::get("a_width"),
+            stringIndexer().get("a_color"),
+            stringIndexer().get("a_blur"),
+            stringIndexer().get("a_opacity"),
+            stringIndexer().get("a_gapwidth"),
+            stringIndexer().get("a_offset"),
+            stringIndexer().get("a_width"),
         };
 
         auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);

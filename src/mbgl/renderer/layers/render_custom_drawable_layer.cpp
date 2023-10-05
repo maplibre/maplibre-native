@@ -59,7 +59,7 @@ void RenderCustomDrawableLayer::markContextDestroyed() {
 void RenderCustomDrawableLayer::prepare(const LayerPrepareParameters&) {}
 
 #if MLN_LEGACY_RENDERER
-void RenderCustomDrawableLayer::render(PaintParameters& paintParameters) {}
+void RenderCustomDrawableLayer::render(PaintParameters&) {}
 #endif
 
 #if MLN_DRAWABLE_RENDERER
