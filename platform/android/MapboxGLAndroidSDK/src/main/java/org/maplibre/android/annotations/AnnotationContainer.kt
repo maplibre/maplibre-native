@@ -101,7 +101,10 @@ class KAnnotationContainer(
     private fun MutableMap<Key, AnnotationManager<*, *>>.getOrCreate(key: Key): AnnotationManager<*, *>? =
         get(key) ?: style?.let {
             when (key.type) {
-                Symbol::class -> SymbolManager(mapView, mapLibreMap, it)
+                Symbol::class -> SymbolManager(mapView, mapLibreMap, it).apply {
+                    textAllowOverlap = true
+                    iconAllowOverlap = true
+                }
                 Circle::class -> CircleManager(mapView, mapLibreMap, it)
                 Line::class -> LineManager(mapView, mapLibreMap, it)
                 Fill::class -> FillManager(mapView, mapLibreMap, it)
