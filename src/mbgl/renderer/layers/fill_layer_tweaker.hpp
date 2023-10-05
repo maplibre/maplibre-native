@@ -31,6 +31,12 @@ public:
     static const StringIdentity idFillInterpolateUBOName;
     static const StringIdentity idFillOutlineInterpolateUBOName;
 
+protected:
+    shaders::ExpressionAttribute getAttribute(const StringIdentity attrNameID,
+                                              const std::optional<shaders::Expression>&);
+    shaders::ColorAttribute getAttribute(const StringIdentity attrNameID,
+                                         const std::optional<shaders::ColorExpression>&);
+
 private:
     gfx::UniformBufferPtr fillPropsUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePropsUniformBuffer;
@@ -46,6 +52,7 @@ private:
     gfx::UniformBufferPtr expressionUniformBuffer;
 
     std::optional<shaders::ColorExpression> fillColorExpr;
+    std::optional<shaders::Expression> opacityExpr;
 #endif // MLN_RENDER_BACKEND_METAL
 };
 

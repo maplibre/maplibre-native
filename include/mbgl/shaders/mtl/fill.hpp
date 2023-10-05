@@ -51,12 +51,11 @@ struct alignas(16) FillInterpolateUBO {
 
 struct alignas(16) FillPermutationUBO {
     /*   0 */ ColorAttribute color;
-    /* 352 */ Attribute opacity;
-    /* 360 */ int32_t /*bool*/ overdrawInspector;
-    /* 364 */ float pad1;
-    /* 368 */
+    /* 352 */ ExpressionAttribute opacity;
+    /* 492 */ int32_t /*bool*/ overdrawInspector;
+    /* 496 */
 };
-static_assert(sizeof(FillPermutationUBO) == 23 * 16, "unexpected padding");
+static_assert(sizeof(FillPermutationUBO) == 31 * 16, "unexpected padding");
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillDrawableUBO& drawable [[buffer(3)]],
@@ -65,10 +64,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillPermutationUBO& permutation [[buffer(6)]],
                                 device const ExpressionInputsUBO& expr [[buffer(7)]]) {
 
-    const auto color          = colorFor(permutation.color,          props.color,          vertx.color,                                   expr);
-    const auto opacity        = valueFor(permutation.opacity,        props.opacity,        vertx.opacity,        interp.opacity_t,        expr);
+    const auto color   = colorFor(permutation.color,   props.color,   vertx.color,                     expr);
+    const auto opacity = valueFor(permutation.opacity, props.opacity, vertx.opacity, interp.opacity_t, expr);
 
-    float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
+    const float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
 
     return {
         .position       = position,

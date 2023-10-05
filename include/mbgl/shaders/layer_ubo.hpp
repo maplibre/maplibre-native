@@ -19,28 +19,24 @@ enum class ExpressionFunction : int32_t {
     Exponential,
 };
 
-struct Expression {
-    /* 0 */ ExpressionFunction function;
-    /* 4 */
-};
-static_assert(sizeof(Expression) == 4, "unexpected padding");
-
 struct Attribute {
     /* 0 */ AttributeSource source;
-    /* 4 */ Expression expression;
+    /* 4 */ float pad;
     /* 8 */
 };
 static_assert(sizeof(Attribute) == 8, "unexpected padding");
 
 constexpr int ExprMaxStops = 16;
-struct Expression2 {
+struct Expression {
     /*   0 */ float zooms[ExprMaxStops];
     /*  64 */ float values[ExprMaxStops];
     /* 128 */ ExpressionFunction function;
-    /* 132 */ int32_t stopCount;
+    /* 132 */ uint32_t stopCount : 6;
+    /* 132 */ uint32_t useIntegerZoom : 1;
+    /* 132 */ uint32_t unusedBits : 25;
     /* 136 */
 };
-static_assert(sizeof(Expression2) == 136, "unexpected padding");
+static_assert(sizeof(Expression) == 136, "unexpected padding");
 
 struct alignas(16) ColorExpression {
     /*   0 */ float zooms[ExprMaxStops];
@@ -53,12 +49,12 @@ struct alignas(16) ColorExpression {
 };
 static_assert(sizeof(ColorExpression) == 21 * 16, "unexpected padding");
 
-struct Attribute2 {
-    /*   0 */ Expression2 expression;
+struct ExpressionAttribute {
+    /*   0 */ Expression expression;
     /* 136 */ AttributeSource source;
     /* 140 */
 };
-static_assert(sizeof(Attribute2) == 140, "unexpected padding");
+static_assert(sizeof(ExpressionAttribute) == 140, "unexpected padding");
 
 struct alignas(16) ColorAttribute {
     /*   0 */ ColorExpression expression;

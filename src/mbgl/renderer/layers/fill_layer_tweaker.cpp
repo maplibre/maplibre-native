@@ -63,31 +63,88 @@ static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("Exp
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 using namespace shaders;
 
-bool populateExpression(const Transitioning<PropertyValue<Color>>& colorTransitionProperty,
-                        shaders::ColorExpression& shaderExpr) {
-    if (colorTransitionProperty.isUndefined() || colorTransitionProperty.hasTransition()) {
+bool populateExpression(const Transitioning<PropertyValue<float>>& transitionProperty,
+                        shaders::Expression& shaderExpr) {
+    if (transitionProperty.isUndefined()) {
         // we need two expressions per property to support transitions
         return false;
     }
 
-    const PropertyValue<Color>& colorProperty = colorTransitionProperty.getValue();
-    if (!colorProperty.isExpression()) {
+    if (transitionProperty.hasTransition()) {
+        // We need two expressions per property to support transitions.
+        // But for now, we won't run this again, so just ignore it.
+    }
+
+    const PropertyValue<float>& property = transitionProperty.getValue();
+    if (!property.isExpression()) {
         return false;
     }
 
     // We're only interested in expressions that are "feature-constant" (meaning it doesn't
     // depend on the data, a.k.a., not "data-driven") and "runtime-constant," which seems to
     // be equivalent to "not image-based".
-    const style::PropertyExpression<Color>& colorPropertyExpression = colorProperty.asExpression();
-    const expression::Expression& colorExpression = colorPropertyExpression.getExpression();
-    if (!colorExpression.getType().is<style::expression::type::ColorType>() ||
-        !colorPropertyExpression.isFeatureConstant() || !colorPropertyExpression.isRuntimeConstant()) {
+    const style::PropertyExpression<float>& propertyExpression = property.asExpression();
+    const expression::Expression& expression = propertyExpression.getExpression();
+    if (!expression.getType().is<style::expression::type::NumberType>() || !propertyExpression.isFeatureConstant() ||
+        !propertyExpression.isRuntimeConstant()) {
         return false;
     }
 
     memset(&shaderExpr, 0, sizeof(shaderExpr));
     shaderExpr.function = ExpressionFunction::Linear;
-    shaderExpr.useIntegerZoom = colorPropertyExpression.useIntegerZoom;
+    shaderExpr.useIntegerZoom = propertyExpression.useIntegerZoom;
+
+    bool failed = false;
+    const auto populateStops = [&](double zoom, const expression::Expression& stopExpr) {
+        if (!failed && shaderExpr.stopCount + 1 < shaders::ExprMaxStops &&
+            stopExpr.getType() == style::expression::type::Number && isConstant(stopExpr)) {
+            const style::expression::EvaluationResult result = stopExpr.evaluate(
+                style::expression::EvaluationContext{});
+            if (result && result->is<double>()) {
+                const auto stopValue = result->get<double>();
+                shaderExpr.zooms[shaderExpr.stopCount] = static_cast<float>(zoom);
+                shaderExpr.values[shaderExpr.stopCount] = static_cast<float>(stopValue);
+                shaderExpr.stopCount += 1;
+                return;
+            }
+        }
+        failed = true;
+    };
+
+    if (const auto steps = propertyExpression.getZoomSteps()) {
+        steps->eachStop(populateStops);
+    } else if (auto interp = propertyExpression.getZoomInterplation()) {
+        interp->eachStop(populateStops);
+    }
+
+    return (!failed && shaderExpr.stopCount > 0);
+}
+
+bool populateExpression(const Transitioning<PropertyValue<Color>>& transitionProperty,
+                        shaders::ColorExpression& shaderExpr) {
+    if (transitionProperty.isUndefined() || transitionProperty.hasTransition()) {
+        // we need two expressions per property to support transitions
+        return false;
+    }
+
+    const PropertyValue<Color>& property = transitionProperty.getValue();
+    if (!property.isExpression()) {
+        return false;
+    }
+
+    // We're only interested in expressions that are "feature-constant" (meaning it doesn't
+    // depend on the data, a.k.a., not "data-driven") and "runtime-constant," which seems to
+    // be equivalent to "not image-based".
+    const style::PropertyExpression<Color>& propertyExpression = property.asExpression();
+    const expression::Expression& expression = propertyExpression.getExpression();
+    if (!expression.getType().is<style::expression::type::ColorType>() || !propertyExpression.isFeatureConstant() ||
+        !propertyExpression.isRuntimeConstant()) {
+        return false;
+    }
+
+    memset(&shaderExpr, 0, sizeof(shaderExpr));
+    shaderExpr.function = ExpressionFunction::Linear;
+    shaderExpr.useIntegerZoom = propertyExpression.useIntegerZoom;
 
     bool failed = false;
     const auto populateStops = [&](double zoom, const expression::Expression& stopExpr) {
@@ -109,9 +166,9 @@ bool populateExpression(const Transitioning<PropertyValue<Color>>& colorTransiti
         failed = true;
     };
 
-    if (const auto steps = colorPropertyExpression.getZoomSteps()) {
+    if (const auto steps = propertyExpression.getZoomSteps()) {
         steps->eachStop(populateStops);
-    } else if (auto interp = colorPropertyExpression.getZoomInterplation()) {
+    } else if (auto interp = propertyExpression.getZoomInterplation()) {
         interp->eachStop(populateStops);
     }
 
@@ -119,13 +176,52 @@ bool populateExpression(const Transitioning<PropertyValue<Color>>& colorTransiti
 }
 
 void FillLayerTweaker::buildAttributeExpressions(const style::FillPaintProperties::Unevaluated& unevaluated) {
-    shaders::ColorExpression shaderExpr;
-    if (populateExpression(unevaluated.get<style::FillColor>(), shaderExpr)) {
-        using ShaderClass = shaders::ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
-        const auto attrNameID = ShaderClass::attributes[ShaderClass::a_color_index].nameID;
-        fillColorExpr = shaderExpr;
+    shaders::ColorExpression colorExpr;
+    if (populateExpression(unevaluated.get<style::FillColor>(), colorExpr)) {
+        fillColorExpr = colorExpr;
+    }
+
+    shaders::Expression floatExpr;
+    if (populateExpression(unevaluated.get<style::FillOpacity>(), floatExpr)) {
+        opacityExpr = floatExpr;
     }
 }
+
+shaders::ExpressionAttribute FillLayerTweaker::getAttribute(const StringIdentity attrNameID,
+                                                            const std::optional<shaders::Expression>& attr) {
+    if (attr) {
+        // from uniforms or attribute arrays
+        return {
+            /*.expression=*/*attr,
+            /*.source=*/AttributeSource::Computed,
+        };
+    } else {
+        // from uniforms or attribute arrays
+        return {
+            /*.expression=*/{},
+            /*.source=*/getAttributeSource(attrNameID),
+        };
+    }
+}
+
+shaders::ColorAttribute FillLayerTweaker::getAttribute(const StringIdentity attrNameID,
+                                                       const std::optional<shaders::ColorExpression>& attr) {
+    if (attr) {
+        // from uniforms or attribute arrays
+        return {/*.expression=*/*attr,
+                /*.source=*/AttributeSource::Computed,
+                /*.pad=*/0,
+                0,
+                0};
+    } else {
+        // from uniforms or attribute arrays
+        return {/*.expression=*/{},
+                /*.source=*/getAttributeSource(attrNameID),
+                /*.pad=*/0,
+                0,
+                0};
+    }
+};
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -153,34 +249,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         fillUniformBufferUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
-        const auto getColorAttr = [&](const StringIdentity attrNameID, const std::optional<ColorExpression>& attr) {
-            if (attr) {
-                // from uniforms or attribute arrays
-                return ColorAttribute{/*.expression=*/*fillColorExpr,
-                                      /*.source=*/AttributeSource::Computed,
-                                      /*.pad=*/0,
-                                      0,
-                                      0};
-            } else {
-                // from uniforms or attribute arrays
-                return ColorAttribute{/*.expression=*/{},
-                                      /*.source=*/getAttributeSource(attrNameID),
-                                      /*.pad=*/0,
-                                      0,
-                                      0};
-            }
-        };
-
         if (permutationUpdated || !fillPermutationUniformBuffer) {
             using ShaderClass = shaders::ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
             const auto colorNameID = ShaderClass::attributes[ShaderClass::a_color_index].nameID;
             const auto opacityNameID = ShaderClass::attributes[ShaderClass::a_opacity_index].nameID;
 
             const FillPermutationUBO permutationUBO = {
-                /* .color = */ getColorAttr(colorNameID, fillColorExpr),
-                /* .opacity = */ {/*.source=*/getAttributeSource(opacityNameID), /*.expression=*/{}},
+                /* .color = */ getAttribute(colorNameID, fillColorExpr),
+                /* .opacity = */ getAttribute(opacityNameID, opacityExpr),
                 /* .overdrawInspector = */ overdrawInspector,
-                0,
             };
 
             context.emplaceOrUpdateUniformBuffer(fillPermutationUniformBuffer, &permutationUBO);

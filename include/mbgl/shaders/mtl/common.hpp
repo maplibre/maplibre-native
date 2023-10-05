@@ -38,26 +38,22 @@ enum class ExpressionFunction : int32_t {
     Exponential,
 };
 
-struct Expression {
-    /* 0 */ ExpressionFunction function;
-    /* 4 */
-};
-static_assert(sizeof(Expression) == 4, "unexpected padding");
-
 struct Attribute {
     AttributeSource source;
-    Expression expression;
+    float pad;
 };
 
 constant constexpr int ExprMaxStops = 16;
-struct Expression2 {
+struct Expression {
     /*   0 */ float zooms[ExprMaxStops];
     /*  64 */ float values[ExprMaxStops];
     /* 128 */ ExpressionFunction function;
-    /* 132 */ int32_t stopCount;
+    /* 132 */ uint32_t stopCount : 6;
+    /* 132 */ uint32_t useIntegerZoom : 1;
+    /* 132 */ uint32_t unusedBits : 25;
     /* 136 */
 };
-static_assert(sizeof(Expression2) == 136, "unexpected padding");
+static_assert(sizeof(Expression) == 136, "unexpected padding");
 
 struct ColorExpression {
     /*   0 */ float zooms[ExprMaxStops];
@@ -71,12 +67,12 @@ struct ColorExpression {
 static_assert(sizeof(ColorExpression) == 21 * 16, "unexpected padding");
 
 
-struct Attribute2 {
-    /*   0 */ Expression2 expression;
+struct ExpressionAttribute {
+    /*   0 */ Expression expression;
     /* 136 */ AttributeSource source;
     /* 140 */
 };
-static_assert(sizeof(Attribute2) == 140, "unexpected padding");
+static_assert(sizeof(ExpressionAttribute) == 140, "unexpected padding");
 
 struct ColorAttribute {
     /*   0 */ ColorExpression expression;
@@ -138,6 +134,36 @@ float valueFor(device const Attribute& attrib,
         case AttributeSource::Constant: return constValue;
     }
 }
+
+float valueFor(device const ExpressionAttribute& attrib,
+               const float constValue,
+               thread const float2& vertexValue,
+               const float t,
+               device const ExpressionInputsUBO& inputs) {
+    switch (attrib.source) {
+        case AttributeSource::PerVertex: return unpack_mix_float(vertexValue, t);
+        case AttributeSource::Computed: {
+            device const auto& expr = attrib.expression;
+            const float curZoom = expr.useIntegerZoom ? round(inputs.zoom) : inputs.zoom;
+            // Find the first zoom greater than the current value
+            for (uint32_t i = 0; i < expr.stopCount; ++i) {
+                if (curZoom < expr.zooms[i]) {
+                    // Use the first value if it's less than the first one
+                    if (i == 0) {
+                        return expr.values[0];
+                    }
+                    // Interpolate
+                    const auto t = (curZoom - expr.zooms[i - 1]) / (expr.zooms[i] - expr.zooms[i - 1]);
+                    return expr.values[i - 1] + t * (expr.values[i] - expr.values[i - 1]);
+                }
+            }
+            return expr.stopCount ? expr.values[expr.stopCount - 1] : NAN;
+        }
+        default:
+        case AttributeSource::Constant: return constValue;
+    }
+}
+
 // single packed color
 float4 colorFor(device const Attribute& attrib,
                 device const float4& constValue,
@@ -186,7 +212,7 @@ float4 colorFor(device const ColorAttribute& attrib,
                     return expr.values[i - 1] + t * (expr.values[i] - expr.values[i - 1]);
                 }
             }
-            return expr.stopCount ? expr.values[expr.stopCount - 1] : float4(0);
+            return expr.stopCount ? expr.values[expr.stopCount - 1] : float4(NAN);
         }
         default:
         case AttributeSource::Constant:
