@@ -47,7 +47,7 @@ public:
 
 private:
     struct TriangleElement;
-    struct Distances;
+    class Distances;
 
     std::ptrdiff_t e1;
     std::ptrdiff_t e2;
