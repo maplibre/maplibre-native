@@ -17,17 +17,23 @@ public:
     VertexVectorBase() = default;
     VertexVectorBase(const VertexVectorBase&) {} // buffer is not copied
     VertexVectorBase(VertexVectorBase&& other)
-        : buffer(std::move(other.buffer)),
+        :
+#if MLN_DRAWABLE_RENDERER
+          buffer(std::move(other.buffer)),
+#endif // MLN_DRAWABLE_RENDERER
           dirty(other.dirty),
-          released(other.released) {}
+          released(other.released) {
+    }
     virtual ~VertexVectorBase() = default;
 
     virtual const void* getRawData() const = 0;
     virtual std::size_t getRawSize() const = 0;
     virtual std::size_t getRawCount() const = 0;
 
+#if MLN_DRAWABLE_RENDERER
     VertexBufferBase* getBuffer() const { return buffer.get(); }
     void setBuffer(std::unique_ptr<VertexBufferBase>&& value) { buffer = std::move(value); }
+#endif // MLN_DRAWABLE_RENDERER
 
     bool getDirty() const { return dirty; }
     void setDirty(bool value = true) { dirty = value; }
@@ -35,7 +41,9 @@ public:
     bool isReleased() const { return released; }
 
 protected:
+#if MLN_DRAWABLE_RENDERER
     std::unique_ptr<VertexBufferBase> buffer;
+#endif // MLN_DRAWABLE_RENDERER
     bool dirty = true;
     bool released = false;
 };
@@ -57,16 +65,20 @@ public:
 
     template <typename Arg>
     void emplace_back(Arg&& vertex) {
+        assert(!released);
         v.emplace_back(std::forward<Arg>(vertex));
+        dirty = true;
     }
 
     void extend(std::size_t n, const Vertex& val) {
+        assert(!released);
         v.resize(v.size() + n, val);
         dirty = true;
     }
 
     Vertex& at(std::size_t n) {
         assert(n < v.size());
+        assert(!released);
         dirty = true;
         return v.at(n);
     }
@@ -86,11 +98,14 @@ public:
         v.clear();
     }
 
+    /// Indicate that this shared vertex vector instance will no longer be updated.
     void release() {
+#if MLN_DRAWABLE_RENDERER
         // If we've already created a buffer, we don't need the raw data any more.
         if (buffer) {
-            clear();
+            v.clear();
         }
+#endif // MLN_DRAWABLE_RENDERER
         released = true;
     }
 

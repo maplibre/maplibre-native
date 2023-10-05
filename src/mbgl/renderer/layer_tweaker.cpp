@@ -80,15 +80,29 @@ void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const std::unordered
 #if MLN_RENDER_BACKEND_METAL
     if (props != propertiesAsUniforms) {
         propertiesAsUniforms = props;
-        propertiesChanged = true;
+        permutationUpdated = true;
     }
+#endif
+}
+
+#if !MLN_RENDER_BACKEND_METAL
+namespace {
+const std::unordered_set<StringIdentity> emptyIDSet;
+}
+#endif
+
+const std::unordered_set<StringIdentity>& LayerTweaker::getPropertiesAsUniforms() const {
+#if MLN_RENDER_BACKEND_METAL
+    return propertiesAsUniforms;
+#else
+    return emptyIDSet;
 #endif
 }
 
 void LayerTweaker::enableOverdrawInspector(bool value) {
     if (overdrawInspector != value) {
         overdrawInspector = value;
-        propertiesChanged = true;
+        permutationUpdated = true;
     }
 }
 

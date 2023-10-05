@@ -60,7 +60,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const CirclePermutationUBO permutationUBO = {
             /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(1), /*.expression=*/{}},
             /* .radius = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(2), /*.expression=*/{}},
@@ -81,7 +81,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup,
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
 
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);

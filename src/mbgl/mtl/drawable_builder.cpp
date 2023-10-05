@@ -38,6 +38,7 @@ void DrawableBuilder::init() {
     if (!impl->sharedIndexes && !impl->buildIndexes.empty()) {
         impl->sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(impl->buildIndexes));
     }
+    assert(impl->sharedIndexes && impl->sharedIndexes->elements());
     drawable.setIndexData(std::move(impl->sharedIndexes), std::move(impl->segments));
 
     impl->buildIndexes.clear();

@@ -112,7 +112,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
     };
 
 #if MLN_RENDER_BACKEND_METAL
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const LinePermutationUBO permutationUBO = {
             /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(2), /*.expression=*/{}},
             /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(3), /*.expression=*/{}},
@@ -134,7 +134,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
         } else {
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);

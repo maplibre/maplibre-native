@@ -88,7 +88,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         fillUniformBufferUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
-        if (propertiesChanged || !fillPermutationUniformBuffer) {
+        if (permutationUpdated || !fillPermutationUniformBuffer) {
             const FillPermutationUBO permutationUBO = {
                 /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::FillShader>(1), /*.expression=*/{}},
                 /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::FillShader>(2), /*.expression=*/{}},
@@ -122,7 +122,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         fillOutlineUniformBufferUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
-        if (propertiesChanged || !fillOutlinePermutationUniformBuffer) {
+        if (permutationUpdated || !fillOutlinePermutationUniformBuffer) {
             const FillOutlinePermutationUBO permutationUBO = {
                 /* .outline_color = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlineShader>(1),
                                         /*.expression=*/{}},
@@ -156,7 +156,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         fillPatternUniformBufferUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
-        if (propertiesChanged || !fillPatternPermutationUniformBuffer) {
+        if (permutationUpdated || !fillPatternPermutationUniformBuffer) {
             const FillPatternPermutationUBO permutationUBO = {
                 /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillPatternShader>(1),
                                        /*.expression=*/{}},
@@ -190,7 +190,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
         fillOutlinePatternUniformBufferUpdated = true;
 
 #if MLN_RENDER_BACKEND_METAL
-        if (propertiesChanged || !fillOutlinePatternPermutationUniformBuffer) {
+        if (permutationUpdated || !fillOutlinePatternPermutationUniformBuffer) {
             const FillOutlinePatternPermutationUBO permutationUBO = {
                 /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillOutlinePatternShader>(1),
                                        /*.expression=*/{}},
@@ -333,7 +333,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif // MLN_RENDER_BACKEND_METAL
     });
 
-    propertiesChanged = false;
+    permutationUpdated = false;
     propertiesUpdated = false;
 }
 

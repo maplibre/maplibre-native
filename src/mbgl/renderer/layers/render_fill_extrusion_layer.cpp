@@ -413,6 +413,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        if (!shaderGroup) {
+            continue;
+        }
+
         gfx::VertexAttributeArray vertexAttrs;
         propertiesAsUniforms.clear();
         vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
@@ -420,9 +424,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                                   FillExtrusionHeight,
                                                   FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
 
-        if (!shaderGroup) {
-            continue;
-        }
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
         if (!shader) {
@@ -513,6 +514,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         colorBuilder->setVertexAttributes(std::move(vertexAttrs));
 
         const auto finish = [&](gfx::DrawableBuilder& builder) {
+            if (!bucket.sharedTriangles->elements()) {
+                return;
+            }
             builder.setSegments(gfx::Triangles(),
                                 bucket.sharedTriangles,
                                 bucket.triangleSegments.data(),

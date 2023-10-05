@@ -129,6 +129,7 @@ if(MLN_WITH_OPENGL)
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp

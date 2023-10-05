@@ -1273,6 +1273,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& bucket = static_cast<const SymbolBucket&>(*renderable.renderData.bucket);
         const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
+        if (!buffer.sharedTriangles->elements()) {
+            continue;
+        }
+
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
