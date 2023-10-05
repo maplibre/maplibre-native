@@ -280,10 +280,10 @@ namespace {
 
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-static const StringIdentity idHeatmapInterpolateUBOName = StringIndexer::get("HeatmapInterpolateUBO");
-static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
-static const StringIdentity idTexColorRampName = StringIndexer::get("u_color_ramp");
+const StringIdentity idHeatmapInterpolateUBOName = stringIndexer().get("HeatmapInterpolateUBO");
+const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
+const StringIdentity idTexImageName = stringIndexer().get("u_image");
+const StringIdentity idTexColorRampName = stringIndexer().get("u_color_ramp");
 
 } // namespace
 

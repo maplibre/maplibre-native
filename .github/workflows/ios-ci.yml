@@ -120,14 +120,14 @@ jobs:
       # size test
 
       - name: Build app for size test & output size
-        if: ${{ matrix.renderer }} == "legacy"
+        if: matrix.renderer == 'legacy'
         working-directory: ./
         run: | 
           bazel build --compilation_mode=opt //platform/ios:size --//:maplibre_platform=ios
           cp "$(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios)" ./size
 
       - name: Upload size test result
-        if: ${{ matrix.renderer }} == "legacy"
+        if: matrix.renderer == 'legacy'
         uses: actions/upload-artifact@v3
         with:
           if-no-files-found: error
@@ -138,7 +138,7 @@ jobs:
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
-        if: ${{ matrix.renderer }} == "legacy"
+        if: matrix.renderer == 'legacy'
         run: |
           set -e
           bazel run //platform/ios:xcodeproj
@@ -155,7 +155,7 @@ jobs:
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.renderer }} == "legacy"
+        if: matrix.renderer == 'legacy'
         with:
           name: ios-render-test
           retention-days: 3
@@ -167,7 +167,7 @@ jobs:
       # C++ unit tests
       
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
-        if: ${{ matrix.renderer }} == "legacy"
+        if: matrix.renderer == 'legacy'
         run: |
           set -e
           bazel run //platform/ios:xcodeproj
@@ -184,7 +184,7 @@ jobs:
           echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.renderer }} == "legacy"
+        if: matrix.renderer == 'legacy'
         with:
           name: ios-cpp-unit-tests
           retention-days: 3

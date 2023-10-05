@@ -44,10 +44,10 @@ std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
-const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
-const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-const StringIdentity idSymbolPermutationUBOName = StringIndexer::get("SymbolPermutationUBO");
+const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
+const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
+const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+const StringIdentity idSymbolPermutationUBOName = stringIndexer().get("SymbolPermutationUBO");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -64,12 +64,12 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = StringIndexer::get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = StringIndexer::get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = StringIndexer::get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = StringIndexer::get(
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
     "SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get(
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = stringIndexer().get(
     "SymbolDrawableInterpolateUBO");
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,

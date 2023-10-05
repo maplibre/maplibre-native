@@ -16,7 +16,7 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapTextureDrawableUBOName = StringIndexer::get("HeatmapTextureDrawableUBO");
+static const StringIdentity idHeatmapTextureDrawableUBOName = stringIndexer().get("HeatmapTextureDrawableUBO");
 
 void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
                                          [[maybe_unused]] const RenderTree& renderTree,

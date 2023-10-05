@@ -158,7 +158,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
         MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
         assert(length > 0 && size > 0);
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-        uniformBlocks.add(StringIndexer::get(name.data()), index, size);
+        uniformBlocks.add(stringIndexer().get(name.data()), index, size);
     }
 
     SamplerLocationMap samplerLocations;
@@ -178,7 +178,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
             GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.data()));
             assert(location != -1);
             if (location != -1) {
-                samplerLocations[StringIndexer::get(name.data())] = location;
+                samplerLocations[stringIndexer().get(name.data())] = location;
             }
         }
     }
@@ -198,7 +198,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
             continue;
         }
         const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
-        addAttr(attrs, StringIndexer::get(name.data()), location, length, size, glType);
+        addAttr(attrs, stringIndexer().get(name.data()), location, length, size, glType);
     }
 
     return std::make_shared<ShaderProgramGL>(

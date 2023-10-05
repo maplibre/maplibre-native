@@ -67,8 +67,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     }
 
     // create a builder
-    static const StringIdentity idVertexAttribName = StringIndexer::get("a_pos");
-    static const StringIdentity idDebugUBOName = StringIndexer::get("DebugUBO");
+    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
+    static const StringIdentity idDebugUBOName = stringIndexer().get("DebugUBO");
     std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder("debug-builder");
     builder->setShader(debugShader);
     builder->setRenderPass(renderPass);
@@ -109,7 +109,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         texture->setImage(emptyImage);
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        static const StringIdentity idDebugOverlayUniformName = StringIndexer::get("u_overlay");
+        static const StringIdentity idDebugOverlayUniformName = stringIndexer().get("u_overlay");
         samplerLocation = debugShader->getSamplerLocation(idDebugOverlayUniformName);
     }
     assert(samplerLocation.has_value());
