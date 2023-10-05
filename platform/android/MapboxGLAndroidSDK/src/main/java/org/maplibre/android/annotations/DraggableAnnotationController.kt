@@ -124,7 +124,8 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
         stopDragging(dragPair)
     }
 
-    private fun <T : KAnnotation<*>> startDragging(dragPair: DragPair<T>): Boolean {
+    @VisibleForTesting
+    internal fun <T : KAnnotation<*>> startDragging(dragPair: DragPair<T>): Boolean {
         if (dragPair.annotation.draggable) {
             for (dragListener in dragPair.annotationManager.getDragListeners()) {
                 dragListener.onAnnotationDragStarted(dragPair.annotation)
@@ -135,7 +136,8 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
         return false
     }
 
-    private fun <T : KAnnotation<*>> stopDragging(dragPair: DragPair<T>?) {
+    @VisibleForTesting
+    internal fun <T : KAnnotation<*>> stopDragging(dragPair: DragPair<T>?) {
         if (dragPair != null) {
             for (d in dragPair.annotationManager.getDragListeners()) {
                 d.onAnnotationDragFinished(dragPair.annotation)
@@ -166,7 +168,8 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
         }
     }
 
-    private data class DragPair<T : KAnnotation<*>>(
+    @VisibleForTesting
+    internal data class DragPair<T : KAnnotation<*>>(
         val annotation: T,
         val annotationManager: AnnotationManager<*, T>
     )
