@@ -28,6 +28,8 @@
 #include <mbgl/util/string_indexer.hpp>
 #include <mbgl/util/convert.hpp>
 
+#include <memory>
+
 using namespace mbgl;
 using namespace mbgl::style;
 
@@ -183,7 +185,7 @@ public:
     }
 
 private:
-    TileLayerGroupPtr layerGroup;
+    std::shared_ptr<TileLayerGroup> layerGroup;
 };
 
 TEST(CustomDrawableLayer, Basic) {
