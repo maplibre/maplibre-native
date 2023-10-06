@@ -46,7 +46,7 @@ jobs:
       fail-fast: true
       matrix:
         renderer: [legacy, drawable]
-    runs-on: MapLibre_Native_Linux_16_core
+    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
     steps:
       - uses: actions/checkout@v4
         with:
