@@ -33,7 +33,27 @@ constexpr float SHARP_CORNER_OFFSET = 15.0f;
 // Angle per triangle for approximating round line joins.
 constexpr float DEG_PER_TRIANGLE = 20.0f;
 
+// The number of bits that is used to store the line distance in the buffer.
+constexpr int LINE_DISTANCE_BUFFER_BITS = 14;
+
+// We don't have enough bits for the line distance as we'd like to have, so
+// use this value to scale the line distance (in tile units) down to a smaller
+// value. This lets us store longer distances while sacrificing precision.
+constexpr float LINE_DISTANCE_SCALE = 1.0 / 2.0;
+
+// The maximum line distance, in tile units, that fits in the buffer.
+constexpr auto MAX_LINE_DISTANCE = static_cast<float>((1u << LINE_DISTANCE_BUFFER_BITS) / LINE_DISTANCE_SCALE);
+
 } // namespace
+
+double PolylineGeneratorDistances::scaleToMaxLineDistance(double tileDistance) const {
+    double relativeTileDistance = tileDistance / total;
+    if (std::isinf(relativeTileDistance) || std::isnan(relativeTileDistance)) {
+        assert(false);
+        relativeTileDistance = 0.0;
+    }
+    return (relativeTileDistance * (clipEnd - clipStart) + clipStart) * (MAX_LINE_DISTANCE - 1);
+}
 
 template <class PLV, class PS>
 struct PolylineGenerator<PLV, PS>::TriangleElement {
