@@ -2,11 +2,13 @@
 
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/programs/line_program.hpp>
 
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/programs/line_program.hpp>
+#endif
 
 #include <memory>
 
@@ -579,8 +581,10 @@ void PolylineGenerator<PLV, PS>::addPieSliceVertex(const GeometryCoordinate& cur
     }
 }
 
+#if MLN_DRAWABLE_RENDERER
 template class PolylineGenerator<gfx::DrawableBuilder::Impl::LineLayoutVertex,
                                  std::unique_ptr<gfx::Drawable::DrawSegment>>;
+#endif
 
 template class PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>>;
 
