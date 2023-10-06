@@ -4,7 +4,7 @@
 
 Firstly you will have to ensure that Bazel is installed
 
-`brew install baselisk`
+`brew install bazelisk`
 
 From there you can use the script in platform/ios/platform/ios/scripts/package-bazel.sh
 

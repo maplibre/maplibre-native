@@ -16,7 +16,7 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapTextureDrawableUBOName = StringIndexer::get("HeatmapTextureDrawableUBO");
+static const StringIdentity idHeatmapTextureDrawableUBOName = stringIndexer().get("HeatmapTextureDrawableUBO");
 
 void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
                                          [[maybe_unused]] const RenderTree& renderTree,
@@ -33,6 +33,10 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
 #endif
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!checkTweakDrawable(drawable)) {
+            return;
+        }
+
         const auto& size = parameters.staticData.backendSize;
         mat4 viewportMat;
         matrix::ortho(viewportMat, 0, size.width, size.height, 0, -1, 1);

@@ -19,9 +19,9 @@ using namespace shaders;
 #if !defined(NDEBUG)
 constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
-static const StringIdentity idBackgroundDrawableUBOName = StringIndexer::get("BackgroundDrawableUBO");
-static const StringIdentity idBackgroundLayerUBOName = StringIndexer::get("BackgroundLayerUBO");
-static const StringIdentity idTexUniformName = StringIndexer::get("u_image");
+static const StringIdentity idBackgroundDrawableUBOName = stringIndexer().get("BackgroundDrawableUBO");
+static const StringIdentity idBackgroundLayerUBOName = stringIndexer().get("BackgroundLayerUBO");
+static const StringIdentity idTexUniformName = stringIndexer().get("u_image");
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& state = parameters.state;
@@ -54,6 +54,9 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
     std::optional<uint32_t> samplerLocation{};
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
 
         // We assume that drawables don't change between pattern and non-pattern.
         const auto& shader = drawable.getShader();

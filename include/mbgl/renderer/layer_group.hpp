@@ -13,6 +13,7 @@ namespace mbgl {
 class LayerGroupBase;
 class PaintParameters;
 class RenderOrchestrator;
+class RenderTree;
 class TileLayerGroup;
 
 using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
@@ -28,6 +29,7 @@ using UniqueDrawable = std::unique_ptr<Drawable>;
 
 class LayerTweaker;
 using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
+using LayerTweakerWeakPtr = std::weak_ptr<LayerTweaker>;
 
 /**
     A layer-like group of drawables, not a group of layers.
@@ -86,16 +88,16 @@ public:
     /// @return The number of items removed
     virtual std::size_t removeDrawablesIf(const std::function<bool(gfx::Drawable&)>&& f) = 0;
 
-    /// Attach a tweaker to be run on this layer group for each frame
-    void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
+    /// Attach a tweaker to be run on this layer group for each frame.
+    /// Tweaker lifetime is controlled by the render layer and drawables, the layer group retains a weak reference.
+    void addLayerTweaker(const LayerTweakerPtr& tweaker) { layerTweakers.emplace_back(tweaker); }
 
-    /// Get the tweaker attached to this layer group
-    const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
+    void runTweakers(const RenderTree&, PaintParameters&);
 
 protected:
     bool enabled = true;
     int32_t layerIndex;
-    LayerTweakerPtr layerTweaker;
+    std::vector<LayerTweakerWeakPtr> layerTweakers;
     std::string name;
 };
 

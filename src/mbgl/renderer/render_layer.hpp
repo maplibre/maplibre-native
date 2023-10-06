@@ -207,11 +207,15 @@ protected:
     /// (Un-)Register the layer group with the orchestrator
     void activateLayerGroup(const LayerGroupBasePtr&, bool activate, UniqueChangeRequestVec& changes);
 
+    /// Change the layer index on a layer group associated with this layer
+    void changeLayerIndex(const LayerGroupBasePtr&, int32_t newLayerIndex, UniqueChangeRequestVec&);
+
     /// Remove all drawables for the tile from the layer group
-    virtual void removeTile(RenderPass, const OverscaledTileID&);
+    /// @return The number of drawables actually removed.
+    virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
 
     /// Remove all the drawables for tiles
-    virtual void removeAllDrawables();
+    virtual std::size_t removeAllDrawables();
 
     /// Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
@@ -230,6 +234,12 @@ protected:
     /// @return true if updated, false if the tile ID is not present in the set of tiles to be rendered or the ID is
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
+
+    /// Update the layer tweaker and drawables which reference it
+    static void replaceTweaker(LayerTweakerPtr& toReplace,
+                               LayerTweakerPtr newTweaker,
+                               const std::vector<LayerGroupBasePtr>&);
+
 #endif // MLN_DRAWABLE_RENDERER
 
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
@@ -247,6 +257,9 @@ protected:
 #if MLN_DRAWABLE_RENDERER
     // will need to be overriden to handle their activation.
     LayerGroupBasePtr layerGroup;
+
+    // An optional tweaker that will update drawables
+    LayerTweakerPtr layerTweaker;
 
     // The set of Tile IDs in `renderTiles`, along with the
     // identity of the bucket from which they were built.

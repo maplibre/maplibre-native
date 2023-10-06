@@ -11,37 +11,32 @@
 
 namespace mbgl {
 
-using StringIdentity = size_t;
+using StringIdentity = std::size_t;
 
 class StringIndexer {
 public:
+    StringIndexer();
+
     StringIndexer(StringIndexer const&) = delete;
     StringIndexer(StringIndexer&&) = delete;
     void operator=(StringIndexer const&) = delete;
-
-    static StringIdentity get(std::string_view);
-
-    static const std::string& get(const StringIdentity id);
-
-    static void clear();
-
-    static size_t size();
-
-protected:
-    StringIndexer();
     ~StringIndexer() = default;
 
-    using MapType = std::unordered_map<std::string_view, StringIdentity>;
-    using VectorType = std::vector<std::string>;
+    StringIdentity get(std::string_view);
 
-    static StringIndexer& instance() {
-        static StringIndexer inst;
-        return inst;
-    }
+    std::string get(const StringIdentity id);
 
-    MapType stringToIdentity;
-    VectorType identityToString;
+    size_t size();
+
+protected:
+    std::unordered_map<std::string_view, StringIdentity> stringToIdentity;
+    std::vector<StringIdentity> identityToString;
+    std::vector<char> buffer;
+
     std::shared_mutex sharedMutex;
 };
+
+/// StringIndexer singleton
+StringIndexer& stringIndexer();
 
 } // namespace mbgl

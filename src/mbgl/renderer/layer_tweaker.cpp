@@ -19,6 +19,12 @@ LayerTweaker::LayerTweaker(std::string id_, Immutable<style::LayerProperties> pr
     : id(std::move(id_)),
       evaluatedProperties(std::move(properties)) {}
 
+bool LayerTweaker::checkTweakDrawable(const gfx::Drawable& drawable) const {
+    // Apply to a drawable if it references us, or if doesn't reference anything.
+    const auto& tweaker = drawable.getLayerTweaker();
+    return !tweaker || tweaker.get() == this;
+}
+
 mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  const RenderTree& renderTree,
                                  const TransformState& state,
@@ -60,31 +66,43 @@ shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint6
             0};
 }
 
-void LayerTweaker::setPropertiesAsUniforms(std::vector<std::string> props) {
-    if (props != propertiesAsUniforms) {
-        propertiesAsUniforms = std::move(props);
-        propertiesChanged = true;
-    }
-}
-bool LayerTweaker::hasPropertyAsUniform(const std::string_view attrName) const {
-    // `attrName` is expected to have the "a_" prefix, while the values in `propertiesAsUniforms`
-    // do not.  Search for the former within the latter without allocating temporary strings.
-    return propertiesAsUniforms.end() !=
-           std::find_if(propertiesAsUniforms.begin(), propertiesAsUniforms.end(), [&](const auto& name) {
-               return name.size() + 2 == attrName.size() && 0 == std::strcmp(name.data(), attrName.data() + 2);
-           });
+bool LayerTweaker::hasPropertyAsUniform(const StringIdentity attrNameID) const {
+    return propertiesAsUniforms.find(attrNameID) != propertiesAsUniforms.end();
 }
 
 using namespace shaders;
-AttributeSource LayerTweaker::getAttributeSource(const std::string_view& attribName) const {
-    return hasPropertyAsUniform(attribName) ? AttributeSource::Constant : AttributeSource::PerVertex;
+AttributeSource LayerTweaker::getAttributeSource(const StringIdentity attribNameID) const {
+    return hasPropertyAsUniform(attribNameID) ? AttributeSource::Constant : AttributeSource::PerVertex;
 }
 #endif // MLN_RENDER_BACKEND_METAL
+
+void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const std::unordered_set<StringIdentity>& props) {
+#if MLN_RENDER_BACKEND_METAL
+    if (props != propertiesAsUniforms) {
+        propertiesAsUniforms = props;
+        permutationUpdated = true;
+    }
+#endif
+}
+
+#if !MLN_RENDER_BACKEND_METAL
+namespace {
+const std::unordered_set<StringIdentity> emptyIDSet;
+}
+#endif
+
+const std::unordered_set<StringIdentity>& LayerTweaker::getPropertiesAsUniforms() const {
+#if MLN_RENDER_BACKEND_METAL
+    return propertiesAsUniforms;
+#else
+    return emptyIDSet;
+#endif
+}
 
 void LayerTweaker::enableOverdrawInspector(bool value) {
     if (overdrawInspector != value) {
         overdrawInspector = value;
-        propertiesChanged = true;
+        permutationUpdated = true;
     }
 }
 

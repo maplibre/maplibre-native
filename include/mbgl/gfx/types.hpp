@@ -113,6 +113,7 @@ enum class TexturePixelType : uint8_t {
 enum class TextureChannelDataType : uint8_t {
     UnsignedByte, ///< 8 bit unsigned byte
     HalfFloat,    ///< 16 bit "half-float"
+    Float,        ///< 32 bit float
 };
 
 /// Texture mip map type

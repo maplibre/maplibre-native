@@ -19,6 +19,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/symbol_icon.hpp>
+#include <mbgl/shaders/mtl/symbol_sdf.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -43,10 +44,10 @@ std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
-const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
-const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-const StringIdentity idSymbolPermutationUBOName = StringIndexer::get("SymbolPermutationUBO");
+const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
+const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
+const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+const StringIdentity idSymbolPermutationUBOName = stringIndexer().get("SymbolPermutationUBO");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -63,12 +64,12 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = StringIndexer::get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = StringIndexer::get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = StringIndexer::get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = StringIndexer::get(
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
     "SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get(
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = stringIndexer().get(
     "SymbolDrawableInterpolateUBO");
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
@@ -90,13 +91,13 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    if (propertiesChanged) {
+    if (permutationUpdated) {
         const SymbolPermutationUBO permutationUBO = {
-            /* .fill_color = */ {/*.source=*/getAttributeSource("a_fill_color"), /*.expression=*/{}},
-            /* .halo_color = */ {/*.source=*/getAttributeSource("a_halo_color"), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource("a_opacity"), /*.expression=*/{}},
-            /* .halo_width = */ {/*.source=*/getAttributeSource("a_halo_width"), /*.expression=*/{}},
-            /* .halo_blur = */ {/*.source=*/getAttributeSource("a_halo_blur"), /*.expression=*/{}},
+            /* .fill_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(5), /*.expression=*/{}},
+            /* .halo_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(6), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(7), /*.expression=*/{}},
+            /* .halo_width = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(8), /*.expression=*/{}},
+            /* .halo_blur = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(9), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,
@@ -108,13 +109,19 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
 
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
 #endif
+
+    if (propertiesUpdated) {
+        textPropertiesUpdated = true;
+        iconPropertiesUpdated = true;
+        propertiesUpdated = false;
+    }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
@@ -125,14 +132,15 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
 
-        if (isText && (!textPaintBuffer || propertiesUpdated)) {
+        if (isText && (!textPaintBuffer || textPropertiesUpdated)) {
             const auto props = buildPaintUBO(true, evaluated);
             textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
-        } else if (!isText && (!iconPaintBuffer || propertiesUpdated)) {
+            textPropertiesUpdated = false;
+        } else if (!isText && (!iconPaintBuffer || iconPropertiesUpdated)) {
             const auto props = buildPaintUBO(false, evaluated);
             iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
+            iconPropertiesUpdated = false;
         }
-        propertiesUpdated = false;
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();

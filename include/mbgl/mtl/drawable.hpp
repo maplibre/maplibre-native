@@ -53,6 +53,15 @@ public:
 
     void upload(gfx::UploadPass&);
 
+    void setColorMode(const gfx::ColorMode&) override;
+
+    void setShader(gfx::ShaderProgramBasePtr) override;
+
+    void setEnableStencil(bool) override;
+    void setEnableDepth(bool) override;
+    void setSubLayerIndex(int32_t) override;
+    void setDepthType(gfx::DepthMaskType) override;
+
 protected:
     // For testing only.
     Drawable(std::unique_ptr<Impl>);
@@ -70,8 +79,6 @@ protected:
 
     class Impl;
     const std::unique_ptr<Impl> impl;
-
-    gfx::AttributeBindingArray attributeBindings;
 };
 
 } // namespace mtl

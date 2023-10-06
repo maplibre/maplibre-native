@@ -151,12 +151,9 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
-    std::vector<std::string> emptyProperties(0);
-    auto shaderGroup = shaders.getShaderGroup(name);
-    if (!shaderGroup) {
-        return nullptr;
-    }
-    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, emptyProperties));
+    const auto shaderGroup = shaders.getShaderGroup(name);
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
@@ -189,8 +186,15 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const 
 
 void Context::setDirtyState() {}
 
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
+                                                                       gfx::TextureChannelDataType type,
+                                                                       bool depth,
+                                                                       bool stencil) {
+    return std::make_unique<OffscreenTexture>(*this, size, type, depth, stencil);
+}
+
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
-    return std::make_unique<OffscreenTexture>(*this, size, type);
+    return createOffscreenTexture(size, type, false, false);
 }
 
 std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,

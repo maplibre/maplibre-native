@@ -46,10 +46,6 @@ private:
     void render(PaintParameters&) override;
 #endif
 
-#if MLN_DRAWABLE_RENDERER
-    void updateLayerTweaker();
-#endif // MLN_DRAWABLE_RENDERER
-
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
                                 float,
@@ -73,13 +69,6 @@ private:
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
-
-    FillLayerTweakerPtr tweaker;
-#if MLN_RENDER_BACKEND_METAL
-    std::vector<std::string> propertiesAsUniforms;
-#endif // MLN_RENDER_BACKEND_METAL
-    bool overdrawInspector = false;
-
 #endif
 };
 

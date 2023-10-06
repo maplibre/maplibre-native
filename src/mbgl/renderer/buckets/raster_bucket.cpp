@@ -13,7 +13,10 @@ RasterBucket::RasterBucket(PremultipliedImage&& image_)
 RasterBucket::RasterBucket(std::shared_ptr<PremultipliedImage> image_)
     : image(std::move(image_)) {}
 
-RasterBucket::~RasterBucket() = default;
+RasterBucket::~RasterBucket() {
+    clear();
+    setImage({});
+}
 
 void RasterBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
     if (!hasData()) {
@@ -49,6 +52,7 @@ void RasterBucket::clear() {
 void RasterBucket::setImage(std::shared_ptr<PremultipliedImage> image_) {
     image = std::move(image_);
     texture = {};
+    texture2d.reset();
     uploaded = false;
 }
 

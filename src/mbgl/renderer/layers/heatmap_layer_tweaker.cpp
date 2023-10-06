@@ -20,10 +20,10 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapDrawableUBOName = StringIndexer::get("HeatmapDrawableUBO");
-static const StringIdentity idHeatmapEvaluatedPropsUBOName = StringIndexer::get("HeatmapEvaluatedPropsUBO");
-static const StringIdentity idHeatmapPermutationUBOName = StringIndexer::get("HeatmapPermutationUBO");
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
+static const StringIdentity idHeatmapDrawableUBOName = stringIndexer().get("HeatmapDrawableUBO");
+static const StringIdentity idHeatmapEvaluatedPropsUBOName = stringIndexer().get("HeatmapEvaluatedPropsUBO");
+static const StringIdentity idHeatmapPermutationUBOName = stringIndexer().get("HeatmapPermutationUBO");
+static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
                                   const RenderTree& renderTree,
@@ -43,15 +43,10 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    using ShaderClass = shaders::ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
-    if (propertiesChanged) {
-        const auto source = [this](const std::string_view& attrName) {
-            return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-        };
-
+    if (permutationUpdated) {
         const HeatmapPermutationUBO permutationUBO = {
-            /* .weight = */ {/*.source=*/source(ShaderClass::attributes[1].name), /*.expression=*/{}},
-            /* .radius = */ {/*.source=*/source(ShaderClass::attributes[2].name), /*.expression=*/{}},
+            /* .weight = */ {/*.source=*/getAttributeSource<BuiltIn::HeatmapShader>(1), /*.expression=*/{}},
+            /* .radius = */ {/*.source=*/getAttributeSource<BuiltIn::HeatmapShader>(2), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad1/2/3 = */ 0,
             0,
@@ -66,7 +61,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
             permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
         }
 
-        propertiesChanged = false;
+        permutationUpdated = false;
     }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
@@ -85,13 +80,15 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup,
     }
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
+
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.addOrReplace(idHeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
-        if (!drawable.getTileID()) {
-            return;
-        }
-        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(tileID,
