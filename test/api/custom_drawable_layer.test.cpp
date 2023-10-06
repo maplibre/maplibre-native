@@ -118,15 +118,10 @@ public:
     void initialize() override {}
 
     /**
-     * @brief Create Drawables for the Custom Drawable Layer
+     * @brief Create or update drawables
      *
-     * @param proxyLayer
-     * @param shaders
-     * @param context
-     * @param state
-     * @param updateParameters
-     * @param renderTree
-     * @param changes
+     * @param proxyLayer the internal proxy layer
+     * @param parameters structure containing object references needed to implement drawable creation
      */
     void update(RenderLayer& proxyLayer, const Parameters& parameters) override {
         // Set up a layer group
