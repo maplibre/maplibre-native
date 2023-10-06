@@ -18,23 +18,6 @@ namespace mbgl {
 namespace util {
 
 namespace {
-/*
- * Sharp corners cause dashed lines to tilt because the distance along the line
- * is the same at both the inner and outer corners. To improve the appearance of
- * dashed lines we add extra points near sharp corners so that a smaller part
- * of the line is tilted.
- *
- * COS_HALF_SHARP_CORNER controls how sharp a corner has to be for us to add an
- * extra vertex. The default is 75 degrees.
- *
- * The newly created vertices are placed SHARP_CORNER_OFFSET pixels from the corner.
- */
-constexpr float COS_HALF_SHARP_CORNER = std::cos(75.0f / 2.0f * (static_cast<float>(M_PI) / 180.0f));
-constexpr float SHARP_CORNER_OFFSET = 15.0f;
-
-// Angle per triangle for approximating round line joins.
-constexpr float DEG_PER_TRIANGLE = 20.0f;
-
 // The number of bits that is used to store the line distance in the buffer.
 constexpr int LINE_DISTANCE_BUFFER_BITS = 14;
 
