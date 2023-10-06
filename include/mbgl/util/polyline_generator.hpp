@@ -29,22 +29,22 @@ namespace {
  *
  * The newly created vertices are placed SHARP_CORNER_OFFSET pixels from the corner.
  */
-const float COS_HALF_SHARP_CORNER = std::cos(75.0f / 2.0f * (static_cast<float>(M_PI) / 180.0f));
-const float SHARP_CORNER_OFFSET = 15.0f;
+constexpr float COS_HALF_SHARP_CORNER = std::cos(75.0f / 2.0f * (static_cast<float>(M_PI) / 180.0f));
+constexpr float SHARP_CORNER_OFFSET = 15.0f;
 
 // Angle per triangle for approximating round line joins.
-const float DEG_PER_TRIANGLE = 20.0f;
+constexpr float DEG_PER_TRIANGLE = 20.0f;
 
 // The number of bits that is used to store the line distance in the buffer.
-const int LINE_DISTANCE_BUFFER_BITS = 14;
+constexpr int LINE_DISTANCE_BUFFER_BITS = 14;
 
 // We don't have enough bits for the line distance as we'd like to have, so
 // use this value to scale the line distance (in tile units) down to a smaller
 // value. This lets us store longer distances while sacrificing precision.
-const float LINE_DISTANCE_SCALE = 1.0 / 2.0;
+constexpr float LINE_DISTANCE_SCALE = 1.0 / 2.0;
 
 // The maximum line distance, in tile units, that fits in the buffer.
-const auto MAX_LINE_DISTANCE = static_cast<float>(std::pow(2, LINE_DISTANCE_BUFFER_BITS) / LINE_DISTANCE_SCALE);
+constexpr auto MAX_LINE_DISTANCE = static_cast<float>( (1u << LINE_DISTANCE_BUFFER_BITS) / LINE_DISTANCE_SCALE);
 
 } // namespace
 
