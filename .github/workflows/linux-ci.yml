@@ -112,7 +112,7 @@ jobs:
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
+        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}-style.json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -120,7 +120,7 @@ jobs:
         with:
           name: render-test-result
           path: |
-            metrics/linux-gcc8-release-style.html
+            metrics/linux-${{ matrix.renderer }}-style.html
       
       # expression tests
 
