@@ -64,9 +64,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
 
     const style::LineJoinType joinType = options.joinType;
 
-    const float miterLimit = joinType == style::LineJoinType::Bevel
-                                 ? 1.05f
-                                 : options.miterLimit;
+    const float miterLimit = joinType == style::LineJoinType::Bevel ? 1.05f : options.miterLimit;
 
     const uint32_t overscaling = options.overscaling;
 
