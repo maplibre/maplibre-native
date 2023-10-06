@@ -44,7 +44,7 @@ constexpr int LINE_DISTANCE_BUFFER_BITS = 14;
 constexpr float LINE_DISTANCE_SCALE = 1.0 / 2.0;
 
 // The maximum line distance, in tile units, that fits in the buffer.
-constexpr auto MAX_LINE_DISTANCE = static_cast<float>( (1u << LINE_DISTANCE_BUFFER_BITS) / LINE_DISTANCE_SCALE);
+constexpr auto MAX_LINE_DISTANCE = static_cast<float>((1u << LINE_DISTANCE_BUFFER_BITS) / LINE_DISTANCE_SCALE);
 
 } // namespace
 
