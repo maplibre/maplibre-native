@@ -6,6 +6,7 @@
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/util/polyline_generator.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -28,6 +29,7 @@ public:
         std::array<uint8_t, 4> a2;
     };
     gfx::VertexVector<LineLayoutVertex> polylineVertices;
+    gfx::IndexVector<gfx::Triangles> polylineIndexes;
 
     std::vector<uint16_t> buildIndexes;
     std::shared_ptr<gfx::IndexVectorBase> sharedIndexes;
@@ -41,33 +43,12 @@ public:
 
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
-                     const DrawableBuilder::PolylineOptions& options);
+                     const util::PolylineGeneratorOptions& options);
 
     void setupForPolylines(gfx::DrawableBuilder& builder);
 
 private:
-    struct TriangleElement;
-    class Distances;
 
-    std::ptrdiff_t e1;
-    std::ptrdiff_t e2;
-    std::ptrdiff_t e3;
-    void addCurrentVertex(const GeometryCoordinate& currentCoordinate,
-                          double& distance,
-                          const Point<double>& normal,
-                          double endLeft,
-                          double endRight,
-                          bool round,
-                          std::size_t startVertex,
-                          std::vector<TriangleElement>& triangleStore,
-                          std::optional<Distances> lineDistances);
-    void addPieSliceVertex(const GeometryCoordinate& currentVertex,
-                           double distance,
-                           const Point<double>& extrude,
-                           bool lineTurnsLeft,
-                           std::size_t startVertex,
-                           std::vector<TriangleElement>& triangleStore,
-                           std::optional<Distances> lineDistances);
     LineLayoutVertex layoutVertex(
         Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0);
 };

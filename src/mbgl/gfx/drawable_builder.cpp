@@ -273,7 +273,7 @@ std::size_t DrawableBuilder::curVertexCount() const {
     return std::max(impl->rawVerticesCount, std::max(impl->vertices.elements(), impl->polylineVertices.elements()));
 }
 
-void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates, const PolylineOptions& options) {
+void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates, const util::PolylineGeneratorOptions& options) {
     // mark the current mode
     if (!checkAndSetMode(Mode::Polylines)) return;
 
