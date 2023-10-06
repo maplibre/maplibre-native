@@ -62,24 +62,11 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
         return;
     }
 
-    // const auto& props = options.feature.getProperties();
-    // auto clip_start_it = props.find("mapbox_clip_start");
-    // auto clip_end_it = props.find("mapbox_clip_end");
-    // if (clip_start_it != props.end() && clip_end_it != props.end()) {
-    //     double total_length = 0.0;
-    //     for (std::size_t i = first; i < len - 1; ++i) {
-    //         total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
-    //     }
-
-    //     lineDistances = Distances{
-    //         *numericValue<double>(clip_start_it->second), *numericValue<double>(clip_end_it->second), total_length};
-    // }
-
-    const style::LineJoinType joinType = options.joinType; // layout.evaluate<LineJoin>(zoom, feature, canonical);
+    const style::LineJoinType joinType = options.joinType;
 
     const float miterLimit = joinType == style::LineJoinType::Bevel
                                  ? 1.05f
-                                 : options.miterLimit; // static_cast<float>(layout.get<LineMiterLimit>());
+                                 : options.miterLimit;
 
     const uint32_t overscaling = options.overscaling;
 
