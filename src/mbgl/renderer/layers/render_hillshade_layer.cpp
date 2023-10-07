@@ -299,9 +299,9 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+static const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
+static const StringIdentity idTexturePosAttribName = stringIndexer().get("a_texture_pos");
+static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
@@ -500,8 +500,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             // Rebuild segments, since they're not shared.
             std::vector<std::unique_ptr<gfx::Drawable::DrawSegment>> drawSegments;
             drawSegments.reserve(segments->size());
-            for (std::size_t i = 0; i < segments->size(); ++i) {
-                const auto& seg = segments->data()[i];
+            for (const auto& seg : *segments) {
                 auto segCopy = SegmentBase{
                     // no copy constructor
                     seg.vertexOffset,

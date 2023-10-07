@@ -153,7 +153,7 @@ jobs:
           tools: ${{ matrix.qt_tools }}
 
       - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v3
+        uses: seanmiddleditch/gha-setup-ninja@v4
 
       - name: Setup Xcode
         if: runner.os == 'macOS'

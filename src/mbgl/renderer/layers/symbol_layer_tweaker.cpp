@@ -19,6 +19,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/symbol_icon.hpp>
+#include <mbgl/shaders/mtl/symbol_sdf.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -43,10 +44,10 @@ std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
-const StringIdentity idTexUniformName = StringIndexer::get("u_texture");
-const StringIdentity idTexIconUniformName = StringIndexer::get("u_texture_icon");
-const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-const StringIdentity idSymbolPermutationUBOName = StringIndexer::get("SymbolPermutationUBO");
+const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
+const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
+const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+const StringIdentity idSymbolPermutationUBOName = stringIndexer().get("SymbolPermutationUBO");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -63,12 +64,12 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = StringIndexer::get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = StringIndexer::get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = StringIndexer::get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = StringIndexer::get(
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
     "SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = StringIndexer::get(
+const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = stringIndexer().get(
     "SymbolDrawableInterpolateUBO");
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
@@ -92,11 +93,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup,
 #if MLN_RENDER_BACKEND_METAL
     if (permutationUpdated) {
         const SymbolPermutationUBO permutationUBO = {
-            /* .fill_color = */ {/*.source=*/getAttributeSource("a_fill_color"), /*.expression=*/{}},
-            /* .halo_color = */ {/*.source=*/getAttributeSource("a_halo_color"), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource("a_opacity"), /*.expression=*/{}},
-            /* .halo_width = */ {/*.source=*/getAttributeSource("a_halo_width"), /*.expression=*/{}},
-            /* .halo_blur = */ {/*.source=*/getAttributeSource("a_halo_blur"), /*.expression=*/{}},
+            /* .fill_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(5), /*.expression=*/{}},
+            /* .halo_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(6), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(7), /*.expression=*/{}},
+            /* .halo_width = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(8), /*.expression=*/{}},
+            /* .halo_blur = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(9), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,

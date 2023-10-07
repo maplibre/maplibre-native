@@ -6,8 +6,6 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/context.hpp>
 
-#include <mbgl/gfx/renderable.hpp>
-
 namespace mbgl {
 namespace gfx {
 

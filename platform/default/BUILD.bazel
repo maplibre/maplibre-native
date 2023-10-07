@@ -55,7 +55,7 @@ cc_library(
         "src/mbgl/util/thread_local.cpp",
         "src/mbgl/util/utf.cpp",
     ] + select({
-        "//:metal_renderer": [],
+        "//:metal_renderer": ["src/mbgl/mtl/headless_backend.cpp"],
         "//conditions:default": ["src/mbgl/gl/headless_backend.cpp"],
     }) + select({
         "//:linux": [
@@ -89,7 +89,7 @@ cc_library(
         "include/mbgl/storage/sqlite3.hpp",
         "include/mbgl/text/unaccent.hpp",
     ] + select({
-        "//:metal_renderer": [],
+        "//:metal_renderer": ["include/mbgl/mtl/headless_backend.hpp"],
         "//conditions:default": ["include/mbgl/gl/headless_backend.hpp"],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,

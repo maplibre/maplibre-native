@@ -246,10 +246,10 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     changeLayerIndex(imageLayerGroup, newLayerIndex, changes);
 }
 
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idTexturePosAttribName = StringIndexer::get("a_texture_pos");
-static const StringIdentity idTexImage0Name = StringIndexer::get("u_image0");
-static const StringIdentity idTexImage1Name = StringIndexer::get("u_image1");
+static const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
+static const StringIdentity idTexturePosAttribName = stringIndexer().get("a_texture_pos");
+static const StringIdentity idTexImage0Name = stringIndexer().get("u_image0");
+static const StringIdentity idTexImage1Name = stringIndexer().get("u_image1");
 
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
@@ -476,7 +476,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
                 if (geometryChanged) {
                     removeTile(renderPass, tileID);
-                    cleared = true;
+                    // cleared = true;
                 } else if (0 < updated) {
                     // If we modified drawables without removing them, we're done with this tile.
                     continue;

@@ -14,21 +14,9 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Short4, 1, "a_normal_ed"},
-        {2, gfx::AttributeDataType::Float4, 1, "a_color"},
-        {3, gfx::AttributeDataType::Float, 1, "a_base"},
-        {4, gfx::AttributeDataType::Float, 1, "a_height"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillExtrusionDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, false, FillExtrusionDrawablePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, FillExtrusionInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(8, true, false, FillExtrusionPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 struct alignas(16) FillExtrusionInterpolateUBO {

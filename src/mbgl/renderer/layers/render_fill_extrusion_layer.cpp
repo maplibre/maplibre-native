@@ -39,10 +39,10 @@ using namespace shaders;
 namespace {
 
 #if MLN_DRAWABLE_RENDERER
-static const StringIdentity idPosAttribName = StringIndexer::get("a_pos");
-static const StringIdentity idNormAttribName = StringIndexer::get("a_normal_ed");
+const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
+const StringIdentity idNormAttribName = stringIndexer().get("a_normal_ed");
 
-static const StringIdentity idIconTextureName = StringIndexer::get("u_image");
+const StringIdentity idIconTextureName = stringIndexer().get("u_image");
 
 #endif // MLN_DRAWABLE_RENDERER
 
@@ -341,6 +341,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -412,16 +413,17 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        gfx::VertexAttributeArray vertexAttrs;
-        const auto propertiesAsUniforms = vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
-                                                                                    FillExtrusionColor,
-                                                                                    FillExtrusionHeight,
-                                                                                    FillExtrusionPattern>(binders,
-                                                                                                          evaluated);
-
         if (!shaderGroup) {
             continue;
         }
+
+        gfx::VertexAttributeArray vertexAttrs;
+        propertiesAsUniforms.clear();
+        vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
+                                                  FillExtrusionColor,
+                                                  FillExtrusionHeight,
+                                                  FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
+
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
         if (!shader) {
@@ -429,7 +431,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(std::move(propertiesAsUniforms));
+            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
         // The non-pattern path in `render()` only uses two-pass rendering if there's translucency.

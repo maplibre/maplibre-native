@@ -14,25 +14,9 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Short4, 1, "a_normal_ed"},
-        {2, gfx::AttributeDataType::Float, 1, "a_base"},
-        {3, gfx::AttributeDataType::Float, 1, "a_height"},
-        {4, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-        {5, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillExtrusionDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, true, FillExtrusionDrawablePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(8, true, false, FillExtrusionDrawableTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, FillExtrusionInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(10, true, true, FillExtrusionPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(11, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct alignas(16) FillExtrusionDrawableTilePropsUBO {

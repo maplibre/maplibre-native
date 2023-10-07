@@ -24,18 +24,18 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idLineUBOName = StringIndexer::get("LineUBO");
-static const StringIdentity idLinePropertiesUBOName = StringIndexer::get("LinePropertiesUBO");
-static const StringIdentity idLineGradientUBOName = StringIndexer::get("LineGradientUBO");
-static const StringIdentity idLineGradientPropertiesUBOName = StringIndexer::get("LineGradientPropertiesUBO");
-static const StringIdentity idLinePatternUBOName = StringIndexer::get("LinePatternUBO");
-static const StringIdentity idLinePatternPropertiesUBOName = StringIndexer::get("LinePatternPropertiesUBO");
-static const StringIdentity idLineSDFUBOName = StringIndexer::get("LineSDFUBO");
-static const StringIdentity idLineSDFPropertiesUBOName = StringIndexer::get("LineSDFPropertiesUBO");
-static const StringIdentity idTexImageName = StringIndexer::get("u_image");
+static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
+static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
+static const StringIdentity idLineGradientUBOName = stringIndexer().get("LineGradientUBO");
+static const StringIdentity idLineGradientPropertiesUBOName = stringIndexer().get("LineGradientPropertiesUBO");
+static const StringIdentity idLinePatternUBOName = stringIndexer().get("LinePatternUBO");
+static const StringIdentity idLinePatternPropertiesUBOName = stringIndexer().get("LinePatternPropertiesUBO");
+static const StringIdentity idLineSDFUBOName = stringIndexer().get("LineSDFUBO");
+static const StringIdentity idLineSDFPropertiesUBOName = stringIndexer().get("LineSDFPropertiesUBO");
+static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
-static const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-static const StringIdentity idLinePermutationUBOName = StringIndexer::get("LinePermutationUBO");
+static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
                                const RenderTree& renderTree,
@@ -112,19 +112,14 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup,
     };
 
 #if MLN_RENDER_BACKEND_METAL
-    using LineShaderClass = shaders::ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>;
     if (permutationUpdated) {
-        const auto source = [this](const std::string_view& attrName) {
-            return hasPropertyAsUniform(attrName) ? AttributeSource::Constant : AttributeSource::PerVertex;
-        };
-
         const LinePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/source(LineShaderClass::attributes[2].name), /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/source(LineShaderClass::attributes[3].name), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/source(LineShaderClass::attributes[4].name), /*.expression=*/{}},
-            /* .gapwidth = */ {/*.source=*/source(LineShaderClass::attributes[5].name), /*.expression=*/{}},
-            /* .offset = */ {/*.source=*/source(LineShaderClass::attributes[6].name), /*.expression=*/{}},
-            /* .width = */ {/*.source=*/source(LineShaderClass::attributes[7].name), /*.expression=*/{}},
+            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(2), /*.expression=*/{}},
+            /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(3), /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(4), /*.expression=*/{}},
+            /* .gapwidth = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(5), /*.expression=*/{}},
+            /* .offset = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(6), /*.expression=*/{}},
+            /* .width = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(7), /*.expression=*/{}},
             /* .floorwidth = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
             /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
             /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},

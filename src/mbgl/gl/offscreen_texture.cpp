@@ -18,7 +18,7 @@ public:
         texture->setSize(size);
         texture->setFormat(gfx::TexturePixelType::RGBA, type);
         texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 #endif
     }
 

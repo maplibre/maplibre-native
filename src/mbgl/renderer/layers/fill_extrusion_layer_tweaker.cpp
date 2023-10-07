@@ -16,23 +16,28 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/string_indexer.hpp>
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/mtl/fill_extrusion.hpp>
+#include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
+#endif
+
 namespace mbgl {
 
 using namespace shaders;
 using namespace style;
 
 namespace {
-const StringIdentity idFillExtrusionDrawableUBOName = StringIndexer::get("FillExtrusionDrawableUBO");
-const StringIdentity idFillExtrusionDrawablePropsUBOName = StringIndexer::get("FillExtrusionDrawablePropsUBO");
-const StringIdentity idExpressionInputsUBOName = StringIndexer::get("ExpressionInputsUBO");
-const StringIdentity idFillExtrusionPermutationUBOName = StringIndexer::get("FillExtrusionPermutationUBO");
-const StringIdentity idTexImageName = StringIndexer::get("u_image");
+const StringIdentity idFillExtrusionDrawableUBOName = stringIndexer().get("FillExtrusionDrawableUBO");
+const StringIdentity idFillExtrusionDrawablePropsUBOName = stringIndexer().get("FillExtrusionDrawablePropsUBO");
+const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+const StringIdentity idFillExtrusionPermutationUBOName = stringIndexer().get("FillExtrusionPermutationUBO");
+const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 } // namespace
 
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = StringIndexer::get(
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = stringIndexer().get(
     "FillExtrusionDrawableTilePropsUBO");
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = StringIndexer::get(
+const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = stringIndexer().get(
     "FillExtrusionInterpolateUBO");
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
@@ -79,11 +84,11 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
     const auto zoom = parameters.state.getZoom();
     if (permutationUpdated) {
         const FillExtrusionPermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/getAttributeSource("a_color"), /*.expression=*/{}},
-            /* .base = */ {/*.source=*/getAttributeSource("a_base"), /*.expression=*/{}},
-            /* .height = */ {/*.source=*/getAttributeSource("a_height"), /*.expression=*/{}},
-            /* .pattern_from = */ {/*.source=*/getAttributeSource("a_pattern_from"), /*.expression=*/{}},
-            /* .pattern_to = */ {/*.source=*/getAttributeSource("a_pattern_to"), /*.expression=*/{}},
+            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(2), /*.expression=*/{}},
+            /* .base = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(3), /*.expression=*/{}},
+            /* .height = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(4), /*.expression=*/{}},
+            /* .pattern_from = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(4), /*.expression=*/{}},
+            /* .pattern_to = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(5), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,

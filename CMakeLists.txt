@@ -57,6 +57,10 @@ add_library(
 
 set(UBSAN_BLACKLIST ${PROJECT_SOURCE_DIR}/scripts/ubsan.blacklist)
 
+if (MLN_DRAWABLE_RENDERER)
+    set(MLN_LEGACY_RENDERER OFF)
+endif()
+
 target_compile_options(
     mbgl-compiler-options
     INTERFACE
@@ -1110,6 +1114,7 @@ if(MLN_WITH_OPENGL)
         list(APPEND INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/collision_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_extrusion_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_layer_ubo.hpp
@@ -1174,6 +1179,8 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_box.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion_pattern.hpp
@@ -1210,6 +1217,25 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background_pattern.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/circle.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_box.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_circle.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion_pattern.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/heatmap.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/heatmap_texture.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/hillshade.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/line.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/line_gradient.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/raster.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_icon.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_sdf.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     ]
     )
 endif()

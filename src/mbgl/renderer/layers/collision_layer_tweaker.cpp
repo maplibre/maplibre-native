@@ -9,6 +9,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/shaders/collision_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
@@ -18,21 +19,10 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
-namespace {
-
-struct alignas(16) CollisionUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 2> extrude_scale;
-    float camera_to_center_distance;
-    float overscale_factor;
-};
-static_assert(sizeof(CollisionUBO) == 20 * 4);
-
-} // namespace
-
-const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = StringIndexer::get(CollisionCircleUBOName);
-const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = StringIndexer::get(CollisionBoxUBOName);
+const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = stringIndexer().get(CollisionCircleUBOName);
+const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = stringIndexer().get(CollisionBoxUBOName);
 
 void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup,
                                     const RenderTree& renderTree,
