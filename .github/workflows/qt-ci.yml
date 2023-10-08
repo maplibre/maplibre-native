@@ -64,12 +64,6 @@ jobs:
             qt_version: 5.15.2
             qt_target: desktop
             compiler: ""
-          - name: Linux
-            os: ubuntu-22.04
-            build_type: RelWithDebInfo
-            qt_version: 6.5.3
-            qt_target: desktop
-            compiler: ""
           - name: Linux_GCC13
             os: ubuntu-22.04
             build_type: RelWithDebInfo
@@ -102,7 +96,7 @@ jobs:
             compiler: "llvm@17"
           - name: win64_msvc2019
             os: windows-2022
-            build_type: "RelWithDebInfo;Debug"
+            build_type: "RelWithDebInfo"
             compiler_type: x64
             compiler_version: 14.29
             qt_version: 5.15.2
@@ -111,31 +105,13 @@ jobs:
             qt_tools: ""
           - name: win64_msvc2019
             os: windows-2022
-            build_type: "RelWithDebInfo;Debug"
+            build_type: "RelWithDebInfo"
             compiler_type: x64
             compiler_version: 14.29
             qt_version: 6.5.3
             qt_target: desktop
             qt_arch: win64_msvc2019_64
             qt_tools: ""
-          - name: win64_mingw
-            os: windows-2022
-            build_type: RelWithDebInfo
-            compiler_type: mingw810_64
-            compiler_version: 8.10.0
-            qt_version: 5.15.2
-            qt_target: desktop
-            qt_arch: win64_mingw81
-            qt_tools: tools_mingw,qt.tools.win64_mingw810
-          - name: win64_mingw
-            os: windows-2022
-            build_type: RelWithDebInfo
-            compiler_type: mingw1120_64
-            compiler_version: 11.2.0
-            qt_version: 6.5.3
-            qt_target: desktop
-            qt_arch: win64_mingw
-            qt_tools: tools_mingw90
     runs-on: ${{ matrix.os }}
     env:
       BUILD_TYPE: ${{ matrix.build_type }}
@@ -158,6 +134,22 @@ jobs:
           auth_header="$(git config --local --get http.https://github.com/.extraheader)"
           git submodule sync --recursive
           git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
+
+      - name: Install test dependencies
+        if: runner.os == 'Linux' && matrix.compiler != ''
+        run: |
+          sudo apt-get install \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xinerama0 \
+            libxcb-xfixes0 \
+            libegl1-mesa \
+            fonts-noto-cjk
 
       - name: Install compiler
         id: install_compiler
@@ -242,13 +234,10 @@ jobs:
             -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
-            -DCMAKE_INSTALL_PREFIX="../install" \
             -DCMAKE_OSX_DEPLOYMENT_TARGET="${DEPLOYMENT_TARGET}" \
             -DCMAKE_OSX_ARCHITECTURES="${DEPLOYMENT_ARCH}" \
-            -DMLN_WITH_QT=ON \
-            -DMLN_QT_DEPLOYMENT=ON
+            -DMLN_WITH_QT=ON
           ninja
-          ninja install
 
       - name: Build maplibre-native (Linux, Qt5)
         if: runner.os == 'Linux' && matrix.qt_version == '5.15.2'
@@ -267,13 +256,10 @@ jobs:
             -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
-            -DCMAKE_INSTALL_PREFIX="../install" \
-            -DMLN_WITH_QT=ON \
-            -DMLN_QT_DEPLOYMENT=ON
+            -DMLN_WITH_QT=ON
           ninja
-          ninja install
 
-      - name: Build maplibre-native (Linux, Qt6, custom compiler)
+      - name: Build maplibre-native (Linux, Qt6, custom compiler, internal libraries)
         if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler != ''
         run: |
           mkdir build-internal && cd build-internal
@@ -283,10 +269,16 @@ jobs:
             -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
             -DMLN_WITH_QT=ON \
-            -DMLN_QT_DEPLOYMENT=ON \
             -DMLN_QT_WITH_INTERNAL_ICU=ON \
             -DMLN_QT_WITH_INTERNAL_SQLITE=ON
           ninja
+
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler != ''
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: ctest --output-on-failure
+          working-directory: build
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
@@ -300,112 +292,5 @@ jobs:
             -DCMAKE_CONFIGURATION_TYPES="${BUILD_TYPE}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache.exe" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache.exe" \
-            -DCMAKE_INSTALL_PREFIX="../install" \
-            -DMLN_WITH_QT=ON \
-            -DMLN_QT_DEPLOYMENT=ON
+            -DMLN_WITH_QT=ON
           ninja.exe
-          ninja.exe install
-
-      - name: Create artifacts
-        shell: bash
-        env:
-          QT_ARCH: ${{ matrix.name }}
-          QT_VERSION: ${{ matrix.qt_version }}
-        run: |
-          pushd install
-          tar cjvf "../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2" ./*
-          popd
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
-          path: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}.tar.bz2
-
-  test-tarball:
-    needs: build
-    strategy:
-      matrix:
-        include:
-          - name: Linux
-            os: ubuntu-22.04
-            qt_version: 6.5.3
-            qt_target: desktop
-          - name: macOS
-            os: macos-12
-            qt_version: 6.5.3
-            qt_target: desktop
-    runs-on: ${{ matrix.os }}
-    env:
-      QT_ARCH: ${{ matrix.name }}
-      QT_VERSION: ${{ matrix.qt_version }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: source
-          fetch-depth: 0
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
-
-      - name: Download Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          aqtversion: ==2.1.*
-          version: ${{ env.QT_VERSION }}
-          dir: ${{ github.workspace }}
-          target: ${{ matrix.qt_target }}
-
-      - name: Setup Xcode
-        if: runner.os == 'macOS'
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
-      - name: Build test app
-        run: |
-          mkdir install && cd install
-          tar xf "../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2"
-          cd ..
-          export CMAKE_PREFIX_PATH="$PWD/install"
-          mkdir build && cd build
-          cmake ../source/platform/qt/app/
-          make
-
-  release:
-    name: Release QMapLibreGL
-    if: github.ref_type == 'tag'
-    runs-on: ubuntu-22.04
-    needs: test-tarball
-    strategy:
-      max-parallel: 1
-      matrix:
-        name: [Linux, macOS, win64_msvc2019, win64_mingw]
-        qt_version: [5.15.2, 6.5.3]
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
-
-      - name: Name tarball
-        env:
-          TAG_NAME: ${{ github.ref_name }}
-          TAG_PLATFORM: ${{ matrix.name }}
-          QT_VERSION: ${{ matrix.qt_version }}
-        run: |
-          mv "maplibre-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2" "QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2"
-
-      - name: Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: QMapLibreGL_*.tar.bz2
-          allowUpdates: true
-          draft: true
