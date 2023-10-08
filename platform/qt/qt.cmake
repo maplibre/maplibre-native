@@ -1,16 +1,7 @@
-message(STATUS "Configuring GL-Native with Qt bindings")
+message(STATUS "Configuring MapLibre Native with Qt platform")
 
-file(READ "${PROJECT_SOURCE_DIR}/platform/qt/VERSION" MLN_QT_VERSION)
-string(REGEX REPLACE "\n" "" MLN_QT_VERSION "${MLN_QT_VERSION}") # get rid of the newline at the end
-set(MLN_QT_VERSION_COMPATIBILITY 2.0.0)
-message(STATUS "Version ${MLN_QT_VERSION}")
-
-option(MLN_QT_LIBRARY_ONLY "Build only libraries" OFF)
-option(MLN_QT_STATIC "Build MapLibre GL Qt bindings staticly" OFF)
-option(MLN_QT_INSIDE_PLUGIN "Build QMapLibreGL as OBJECT library, so it can be bundled into separate single plugin lib." OFF)
-option(MLN_QT_WITH_HEADLESS "Build MapLibre GL Qt with headless support" ON)
-option(MLN_QT_WITH_INTERNAL_SQLITE "Build MapLibre GL Qt bindings with internal sqlite" OFF)
-option(MLN_QT_DEPLOYMENT "Autogenerate files necessary for deployment" OFF)
+option(MLN_QT_LIBRARY_ONLY "Build only MapLibre Native Qt bindings libraries" OFF)
+option(MLN_QT_WITH_INTERNAL_SQLITE "Build MapLibre Native Qt bindings with internal sqlite" OFF)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(Threads REQUIRED)
@@ -46,13 +37,6 @@ find_package(Qt${QT_VERSION_MAJOR}
                         Network
              REQUIRED)
 
-if(NOT MLN_QT_LIBRARY_ONLY)
-    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
-    if (Qt6_FOUND)
-        find_package(Qt${QT_VERSION_MAJOR}OpenGLWidgets REQUIRED)
-    endif()
-endif()
-
 if(NOT MLN_QT_WITH_INTERNAL_SQLITE)
     find_package(Qt${QT_VERSION_MAJOR}Sql REQUIRED)
 else()
@@ -69,15 +53,6 @@ if (MSVC)
             set(${flags_var} "${${flags_var}}" PARENT_SCOPE)
         endforeach()
     endforeach()
-endif()
-
-if(ANDROID)
-    message(STATUS "Building for ABI: ${ANDROID_ABI}")
-    set(CMAKE_STATIC_LIBRARY_SUFFIX "_${ANDROID_ABI}.a")
-elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
-    set(CMAKE_DEBUG_POSTFIX "_debug")
-elseif(MSVC OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
 target_sources(
@@ -108,10 +83,10 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,default/src/mbgl/storage/sqlite3.cpp,qt/src/mbgl/sqlite3.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        $<$<BOOL:${MLN_QT_WITH_HEADLESS}>:${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp>
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/headless_backend_qt.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_file_source.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/http_request.cpp
@@ -128,6 +103,11 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/timer_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/utf.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_observer.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.cpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.hpp
 )
 
 target_compile_definitions(
@@ -141,7 +121,6 @@ target_include_directories(
     PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include
 )
 
-include(GNUInstallDirs)
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
 
 set_property(TARGET mbgl-core PROPERTY AUTOMOC ON)
@@ -164,221 +143,29 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Network
 )
 
-# Interface library for object linking
-add_library(mbgl-core-interface INTERFACE)
-target_link_libraries(
-    mbgl-core-interface
-    INTERFACE
-        $<BUILD_INTERFACE:mbgl-core> $<TARGET_OBJECTS:mbgl-core>
-        $<BUILD_INTERFACE:mbgl-vendor-parsedate> $<TARGET_OBJECTS:mbgl-vendor-parsedate>
-        $<BUILD_INTERFACE:mbgl-vendor-nunicode> $<TARGET_OBJECTS:mbgl-vendor-nunicode>
-        $<BUILD_INTERFACE:mbgl-vendor-csscolorparser> $<TARGET_OBJECTS:mbgl-vendor-csscolorparser>
-        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
-        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<TARGET_OBJECTS:mbgl-vendor-sqlite>>
-)
-export(TARGETS mbgl-core-interface FILE MapboxCoreTargets.cmake APPEND)
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if (MLN_QT_WITH_INTERNAL_ICU)
         target_link_libraries(mbgl-core PUBLIC $<BUILD_INTERFACE:mbgl-vendor-icu>)
-        target_link_libraries(mbgl-core-interface INTERFACE $<BUILD_INTERFACE:mbgl-vendor-icu> $<TARGET_OBJECTS:mbgl-vendor-icu>)
     else()
         target_link_libraries(mbgl-core PUBLIC ICU::uc)
     endif()
 endif()
 
-set(qmaplibregl_headers
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/QMapLibreGL
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/export.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/map.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Map
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/settings.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Settings
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/types.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Types
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/utils.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/Utils
-)
-
-if (MLN_QT_INSIDE_PLUGIN)
-    add_library(qmaplibregl OBJECT)
-elseif(MLN_QT_STATIC)
-    add_library(qmaplibregl STATIC)
-else()
-    add_library(qmaplibregl SHARED)
-endif()
-
-target_sources(
-    qmaplibregl
-    PRIVATE
-    ${qmaplibregl_headers}
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/map.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/map_p.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/settings.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/types.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/map_observer.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/map_observer.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/map_renderer.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/map_renderer.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_backend.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/renderer_observer.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/scheduler.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/conversion.hpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/geojson.cpp
-    ${PROJECT_SOURCE_DIR}/platform/qt/src/utils/geojson.hpp
-)
-
-# Linux/Mac: Set framework, version and headers
-set_target_properties(
-    qmaplibregl PROPERTIES
-    AUTOMOC ON
-    EXPORT_NAME QMapLibreGL
-    OUTPUT_NAME QMapLibreGL
-    VERSION ${MLN_QT_VERSION}
-    SOVERSION ${MLN_QT_VERSION_COMPATIBILITY}
-    PUBLIC_HEADER "${qmaplibregl_headers}"
-)
-if (Qt6_FOUND AND COMMAND qt_enable_autogen_tool)
-    qt_enable_autogen_tool(qmaplibregl "moc" ON)
-endif()
-if (APPLE AND NOT MLN_QT_STATIC AND NOT MLN_QT_INSIDE_PLUGIN)
-    set_target_properties(
-        qmaplibregl PROPERTIES
-        FRAMEWORK ON
-        FRAMEWORK_VERSION A
-        MACOSX_FRAMEWORK_IDENTIFIER org.maplibre.QMapLibreGL
-        MACOSX_FRAMEWORK_BUNDLE_VERSION ${MLN_QT_VERSION}
-        MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${MLN_QT_VERSION}
-    )
-    target_include_directories(
-        qmaplibregl
-        INTERFACE
-            $<INSTALL_INTERFACE:lib/QMapLibreGL.framework>
+# Object library list
+get_directory_property(MLN_QT_HAS_PARENT PARENT_DIRECTORY)
+if(MLN_QT_HAS_PARENT)
+    set(MLN_QT_VENDOR_LIBRARIES
+        mbgl-vendor-parsedate
+        mbgl-vendor-nunicode
+        mbgl-vendor-csscolorparser
+        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
+        $<$<AND:$<PLATFORM_ID:Linux>,$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>>:$<BUILD_INTERFACE:mbgl-vendor-icu>>
+        PARENT_SCOPE
     )
 endif()
-
-include(CMakePackageConfigHelpers)
-set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/QMapLibreGL/)
-
-configure_package_config_file(
-    "platform/qt/QMapLibreGLConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/QMapLibreGLConfig.cmake"
-    INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR}
-    PATH_VARS CMAKE_INSTALL_PREFIX CMAKE_INSTALL_INCLUDEDIR
-    CMAKE_INSTALL_LIBDIR NO_CHECK_REQUIRED_COMPONENTS_MACRO)
-
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/QMapLibreGLConfigVersion.cmake
-    VERSION ${MLN_QT_VERSION}
-    COMPATIBILITY AnyNewerVersion)
-
-install(EXPORT QMapLibreGLTargets
-    DESTINATION ${CMAKECONFIG_INSTALL_DIR}
-    COMPONENT development)
-
-export(EXPORT QMapLibreGLTargets)
-
-install(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/QMapLibreGLConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/QMapLibreGLConfigVersion.cmake"
-    DESTINATION ${CMAKECONFIG_INSTALL_DIR}
-    COMPONENT development)
-
-install(
-    DIRECTORY include/mbgl
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-    COMPONENT development
-)
-
-if(MLN_QT_DEPLOYMENT)
-    install(FILES ${PROJECT_SOURCE_DIR}/LICENSE.md
-            DESTINATION .)
-endif()
-
-# FIXME: Because of rapidjson conversion
-target_include_directories(
-    qmaplibregl
-    PRIVATE
-        ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/platform/qt/include
-)
-
-target_compile_definitions(
-    qmaplibregl
-    PRIVATE
-    QT_BUILD_MAPLIBREGL_LIB
-)
-
-target_link_libraries(
-    qmaplibregl
-    PUBLIC
-        Qt${QT_VERSION_MAJOR}::Core
-        Qt${QT_VERSION_MAJOR}::Gui
-        Qt${QT_VERSION_MAJOR}::Network
-    PRIVATE
-        $<BUILD_INTERFACE:mbgl-compiler-options>
-        $<BUILD_INTERFACE:mbgl-core-interface>
-)
-
-if (MLN_QT_STATIC OR MLN_QT_INSIDE_PLUGIN)
-    # Don't add import/export into public header because we don't build shared library.
-    # In case on MLN_QT_INSIDE_PLUGIN it's always OBJECT library and bundled into one
-    # single Qt plugin lib.
-    target_compile_definitions(
-        qmaplibregl
-        PUBLIC QT_MAPLIBREGL_STATIC
-    )
-endif()
-
-
-install(TARGETS qmaplibregl
-        EXPORT QMapLibreGLTargets
-        # Explicit set of DESTINATION is needed for older CMake versions.
-        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        FRAMEWORK DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/QMapLibreGL"
-)
 
 if(NOT MLN_QT_LIBRARY_ONLY)
-    set(mbglqt_sources
-        ${PROJECT_SOURCE_DIR}/platform/qt/app/main.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/app/mapwindow.cpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/app/mapwindow.hpp
-        ${PROJECT_SOURCE_DIR}/platform/qt/resources/common.qrc
-    )
-    if (COMMAND qt_add_executable)
-        qt_add_executable(mbgl-qt ${mbglqt_sources})
-    else()
-        add_executable(mbgl-qt ${mbglqt_sources})
-    endif()
-
-    # Qt public API should keep compatibility with old compilers for legacy systems
-    set_property(TARGET mbgl-qt PROPERTY CXX_STANDARD 98)
-    set_property(TARGET mbgl-qt PROPERTY AUTOMOC ON)
-
-    target_link_libraries(
-        mbgl-qt
-        PRIVATE
-            Qt${QT_VERSION_MAJOR}::Widgets
-            Qt${QT_VERSION_MAJOR}::Gui
-            $<$<BOOL:${Qt6_FOUND}>:Qt${QT_VERSION_MAJOR}::OpenGLWidgets>
-            mbgl-compiler-options
-            qmaplibregl
-    )
-
-    target_include_directories(
-        mbgl-qt
-        PRIVATE ${PROJECT_SOURCE_DIR}/platform/qt/include
-    )
-endif()
-
-# tests
-if(NOT MLN_QT_LIBRARY_ONLY AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    # test runner
     add_executable(
         mbgl-test-runner
         ${PROJECT_SOURCE_DIR}/platform/qt/test/main.cpp
@@ -416,19 +203,4 @@ if(NOT MLN_QT_LIBRARY_ONLY AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     endif()
 
     add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-endif()
-
-find_program(MLN_QDOC NAMES qdoc)
-
-if(MLN_QDOC)
-    add_custom_target(mbgl-qt-docs)
-
-    add_custom_command(
-        TARGET mbgl-qt-docs PRE_BUILD
-        COMMAND
-            ${MLN_QDOC}
-            ${PROJECT_SOURCE_DIR}/platform/qt/config.qdocconf
-            -outputdir
-            ${CMAKE_BINARY_DIR}/docs
-    )
 endif()
