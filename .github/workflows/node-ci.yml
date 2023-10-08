@@ -193,6 +193,7 @@ jobs:
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
+        shell: bash -leo pipefail {0}
         run: |
           cmake . -B build \
             -G Ninja \
