@@ -628,5 +628,5 @@ template class PolylineGenerator<gfx::DrawableBuilder::Impl::LineLayoutVertex,
 
 template class PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>>;
 
-} // namespace util
+} // namespace gfx
 } // namespace mbgl

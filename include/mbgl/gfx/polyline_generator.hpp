@@ -99,5 +99,5 @@ private:
     std::ptrdiff_t e3;
 };
 
-} // namespace util
+} // namespace gfx
 } // namespace mbgl
