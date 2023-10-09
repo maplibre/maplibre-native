@@ -23,7 +23,7 @@
 
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/string_indexer.hpp>
-#include <mbgl/renderer/layers/line_layer_tweaker.hpp>
+#include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
@@ -174,7 +174,6 @@ public:
         // finish
         builder->flush();
         for (auto& drawable : builder->clearDrawables()) {
-            drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Simple));
             drawable->setTileID(tileID);
             drawable->addTweaker(tweaker);
 
