@@ -124,13 +124,13 @@ void RenderLineLayer::prepare(const LayerPrepareParameters& params) {
 #endif // MLN_DRAWABLE_RENDERER
 }
 
+#if MLN_LEGACY_RENDERER
 void RenderLineLayer::upload(gfx::UploadPass& uploadPass) {
     if (!unevaluated.get<LineGradient>().getValue().isUndefined() && !colorRampTexture) {
         colorRampTexture = uploadPass.createTexture(*colorRamp);
     }
 }
 
-#if MLN_LEGACY_RENDERER
 void RenderLineLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
     if (parameters.pass == RenderPass::Opaque) {
