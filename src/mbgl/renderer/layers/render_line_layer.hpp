@@ -53,9 +53,9 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
-    void upload(gfx::UploadPass&) override;
 
 #if MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass&) override;
     void render(PaintParameters&) override;
 #endif
 
