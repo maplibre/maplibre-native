@@ -4,6 +4,9 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
+#include <mbgl/util/logging.hpp>
+
+#include <string>
 
 namespace mbgl {
 namespace gfx {
@@ -88,6 +91,35 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
     builder.setVertexAttributes(std::move(attrs));
 
     sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(polylineIndexes));
+}
+
+bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
+    if (target != mode && vertexCount()) {
+        // log error
+        using namespace std::string_literals;
+        auto to_string = [](Mode value) -> std::string {
+            switch (value) {
+                case Mode::Primitives:
+                    return "Mode::Primitives";
+                case Mode::Polylines:
+                    return "Mode::Polylines";
+                case Mode::Custom:
+                    return "Mode::Custom";
+                default:
+                    return "Unknown"; // Handle unknown enum values if needed
+            }
+        };
+        mbgl::Log::Error(
+            mbgl::Event::General,
+            "DrawableBuilder mode mismatch. Target is "s + to_string(target) + ", current is " + to_string(mode));
+
+        // the builder is building in a different mode
+        assert(false);
+        // TODO: throw?
+        return false;
+    }
+    mode = target;
+    return true;
 }
 
 } // namespace gfx

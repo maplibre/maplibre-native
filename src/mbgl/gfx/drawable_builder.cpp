@@ -46,7 +46,7 @@ UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
 
 void DrawableBuilder::flush() {
     if (curVertexCount()) {
-        if (Mode::Polylines == mode) {
+        if (Impl::Mode::Polylines == impl->getMode()) {
             // setup for polylines
             impl->setupForPolylines(*this);
         }
@@ -76,7 +76,7 @@ void DrawableBuilder::flush() {
         init();
 
         // reset mode
-        mode = Mode::Custom;
+        impl->setMode(Impl::Mode::Custom);
     }
     if (currentDrawable) {
         drawables.emplace_back(std::move(currentDrawable));
@@ -111,7 +111,7 @@ void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture,
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
     // check and set the current mode
-    if (!checkAndSetMode(Mode::Primitives)) return;
+    if (!impl->checkAndSetMode(Impl::Mode::Primitives)) return;
 
     const auto n = static_cast<uint16_t>(impl->vertices.elements());
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
@@ -130,7 +130,7 @@ void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1
 
 void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
     // check and set the current mode
-    if (!checkAndSetMode(Mode::Primitives)) return;
+    if (!impl->checkAndSetMode(Impl::Mode::Primitives)) return;
 
     const auto n = (uint16_t)impl->vertices.elements();
     impl->vertices.emplace_back(Impl::VT({{{x0, y0}}}));
@@ -145,7 +145,7 @@ void DrawableBuilder::appendTriangle(int16_t x0, int16_t y0) {
 
 void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     // check and set the current mode
-    if (!checkAndSetMode(Mode::Primitives)) return;
+    if (!impl->checkAndSetMode(Impl::Mode::Primitives)) return;
 
     addTriangle(x0, y0, x1, y0, x0, y1);
     appendTriangle(x1, y1);
@@ -175,14 +175,14 @@ void DrawableBuilder::setRawVertices(std::vector<uint8_t>&& data, std::size_t co
     impl->rawVerticesType = type;
 }
 
-void DrawableBuilder::setSegments(const gfx::DrawMode drawMode,
+void DrawableBuilder::setSegments(const gfx::DrawMode mode,
                                   std::vector<uint16_t> indexes,
                                   const SegmentBase* segments,
                                   const std::size_t segmentCount) {
-    setSegments(drawMode, std::make_shared<gfx::IndexVectorBase>(std::move(indexes)), segments, segmentCount);
+    setSegments(mode, std::make_shared<gfx::IndexVectorBase>(std::move(indexes)), segments, segmentCount);
 }
 
-void DrawableBuilder::setSegments(const gfx::DrawMode drawMode,
+void DrawableBuilder::setSegments(const gfx::DrawMode mode,
                                   gfx::IndexVectorBasePtr indexes,
                                   const SegmentBase* segments,
                                   const std::size_t segmentCount) {
@@ -217,7 +217,7 @@ void DrawableBuilder::setSegments(const gfx::DrawMode drawMode,
             seg.indexLength,
             seg.sortKey,
         };
-        impl->segments.emplace_back(createSegment(drawMode, std::move(segCopy)));
+        impl->segments.emplace_back(createSegment(mode, std::move(segCopy)));
     }
 }
 
@@ -270,27 +270,16 @@ void DrawableBuilder::addTriangles(const std::vector<uint16_t>& indexes,
 }
 
 std::size_t DrawableBuilder::curVertexCount() const {
-    return std::max(impl->rawVerticesCount, std::max(impl->vertices.elements(), impl->polylineVertices.elements()));
+    return impl->vertexCount();
 }
 
 void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates,
                                   const gfx::PolylineGeneratorOptions& options) {
     // mark the current mode
-    if (!checkAndSetMode(Mode::Polylines)) return;
+    if (!impl->checkAndSetMode(Impl::Mode::Polylines)) return;
 
     // append polyline
     impl->addPolyline(*this, coordinates, options);
-}
-
-bool DrawableBuilder::checkAndSetMode(Mode target) {
-    if (target != mode && curVertexCount()) {
-        // the builder is building in a different mode
-        assert(false);
-        // TODO: throw?
-        return false;
-    }
-    mode = target;
-    return true;
 }
 
 } // namespace gfx
