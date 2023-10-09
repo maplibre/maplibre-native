@@ -22,11 +22,11 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
-    float2 blur [[attribute(3)]];
-    float2 opacity [[attribute(4)]];
-    float2 gapwidth [[attribute(5)]];
-    float2 offset [[attribute(6)]];
-    float2 width [[attribute(7)]];
+    float2 blur [[attribute(2)]];
+    float2 opacity [[attribute(3)]];
+    float2 gapwidth [[attribute(4)]];
+    float2 offset [[attribute(5)]];
+    float2 width [[attribute(6)]];
 };
 
 struct FragmentStage {
@@ -59,7 +59,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
     const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
-    const v_lineprogress = (floor(float(a_data.z) / 4.0) + a_data.w * 64.0) * 2.0 / MAX_LINE_DISTANCE;
+    const float v_lineprogress = (floor(float(vertx.data.z) / 4.0) + vertx.data.w * 64.0) * 2.0 / MAX_LINE_DISTANCE;
     const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
 
     // x is 1 if it's a round cap, 0 otherwise
@@ -73,7 +73,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
 
     // Scale the extrusion vector down to a normal and then up by the line width of this vertex.
-    const float2 dist = outset * a_extrude * scale;
+    const float2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
 
     // Calculate the offset when drawing a line that is to the side of the actual line.
     // We do this by creating a vector that points towards the extrude, but rotate
@@ -81,7 +81,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // extrude vector points in another direction.
     const float u = 0.5 * a_direction;
     const float t = 1.0 - abs(u);
-    const float2 offset2 = offset * a_extrude * scale * v_normal.y * float2x2(t, -u, u, t);
+    const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
     const float4 projected_extrude = line.matrix * float4(dist / line.ratio, 0.0, 0.0);
     const float4 position = line.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
@@ -104,8 +104,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineGradientUBO& line [[buffer(7)]],
-                            device const LineGradientPermutationUBO& permutation [[buffer(10)]],
-                            metal::texture2d<float, metal::access::sample>* gradientTexture [[texture(0)]]) {
+                            device const LinePermutationUBO& permutation [[buffer(10)]],
+                            texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
     if (permutation.overdrawInspector) {
         return half4(1.0);
     }
@@ -121,7 +121,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // For gradient lines, v_lineprogress is the ratio along the entire line,
     // scaled to [0, 2^15), and the gradient ramp is stored in a texture.
     constexpr sampler sampler2d(coord::normalized, filter::linear);
-    const vec4 color = gradientTexture ? gradientTexture->sample(sampler, vec2(in.lineprogress, 0.5)) : vec4(1,0,1,1);
+    const float4 color = gradientTexture.sample(sampler2d, float2(in.lineprogress, 0.5));
 
     return half4(color * (alpha * in.opacity));
 }
