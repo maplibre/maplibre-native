@@ -2,11 +2,7 @@ if(TARGET mbgl-vendor-nunicode)
     return()
 endif()
 
-if(MLN_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
-    add_library(mbgl-vendor-nunicode OBJECT)
-else()
-    add_library(mbgl-vendor-nunicode STATIC)
-endif()
+add_library(mbgl-vendor-nunicode OBJECT)
 
 target_sources(
     mbgl-vendor-nunicode PRIVATE

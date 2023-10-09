@@ -90,8 +90,8 @@ target_link_libraries(
         atomic
         jnigraphics
         log
-        mbgl-vendor-icu
-        mbgl-vendor-sqlite
+        $<BUILD_INTERFACE:mbgl-vendor-icu>
+        $<BUILD_INTERFACE:mbgl-vendor-sqlite>
         z
 )
 

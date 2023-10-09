@@ -3,7 +3,7 @@ if(TARGET mbgl-vendor-sqlite)
 endif()
 
 add_library(
-    mbgl-vendor-sqlite STATIC
+    mbgl-vendor-sqlite OBJECT
     ${CMAKE_CURRENT_LIST_DIR}/sqlite/src/sqlite3.c
 )
 

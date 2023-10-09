@@ -144,7 +144,7 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Network
         $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,mbgl-vendor-sqlite,Qt${QT_VERSION_MAJOR}::Sql>
         $<$<PLATFORM_ID:Linux>:$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>,mbgl-vendor-icu,ICU::uc>>
-        mbgl-vendor-nunicode
+        $<BUILD_INTERFACE:mbgl-vendor-nunicode>
 )
 
 set(qmaplibregl_headers

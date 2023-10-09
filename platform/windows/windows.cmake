@@ -182,8 +182,8 @@ target_link_libraries(
         $<$<NOT:$<BOOL:${MLN_USE_BUILTIN_ICU}>>:ICU::uc>
         $<$<BOOL:${MLN_USE_BUILTIN_ICU}>:mbgl-vendor-icu>
         PNG::PNG
-        mbgl-vendor-nunicode
-        mbgl-vendor-sqlite
+        $<BUILD_INTERFACE:mbgl-vendor-nunicode>
+        $<BUILD_INTERFACE:mbgl-vendor-sqlite>
 )
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)

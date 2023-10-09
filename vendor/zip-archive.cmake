@@ -3,7 +3,7 @@ if(TARGET mbgl-vendor-zip-archive)
 endif()
 
 add_library(
-    mbgl-vendor-zip-archive STATIC
+    mbgl-vendor-zip-archive OBJECT
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/SSZipArchive.h
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/SSZipArchive.m
     ${CMAKE_CURRENT_LIST_DIR}/zip-archive/SSZipArchive/SSZipCommon.h

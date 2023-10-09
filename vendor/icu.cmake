@@ -3,7 +3,7 @@ if(TARGET mbgl-vendor-icu)
 endif()
 
 add_library(
-    mbgl-vendor-icu STATIC
+    mbgl-vendor-icu OBJECT
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/cmemory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/cstring.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ubidi.cpp

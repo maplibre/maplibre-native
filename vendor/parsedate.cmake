@@ -2,11 +2,7 @@ if(TARGET mbgl-vendor-parsedate)
     return()
 endif()
 
-if(MLN_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
-    add_library(mbgl-vendor-parsedate OBJECT)
-else()
-    add_library(mbgl-vendor-parsedate STATIC)
-endif()
+add_library(mbgl-vendor-parsedate OBJECT)
 
 target_sources(
     mbgl-vendor-parsedate PRIVATE

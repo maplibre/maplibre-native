@@ -1315,10 +1315,10 @@ target_link_libraries(
         Mapbox::Base::cheap-ruler-cpp
         mbgl-compiler-options
         mbgl-vendor-boost
-        mbgl-vendor-csscolorparser
+        $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
-        mbgl-vendor-parsedate
+        $<BUILD_INTERFACE:mbgl-vendor-parsedate>
         mbgl-vendor-polylabel
         mbgl-vendor-protozero
         mbgl-vendor-unique_resource
