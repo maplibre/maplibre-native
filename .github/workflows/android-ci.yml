@@ -6,11 +6,11 @@ on:
     branches:
       - main
     tags:
-      - 'android-*'
+      - "android-*"
 
   pull_request:
     branches:
-      - '*'
+      - "*"
 
 concurrency:
   # cancel jobs on PRs only
@@ -62,11 +62,18 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: "3.19.x"
+
+      - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
+
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
-      
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Cache node modules
         uses: actions/cache@v3
         env:
@@ -115,7 +122,7 @@ jobs:
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
-    
+
       - name: Build UI tests
         run: make android-ui-test-arm-v8
 
