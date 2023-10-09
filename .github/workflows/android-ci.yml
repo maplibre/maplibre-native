@@ -6,10 +6,10 @@ on:
     branches:
       - main
     tags:
-      - 'android-*'
+      - "android-*"
     paths:
       - CMakeLists.txt
-      - 'platform/android/**'
+      - "platform/android/**"
       - ".github/workflows/android-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -36,12 +36,18 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
-
       - uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 0
-      
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: "3.19.x"
+
+      - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
+
       - name: Cache node modules
         uses: actions/cache@v3
         env:
@@ -108,7 +114,7 @@ jobs:
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
-    
+
       - name: Build UI tests
         run: make android-ui-test-arm-v8
 
