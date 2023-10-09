@@ -194,9 +194,9 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
     for (std::size_t i = 0; i < segmentCount; ++i) {
         const auto& seg = segments[i];
 #if !defined(NDEBUG)
-        if (drawMode.type == DrawModeType::Triangles) {
+        if (mode.type == DrawModeType::Triangles) {
             assert(seg.indexLength % 3 == 0);
-        } else if (drawMode.type == DrawModeType::Lines) {
+        } else if (mode.type == DrawModeType::Lines) {
             assert(seg.indexLength % 2 == 0);
         }
         const auto vertexCount = curVertexCount();
