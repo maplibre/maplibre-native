@@ -18,6 +18,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
+#include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
 #endif
 
 namespace mbgl {
@@ -84,6 +85,10 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(2), /*.expression=*/{}},
             /* .base = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(3), /*.expression=*/{}},
             /* .height = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(4), /*.expression=*/{}},
+            /* .pattern_from = */
+            {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(4), /*.expression=*/{}},
+            /* .pattern_to = */
+            {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(5), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,
