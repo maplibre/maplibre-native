@@ -6,6 +6,7 @@ load(
     "MLN_DARWIN_PRIVATE_HEADERS",
     "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE",
+    "MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
     "MLN_GENERATED_DARWIN_STYLE_HEADERS",
     "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
@@ -43,6 +44,11 @@ filegroup(
 filegroup(
     name = "darwin_objcpp_opengl_srcs",
     srcs = MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE,
+    visibility = ["//visibility:public"],
+)
+filegroup(
+    name = "darwin_objcpp_custom_drawable_srcs",
+    srcs = MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE,
     visibility = ["//visibility:public"],
 )
 

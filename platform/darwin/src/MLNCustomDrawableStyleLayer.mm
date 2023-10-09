@@ -6,14 +6,14 @@
 #import "MLNStyleLayer_Private.h"
 #import "MLNGeometry_Private.h"
 
-#include <mbgl/style/layers/custom_layer.hpp>
+#include <mbgl/style/layers/custom_drawable_layer.hpp>
 #include <mbgl/math/wrap.hpp>
 
 class MLNCustomDrawableLayerHost;
 
 @interface MLNCustomDrawableStyleLayer ()
 
-@property (nonatomic, readonly) mbgl::style::CustomLayer *rawLayer;
+@property (nonatomic, readonly) mbgl::style::CustomDrawableLayer *rawLayer;
 
 @property (nonatomic, readonly, nullable) MLNMapView *mapView;
 
@@ -24,13 +24,13 @@ class MLNCustomDrawableLayerHost;
 @implementation MLNCustomDrawableStyleLayer
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
-    auto layer = std::make_unique<mbgl::style::CustomLayer>(identifier.UTF8String,
+    auto layer = std::make_unique<mbgl::style::CustomDrawableLayer>(identifier.UTF8String,
                                                             std::make_unique<MLNCustomDrawableLayerHost>(self));
     return self = [super initWithPendingLayer:std::move(layer)];
 }
 
-- (mbgl::style::CustomLayer *)rawLayer {
-    return (mbgl::style::CustomLayer *)super.rawLayer;
+- (mbgl::style::CustomDrawableLayer *)rawLayer {
+    return (mbgl::style::CustomDrawableLayer *)super.rawLayer;
 }
 
 - (MLNMapView *)mapView {
@@ -38,19 +38,6 @@ class MLNCustomDrawableLayerHost;
         return (MLNMapView *)self.style.stylable;
     }
     return nil;
-}
-
-// MARK: - Adding to and removing from a map view
-- (void)addToStyle:(MLNStyle *)style belowLayer:(MLNStyleLayer *)otherLayer {
-    self.style = style;
-    self.style.openGLLayers[self.identifier] = self;
-    [super addToStyle:style belowLayer:otherLayer];
-}
-
-- (void)removeFromStyle:(MLNStyle *)style {
-    [super removeFromStyle:style];
-    self.style.openGLLayers[self.identifier] = nil;
-    self.style = nil;
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
@@ -87,24 +74,15 @@ public:
         }
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &params) {
-        if(!layer) return;
+    void update(mbgl::RenderLayer& proxyLayer,
+                        mbgl::gfx::ShaderRegistry& shaders,
+                        mbgl::gfx::Context& context,
+                        const mbgl::TransformState& state,
+                        const std::shared_ptr<mbgl::UpdateParameters>&,
+                        const mbgl::RenderTree& renderTree,
+                        mbgl::UniqueChangeRequestVec& changes) {
 
-        MLNStyleLayerDrawingContext drawingContext = {
-            .size = CGSizeMake(params.width, params.height),
-            .centerCoordinate = CLLocationCoordinate2DMake(params.latitude, params.longitude),
-            .zoomLevel = params.zoom,
-            .direction = mbgl::util::wrap(params.bearing, 0., 360.),
-            .pitch = static_cast<CGFloat>(params.pitch),
-            .fieldOfView = static_cast<CGFloat>(params.fieldOfView),
-            .projectionMatrix = MLNMatrix4Make(params.projectionMatrix)
-        };
-        if (layer.mapView) {
-            [layer drawInMapView:layer.mapView withContext:drawingContext];
-        }
     }
-
-    void contextLost() {}
 
     void deinitialize() {
         if (layer == nil) return;
