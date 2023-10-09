@@ -386,10 +386,9 @@ public:
                                        std::unordered_set<StringIdentity>& propertiesAsUniforms) {
         // Read each property in the type pack
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
-        (readDataDrivenPaintProperty<DataDrivenPaintProperty>(
-            binders.template get<DataDrivenPaintProperty>(),
-            isConstant<DataDrivenPaintProperty>(evaluated),
-            propertiesAsUniforms),
+        (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
+                                                              isConstant<DataDrivenPaintProperty>(evaluated),
+                                                              propertiesAsUniforms),
          ...);
     }
 
@@ -401,7 +400,8 @@ protected:
 
     /// Place one property from a type pack into an attribute in this collection, replacing if it already exists.
     template <typename DataDrivenPaintProperty, typename Binder>
-    void readDataDrivenPaintProperty(const Binder& binder, const bool isConstant,
+    void readDataDrivenPaintProperty(const Binder& binder,
+                                     const bool isConstant,
                                      std::unordered_set<StringIdentity>& propertiesAsUniforms) {
         if (!binder) {
             return;
@@ -440,9 +440,8 @@ protected:
             const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
             const bool isInterpolated = binder->isInterpolated();
             const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-            assert(rawSize == static_cast<uint32_t>(isInterpolated
-                                                        ? sizeof(typename InterpType::Value)
-                                                        : sizeof(typename Type::Value)));
+            assert(rawSize == static_cast<uint32_t>(isInterpolated ? sizeof(typename InterpType::Value)
+                                                                   : sizeof(typename Type::Value)));
             assert(sharedVector->getRawCount() == binder->getVertexCount());
             attrib->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
         } else {
@@ -452,7 +451,6 @@ protected:
             }
         }
     }
-
 
     const UniqueVertexAttribute& add(const StringIdentity id, std::unique_ptr<VertexAttribute>&&);
 
