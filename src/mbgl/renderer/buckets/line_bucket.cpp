@@ -3,7 +3,7 @@
 #include <mbgl/style/layers/line_layer_impl.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/constants.hpp>
-#include <mbgl/util/polyline_generator.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 
 #include <cassert>
 #include <utility>
@@ -54,7 +54,7 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
                              const GeometryTileFeature& feature,
                              const CanonicalTileID& canonical) {
-    util::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
+    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
         vertices,
         LineProgram::layoutVertex,
         segments,
@@ -64,7 +64,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         [](auto& seg) -> Segment<LineAttributes>& { return seg; },
         triangles);
 
-    util::PolylineGeneratorOptions options;
+    gfx::PolylineGeneratorOptions options;
 
     options.type = feature.getType();
     const std::size_t len = [&coordinates] {
@@ -99,7 +99,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
             total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
         }
 
-        options.lineDistances = util::PolylineGeneratorDistances{
+        options.lineDistances = gfx::PolylineGeneratorDistances{
             *numericValue<double>(clip_start_it->second), *numericValue<double>(clip_end_it->second), total_length};
     }
 

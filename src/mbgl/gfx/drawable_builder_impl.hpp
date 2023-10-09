@@ -6,7 +6,7 @@
 #include <mbgl/gfx/vertex_vector.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/util/polyline_generator.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -43,7 +43,7 @@ public:
 
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
-                     const util::PolylineGeneratorOptions& options);
+                     const gfx::PolylineGeneratorOptions& options);
 
     void setupForPolylines(gfx::DrawableBuilder& builder);
 

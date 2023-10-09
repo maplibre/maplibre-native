@@ -1,4 +1,4 @@
-#include <mbgl/util/polyline_generator.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/constants.hpp>
@@ -13,7 +13,7 @@
 #include <memory>
 
 namespace mbgl {
-namespace util {
+namespace gfx {
 
 namespace {
 /*

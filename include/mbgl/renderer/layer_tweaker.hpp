@@ -75,11 +75,6 @@ public:
 
     void updateProperties(Immutable<style::LayerProperties>);
 
-    // protected:
-public:
-    /// Determine whether this tweaker should apply to the given drawable
-    bool checkTweakDrawable(const gfx::Drawable&) const;
-
     /// Calculate matrices for this tile.
     /// @param nearClipped If true, the near plane is moved further to enhance depth buffer precision.
     /// @param inViewportPixelUnits If false, the translation is scaled based on the current zoom.
@@ -92,6 +87,9 @@ public:
                               bool aligned = false);
 
 protected:
+    /// Determine whether this tweaker should apply to the given drawable
+    bool checkTweakDrawable(const gfx::Drawable&) const;
+
     std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;
 

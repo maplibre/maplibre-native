@@ -162,7 +162,7 @@ public:
         const auto size{util::EXTENT};
         GeometryCoordinates geom{{0, 0}, {size, 0}, {0, size}, {size, size}, {size / 3, size / 3}};
 
-        util::PolylineGeneratorOptions options;
+        gfx::PolylineGeneratorOptions options;
         options.beginCap = style::LineCapType::Round;
         options.endCap = style::LineCapType::Round;
         options.joinType = style::LineJoinType::Round;

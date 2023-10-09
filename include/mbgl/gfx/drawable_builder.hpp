@@ -5,7 +5,7 @@
 #include <mbgl/util/string_indexer.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/style/types.hpp>
-#include <mbgl/util/polyline_generator.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 
 #include <array>
 #include <memory>
@@ -206,7 +206,7 @@ public:
     virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
 
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
-    void addPolyline(const GeometryCoordinates& coordinates, const util::PolylineGeneratorOptions&);
+    void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
 protected:
     std::size_t curVertexCount() const;

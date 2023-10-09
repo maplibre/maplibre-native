@@ -3,7 +3,7 @@
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/style/types.hpp>
-#include <mbgl/util/polyline_generator.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -42,9 +42,9 @@ DrawableBuilder::Impl::LineLayoutVertex DrawableBuilder::Impl::layoutVertex(
 
 void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
                                         const GeometryCoordinates& coordinates,
-                                        const util::PolylineGeneratorOptions& options) {
+                                        const gfx::PolylineGeneratorOptions& options) {
     using namespace std::placeholders;
-    util::PolylineGenerator<DrawableBuilder::Impl::LineLayoutVertex, std::unique_ptr<Drawable::DrawSegment>> generator(
+    gfx::PolylineGenerator<DrawableBuilder::Impl::LineLayoutVertex, std::unique_ptr<Drawable::DrawSegment>> generator(
         polylineVertices,
         std::bind(&DrawableBuilder::Impl::layoutVertex, this, _1, _2, _3, _4, _5, _6),
         segments,

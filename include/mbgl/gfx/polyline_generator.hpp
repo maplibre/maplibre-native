@@ -15,7 +15,7 @@
 #include <optional>
 
 namespace mbgl {
-namespace util {
+namespace gfx {
 
 class PolylineGeneratorDistances {
 public:
