@@ -7,17 +7,17 @@ on:
       - main
       - topic/drawable
     tags:
-      - 'node-*'
+      - "node-*"
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
       - "platform/default/**"
-      - 'platform/node/**'
-      - 'platform/windows/**'
-      - 'platform/darwin/**'
-      - 'platform/macos/**'
-      - 'platform/ios/platform/darwin/**'
-      - 'platform/ios/platform/macos/**'
+      - "platform/node/**"
+      - "platform/windows/**"
+      - "platform/darwin/**"
+      - "platform/macos/**"
+      - "platform/ios/platform/darwin/**"
+      - "platform/ios/platform/macos/**"
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -33,17 +33,17 @@ on:
 
   pull_request:
     branches:
-      - '*'
+      - "*"
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
       - "platform/default/**"
-      - 'platform/node/**'
-      - 'platform/windows/**'
-      - 'platform/darwin/**'
-      - 'platform/macos/**'
-      - 'platform/ios/platform/darwin/**'
-      - 'platform/ios/platform/macos/**'
+      - "platform/node/**"
+      - "platform/windows/**"
+      - "platform/darwin/**"
+      - "platform/macos/**"
+      - "platform/ios/platform/darwin/**"
+      - "platform/ios/platform/macos/**"
       - ".github/workflows/node-ci.yml"
       - "bin/**"
       - "expression-test/**"
@@ -77,7 +77,7 @@ jobs:
             arch: x86_64
     continue-on-error: true
     env:
-      BUILDTYPE: 'Release'
+      BUILDTYPE: "Release"
 
     defaults:
       run:
@@ -122,7 +122,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             ccache \
-            cmake \
             ninja-build \
             pkg-config \
             xvfb \
@@ -149,6 +148,12 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Setup cmake (Linux)
+        if: runner.os == 'Linux' && runner.arch != 'arm64'
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: "3.19.x"
+
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@v1
@@ -163,7 +168,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: hendrikmuhs/ccache-action@v1
         with:
-          variant: 'sccache'
+          variant: "sccache"
           key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
@@ -188,6 +193,7 @@ jobs:
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
+        shell: bash -leo pipefail {0}
         run: |
           cmake . -B build \
             -G Ninja \
@@ -269,4 +275,3 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
-          

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
 option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
@@ -132,7 +132,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-if(MLN_WITH_QT AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+if(MLN_WITH_QT)
     add_library(mbgl-core OBJECT)
 else()
     add_library(mbgl-core STATIC)
