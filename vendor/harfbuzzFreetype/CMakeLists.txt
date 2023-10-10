@@ -66,3 +66,9 @@ target_compile_options(
     PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
 )
+
+target_compile_options(
+    harfbuzz-subset
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+)
