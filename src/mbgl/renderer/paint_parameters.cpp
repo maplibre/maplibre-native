@@ -103,53 +103,71 @@ gfx::DepthMode PaintParameters::depthModeFor3D() const {
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
 }
 
-void PaintParameters::clearStencil() {
-    nextStencilID = 1;
-    tileClippingMaskIDs.clear();
-
-#if MLN_RENDER_BACKEND_METAL
-    // Metal doesn't have an equivalent of `glClear`, so we clear the buffer by drawing zero to (0:0,0)
-    std::set<UnwrappedTileID> ids{{0, 0, 0}};
-    auto f = [](const auto& ii) -> const UnwrappedTileID& {
-        return ii;
-    };
-    renderTileClippingMasks(ids.cbegin(), ids.cend(), std::move(f), /*clear=*/true);
-#else
-    context.clearStencilBuffer(0b00000000);
-#endif
-}
-
 namespace {
 
 template <typename TIter>
 using GetTileIDFunc = std::function<const UnwrappedTileID&(const typename TIter::value_type&)>;
 using TileMaskIDMap = std::map<UnwrappedTileID, int32_t>;
 
-// Detects a difference in keys of renderTiles and tileClippingMaskIDs
+// `std::includes` adapted to unwrap arbitrary collection iterators
+template <class I1, class I2>
+bool includes(I1 beg1, const I1 end1, I2 beg2, const I2 end2, const GetTileIDFunc<I2>& f) {
+    for (; beg2 != end2; ++beg1) {
+        if (beg1 == end1) {
+            return false;
+        }
+        const auto id2 = f(*beg2);
+        if (id2 < beg1->first) {
+            return false;
+        } else if (!(beg1->first < id2)) {
+            ++beg2;
+        }
+    }
+    return true;
+}
+
+// Check whether the given set of tile IDs is a subset of the ones already rendered
 template <typename TIter>
-bool tileIDsIdentical(TIter beg, TIter end, GetTileIDFunc<TIter>& f, const TileMaskIDMap& idMap) {
-    if (static_cast<std::size_t>(std::distance(beg, end)) != idMap.size()) {
+bool tileIDsCovered(TIter beg, TIter end, GetTileIDFunc<TIter>& f, const TileMaskIDMap& idMap) {
+    if (idMap.size() < static_cast<std::size_t>(std::distance(beg, end))) {
         return false;
     }
     assert(std::is_sorted(beg, end, [&f](const auto& a, const auto& b) { return f(a) < f(b); }));
-    return std::equal(beg, end, idMap.cbegin(), [&f](const auto& ii, const auto& pair) { return f(ii) == pair.first; });
+    return includes(idMap.cbegin(), idMap.cend(), beg, end, f);
 }
 
+#if !MLN_LEGACY_RENDERER
+const UnwrappedTileID& unwrapIdentity(const UnwrappedTileID& value) {
+    return value;
+}
+#endif // !MLN_LEGACY_RENDERER
 } // namespace
 
-void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
-    auto f = [](const auto& ii) -> const UnwrappedTileID& {
-        return ii;
-    };
-    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), std::move(f), /*clear=*/false);
+void PaintParameters::clearStencil() {
+    nextStencilID = 1;
+    tileClippingMaskIDs.clear();
+
+#if MLN_RENDER_BACKEND_METAL
+    // Metal doesn't have an equivalent of `glClear`, so we clear the buffer by drawing zero to (0:0,0)
+    static const std::set<UnwrappedTileID> ids{{0, 0, 0}};
+    renderTileClippingMasks(ids.cbegin(), ids.cend(), &unwrapIdentity, /*clear=*/true);
+#else
+    context.clearStencilBuffer(0b00000000);
+#endif
 }
 
+#if MLN_LEGACY_RENDERER
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     auto f = [](const auto& ii) -> const UnwrappedTileID& {
         return ii.get().id;
     };
     renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), std::move(f), /*clear=*/false);
 }
+#else  // !MLN_LEGACY_RENDERER
+void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
+    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), &unwrapIdentity, /*clear=*/false);
+}
+#endif // MLN_LEGACY_RENDERER
 
 void PaintParameters::clearTileClippingMasks() {
     if (!tileClippingMaskIDs.empty()) {
@@ -177,20 +195,22 @@ const auto clipMaskDepthMode = gfx::DepthMode{
 
 template <typename TIter>
 void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&& f, bool clear) {
-    if (tileIDsIdentical(beg, end, f, tileClippingMaskIDs)) {
-        // The current stencil mask is for this source already; no need to draw another one.
-        return;
-    }
-
-    const auto count = std::distance(beg, end);
-    if (!clear && nextStencilID + count > maxStencilValue) {
-        // we'll run out of fresh IDs so we need to clear and start from scratch
-        clearStencil();
-    }
-
     if (!renderPass) {
         assert(false);
         return;
+    }
+
+    if (!clear) {
+        if (tileIDsCovered(beg, end, f, tileClippingMaskIDs)) {
+            // The current stencil mask is for this source already; no need to draw another one.
+            return;
+        }
+
+        const auto count = std::distance(beg, end);
+        if (nextStencilID + count > maxStencilValue) {
+            // we'll run out of fresh IDs so we need to clear and start from scratch
+            clearStencil();
+        }
     }
 
 #if !defined(NDEBUG)

@@ -95,8 +95,11 @@ public:
 
     // Stencil handling
 public:
+#if MLN_LEGACY_RENDERER
     void renderTileClippingMasks(const RenderTiles&);
+#else
     void renderTileClippingMasks(const std::set<UnwrappedTileID>&);
+#endif // MLN_LEGACY_RENDERER
 
     /// Clear any tile masks and the stencil buffer, if necessary
     void clearTileClippingMasks();
