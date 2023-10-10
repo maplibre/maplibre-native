@@ -65,6 +65,11 @@ class SymbolTextAndIconProgram;
 class CollisionBoxProgram;
 class CollisionCircleProgram;
 
+#if MLN_DRAWABLE_RENDERER
+class SymbolLayerTweaker;
+using SymbolLayerTweakerPtr = std::shared_ptr<SymbolLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class RenderSymbolLayer final : public RenderLayer {
 public:
     struct Programs {
@@ -97,11 +102,26 @@ public:
 
 protected:
 #if MLN_DRAWABLE_RENDERER
+    /// @brief Called by the RenderOrchestrator during RenderTree construction.
+    /// This event is run to indicate if the layer should render or not for the current frame.
+    /// @param willRender Indicates if this layer should render or not
+    /// @param changes The collection of current pending change requests
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
+
+    /// @brief Called when the layer index changes
+    /// This event is run when a layer is added or removed from the style.
+    /// @param newLayerIndex The new layer index for this layer
+    /// @param changes The collection of current pending change requests
+    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
+
+    /// Called when the style layer is removed
+    void layerRemoved(UniqueChangeRequestVec&) override;
+
     /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&) override;
+    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
-    void removeAllDrawables() override;
+    std::size_t removeAllDrawables() override;
 #endif // MLN_DRAWABLE_RENDERER
 
 private:
@@ -132,13 +152,14 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr symbolIconGroup;
-    gfx::ShaderGroupPtr symbolSDFIconGroup;
-    gfx::ShaderGroupPtr symbolSDFTextGroup;
+    gfx::ShaderGroupPtr symbolSDFGroup;
     gfx::ShaderGroupPtr symbolTextAndIconGroup;
 
     gfx::ShaderGroupPtr collisionBoxGroup;
     gfx::ShaderGroupPtr collisionCircleGroup;
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
+
+    LayerTweakerPtr collisionLayerTweaker;
 #endif // MLN_DRAWABLE_RENDERER
 };
 

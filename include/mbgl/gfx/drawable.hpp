@@ -18,7 +18,10 @@ namespace mbgl {
 
 class Color;
 class PaintParameters;
+class LayerTweaker;
 enum class RenderPass : uint8_t;
+
+using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
 
 namespace gfx {
 
@@ -68,7 +71,7 @@ public:
     const gfx::ShaderProgramBasePtr& getShader() const { return shader; }
 
     /// Set the shader to be used
-    void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
+    virtual void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// The pass on which we'll be rendered
     mbgl::RenderPass getRenderPass() const { return renderPass; }
@@ -131,7 +134,7 @@ public:
     bool getEnableStencil() const { return enableStencil; }
 
     /// Set stencil usage
-    void setEnableStencil(bool value) { enableStencil = value; }
+    virtual void setEnableStencil(bool value) { enableStencil = value; }
 
     /// not used for anything yet
     DrawPriority getDrawPriority() const { return drawPriority; }
@@ -139,19 +142,19 @@ public:
 
     /// Whether to enable depth testing
     bool getEnableDepth() { return enableDepth; }
-    void setEnableDepth(bool value) { enableDepth = value; }
+    virtual void setEnableDepth(bool value) { enableDepth = value; }
 
     /// Determines depth range within the layer for 2D drawables
     int32_t getSubLayerIndex() const { return subLayerIndex; }
 
     /// Set sub-layer index
-    void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
+    virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
 
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
 
     /// Set depth type
-    void setDepthType(DepthMaskType value) { depthType = value; }
+    virtual void setDepthType(DepthMaskType value) { depthType = value; }
 
     /// Uses 3D depth mode
     bool getIs3D() const { return is3D; }
@@ -181,7 +184,7 @@ public:
     const gfx::ColorMode& getColorMode() const;
 
     /// Set color mode
-    void setColorMode(const gfx::ColorMode&);
+    virtual void setColorMode(const gfx::ColorMode&);
 
     /// Get the vertex attributes that override default values in the shader program
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
@@ -234,6 +237,10 @@ public:
     /// Get drawable user-defined type
     size_t getType() const { return type; }
 
+    /// Associate the drawable with a layer tweaker.  This is used to manage the lifetime of the tweaker.
+    void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
+    const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
+
 protected:
     bool enabled = true;
     bool enableColor = true;
@@ -257,6 +264,7 @@ protected:
 
     Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
+    LayerTweakerPtr layerTweaker;
 
     std::size_t type = 0;
 };

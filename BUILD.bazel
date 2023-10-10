@@ -3,14 +3,14 @@ load(
     "//bazel:core.bzl",
     "MLN_CORE_HEADERS",
     "MLN_CORE_SOURCE",
-    "MLN_DRAWABLES_HEADERS",
-    "MLN_DRAWABLES_SOURCE",
     "MLN_DRAWABLES_GL_HEADERS",
     "MLN_DRAWABLES_GL_SOURCE",
+    "MLN_DRAWABLES_HEADERS",
     "MLN_DRAWABLES_MTL_HEADERS",
     "MLN_DRAWABLES_MTL_SOURCE",
-    "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_DRAWABLES_SOURCE",
     "MLN_GENERATED_OPENGL_SHADER_HEADERS",
+    "MLN_GENERATED_SHADER_HEADERS",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
@@ -90,17 +90,17 @@ cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE +
            MLN_GENERATED_STYLE_SOURCE + select({
-            ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
-            ":legacy_renderer": MLN_OPENGL_SOURCE,
-            ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
-            "//conditions:default": [],
-        }),
+        ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+        ":legacy_renderer": MLN_OPENGL_SOURCE,
+        ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+        "//conditions:default": [],
+    }),
     hdrs = MLN_CORE_HEADERS + select({
-            ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
-            ":legacy_renderer": MLN_OPENGL_HEADERS,
-            ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
-            "//conditions:default": [],
-        }),
+        ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+        ":legacy_renderer": MLN_OPENGL_HEADERS,
+        ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
+        "//conditions:default": [],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
         ":legacy_renderer": [
@@ -210,11 +210,11 @@ config_setting(
 string_flag(
     name = "renderer",
     build_setting_default = "legacy",
-    values=[
+    values = [
         "legacy",
         "drawable",
-        "metal"
-    ]
+        "metal",
+    ],
 )
 
 config_setting(
@@ -234,8 +234,8 @@ config_setting(
 config_setting(
     name = "metal_renderer",
     flag_values = {
-        ":renderer": "metal"
-    }
+        ":renderer": "metal",
+    },
 )
 
 exports_files(

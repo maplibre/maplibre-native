@@ -129,11 +129,15 @@ void Map::Impl::onWillStartRenderingFrame() {
     }
 }
 
-void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode, bool needsRepaint, bool placemenChanged) {
+void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
+                                          bool needsRepaint,
+                                          bool placemenChanged,
+                                          double frameTime) {
     rendererFullyLoaded = renderMode == RenderMode::Full;
 
     if (mode == MapMode::Continuous) {
-        observer.onDidFinishRenderingFrame({MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged});
+        observer.onDidFinishRenderingFrame(
+            {MapObserver::RenderMode(renderMode), needsRepaint, placemenChanged, frameTime});
 
         if (needsRepaint || transform.inTransition()) {
             onUpdate();

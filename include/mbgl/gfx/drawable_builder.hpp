@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/types.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <array>
 #include <memory>
@@ -137,12 +138,15 @@ public:
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
     /// The attribute names for vertex/position attributes
-    void setVertexAttrName(std::string value) { vertexAttrName = std::move(value); }
+    void setVertexAttrNameId(const StringIdentity id) { vertexAttrNameId = id; }
 
     /// @brief Attach the given texture at the given sampler location.
     /// @param texture Texture2D instance
     /// @param location A sampler location in the shader being used.
     void setTexture(const gfx::Texture2DPtr&, int32_t location);
+
+    /// Direct access to the current texture set
+    const gfx::Drawable::Textures& getTextures() const { return textures; }
 
     /// Add a tweaker to emitted drawable
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
@@ -203,7 +207,7 @@ protected:
 protected:
     std::string name;
     std::string drawableName;
-    std::string vertexAttrName;
+    StringIdentity vertexAttrNameId;
     mbgl::RenderPass renderPass;
     bool enabled = true;
     bool enableColor = true;
@@ -223,6 +227,8 @@ protected:
     struct Impl;
     std::unique_ptr<Impl> impl;
 };
+
+using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 
 } // namespace gfx
 } // namespace mbgl

@@ -5,20 +5,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "src/**"
-      - "test/**"
-      - "render-test/**"
-      - "expression-test/**"
-      - "include/**"
-      - ".github/workflows/linux-ci.yml"
-      - "vendor/**"
-      - "CMakeLists.txt"
-      - metrics/linux-gcc8-release-style.json
-      - WORKSPACE
-      - BUILD.bazel
-      - .bazelrc
-      - .bazelversion
 
   pull_request:
     branches:
@@ -30,12 +16,37 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  linux-build:
+  pre_job:
+    runs-on: ubuntu-22.04
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          paths: |
+            ["src/**",
+            "test/**",
+            "render-test/**",
+            "expression-test/**",
+            "include/**",
+            ".github/workflows/linux-ci.yml",
+            "vendor/**",
+            "CMakeLists.txt",
+            "metrics/linux-gcc8-release-style.json",
+            "WORKSPACE",
+            "BUILD.bazel",
+            ".bazelrc",
+            ".bazelversion"]
+
+  linux-build-and-test:
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: pre_job
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         renderer: [legacy, drawable]
-    runs-on: ubuntu-22.04
+    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,6 +59,8 @@ jobs:
           languages: cpp
 
       - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}
 
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -64,12 +77,13 @@ jobs:
             libjpeg-dev \
             libpng-dev \
             libglfw3-dev \
-            libwebp-dev
+            libwebp-dev \
+            libopengl0
 
-      - if: ${{ matrix.renderer }} == "drawable"
+      - if: matrix.renderer == 'drawable'
         run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
 
-      - if: ${{ matrix.renderer }} == "legacy"
+      - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
 
       - name: Build MapLibre Native Core
@@ -85,86 +99,20 @@ jobs:
         with:
           category: "/language:cpp"
 
-      - name: Archive mbgl-test-runner
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-test-runner
-          path: build/mbgl-test-runner
-          retention-days: 1
+      # unit tests
 
-      - name: Archive mbgl-render-test-runner
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-render-test-runner
-          path: build/mbgl-render-test-runner
-          retention-days: 1
-
-      - name: Archive mbgl-expression-test
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-expression-test
-          path: build/expression-test/mbgl-expression-test
-          retention-days: 1
-
-  linux-test:
-    needs: linux-build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
-
-      - name: Download mbgl-test-runner
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-test-runner
-
-      - run: chmod +x ./mbgl-test-runner
+      - run: chmod +x build/mbgl-test-runner
 
       - name: Run C++ tests
-        run: xvfb-run -a ./mbgl-test-runner
+        run: xvfb-run -a build/mbgl-test-runner
 
-  linux-expression-test:
-    needs: linux-build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download mbgl-expression-test
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-expression-test
+      # render tests
 
-      - run: chmod +x ./mbgl-expression-test
-
-      - name: Run expression test
-        run: ./mbgl-expression-test
-
-  linux-render-test:
-    needs: linux-build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
-
-      - uses: actions/checkout@v4
-
-      - name: Download mbgl-render-test-runner
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-render-test-runner
-
-      - run: chmod +x ./mbgl-render-test-runner
+      - run: chmod +x build/mbgl-render-test-runner
 
       - name: Run render test
         id: render_test
-        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
+        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure'
@@ -173,6 +121,13 @@ jobs:
           name: render-test-result
           path: |
             metrics/linux-gcc8-release-style.html
+      
+      # expression tests
+
+      - run: chmod +x build/expression-test/mbgl-expression-test
+
+      - name: Run expression test
+        run: build/expression-test/mbgl-expression-test
 
   linux-coverage:
     runs-on: ubuntu-22.04
@@ -225,3 +180,16 @@ jobs:
           files: ${{ env.coverage_report }}
           fail_ci_if_error: true
           verbose: true
+
+  linux-ci-result:
+    name: Linux CI Result
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    runs-on: ubuntu-22.04
+    needs:
+      - pre_job
+      - linux-build-and-test
+      - linux-coverage
+    steps:
+      - name: Mark result as failed
+        if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
+        run: exit 1

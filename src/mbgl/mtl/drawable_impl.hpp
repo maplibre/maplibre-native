@@ -8,11 +8,13 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLVertexDescriptor.hpp>
@@ -51,9 +53,18 @@ public:
     gfx::StencilMode stencilMode;
     gfx::CullFaceMode cullFaceMode;
     // GLfloat pointSize = 0.0f;
-    std::string vertexAttrName = "a_pos";
+    StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
 
     gfx::UniqueVertexBufferResource noBindingBuffer;
+
+    gfx::AttributeBindingArray attributeBindings;
+
+    MTLRenderPipelineStatePtr pipelineState;
+
+    std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
+
+    MTLDepthStencilStatePtr depthStencilState;
+    gfx::StencilMode previousStencilMode;
 };
 
 struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {

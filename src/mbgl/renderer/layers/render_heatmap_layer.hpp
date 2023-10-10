@@ -11,6 +11,13 @@
 
 namespace mbgl {
 
+#if MLN_DRAWABLE_RENDERER
+class HeatmapLayerTweaker;
+class HeatmapTextureLayerTweaker;
+using HeatmapLayerTweakerPtr = std::shared_ptr<HeatmapLayerTweaker>;
+using HeatmapTextureLayerTweakerPtr = std::shared_ptr<HeatmapTextureLayerTweaker>;
+#endif // MLN_DRAWABLE_RENDERER
+
 class RenderHeatmapLayer final : public RenderLayer {
 public:
     explicit RenderHeatmapLayer(Immutable<style::HeatmapLayer::Impl>);
@@ -34,9 +41,9 @@ private:
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-    void upload(gfx::UploadPass&) override;
 
 #if MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass&) override;
     void render(PaintParameters&) override;
 #endif
 
@@ -51,10 +58,12 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     /// Remove all drawables for the tile from the layer group
-    void removeTile(RenderPass, const OverscaledTileID&) override;
+    /// @return The number of drawables actually removed.
+    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
 
     /// Remove all the drawables for tiles
-    void removeAllDrawables() override;
+    /// @return The number of drawables actually removed.
+    std::size_t removeAllDrawables() override;
 #endif
 
     // Paint properties
@@ -77,6 +86,10 @@ private:
 
     using TextureVertexVector = gfx::VertexVector<HeatmapTextureLayoutVertex>;
     std::shared_ptr<TextureVertexVector> sharedTextureVertices;
+
+    // This is the layer tweaker for applying the off-screen texture to the framebuffer.
+    // The inherited layer tweaker is for applying tiles to the off-screen texture.
+    LayerTweakerPtr textureTweaker;
 #endif
 };
 

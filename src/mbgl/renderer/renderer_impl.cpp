@@ -152,11 +152,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif
 
         // Tweakers are run in the upload pass so they can set up uniforms.
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            if (layerGroup.getLayerTweaker()) {
-                layerGroup.getLayerTweaker()->execute(layerGroup, renderTree, parameters);
-            }
-        });
+        orchestrator.visitLayerGroups(
+            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
     }
 
     // Update the debug layer groups
@@ -207,12 +204,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     const auto drawable3DPass = [&] {
         const auto debugGroup(parameters.encoder->createDebugGroup("drawables-3d"));
         assert(parameters.pass == RenderPass::Pass3D);
-        parameters.currentLayer = 0;
 
-        // draw layer groups, opaque pass
+        // draw layer groups, 3D pass
+        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer++;
+            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
         });
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -395,10 +392,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Ends the RenderPass
     parameters.renderPass.reset();
-    const bool isMapModeContinuous = renderTreeParameters.mapMode == MapMode::Continuous;
-    if (isMapModeContinuous) {
-        parameters.encoder->present(parameters.backend.getDefaultRenderable());
-    }
+    parameters.encoder->present(parameters.backend.getDefaultRenderable());
 
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
@@ -406,7 +400,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
-        renderTreeParameters.placementChanged);
+        renderTreeParameters.placementChanged,
+        renderTree.getElapsedTime());
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

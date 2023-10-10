@@ -5,21 +5,20 @@ load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
     "xcodeproj",
-    "xcode_schemes",
 )
-load("//platform/ios/bazel:macros.bzl", "info_plist")
 load("//platform/ios/bazel:config.bzl", "BUILD_MODE", "BUNDLE_ID_PREFIX")
 load(
     "//platform/ios/bazel:files.bzl",
     "MLN_IOS_PRIVATE_HEADERS",
     "MLN_IOS_PUBLIC_HEADERS",
-    "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
-    "MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE",
     "MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE",
+    "MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE",
+    "MLN_IOS_PUBLIC_OBJCPP_SOURCE",
     "MLN_IOS_PUBLIC_OBJC_SOURCE",
     "MLN_IOS_SDK_HEADERS",
     "MLN_PUBLIC_IOS_APP_SOPURCE",
 )
+load("//platform/ios/bazel:macros.bzl", "info_plist")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
 
 configure_device_profiles()
@@ -30,9 +29,23 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
+# this can be removed once the legacy renderer is removed completely for iOS
+genrule(
+    name = "umbrella_header",
+    srcs = ["src/Mapbox.template.h"],
+    outs = ["src/Mapbox.h"],
+    cmd = select({
+        "//:metal_renderer": """
+        echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
+        cat $(location src/Mapbox.template.h) >> $@;
+    """,
+        "//conditions:default": "cat $(location src/Mapbox.template.h) >> $@"
+    }),
+)
+
 filegroup(
     name = "ios_public_hdrs",
-    srcs = MLN_IOS_PUBLIC_HEADERS,
+    srcs = MLN_IOS_PUBLIC_HEADERS + [":umbrella_header"],
     visibility = ["//visibility:public"],
 )
 
@@ -63,34 +76,6 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-apple_static_xcframework(
-    name = "Mapbox.static",
-    bundle_name = "Mapbox",
-    ios = {
-        "simulator": [
-            "x86_64",
-            "arm64",
-        ],
-        "device": ["arm64"],
-    },
-    minimum_os_versions = {"ios": "12.0"},
-    public_hdrs = [
-        ":ios_public_hdrs",
-        ":ios_sdk_hdrs",
-        "//platform/darwin:darwin_objc_hdrs",
-        "//platform/darwin:darwin_objcpp_hdrs",
-    ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objc_opengl_hdrs",
-            "//platform/darwin:darwin_objcpp_opengl_hdrs"
-        ],
-    }),
-    umbrella_header = "src/Mapbox.h",
-    visibility = ["//visibility:public"],
-    deps = ["//platform:ios-sdk"],
-)
-
 info_plist(
     name = "info_plist",
     out = "Info.plist",
@@ -101,6 +86,38 @@ info_plist(
     name = "info_static_plist",
     out = "Info-static.plist",
     base_info_plist = "framework/Info-static.plist",
+)
+
+info_plist(
+    name = "info_app_plist",
+    out = "Info-app.plist",
+    base_info_plist = "app/Info.plist",
+)
+
+public_hdrs = [
+    ":umbrella_header",
+    ":ios_public_hdrs",
+    ":ios_sdk_hdrs",
+    "//platform/darwin:darwin_objc_hdrs",
+    "//platform/darwin:darwin_objcpp_hdrs",
+    "//platform/darwin:generated_style_public_hdrs",
+]
+
+apple_static_xcframework(
+    name = "MapLibre.static",
+    bundle_name = "MapLibre",
+    ios = {
+        "simulator": [
+            "x86_64",
+            "arm64",
+        ],
+        "device": ["arm64"],
+    },
+    minimum_os_versions = {"ios": "12.0"},
+    public_hdrs = public_hdrs,
+    umbrella_header = "umbrella_header",
+    visibility = ["//visibility:public"],
+    deps = ["//platform:ios-sdk"],
 )
 
 apple_xcframework(
@@ -120,19 +137,8 @@ apple_xcframework(
         "device": ["arm64"],
     },
     minimum_os_versions = {"ios": "12.0"},
-    public_hdrs = [
-        ":ios_public_hdrs",
-        ":ios_sdk_hdrs",
-        "//platform/darwin:darwin_objc_hdrs",
-        "//platform/darwin:darwin_objcpp_hdrs",
-    ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objc_opengl_hdrs",
-            "//platform/darwin:darwin_objcpp_opengl_hdrs"
-        ],
-    }),
-    umbrella_header = "src/Mapbox.h",
+    public_hdrs = public_hdrs,
+    umbrella_header = "umbrella_header",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],
 )
@@ -183,7 +189,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["build/Info-app.plist"],
+    infoplists = ["info_app_plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
@@ -220,7 +226,7 @@ ios_application(
         "iphone",
         "ipad",
     ],
-    infoplists = ["build/Info-benchmark.plist"],
+    infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = ["//platform/ios/benchmark:bundle_resources"],
@@ -327,5 +333,5 @@ exports_files(
     MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE +
     MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_IOS_PUBLIC_OBJC_SOURCE +
-    MLN_PUBLIC_IOS_APP_SOPURCE
+    MLN_PUBLIC_IOS_APP_SOPURCE,
 )

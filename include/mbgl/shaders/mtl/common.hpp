@@ -1,8 +1,5 @@
 #pragma once
 
-#define MLN_MTL_UNIFORM_BLOCK(idx, vert, frag, struc) \
-    { idx, vert, frag, sizeof(struc), MLN_STRINGIZE(struc) }
-
 namespace mbgl {
 namespace shaders {
 
@@ -10,9 +7,24 @@ constexpr auto prelude = R"(
 #include <metal_stdlib>
 using namespace metal;
 
+// The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
+// in a byte (-128..127). We scale regular normals up to length 63, but there are also
+// "special" normals that have a bigger length (of up to 126 in this case).
+#define LINE_NORMAL_SCALE (1.0 / (127 / 2))
+
+// The attribute conveying progress along a line is scaled to [0, 2^15).
+#define MAX_LINE_DISTANCE 32767.0
+
+#define SDF_PX 8.0
+
+// OpenGL `mod` is `x-y*floor(x/y)` where `floor` rounds down.
+// Metal `fmod` is `x-y*trunc(x/y)` where `trunc` rounds toward zero.
+// This function provides GL-compatible modulus for porting GLSL shaders.
 template <typename T1, typename T2>
-inline auto mod(T1 x, T2 y) -> decltype(x - y * floor(x/y)) {
-    return x - y * metal::floor(x/y);
+inline auto glMod(T1 x, T2 y) { return x - y * metal::floor(x/y); }
+
+float radians(float degrees) {
+    return M_PI_F * degrees / 180.0;
 }
 
 enum class AttributeSource : int32_t {
@@ -67,9 +79,9 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
 }
 
 float valueFor(device const Attribute& attrib,
-               device const float& constValue,
+               const float constValue,
                thread const float2& vertexValue,
-               device const float& t,
+               const float t,
                device const ExpressionInputsUBO&) {
     switch (attrib.source) {
         case AttributeSource::PerVertex: return unpack_mix_float(vertexValue, t);
@@ -93,8 +105,8 @@ float4 colorFor(device const Attribute& attrib,
 // interpolated packed colors
 float4 colorFor(device const Attribute& attrib,
                 device const float4& constValue,
-                thread const float4& vertexValue,
-                device const float& t,
+                const float4 vertexValue,
+                const float t,
                 device const ExpressionInputsUBO&) {
     switch (attrib.source) {
         case AttributeSource::PerVertex: return unpack_mix_color(vertexValue, t);
@@ -103,14 +115,6 @@ float4 colorFor(device const Attribute& attrib,
         case AttributeSource::Constant: return constValue;
     }
 }
-
-// The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
-// in a byte (-128..127). We scale regular normals up to length 63, but there are also
-// "special" normals that have a bigger length (of up to 126 in this case).
-constant float LINE_NORMAL_SCALE = 1.0 / (127 / 2);
-
-// The attribute conveying progress along a line is scaled to [0, 2^15).
-constant float MAX_LINE_DISTANCE = 32767.0;
 
 struct alignas(16) LineUBO {
     float4x4 matrix;
@@ -179,7 +183,70 @@ struct alignas(16) LineGradientInterpolationUBO {
     float pad1, pad2, pad3;
 };
 
-// interpolated packed pattern
+struct alignas(16) SymbolDrawableTilePropsUBO {
+    /*bool*/ int is_text;
+    /*bool*/ int is_halo;
+    /*bool*/ int pitch_with_map;
+    /*bool*/ int is_size_zoom_constant;
+    /*bool*/ int is_size_feature_constant;
+    float size_t;
+    float size;
+    float padding;
+};
+static_assert(sizeof(SymbolDrawableTilePropsUBO) == 2 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDrawableInterpolateUBO {
+    float fill_color_t;
+    float halo_color_t;
+    float opacity_t;
+    float halo_width_t;
+    float halo_blur_t;
+    float pad1, pad2, pad3;
+};
+static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32, "unexpected padding");
+
+struct alignas(16) SymbolDrawableUBO {
+    float4x4 matrix;
+    float4x4 label_plane_matrix;
+    float4x4 coord_matrix;
+
+    float2 texsize;
+    float2 texsize_icon;
+
+    float gamma_scale;
+    float device_pixel_ratio;
+
+    float camera_to_center_distance;
+    float pitch;
+    /*bool*/ int rotate_symbol;
+    float aspect_ratio;
+    float fade_change;
+    float pad;
+};
+static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDrawablePaintUBO {
+    float4 fill_color;
+    float4 halo_color;
+    float opacity;
+    float halo_width;
+    float halo_blur;
+    float padding;
+};
+static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16, "unexpected padding");
+
+struct alignas(16) SymbolPermutationUBO {
+    Attribute fill_color;
+    Attribute halo_color;
+    Attribute opacity;
+    Attribute halo_width;
+    Attribute halo_blur;
+    int32_t /*bool*/ overdrawInspector;
+    float pad1, pad2, pad3;
+};
+static_assert(sizeof(SymbolPermutationUBO) == 4 * 16, "unexpected padding");
+
+
 float4 patternFor(device const Attribute& attrib,
                 device const float4& constValue,
                 thread const ushort4& vertexValue,
@@ -196,8 +263,7 @@ float4 patternFor(device const Attribute& attrib,
 // unpack pattern position
 inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,
                      const float2 pattern_size, const float tile_units_to_pixels, const float2 pos) {
-    
-    float2 offset = mod(mod(mod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
+    const float2 offset = glMod(glMod(glMod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 

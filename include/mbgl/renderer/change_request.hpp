@@ -54,14 +54,13 @@ protected:
  */
 class AddLayerGroupRequest : public ChangeRequest {
 public:
-    AddLayerGroupRequest(LayerGroupBasePtr layerGroup_, bool canReplace);
+    AddLayerGroupRequest(LayerGroupBasePtr layerGroup_);
     AddLayerGroupRequest(AddLayerGroupRequest &&other);
 
     void execute(RenderOrchestrator &) override;
 
 protected:
     LayerGroupBasePtr layerGroup;
-    bool replace;
 };
 
 /**
@@ -69,14 +68,14 @@ protected:
  */
 class RemoveLayerGroupRequest : public ChangeRequest {
 public:
-    RemoveLayerGroupRequest(int32_t layerIndex_)
-        : layerIndex(layerIndex_) {}
+    RemoveLayerGroupRequest(LayerGroupBasePtr layerGroup_)
+        : layerGroup(std::move(layerGroup_)) {}
     RemoveLayerGroupRequest(const RemoveLayerGroupRequest &) = default;
 
     void execute(RenderOrchestrator &) override;
 
 protected:
-    int32_t layerIndex;
+    LayerGroupBasePtr layerGroup;
 };
 
 class UpdateLayerGroupIndexRequest : public ChangeRequest {

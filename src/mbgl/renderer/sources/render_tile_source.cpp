@@ -17,6 +17,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <unordered_set>
 #endif
@@ -54,7 +55,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         float pad1, pad2, pad3;
     };
     static_assert(sizeof(DebugUBO) % 16 == 0);
-    constexpr auto DebugUBOName = "DebugUBO";
 
     // initialize
     auto& context = parameters.context;
@@ -67,7 +67,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     }
 
     // create a builder
-    constexpr auto VertexAttribName = "a_pos";
+    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
+    static const StringIdentity idDebugUBOName = stringIndexer().get("DebugUBO");
     std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder("debug-builder");
     builder->setShader(debugShader);
     builder->setRenderPass(renderPass);
@@ -75,7 +76,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     builder->setColorMode(gfx::ColorMode::unblended());
     builder->setCullFaceMode(gfx::CullFaceMode::disabled());
     builder->setEnableStencil(false);
-    builder->setVertexAttrName(VertexAttribName);
+    builder->setVertexAttrNameId(idVertexAttribName);
 
     // add or get the layer group for a debug type
     const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](
@@ -108,8 +109,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         texture->setImage(emptyImage);
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        constexpr auto DebugOverlayUniformName = "u_overlay";
-        samplerLocation = debugShader->getSamplerLocation(DebugOverlayUniformName);
+        static const StringIdentity idDebugOverlayUniformName = stringIndexer().get("u_overlay");
+        samplerLocation = debugShader->getSamplerLocation(idDebugOverlayUniformName);
     }
     assert(samplerLocation.has_value());
     if (!samplerLocation.has_value()) return;
@@ -120,7 +121,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // update existing drawable
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
+            uniforms.createOrUpdate(idDebugUBOName, &debugUBO, context);
         });
         return updatedCount;
     };
@@ -149,7 +150,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.createOrUpdate(DebugUBOName, &debugUBO, context);
+            uniforms.createOrUpdate(idDebugUBOName, &debugUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
         }

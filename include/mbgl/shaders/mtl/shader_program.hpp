@@ -10,26 +10,32 @@
 
 #include <optional>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 namespace mbgl {
 namespace shaders {
 struct AttributeInfo {
+    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::size_t count, std::string_view name);
     std::size_t index;
     gfx::AttributeDataType dataType;
     std::size_t count;
     std::string_view name;
+    StringIdentity nameID;
 };
 struct UniformBlockInfo {
+    UniformBlockInfo(std::size_t index, bool vertex, bool fragment, std::size_t size, std::string_view name);
     std::size_t index;
     bool vertex;
     bool fragment;
     std::size_t size;
     std::string_view name;
+    StringIdentity nameID;
 };
 struct TextureInfo {
+    TextureInfo(std::size_t index, std::string_view name);
     std::size_t index;
     std::string_view name;
+    StringIdentity nameID;
 };
 } // namespace shaders
 namespace mtl {
@@ -53,7 +59,7 @@ public:
                                                      const MTLVertexDescriptorPtr&,
                                                      const gfx::ColorMode& colorMode) const;
 
-    std::optional<uint32_t> getSamplerLocation(std::string_view name) const override;
+    std::optional<uint32_t> getSamplerLocation(const StringIdentity id) const override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     gfx::VertexAttributeArray& mutableVertexAttributes() override { return vertexAttributes; }
@@ -72,7 +78,7 @@ protected:
     MTLFunctionPtr fragmentFunction;
     UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
-    std::vector<std::string> textureBindings;
+    std::unordered_map<StringIdentity, std::size_t> textureBindings;
 };
 
 } // namespace mtl

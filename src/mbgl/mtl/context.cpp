@@ -4,14 +4,17 @@
 #include <mbgl/mtl/command_encoder.hpp>
 #include <mbgl/mtl/drawable_builder.hpp>
 #include <mbgl/mtl/layer_group.hpp>
+#include <mbgl/mtl/offscreen_texture.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/tile_layer_group.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
@@ -148,12 +151,9 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
-    std::vector<std::string> emptyProperties(0);
-    auto shaderGroup = shaders.getShaderGroup(name);
-    if (!shaderGroup) {
-        return nullptr;
-    }
-    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, emptyProperties));
+    const auto shaderGroup = shaders.getShaderGroup(name);
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
@@ -169,17 +169,32 @@ gfx::Texture2DPtr Context::createTexture2D() {
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    assert(false);
-    return nullptr;
+    return std::make_shared<RenderTarget>(*this, size, type);
 }
 
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
 
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+    if (buffer) {
+        buffer->update(data, size);
+        return false;
+    } else {
+        buffer = createUniformBuffer(data, size);
+        return true;
+    }
+}
+
 void Context::setDirtyState() {}
 
-std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size, gfx::TextureChannelDataType) {
-    assert(false);
-    return nullptr;
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
+                                                                       gfx::TextureChannelDataType type,
+                                                                       bool depth,
+                                                                       bool stencil) {
+    return std::make_unique<OffscreenTexture>(*this, size, type, depth, stencil);
+}
+
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
+    return createOffscreenTexture(size, type, false, false);
 }
 
 std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
@@ -204,7 +219,152 @@ void Context::visualizeStencilBuffer() {}
 void Context::visualizeDepthBuffer(float depthRangeSize) {}
 #endif // !defined(NDEBUG)
 
-void Context::clearStencilBuffer(int32_t) {}
+void Context::clearStencilBuffer(int32_t) {
+    // See `PaintParameters::clearStencil`
+    assert(false);
+}
+
+namespace {
+
+MTL::CompareFunction mapFunc(const gfx::DepthFunctionType func) {
+    switch (func) {
+        default:
+        case gfx::DepthFunctionType::Never:
+            return MTL::CompareFunction::CompareFunctionNever;
+        case gfx::DepthFunctionType::Less:
+            return MTL::CompareFunction::CompareFunctionLess;
+        case gfx::DepthFunctionType::Equal:
+            return MTL::CompareFunction::CompareFunctionEqual;
+        case gfx::DepthFunctionType::LessEqual:
+            return MTL::CompareFunction::CompareFunctionLessEqual;
+        case gfx::DepthFunctionType::Greater:
+            return MTL::CompareFunction::CompareFunctionGreater;
+        case gfx::DepthFunctionType::NotEqual:
+            return MTL::CompareFunction::CompareFunctionNotEqual;
+        case gfx::DepthFunctionType::GreaterEqual:
+            return MTL::CompareFunction::CompareFunctionGreaterEqual;
+        case gfx::DepthFunctionType::Always:
+            return MTL::CompareFunction::CompareFunctionAlways;
+    };
+}
+MTL::CompareFunction mapFunc(const gfx::StencilFunctionType func) {
+    switch (func) {
+        default:
+        case gfx::StencilFunctionType::Never:
+            return MTL::CompareFunction::CompareFunctionNever;
+        case gfx::StencilFunctionType::Less:
+            return MTL::CompareFunction::CompareFunctionLess;
+        case gfx::StencilFunctionType::Equal:
+            return MTL::CompareFunction::CompareFunctionEqual;
+        case gfx::StencilFunctionType::LessEqual:
+            return MTL::CompareFunction::CompareFunctionLessEqual;
+        case gfx::StencilFunctionType::Greater:
+            return MTL::CompareFunction::CompareFunctionGreater;
+        case gfx::StencilFunctionType::NotEqual:
+            return MTL::CompareFunction::CompareFunctionNotEqual;
+        case gfx::StencilFunctionType::GreaterEqual:
+            return MTL::CompareFunction::CompareFunctionGreaterEqual;
+        case gfx::StencilFunctionType::Always:
+            return MTL::CompareFunction::CompareFunctionAlways;
+    };
+}
+
+MTL::StencilOperation mapOperation(const gfx::StencilOpType op) {
+    switch (op) {
+        case gfx::StencilOpType::Zero:
+            return MTL::StencilOperation::StencilOperationZero;
+        default:
+        case gfx::StencilOpType::Keep:
+            return MTL::StencilOperation::StencilOperationKeep;
+        case gfx::StencilOpType::Replace:
+            return MTL::StencilOperation::StencilOperationReplace;
+        case gfx::StencilOpType::Increment:
+            return MTL::StencilOperation::StencilOperationIncrementClamp;
+        case gfx::StencilOpType::Decrement:
+            return MTL::StencilOperation::StencilOperationDecrementClamp;
+        case gfx::StencilOpType::Invert:
+            return MTL::StencilOperation::StencilOperationInvert;
+        case gfx::StencilOpType::IncrementWrap:
+            return MTL::StencilOperation::StencilOperationIncrementWrap;
+        case gfx::StencilOpType::DecrementWrap:
+            return MTL::StencilOperation::StencilOperationDecrementWrap;
+    }
+}
+
+void applyDepthMode(const gfx::DepthMode& depthMode, MTL::DepthStencilDescriptor* desc) {
+    desc->setDepthCompareFunction(mapFunc(depthMode.func));
+    desc->setDepthWriteEnabled(depthMode.mask == gfx::DepthMaskType::ReadWrite);
+    // depthMode.range ?
+}
+
+struct StencilModeVisitor {
+    MTL::StencilDescriptor* desc;
+
+    template <gfx::StencilFunctionType F>
+    void operator()(const gfx::StencilMode::SimpleTest<F>& mode) {
+        apply(mode.func, std::numeric_limits<uint32_t>::max());
+    }
+    template <gfx::StencilFunctionType F>
+    void operator()(const gfx::StencilMode::MaskedTest<F>& mode) {
+        apply(mode.func, mode.mask);
+    }
+
+    void apply(gfx::StencilFunctionType func, uint32_t mask) {
+        desc->setStencilCompareFunction(mapFunc(func));
+        desc->setReadMask(mask);
+        desc->setWriteMask(mask);
+    }
+};
+
+// helper type for the visitor #4
+void applyStencilMode(const gfx::StencilMode& stencilMode, MTL::StencilDescriptor* desc) {
+    mapbox::util::apply_visitor(StencilModeVisitor{desc}, stencilMode.test);
+
+    desc->setStencilFailureOperation(mapOperation(stencilMode.fail));
+    desc->setDepthFailureOperation(mapOperation(stencilMode.depthFail));
+    desc->setDepthStencilPassOperation(mapOperation(stencilMode.pass));
+}
+
+} // namespace
+
+MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& depthMode,
+                                                       const gfx::StencilMode& stencilMode,
+                                                       const mtl::RenderPass& renderPass) const {
+    auto depthStencilDescriptor = NS::TransferPtr(MTL::DepthStencilDescriptor::alloc()->init());
+    if (!depthStencilDescriptor) {
+        return {};
+    }
+
+    auto& device = backend.getDevice();
+    const auto& renderPassDescriptor = renderPass.getDescriptor();
+    const auto& renderable = renderPassDescriptor.renderable;
+    const auto& renderableResource = renderable.getResource<RenderableResource>();
+    if (const auto& rpd = renderableResource.getRenderPassDescriptor()) {
+        // Setting depth/stencil properties when the corresponding target textures aren't set causes, e.g.:
+        // `Draw Errors Validation MTLDepthStencilDescriptor sets depth test but MTLRenderPassDescriptor has a nil
+        // depthAttachment texture`
+        if (auto* depthTarget = rpd->depthAttachment()) {
+            if (auto* tex = depthTarget->texture()) {
+                applyDepthMode(depthMode, depthStencilDescriptor.get());
+            }
+        }
+        if (auto* stencilTarget = rpd->stencilAttachment()) {
+            if (auto* tex = stencilTarget->texture()) {
+                auto stencilDescriptor = NS::TransferPtr(MTL::StencilDescriptor::alloc()->init());
+                if (!stencilDescriptor) {
+                    return {};
+                }
+
+                applyStencilMode(stencilMode, stencilDescriptor.get());
+
+                depthStencilDescriptor->setFrontFaceStencil(stencilDescriptor.get());
+                depthStencilDescriptor->setBackFaceStencil(stencilDescriptor.get());
+            }
+        }
+    }
+
+    return NS::TransferPtr(device->newDepthStencilState(depthStencilDescriptor.get()));
+}
 
 } // namespace mtl
 } // namespace mbgl

@@ -118,9 +118,11 @@ public:
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
-    UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
+    Framebuffer createFramebuffer(const gfx::Texture2D& color);
 
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
+
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size) override;
 #endif
 
     void setDirtyState() override;
@@ -170,9 +172,8 @@ private:
     State<value::CullFaceSide> cullFaceSide;
     State<value::CullFaceWinding> cullFaceWinding;
 
-    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
-
 public:
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
                                                                 gfx::TexturePixelType,
                                                                 gfx::TextureChannelDataType) override;

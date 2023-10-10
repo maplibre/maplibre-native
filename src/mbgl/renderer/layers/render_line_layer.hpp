@@ -53,13 +53,10 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
-    void upload(gfx::UploadPass&) override;
 
 #if MLN_LEGACY_RENDERER
+    void upload(gfx::UploadPass&) override;
     void render(PaintParameters&) override;
-#endif
-#if MLN_DRAWABLE_RENDERER
-    void updateLayerTweaker();
 #endif
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
@@ -97,13 +94,6 @@ private:
     gfx::ShaderGroupPtr linePatternShaderGroup;
 
     gfx::DrawableTweakerPtr iconTweaker;
-    LineLayerTweakerPtr tweaker;
-
-#if MLN_RENDER_BACKEND_METAL
-    std::vector<std::string> propertiesAsUniforms;
-#endif // MLN_RENDER_BACKEND_METAL
-
-    bool overdrawInspector = false;
 #endif
 };
 

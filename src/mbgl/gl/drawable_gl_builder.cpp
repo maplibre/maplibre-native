@@ -22,7 +22,7 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableGLBuilder::createSegment(gfx
 void DrawableGLBuilder::init() {
     auto& drawableGL = static_cast<DrawableGL&>(*currentDrawable);
 
-    drawableGL.setVertexAttrName(vertexAttrName);
+    drawableGL.setVertexAttrNameId(vertexAttrNameId);
 
     if (impl->rawVerticesCount) {
         auto raw = impl->rawVertices;
@@ -43,6 +43,7 @@ void DrawableGLBuilder::init() {
     impl->buildIndexes.clear();
     impl->segments.clear();
     impl->vertices.clear();
+    textures.clear();
 }
 
 } // namespace gl

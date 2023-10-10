@@ -10,12 +10,14 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
-
 using namespace shaders;
+
+static const StringIdentity idRasterDrawableUBOName = stringIndexer().get("RasterDrawableUBO");
 
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const RenderTree& renderTree,
@@ -23,6 +25,10 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
 
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+        if (!checkTweakDrawable(drawable)) {
+            return;
+        }
+
         const auto spinWeights = [](float spin) -> std::array<float, 4> {
             spin = util::deg2radf(spin);
             const float s = std::sin(spin);
@@ -75,13 +81,13 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             /*.brightness_high = */ evaluated.get<RasterBrightnessMax>(),
             /*.saturation_factor = */ saturationFactor(evaluated.get<RasterSaturation>()),
             /*.contrast_factor = */ contrastFactor(evaluated.get<RasterContrast>()),
-            /* .overdrawInspector = */ overdrawInspector,
+            /*.overdrawInspector = */ overdrawInspector,
             0,
             0,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate("RasterDrawableUBO", &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idRasterDrawableUBOName, &drawableUBO, parameters.context);
     });
 }
 

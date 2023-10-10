@@ -20,9 +20,9 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
-#include <mbgl/gl/render_target_gl.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 #include <mbgl/gl/texture2d.hpp>
+#include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #endif
 
@@ -432,6 +432,16 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setColorMode(colorMode);
     setCullFaceMode(gfx::CullFaceMode::disabled());
 }
+
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+    if (buffer) {
+        buffer->update(data, size);
+        return false;
+    } else {
+        buffer = createUniformBuffer(data, size);
+        return true;
+    }
+}
 #endif
 
 void Context::setDirtyState() {
@@ -479,12 +489,11 @@ gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
-    std::vector<std::string> emptyProperties(0);
     auto shaderGroup = shaders.getShaderGroup(name);
     if (!shaderGroup) {
         return nullptr;
     }
-    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, emptyProperties));
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, {}));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
@@ -500,10 +509,10 @@ gfx::Texture2DPtr Context::createTexture2D() {
 }
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<gl::RenderTargetGL>(*this, size, type);
+    return std::make_shared<RenderTarget>(*this, size, type);
 }
 
-UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
+Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     auto fbo = createFramebuffer();
     bindFramebuffer = fbo;
     MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
@@ -512,7 +521,7 @@ UniqueFramebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
     checkFramebuffer();
-    return fbo;
+    return {color.getSize(), std::move(fbo)};
 }
 #endif
 

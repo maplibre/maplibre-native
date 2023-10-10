@@ -9,14 +9,19 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
 
-static constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
-static constexpr auto texUniformName = "u_image";
+#if !defined(NDEBUG)
+constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
+#endif
+static const StringIdentity idBackgroundDrawableUBOName = stringIndexer().get("BackgroundDrawableUBO");
+static const StringIdentity idBackgroundLayerUBOName = stringIndexer().get("BackgroundLayerUBO");
+static const StringIdentity idTexUniformName = stringIndexer().get("u_image");
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTree&, const PaintParameters& parameters) {
     const auto& state = parameters.state;
@@ -49,6 +54,9 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
     std::optional<uint32_t> samplerLocation{};
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
+            return;
+        }
 
         // We assume that drawables don't change between pattern and non-pattern.
         const auto& shader = drawable.getShader();
@@ -61,11 +69,11 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
         const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate("BackgroundDrawableUBO", &drawableUBO, context);
+        uniforms.createOrUpdate(idBackgroundDrawableUBOName, &drawableUBO, context);
 
         if (hasPattern) {
             if (!samplerLocation.has_value()) {
-                samplerLocation = shader->getSamplerLocation(texUniformName);
+                samplerLocation = shader->getSamplerLocation(idTexUniformName);
                 if (const auto& tex = parameters.patternAtlas.texture()) {
                     tex->setSamplerConfiguration(
                         {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
@@ -103,7 +111,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad = */ 0,
             };
-            uniforms.createOrUpdate("BackgroundLayerUBO", &layerUBO, context);
+            uniforms.createOrUpdate(idBackgroundLayerUBOName, &layerUBO, context);
         } else {
             // UBOs can be shared
             if (!backgroundLayerBuffer) {
@@ -114,7 +122,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const RenderTre
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
             }
-            uniforms.addOrReplace("BackgroundLayerUBO", backgroundLayerBuffer);
+            uniforms.addOrReplace(idBackgroundLayerUBOName, backgroundLayerBuffer);
         }
     });
 }

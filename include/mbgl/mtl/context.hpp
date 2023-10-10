@@ -11,6 +11,8 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
+#include <mbgl/mtl/mtl_fwd.hpp>
+
 #include <memory>
 #include <unordered_map>
 
@@ -20,6 +22,7 @@ class ProgramParameters;
 
 namespace mtl {
 
+class RenderPass;
 class RendererBackend;
 class ShaderProgram;
 
@@ -31,6 +34,8 @@ public:
     ~Context() noexcept override;
     Context(const Context&) = delete;
     Context& operator=(const Context& other) = delete;
+
+    const RendererBackend& getBackend() const { return backend; }
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
@@ -48,24 +53,6 @@ public:
 
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
-
-    /*
-    Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
-    Framebuffer createFramebuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA>&);
-    Framebuffer createFramebuffer(const gfx::Texture&,
-                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>&);
-    Framebuffer createFramebuffer(const gfx::Texture&);
-    Framebuffer createFramebuffer(const gfx::Texture&, const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>&);
-
-    template <typename Image,
-              gfx::TexturePixelType format = Image::channels == 4 ? gfx::TexturePixelType::RGBA
-                                                                  : gfx::TexturePixelType::Alpha>
-    Image readFramebuffer(const Size size, bool flip = true) {
-        static_assert(Image::channels == (format == gfx::TexturePixelType::RGBA ? 4 : 1), "image format mismatch");
-        return {size, readFramebuffer(size, format, flip)};
-    }
-*/
 
     // Actually remove the objects we marked as abandoned with the above methods.
     void performCleanup() override {}
@@ -91,6 +78,8 @@ public:
 
     void setDirtyState() override;
 
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
+
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
@@ -112,6 +101,12 @@ public:
 #endif
 
     void clearStencilBuffer(int32_t) override;
+
+    MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode& depthMode,
+                                                  const gfx::StencilMode& stencilMode,
+                                                  const mtl::RenderPass& renderPass) const;
+
+    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size);
 
 private:
     RendererBackend& backend;

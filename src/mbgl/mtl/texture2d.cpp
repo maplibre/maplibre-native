@@ -6,7 +6,6 @@
 #include <Metal/MTLDevice.hpp>
 #include <Metal/MTLRenderCommandEncoder.hpp>
 #include <Metal/MTLSampler.hpp>
-#include <Metal/MTLTexture.hpp>
 
 namespace mbgl {
 namespace mtl {
@@ -57,6 +56,8 @@ size_t Texture2D::getPixelStride() const noexcept {
             return 1 * numChannels();
         case gfx::TextureChannelDataType::HalfFloat:
             return 2 * numChannels();
+        case gfx::TextureChannelDataType::Float:
+            return 4 * numChannels();
     }
 }
 
@@ -65,6 +66,10 @@ size_t Texture2D::numChannels() const noexcept {
         case gfx::TexturePixelType::RGBA:
             return 4;
         case gfx::TexturePixelType::Alpha:
+            return 1;
+        case gfx::TexturePixelType::Stencil:
+            return 1;
+        case gfx::TexturePixelType::Depth:
             return 1;
         default:
             return 0;
@@ -79,6 +84,8 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
                     return MTL::PixelFormat::PixelFormatRGBA8Unorm;
                 case gfx::TexturePixelType::Alpha:
                     return MTL::PixelFormat::PixelFormatA8Unorm;
+                case gfx::TexturePixelType::Stencil:
+                    return MTL::PixelFormat::PixelFormatStencil8;
                 default:
                     assert(false);
                     return MTL::PixelFormat::PixelFormatInvalid;
@@ -89,6 +96,18 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
                     return MTL::PixelFormat::PixelFormatRGBA16Float;
                 case gfx::TexturePixelType::Alpha:
                     return MTL::PixelFormat::PixelFormatR16Float;
+                default:
+                    assert(false);
+                    return MTL::PixelFormat::PixelFormatInvalid;
+            }
+        case gfx::TextureChannelDataType::Float:
+            switch (pixelFormat) {
+                case gfx::TexturePixelType::RGBA:
+                    return MTL::PixelFormat::PixelFormatRGBA32Float;
+                case gfx::TexturePixelType::Alpha:
+                    return MTL::PixelFormat::PixelFormatR32Float;
+                case gfx::TexturePixelType::Depth:
+                    return MTL::PixelFormat::PixelFormatDepth32Float;
                 default:
                     assert(false);
                     return MTL::PixelFormat::PixelFormatInvalid;
@@ -113,6 +132,7 @@ void Texture2D::createMetalTexture() noexcept {
     // Create a new texture object
     if (auto textureDescriptor = NS::RetainPtr(
             MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
+        textureDescriptor->setUsage(usage);
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
     }
 
@@ -129,6 +149,17 @@ void Texture2D::create() noexcept {
     if (samplerStateDirty) {
         updateSamplerConfiguration();
     }
+}
+
+gfx::Texture2D& Texture2D::setUsage(MTL::TextureUsage usage_) noexcept {
+    usage = usage_;
+    textureDirty = true;
+    return *this;
+}
+
+MTL::Texture* Texture2D::getMetalTexture() const noexcept {
+    assert(metalTexture);
+    return metalTexture.get();
 }
 
 void Texture2D::updateSamplerConfiguration() noexcept {

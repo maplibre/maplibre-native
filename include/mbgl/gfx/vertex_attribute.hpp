@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <algorithm>
 #include <array>
@@ -10,6 +11,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -237,8 +239,9 @@ public:
     const gfx::UniqueVertexBufferResource& getBuffer() const { return buffer; }
     void setBuffer(gfx::UniqueVertexBufferResource&& value) { buffer = std::move(value); }
 
-protected:
     VertexAttribute& operator=(const VertexAttribute&) = delete;
+
+protected:
     VertexAttribute& operator=(VertexAttribute&& other) {
         index = other.index;
         dataType = other.dataType;
@@ -271,9 +274,9 @@ protected:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray {
 public:
-    using AttributeMap = std::unordered_map<std::string, std::unique_ptr<VertexAttribute>>;
+    using AttributeMap = std::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
 
-    VertexAttributeArray(int initCapacity = 10);
+    VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&&);
     VertexAttributeArray(const VertexAttributeArray&) = delete; // Would need to use the virtual assignment operator
     virtual ~VertexAttributeArray() = default;
@@ -290,15 +293,15 @@ public:
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const UniqueVertexAttribute& get(const std::string& name) const;
+    const std::unique_ptr<VertexAttribute>& get(const StringIdentity id) const;
 
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
-    const UniqueVertexAttribute& add(std::string name,
-                                     int index = -1,
-                                     AttributeDataType = AttributeDataType::Invalid,
-                                     std::size_t count = 1);
+    const std::unique_ptr<VertexAttribute>& add(const StringIdentity id,
+                                                int index = -1,
+                                                AttributeDataType = AttributeDataType::Invalid,
+                                                std::size_t count = 1);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
@@ -306,22 +309,22 @@ public:
     /// @param index index to match, or -1 for any
     /// @param type type to match, or `Invalid` for any
     /// @param count type to match, or 0 for any
-    const UniqueVertexAttribute& getOrAdd(std::string name,
-                                          int index = -1,
-                                          AttributeDataType type = AttributeDataType::Invalid,
-                                          std::size_t count = 0);
+    const std::unique_ptr<VertexAttribute>& getOrAdd(const StringIdentity id,
+                                                     int index = -1,
+                                                     AttributeDataType type = AttributeDataType::Invalid,
+                                                     std::size_t count = 0);
 
     // Set a value if the element is present
     template <typename T>
-    bool set(const std::string& name, std::size_t i, T value) {
-        if (const auto& item = get(name)) {
+    bool set(const StringIdentity id, std::size_t i, T value) {
+        if (const auto& item = get(id)) {
             return item->set(i, value);
         }
         return false;
     }
 
     /// Indicates whether any values have changed
-    bool isDirty() const {
+    virtual bool isDirty() const {
         return std::any_of(
             attrs.begin(), attrs.end(), [](const auto& kv) { return kv.second && kv.second->isDirty(); });
     }
@@ -330,7 +333,7 @@ public:
     void clear();
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const std::string&, VertexAttribute&)>& f) {
+    void visitAttributes(const std::function<void(const StringIdentity, VertexAttribute&)>& f) {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -339,7 +342,7 @@ public:
     }
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const std::string&, const VertexAttribute&)>& f) const {
+    void visitAttributes(const std::function<void(const StringIdentity, const VertexAttribute&)>& f) const {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -347,7 +350,8 @@ public:
         });
     }
 
-    using ResolveDelegate = std::function<void(const std::string&, VertexAttribute&, const UniqueVertexAttribute&)>;
+    using ResolveDelegate =
+        std::function<void(const StringIdentity, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
     void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
 
@@ -361,53 +365,6 @@ public:
         return newAttrs;
     }
 
-    /// Specialized DataDrivenPaintProperty reader
-    template <class... DataDrivenPaintProperty, class Binders, class Evaluated>
-    std::vector<std::string> readDataDrivenPaintProperties(const Binders& binders, const Evaluated& evaluated) {
-        std::vector<std::string> propertiesAsUniforms;
-        propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
-        (
-            [&](const auto& attributeNames) {
-                for (std::size_t attrIndex = 0; attrIndex < attributeNames.size(); ++attrIndex) {
-                    const auto& attributeName = std::string(attributeNames[attrIndex]);
-                    if (auto& binder = binders.template get<DataDrivenPaintProperty>()) {
-                        using Attribute = typename DataDrivenPaintProperty::Attribute;
-                        using Type = typename Attribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
-                        using InterpType = ZoomInterpolatedAttributeType<Type>;
-#if !defined(NDEBUG)
-                        using Value = typename Type::Value;             // std::array<T, N>
-                        using InterpValue = typename InterpType::Value; // std::array<T, 2*N>
-#endif
-
-                        const auto vertexCount = binder->getVertexCount();
-                        const auto isConstant = evaluated.template get<DataDrivenPaintProperty>().isConstant();
-                        if (vertexCount > 0 && !isConstant) {
-                            if (auto& attr = getOrAdd("a_" + attributeName)) {
-                                if (const auto& sharedVector = binder->getSharedVertexVector()) {
-                                    const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
-                                    const bool isInterpolated = binder->isInterpolated();
-                                    const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
-                                    assert(rawSize ==
-                                           static_cast<uint32_t>(isInterpolated ? sizeof(InterpValue) : sizeof(Value)));
-                                    assert(sharedVector->getRawCount() == vertexCount);
-                                    attr->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
-                                } else {
-                                    for (std::size_t i = 0; i < vertexCount; ++i) {
-                                        attr->set(i, binder->getVertexValue(i), attrIndex);
-                                    }
-                                }
-                            }
-                            propertiesAsUniforms.emplace_back(std::string());
-                        } else {
-                            propertiesAsUniforms.emplace_back(attributeName);
-                        }
-                    }
-                }
-            }(DataDrivenPaintProperty::AttributeNames),
-            ...);
-        return propertiesAsUniforms;
-    }
-
     /// Copy another collection into this one
     virtual void copy(const VertexAttributeArray& other) {
         for (const auto& kv : other.attrs) {
@@ -417,8 +374,85 @@ public:
         }
     }
 
+    /// Specialized DataDrivenPaintProperty reader
+    /// @param binders Property binders for the target shader
+    /// @param evaluated Evaluated properties
+    /// @param propertiesAsUniforms [out] A set of string identities for the properties which will be constant, not
+    /// attributes.
+    /// @details The property name IDs refer to the "a\_" prefixed values to match the shader definitions.
+    template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
+    void readDataDrivenPaintProperties(const Binders& binders,
+                                       const Evaluated& evaluated,
+                                       std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+        // Read each property in the type pack
+        propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
+        (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
+                                                              isConstant<DataDrivenPaintProperty>(evaluated),
+                                                              propertiesAsUniforms),
+         ...);
+    }
+
 protected:
-    const UniqueVertexAttribute& add(std::string name, std::unique_ptr<VertexAttribute>&&);
+    template <typename DataDrivenPaintProperty, typename Evaluated>
+    static bool isConstant(const Evaluated& evaluated) {
+        return evaluated.template get<DataDrivenPaintProperty>().isConstant();
+    }
+
+    /// Place one property from a type pack into an attribute in this collection, replacing if it already exists.
+    template <typename DataDrivenPaintProperty, typename Binder>
+    void readDataDrivenPaintProperty(const Binder& binder,
+                                     const bool isConstant,
+                                     std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+        if (!binder) {
+            return;
+        }
+
+        // Consider each attribute name in the attribute (e.g., pattern_from, pattern_to)
+        for (std::size_t attrIndex = 0; attrIndex < DataDrivenPaintProperty::AttributeNames.size(); ++attrIndex) {
+            auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
+            if (!attributeNameID) {
+                const auto& attributeName = DataDrivenPaintProperty::AttributeNames[attrIndex];
+                attributeNameID = stringIndexer().get(attributePrefix + attributeName.data());
+            }
+
+            // Apply the property, or add it to the uniforms collection if it's constant.
+            if (!isConstant && binder->getVertexCount() > 0) {
+                using Attribute = typename DataDrivenPaintProperty::Attribute;
+                applyPaintProperty<Attribute>(attrIndex, getOrAdd(*attributeNameID), binder);
+            } else {
+                propertiesAsUniforms.emplace(*attributeNameID);
+            }
+        }
+    }
+
+    /// Copy or share the attribute data from a paint property
+    template <typename TAttribute, typename TBinder>
+    static void applyPaintProperty(const std::size_t attrIndex, const UniqueVertexAttribute& attrib, TBinder& binder) {
+        using Type = typename TAttribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+        using InterpType = ZoomInterpolatedAttributeType<Type>;
+
+        if (!attrib) {
+            assert(!"Failed to add attribute");
+            return;
+        }
+
+        if (const auto& sharedVector = binder->getSharedVertexVector()) {
+            const auto rawSize = static_cast<uint32_t>(sharedVector->getRawSize());
+            const bool isInterpolated = binder->isInterpolated();
+            const auto dataType = isInterpolated ? InterpType::DataType : Type::DataType;
+            assert(rawSize == static_cast<uint32_t>(isInterpolated ? sizeof(typename InterpType::Value)
+                                                                   : sizeof(typename Type::Value)));
+            assert(sharedVector->getRawCount() == binder->getVertexCount());
+            attrib->setSharedRawData(std::move(sharedVector), 0, 0, rawSize, dataType);
+        } else {
+            const auto vertexCount = binder->getVertexCount();
+            for (std::size_t i = 0; i < vertexCount; ++i) {
+                attrib->set(i, binder->getVertexValue(i), attrIndex);
+            }
+        }
+    }
+
+    const UniqueVertexAttribute& add(const StringIdentity id, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count, count);
@@ -430,7 +464,8 @@ protected:
 
 protected:
     AttributeMap attrs;
-    static std::unique_ptr<VertexAttribute> nullref;
+    static const std::unique_ptr<VertexAttribute> nullref;
+    static const std::string attributePrefix;
 };
 
 } // namespace gfx

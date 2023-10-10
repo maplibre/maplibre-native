@@ -14,19 +14,9 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Float2, 1, "a_color"},
-        {2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(3, true, false, FillDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 
@@ -99,19 +89,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::Float2, 1, "a_outline_color"},
-        {2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(3, true, false, FillOutlineDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillOutlineEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillOutlineInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillOutlinePermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, ExpressionInputsUBO),
-    };
-    static constexpr TextureInfo textures[] = {};
+    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 
@@ -131,6 +111,7 @@ struct FragmentStage {
 struct alignas(16) FillOutlineDrawableUBO {
     float4x4 matrix;
     float2 world;
+    float2 pad1;
 };
 
 struct alignas(16) FillOutlineEvaluatedPropsUBO {
@@ -194,24 +175,9 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-        {2, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-        {3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillPatternDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillPatternTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillPatternEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, FillPatternInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(8, true, true, FillPatternPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
-    };
-
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 
@@ -308,18 +274,18 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    float2 pattern_tl_a = in.pattern_from.xy;
-    float2 pattern_br_a = in.pattern_from.zw;
-    float2 pattern_tl_b = in.pattern_to.xy;
-    float2 pattern_br_b = in.pattern_to.zw;
+    const float2 pattern_tl_a = in.pattern_from.xy;
+    const float2 pattern_br_a = in.pattern_from.zw;
+    const float2 pattern_tl_b = in.pattern_to.xy;
+    const float2 pattern_br_b = in.pattern_to.zw;
 
-    float2 imagecoord = mod(in.v_pos_a, 1.0);
-    float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
-    float4 color1 = image0.sample(image0_sampler, pos);
-        
-    float2 imagecoord_b = mod(in.v_pos_b, 1.0);
-    float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
-    float4 color2 = image0.sample(image0_sampler, pos2);
+    const float2 imagecoord = glMod(in.v_pos_a, 1.0);
+    const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
+    const float4 color1 = image0.sample(image0_sampler, pos);
+
+    const float2 imagecoord_b = glMod(in.v_pos_b, 1.0);
+    const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
+    const float4 color2 = image0.sample(image0_sampler, pos2);
 
     return half4(mix(color1, color2, props.fade) * in.opacity);
 }
@@ -332,24 +298,9 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static constexpr AttributeInfo attributes[] = {
-        {0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        {1, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-        {2, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-        {3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-    };
-    static constexpr UniformBlockInfo uniforms[] = {
-        MLN_MTL_UNIFORM_BLOCK(4, true, true, FillOutlinePatternDrawableUBO),
-        MLN_MTL_UNIFORM_BLOCK(5, true, false, FillOutlinePatternTilePropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(6, true, true, FillOutlinePatternEvaluatedPropsUBO),
-        MLN_MTL_UNIFORM_BLOCK(7, true, false, FillOutlinePatternInterpolateUBO),
-        MLN_MTL_UNIFORM_BLOCK(8, true, true, FillOutlinePatternPermutationUBO),
-        MLN_MTL_UNIFORM_BLOCK(9, true, false, ExpressionInputsUBO),
-    };
-
-    static constexpr TextureInfo textures[] = {
-        {0, "u_image"},
-    };
+    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 
@@ -450,18 +401,18 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    float2 pattern_tl_a = in.pattern_from.xy;
-    float2 pattern_br_a = in.pattern_from.zw;
-    float2 pattern_tl_b = in.pattern_to.xy;
-    float2 pattern_br_b = in.pattern_to.zw;
+    const float2 pattern_tl_a = in.pattern_from.xy;
+    const float2 pattern_br_a = in.pattern_from.zw;
+    const float2 pattern_tl_b = in.pattern_to.xy;
+    const float2 pattern_br_b = in.pattern_to.zw;
 
-    float2 imagecoord = mod(in.v_pos_a, 1.0);
-    float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
-    float4 color1 = image0.sample(image0_sampler, pos);
-        
-    float2 imagecoord_b = mod(in.v_pos_b, 1.0);
-    float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
-    float4 color2 = image0.sample(image0_sampler, pos2);
+    const float2 imagecoord = glMod(in.v_pos_a, 1.0);
+    const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
+    const float4 color1 = image0.sample(image0_sampler, pos);
+
+    const float2 imagecoord_b = glMod(in.v_pos_b, 1.0);
+    const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
+    const float4 color2 = image0.sample(image0_sampler, pos2);
 
     // TODO: Should triangate the lines into triangles to support thick line and edge antialiased.
     //float dist = length(in.v_pos - in.position.xy);

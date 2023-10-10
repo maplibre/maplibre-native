@@ -8,6 +8,7 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -110,8 +111,8 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void DrawableGL::setVertexAttrName(std::string value) {
-    impl->vertexAttrName = std::move(value);
+void DrawableGL::setVertexAttrNameId(const StringIdentity id) {
+    impl->idVertexAttrName = id;
 }
 
 void DrawableGL::bindUniformBuffers() const {
@@ -121,8 +122,11 @@ void DrawableGL::bindUniformBuffers() const {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
             if (!uniformBuffer) {
                 using namespace std::string_literals;
+                const auto tileIDStr = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 Log::Error(Event::General,
-                           "DrawableGL::bindUniformBuffers: UBO "s + element.first + " not found. skipping.");
+                           "bindUniformBuffers: UBO "s + std::string(stringIndexer().get(element.first)) +
+                               " not found for " + util::toString(getID()) + " / " + getName() + " / " + tileIDStr +
+                               ". skipping.");
                 assert(false);
                 continue;
             }
@@ -167,7 +171,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         const auto& defaults = shader->getVertexAttributes();
         const auto& overrides = impl->vertexAttributes;
 
-        const auto& indexAttribute = defaults.get(impl->vertexAttrName);
+        const auto& indexAttribute = defaults.get(impl->idVertexAttrName);
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;

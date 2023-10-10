@@ -397,6 +397,15 @@ platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(const gfx::TexturePixel
                 default:
                     break;
             }
+            break;
+        }
+        case gfx::TextureChannelDataType::Float: {
+            switch (value) {
+                case gfx::TexturePixelType::RGBA:
+                    return GL_RGBA32F;
+                default:
+                    break;
+            }
         }
     }
 
@@ -410,6 +419,8 @@ gfx::TextureChannelDataType Enum<gfx::TextureChannelDataType>::from(const platfo
             return gfx::TextureChannelDataType::UnsignedByte;
         case GL_HALF_FLOAT:
             return gfx::TextureChannelDataType::HalfFloat;
+        case GL_FLOAT:
+            return gfx::TextureChannelDataType::Float;
     }
     return {};
 }
@@ -421,6 +432,8 @@ platform::GLenum Enum<gfx::TextureChannelDataType>::to(const gfx::TextureChannel
             return GL_UNSIGNED_BYTE;
         case gfx::TextureChannelDataType::HalfFloat:
             return GL_HALF_FLOAT;
+        case gfx::TextureChannelDataType::Float:
+            return GL_FLOAT;
     }
     return GL_INVALID_ENUM;
 }

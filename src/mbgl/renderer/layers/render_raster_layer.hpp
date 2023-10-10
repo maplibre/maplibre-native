@@ -8,11 +8,6 @@
 
 namespace mbgl {
 
-#if MLN_DRAWABLE_RENDERER
-class RasterLayerTweaker;
-using RasterLayerTweakerPtr = std::shared_ptr<RasterLayerTweaker>;
-#endif // MLN_DRAWABLE_RENDERER
-
 class ImageSourceRenderData;
 class RasterProgram;
 
@@ -33,7 +28,20 @@ public:
 
 protected:
 #if MLN_DRAWABLE_RENDERER
+    /// @brief Called by the RenderOrchestrator during RenderTree construction.
+    /// This event is run to indicate if the layer should render or not for the current frame.
+    /// @param willRender Indicates if this layer should render or not
+    /// @param changes The collection of current pending change requests
     void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
+
+    /// @brief Called when the layer index changes
+    /// This event is run when a layer is added or removed from the style.
+    /// @param newLayerIndex The new layer index for this layer
+    /// @param changes The collection of current pending change requests
+    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
+
+    /// Called when the style layer is removed
+    void layerRemoved(UniqueChangeRequestVec&) override;
 #endif // MLN_DRAWABLE_RENDERER
 
 private:
@@ -47,10 +55,6 @@ private:
     void render(PaintParameters&) override;
 #endif
 
-#if MLN_DRAWABLE_RENDERER
-    void updateLayerTweaker();
-#endif // MLN_DRAWABLE_RENDERER
-
     // Paint properties
     style::RasterPaintProperties::Unevaluated unevaluated;
     const ImageSourceRenderData* imageData = nullptr;
@@ -62,6 +66,8 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderProgramBasePtr rasterShader;
+    std::optional<uint32_t> rasterSampler0;
+    std::optional<uint32_t> rasterSampler1;
     LayerGroupPtr imageLayerGroup;
 
     using RasterVertexVector = gfx::VertexVector<RasterLayoutVertex>;
@@ -75,9 +81,6 @@ private:
     using RasterSegmentVector = SegmentVector<RasterAttributes>;
     using RasterSegmentVectorPtr = std::shared_ptr<RasterSegmentVector>;
     std::shared_ptr<RasterSegmentVector> staticDataSegments;
-
-    RasterLayerTweakerPtr tweaker;
-    bool overdrawInspector = false;
 #endif
 };
 

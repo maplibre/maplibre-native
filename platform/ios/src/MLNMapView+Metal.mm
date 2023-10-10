@@ -69,15 +69,26 @@ public:
         return NS::TransferPtr(MTL::BlitPassDescriptor::alloc()->init());
     }
 
-    mbgl::mtl::MTLRenderPassDescriptorPtr getRenderPassDescriptor() const override {
-        return NS::RetainPtr((__bridge MTL::RenderPassDescriptor*)mtlView.currentRenderPassDescriptor);
+    const mbgl::mtl::MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const override {
+        if (!cachedRenderPassDescriptor) {
+            auto* mtlDesc = mtlView.currentRenderPassDescriptor;
+            cachedRenderPassDescriptor = NS::RetainPtr((__bridge MTL::RenderPassDescriptor*)mtlDesc);
+        }
+        return cachedRenderPassDescriptor;
     }
 
     void swap() override {
         [commandBuffer presentDrawable:currentDrawable];
         [commandBuffer commit];
+
+        // Un-comment for synchronous, which can help troubleshoot rendering problems,
+        // particularly those related to resource tracking and multiple queued buffers.
+        //[commandBuffer waitUntilCompleted];
+
         commandBuffer = nil;
         commandBufferPtr.reset();
+
+        cachedRenderPassDescriptor.reset();
     }
 
     mbgl::Size framebufferSize() {
@@ -89,6 +100,7 @@ public:
 private:
     MLNMapViewMetalImpl& backend;
     mbgl::mtl::MTLCommandBufferPtr commandBufferPtr;
+    mutable mbgl::mtl::MTLRenderPassDescriptorPtr cachedRenderPassDescriptor;
 
 public:
     MLNMapViewImplDelegate* delegate = nil;
@@ -158,7 +170,6 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.opaque = mapView.opaque;
     resource.mtlView.layer.opaque = mapView.opaque;
     resource.mtlView.enableSetNeedsDisplay = YES;
-
     if (@available(iOS 13.0, *)) {
         CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
         metalLayer.presentsWithTransaction = presentsWithTransaction;

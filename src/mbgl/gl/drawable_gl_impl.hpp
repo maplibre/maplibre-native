@@ -13,6 +13,7 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -50,7 +51,7 @@ public:
     gfx::CullFaceMode cullFaceMode;
     GLfloat pointSize = 0.0f;
 
-    std::string vertexAttrName = "a_pos";
+    StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
 };
 
 struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {

@@ -5,6 +5,7 @@
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/programs/segment.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <memory>
 
@@ -49,7 +50,7 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    void setVertexAttrName(std::string);
+    void setVertexAttrNameId(const StringIdentity id);
 
     void upload(gfx::UploadPass&);
 
