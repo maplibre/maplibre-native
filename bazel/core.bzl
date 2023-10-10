@@ -986,7 +986,6 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/util/suppress_copies.hpp",
     "include/mbgl/style/layers/custom_drawable_layer.hpp",
     "include/mbgl/layermanager/custom_drawable_layer_factory.hpp",
-
 ]
 
 MLN_DRAWABLES_GL_SOURCE = [
