@@ -75,7 +75,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.13
+        uses: jwlawson/actions-setup-cmake@v1.14
         with:
           cmake-version: "3.19.x"
 
