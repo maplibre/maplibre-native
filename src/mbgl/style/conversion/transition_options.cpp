@@ -12,7 +12,7 @@ std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const 
         return std::nullopt;
     }
 
-    std::optional<TransitionOptions> result = TransitionOptions{};
+    auto result = TransitionOptions{};
 
     auto duration = objectMember(value, "duration");
     if (duration) {
@@ -21,7 +21,7 @@ std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const 
             error.message = "duration must be a number";
             return std::nullopt;
         }
-        result->duration = {std::chrono::milliseconds(int64_t(*number))};
+        result.duration = {std::chrono::milliseconds(int64_t(*number))};
     }
 
     auto delay = objectMember(value, "delay");
@@ -31,10 +31,10 @@ std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const 
             error.message = "delay must be a number";
             return std::nullopt;
         }
-        result->delay = {std::chrono::milliseconds(int64_t(*number))};
+        result.delay = {std::chrono::milliseconds(int64_t(*number))};
     }
 
-    return result;
+    return std::make_optional(std::move(result));
 }
 
 } // namespace conversion
