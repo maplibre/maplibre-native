@@ -166,7 +166,7 @@ public:
         layer = nil;
     }
     
-    void initialize() {
+    void initialize() override {
         if (layerRef == nil) return;
         else if (layer == nil) layer = layerRef;
         
@@ -175,34 +175,27 @@ public:
         }
     }
     
-    void update(mbgl::RenderLayer& proxyLayer,
-                mbgl::gfx::ShaderRegistry& shaders,
-                mbgl::gfx::Context& context,
-                const mbgl::TransformState& state,
-                const std::shared_ptr<mbgl::UpdateParameters>&,
-                const mbgl::RenderTree& renderTree,
-                mbgl::UniqueChangeRequestVec& changes) {
-        
+    void update(mbgl::RenderLayer& proxyLayer, const Parameters& parameters) override {
         // Set up a layer group
         if (!layerGroup) {
-            if (auto layerGroup_ = context.createTileLayerGroup(
-                                                                /*layerIndex*/ proxyLayer.getLayerIndex(), /*initialCapacity=*/2, proxyLayer.getID())) {
-                                                                    changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
-                                                                    layerGroup = std::move(layerGroup_);
-                                                                }
+            if (auto layerGroup_ = parameters.context.createTileLayerGroup(
+                    /*layerIndex*/ proxyLayer.getLayerIndex(), /*initialCapacity=*/2, proxyLayer.getID())) {
+                parameters.changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
+                layerGroup = std::move(layerGroup_);
+            }
         }
-        
+
         if (!layerGroup) return;
-        
+
         // if we have build our drawable(s) already, either update or skip
         if (layerGroup->getDrawableCount()) return;
-        
+
         // create drawable(s)
         const OverscaledTileID tileID{11, 327, 791};
-        
+
         auto createLineBuilder = [&](const std::string& name,
                                      gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
-            std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
+            std::unique_ptr<gfx::DrawableBuilder> builder = parameters.context.createDrawableBuilder(name);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setSubLayerIndex(0);
             builder->setEnableDepth(false);
@@ -210,12 +203,12 @@ public:
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
             builder->setEnableStencil(false);
             builder->setRenderPass(RenderPass::Translucent);
-            
+
             return builder;
         };
-        
-        gfx::ShaderGroupPtr lineShaderGroup = shaders.getShaderGroup("LineShader");
-        
+
+        gfx::ShaderGroupPtr lineShaderGroup = parameters.shaders.getShaderGroup("LineShader");
+
         const std::unordered_set<StringIdentity> propertiesAsUniforms{
             stringIndexer().get("a_color"),
             stringIndexer().get("a_blur"),
@@ -224,36 +217,36 @@ public:
             stringIndexer().get("a_offset"),
             stringIndexer().get("a_width"),
         };
-        
-        auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+
+        auto shader = lineShaderGroup->getOrCreateShader(parameters.context, propertiesAsUniforms);
         auto builder = createLineBuilder("thick-lines", shader);
-        
+
         auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-        
+
         // add polylines
         const auto size{util::EXTENT};
         GeometryCoordinates geom{{0, 0}, {size, 0}, {0, size}, {size, size}, {size / 3, size / 3}};
-        
+
         gfx::PolylineGeneratorOptions options;
         options.beginCap = style::LineCapType::Round;
         options.endCap = style::LineCapType::Round;
         options.joinType = style::LineJoinType::Round;
         builder->addPolyline(geom, options);
-        
+
         // create tweaker
         auto tweaker = std::make_shared<TestDrawableTweaker>();
-        
+
         // finish
         builder->flush();
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);
             drawable->addTweaker(tweaker);
-            
+
             tileLayerGroup->addDrawable(RenderPass::Translucent, tileID, std::move(drawable));
         }
     }
     
-    void deinitialize() {
+    void deinitialize() override {
         if (layer == nil) return;
         
         if (layer.mapView) {
