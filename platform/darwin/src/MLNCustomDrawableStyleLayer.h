@@ -12,16 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNMapView;
 @class MLNStyle;
 
-typedef struct MLNStyleLayerDrawingContext {
-    CGSize size;
-    CLLocationCoordinate2D centerCoordinate;
-    double zoomLevel;
-    CLLocationDirection direction;
-    CGFloat pitch;
-    CGFloat fieldOfView;
-    MLNMatrix4 projectionMatrix;
-} MLNStyleLayerDrawingContext;
-
 MLN_EXPORT
 @interface MLNCustomDrawableStyleLayer : MLNStyleLayer
 
@@ -32,8 +22,6 @@ MLN_EXPORT
 - (void)didMoveToMapView:(MLNMapView *)mapView;
 
 - (void)willMoveFromMapView:(MLNMapView *)mapView;
-
-- (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context;
 
 - (void)setNeedsDisplay;
 

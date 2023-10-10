@@ -17,6 +17,10 @@
 #import "LimeGreenStyleLayer.h"
 #endif
 
+#if MLN_DRAWABLE_RENDERER
+#import "MLNCustomDrawableStyleLayer.h"
+#endif
+
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
 #import <objc/runtime.h>
@@ -108,6 +112,9 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
+#if MLN_DRAWABLE_RENDERER
+    MBXSettingsRuntimeStylingCustomDrawableLayer,
+#endif
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
@@ -435,10 +442,15 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Style Raster Tile Source",
                 @"Style Image Source",
                 @"Add Route Line",
+#if !MLN_RENDER_BACKEND_METAL
                 @"Add Lime Green Triangle Layer",
+#endif
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
                 @"Style Route line with gradient",
+#if MLN_DRAWABLE_RENDERER
+                @"Add Custom Drawable Layer",
+#endif
             ]];
             break;
         case MBXSettingsMiscellaneous:
@@ -664,6 +676,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingLineGradient:
                     [self styleLineGradient];
                     break;
+#if MLN_DRAWABLE_RENDERER
+                case MBXSettingsRuntimeStylingCustomDrawableLayer:
+                    [self addCustomDrawableLayer];
+                    break;
+#endif
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
                     break;
@@ -1561,6 +1578,18 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     routeLayer.lineGradient = lineGradientExpression;
     [self.mapView.style addLayer:routeLayer];
 }
+
+#if MLN_DRAWABLE_RENDERER
+- (void)addCustomDrawableLayer
+{
+    // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
+    MLNCustomDrawableStyleLayer* layer = [[MLNCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
+
+    if (layer) {
+        [self.mapView.style addLayer:layer];
+    }
+}
+#endif
 
 - (void)styleRouteLine
 {
