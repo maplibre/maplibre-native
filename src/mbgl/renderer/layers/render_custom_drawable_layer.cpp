@@ -42,7 +42,6 @@ RenderCustomDrawableLayer::~RenderCustomDrawableLayer() {
 
 void RenderCustomDrawableLayer::evaluate(const PropertyEvaluationParameters&) {
     passes = RenderPass::Translucent;
-    // It is fine to not update `evaluatedProperties`, as `baseImpl` should never be updated for this layer.
 }
 
 bool RenderCustomDrawableLayer::hasTransition() const {
@@ -50,10 +49,6 @@ bool RenderCustomDrawableLayer::hasTransition() const {
 }
 bool RenderCustomDrawableLayer::hasCrossfade() const {
     return false;
-}
-
-void RenderCustomDrawableLayer::markContextDestroyed() {
-    contextDestroyed = true;
 }
 
 void RenderCustomDrawableLayer::prepare(const LayerPrepareParameters&) {}
@@ -84,7 +79,7 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
 
     // delegate the call to the custom layer
     if (host) {
-        CustomDrawableLayerHost::Parameters params {
+        CustomDrawableLayerHost::Interface interface {
         /*gfx::ShaderRegistry &shaders = */ shaders,
         /*gfx::Context &context = */ context,
         /*const TransformState &state = */ state,
@@ -92,7 +87,7 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
         /*const RenderTree &renderTree = */ renderTree,
         /*UniqueChangeRequestVec &changes = */ changes
         };
-        host->update(*this, params);
+        host->update(*this, interface);
     }
 }
 #endif

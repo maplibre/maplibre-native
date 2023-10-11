@@ -26,12 +26,14 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/util/string_indexer.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/geometry.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/line.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 #include <memory>
+#include <cmath>
 
 class MLNCustomDrawableLayerHost;
 
@@ -175,64 +177,47 @@ public:
         }
     }
     
-    void update(mbgl::RenderLayer& proxyLayer, const Parameters& parameters) override {
+    void update(mbgl::RenderLayer& proxyLayer, Interface& interface) override {
+        
         // Set up a layer group
-        if (!layerGroup) {
-            if (auto layerGroup_ = parameters.context.createTileLayerGroup(
-                    /*layerIndex*/ proxyLayer.getLayerIndex(), /*initialCapacity=*/2, proxyLayer.getID())) {
-                parameters.changes.emplace_back(std::make_unique<AddLayerGroupRequest>(layerGroup_));
-                layerGroup = std::move(layerGroup_);
-            }
-        }
-
-        if (!layerGroup) return;
+        if (!interface.getTileLayerGroup(/*out*/layerGroup, proxyLayer))
+            return;
 
         // if we have build our drawable(s) already, either update or skip
-        if (layerGroup->getDrawableCount()) return;
+        if (layerGroup->getDrawableCount()) 
+            return;
 
         // create drawable(s)
         const OverscaledTileID tileID{11, 327, 791};
 
-        auto createLineBuilder = [&](const std::string& name,
-                                     gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
-            std::unique_ptr<gfx::DrawableBuilder> builder = parameters.context.createDrawableBuilder(name);
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
-            builder->setSubLayerIndex(0);
-            builder->setEnableDepth(false);
-            builder->setColorMode(gfx::ColorMode::alphaBlended());
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setEnableStencil(false);
-            builder->setRenderPass(RenderPass::Translucent);
-
-            return builder;
-        };
-
-        gfx::ShaderGroupPtr lineShaderGroup = parameters.shaders.getShaderGroup("LineShader");
-
-        const std::unordered_set<StringIdentity> propertiesAsUniforms{
-            stringIndexer().get("a_color"),
-            stringIndexer().get("a_blur"),
-            stringIndexer().get("a_opacity"),
-            stringIndexer().get("a_gapwidth"),
-            stringIndexer().get("a_offset"),
-            stringIndexer().get("a_width"),
-        };
-
-        auto shader = lineShaderGroup->getOrCreateShader(parameters.context, propertiesAsUniforms);
-        auto builder = createLineBuilder("thick-lines", shader);
-
-        auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+        // create a builder
+        auto shader = interface.lineShaderDefault();
+        auto builder = interface.createBuilder("thick-lines", shader);
 
         // add polylines
-        const auto size{util::EXTENT};
-        GeometryCoordinates geom{{0, 0}, {size, 0}, {0, size}, {size, size}, {size / 3, size / 3}};
+        auto lineHelper = interface.createLineBuilderHelper();
 
+        constexpr auto numLines = 6;
+        Color colors[numLines] {Color::red(), Color(1.f, 0.5f, 0, 1.f), Color(1.f, 1.f, 0, 1.f), Color::green(), Color::blue(), Color(1.f, 0, 1.f, 1.f)};
+        
+        constexpr auto numPoints = 100;
+        GeometryCoordinates polyline;
+        for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
+            polyline.emplace_back(ipoint * util::EXTENT / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f);
+        }
+        
         gfx::PolylineGeneratorOptions options;
         options.beginCap = style::LineCapType::Round;
         options.endCap = style::LineCapType::Round;
         options.joinType = style::LineJoinType::Round;
-        builder->addPolyline(geom, options);
-
+        
+        for (auto index {0}; index <  numLines; ++index) {
+            for(auto &p : polyline) {
+                p.y += util::EXTENT / numLines;
+            }
+            builder->addPolyline(polyline, options);
+        }
+        
         // create tweaker
         auto tweaker = std::make_shared<TestDrawableTweaker>();
 
@@ -242,7 +227,7 @@ public:
             drawable->setTileID(tileID);
             drawable->addTweaker(tweaker);
 
-            tileLayerGroup->addDrawable(RenderPass::Translucent, tileID, std::move(drawable));
+            layerGroup->addDrawable(RenderPass::Translucent, tileID, std::move(drawable));
         }
     }
     
