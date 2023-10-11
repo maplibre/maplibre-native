@@ -30,11 +30,11 @@ public:
         constexpr auto& fragMain = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::fragmentMainFunction;
 
         const std::string shaderName = std::string(name);
-        const auto shaderSource = std::string(shaders::prelude) + source;
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {
             auto& context = static_cast<Context&>(gfxContext);
+            const auto shaderSource = std::string(shaders::prelude) + source;
             shader = context.createProgram(shaderName, shaderSource, vertMain, fragMain, programParameters, {});
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {

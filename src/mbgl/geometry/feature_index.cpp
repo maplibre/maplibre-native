@@ -34,8 +34,7 @@ mbgl::Point<double> project(const mbgl::LatLng& coordinate, const mbgl::Transfor
 namespace mbgl {
 
 FeatureIndex::FeatureIndex(std::unique_ptr<const GeometryTileData> tileData_)
-    : grid(util::EXTENT, util::EXTENT, util::EXTENT / 16) // 16x16 grid -> 32px cell
-      ,
+    : grid(util::EXTENT, util::EXTENT, util::EXTENT / 16), // 16x16 grid -> 32px cell
       tileData(std::move(tileData_)) {}
 
 void FeatureIndex::insert(const GeometryCollection& geometries,
