@@ -32,9 +32,11 @@ using namespace metal;
 
 struct alignas(16) ClipUBO {
     /*  0 */ float4x4 matrix;
-    /* 64 */
+    /* 64 */ uint32_t stencil_ref;
+    /* 68 */ uint32_t pad1, pad2, pad3;
+    /* 80 */
 };
-static_assert(sizeof(ClipUBO) == 4 * 16, "unexpected padding");
+static_assert(sizeof(ClipUBO) == 5 * 16, "unexpected padding");
 
 struct VertexStage {
     short2 position [[attribute(0)]];
