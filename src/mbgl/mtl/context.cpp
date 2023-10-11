@@ -289,14 +289,13 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // This could potentially be reused, but `PaintParameters` is recreated for each frame.
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
     const auto uboRes = createBuffer(tileUBOs.data(), tileUBOs.size() * uboSize, gfx::BufferUsageType::StaticDraw);
-    const auto uboPtr = uboRes.getMetalBuffer().get();
-    if (!uboPtr) {
+    if (!uboRes) {
         return false;
     }
 
     encoder->setCullMode(MTL::CullModeNone);
     encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
-    encoder->setVertexBuffer(uboPtr, /*offset=*/0, ShaderClass::uniforms[0].index);
+    encoder->setVertexBuffer(uboRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,

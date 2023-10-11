@@ -233,6 +233,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         return;
     }
 
+    static_cast<gl::Context&>(context).renderingStats().stencilUpdates++;
+
     const style::Properties<>::PossiblyEvaluated properties{};
     const ClippingMaskProgram::Binders paintAttributeData(properties, 0);
 
