@@ -285,9 +285,6 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         return false;
     }
 
-    encoder->setCullMode(MTL::CullModeNone);
-    encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
-
     // Create a buffer for the UBO data.
     // This could potentially be reused, but `PaintParameters` is recreated for each frame.
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
@@ -297,19 +294,17 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         return false;
     }
 
-    // For each tile in the set...
-    for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
-        encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
-        encoder->setVertexBuffer(uboPtr, /*offset=*/ii * uboSize, ShaderClass::uniforms[0].index);
-        encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
-                                       indexCount,
-                                       MTL::IndexType::IndexTypeUInt16,
-                                       indexRes->getMetalBuffer().get(),
-                                       /*indexOffset=*/0,
-                                       /*instanceCount=*/1,
-                                       /*baseVertex=*/0,
-                                       /*baseInstance=*/0);
-    }
+    encoder->setCullMode(MTL::CullModeNone);
+    encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
+    encoder->setVertexBuffer(uboPtr, /*offset=*/0, ShaderClass::uniforms[0].index);
+    encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
+                                   indexCount,
+                                   MTL::IndexType::IndexTypeUInt16,
+                                   indexRes->getMetalBuffer().get(),
+                                   /*indexOffset=*/0,
+                                   /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()),
+                                   /*baseVertex=*/0,
+                                   /*baseInstance=*/0);
 
     return true;
 }
