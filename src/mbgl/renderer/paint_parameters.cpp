@@ -120,19 +120,23 @@ bool includes(I1 beg1, const I1 end1, I2 beg2, const I2 end2, const GetTileIDFun
 
 // Check whether the given set of tile IDs is a subset of the ones already rendered
 template <typename TIter>
-bool tileIDsCovered(TIter beg, TIter end, GetTileIDFunc<TIter>& f, const TileMaskIDMap& idMap) {
+bool tileIDsCovered(TIter beg, TIter end, GetTileIDFunc<TIter>& unwrap, const TileMaskIDMap& idMap) {
     if (idMap.size() < static_cast<std::size_t>(std::distance(beg, end))) {
         return false;
     }
-    assert(std::is_sorted(beg, end, [&f](const auto& a, const auto& b) { return f(a) < f(b); }));
-    return includes(idMap.cbegin(), idMap.cend(), beg, end, f);
+    assert(std::is_sorted(beg, end, [=](const auto& a, const auto& b) { return unwrap(a) < unwrap(b); }));
+    return includes(idMap.cbegin(), idMap.cend(), beg, end, unwrap);
 }
 
-#if !MLN_LEGACY_RENDERER
+#if MLN_LEGACY_RENDERER
+const UnwrappedTileID& unwrapRenderTiles(const RenderTiles::element_type::value_type& iter) {
+    return iter.get().id;
+}
+#else  // !MLN_LEGACY_RENDERER
 const UnwrappedTileID& unwrapIdentity(const UnwrappedTileID& value) {
     return value;
 }
-#endif // !MLN_LEGACY_RENDERER
+#endif // MLN_LEGACY_RENDERER
 } // namespace
 
 void PaintParameters::clearStencil() {
@@ -149,11 +153,6 @@ void PaintParameters::clearStencil() {
 }
 
 #if MLN_LEGACY_RENDERER
-namespace {
-const UnwrappedTileID& unwrapRenderTiles(const RenderTiles::element_type::value_type& iter) {
-    return iter.get().id;
-}
-} // namespace
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), &unwrapRenderTiles, /*clear=*/false);
 }
