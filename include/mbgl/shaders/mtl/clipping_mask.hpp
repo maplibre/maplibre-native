@@ -10,9 +10,11 @@ namespace shaders {
 
 struct alignas(16) ClipUBO {
     /*  0 */ std::array<float, 4 * 4> matrix;
-    /* 64 */
+    /* 64 */ std::uint32_t stencil_ref;
+    /* 68 */ std::uint32_t pad1, pad2, pad3;
+    /* 80 */
 };
-static_assert(sizeof(ClipUBO) == 4 * 16);
+static_assert(sizeof(ClipUBO) == 5 * 16);
 
 template <>
 struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {

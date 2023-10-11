@@ -16,6 +16,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
+#include <mbgl/shaders/mtl/clipping_mask.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
@@ -200,6 +201,117 @@ const BufferResource& Context::getTileIndexBuffer() {
         tileIndexBuffer.emplace(createBuffer(indexes.data(), indexes.bytes(), gfx::BufferUsageType::StaticDraw));
     }
     return *tileIndexBuffer;
+}
+
+namespace {
+const auto clipMaskStencilMode = gfx::StencilMode{
+    /*.test=*/gfx::StencilMode::Always(),
+    /*.ref=*/0,
+    /*.mask=*/0b11111111,
+    /*.fail=*/gfx::StencilOpType::Keep,
+    /*.depthFail=*/gfx::StencilOpType::Keep,
+    /*.pass=*/gfx::StencilOpType::Replace,
+};
+const auto clipMaskDepthMode = gfx::DepthMode{
+    /*.func=*/gfx::DepthFunctionType::Always,
+    /*.mask=*/gfx::DepthMaskType::ReadOnly,
+    /*.range=*/{0, 1},
+};
+} // namespace
+
+bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<shaders::ClipUBO>& tileUBOs) {
+    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal>;
+    const auto group = staticData.shaders->getShaderGroup("ClippingMaskProgram");
+    if (!group) {
+        return false;
+    }
+    const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
+    if (!shader) {
+        return false;
+    }
+
+    const auto& mtlShader = static_cast<const mtl::ShaderProgram&>(*shader);
+    const auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
+    const auto& encoder = mtlRenderPass.getMetalEncoder();
+    const auto colorMode = gfx::ColorMode::disabled();
+
+    // Create a vertex buffer from the fixed tile coordinates
+    constexpr auto vertexSize = sizeof(gfx::Vertex<PositionOnlyLayoutAttributes>::a1);
+    const auto& vertexRes = getTileVertexBuffer();
+    if (!vertexRes) {
+        assert(vertexSize == vertexRes.getSizeInBytes());
+        return false;
+    }
+
+    // Create a buffer from the fixed tile indexes
+    constexpr NS::UInteger indexCount = 6;
+    const auto indexRes = &getTileIndexBuffer();
+    if (!indexRes) {
+        return false;
+    }
+    assert(indexCount * sizeof(std::uint16_t) == indexRes->getSizeInBytes());
+
+    if (auto depthStencilState = makeDepthStencilState(clipMaskDepthMode, clipMaskStencilMode, mtlRenderPass)) {
+        encoder->setDepthStencilState(depthStencilState.get());
+    } else {
+        assert(!"Failed to create depth-stencil state");
+        return false;
+    }
+
+    // A vertex descriptor tells Metal what's in the vertex buffer
+    auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
+    auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
+    auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
+    if (!vertDesc || !attribDesc || !layoutDesc) {
+        return false;
+    }
+
+    attribDesc->setBufferIndex(ShaderClass::attributes[0].index);
+    attribDesc->setOffset(0);
+    attribDesc->setFormat(MTL::VertexFormatShort2);
+    layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
+    layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
+    layoutDesc->setStepRate(1);
+    vertDesc->attributes()->setObject(attribDesc.get(), 0);
+    vertDesc->layouts()->setObject(layoutDesc.get(), 0);
+
+    // Create a render pipeline state, telling Metal how to render the primitives
+    const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
+    if (auto state = mtlShader.getRenderPipelineState(renderPassDescriptor, vertDesc, colorMode)) {
+        encoder->setRenderPipelineState(state.get());
+    } else {
+        return false;
+    }
+
+    encoder->setCullMode(MTL::CullModeNone);
+    encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
+
+    // Create a buffer for the UBO data.
+    // This could potentially be reused, but `PaintParameters` is recreated for each frame.
+    constexpr auto uboSize = sizeof(shaders::ClipUBO);
+    const auto uboRes = createBuffer(tileUBOs.data(), tileUBOs.size() * uboSize, gfx::BufferUsageType::StaticDraw);
+    const auto uboPtr = uboRes.getMetalBuffer().get();
+    if (!uboPtr) {
+        return false;
+    }
+
+    // For each tile in the set...
+    for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
+        encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
+        encoder->setVertexBuffer(uboPtr, /*offset=*/ii * uboSize, ShaderClass::uniforms[0].index);
+        encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
+                                       indexCount,
+                                       MTL::IndexType::IndexTypeUInt16,
+                                       indexRes->getMetalBuffer().get(),
+                                       /*indexOffset=*/0,
+                                       /*instanceCount=*/1,
+                                       /*baseVertex=*/0,
+                                       /*baseInstance=*/0);
+    }
+
+    return true;
 }
 
 void Context::setDirtyState() {}
