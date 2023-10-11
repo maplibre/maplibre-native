@@ -14,6 +14,7 @@
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/traits.hpp>
@@ -182,6 +183,23 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const 
         buffer = createUniformBuffer(data, size);
         return true;
     }
+}
+
+const BufferResource& Context::getTileVertexBuffer() {
+    if (!tileVertexBuffer) {
+        const auto vertices = RenderStaticData::tileVertices();
+        constexpr auto vertexSize = sizeof(decltype(vertices)::Vertex::a1);
+        tileVertexBuffer.emplace(createBuffer(vertices.data(), vertices.bytes(), gfx::BufferUsageType::StaticDraw));
+    }
+    return *tileVertexBuffer;
+}
+
+const BufferResource& Context::getTileIndexBuffer() {
+    if (!tileIndexBuffer) {
+        const auto indexes = RenderStaticData::quadTriangleIndices();
+        tileIndexBuffer.emplace(createBuffer(indexes.data(), indexes.bytes(), gfx::BufferUsageType::StaticDraw));
+    }
+    return *tileIndexBuffer;
 }
 
 void Context::setDirtyState() {}

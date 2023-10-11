@@ -14,6 +14,7 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 namespace mbgl {
@@ -108,9 +109,18 @@ public:
 
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size);
 
+    /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
+    const BufferResource& getTileVertexBuffer();
+
+    /// Get a reusable buffer containing the standard fixed tile indexes
+    const BufferResource& getTileIndexBuffer();
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
+
+    std::optional<BufferResource> tileVertexBuffer;
+    std::optional<BufferResource> tileIndexBuffer;
 
     gfx::RenderingStats stats;
 };
