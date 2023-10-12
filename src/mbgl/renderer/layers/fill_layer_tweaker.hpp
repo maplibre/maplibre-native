@@ -2,11 +2,8 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
-#include <mbgl/util/string_indexer.hpp>
-
-#if MLN_RENDER_BACKEND_METAL
 #include <mbgl/style/layers/fill_layer_properties.hpp>
-#endif // MLN_RENDER_BACKEND_METAL
+#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 
@@ -23,19 +20,15 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-#if MLN_RENDER_BACKEND_METAL
-    void buildAttributeExpressions(const style::FillPaintProperties::Unevaluated&);
-#endif // MLN_RENDER_BACKEND_METAL
+    using PropertyExpressionMask = style::FillPaintProperties::PropertyMaskType;
+
+    /// Create shader expression representations from suitable un-evaluated properties.
+    /// @return A bitset with 1 where an expression was set up, 0 where the property must still be evaluated.
+    PropertyExpressionMask buildPropertyExpressions(const style::FillPaintProperties::Unevaluated&);
 
     static const StringIdentity idFillTilePropsUBOName;
     static const StringIdentity idFillInterpolateUBOName;
     static const StringIdentity idFillOutlineInterpolateUBOName;
-
-protected:
-    shaders::ExpressionAttribute getAttribute(const StringIdentity attrNameID,
-                                              const std::optional<shaders::Expression>&);
-    shaders::ColorAttribute getAttribute(const StringIdentity attrNameID,
-                                         const std::optional<shaders::ColorExpression>&);
 
 private:
     gfx::UniformBufferPtr fillPropsUniformBuffer;

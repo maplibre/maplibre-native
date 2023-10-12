@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/immutable.hpp>
 
@@ -48,19 +49,22 @@ public:
 
     const std::string& getID() const { return id; }
 
+    using AttributeSource = shaders::AttributeSource;
 #if MLN_RENDER_BACKEND_METAL
     /// Build the common expression inupts UBO
     static shaders::ExpressionInputsUBO buildExpressionUBO(double zoom, uint64_t frameCount);
 
     /// @brief Check whether a property name exists within the previously set collection.
     bool hasPropertyAsUniform(StringIdentity) const;
-    shaders::AttributeSource getAttributeSource(StringIdentity) const;
+    AttributeSource getAttributeSource(StringIdentity) const;
 
     template <shaders::BuiltIn ShaderType>
-    shaders::AttributeSource getAttributeSource(size_t index) {
+    AttributeSource getAttributeSource(size_t index) {
         using ShaderClass = shaders::ShaderSource<ShaderType, gfx::Backend::Type::Metal>;
         return getAttributeSource(ShaderClass::attributes[index].nameID);
     }
+#else  // !MLN_RENDER_BACKEND_METAL
+    AttributeSource getAttributeSource(const StringIdentity attribNameID) const { return AttributeSource::Constant; }
 #endif // MLN_RENDER_BACKEND_METAL
 
     /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
@@ -68,6 +72,10 @@ public:
     /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
     void setPropertiesAsUniforms(const std::unordered_set<StringIdentity>&);
     const std::unordered_set<StringIdentity>& getPropertiesAsUniforms() const;
+
+    /// Create the attribute UBO entry based on the constant, per-vertex, or computed value configured
+    shaders::ExpressionAttribute buildAttribute(StringIdentity attrNameID, const std::optional<shaders::Expression>&);
+    shaders::ColorAttribute buildAttribute(StringIdentity attrNameID, const std::optional<shaders::ColorExpression>&);
 
     void enableOverdrawInspector(bool);
 

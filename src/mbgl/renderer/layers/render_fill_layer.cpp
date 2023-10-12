@@ -83,7 +83,7 @@ void RenderFillLayer::transition(const TransitionParameters& parameters) {
 void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<FillLayerProperties>(staticImmutableCast<FillLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
-                                                       unevaluated.evaluate(parameters));
+                                                       unevaluated.evaluate(parameters, propertyExpressionMask));
     auto& evaluated = properties->evaluated;
 
     if (unevaluated.get<style::FillOutlineColor>().isUndefined()) {
@@ -331,7 +331,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!layerTweaker) {
         auto fillTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
-        fillTweaker->buildAttributeExpressions(unevaluated);
+        propertyExpressionMask = ~fillTweaker->buildPropertyExpressions(unevaluated);
         layerTweaker = std::move(fillTweaker);
         layerGroup->addLayerTweaker(layerTweaker);
     }

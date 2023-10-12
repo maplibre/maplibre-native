@@ -15,6 +15,8 @@
 
 namespace mbgl {
 
+using namespace shaders;
+
 LayerTweaker::LayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
     : id(std::move(id_)),
       evaluatedProperties(std::move(properties)) {}
@@ -52,7 +54,7 @@ void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) 
 }
 
 #if MLN_RENDER_BACKEND_METAL
-shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint64_t frameCount) {
+ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint64_t frameCount) {
     const auto time = util::MonotonicTimer::now();
     const auto time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(time).count();
     return {/* .time_lo = */ static_cast<uint32_t>(time_ns),
@@ -69,7 +71,6 @@ bool LayerTweaker::hasPropertyAsUniform(const StringIdentity attrNameID) const {
     return propertiesAsUniforms.find(attrNameID) != propertiesAsUniforms.end();
 }
 
-using namespace shaders;
 AttributeSource LayerTweaker::getAttributeSource(const StringIdentity attribNameID) const {
     return hasPropertyAsUniform(attribNameID) ? AttributeSource::Constant : AttributeSource::PerVertex;
 }
@@ -83,6 +84,42 @@ void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const std::unordered
     }
 #endif
 }
+
+ExpressionAttribute LayerTweaker::buildAttribute(const StringIdentity attrNameID,
+                                                 const std::optional<shaders::Expression>& attr) {
+    if (attr) {
+        // from uniforms or attribute arrays
+        return {
+            /*.expression=*/*attr,
+            /*.source=*/AttributeSource::Computed,
+        };
+    } else {
+        // from uniforms or attribute arrays
+        return {
+            /*.expression=*/{},
+            /*.source=*/getAttributeSource(attrNameID),
+        };
+    }
+}
+
+ColorAttribute LayerTweaker::buildAttribute(const StringIdentity attrNameID,
+                                            const std::optional<ColorExpression>& attr) {
+    if (attr) {
+        // from uniforms or attribute arrays
+        return {/*.expression=*/*attr,
+                /*.source=*/AttributeSource::Computed,
+                /*.pad=*/0,
+                0,
+                0};
+    } else {
+        // from uniforms or attribute arrays
+        return {/*.expression=*/{},
+                /*.source=*/getAttributeSource(attrNameID),
+                /*.pad=*/0,
+                0,
+                0};
+    }
+};
 
 #if !MLN_RENDER_BACKEND_METAL
 namespace {

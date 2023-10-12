@@ -133,6 +133,9 @@ public:
     using DataDrivenProperties = FilteredTypeList<PropertyTypes, IsDataDriven>;
     using OverridableProperties = FilteredTypeList<PropertyTypes, IsOverridable>;
 
+    static constexpr std::size_t PropertyTypeCount = sizeof...(Ps);
+    using PropertyMaskType = std::bitset<PropertyTypeCount>;
+
     template <class TypeList>
     using Tuple = IndexedTuple<PropertyTypes, TypeList>;
 
@@ -270,11 +273,24 @@ public:
             return PossiblyEvaluated{evaluate<Ps>(parameters)...};
         }
 
+        /// Evaluate parameters, skipping and producing undefined values where the index is 0 in the provided mask
+        PossiblyEvaluated evaluate(const PropertyEvaluationParameters& parameters, const PropertyMaskType& mask) const {
+            return {(test<Ps, Ps...>(mask) ? evaluate<Ps>(parameters) : EvalResultType<Ps>{})...};
+        }
+
         template <class Writer>
         void stringify(Writer& writer) const {
             writer.StartObject();
             util::ignore({(conversion::stringify<Ps>(writer, this->template get<Ps>()), 0)...});
             writer.EndObject();
+        }
+
+    protected:
+        template <typename T>
+        using EvalResultType = typename T::EvaluatorType::ResultType;
+        template <typename T, typename... Ts>
+        static bool test(const PropertyMaskType& mask) {
+            return mask[TypeListIndex<T, TypeList<Ts...>>];
         }
     };
 

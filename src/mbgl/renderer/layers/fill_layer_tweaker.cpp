@@ -175,7 +175,16 @@ bool populateExpression(const Transitioning<PropertyValue<Color>>& transitionPro
     return (!failed && shaderExpr.stopCount > 0);
 }
 
-void FillLayerTweaker::buildAttributeExpressions(const style::FillPaintProperties::Unevaluated& unevaluated) {
+FillLayerTweaker::PropertyExpressionMask FillLayerTweaker::buildPropertyExpressions(
+    const style::FillPaintProperties::Unevaluated& unevaluated) {
+    constexpr auto colorIndex = TypeListIndex<FillColor, FillPaintProperties::PropertyTypes>;
+    constexpr auto opacityIndex = TypeListIndex<FillOpacity, FillPaintProperties::PropertyTypes>;
+
+    using MaskValueType = unsigned long long; // See std::bitset constructor, no alias defined
+    using MaskLimits = std::numeric_limits<MaskValueType>;
+    static_assert(std::max(colorIndex, opacityIndex) < MaskLimits::digits && MaskLimits::radix == 2);
+
+#if MLN_RENDER_BACKEND_METAL
     shaders::ColorExpression colorExpr;
     if (populateExpression(unevaluated.get<style::FillColor>(), colorExpr)) {
         fillColorExpr = colorExpr;
@@ -185,43 +194,13 @@ void FillLayerTweaker::buildAttributeExpressions(const style::FillPaintPropertie
     if (populateExpression(unevaluated.get<style::FillOpacity>(), floatExpr)) {
         opacityExpr = floatExpr;
     }
-}
 
-shaders::ExpressionAttribute FillLayerTweaker::getAttribute(const StringIdentity attrNameID,
-                                                            const std::optional<shaders::Expression>& attr) {
-    if (attr) {
-        // from uniforms or attribute arrays
-        return {
-            /*.expression=*/*attr,
-            /*.source=*/AttributeSource::Computed,
-        };
-    } else {
-        // from uniforms or attribute arrays
-        return {
-            /*.expression=*/{},
-            /*.source=*/getAttributeSource(attrNameID),
-        };
-    }
+    // Set each bit corresponding to the type with a valid expression
+    return {0ULL | (fillColorExpr ? 1 << colorIndex : 0) | (opacityExpr ? 1 << opacityIndex : 0)};
+#else  // !MLN_RENDER_BACKEND_METAL
+    return {0};
+#endif // MLN_RENDER_BACKEND_METAL
 }
-
-shaders::ColorAttribute FillLayerTweaker::getAttribute(const StringIdentity attrNameID,
-                                                       const std::optional<shaders::ColorExpression>& attr) {
-    if (attr) {
-        // from uniforms or attribute arrays
-        return {/*.expression=*/*attr,
-                /*.source=*/AttributeSource::Computed,
-                /*.pad=*/0,
-                0,
-                0};
-    } else {
-        // from uniforms or attribute arrays
-        return {/*.expression=*/{},
-                /*.source=*/getAttributeSource(attrNameID),
-                /*.pad=*/0,
-                0,
-                0};
-    }
-};
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -255,8 +234,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             const auto opacityNameID = ShaderClass::attributes[ShaderClass::a_opacity_index].nameID;
 
             const FillPermutationUBO permutationUBO = {
-                /* .color = */ getAttribute(colorNameID, fillColorExpr),
-                /* .opacity = */ getAttribute(opacityNameID, opacityExpr),
+                /* .color = */ buildAttribute(colorNameID, fillColorExpr),
+                /* .opacity = */ buildAttribute(opacityNameID, opacityExpr),
                 /* .overdrawInspector = */ overdrawInspector,
             };
 

@@ -72,6 +72,8 @@ private:
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
+
+    style::FillPaintProperties::PropertyMaskType propertyExpressionMask = {~0ULL};
 #endif
 };
 
