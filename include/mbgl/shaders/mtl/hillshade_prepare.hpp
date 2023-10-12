@@ -93,7 +93,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     float b = getElevation(in.pos + float2(0, -epsilon.y), 0.0, image, image_sampler, drawable.unpack);
     float c = getElevation(in.pos + float2(epsilon.x, -epsilon.y), 0.0, image, image_sampler, drawable.unpack);
     float d = getElevation(in.pos + float2(-epsilon.x, 0), 0.0, image, image_sampler, drawable.unpack);
-    float e = getElevation(in.pos, 0.0, image, image_sampler, drawable.unpack);
+  //float e = getElevation(in.pos, 0.0, image, image_sampler, drawable.unpack);
     float f = getElevation(in.pos + float2(epsilon.x, 0), 0.0, image, image_sampler, drawable.unpack);
     float g = getElevation(in.pos + float2(-epsilon.x, epsilon.y), 0.0, image, image_sampler, drawable.unpack);
     float h = getElevation(in.pos + float2(0, epsilon.y), 0.0, image, image_sampler, drawable.unpack);
