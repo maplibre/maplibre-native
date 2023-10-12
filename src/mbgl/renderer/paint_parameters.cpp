@@ -8,21 +8,12 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
-
-#if MLN_RENDER_BACKEND_METAL
-#include <mbgl/mtl/context.hpp>
-#include <mbgl/mtl/render_pass.hpp>
-#include <mbgl/mtl/renderer_backend.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
-#include <mbgl/shaders/mtl/clipping_mask.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 
-#include <Foundation/Foundation.hpp>
-#include <Metal/Metal.hpp>
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/mtl/context.hpp>
+#include <mbgl/shaders/mtl/clipping_mask.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -103,53 +94,73 @@ gfx::DepthMode PaintParameters::depthModeFor3D() const {
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
 }
 
+namespace {
+
+template <typename TIter>
+using GetTileIDFunc = const UnwrappedTileID& (*)(const typename TIter::value_type&);
+
+using TileMaskIDMap = std::map<UnwrappedTileID, int32_t>;
+
+// `std::includes` adapted to extract tile IDs from arbitrary collection iterators
+template <class I1, class I2>
+bool includes(I1 beg1, const I1 end1, I2 beg2, const I2 end2, const GetTileIDFunc<I2>& unwrap) {
+    for (; beg2 != end2; ++beg1) {
+        if (beg1 == end1) {
+            return false;
+        }
+        const auto id2 = unwrap(*beg2);
+        if (id2 < beg1->first) {
+            return false;
+        } else if (!(beg1->first < id2)) {
+            ++beg2;
+        }
+    }
+    return true;
+}
+
+// Check whether the given set of tile IDs is a subset of the ones already rendered
+template <typename TIter>
+bool tileIDsCovered(TIter beg, TIter end, GetTileIDFunc<TIter>& unwrap, const TileMaskIDMap& idMap) {
+    if (idMap.size() < static_cast<std::size_t>(std::distance(beg, end))) {
+        return false;
+    }
+    assert(std::is_sorted(beg, end, [=](const auto& a, const auto& b) { return unwrap(a) < unwrap(b); }));
+    return includes(idMap.cbegin(), idMap.cend(), beg, end, unwrap);
+}
+
+#if MLN_LEGACY_RENDERER
+const UnwrappedTileID& unwrapRenderTiles(const RenderTiles::element_type::value_type& iter) {
+    return iter.get().id;
+}
+#else  // !MLN_LEGACY_RENDERER
+const UnwrappedTileID& unwrapIdentity(const UnwrappedTileID& value) {
+    return value;
+}
+#endif // MLN_LEGACY_RENDERER
+} // namespace
+
 void PaintParameters::clearStencil() {
     nextStencilID = 1;
     tileClippingMaskIDs.clear();
 
 #if MLN_RENDER_BACKEND_METAL
     // Metal doesn't have an equivalent of `glClear`, so we clear the buffer by drawing zero to (0:0,0)
-    std::set<UnwrappedTileID> ids{{0, 0, 0}};
-    auto f = [](const auto& ii) -> const UnwrappedTileID& {
-        return ii;
-    };
-    renderTileClippingMasks(ids.cbegin(), ids.cend(), std::move(f), /*clear=*/true);
+    static const std::set<UnwrappedTileID> ids{{0, 0, 0}};
+    renderTileClippingMasks(ids.cbegin(), ids.cend(), &unwrapIdentity, /*clear=*/true);
 #else
     context.clearStencilBuffer(0b00000000);
 #endif
 }
 
-namespace {
-
-template <typename TIter>
-using GetTileIDFunc = std::function<const UnwrappedTileID&(const typename TIter::value_type&)>;
-using TileMaskIDMap = std::map<UnwrappedTileID, int32_t>;
-
-// Detects a difference in keys of renderTiles and tileClippingMaskIDs
-template <typename TIter>
-bool tileIDsIdentical(TIter beg, TIter end, GetTileIDFunc<TIter>& f, const TileMaskIDMap& idMap) {
-    if (static_cast<std::size_t>(std::distance(beg, end)) != idMap.size()) {
-        return false;
-    }
-    assert(std::is_sorted(beg, end, [&f](const auto& a, const auto& b) { return f(a) < f(b); }));
-    return std::equal(beg, end, idMap.cbegin(), [&f](const auto& ii, const auto& pair) { return f(ii) == pair.first; });
-}
-
-} // namespace
-
-void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
-    auto f = [](const auto& ii) -> const UnwrappedTileID& {
-        return ii;
-    };
-    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), std::move(f), /*clear=*/false);
-}
-
+#if MLN_LEGACY_RENDERER
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    auto f = [](const auto& ii) -> const UnwrappedTileID& {
-        return ii.get().id;
-    };
-    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), std::move(f), /*clear=*/false);
+    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), &unwrapRenderTiles, /*clear=*/false);
 }
+#else  // !MLN_LEGACY_RENDERER
+void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
+    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), &unwrapIdentity, /*clear=*/false);
+}
+#endif // MLN_LEGACY_RENDERER
 
 void PaintParameters::clearTileClippingMasks() {
     if (!tileClippingMaskIDs.empty()) {
@@ -157,135 +168,31 @@ void PaintParameters::clearTileClippingMasks() {
     }
 }
 
-#if MLN_RENDER_BACKEND_METAL
-namespace {
-const auto clipMaskStencilMode = gfx::StencilMode{
-    /*.test=*/gfx::StencilMode::Always(),
-    /*.ref=*/0,
-    /*.mask=*/0b11111111,
-    /*.fail=*/gfx::StencilOpType::Keep,
-    /*.depthFail=*/gfx::StencilOpType::Keep,
-    /*.pass=*/gfx::StencilOpType::Replace,
-};
-const auto clipMaskDepthMode = gfx::DepthMode{
-    /*.func=*/gfx::DepthFunctionType::Always,
-    /*.mask=*/gfx::DepthMaskType::ReadOnly,
-    /*.range=*/{0, 1},
-};
-} // namespace
-#endif // MLN_RENDER_BACKEND_METAL
-
 template <typename TIter>
-void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&& f, bool clear) {
-    if (tileIDsIdentical(beg, end, f, tileClippingMaskIDs)) {
-        // The current stencil mask is for this source already; no need to draw another one.
-        return;
-    }
-
-    const auto count = std::distance(beg, end);
-    if (!clear && nextStencilID + count > maxStencilValue) {
-        // we'll run out of fresh IDs so we need to clear and start from scratch
-        clearStencil();
-    }
-
+void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap, bool clear) {
     if (!renderPass) {
         assert(false);
         return;
     }
 
-#if !defined(NDEBUG)
-    const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
-#endif
+    if (!clear) {
+        if (tileIDsCovered(beg, end, unwrap, tileClippingMaskIDs)) {
+            // The current stencil mask is for this source already; no need to draw another one.
+            return;
+        }
+
+        const auto count = std::distance(beg, end);
+        if (nextStencilID + count > maxStencilValue) {
+            // we'll run out of fresh IDs so we need to clear and start from scratch
+            clearStencil();
+        }
+    }
 
 #if MLN_RENDER_BACKEND_METAL
-    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal>;
-    const auto group = staticData.shaders->getShaderGroup("ClippingMaskProgram");
-    if (!group) {
-        return;
-    }
-    const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(context, {}));
-    if (!shader) {
-        return;
-    }
-
-    auto& mtlContext = static_cast<mtl::Context&>(context);
-    const auto& mtlShader = static_cast<const mtl::ShaderProgram&>(*shader);
-    const auto& mtlRenderPass = static_cast<mtl::RenderPass&>(*renderPass);
-    const auto& encoder = mtlRenderPass.getMetalEncoder();
-    const auto colorMode = gfx::ColorMode::disabled();
-
-    const mtl::BufferResource* indexRes = nullptr;
-    constexpr NS::UInteger indexCount = 6;
-
-    const auto init = [&]() {
-        // Create a vertex buffer from the fixed tile coordinates
-        constexpr auto vertexSize = sizeof(gfx::Vertex<PositionOnlyLayoutAttributes>::a1);
-        const auto& vertexRes = mtlContext.getTileVertexBuffer();
-        if (!vertexRes) {
-            assert(vertexSize == vertexRes.getSizeInBytes());
-            return false;
-        }
-
-        // Create a buffer from the fixed tile indexes
-        if (!indexRes) {
-            indexRes = &mtlContext.getTileIndexBuffer();
-            if (!indexRes) {
-                return false;
-            }
-            assert(indexCount * sizeof(std::uint16_t) == indexRes->getSizeInBytes());
-        }
-
-        if (auto depthStencilState = mtlContext.makeDepthStencilState(
-                clipMaskDepthMode, clipMaskStencilMode, mtlRenderPass)) {
-            encoder->setDepthStencilState(depthStencilState.get());
-        } else {
-            assert(!"Failed to create depth-stencil state");
-            return false;
-        }
-
-        // A vertex descriptor tells Metal what's in the vertex buffer
-        auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
-        auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());
-        auto layoutDesc = NS::TransferPtr(MTL::VertexBufferLayoutDescriptor::alloc()->init());
-        if (!vertDesc || !attribDesc || !layoutDesc) {
-            return false;
-        }
-
-        attribDesc->setBufferIndex(ShaderClass::attributes[0].index);
-        attribDesc->setOffset(0);
-        attribDesc->setFormat(MTL::VertexFormatShort2);
-        layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
-        layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
-        layoutDesc->setStepRate(1);
-        vertDesc->attributes()->setObject(attribDesc.get(), 0);
-        vertDesc->layouts()->setObject(layoutDesc.get(), 0);
-
-        // Create a render pipeline state, telling Metal how to render the primitives
-        const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
-        if (auto state = mtlShader.getRenderPipelineState(renderPassDescriptor, vertDesc, colorMode)) {
-            encoder->setRenderPipelineState(state.get());
-        } else {
-            return false;
-        }
-
-        encoder->setCullMode(MTL::CullModeNone);
-        encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
-
-        return true;
-    };
-
-    std::vector<std::uint32_t> maskIDs;
-    std::vector<std::uint32_t> tileIndexes;
+    // Assign a stencil ID and build a UBO for each tile in the set
     std::vector<shaders::ClipUBO> tileUBOs;
-
-    const auto tileCount = std::distance(beg, end);
-    maskIDs.reserve(tileCount);
-    tileIndexes.reserve(tileCount);
-    tileUBOs.reserve(tileCount);
-
-    // For each tile in the set, work out the stencil ID
     for (auto i = beg; i != end; ++i) {
-        const auto& tileID = f(*i);
+        const auto& tileID = unwrap(*i);
 
         const int32_t stencilID = clear ? 0 : nextStencilID;
         if (!clear) {
@@ -299,38 +206,26 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
             }
         }
 
-        maskIDs.push_back(stencilID);
-        tileUBOs.emplace_back(shaders::ClipUBO{/* .matrix = */ util::cast<float>(matrixForTile(tileID))});
+        if (tileUBOs.empty()) {
+            tileUBOs.reserve(std::distance(beg, end));
+        }
+
+        tileUBOs.emplace_back(shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile(tileID)),
+                                               /*.stencil_ref=*/stencilID,
+                                               /*.pad=*/0,
+                                               0,
+                                               0});
     }
 
-    // Set up the encoder if we have anything to draw
-    if (tileUBOs.empty() || !init()) {
-        return;
+    if (!tileUBOs.empty()) {
+#if !defined(NDEBUG)
+        const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
+#endif
+
+        auto& mtlContext = static_cast<mtl::Context&>(context);
+        mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
     }
 
-    // Create a buffer for the UBO data.
-    // This could potentially be reused, but `PaintParameters` is recreated for each frame.
-    constexpr auto uboSize = sizeof(shaders::ClipUBO);
-    const auto uboRes = mtlContext.createBuffer(
-        tileUBOs.data(), tileUBOs.size() * uboSize, gfx::BufferUsageType::StaticDraw);
-    const auto uboPtr = uboRes.getMetalBuffer().get();
-    if (!uboPtr) {
-        return;
-    }
-
-    // For each tile in the set...
-    for (std::size_t ii = 0; ii < maskIDs.size(); ++ii) {
-        encoder->setStencilReferenceValue(maskIDs[ii]);
-        encoder->setVertexBuffer(uboPtr, /*offset=*/ii * uboSize, ShaderClass::uniforms[0].index);
-        encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
-                                       indexCount,
-                                       MTL::IndexType::IndexTypeUInt16,
-                                       indexRes->getMetalBuffer().get(),
-                                       /*indexOffset=*/0,
-                                       /*instanceCount=*/1,
-                                       /*baseVertex=*/0,
-                                       /*baseInstance=*/0);
-    }
 #else  // !MLN_RENDER_BACKEND_METAL
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
@@ -338,11 +233,13 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         return;
     }
 
+    static_cast<gl::Context&>(context).renderingStats().stencilUpdates++;
+
     const style::Properties<>::PossiblyEvaluated properties{};
     const ClippingMaskProgram::Binders paintAttributeData(properties, 0);
 
     for (auto i = beg; i != end; ++i) {
-        const auto& tileID = f(*i);
+        const auto& tileID = unwrap(*i);
 
         const int32_t stencilID = nextStencilID;
         const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
