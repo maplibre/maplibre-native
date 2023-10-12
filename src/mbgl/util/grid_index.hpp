@@ -61,6 +61,9 @@ public:
     using BBox = mapbox::geometry::box<float>;
     using BCircle = geometry::circle<float>;
 
+    /// Set the expected number of elements per cell to avoid small re-allocations for populated cells
+    void reserve(std::size_t value) { estimatedElementsPerCell = value; }
+
     void insert(T&& t, const BBox&);
     void insert(T&& t, const BCircle&);
 
@@ -90,6 +93,8 @@ private:
     const float width;
     const float height;
 
+    std::size_t estimatedElementsPerCell = 0;
+
     const std::size_t xCellCount;
     const std::size_t yCellCount;
     const double xScale;
@@ -118,20 +123,20 @@ GridIndex<T>::GridIndex(const float width_, const float height_, const uint32_t 
 
 template <class T>
 void GridIndex<T>::insert(T&& t, const BBox& bbox) {
-    size_t uid = boxElements.size();
+    const size_t uid = boxElements.size();
 
-    auto cx1 = convertToXCellCoord(bbox.min.x);
-    auto cy1 = convertToYCellCoord(bbox.min.y);
-    auto cx2 = convertToXCellCoord(bbox.max.x);
-    auto cy2 = convertToYCellCoord(bbox.max.y);
+    const auto cx1 = convertToXCellCoord(bbox.min.x);
+    const auto cy1 = convertToYCellCoord(bbox.min.y);
+    const auto cx2 = convertToXCellCoord(bbox.max.x);
+    const auto cy2 = convertToYCellCoord(bbox.max.y);
 
-    std::size_t x;
-    std::size_t y;
-    std::size_t cellIndex;
-    for (x = cx1; x <= cx2; ++x) {
-        for (y = cy1; y <= cy2; ++y) {
-            cellIndex = xCellCount * y + x;
-            boxCells[cellIndex].push_back(uid);
+    for (std::size_t x = cx1; x <= cx2; ++x) {
+        for (std::size_t y = cy1; y <= cy2; ++y) {
+            auto& cell = boxCells[xCellCount * y + x];
+            if (estimatedElementsPerCell && cell.empty()) {
+                cell.reserve(estimatedElementsPerCell);
+            }
+            cell.push_back(uid);
         }
     }
 
@@ -140,20 +145,20 @@ void GridIndex<T>::insert(T&& t, const BBox& bbox) {
 
 template <class T>
 void GridIndex<T>::insert(T&& t, const BCircle& bcircle) {
-    size_t uid = circleElements.size();
+    const size_t uid = circleElements.size();
 
-    auto cx1 = convertToXCellCoord(bcircle.center.x - bcircle.radius);
-    auto cy1 = convertToYCellCoord(bcircle.center.y - bcircle.radius);
-    auto cx2 = convertToXCellCoord(bcircle.center.x + bcircle.radius);
-    auto cy2 = convertToYCellCoord(bcircle.center.y + bcircle.radius);
+    const auto cx1 = convertToXCellCoord(bcircle.center.x - bcircle.radius);
+    const auto cy1 = convertToYCellCoord(bcircle.center.y - bcircle.radius);
+    const auto cx2 = convertToXCellCoord(bcircle.center.x + bcircle.radius);
+    const auto cy2 = convertToYCellCoord(bcircle.center.y + bcircle.radius);
 
-    std::size_t x;
-    std::size_t y;
-    std::size_t cellIndex;
-    for (x = cx1; x <= cx2; ++x) {
-        for (y = cy1; y <= cy2; ++y) {
-            cellIndex = xCellCount * y + x;
-            circleCells[cellIndex].push_back(uid);
+    for (std::size_t x = cx1; x <= cx2; ++x) {
+        for (std::size_t y = cy1; y <= cy2; ++y) {
+            auto& cell = circleCells[xCellCount * y + x];
+            if (estimatedElementsPerCell && cell.empty()) {
+                cell.reserve(estimatedElementsPerCell);
+            }
+            cell.push_back(uid);
         }
     }
 
