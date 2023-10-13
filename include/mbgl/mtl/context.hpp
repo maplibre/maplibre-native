@@ -133,6 +133,7 @@ private:
     gfx::ShaderProgramBasePtr clipMaskShader;
     MTLDepthStencilStatePtr clipMaskDepthStencilState;
     MTLRenderPipelineStatePtr clipMaskPipelineState;
+    BufferResource clipMaskUniformsBuffer;
     const gfx::Renderable* stencilStateRenderable = nullptr;
 
     gfx::RenderingStats stats;

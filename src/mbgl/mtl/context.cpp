@@ -309,16 +309,21 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     }
 
     // Create a buffer for the UBO data.
-    // This could potentially be reused, but `PaintParameters` is recreated for each frame.
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
-    const auto uboRes = createBuffer(tileUBOs.data(), tileUBOs.size() * uboSize, gfx::BufferUsageType::StaticDraw);
-    if (!uboRes) {
-        return false;
+    const auto bufferSize = tileUBOs.size() * uboSize;
+    if (!clipMaskUniformsBuffer || clipMaskUniformsBuffer.getSizeInBytes() < bufferSize) {
+        clipMaskUniformsBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
+        if (!clipMaskUniformsBuffer) {
+            return false;
+        }
+    } else {
+        clipMaskUniformsBuffer.update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
     encoder->setCullMode(MTL::CullModeNone);
     encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
-    encoder->setVertexBuffer(uboRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
+    encoder->setVertexBuffer(
+        clipMaskUniformsBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,
