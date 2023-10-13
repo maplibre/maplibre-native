@@ -563,9 +563,7 @@ class FillManagerTest {
 
     @Test
     fun testClickListener() {
-        val listener = object : OnFillClickListener {
-            override fun onAnnotationClick(t: Fill): Boolean = false
-        }
+        val listener: OnFillClickListener = { false }
         fillManager = FillManager(
             mapView,
             maplibreMap,
@@ -585,9 +583,7 @@ class FillManagerTest {
 
     @Test
     fun testLongClickListener() {
-        val listener = object : OnFillLongClickListener {
-            override fun onAnnotationLongClick(t: Fill): Boolean = false
-        }
+        val listener: OnFillLongClickListener = { false }
         fillManager = FillManager(
             mapView,
             maplibreMap,

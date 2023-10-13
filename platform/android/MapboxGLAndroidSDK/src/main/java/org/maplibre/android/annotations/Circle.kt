@@ -51,6 +51,9 @@ class Circle @JvmOverloads constructor(
             updateThis()
         }
 
+    override var clickListener: OnAnnotationClickListener<Circle>? = null
+    override var longClickListener: OnAnnotationLongClickListener<Circle>? = null
+
     override var geometry: Point = Point.fromLngLat(center.longitude, center.latitude)
 
     override val dataDrivenProperties: List<PairWithDefault>

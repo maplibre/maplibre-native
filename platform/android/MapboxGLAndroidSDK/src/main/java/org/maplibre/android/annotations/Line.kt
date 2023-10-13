@@ -74,6 +74,9 @@ class Line @JvmOverloads constructor(
             updateThis()
         }
 
+    override var clickListener: OnAnnotationClickListener<Line>? = null
+    override var longClickListener: OnAnnotationLongClickListener<Line>? = null
+
     override var geometry: LineString = LineString.fromLngLats(
             path.map { Point.fromLngLat(it.longitude, it.latitude) }
         )

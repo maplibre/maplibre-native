@@ -14,13 +14,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.MenuItemCompat
-import org.maplibre.android.annotations.OnSymbolClickListener
 import org.maplibre.android.annotations.Symbol
 import org.maplibre.android.annotations.data.Icon
 import org.maplibre.android.annotations.data.Text
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -108,12 +107,10 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
                     icon = icon
                 ).apply {
                     if (i == 0) {
-                        clickListener = object : OnSymbolClickListener {
-                            override fun onAnnotationClick(t: Symbol): Boolean {
-                                Toast.makeText(this@BulkMarkerActivity, "You have clicked the very first marker!", Toast.LENGTH_SHORT).show()
-                                return true
+                        clickListener = {
+                            Toast.makeText(this@BulkMarkerActivity, "You have clicked the very first marker!", Toast.LENGTH_SHORT).show()
+                                true
                             }
-                        }
                     }
 
                     if (i == 1) {

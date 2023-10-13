@@ -33,6 +33,9 @@ class Symbol @JvmOverloads constructor(
             updateThis()
         }
 
+    override var clickListener: OnAnnotationClickListener<Symbol>? = null
+    override var longClickListener: OnAnnotationLongClickListener<Symbol>? = null
+
     override var geometry: Point = Point.fromLngLat(position.longitude, position.latitude)
 
     override val dataDrivenProperties: List<PairWithDefault>

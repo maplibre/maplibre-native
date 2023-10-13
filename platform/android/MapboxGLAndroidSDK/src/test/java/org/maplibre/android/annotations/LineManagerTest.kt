@@ -650,9 +650,7 @@ class LineManagerTest {
 
     @Test
     fun testClickListener() {
-        val listener = object : OnLineClickListener {
-            override fun onAnnotationClick(t: Line): Boolean = false
-        }
+        val listener: OnLineClickListener = { false }
         lineManager = LineManager(
             mapView,
             maplibreMap,
@@ -672,9 +670,7 @@ class LineManagerTest {
 
     @Test
     fun testLongClickListener() {
-        val listener = object : OnLineLongClickListener {
-            override fun onAnnotationLongClick(t: Line): Boolean = false
-        }
+        val listener: OnLineLongClickListener = { false }
         lineManager = LineManager(
             mapView,
             maplibreMap,

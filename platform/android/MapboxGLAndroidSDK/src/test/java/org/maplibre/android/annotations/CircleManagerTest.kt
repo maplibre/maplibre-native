@@ -575,9 +575,7 @@ class CircleManagerTest {
 
     @Test
     fun testClickListener() {
-        val listener = object : OnCircleClickListener {
-            override fun onAnnotationClick(t: Circle): Boolean = false
-        }
+        val listener: OnCircleClickListener = { false }
         circleManager = CircleManager(
             mapView,
             maplibreMap,
@@ -597,9 +595,7 @@ class CircleManagerTest {
 
     @Test
     fun testLongClickListener() {
-        val listener = object : OnCircleLongClickListener {
-            override fun onAnnotationLongClick(t: Circle): Boolean = false
-        }
+        val listener: OnCircleClickListener = { false }
         circleManager = CircleManager(
             mapView,
             maplibreMap,

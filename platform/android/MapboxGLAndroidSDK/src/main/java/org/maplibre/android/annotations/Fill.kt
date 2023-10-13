@@ -48,6 +48,9 @@ class Fill @JvmOverloads constructor(
             updateThis()
         }
 
+    override var clickListener: OnAnnotationClickListener<Fill>? = null
+    override var longClickListener: OnAnnotationLongClickListener<Fill>? = null
+
     override var geometry: Polygon = Polygon.fromLngLats(paths.map { it.map { Point.fromLngLat(it.longitude, it.latitude) } })
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(

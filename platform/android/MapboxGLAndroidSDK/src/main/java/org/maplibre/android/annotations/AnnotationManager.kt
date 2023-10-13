@@ -352,12 +352,12 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
                      * annotations of type T, which in turn only accept click listeners of type T.
                      */
                     val annotationHandlesClick =
-                        (annotation.clickListener as OnAnnotationClickListener<T>?)?.onAnnotationClick(annotation)
+                        (annotation.clickListener as OnAnnotationClickListener<T>?)?.invoke(annotation)
 
                     if (annotationHandlesClick == true) {
                         true
                     } else {
-                        clickListeners.any { it.onAnnotationClick(annotation) }
+                        clickListeners.any { it(annotation) }
                     }
                 } ?: false
             } else {
@@ -369,14 +369,14 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
                 queryMapForFeatures(point)?.let { annotation ->
                     // Unchecked cast see above.
                     val annotationHandlesLongClick =
-                        (annotation.longClickListener as OnAnnotationLongClickListener<T>?)?.onAnnotationLongClick(
+                        (annotation.longClickListener as OnAnnotationLongClickListener<T>?)?.invoke(
                             annotation
                         )
 
                     if (annotationHandlesLongClick == true) {
                         true
                     } else {
-                        longClickListeners.any { it.onAnnotationLongClick(annotation) }
+                        longClickListeners.any { it(annotation) }
                     }
                 } ?: false
             } else {

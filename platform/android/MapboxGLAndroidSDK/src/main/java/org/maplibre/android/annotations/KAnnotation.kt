@@ -12,9 +12,9 @@ sealed class KAnnotation<T : Geometry>(
     zLayer: Int = Defaults.Z_LAYER,
     draggable: Boolean = Defaults.DRAGGABLE,
     data: JsonElement? = Defaults.JSON_ELEMENT,
-    var clickListener: OnAnnotationClickListener<out KAnnotation<T>>? = null,
+    open val clickListener: OnAnnotationClickListener<*>? = null,
     var dragListener: OnAnnotationDragListener<out KAnnotation<T>>? = null,
-    var longClickListener: OnAnnotationLongClickListener<out KAnnotation<T>>? = null
+    open val longClickListener: OnAnnotationLongClickListener<*>? = null
 ) {
 
     var zLayer = zLayer
