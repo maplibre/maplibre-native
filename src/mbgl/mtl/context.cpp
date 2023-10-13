@@ -261,6 +261,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         // We're on a new renderable, invalidate objects constructed for the previous one.
         clipMaskPipelineState.reset();
         clipMaskDepthStencilState.reset();
+        stencilStateRenderable = &renderable;
     }
 
     // Create the depth-stencil state, if necessary.
