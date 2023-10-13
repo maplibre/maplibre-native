@@ -16,24 +16,22 @@ namespace style {
 
 class CustomDrawableLayerHost {
 public:
-    class LineBuilderHelper {
-    
-    };
-    
+    class LineBuilderHelper {};
+
     struct Interface {
-        gfx::ShaderRegistry &shaders;
-        gfx::Context &context;
-        const TransformState &state;
-        const std::shared_ptr<UpdateParameters> &updateParameters;
-        const RenderTree &renderTree;
-        UniqueChangeRequestVec &changes;
-        
+        gfx::ShaderRegistry& shaders;
+        gfx::Context& context;
+        const TransformState& state;
+        const std::shared_ptr<UpdateParameters>& updateParameters;
+        const RenderTree& renderTree;
+        UniqueChangeRequestVec& changes;
+
         gfx::ShaderPtr lineShaderDefault() const;
-        
+
         bool getTileLayerGroup(std::shared_ptr<TileLayerGroup>& layerGroupRef, mbgl::RenderLayer& proxyLayer) const;
-        
+
         std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
-        
+
         std::unique_ptr<LineBuilderHelper> createLineBuilderHelper() const;
     };
 
