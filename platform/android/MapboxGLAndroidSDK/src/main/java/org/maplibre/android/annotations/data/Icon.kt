@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 import androidx.core.graphics.drawable.toBitmap
-import org.maplibre.android.annotations.KSymbol
+import org.maplibre.android.annotations.Symbol
 import org.maplibre.android.annotations.PairWithDefault
 import org.maplibre.android.annotations.asColorString
 import org.maplibre.android.annotations.default
@@ -66,12 +66,12 @@ open class Icon(
 
     open val flattenedValues: List<PairWithDefault>
         get() = listOf(
-            KSymbol.PROPERTY_ICON_SIZE to size default Defaults.ICON_SIZE,
-            KSymbol.PROPERTY_ICON_IMAGE to image default Unit, // todo string representation
-            KSymbol.PROPERTY_ICON_ROTATE to rotate default Defaults.ICON_ROTATE,
-            KSymbol.PROPERTY_ICON_OFFSET to offset.toArray() default Defaults.ICON_OFFSET,
-            KSymbol.PROPERTY_ICON_ANCHOR to anchor.toString() default Defaults.ICON_ANCHOR.toString(),
-            KSymbol.PROPERTY_ICON_OPACITY to opacity default Defaults.ICON_OPACITY
+            Symbol.PROPERTY_ICON_SIZE to size default Defaults.ICON_SIZE,
+            Symbol.PROPERTY_ICON_IMAGE to image default Unit, // todo string representation
+            Symbol.PROPERTY_ICON_ROTATE to rotate default Defaults.ICON_ROTATE,
+            Symbol.PROPERTY_ICON_OFFSET to offset.toArray() default Defaults.ICON_OFFSET,
+            Symbol.PROPERTY_ICON_ANCHOR to anchor.toString() default Defaults.ICON_ANCHOR.toString(),
+            Symbol.PROPERTY_ICON_OPACITY to opacity default Defaults.ICON_OPACITY
         )
 }
 
@@ -87,10 +87,10 @@ class SdfIcon(
 ) : Icon(image, size, rotate, offset, anchor, opacity) {
     override val flattenedValues: List<PairWithDefault>
         get() = super.flattenedValues + listOf(
-            KSymbol.PROPERTY_ICON_COLOR to color.asColorString() default Unit,
-            KSymbol.PROPERTY_ICON_HALO_COLOR to halo?.color default Defaults.ICON_HALO?.color,
-            KSymbol.PROPERTY_ICON_HALO_WIDTH to halo?.width default Defaults.ICON_HALO?.width,
-            KSymbol.PROPERTY_ICON_HALO_BLUR to halo?.blur default Defaults.ICON_HALO?.blur
+            Symbol.PROPERTY_ICON_COLOR to color.asColorString() default Unit,
+            Symbol.PROPERTY_ICON_HALO_COLOR to halo?.color default Defaults.ICON_HALO?.color,
+            Symbol.PROPERTY_ICON_HALO_WIDTH to halo?.width default Defaults.ICON_HALO?.width,
+            Symbol.PROPERTY_ICON_HALO_BLUR to halo?.blur default Defaults.ICON_HALO?.blur
         )
 }
 

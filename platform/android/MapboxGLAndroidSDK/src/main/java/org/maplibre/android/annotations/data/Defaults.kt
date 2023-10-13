@@ -1,9 +1,12 @@
 package org.maplibre.android.annotations.data
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PointF
 import androidx.annotation.ColorInt
 import com.google.gson.JsonElement
+import org.maplibre.android.annotations.Circle
+import org.maplibre.android.annotations.Line
 
 class Defaults {
     companion object {
@@ -46,5 +49,31 @@ class Defaults {
         @ColorInt
         val TEXT_COLOR: Int = Color.BLACK
         val TEXT_HALO: Halo? = null
+
+        val CIRCLE_RADIUS: Float = 5f
+        @ColorInt
+        val CIRCLE_COLOR: Int = Color.BLACK
+        val CIRCLE_BLUR: Float? = null
+        val CIRCLE_OPACITY: Float = 1f
+        val CIRCLE_STROKE: Circle.Stroke? = null
+
+        val CIRCLE_STROKE_COLOR: Int = Color.BLACK
+        val CIRCLE_STROKE_OPACITY: Float = 1f
+
+        val LINE_JOIN: Line.Join = Line.Join.MITER
+        val LINE_OPACITY: Float = 1f
+        @ColorInt
+        val LINE_COLOR: Int = Color.BLACK
+        val LINE_WIDTH: Float = 1f
+        val LINE_GAP: Float? = null
+        val LINE_OFFSET: Float = 0f
+        val LINE_BLUR: Float? = null
+        val LINE_PATTERN: Bitmap? = null
+
+        val FILL_OPACITY: Float = 1f
+        @ColorInt
+        val FILL_COLOR: Int = Color.BLACK
+        val FILL_OUTLINE_COLOR: Int? = null
+        val FILL_PATTERN: Bitmap? = null
     }
 }

@@ -32,7 +32,7 @@ class SymbolManager @UiThread internal constructor(
         mapView,
         maplibreMap
     )
-) : AnnotationManager<SymbolLayer, KSymbol>(
+) : AnnotationManager<SymbolLayer, Symbol>(
     mapView,
     maplibreMap,
     style,
@@ -100,113 +100,113 @@ class SymbolManager @UiThread internal constructor(
     }
 
     override fun generateDataDrivenPropertyExpression(property: String): PropertyValue<Expression> = when (property) {
-        KSymbol.PROPERTY_SYMBOL_SORT_KEY -> PropertyFactory.symbolSortKey(
-            Expression.get(KSymbol.PROPERTY_SYMBOL_SORT_KEY)
+        Symbol.PROPERTY_SYMBOL_SORT_KEY -> PropertyFactory.symbolSortKey(
+            Expression.get(Symbol.PROPERTY_SYMBOL_SORT_KEY)
         )
 
-        KSymbol.PROPERTY_ICON_SIZE -> PropertyFactory.iconSize(
-            Expression.get(KSymbol.PROPERTY_ICON_SIZE)
+        Symbol.PROPERTY_ICON_SIZE -> PropertyFactory.iconSize(
+            Expression.get(Symbol.PROPERTY_ICON_SIZE)
         )
 
-        KSymbol.PROPERTY_ICON_IMAGE -> PropertyFactory.iconImage(
-            Expression.get(KSymbol.PROPERTY_ICON_IMAGE)
+        Symbol.PROPERTY_ICON_IMAGE -> PropertyFactory.iconImage(
+            Expression.get(Symbol.PROPERTY_ICON_IMAGE)
         )
 
-        KSymbol.PROPERTY_ICON_ROTATE -> PropertyFactory.iconRotate(
-            Expression.get(KSymbol.PROPERTY_ICON_ROTATE)
+        Symbol.PROPERTY_ICON_ROTATE -> PropertyFactory.iconRotate(
+            Expression.get(Symbol.PROPERTY_ICON_ROTATE)
         )
 
-        KSymbol.PROPERTY_ICON_OFFSET -> PropertyFactory.iconOffset(
-            Expression.get(KSymbol.PROPERTY_ICON_OFFSET)
+        Symbol.PROPERTY_ICON_OFFSET -> PropertyFactory.iconOffset(
+            Expression.get(Symbol.PROPERTY_ICON_OFFSET)
         )
 
-        KSymbol.PROPERTY_ICON_ANCHOR -> PropertyFactory.iconAnchor(
-            Expression.get(KSymbol.PROPERTY_ICON_ANCHOR)
+        Symbol.PROPERTY_ICON_ANCHOR -> PropertyFactory.iconAnchor(
+            Expression.get(Symbol.PROPERTY_ICON_ANCHOR)
         )
 
-        KSymbol.PROPERTY_TEXT_FIELD -> PropertyFactory.textField(
-            Expression.get(KSymbol.PROPERTY_TEXT_FIELD)
+        Symbol.PROPERTY_TEXT_FIELD -> PropertyFactory.textField(
+            Expression.get(Symbol.PROPERTY_TEXT_FIELD)
         )
 
-        KSymbol.PROPERTY_TEXT_FONT -> PropertyFactory.textFont(
-            Expression.get(KSymbol.PROPERTY_TEXT_FONT)
+        Symbol.PROPERTY_TEXT_FONT -> PropertyFactory.textFont(
+            Expression.get(Symbol.PROPERTY_TEXT_FONT)
         )
 
-        KSymbol.PROPERTY_TEXT_SIZE -> PropertyFactory.textSize(
-            Expression.get(KSymbol.PROPERTY_TEXT_SIZE)
+        Symbol.PROPERTY_TEXT_SIZE -> PropertyFactory.textSize(
+            Expression.get(Symbol.PROPERTY_TEXT_SIZE)
         )
 
-        KSymbol.PROPERTY_TEXT_MAX_WIDTH -> PropertyFactory.textMaxWidth(
-            Expression.get(KSymbol.PROPERTY_TEXT_MAX_WIDTH)
+        Symbol.PROPERTY_TEXT_MAX_WIDTH -> PropertyFactory.textMaxWidth(
+            Expression.get(Symbol.PROPERTY_TEXT_MAX_WIDTH)
         )
 
-        KSymbol.PROPERTY_TEXT_LETTER_SPACING -> PropertyFactory.textLetterSpacing(
-            Expression.get(KSymbol.PROPERTY_TEXT_LETTER_SPACING)
+        Symbol.PROPERTY_TEXT_LETTER_SPACING -> PropertyFactory.textLetterSpacing(
+            Expression.get(Symbol.PROPERTY_TEXT_LETTER_SPACING)
         )
 
-        KSymbol.PROPERTY_TEXT_JUSTIFY -> PropertyFactory.textJustify(
-            Expression.get(KSymbol.PROPERTY_TEXT_JUSTIFY)
+        Symbol.PROPERTY_TEXT_JUSTIFY -> PropertyFactory.textJustify(
+            Expression.get(Symbol.PROPERTY_TEXT_JUSTIFY)
         )
 
-        KSymbol.PROPERTY_TEXT_RADIAL_OFFSET -> PropertyFactory.textRadialOffset(
-            Expression.get(KSymbol.PROPERTY_TEXT_RADIAL_OFFSET)
+        Symbol.PROPERTY_TEXT_RADIAL_OFFSET -> PropertyFactory.textRadialOffset(
+            Expression.get(Symbol.PROPERTY_TEXT_RADIAL_OFFSET)
         )
 
-        KSymbol.PROPERTY_TEXT_ANCHOR -> PropertyFactory.textAnchor(
-            Expression.get(KSymbol.PROPERTY_TEXT_ANCHOR)
+        Symbol.PROPERTY_TEXT_ANCHOR -> PropertyFactory.textAnchor(
+            Expression.get(Symbol.PROPERTY_TEXT_ANCHOR)
         )
 
-        KSymbol.PROPERTY_TEXT_ROTATE -> PropertyFactory.textRotate(
-            Expression.get(KSymbol.PROPERTY_TEXT_ROTATE)
+        Symbol.PROPERTY_TEXT_ROTATE -> PropertyFactory.textRotate(
+            Expression.get(Symbol.PROPERTY_TEXT_ROTATE)
         )
 
-        KSymbol.PROPERTY_TEXT_TRANSFORM -> PropertyFactory.textTransform(
-            Expression.get(KSymbol.PROPERTY_TEXT_TRANSFORM)
+        Symbol.PROPERTY_TEXT_TRANSFORM -> PropertyFactory.textTransform(
+            Expression.get(Symbol.PROPERTY_TEXT_TRANSFORM)
         )
 
-        KSymbol.PROPERTY_TEXT_OFFSET -> PropertyFactory.textOffset(
-            Expression.get(KSymbol.PROPERTY_TEXT_OFFSET)
+        Symbol.PROPERTY_TEXT_OFFSET -> PropertyFactory.textOffset(
+            Expression.get(Symbol.PROPERTY_TEXT_OFFSET)
         )
 
-        KSymbol.PROPERTY_ICON_OPACITY -> PropertyFactory.iconOpacity(
-            Expression.get(KSymbol.PROPERTY_ICON_OPACITY)
+        Symbol.PROPERTY_ICON_OPACITY -> PropertyFactory.iconOpacity(
+            Expression.get(Symbol.PROPERTY_ICON_OPACITY)
 
         )
 
-        KSymbol.PROPERTY_ICON_COLOR -> PropertyFactory.iconColor(
-            Expression.get(KSymbol.PROPERTY_ICON_COLOR)
+        Symbol.PROPERTY_ICON_COLOR -> PropertyFactory.iconColor(
+            Expression.get(Symbol.PROPERTY_ICON_COLOR)
         )
 
-        KSymbol.PROPERTY_ICON_HALO_COLOR -> PropertyFactory.iconHaloColor(
-            Expression.get(KSymbol.PROPERTY_ICON_HALO_COLOR)
+        Symbol.PROPERTY_ICON_HALO_COLOR -> PropertyFactory.iconHaloColor(
+            Expression.get(Symbol.PROPERTY_ICON_HALO_COLOR)
         )
 
-        KSymbol.PROPERTY_ICON_HALO_WIDTH -> PropertyFactory.iconHaloWidth(
-            Expression.get(KSymbol.PROPERTY_ICON_HALO_WIDTH)
+        Symbol.PROPERTY_ICON_HALO_WIDTH -> PropertyFactory.iconHaloWidth(
+            Expression.get(Symbol.PROPERTY_ICON_HALO_WIDTH)
         )
 
-        KSymbol.PROPERTY_ICON_HALO_BLUR -> PropertyFactory.iconHaloBlur(
-            Expression.get(KSymbol.PROPERTY_ICON_HALO_BLUR)
+        Symbol.PROPERTY_ICON_HALO_BLUR -> PropertyFactory.iconHaloBlur(
+            Expression.get(Symbol.PROPERTY_ICON_HALO_BLUR)
         )
 
-        KSymbol.PROPERTY_TEXT_OPACITY -> PropertyFactory.textOpacity(
-            Expression.get(KSymbol.PROPERTY_TEXT_OPACITY)
+        Symbol.PROPERTY_TEXT_OPACITY -> PropertyFactory.textOpacity(
+            Expression.get(Symbol.PROPERTY_TEXT_OPACITY)
         )
 
-        KSymbol.PROPERTY_TEXT_COLOR -> PropertyFactory.textColor(
-            Expression.get(KSymbol.PROPERTY_TEXT_COLOR)
+        Symbol.PROPERTY_TEXT_COLOR -> PropertyFactory.textColor(
+            Expression.get(Symbol.PROPERTY_TEXT_COLOR)
         )
 
-        KSymbol.PROPERTY_TEXT_HALO_COLOR -> PropertyFactory.textHaloColor(
-            Expression.get(KSymbol.PROPERTY_TEXT_HALO_COLOR)
+        Symbol.PROPERTY_TEXT_HALO_COLOR -> PropertyFactory.textHaloColor(
+            Expression.get(Symbol.PROPERTY_TEXT_HALO_COLOR)
         )
 
-        KSymbol.PROPERTY_TEXT_HALO_WIDTH -> PropertyFactory.textHaloWidth(
-            Expression.get(KSymbol.PROPERTY_TEXT_HALO_WIDTH)
+        Symbol.PROPERTY_TEXT_HALO_WIDTH -> PropertyFactory.textHaloWidth(
+            Expression.get(Symbol.PROPERTY_TEXT_HALO_WIDTH)
         )
 
-        KSymbol.PROPERTY_TEXT_HALO_BLUR -> PropertyFactory.textHaloBlur(
-            Expression.get(KSymbol.PROPERTY_TEXT_HALO_BLUR)
+        Symbol.PROPERTY_TEXT_HALO_BLUR -> PropertyFactory.textHaloBlur(
+            Expression.get(Symbol.PROPERTY_TEXT_HALO_BLUR)
         )
 
         else -> throw IllegalArgumentException(
@@ -238,7 +238,7 @@ class SymbolManager @UiThread internal constructor(
         super.removeLongClickListener(v)
     }
 
-// Property accessors
+    // Property accessors
     /**
      * Label placement relative to its geometry.
      */

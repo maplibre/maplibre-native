@@ -43,7 +43,7 @@ sealed class KAnnotation<T : Geometry>(
         private set
 
     internal abstract var geometry: T
-    internal abstract val dataDrivenProperties: List<Triple<String, Any?, Any?>>
+    internal abstract val dataDrivenProperties: List<PairWithDefault>
 
     internal open fun updateThis() {
         attachedToMap?.updateAnnotation(this)
@@ -99,4 +99,8 @@ sealed class KAnnotation<T : Geometry>(
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
     ): Geometry?
+
+    companion object {
+        internal const val PROPERTY_IS_DRAGGABLE = "is-draggable"
+    }
 }

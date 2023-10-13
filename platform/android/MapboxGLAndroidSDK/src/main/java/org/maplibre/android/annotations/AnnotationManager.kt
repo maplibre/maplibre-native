@@ -7,7 +7,6 @@ import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import java.util.concurrent.atomic.AtomicBoolean
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.MapLibreMap.OnMapLongClickListener
@@ -97,15 +96,19 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
      */
     @UiThread
     fun add(annotation: T) {
-        if (annotation.id == 0L) {
-            // At this point, the annotation has no ID iff the user has added it directly to the manager.
-            annotation.attach(this, nextId--)
+        if (annotations[annotation.id] === annotation) {
+            Timber.w("The same annotation was added twice. Ignoring.")
+        } else {
+            if (annotation.id == 0L) {
+                // At this point, the annotation has no ID iff the user has added it directly to the manager.
+                annotation.attach(this, nextId--)
+            }
+            annotations[annotation.id]?.let {
+                throw IllegalStateException("An ID was generated twice.")
+            }
+            annotations[annotation.id] = annotation
+            updateSource()
         }
-        annotations[annotation.id]?.let {
-            throw IllegalStateException("An ID was generated twice.")
-        }
-        annotations[annotation.id] = annotation
-        updateSource()
     }
 
     /**

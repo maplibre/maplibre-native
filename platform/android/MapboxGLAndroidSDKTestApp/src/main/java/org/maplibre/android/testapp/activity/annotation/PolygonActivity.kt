@@ -6,8 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.annotations.Polygon
-import org.maplibre.android.annotations.PolygonOptions
+import org.maplibre.android.annotations.Fill
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.* // ktlint-disable no-wildcard-imports
@@ -24,7 +23,7 @@ import java.util.ArrayList
 class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
-    private var polygon: Polygon? = null
+    private var polygon: Fill? = null
     private var fullAlpha = true
     private var polygonIsVisible = true
     private var color = true
@@ -56,18 +55,16 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Streets"))
-        map.setOnPolygonClickListener { polygon: Polygon ->
+        /*map.setOnPolygonClickListener { polygon: Fill ->
             Toast.makeText(
                 this@PolygonActivity,
                 "You clicked on polygon with id = " + polygon.id,
                 Toast.LENGTH_SHORT
             ).show()
+        }*/
+        polygon = Fill(listOf(Config.STAR_SHAPE_POINTS), color = Config.BLUE_COLOR).also {
+            maplibreMap.addAnnotation(it)
         }
-        polygon = maplibreMap.addPolygon(
-            PolygonOptions()
-                .addAll(Config.STAR_SHAPE_POINTS)
-                .fillColor(Config.BLUE_COLOR)
-        )
     }
 
     override fun onStart() {
@@ -109,32 +106,35 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
         return when (item.itemId) {
             R.id.action_id_alpha -> {
                 fullAlpha = !fullAlpha
-                polygon!!.alpha =
+                polygon!!.opacity =
                     if (fullAlpha) Config.FULL_ALPHA else Config.PARTIAL_ALPHA
                 true
             }
             R.id.action_id_visible -> {
                 polygonIsVisible = !polygonIsVisible
-                polygon!!.alpha =
+                polygon!!.opacity =
                     if (polygonIsVisible) if (fullAlpha) Config.FULL_ALPHA else Config.PARTIAL_ALPHA else Config.NO_ALPHA
                 true
             }
             R.id.action_id_points -> {
                 allPoints = !allPoints
-                polygon!!.points =
-                    if (allPoints) Config.STAR_SHAPE_POINTS else Config.BROKEN_SHAPE_POINTS
+                polygon!!.paths =
+                    if (allPoints) listOf(Config.STAR_SHAPE_POINTS) else listOf(Config.BROKEN_SHAPE_POINTS)
+                holes = false
                 true
             }
             R.id.action_id_color -> {
                 color = !color
-                polygon!!.fillColor =
+                polygon!!.color =
                     if (color) Config.BLUE_COLOR else Config.RED_COLOR
                 true
             }
             R.id.action_id_holes -> {
                 holes = !holes
-                polygon!!.holes =
-                    if (holes) Config.STAR_SHAPE_HOLES else emptyList()
+                val holesList = if (holes) Config.STAR_SHAPE_HOLES else emptyList()
+                val allList = if (allPoints) Config.STAR_SHAPE_POINTS else Config.BROKEN_SHAPE_POINTS
+
+                polygon!!.paths = listOf(allList) + holesList
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -152,7 +152,7 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
         const val FULL_ALPHA = 1.0f
         const val PARTIAL_ALPHA = 0.5f
         const val NO_ALPHA = 0.0f
-        val STAR_SHAPE_POINTS: ArrayList<LatLng?> = object : ArrayList<LatLng?>() {
+        val STAR_SHAPE_POINTS: ArrayList<LatLng> = object : ArrayList<LatLng>() {
             init {
                 add(LatLng(45.522585, -122.685699))
                 add(LatLng(45.534611, -122.708873))
@@ -170,7 +170,7 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
         val BROKEN_SHAPE_POINTS = STAR_SHAPE_POINTS.subList(0, STAR_SHAPE_POINTS.size - 3)
-        val STAR_SHAPE_HOLES: ArrayList<List<LatLng?>?> = object : ArrayList<List<LatLng?>?>() {
+        val STAR_SHAPE_HOLES: ArrayList<List<LatLng>> = object : ArrayList<List<LatLng>>() {
             init {
                 add(
                     ArrayList<LatLng>(object : ArrayList<LatLng?>() {

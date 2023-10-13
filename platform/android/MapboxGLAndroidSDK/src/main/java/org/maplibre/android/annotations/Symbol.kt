@@ -11,7 +11,7 @@ import org.maplibre.android.constants.GeometryConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Projection
 
-class KSymbol(
+class Symbol @JvmOverloads constructor(
     position: LatLng,
     icon: Icon? = Defaults.SYMBOL_ICON,
     text: Text? = Defaults.SYMBOL_TEXT
@@ -19,6 +19,7 @@ class KSymbol(
     var position: LatLng = position
         set(value) {
             field = value
+            geometry = Point.fromLngLat(value.longitude, value.latitude)
             updateThis()
         }
     var icon: Icon? = icon
@@ -87,6 +88,5 @@ class KSymbol(
         internal const val PROPERTY_TEXT_HALO_COLOR = "text-halo-color"
         internal const val PROPERTY_TEXT_HALO_WIDTH = "text-halo-width"
         internal const val PROPERTY_TEXT_HALO_BLUR = "text-halo-blur"
-        internal const val PROPERTY_IS_DRAGGABLE = "is-draggable"
     }
 }
