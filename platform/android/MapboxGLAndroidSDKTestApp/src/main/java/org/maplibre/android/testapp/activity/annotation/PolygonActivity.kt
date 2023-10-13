@@ -55,15 +55,17 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(Style.getPredefinedStyle("Streets"))
-        /*map.setOnPolygonClickListener { polygon: Fill ->
-            Toast.makeText(
-                this@PolygonActivity,
-                "You clicked on polygon with id = " + polygon.id,
-                Toast.LENGTH_SHORT
-            ).show()
-        }*/
         polygon = Fill(listOf(Config.STAR_SHAPE_POINTS), color = Config.BLUE_COLOR).also {
             maplibreMap.addAnnotation(it)
+        }.apply {
+            clickListener = {
+                Toast.makeText(
+                    this@PolygonActivity,
+                    "You clicked on the polygon!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                true
+            }
         }
     }
 
