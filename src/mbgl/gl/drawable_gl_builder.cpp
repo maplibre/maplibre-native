@@ -15,8 +15,9 @@ gfx::UniqueDrawable DrawableGLBuilder::createDrawable() const {
     return std::make_unique<DrawableGL>(drawableName.empty() ? name : drawableName);
 };
 
-std::unique_ptr<gfx::Drawable::DrawSegment> DrawableGLBuilder::createSegment(gfx::DrawMode mode, SegmentBase&& seg) {
-    return std::make_unique<DrawableGL::DrawSegmentGL>(mode, std::move(seg), VertexArray{{nullptr, false}});
+std::unique_ptr<gfx::Drawable::DrawSegment> DrawableGLBuilder::createSegment(gfx::DrawMode drawMode,
+                                                                             SegmentBase&& seg) {
+    return std::make_unique<DrawableGL::DrawSegmentGL>(drawMode, std::move(seg), VertexArray{{nullptr, false}});
 }
 
 void DrawableGLBuilder::init() {

@@ -28,7 +28,7 @@ public:
 
     ~LineLayerTweaker() override = default;
 
-    void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
+    void execute(LayerGroupBase&, const PaintParameters&) override;
 
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;

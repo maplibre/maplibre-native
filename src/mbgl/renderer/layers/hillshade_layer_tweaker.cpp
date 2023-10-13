@@ -32,9 +32,7 @@ std::array<float, 2> getLight(const PaintParameters& parameters,
     return {{evaluated.get<HillshadeExaggeration>(), azimuthal}};
 }
 
-void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                    const RenderTree& renderTree,
-                                    const PaintParameters& parameters) {
+void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {
@@ -64,7 +62,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup,
         drawable.mutableUniformBuffers().addOrReplace(idHillshadeEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
 
         const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, true);
+            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, true);
         HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                             /* .latrange = */ getLatRange(tileID),
                                             /* .light = */ getLight(parameters, evaluated),

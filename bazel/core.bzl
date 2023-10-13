@@ -612,6 +612,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/premultiply.cpp",
     "src/mbgl/util/quaternion.cpp",
     "src/mbgl/util/quaternion.hpp",
+    "src/mbgl/gfx/polyline_generator.cpp",
     "src/mbgl/util/rapidjson.cpp",
     "src/mbgl/util/rapidjson.hpp",
     "src/mbgl/util/rect.hpp",
@@ -818,6 +819,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/monotonic_timer.hpp",
     "include/mbgl/util/noncopyable.hpp",
     "include/mbgl/util/platform.hpp",
+    "include/mbgl/gfx/polyline_generator.hpp",
     "include/mbgl/util/premultiply.hpp",
     "include/mbgl/util/projection.hpp",
     "include/mbgl/util/range.hpp",
@@ -900,6 +902,7 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/gfx/drawable.cpp",
     "src/mbgl/gfx/drawable_builder.cpp",
     "src/mbgl/gfx/drawable_builder_impl.hpp",
+    "src/mbgl/gfx/drawable_builder_impl.cpp",
     "src/mbgl/gfx/drawable_atlases_tweaker.cpp",
     "src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp",
     "src/mbgl/gfx/hillshade_prepare_drawable_data.hpp",
@@ -941,6 +944,12 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/renderer/layers/collision_layer_tweaker.hpp",
     "src/mbgl/shaders/shader_program_base.cpp",
     "src/mbgl/util/identity.cpp",
+    "src/mbgl/style/layers/custom_drawable_layer.cpp",
+    "src/mbgl/layermanager/custom_drawable_layer_factory.cpp",
+    "src/mbgl/style/layers/custom_drawable_layer_impl.cpp",
+    "src/mbgl/style/layers/custom_drawable_layer_impl.hpp",
+    "src/mbgl/renderer/layers/render_custom_drawable_layer.cpp",
+    "src/mbgl/renderer/layers/render_custom_drawable_layer.hpp",
 ]
 
 MLN_DRAWABLES_HEADERS = [
@@ -974,7 +983,9 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/shaders/symbol_layer_ubo.hpp",
     "include/mbgl/util/identity.hpp",
-    "include/mbgl/util/suppress_copies.hpp"
+    "include/mbgl/util/suppress_copies.hpp",
+    "include/mbgl/style/layers/custom_drawable_layer.hpp",
+    "include/mbgl/layermanager/custom_drawable_layer_factory.hpp",
 ]
 
 MLN_DRAWABLES_GL_SOURCE = [
