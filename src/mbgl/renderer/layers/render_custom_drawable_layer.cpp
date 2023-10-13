@@ -42,6 +42,7 @@ RenderCustomDrawableLayer::~RenderCustomDrawableLayer() {
 
 void RenderCustomDrawableLayer::evaluate(const PropertyEvaluationParameters&) {
     passes = RenderPass::Translucent;
+    // It is fine to not update `evaluatedProperties`, as `baseImpl` should never be updated for this layer.
 }
 
 bool RenderCustomDrawableLayer::hasTransition() const {
