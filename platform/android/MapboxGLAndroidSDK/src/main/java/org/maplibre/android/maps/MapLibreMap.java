@@ -1003,26 +1003,46 @@ public final class MapLibreMap {
    * four times for all of the subtypes of Annotation.
    */
 
+  /**
+   * Adds the provided symbol to the map, to be rendered at its position using its text and icon.
+   * @param annotation symbol to be added
+   */
   public void addAnnotation(@NonNull Symbol annotation) {
     annotation.attach(this, nextId++);
     annotationContainer.add(annotation);
   }
 
+  /**
+   * Adds the provided circle to the map, to be rendered at its position using its radius and colors.
+   * @param annotation circle to be added
+   */
   public void addAnnotation(@NonNull Circle annotation) {
     annotation.attach(this, nextId++);
     annotationContainer.add(annotation);
   }
 
+  /**
+   * Adds the provided line to the map, to be rendered according to its path.
+   * @param annotation line to be added
+   */
   public void addAnnotation(@NonNull Line annotation) {
     annotation.attach(this, nextId++);
     annotationContainer.add(annotation);
   }
 
+  /**
+   * Adds the provided fill to the map, to be rendered according to its paths.
+   * @param annotation fill to be added
+   */
   public void addAnnotation(@NonNull Fill annotation) {
     annotation.attach(this, nextId++);
     annotationContainer.add(annotation);
   }
 
+  /**
+   * Adds all provided annotations to the map.
+   * @param annotations list of annotations to be added
+   */
   public void addAnnotations(@NonNull KAnnotation... annotations) {
     for (KAnnotation annotation : annotations) {
       annotation.attach(this, nextId++);
@@ -1030,11 +1050,17 @@ public final class MapLibreMap {
     }
   }
 
+  /**
+   * Forces redraw of annotations. Annotations are automatically redrawn if any of their properties
+   * are changed, or if a new map style is applied.
+   */
   public void updateAnnotations() {
     annotationContainer.updateAll();
   }
 
   /**
+   * Propagate updates of a single annotation. Called automatically if annotation properties are changed.
+   * <p>
    * Only to be used when the association of annotations to managers has not changed.
    * Otherwise, use {@link #updateAnnotations()}.
    */
@@ -1042,10 +1068,18 @@ public final class MapLibreMap {
     annotationContainer.update(annotation);
   }
 
+  /**
+   * Removes an annotation from the map.
+   * @param annotation the annotation to be removed
+   */
   public void removeAnnotation(@NonNull KAnnotation annotation) {
     annotationContainer.remove(annotation);
   }
 
+  /**
+   * Removes a series of annotations from the map.
+   * @param annotations the annotations to be removed
+   */
   public void removeAnnotations(@NonNull KAnnotation... annotations) {
     for (KAnnotation annotation : annotations) {
       annotationContainer.remove(annotation);
@@ -1300,23 +1334,16 @@ public final class MapLibreMap {
 
   /**
    * Removes all annotations from the map.
-   *
-   * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * MapLibre Annotation Plugin</a> instead
    */
-  @Deprecated
   public void removeAnnotations() {
     annotationManager.removeAnnotations();
     annotationContainer.clear();
   }
 
   /**
-   * Removes all markers, polylines, polygons, overlays, etc from the map.
+   * Removes all annotations from the map.
    *
-   * @deprecated As of 7.0.0,
-   * use <a href="https://github.com/mapbox/mapbox-plugins-android/tree/master/plugin-annotation">
-   * MapLibre Annotation Plugin</a> instead
+   * @deprecated use {@link #removeAnnotations()} instead.
    */
   @Deprecated
   public void clear() {
