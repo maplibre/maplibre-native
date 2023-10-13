@@ -15,11 +15,6 @@ objc_library(
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_opengl_srcs",
         ],
-    }) + select({
-        "//:legacy_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
-        ],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
@@ -246,11 +241,6 @@ sh_binary(
         "//:metal_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
-        "//:legacy_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
         ],
     }),
     deps = [
