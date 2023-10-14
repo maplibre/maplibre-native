@@ -6,7 +6,7 @@ on:
     branches:
       - main
     tags:
-      - 'qt-**'
+      - "qt-**"
     paths:
       - CMakeLists.txt
       - ".github/actions/qt5-build/**"
@@ -28,7 +28,7 @@ on:
 
   pull_request:
     branches:
-      - '*'
+      - "*"
     paths:
       - CMakeLists.txt
       - ".github/actions/qt5-build/**"
@@ -63,11 +63,19 @@ jobs:
             build_type: RelWithDebInfo
             qt_version: 5.15.2
             qt_target: desktop
+            compiler: ""
           - name: Linux
             os: ubuntu-22.04
             build_type: RelWithDebInfo
-            qt_version: 6.5.0
+            qt_version: 6.5.3
             qt_target: desktop
+            compiler: ""
+          - name: Linux_GCC13
+            os: ubuntu-22.04
+            build_type: RelWithDebInfo
+            qt_version: 6.5.3
+            qt_target: desktop
+            compiler: "gcc-13"
           - name: macOS
             os: macos-12
             build_type: RelWithDebInfo
@@ -75,13 +83,23 @@ jobs:
             qt_target: desktop
             deployment_target: 10.13
             deployment_arch: "x86_64"
+            compiler: ""
           - name: macOS
             os: macos-12
             build_type: RelWithDebInfo
-            qt_version: 6.5.0
+            qt_version: 6.5.3
             qt_target: desktop
             deployment_target: 11.0
             deployment_arch: "x86_64;arm64"
+            compiler: ""
+          - name: macOS_LLVM17
+            os: macos-13
+            build_type: RelWithDebInfo
+            qt_version: 6.5.3
+            qt_target: desktop
+            deployment_target: 11.0
+            deployment_arch: "x86_64"
+            compiler: "llvm@17"
           - name: win64_msvc2019
             os: windows-2022
             build_type: "RelWithDebInfo;Debug"
@@ -90,16 +108,16 @@ jobs:
             qt_version: 5.15.2
             qt_target: desktop
             qt_arch: win64_msvc2019_64
-            qt_tools: ''
+            qt_tools: ""
           - name: win64_msvc2019
             os: windows-2022
             build_type: "RelWithDebInfo;Debug"
             compiler_type: x64
             compiler_version: 14.29
-            qt_version: 6.5.0
+            qt_version: 6.5.3
             qt_target: desktop
             qt_arch: win64_msvc2019_64
-            qt_tools: ''
+            qt_tools: ""
           - name: win64_mingw
             os: windows-2022
             build_type: RelWithDebInfo
@@ -114,7 +132,7 @@ jobs:
             build_type: RelWithDebInfo
             compiler_type: mingw1120_64
             compiler_version: 11.2.0
-            qt_version: 6.5.0
+            qt_version: 6.5.3
             qt_target: desktop
             qt_arch: win64_mingw
             qt_tools: tools_mingw90
@@ -154,6 +172,38 @@ jobs:
 
       - name: Setup ninja
         uses: seanmiddleditch/gha-setup-ninja@v4
+
+      - name: Install compiler
+        id: install_compiler
+        if: runner.os == 'Linux' && matrix.compiler != ''
+        uses: rlalik/setup-cpp-compiler@master
+        with:
+          compiler: ${{ matrix.compiler }}
+
+      - name: Setup compiler (Linux)
+        if: runner.os == 'Linux' && matrix.compiler != ''
+        env:
+          CC: ${{ steps.install_compiler.outputs.cc }}
+          CXX: ${{ steps.install_compiler.outputs.cxx }}
+        run: |
+          {
+            echo "CC=$CC"
+            echo "CXX=$CXX"
+          } >> "$GITHUB_ENV"
+
+      - name: Setup compiler (macOS)
+        if: runner.os == 'macOS' && matrix.compiler != ''
+        env:
+          MLN_COMPILER: ${{ matrix.compiler }}
+        run: |
+          brew install "$MLN_COMPILER"
+          echo "/usr/local/opt/${MLN_COMPILER}/bin" >> "$GITHUB_PATH"
+          {
+            echo "CC=/usr/local/opt/${MLN_COMPILER}/bin/clang"
+            echo "CXX=/usr/local/opt/${MLN_COMPILER}/bin/clang++"
+            echo "LDFLAGS=\"-L/usr/local/opt/${MLN_COMPILER}/lib\""
+            echo "CPPFLAGS=\"-I/usr/local/opt/${MLN_COMPILER}/include\""
+          } >> "$GITHUB_ENV"
 
       - name: Setup Xcode
         if: runner.os == 'macOS'
@@ -204,8 +254,24 @@ jobs:
         uses: ./source/.github/actions/qt5-build
 
       - name: Build maplibre-native (Linux, Qt6)
-        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2'
+        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler == ''
         uses: ./source/.github/actions/qt6-build
+
+      - name: Build maplibre-native (Linux, Qt6, custom compiler)
+        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler != ''
+        run: |
+          mkdir build && cd build
+          qt-cmake ../source/ \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_INSTALL_PREFIX="../install" \
+            -DMLN_WITH_QT=ON \
+            -DMLN_QT_DEPLOYMENT=ON \
+            -DMLN_QT_WITH_INTERNAL_ICU=ON
+          ninja
+          ninja install
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
@@ -238,7 +304,7 @@ jobs:
           QT_VERSION: ${{ matrix.qt_version }}
         run: |
           pushd install
-          tar cjvf ../maplibre-native_"${QT_ARCH}"_Qt"${QT_VERSION}".tar.bz2 ./*
+          tar cjvf "../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2" ./*
           popd
 
       - name: Upload artifacts
@@ -254,11 +320,11 @@ jobs:
         include:
           - name: Linux
             os: ubuntu-22.04
-            qt_version: 6.5.0
+            qt_version: 6.5.3
             qt_target: desktop
           - name: macOS
             os: macos-12
-            qt_version: 6.5.0
+            qt_version: 6.5.3
             qt_target: desktop
     runs-on: ${{ matrix.os }}
     env:
@@ -294,9 +360,9 @@ jobs:
       - name: Build test app
         run: |
           mkdir install && cd install
-          tar xf ../maplibre-native_"${QT_ARCH}"_Qt"${QT_VERSION}".tar.bz2
+          tar xf "../maplibre-native_${QT_ARCH}_Qt${QT_VERSION}.tar.bz2"
           cd ..
-          export CMAKE_PREFIX_PATH="$PWD"/install
+          export CMAKE_PREFIX_PATH="$PWD/install"
           mkdir build && cd build
           cmake ../source/platform/qt/app/
           make
@@ -310,27 +376,27 @@ jobs:
       max-parallel: 1
       matrix:
         name: [Linux, macOS, win64_msvc2019, win64_mingw]
-        qt_version: [5.15.2, 6.5.0]
+        qt_version: [5.15.2, 6.5.3]
     permissions:
       contents: write
 
     steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: maplibre-native_${{ matrix.name }}_Qt${{ matrix.qt_version }}
 
-    - name: Name tarball
-      env:
-        TAG_NAME: ${{ github.ref_name }}
-        TAG_PLATFORM: ${{ matrix.name }}
-        QT_VERSION: ${{ matrix.qt_version }}
-      run: |
-        mv maplibre-native_"${TAG_PLATFORM}"_Qt"${QT_VERSION}".tar.bz2 QMapLibreGL_"${TAG_NAME//qt-/}"_Qt"${QT_VERSION}"_"${TAG_PLATFORM}".tar.bz2
+      - name: Name tarball
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+          TAG_PLATFORM: ${{ matrix.name }}
+          QT_VERSION: ${{ matrix.qt_version }}
+        run: |
+          mv "maplibre-native_${TAG_PLATFORM}_Qt${QT_VERSION}.tar.bz2" "QMapLibreGL_${TAG_NAME//qt-/}_Qt${QT_VERSION}_${TAG_PLATFORM}.tar.bz2"
 
-    - name: Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: QMapLibreGL_*.tar.bz2
-        allowUpdates: true
-        draft: true
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: QMapLibreGL_*.tar.bz2
+          allowUpdates: true
+          draft: true

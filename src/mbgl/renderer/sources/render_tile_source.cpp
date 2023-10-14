@@ -314,12 +314,12 @@ RenderTiles RenderTileSource::getRenderTiles() const {
 
 RenderTiles RenderTileSource::getRenderTilesSortedByYPosition() const {
     if (!renderTilesSortedByY) {
-        const auto comp = [bearing = this->bearing](const RenderTile& a, const RenderTile& b) {
+        const auto comp = [sourceBearing = this->bearing](const RenderTile& a, const RenderTile& b) {
             Point<float> pa(static_cast<float>(a.id.canonical.x), static_cast<float>(a.id.canonical.y));
             Point<float> pb(static_cast<float>(b.id.canonical.x), static_cast<float>(b.id.canonical.y));
 
-            auto par = util::rotate(pa, bearing);
-            auto pbr = util::rotate(pb, bearing);
+            auto par = util::rotate(pa, sourceBearing);
+            auto pbr = util::rotate(pb, sourceBearing);
 
             return std::tie(b.id.canonical.z, par.y, par.x) < std::tie(a.id.canonical.z, pbr.y, pbr.x);
         };
