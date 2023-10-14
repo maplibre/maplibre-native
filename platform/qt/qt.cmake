@@ -136,16 +136,41 @@ endif()
 
 target_link_libraries(
     mbgl-core
+    PUBLIC
+        $<BUILD_INTERFACE:mbgl-vendor-parsedate>
+        $<BUILD_INTERFACE:mbgl-vendor-nunicode>
+        $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
+        $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
+        $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,$<BUILD_INTERFACE:mbgl-vendor-sqlite>,Qt${QT_VERSION_MAJOR}::Sql>
     PRIVATE
         $<$<PLATFORM_ID:Linux>:${CMAKE_THREAD_LIBS_INIT}>
-        $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Gui
         Qt${QT_VERSION_MAJOR}::Network
-        $<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,mbgl-vendor-sqlite,Qt${QT_VERSION_MAJOR}::Sql>
-        $<$<PLATFORM_ID:Linux>:$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_ICU}>,mbgl-vendor-icu,ICU::uc>>
-        mbgl-vendor-nunicode
 )
+
+# Interface library for object linking
+add_library(mbgl-core-interface INTERFACE)
+target_link_libraries(
+    mbgl-core-interface
+    INTERFACE
+        $<BUILD_INTERFACE:mbgl-core> $<TARGET_OBJECTS:mbgl-core>
+        $<BUILD_INTERFACE:mbgl-vendor-parsedate> $<TARGET_OBJECTS:mbgl-vendor-parsedate>
+        $<BUILD_INTERFACE:mbgl-vendor-nunicode> $<TARGET_OBJECTS:mbgl-vendor-nunicode>
+        $<BUILD_INTERFACE:mbgl-vendor-csscolorparser> $<TARGET_OBJECTS:mbgl-vendor-csscolorparser>
+        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<BUILD_INTERFACE:mbgl-vendor-sqlite>>
+        $<$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>:$<TARGET_OBJECTS:mbgl-vendor-sqlite>>
+)
+export(TARGETS mbgl-core-interface FILE MapboxCoreTargets.cmake APPEND)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if (MLN_QT_WITH_INTERNAL_ICU)
+        target_link_libraries(mbgl-core PUBLIC $<BUILD_INTERFACE:mbgl-vendor-icu>)
+        target_link_libraries(mbgl-core-interface INTERFACE $<BUILD_INTERFACE:mbgl-vendor-icu> $<TARGET_OBJECTS:mbgl-vendor-icu>)
+    else()
+        target_link_libraries(mbgl-core PUBLIC ICU::uc)
+    endif()
+endif()
 
 set(qmaplibregl_headers
     ${PROJECT_SOURCE_DIR}/platform/qt/include/QMapLibreGL/QMapLibreGL
@@ -279,20 +304,8 @@ target_link_libraries(
         Qt${QT_VERSION_MAJOR}::Network
     PRIVATE
         $<BUILD_INTERFACE:mbgl-compiler-options>
-        $<BUILD_INTERFACE:mbgl-core>
-        $<BUILD_INTERFACE:mbgl-vendor-parsedate>
-        $<BUILD_INTERFACE:mbgl-vendor-nunicode>
-        $<BUILD_INTERFACE:mbgl-vendor-csscolorparser>
+        $<BUILD_INTERFACE:mbgl-core-interface>
 )
-# Do not use generator expressions for cleaner output
-if (MLN_QT_STATIC AND NOT MLN_QT_INSIDE_PLUGIN)
-    target_link_libraries(
-        qmaplibregl
-        PUBLIC
-            $<$<NOT:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>>:Qt${QT_VERSION_MAJOR}::Sql>
-            $<$<NOT:$<OR:$<PLATFORM_ID:Windows>,$<PLATFORM_ID:Emscripten>>>:z>
-    )
-endif()
 
 if (MLN_QT_STATIC OR MLN_QT_INSIDE_PLUGIN)
     # Don't add import/export into public header because we don't build shared library.
@@ -317,16 +330,16 @@ install(TARGETS qmaplibregl
 )
 
 if(NOT MLN_QT_LIBRARY_ONLY)
-    add_executable(
-        mbgl-qt
+    set(mbglqt_sources
         ${PROJECT_SOURCE_DIR}/platform/qt/app/main.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/app/mapwindow.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/app/mapwindow.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/resources/common.qrc
     )
-
-    if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-        set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    if (COMMAND qt_add_executable)
+        qt_add_executable(mbgl-qt ${mbglqt_sources})
+    else()
+        add_executable(mbgl-qt ${mbglqt_sources})
     endif()
 
     # Qt public API should keep compatibility with old compilers for legacy systems
@@ -347,7 +360,10 @@ if(NOT MLN_QT_LIBRARY_ONLY)
         mbgl-qt
         PRIVATE ${PROJECT_SOURCE_DIR}/platform/qt/include
     )
+endif()
 
+# tests
+if(NOT MLN_QT_LIBRARY_ONLY AND NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     add_executable(
         mbgl-test-runner
         ${PROJECT_SOURCE_DIR}/platform/qt/test/main.cpp
@@ -383,6 +399,8 @@ if(NOT MLN_QT_LIBRARY_ONLY)
             PRIVATE -Wl,--whole-archive mbgl-test -Wl,--no-whole-archive
         )
     endif()
+
+    add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
 
 find_program(MLN_QDOC NAMES qdoc)
@@ -398,8 +416,4 @@ if(MLN_QDOC)
             -outputdir
             ${CMAKE_BINARY_DIR}/docs
     )
-endif()
-
-if(NOT MLN_QT_LIBRARY_ONLY)
-    add_test(NAME mbgl-test-runner COMMAND mbgl-test-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
