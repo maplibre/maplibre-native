@@ -31,8 +31,11 @@ public:
         if (srcLength != bytes()) {
             throw std::invalid_argument("mismatched image size");
         }
-        data = std::make_unique<uint8_t[]>(bytes());
-        std::copy(srcData, srcData + srcLength, data.get());
+
+        if (bytes()) {
+            data = std::make_unique<uint8_t[]>(bytes());
+            std::copy(srcData, srcData + srcLength, data.get());
+        }
     }
 
     Image(Size size_, std::unique_ptr<uint8_t[]> data_)
@@ -63,21 +66,32 @@ public:
     template <typename T = Image>
     T clone() const {
         T copy_(size);
-        std::copy(data.get(), data.get() + bytes(), copy_.data.get());
+        if (valid() && copy_.valid()) {
+            assert(bytes() == copy_.bytes());
+            std::copy(data.get(), data.get() + bytes(), copy_.data.get());
+        }
         return copy_;
     }
 
     size_t stride() const { return channels * size.width; }
     size_t bytes() const { return stride() * size.height; }
 
-    void fill(uint8_t value) { std::fill(data.get(), data.get() + bytes(), value); }
+    void fill(uint8_t value) {
+        if (valid()) {
+            assert(bytes());
+            std::fill(data.get(), data.get() + bytes(), value);
+        }
+    }
 
     void resize(Size size_) {
         if (size == size_) {
             return;
         }
         Image newImage(size_);
-        newImage.fill(0);
+        if (valid()) {
+            assert(bytes()); // gcc12 bug
+            newImage.fill(0);
+        }
         copy(*this, newImage, {0, 0}, {0, 0}, {std::min(size.width, size_.width), std::min(size.height, size_.height)});
         operator=(std::move(newImage));
     }
@@ -105,9 +119,10 @@ public:
         }
     }
 
-    /// Copy image data within `rect` from `src` to the rectangle of the same size at `pt`
-    /// in `dst`. If the specified bounds exceed the bounds of the source or destination,
-    /// throw `std::out_of_range`. Must not be used to move data within a single Image.
+    /// Copy image data within `rect` from `src` to the rectangle of the same
+    /// size at `pt` in `dst`. If the specified bounds exceed the bounds of the
+    /// source or destination, throw `std::out_of_range`. Must not be used to
+    /// move data within a single Image.
     static void copy(const Image& srcImg,
                      Image& dstImg,
                      const Point<uint32_t>& srcPt,
