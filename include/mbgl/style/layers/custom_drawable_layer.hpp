@@ -53,7 +53,7 @@ public:
      * @param tileID
      */
     void setTileID(OverscaledTileID tileID);
-    
+
     void setColor(Color color);
 
     /**

@@ -71,7 +71,8 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    LineDrawableTweaker(Color color_) : color(color_) {}
+    LineDrawableTweaker(Color color_)
+        : color(color_) {}
     ~LineDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -145,7 +146,7 @@ public:
         uniforms.createOrUpdate(idLinePermutationUBOName, &permutationUBO, parameters.context);
 #endif // MLN_RENDER_BACKEND_METAL
     };
-    
+
 private:
     Color color;
 };
@@ -185,8 +186,7 @@ void CustomDrawableLayerHost::Interface::setTileID(OverscaledTileID tileID_) {
 }
 
 void CustomDrawableLayerHost::Interface::setColor(Color color) {
-    
-    if(currentColor.has_value() && currentColor.value() != color) {
+    if (currentColor.has_value() && currentColor.value() != color) {
         finish();
     }
     currentColor = color;
