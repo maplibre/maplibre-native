@@ -41,19 +41,18 @@ public:
               UniqueChangeRequestVec& changes);
 
     std::size_t getDrawableCount() const;
-    
+
     void setTileID(OverscaledTileID tileID);
-    
+
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions& options);
-    
+
     void finish();
-    
+
 protected:
-    
     gfx::ShaderPtr lineShaderDefault() const;
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
-        
+
 private:
     RenderLayer& layer;
     LayerGroupBasePtr& layerGroup;
@@ -63,7 +62,7 @@ private:
     const std::shared_ptr<UpdateParameters>& updateParameters;
     const RenderTree& renderTree;
     UniqueChangeRequestVec& changes;
-    
+
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
 };

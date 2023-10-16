@@ -147,7 +147,6 @@ public:
     };
 };
 
-
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
                                               LayerGroupBasePtr& layerGroup_,
                                               gfx::ShaderRegistry& shaders_,
@@ -156,8 +155,14 @@ CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
                                               const std::shared_ptr<UpdateParameters>& updateParameters_,
                                               const RenderTree& renderTree_,
                                               UniqueChangeRequestVec& changes_)
-: layer(layer_), layerGroup(layerGroup_), shaders(shaders_), context(context_), state(state_), updateParameters(updateParameters_), renderTree(renderTree_), changes(changes_)
-{
+    : layer(layer_),
+      layerGroup(layerGroup_),
+      shaders(shaders_),
+      context(context_),
+      state(state_),
+      updateParameters(updateParameters_),
+      renderTree(renderTree_),
+      changes(changes_) {
     // ensure we have a default layer group set up
     if (!layerGroup) {
         if (auto aLayerGroup = context.createTileLayerGroup(
@@ -176,7 +181,8 @@ void CustomDrawableLayerHost::Interface::setTileID(OverscaledTileID tileID_) {
     tileID = tileID_;
 }
 
-void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions& options) {
+void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
+                                                     const gfx::PolylineGeneratorOptions& options) {
     if (!builder) {
         builder = createBuilder("thick-lines", lineShaderDefault());
     } else {
@@ -186,7 +192,6 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
 }
 
 void CustomDrawableLayerHost::Interface::finish() {
-    
     // create tweaker
     auto tweaker = std::make_shared<LineDrawableTweaker>();
 
