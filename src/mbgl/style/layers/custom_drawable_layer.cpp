@@ -71,7 +71,7 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    LineDrawableTweaker() {}
+    LineDrawableTweaker(Color color_) : color(color_) {}
     ~LineDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -97,7 +97,7 @@ public:
             /*device_pixel_ratio = */ parameters.pixelRatio};
 
         static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
-        const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/Color(1.f, 0.f, 1.f, 1.f),
+        const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/color,
                                                            /*blur =*/0.f,
                                                            /*opacity =*/1.f,
                                                            /*gapwidth =*/0.f,
@@ -145,6 +145,9 @@ public:
         uniforms.createOrUpdate(idLinePermutationUBOName, &permutationUBO, parameters.context);
 #endif // MLN_RENDER_BACKEND_METAL
     };
+    
+private:
+    Color color;
 };
 
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
@@ -181,6 +184,14 @@ void CustomDrawableLayerHost::Interface::setTileID(OverscaledTileID tileID_) {
     tileID = tileID_;
 }
 
+void CustomDrawableLayerHost::Interface::setColor(Color color) {
+    
+    if(currentColor.has_value() && currentColor.value() != color) {
+        finish();
+    }
+    currentColor = color;
+}
+
 void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
                                                      const gfx::PolylineGeneratorOptions& options) {
     if (!builder) {
@@ -193,11 +204,13 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
 
 void CustomDrawableLayerHost::Interface::finish() {
     // create tweaker
-    auto tweaker = std::make_shared<LineDrawableTweaker>();
+    assert(currentColor.has_value());
+    auto tweaker = std::make_shared<LineDrawableTweaker>(currentColor.value());
 
     // finish
     builder->flush();
     for (auto& drawable : builder->clearDrawables()) {
+        assert(tileID.has_value());
         drawable->setTileID(tileID.value());
         drawable->addTweaker(tweaker);
 

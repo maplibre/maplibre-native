@@ -54,6 +54,8 @@ public:
      * @param tileID 
      */
     void setTileID(OverscaledTileID tileID);
+    
+    void setColor(Color color);
 
     /**
      * @brief Add a polyline
@@ -86,6 +88,7 @@ private:
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
+    std::optional<Color> currentColor;
 };
 
 class CustomDrawableLayer final : public Layer {

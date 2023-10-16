@@ -78,6 +78,7 @@ public:
             for(auto &p : polyline) {
                 p.y += util::EXTENT / numLines;
             }
+            interface.setColor(colors[index]);
             interface.addPolyline(polyline, options);
         }
         
