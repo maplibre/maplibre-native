@@ -6,11 +6,11 @@ on:
     branches:
       - main
     tags:
-      - 'android-*'
+      - "android-*"
 
   pull_request:
     branches:
-      - '*'
+      - "*"
 
 concurrency:
   # cancel jobs on PRs only
@@ -44,7 +44,7 @@ jobs:
             "!**/*.md"]
 
   android-build:
-    runs-on: MapLibre_Native_Linux_16_core
+    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -57,16 +57,30 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
+      - name: Free Disk Space (Ubuntu)
+        if: startsWith(runner.name, 'GitHub Actions')
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
 
+      - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
+
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
-      
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Cache node modules
         uses: actions/cache@v3
         env:
@@ -93,7 +107,7 @@ jobs:
           cache-name: gradle-v1
         with:
           path: ~/.gradle
-          key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
+          key: ${{ env.cache-name }}-${{ hashFiles('platform/android/gradle/dependencies.gradle') }}-${{ hashFiles('platform/android/build.gradle') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             - ${{ env.cache-name }}
 
@@ -115,7 +129,7 @@ jobs:
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
-    
+
       - name: Build UI tests
         run: make android-ui-test-arm-v8
 

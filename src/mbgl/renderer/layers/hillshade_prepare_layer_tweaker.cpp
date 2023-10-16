@@ -27,9 +27,7 @@ const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
     return encoding == Tileset::DEMEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
 }
 
-void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                           [[maybe_unused]] const RenderTree& renderTree,
-                                           const PaintParameters& parameters) {
+void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     // const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {

@@ -46,6 +46,7 @@
     self.mapView = [[MLNMapView alloc] initWithFrame:self.view.bounds styleURL:url];
     self.mapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.mapView.delegate = self;
+    self.mapView.opaque = YES;
     self.mapView.zoomEnabled = NO;
     self.mapView.scrollEnabled = NO;
     self.mapView.rotateEnabled = NO;

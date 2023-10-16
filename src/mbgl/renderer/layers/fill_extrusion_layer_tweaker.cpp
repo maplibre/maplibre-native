@@ -18,6 +18,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
+#include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
 #endif
 
 namespace mbgl {
@@ -39,9 +40,7 @@ const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName 
 const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = stringIndexer().get(
     "FillExtrusionInterpolateUBO");
 
-void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                        const RenderTree& renderTree,
-                                        const PaintParameters& parameters) {
+void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& props = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties);
     const auto& evaluated = props.evaluated;
@@ -86,6 +85,10 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
             /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(2), /*.expression=*/{}},
             /* .base = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(3), /*.expression=*/{}},
             /* .height = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(4), /*.expression=*/{}},
+            /* .pattern_from = */
+            {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(4), /*.expression=*/{}},
+            /* .pattern_to = */
+            {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(5), /*.expression=*/{}},
             /* .overdrawInspector = */ overdrawInspector,
             /* .pad = */ 0,
             0,
@@ -119,8 +122,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup,
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = true;
-        const auto matrix = getTileMatrix(
-            tileID, renderTree, parameters.state, translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);

@@ -172,6 +172,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     const auto& descriptor = renderPass.getDescriptor();
+    const auto& renderable = descriptor.renderable;
     if (impl->renderPassDescriptor && descriptor != *impl->renderPassDescriptor) {
         impl->pipelineState.reset();
     }
@@ -187,8 +188,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     bindAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
-
-    const auto& renderPassDescriptor = renderPass.getDescriptor();
 
     if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
         assert(!"Index buffer not uploaded");
@@ -210,7 +209,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
     if (!impl->pipelineState) {
-        impl->pipelineState = shaderMTL.getRenderPipelineState(renderPassDescriptor, impl->vertexDesc, getColorMode());
+        impl->pipelineState = shaderMTL.getRenderPipelineState(renderable, impl->vertexDesc, getColorMode());
     }
     if (impl->pipelineState) {
         encoder->setRenderPipelineState(impl->pipelineState.get());
@@ -239,7 +238,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
-            impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderPass);
+            impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
             impl->previousStencilMode = *newStencilMode;
         }
         if (impl->depthStencilState) {

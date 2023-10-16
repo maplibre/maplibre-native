@@ -11,14 +11,19 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
-#include <mbgl/mtl/mtl_fwd.hpp>
-
 #include <memory>
+#include <optional>
 #include <unordered_map>
+#include <vector>
 
 namespace mbgl {
 
 class ProgramParameters;
+class RenderStaticData;
+
+namespace shaders {
+struct ClipUBO;
+} // namespace shaders
 
 namespace mtl {
 
@@ -102,15 +107,34 @@ public:
 
     void clearStencilBuffer(int32_t) override;
 
-    MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode& depthMode,
-                                                  const gfx::StencilMode& stencilMode,
-                                                  const mtl::RenderPass& renderPass) const;
+    MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode&,
+                                                  const gfx::StencilMode&,
+                                                  const gfx::Renderable&) const;
 
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size);
+
+    /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
+    const BufferResource& getTileVertexBuffer();
+
+    /// Get a reusable buffer containing the standard fixed tile indexes
+    const BufferResource& getTileIndexBuffer();
+
+    bool renderTileClippingMasks(gfx::RenderPass& renderPass,
+                                 RenderStaticData& staticData,
+                                 const std::vector<shaders::ClipUBO>& tileUBOs);
 
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
+
+    std::optional<BufferResource> tileVertexBuffer;
+    std::optional<BufferResource> tileIndexBuffer;
+
+    gfx::ShaderProgramBasePtr clipMaskShader;
+    MTLDepthStencilStatePtr clipMaskDepthStencilState;
+    MTLRenderPipelineStatePtr clipMaskPipelineState;
+    BufferResource clipMaskUniformsBuffer;
+    const gfx::Renderable* stencilStateRenderable = nullptr;
 
     gfx::RenderingStats stats;
 };

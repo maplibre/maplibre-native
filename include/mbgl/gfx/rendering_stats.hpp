@@ -17,6 +17,9 @@ struct RenderingStats {
     int memIndexBuffers;
     int memVertexBuffers;
 
+    int stencilClears = 0;
+    int stencilUpdates = 0;
+
     RenderingStats& operator+=(const RenderingStats& right);
 };
 
@@ -30,6 +33,10 @@ inline RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     memTextures += r.memTextures;
     memIndexBuffers += r.memIndexBuffers;
     memVertexBuffers += r.memVertexBuffers;
+
+    stencilClears += r.stencilClears;
+    stencilUpdates += r.stencilUpdates;
+
     return *this;
 }
 

@@ -38,13 +38,14 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
 }
 
 void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
-    if (!enabled || !getDrawableCount()) {
+    if (!enabled || !getDrawableCount() || !parameters.renderPass) {
         return;
     }
 
     auto& context = static_cast<Context&>(parameters.context);
     const auto& renderPass = static_cast<const mtl::RenderPass&>(*parameters.renderPass);
     const auto& encoder = renderPass.getMetalEncoder();
+    const auto& renderable = renderPass.getDescriptor().renderable;
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
     // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
@@ -90,10 +91,10 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         const auto depthMode = parameters.depthModeFor3D();
         if (stencil3d) {
             stencilMode3d = parameters.stencilModeFor3D();
-            stateWithStencil = context.makeDepthStencilState(depthMode, stencilMode3d, renderPass);
+            stateWithStencil = context.makeDepthStencilState(depthMode, stencilMode3d, renderable);
             encoder->setStencilReferenceValue(stencilMode3d.ref);
         }
-        stateWithoutStencil = context.makeDepthStencilState(depthMode, gfx::StencilMode::disabled(), renderPass);
+        stateWithoutStencil = context.makeDepthStencilState(depthMode, gfx::StencilMode::disabled(), renderable);
     } else if (!tileIDs.empty()) {
         parameters.renderTileClippingMasks(tileIDs);
     }

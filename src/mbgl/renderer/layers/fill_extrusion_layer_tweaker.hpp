@@ -18,7 +18,7 @@ public:
 public:
     ~FillExtrusionLayerTweaker() override = default;
 
-    void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
+    void execute(LayerGroupBase&, const PaintParameters&) override;
 
     static const StringIdentity idFillExtrusionTilePropsUBOName;
     static const StringIdentity idFillExtrusionInterpolateUBOName;
