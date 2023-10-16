@@ -121,7 +121,7 @@ private:
     template <typename TIter>
     using GetTileIDFunc = const UnwrappedTileID& (*)(const typename TIter::value_type&);
     template <typename TIter>
-    void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap, bool clear);
+    void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap);
 
     // This needs to be an ordered map so that we have the same order as the renderTiles.
     std::map<UnwrappedTileID, int32_t> tileClippingMaskIDs;

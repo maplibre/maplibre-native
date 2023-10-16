@@ -60,7 +60,7 @@ public:
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 
     // Actually remove the objects we marked as abandoned with the above methods.
-    void performCleanup() override {}
+    void performCleanup() override;
 
     void reduceMemoryUsage() override {}
 
@@ -134,6 +134,7 @@ private:
     MTLDepthStencilStatePtr clipMaskDepthStencilState;
     MTLRenderPipelineStatePtr clipMaskPipelineState;
     BufferResource clipMaskUniformsBuffer;
+    bool clipMaskUniformsBufferUsed = false;
     const gfx::Renderable* stencilStateRenderable = nullptr;
 
     gfx::RenderingStats stats;
