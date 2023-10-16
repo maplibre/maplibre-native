@@ -34,6 +34,8 @@ QNetworkRequest HTTPRequest::networkRequest() const {
     QNetworkRequest req = QNetworkRequest(requestUrl());
     req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
+    // User-Agent can not be set on WASM
+#ifndef Q_OS_WASM
     static const QByteArray agent =
         !m_context->getClientOptions().name().empty()
             ? QString("%1/%2 (%3) MapLibreGL/%4 (Qt %5)")
@@ -45,6 +47,7 @@ QNetworkRequest HTTPRequest::networkRequest() const {
                   .toLatin1()
             : QString("MapLibreGL/%1 (Qt %2)").arg(version::revision).arg(QT_VERSION_STR).toLatin1();
     req.setRawHeader("User-Agent", agent);
+#endif
 
     if (m_resource.priorEtag) {
         const auto etag = m_resource.priorEtag;

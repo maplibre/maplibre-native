@@ -386,7 +386,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
-    //     Give the layers a chance to do cleanup
+    // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
 #endif
 

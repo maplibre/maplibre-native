@@ -26,8 +26,7 @@ bool LayerTweaker::checkTweakDrawable(const gfx::Drawable& drawable) const {
 }
 
 mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
-                                 const RenderTree& renderTree,
-                                 const TransformState& state,
+                                 const PaintParameters& parameters,
                                  const std::array<float, 2>& translation,
                                  style::TranslateAnchorType anchor,
                                  bool nearClipped,
@@ -35,16 +34,16 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  bool aligned) {
     // from RenderTile::prepare
     mat4 tileMatrix;
-    state.matrixFor(/*out*/ tileMatrix, tileID);
+    parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
-    const auto& transformParams = renderTree.getParameters().transformParams;
     // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
-    const auto& projMatrix = aligned
-                                 ? transformParams.alignedProjMatrix
-                                 : (nearClipped ? transformParams.nearClippedProjMatrix : transformParams.projMatrix);
+    const auto& projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
+                                     : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
+                                                    : parameters.transformParams.projMatrix);
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);
 
-    return RenderTile::translateVtxMatrix(tileID, tileMatrix, translation, anchor, state, inViewportPixelUnits);
+    return RenderTile::translateVtxMatrix(
+        tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
 }
 
 void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {
