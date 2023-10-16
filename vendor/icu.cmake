@@ -2,8 +2,14 @@ if(TARGET mbgl-vendor-icu)
     return()
 endif()
 
-add_library(
-    mbgl-vendor-icu STATIC
+if(MLN_WITH_QT)
+    add_library(mbgl-vendor-icu OBJECT)
+else()
+    add_library(mbgl-vendor-icu STATIC)
+endif()
+
+target_sources(
+    mbgl-vendor-icu PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/cmemory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/cstring.cpp
     ${CMAKE_CURRENT_LIST_DIR}/icu/src/ubidi.cpp
