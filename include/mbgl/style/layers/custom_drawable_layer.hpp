@@ -31,6 +31,8 @@ public:
 
 class CustomDrawableLayerHost::Interface {
 public:
+
+    /// @brief Construct a new Interface object (internal core use only)
     Interface(RenderLayer& layer,
               LayerGroupBasePtr& layerGroup,
               gfx::ShaderRegistry& shaders,
@@ -39,13 +41,32 @@ public:
               const std::shared_ptr<UpdateParameters>& updateParameters,
               const RenderTree& renderTree,
               UniqueChangeRequestVec& changes);
-
+    /**
+     * @brief Get the drawable count 
+     * 
+     * @return std::size_t 
+     */
     std::size_t getDrawableCount() const;
 
+    /**
+     * @brief Set the Tile ID 
+     * 
+     * @param tileID 
+     */
     void setTileID(OverscaledTileID tileID);
 
+    /**
+     * @brief Add a polyline
+     * 
+     * @param coordinates 
+     * @param options Polyline options
+     */
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions& options);
 
+    /**
+     * @brief Finishe the current drawable building session
+     * 
+     */
     void finish();
 
 protected:
