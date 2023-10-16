@@ -1,36 +1,45 @@
 #include <mbgl/mtl/buffer_resource.hpp>
 
+#include <mbgl/mtl/context.hpp>
+#include <mbgl/mtl/renderer_backend.hpp>
+
 #include <Metal/MTLDevice.hpp>
+
 #include <algorithm>
 
 namespace mbgl {
 namespace mtl {
 
-BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size_t size, MTL::ResourceOptions usage_)
-    : device(std::move(device_)),
+BufferResource::BufferResource(Context& context_, const void* data, std::size_t size_, MTL::ResourceOptions usage_)
+    : context(context_),
+      size(static_cast<NS::UInteger>(size_)),
       usage(usage_) {
-    if (data && size) {
-        buffer = NS::TransferPtr(device->newBuffer(data, static_cast<NS::UInteger>(size), usage));
-    } else {
-        buffer = NS::TransferPtr(device->newBuffer(static_cast<NS::UInteger>(size), usage));
+    auto& device = context.getBackend().getDevice();
+    buffer = NS::TransferPtr((data && size) ? device->newBuffer(data, size, usage) : device->newBuffer(size, usage));
+    if (buffer) {
+        context.renderingStats().numBuffers++;
+        context.renderingStats().memBuffers += size;
     }
 }
 
-BufferResource::BufferResource(const BufferResource& other)
-    : device(other.device),
-      usage(other.usage) {
-    if (other.buffer) {
-        buffer = NS::TransferPtr(device->newBuffer(other.buffer->contents(), other.buffer->length(), other.usage));
+BufferResource::~BufferResource() {
+    if (buffer) {
+        context.renderingStats().numBuffers--;
+        context.renderingStats().memBuffers -= size;
     }
+}
+
+BufferResource BufferResource::clone() const {
+    return {context, buffer->contents(), size, usage};
 }
 
 BufferResource::BufferResource(BufferResource&& other)
-    : device(std::move(other.device)),
+    : context(other.context),
       buffer(std::move(other.buffer)),
       usage(other.usage) {}
 
 BufferResource& BufferResource::operator=(BufferResource&& other) {
-    device = std::move(other.device);
+    assert(&context == &other.context);
     buffer = std::move(other.buffer);
     usage = other.usage;
     return *this;

@@ -37,8 +37,7 @@ constexpr uint32_t maximumVertexBindingCount = 31;
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(mtl::maximumVertexBindingCount),
-      backend(backend_),
-      stats() {}
+      backend(backend_) {}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
@@ -52,7 +51,7 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
 }
 
 BufferResource Context::createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const {
-    return {backend.getDevice(), data, size, MTL::ResourceStorageModeShared};
+    return {const_cast<Context&>(*this), data, size, MTL::ResourceStorageModeShared};
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
@@ -142,6 +141,11 @@ MTLTexturePtr Context::createMetalTexture(MTLTextureDescriptorPtr textureDescrip
 
 MTLSamplerStatePtr Context::createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const {
     return NS::TransferPtr(backend.getDevice()->newSamplerState(samplerDescriptor.get()));
+}
+
+void Context::clear() {
+    stats.numDrawCalls = 0;
+    stats.numFrames++;
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
@@ -311,19 +315,19 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Create a buffer for the UBO data.
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
     const auto bufferSize = tileUBOs.size() * uboSize;
-    if (!clipMaskUniformsBuffer || clipMaskUniformsBuffer.getSizeInBytes() < bufferSize) {
+    if (!clipMaskUniformsBuffer || clipMaskUniformsBuffer->getSizeInBytes() < bufferSize) {
         clipMaskUniformsBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
-        if (!clipMaskUniformsBuffer) {
+        if (!*clipMaskUniformsBuffer) {
             return false;
         }
     } else {
-        clipMaskUniformsBuffer.update(tileUBOs.data(), bufferSize, /*offset=*/0);
+        clipMaskUniformsBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
     encoder->setCullMode(MTL::CullModeNone);
     encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
     encoder->setVertexBuffer(
-        clipMaskUniformsBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
+        clipMaskUniformsBuffer->getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,
@@ -332,7 +336,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()),
                                    /*baseVertex=*/0,
                                    /*baseInstance=*/0);
-
+    stats.numDrawCalls++;
+    stats.totalDrawCalls++;
     return true;
 }
 

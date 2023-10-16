@@ -147,6 +147,7 @@ void PaintParameters::clearStencil() {
     // Metal doesn't have an equivalent of `glClear`, so we clear the buffer by drawing zero to (0:0,0)
     static const std::set<UnwrappedTileID> ids{{0, 0, 0}};
     renderTileClippingMasks(ids.cbegin(), ids.cend(), &unwrapIdentity, /*clear=*/true);
+    context.renderingStats().stencilClears++;
 #else
     context.clearStencilBuffer(0b00000000);
 #endif
@@ -224,6 +225,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
 
         auto& mtlContext = static_cast<mtl::Context&>(context);
         mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+
+        mtlContext.renderingStats().stencilUpdates++;
     }
 
 #else  // !MLN_RENDER_BACKEND_METAL

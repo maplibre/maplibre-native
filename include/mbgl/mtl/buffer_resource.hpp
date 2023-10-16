@@ -10,6 +10,8 @@
 namespace mbgl {
 namespace mtl {
 
+class Context;
+
 class BufferResource {
 public:
     BufferResource() = default;
@@ -19,23 +21,29 @@ public:
         @param size The minimum size of the new buffer.  Must be non-zero.
         @param usage A `MTL::ResourceOptions` value.  Currently, only `ResourceStorageModeShared` is supported.
      */
-    BufferResource(MTLDevicePtr device, const void* raw, std::size_t size, MTL::ResourceOptions usage);
-    BufferResource(const BufferResource&);
+    BufferResource(Context& context_, const void* raw, std::size_t size, MTL::ResourceOptions usage);
     BufferResource(BufferResource&&);
+    virtual ~BufferResource();
+
     BufferResource& operator=(BufferResource&&);
+
+    BufferResource clone() const;
 
     void update(const void* data, std::size_t size, std::size_t offset);
 
     std::size_t getSizeInBytes() const { return buffer ? buffer->length() : 0; }
     void* contents() const { return buffer ? buffer->contents() : nullptr; }
 
+    Context& getContext() const { return context; }
     const MTLBufferPtr& getMetalBuffer() const { return buffer; }
 
     operator bool() const { return buffer.operator bool(); }
+    bool operator!() const { return !buffer.operator bool(); }
 
 protected:
-    MTLDevicePtr device;
+    Context& context;
     MTLBufferPtr buffer;
+    NS::UInteger size;
     NS::UInteger usage;
 };
 

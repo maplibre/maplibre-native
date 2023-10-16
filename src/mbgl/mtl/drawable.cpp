@@ -157,7 +157,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    const auto& context = static_cast<Context&>(parameters.context);
+    auto& context = static_cast<Context&>(parameters.context);
     const auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
     const auto& encoder = renderPass.getMetalEncoder();
     if (!encoder) {
@@ -304,6 +304,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                                            instanceCount,
                                            baseVertex,
                                            baseInstance);
+            context.renderingStats().numDrawCalls++;
         }
     }
 

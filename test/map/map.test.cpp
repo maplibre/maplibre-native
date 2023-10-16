@@ -1607,6 +1607,7 @@ TEST(Map, StencilOverflow) {
 
     const auto& backend = test.frontend.getBackend();
     gfx::BackendScope scope{*backend};
+    const auto& context = backend->getContext();
 
     auto& style = test.map.getStyle();
     style.loadJSON("{}");
@@ -1629,11 +1630,7 @@ TEST(Map, StencilOverflow) {
 
     // In drawable builds, no drawables are built because no bucket/tiledata is available.
 #if !MLN_DRAWABLE_RENDERER
-    // TODO: Collect stats on Metal context
-#if MLN_RENDER_BACKEND_OPENGL
-    const auto& context = static_cast<const gl::Context&>(backend->getContext());
     ASSERT_LT(0, context.renderingStats().stencilClears);
-#endif // MLN_RENDER_BACKEND_OPENGL
 #endif // !MLN_DRAWABLE_RENDERER
 
     // TODO: confirm that the stencil masking actually worked

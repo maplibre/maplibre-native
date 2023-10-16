@@ -44,9 +44,6 @@ public:
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
-    gfx::RenderingStats& renderingStats() { return stats; }
-    const gfx::RenderingStats& renderingStats() const override { return stats; }
-
     BufferResource createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const;
 
     UniqueShaderProgram createProgram(std::string name,
@@ -58,6 +55,8 @@ public:
 
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
+
+    void clear();
 
     // Actually remove the objects we marked as abandoned with the above methods.
     void performCleanup() override {}
@@ -133,10 +132,8 @@ private:
     gfx::ShaderProgramBasePtr clipMaskShader;
     MTLDepthStencilStatePtr clipMaskDepthStencilState;
     MTLRenderPipelineStatePtr clipMaskPipelineState;
-    BufferResource clipMaskUniformsBuffer;
+    std::optional<BufferResource> clipMaskUniformsBuffer;
     const gfx::Renderable* stencilStateRenderable = nullptr;
-
-    gfx::RenderingStats stats;
 };
 
 } // namespace mtl

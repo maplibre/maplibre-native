@@ -9,11 +9,13 @@ namespace mtl {
 class UniformBuffer final : public gfx::UniformBuffer {
 public:
     UniformBuffer(BufferResource&&);
-    UniformBuffer(const UniformBuffer&) = default;
+    UniformBuffer(const UniformBuffer&) = delete;
     UniformBuffer(UniformBuffer&&);
-    ~UniformBuffer() override = default;
+    ~UniformBuffer() override;
 
     const BufferResource& getBufferResource() const { return buffer; }
+
+    UniformBuffer clone() const { return {buffer.clone()}; }
 
     void update(const void* data, std::size_t size_) override;
 
@@ -40,7 +42,7 @@ public:
 
 private:
     gfx::UniqueUniformBuffer copy(const gfx::UniformBuffer& buffer) override {
-        return std::make_unique<UniformBuffer>(static_cast<const UniformBuffer&>(buffer));
+        return std::make_unique<UniformBuffer>(static_cast<const UniformBuffer&>(buffer).clone());
     }
 };
 

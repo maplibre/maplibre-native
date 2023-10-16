@@ -69,8 +69,7 @@ Context::Context(RendererBackend& backend_)
           MBGL_CHECK_ERROR(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value));
           return value;
       }()),
-      backend(backend_),
-      stats() {}
+      backend(backend_) {}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
