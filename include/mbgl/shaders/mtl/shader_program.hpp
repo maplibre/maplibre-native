@@ -55,7 +55,7 @@ public:
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }
 
-    MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::RenderPassDescriptor&,
+    MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::Renderable&,
                                                      const MTLVertexDescriptorPtr&,
                                                      const gfx::ColorMode& colorMode) const;
 

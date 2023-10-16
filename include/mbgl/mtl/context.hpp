@@ -107,9 +107,9 @@ public:
 
     void clearStencilBuffer(int32_t) override;
 
-    MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode& depthMode,
-                                                  const gfx::StencilMode& stencilMode,
-                                                  const mtl::RenderPass& renderPass) const;
+    MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode&,
+                                                  const gfx::StencilMode&,
+                                                  const gfx::Renderable&) const;
 
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size);
 
@@ -129,6 +129,12 @@ private:
 
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
+
+    gfx::ShaderProgramBasePtr clipMaskShader;
+    MTLDepthStencilStatePtr clipMaskDepthStencilState;
+    MTLRenderPipelineStatePtr clipMaskPipelineState;
+    BufferResource clipMaskUniformsBuffer;
+    const gfx::Renderable* stencilStateRenderable = nullptr;
 
     gfx::RenderingStats stats;
 };
