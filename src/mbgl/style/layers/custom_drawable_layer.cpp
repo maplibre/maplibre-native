@@ -72,7 +72,8 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
     LineDrawableTweaker(Color color_, float width_)
-        : color(color_), width(width_) {}
+        : color(color_),
+          width(width_) {}
     ~LineDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -211,19 +212,19 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
 }
 
 void CustomDrawableLayerHost::Interface::finish() {
-    if(builder->curVertexCount()) {
+    if (builder->curVertexCount()) {
         // create tweaker
         assert(currentColor.has_value());
         assert(currentWidth.has_value());
         auto tweaker = std::make_shared<LineDrawableTweaker>(currentColor.value(), currentWidth.value());
-        
+
         // finish
         builder->flush();
         for (auto& drawable : builder->clearDrawables()) {
             assert(tileID.has_value());
             drawable->setTileID(tileID.value());
             drawable->addTweaker(tweaker);
-            
+
             TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
             tileLayerGroup->addDrawable(RenderPass::Translucent, tileID.value(), std::move(drawable));
         }
