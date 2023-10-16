@@ -81,6 +81,8 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
     // delegate the call to the custom layer
     if (host) {
         CustomDrawableLayerHost::Interface interface {
+            *this,
+            layerGroup,
             /*gfx::ShaderRegistry &shaders = */ shaders,
                 /*gfx::Context &context = */ context,
                 /*const TransformState &state = */ state,
@@ -88,9 +90,10 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
                 /*const RenderTree &renderTree = */ renderTree,
                 /*UniqueChangeRequestVec &changes = */ changes
         };
-        host->update(*this, interface);
+        host->update(interface);
     }
 }
+
 #endif
 
 } // namespace mbgl

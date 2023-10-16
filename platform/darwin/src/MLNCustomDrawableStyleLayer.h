@@ -19,12 +19,6 @@ MLN_EXPORT
 
 - (instancetype)initWithIdentifier:(NSString *)identifier;
 
-- (void)didMoveToMapView:(MLNMapView *)mapView;
-
-- (void)willMoveFromMapView:(MLNMapView *)mapView;
-
-- (void)setNeedsDisplay;
-
 @end
 
 NS_ASSUME_NONNULL_END

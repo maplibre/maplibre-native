@@ -10,39 +10,62 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 
 namespace mbgl {
 namespace style {
 
 class CustomDrawableLayerHost {
 public:
-    class LineBuilderHelper {};
-
-    struct Interface {
-        gfx::ShaderRegistry& shaders;
-        gfx::Context& context;
-        const TransformState& state;
-        const std::shared_ptr<UpdateParameters>& updateParameters;
-        const RenderTree& renderTree;
-        UniqueChangeRequestVec& changes;
-
-        gfx::ShaderPtr lineShaderDefault() const;
-
-        bool getTileLayerGroup(std::shared_ptr<TileLayerGroup>& layerGroupRef, mbgl::RenderLayer& proxyLayer) const;
-
-        std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
-
-        std::unique_ptr<LineBuilderHelper> createLineBuilderHelper() const;
-    };
+    class Interface;
 
 public:
     virtual ~CustomDrawableLayerHost() = default;
 
     virtual void initialize() = 0;
 
-    virtual void update(RenderLayer& proxyLayer, Interface& interface) = 0;
+    virtual void update(Interface& interface) = 0;
 
     virtual void deinitialize() = 0;
+};
+
+class CustomDrawableLayerHost::Interface {
+public:
+    Interface(RenderLayer& layer,
+              LayerGroupBasePtr& layerGroup,
+              gfx::ShaderRegistry& shaders,
+              gfx::Context& context,
+              const TransformState& state,
+              const std::shared_ptr<UpdateParameters>& updateParameters,
+              const RenderTree& renderTree,
+              UniqueChangeRequestVec& changes);
+
+    std::size_t getDrawableCount() const;
+    
+    void setTileID(OverscaledTileID tileID);
+    
+    void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions& options);
+    
+    void finish();
+    
+protected:
+    
+    gfx::ShaderPtr lineShaderDefault() const;
+
+    std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
+        
+private:
+    RenderLayer& layer;
+    LayerGroupBasePtr& layerGroup;
+    gfx::ShaderRegistry& shaders;
+    gfx::Context& context;
+    const TransformState& state;
+    const std::shared_ptr<UpdateParameters>& updateParameters;
+    const RenderTree& renderTree;
+    UniqueChangeRequestVec& changes;
+    
+    std::unique_ptr<gfx::DrawableBuilder> builder;
+    std::optional<OverscaledTileID> tileID;
 };
 
 class CustomDrawableLayer final : public Layer {
