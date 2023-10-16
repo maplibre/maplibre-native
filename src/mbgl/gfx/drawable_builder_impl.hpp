@@ -65,6 +65,15 @@ public:
         return std::max(rawVerticesCount, std::max(vertices.elements(), polylineVertices.elements()));
     }
 
+    void clear() {
+        vertices.clear();
+        rawVertices.clear();
+        rawVerticesCount = 0;
+        polylineVertices.clear();
+        polylineIndexes.clear();
+        buildIndexes.clear();
+        segments.clear();
+    }
 private:
     LineLayoutVertex layoutVertex(
         Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0);
