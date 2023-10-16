@@ -16,6 +16,7 @@ filegroup(
         "cache-style.db",
         "ios-render-test-runner-metrics.json",  # iOS only
         "ios-render-test-runner-style.json",  # iOS only
+        "linux-drawable-style.json",
         "linux-gcc8-release-metrics.json",
         "linux-gcc8-release-style.json",
     ],
