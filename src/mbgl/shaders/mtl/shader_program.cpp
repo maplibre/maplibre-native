@@ -103,12 +103,11 @@ ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFun
       vertexFunction(std::move(vert)),
       fragmentFunction(std::move(frag)) {}
 
-MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::RenderPassDescriptor& renderPassDescriptor,
+MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Renderable& renderable,
                                                                 const MTLVertexDescriptorPtr& vertexDescriptor,
                                                                 const gfx::ColorMode& colorMode) const {
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
-    const auto& renderable = renderPassDescriptor.renderable;
     const auto& renderableResource = renderable.getResource<RenderableResource>();
 
     auto colorFormat = MTL::PixelFormat::PixelFormatBGRA8Unorm;
