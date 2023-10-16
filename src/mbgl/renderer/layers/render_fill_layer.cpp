@@ -102,8 +102,12 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerTweaker) {
-        layerTweaker->updateProperties(evaluatedProperties);
+    if (auto tweaker = static_cast<FillLayerTweaker*>(layerTweaker.get())) {
+        tweaker->updateProperties(evaluatedProperties);
+
+        // Apply the latest state of the unevaluated properties.
+        // Any expressions built as a result will exclude that property from future evaluations.
+        propertyExpressionMask = ~tweaker->updateUnevaluated(unevaluated);
     }
 #endif
 }
@@ -331,7 +335,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     if (!layerTweaker) {
         auto fillTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
-        propertyExpressionMask = ~fillTweaker->buildPropertyExpressions(unevaluated);
+        propertyExpressionMask = ~fillTweaker->updateUnevaluated(unevaluated);
         layerTweaker = std::move(fillTweaker);
         layerGroup->addLayerTweaker(layerTweaker);
     }

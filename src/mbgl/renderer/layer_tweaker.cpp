@@ -86,11 +86,11 @@ void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const std::unordered
 }
 
 ExpressionAttribute LayerTweaker::buildAttribute(const StringIdentity attrNameID,
-                                                 const std::optional<shaders::Expression>& attr) {
-    if (attr) {
+                                                 const std::optional<shaders::Expression>& expression) {
+    if (expression) {
         // from uniforms or attribute arrays
         return {
-            /*.expression=*/*attr,
+            /*.expression=*/*expression,
             /*.source=*/AttributeSource::Computed,
         };
     } else {
@@ -103,10 +103,10 @@ ExpressionAttribute LayerTweaker::buildAttribute(const StringIdentity attrNameID
 }
 
 ColorAttribute LayerTweaker::buildAttribute(const StringIdentity attrNameID,
-                                            const std::optional<ColorExpression>& attr) {
-    if (attr) {
+                                            const std::optional<ColorExpression>& expression) {
+    if (expression) {
         // from uniforms or attribute arrays
-        return {/*.expression=*/*attr,
+        return {/*.expression=*/*expression,
                 /*.source=*/AttributeSource::Computed,
                 /*.pad=*/0,
                 0,

@@ -20,15 +20,23 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-    using PropertyExpressionMask = style::FillPaintProperties::PropertyMaskType;
+    using Unevaluated = style::FillPaintProperties::Unevaluated;
+    using PropertyMask = style::FillPaintProperties::PropertyMaskType;
 
-    /// Create shader expression representations from suitable un-evaluated properties.
+    /// Apply the current state of the un-evaluated properties.
     /// @return A bitset with 1 where an expression was set up, 0 where the property must still be evaluated.
-    PropertyExpressionMask buildPropertyExpressions(const style::FillPaintProperties::Unevaluated&);
+    PropertyMask updateUnevaluated(const Unevaluated&);
 
     static const StringIdentity idFillTilePropsUBOName;
     static const StringIdentity idFillInterpolateUBOName;
     static const StringIdentity idFillOutlineInterpolateUBOName;
+
+protected:
+    /// Create shader expression representations from  un-evaluated properties where the corresponding mask bit is set.
+    /// @return A bitset with 1 where an expression was set up, 0 where the property must still be evaluated.
+    PropertyMask buildPropertyExpressions(const Unevaluated&, const PropertyMask&);
+
+    PropertyMask getTransitionMask(const Unevaluated&) const;
 
 private:
     gfx::UniformBufferPtr fillPropsUniformBuffer;
@@ -46,6 +54,9 @@ private:
 
     std::optional<shaders::ColorExpression> fillColorExpr;
     std::optional<shaders::Expression> opacityExpr;
+
+    PropertyMask expressionMask = {0};
+    PropertyMask rebuildExpressionsMask = {~0LL};
 #endif // MLN_RENDER_BACKEND_METAL
 };
 

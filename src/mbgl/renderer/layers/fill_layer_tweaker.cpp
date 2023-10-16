@@ -66,13 +66,7 @@ using namespace shaders;
 bool populateExpression(const Transitioning<PropertyValue<float>>& transitionProperty,
                         shaders::Expression& shaderExpr) {
     if (transitionProperty.isUndefined()) {
-        // we need two expressions per property to support transitions
         return false;
-    }
-
-    if (transitionProperty.hasTransition()) {
-        // We need two expressions per property to support transitions.
-        // But for now, we won't run this again, so just ignore it.
     }
 
     const PropertyValue<float>& property = transitionProperty.getValue();
@@ -122,7 +116,7 @@ bool populateExpression(const Transitioning<PropertyValue<float>>& transitionPro
 
 bool populateExpression(const Transitioning<PropertyValue<Color>>& transitionProperty,
                         shaders::ColorExpression& shaderExpr) {
-    if (transitionProperty.isUndefined() || transitionProperty.hasTransition()) {
+    if (transitionProperty.isUndefined()) {
         // we need two expressions per property to support transitions
         return false;
     }
@@ -175,28 +169,59 @@ bool populateExpression(const Transitioning<PropertyValue<Color>>& transitionPro
     return (!failed && shaderExpr.stopCount > 0);
 }
 
-FillLayerTweaker::PropertyExpressionMask FillLayerTweaker::buildPropertyExpressions(
-    const style::FillPaintProperties::Unevaluated& unevaluated) {
-    constexpr auto colorIndex = TypeListIndex<FillColor, FillPaintProperties::PropertyTypes>;
-    constexpr auto opacityIndex = TypeListIndex<FillOpacity, FillPaintProperties::PropertyTypes>;
+namespace {
+constexpr auto colorTypeIndex = TypeListIndex<FillColor, FillPaintProperties::PropertyTypes>;
+constexpr auto opacityTypeIndex = TypeListIndex<FillOpacity, FillPaintProperties::PropertyTypes>;
 
-    using MaskValueType = unsigned long long; // See std::bitset constructor, no alias defined
-    using MaskLimits = std::numeric_limits<MaskValueType>;
-    static_assert(std::max(colorIndex, opacityIndex) < MaskLimits::digits && MaskLimits::radix == 2);
+using PropertyMask = FillLayerTweaker::PropertyMask;
+using TypeMaskValueType = unsigned long long; // See std::bitset constructor, no alias defined
+using TypeMaskLimits = std::numeric_limits<TypeMaskValueType>;
+static_assert(std::max(colorTypeIndex, opacityTypeIndex) < TypeMaskLimits::digits && TypeMaskLimits::radix == 2);
 
+TypeMaskValueType maybeBit(bool value, std::size_t bit) {
+    return value ? 1 << bit : 0;
+}
+} // namespace
+
+PropertyMask FillLayerTweaker::updateUnevaluated(const Unevaluated& unevaluated) {
+    // As long as transitions are in progress for any of our properties, we can't use expressions.
+    const auto transitionsMask = getTransitionMask(unevaluated);
+    if (transitionsMask.any()) {
+        expressionMask.reset();
+        rebuildExpressionsMask |= transitionsMask;
+        Log::Warning(Event::General, getID() + " Transition for " + transitionsMask.to_string());
+        if (transitionsMask[colorTypeIndex]) {
+            fillColorExpr.reset();
+        }
+        if (transitionsMask[opacityTypeIndex]) {
+            opacityExpr.reset();
+        }
+    } else if (rebuildExpressionsMask.any()) {
+        expressionMask = buildPropertyExpressions(unevaluated, rebuildExpressionsMask);
+        rebuildExpressionsMask.reset();
+    }
+    return expressionMask;
+}
+
+PropertyMask FillLayerTweaker::getTransitionMask(const Unevaluated& unevaluated) const {
+    return {maybeBit(unevaluated.get<style::FillColor>().hasTransition(), colorTypeIndex) |
+            maybeBit(unevaluated.get<style::FillOpacity>().hasTransition(), opacityTypeIndex)};
+}
+
+PropertyMask FillLayerTweaker::buildPropertyExpressions(const Unevaluated& unevaluated, const PropertyMask& mask) {
 #if MLN_RENDER_BACKEND_METAL
     shaders::ColorExpression colorExpr;
-    if (populateExpression(unevaluated.get<style::FillColor>(), colorExpr)) {
+    if (mask[colorTypeIndex] && populateExpression(unevaluated.get<style::FillColor>(), colorExpr)) {
         fillColorExpr = colorExpr;
     }
 
     shaders::Expression floatExpr;
-    if (populateExpression(unevaluated.get<style::FillOpacity>(), floatExpr)) {
+    if (mask[opacityTypeIndex] && populateExpression(unevaluated.get<style::FillOpacity>(), floatExpr)) {
         opacityExpr = floatExpr;
     }
 
     // Set each bit corresponding to the type with a valid expression
-    return {0ULL | (fillColorExpr ? 1 << colorIndex : 0) | (opacityExpr ? 1 << opacityIndex : 0)};
+    return {maybeBit(!!fillColorExpr, colorTypeIndex) | maybeBit(!!opacityExpr, opacityTypeIndex)};
 #else  // !MLN_RENDER_BACKEND_METAL
     return {0};
 #endif // MLN_RENDER_BACKEND_METAL
