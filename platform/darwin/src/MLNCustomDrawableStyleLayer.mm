@@ -61,9 +61,13 @@ public:
         using namespace mbgl;
         
         constexpr auto numLines = 6;
-        Color colors[numLines] {Color::red(), Color::blue(), Color(1.f, 0.5f, 0, 0.5f), Color(1.f, 1.f, 0, 0.3f), Color::black(),  Color(1.f, 0, 1.f, 1.f)};
+        Color colors[numLines] {Color::red(), Color::blue(), Color(1.f, 0.5f, 0, 0.5f), Color(1.f, 1.f, 0, 0.3f), Color::black(),  Color(1.f, 0, 1.f, 0.2f)};
+        float blurs[numLines] {0.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
+        float opacities[numLines] {1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f};
+        float gapWidths[numLines] {0.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+        float offsets[numLines] {0.0f, -1.0f, 2.0f, -2.0f, 0.5f, -5.0f};
         float widths[numLines] {8.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
-        
+
         constexpr auto numPoints = 100;
         GeometryCoordinates polyline;
         for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
@@ -82,6 +86,10 @@ public:
             
             // set property values
             interface.setColor(colors[index]);
+            interface.setBlur(blurs[index]);
+            interface.setOpacity(opacities[index]);
+            interface.setGapWidth(gapWidths[index]);
+            interface.setOffset(offsets[index]);
             interface.setWidth(widths[index]);
             
             // add polyline

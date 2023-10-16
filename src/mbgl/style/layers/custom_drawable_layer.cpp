@@ -71,9 +71,8 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    LineDrawableTweaker(Color color_, float width_)
-        : color(color_),
-          width(width_) {}
+    LineDrawableTweaker(const shaders::LinePropertiesUBO& properties)
+        : linePropertiesUBO(properties) {}
     ~LineDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -99,15 +98,6 @@ public:
             /*device_pixel_ratio = */ parameters.pixelRatio};
 
         static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
-        const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/color,
-                                                           /*blur =*/0.f,
-                                                           /*opacity =*/1.f,
-                                                           /*gapwidth =*/0.f,
-                                                           /*offset =*/0.f,
-                                                           /*width =*/width,
-                                                           0,
-                                                           0,
-                                                           0};
 
         static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
         const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
@@ -149,8 +139,7 @@ public:
     };
 
 private:
-    Color color;
-    float width;
+    shaders::LinePropertiesUBO linePropertiesUBO;
 };
 
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
@@ -188,16 +177,32 @@ void CustomDrawableLayerHost::Interface::setTileID(OverscaledTileID tileID_) {
 }
 
 void CustomDrawableLayerHost::Interface::setColor(Color color) {
-    if (currentColor.has_value() && currentColor.value() != color) {
-        finish();
-    }
+    if (currentColor != color) finish();
     currentColor = color;
 }
 
+void CustomDrawableLayerHost::Interface::setBlur(float blur) {
+    if (currentBlur != blur) finish();
+    currentBlur = blur;
+}
+
+void CustomDrawableLayerHost::Interface::setOpacity(float opacity) {
+    if (currentOpacity != opacity) finish();
+    currentOpacity = opacity;
+}
+
+void CustomDrawableLayerHost::Interface::setGapWidth(float gapWidth) {
+    if (currentGapWidth != gapWidth) finish();
+    currentGapWidth = gapWidth;
+}
+
+void CustomDrawableLayerHost::Interface::setOffset(float offset) {
+    if (currentOffset != offset) finish();
+    currentOffset = offset;
+}
+
 void CustomDrawableLayerHost::Interface::setWidth(float width) {
-    if (currentWidth.has_value() && currentWidth.value() != width) {
-        finish();
-    }
+    if (currentWidth != width) finish();
     currentWidth = width;
 }
 
@@ -212,11 +217,12 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
 }
 
 void CustomDrawableLayerHost::Interface::finish() {
-    if (builder->curVertexCount()) {
+    if (builder && builder->curVertexCount()) {
         // create tweaker
-        assert(currentColor.has_value());
-        assert(currentWidth.has_value());
-        auto tweaker = std::make_shared<LineDrawableTweaker>(currentColor.value(), currentWidth.value());
+        const shaders::LinePropertiesUBO linePropertiesUBO{
+            currentColor, currentBlur, currentOpacity, currentGapWidth, currentOffset, currentWidth, 0, 0, 0};
+
+        auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 
         // finish
         builder->flush();

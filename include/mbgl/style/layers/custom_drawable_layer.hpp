@@ -55,6 +55,10 @@ public:
     void setTileID(OverscaledTileID tileID);
 
     void setColor(Color color);
+    void setBlur(float blur);
+    void setOpacity(float opacity);
+    void setGapWidth(float gapWidth);
+    void setOffset(float offset);
     void setWidth(float width);
 
     /**
@@ -89,8 +93,12 @@ public:
 private:
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
-    std::optional<Color> currentColor;
-    std::optional<float> currentWidth;
+    Color currentColor;
+    float currentBlur = 0.f;
+    float currentOpacity = 1.f;
+    float currentGapWidth = 0.f;
+    float currentOffset = 0.f;
+    float currentWidth = 1.f;
 };
 
 class CustomDrawableLayer final : public Layer {
