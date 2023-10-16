@@ -55,6 +55,7 @@ public:
     void setTileID(OverscaledTileID tileID);
 
     void setColor(Color color);
+    void setWidth(float width);
 
     /**
      * @brief Add a polyline
@@ -75,7 +76,7 @@ protected:
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
 
-private:
+public:
     RenderLayer& layer;
     LayerGroupBasePtr& layerGroup;
     gfx::ShaderRegistry& shaders;
@@ -85,9 +86,11 @@ private:
     const RenderTree& renderTree;
     UniqueChangeRequestVec& changes;
 
+private:
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
     std::optional<Color> currentColor;
+    std::optional<float> currentWidth;
 };
 
 class CustomDrawableLayer final : public Layer {

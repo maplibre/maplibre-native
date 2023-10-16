@@ -50,7 +50,7 @@ public:
     
     void update(Interface& interface) override {
         
-        // if we have build our drawable(s) already, either update or skip
+        // if we have built our drawable(s) already, either update or skip
         if (interface.getDrawableCount())
             return;
         
@@ -61,7 +61,8 @@ public:
         using namespace mbgl;
         
         constexpr auto numLines = 6;
-        Color colors[numLines] {Color::red(), Color(1.f, 0.5f, 0, 1.f), Color(1.f, 1.f, 0, 1.f), Color::green(), Color::blue(), Color(1.f, 0, 1.f, 1.f)};
+        Color colors[numLines] {Color::red(), Color::blue(), Color(1.f, 0.5f, 0, 0.5f), Color(1.f, 1.f, 0, 0.3f), Color::black(),  Color(1.f, 0, 1.f, 1.f)};
+        float widths[numLines] {8.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
         
         constexpr auto numPoints = 100;
         GeometryCoordinates polyline;
@@ -78,7 +79,12 @@ public:
             for(auto &p : polyline) {
                 p.y += util::EXTENT / numLines;
             }
+            
+            // set property values
             interface.setColor(colors[index]);
+            interface.setWidth(widths[index]);
+            
+            // add polyline
             interface.addPolyline(polyline, options);
         }
         

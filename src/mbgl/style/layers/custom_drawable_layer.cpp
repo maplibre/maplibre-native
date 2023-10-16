@@ -71,8 +71,8 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    LineDrawableTweaker(Color color_)
-        : color(color_) {}
+    LineDrawableTweaker(Color color_, float width_)
+        : color(color_), width(width_) {}
     ~LineDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -103,7 +103,7 @@ public:
                                                            /*opacity =*/1.f,
                                                            /*gapwidth =*/0.f,
                                                            /*offset =*/0.f,
-                                                           /*width =*/8.f,
+                                                           /*width =*/width,
                                                            0,
                                                            0,
                                                            0};
@@ -149,6 +149,7 @@ public:
 
 private:
     Color color;
+    float width;
 };
 
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
@@ -192,6 +193,13 @@ void CustomDrawableLayerHost::Interface::setColor(Color color) {
     currentColor = color;
 }
 
+void CustomDrawableLayerHost::Interface::setWidth(float width) {
+    if (currentWidth.has_value() && currentWidth.value() != width) {
+        finish();
+    }
+    currentWidth = width;
+}
+
 void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
                                                      const gfx::PolylineGeneratorOptions& options) {
     if (!builder) {
@@ -203,19 +211,22 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
 }
 
 void CustomDrawableLayerHost::Interface::finish() {
-    // create tweaker
-    assert(currentColor.has_value());
-    auto tweaker = std::make_shared<LineDrawableTweaker>(currentColor.value());
-
-    // finish
-    builder->flush();
-    for (auto& drawable : builder->clearDrawables()) {
-        assert(tileID.has_value());
-        drawable->setTileID(tileID.value());
-        drawable->addTweaker(tweaker);
-
-        TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-        tileLayerGroup->addDrawable(RenderPass::Translucent, tileID.value(), std::move(drawable));
+    if(builder->curVertexCount()) {
+        // create tweaker
+        assert(currentColor.has_value());
+        assert(currentWidth.has_value());
+        auto tweaker = std::make_shared<LineDrawableTweaker>(currentColor.value(), currentWidth.value());
+        
+        // finish
+        builder->flush();
+        for (auto& drawable : builder->clearDrawables()) {
+            assert(tileID.has_value());
+            drawable->setTileID(tileID.value());
+            drawable->addTweaker(tweaker);
+            
+            TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+            tileLayerGroup->addDrawable(RenderPass::Translucent, tileID.value(), std::move(drawable));
+        }
     }
 }
 
