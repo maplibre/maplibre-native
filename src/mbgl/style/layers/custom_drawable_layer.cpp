@@ -254,16 +254,16 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
 
 std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::createBuilder(const std::string& name,
                                                                                         gfx::ShaderPtr shader) const {
-    std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
-    builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
-    builder->setSubLayerIndex(0);
-    builder->setEnableDepth(false);
-    builder->setColorMode(gfx::ColorMode::alphaBlended());
-    builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-    builder->setEnableStencil(false);
-    builder->setRenderPass(RenderPass::Translucent);
+    std::unique_ptr<gfx::DrawableBuilder> builder_ = context.createDrawableBuilder(name);
+    builder_->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+    builder_->setSubLayerIndex(0);
+    builder_->setEnableDepth(false);
+    builder_->setColorMode(gfx::ColorMode::alphaBlended());
+    builder_->setCullFaceMode(gfx::CullFaceMode::disabled());
+    builder_->setEnableStencil(false);
+    builder_->setRenderPass(RenderPass::Translucent);
 
-    return builder;
+    return builder_;
 }
 
 } // namespace style
