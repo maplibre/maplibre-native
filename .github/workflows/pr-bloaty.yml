@@ -19,6 +19,8 @@ jobs:
   pr-bloaty:
     runs-on: ubuntu-22.04
     steps:
+      - uses: actions/checkout@v4
+
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: mbgl-render
