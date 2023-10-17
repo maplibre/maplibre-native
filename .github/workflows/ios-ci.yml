@@ -21,33 +21,33 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip || contains(github.event.head_commit.message, '[skip ci]') }}
+      should_skip: steps.changed-files-yaml.outputs.ios_any_changed != 'true'
     steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
+      - name: Get all iOS files that have changed
+        id: changed-files-yaml
+        uses: tj-actions/changed-files@v39
         with:
-          do_not_skip: '["workflow_dispatch", "push"]'
-          paths: |
-            ["CMakeLists.txt",
-            "platform/ios/**",
-            "platform/darwin/**",
-            ".github/workflows/ios-ci.yml",
-            "bin/**",
-            "expression-test/**",
-            "include/**",
-            "metrics/**",
-            "platform/default/**",
-            "render-test/**",
-            "scripts/**",
-            "src/**",
-            "test/**",
-            "vendor/**",
-            ".gitmodules",
-            "!**/*.md",
-            "WORKSPACE",
-            "BUILD.bazel",
-            ".bazelrc",
-            ".bazelversion"]
+          files_yaml: |
+            ios:
+              - 'platform/ios/**'
+              - 'platform/darwin/**'
+              - '.github/workflows/ios-ci.yml'
+              - 'bin/**'
+              - 'expression-test/**'
+              - 'include/**'
+              - 'metrics/**'
+              - 'platform/default/**'
+              - 'render-test/**'
+              - 'scripts/**'
+              - 'src/**'
+              - 'test/**'
+              - 'vendor/**'
+              - '.gitmodules'
+              - '!**/*.md'
+              - 'WORKSPACE'
+              - 'BUILD.bazel'
+              - '.bazelrc'
+              - '.bazelversion'
 
   ios-build:
     needs: pre_job
