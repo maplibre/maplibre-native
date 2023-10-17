@@ -192,6 +192,9 @@ jobs:
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}
+  
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
 
   linux-ci-result:
     name: Linux CI Result

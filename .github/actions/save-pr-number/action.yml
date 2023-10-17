@@ -1,0 +1,17 @@
+name: 'save-pr-number'
+description: 'Saves the current PR number as artifact'
+runs:
+  using: "composite"
+  steps:
+      - name: Save PR number
+        shell: bash
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "${{ github.event.number }}" > ./pr_number
+
+      - name: Upload pr_number
+        shell: bash
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr-number
+          path: ./pr_number
