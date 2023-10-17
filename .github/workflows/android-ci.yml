@@ -29,21 +29,21 @@ jobs:
         with:
           files_yaml: |
             android:
-              - 'CMakeLists.txt',
-              - 'platform/android/**',
-              - '.github/workflows/android-ci.yml',
-              - 'bin/**',
-              - 'expression-test/**',
-              - 'include/**',
-              - 'metrics/**',
-              - 'platform/default/**',
-              - 'render-test/**',
-              - 'scripts/**',
-              - 'src/**',
-              - 'test/**',
-              - 'vendor/**',
-              - '.gitmodules',
-              - '!**/*.md']
+              - 'CMakeLists.txt'
+              - 'platform/android/**'
+              - '.github/workflows/android-ci.yml'
+              - 'bin/**'
+              - 'expression-test/**'
+              - 'include/**'
+              - 'metrics/**'
+              - 'platform/default/**'
+              - 'render-test/**'
+              - 'scripts/**'
+              - 'src/**'
+              - 'test/**'
+              - 'vendor/**'
+              - '.gitmodules'
+              - '!**/*.md'
 
   android-build:
     runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}

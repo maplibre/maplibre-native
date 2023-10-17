@@ -27,18 +27,18 @@ jobs:
         with:
           files_yaml: |
             linux:
-              - 'src/**',
-              - 'test/**',
-              - 'render-test/**',
-              - 'expression-test/**',
-              - 'include/**',
-              - '.github/workflows/linux-ci.yml',
-              - 'vendor/**',
-              - 'CMakeLists.txt',
-              - 'metrics/linux-gcc8-release-style.json',
-              - 'WORKSPACE',
-              - 'BUILD.bazel',
-              - '.bazelrc',
+              - 'src/**'
+              - 'test/**'
+              - 'render-test/**'
+              - 'expression-test/**'
+              - 'include/**'
+              - '.github/workflows/linux-ci.yml'
+              - 'vendor/**'
+              - 'CMakeLists.txt'
+              - 'metrics/linux-gcc8-release-style.json'
+              - 'WORKSPACE'
+              - 'BUILD.bazel'
+              - '.bazelrc'
               - '.bazelversion'
 
       - name: List changed files
