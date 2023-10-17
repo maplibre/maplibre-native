@@ -22,42 +22,46 @@ class TestDrawableLayer : public mbgl::style::CustomDrawableLayerHost {
 public:
     void initialize() override {}
 
-        void update(Interface& interface) override {
-        
+    void update(Interface& interface) override {
         // if we have built our drawable(s) already, either update or skip
-        if (interface.getDrawableCount())
-            return;
-        
+        if (interface.getDrawableCount()) return;
+
         // set tile
         interface.setTileID({11, 327, 791});
 
         // add polylines
         using namespace mbgl;
-        
+
         constexpr auto numLines = 6;
-        Color colors[numLines] {Color::red(), Color::blue(), Color(1.f, 0.5f, 0, 0.5f), Color(1.f, 1.f, 0, 0.3f), Color::black(),  Color(1.f, 0, 1.f, 0.2f)};
-        float blurs[numLines] {0.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
-        float opacities[numLines] {1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f};
-        float gapWidths[numLines] {0.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-        float offsets[numLines] {0.0f, -1.0f, 2.0f, -2.0f, 0.5f, -5.0f};
-        float widths[numLines] {8.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
+        Color colors[numLines]{Color::red(),
+                               Color::blue(),
+                               Color(1.f, 0.5f, 0, 0.5f),
+                               Color(1.f, 1.f, 0, 0.3f),
+                               Color::black(),
+                               Color(1.f, 0, 1.f, 0.2f)};
+        float blurs[numLines]{0.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
+        float opacities[numLines]{1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f};
+        float gapWidths[numLines]{0.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+        float offsets[numLines]{0.0f, -1.0f, 2.0f, -2.0f, 0.5f, -5.0f};
+        float widths[numLines]{8.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
 
         constexpr auto numPoints = 100;
         GeometryCoordinates polyline;
         for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
-            polyline.emplace_back(ipoint * util::EXTENT / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f);
+            polyline.emplace_back(ipoint * util::EXTENT / numPoints,
+                                  std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f);
         }
-        
+
         gfx::PolylineGeneratorOptions options;
         options.beginCap = style::LineCapType::Round;
         options.endCap = style::LineCapType::Round;
         options.joinType = style::LineJoinType::Round;
-        
-        for (auto index {0}; index <  numLines; ++index) {
-            for(auto &p : polyline) {
+
+        for (auto index{0}; index < numLines; ++index) {
+            for (auto& p : polyline) {
                 p.y += util::EXTENT / numLines;
             }
-            
+
             // set property values
             interface.setColor(colors[index]);
             interface.setBlur(blurs[index]);
@@ -65,17 +69,16 @@ public:
             interface.setGapWidth(gapWidths[index]);
             interface.setOffset(offsets[index]);
             interface.setWidth(widths[index]);
-            
+
             // add polyline
             interface.addPolyline(polyline, options);
         }
-        
+
         // finish
         interface.finish();
     }
 
-    void deinitialize() override {
-    }
+    void deinitialize() override {}
 };
 
 TEST(CustomDrawableLayer, Basic) {
