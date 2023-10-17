@@ -44,7 +44,7 @@ jobs:
       - name: List changed files
         if: steps.changed-files.outputs.linux_any_changed == 'true'  
         run: |
-          echo "Changed file(s): ${{ steps.changed-files.outputs.ios_all_changed_files }}"
+          echo "Changed file(s): ${{ steps.changed-files.outputs.linux_all_changed_files }}"
 
   linux-build-and-test:
     if: needs.pre_job.outputs.should_skip != 'true'
