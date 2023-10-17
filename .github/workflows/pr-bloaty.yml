@@ -36,7 +36,7 @@ jobs:
       - name: Compile Bloaty
         run: |
           git clone https://github.com/google/bloaty.git
-          cmake -B bloaty/build -G Ninja -S bloaty
+          cmake -B bloaty/build -S bloaty
           cmake --build bloaty/build
 
       - name: Download legacy and main mbgl-render
