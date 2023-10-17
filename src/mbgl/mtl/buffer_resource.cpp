@@ -1,6 +1,7 @@
 #include <mbgl/mtl/buffer_resource.hpp>
 
 #include <Metal/MTLDevice.hpp>
+#include <Metal/MTLHeap.hpp>
 #include <algorithm>
 
 namespace mbgl {
@@ -13,6 +14,15 @@ BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size
         buffer = NS::TransferPtr(device->newBuffer(data, static_cast<NS::UInteger>(size), usage));
     } else {
         buffer = NS::TransferPtr(device->newBuffer(static_cast<NS::UInteger>(size), usage));
+    }
+}
+
+BufferResource::BufferResource(MTLDevicePtr device_, MTLHeapPtr heap, const void* data, std::size_t size, MTL::ResourceOptions usage_)
+    : device(std::move(device_)),
+      usage(usage_) {
+    buffer = NS::TransferPtr(heap->newBuffer(static_cast<NS::UInteger>(size), usage));
+    if (data && size) {
+        update(data, size, 0);
     }
 }
 

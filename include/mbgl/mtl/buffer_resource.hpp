@@ -20,6 +20,7 @@ public:
         @param usage A `MTL::ResourceOptions` value.  Currently, only `ResourceStorageModeShared` is supported.
      */
     BufferResource(MTLDevicePtr device, const void* raw, std::size_t size, MTL::ResourceOptions usage);
+    BufferResource(MTLDevicePtr device, MTLHeapPtr heap, const void* raw, std::size_t size, MTL::ResourceOptions usage);
     BufferResource(const BufferResource&);
     BufferResource(BufferResource&&);
     BufferResource& operator=(BufferResource&&);

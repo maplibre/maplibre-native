@@ -138,6 +138,7 @@ private:
     const gfx::Renderable* stencilStateRenderable = nullptr;
 
     gfx::RenderingStats stats;
+    MTLHeapPtr heap;
 };
 
 } // namespace mtl

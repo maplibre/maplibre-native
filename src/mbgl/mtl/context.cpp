@@ -38,7 +38,12 @@ constexpr uint32_t maximumVertexBindingCount = 31;
 Context::Context(RendererBackend& backend_)
     : gfx::Context(mtl::maximumVertexBindingCount),
       backend(backend_),
-      stats() {}
+      stats() {
+    MTLHeapDescriptorPtr heapDescriptor = NS::TransferPtr(MTL::HeapDescriptor::alloc()->init());
+    heapDescriptor->setSize(200000000);
+    heapDescriptor->setStorageMode(MTL::StorageModeShared);
+    heap = NS::TransferPtr(backend.getDevice()->newHeap(heapDescriptor.get()));
+}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
@@ -52,7 +57,8 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
 }
 
 BufferResource Context::createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const {
-    return {backend.getDevice(), data, size, MTL::ResourceStorageModeShared};
+    //return {backend.getDevice(), data, size, MTL::ResourceStorageModeShared};
+    return {backend.getDevice(), heap, data, size, MTL::ResourceStorageModeShared};
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
