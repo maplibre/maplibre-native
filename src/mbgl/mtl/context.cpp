@@ -144,6 +144,10 @@ MTLSamplerStatePtr Context::createMetalSamplerState(MTLSamplerDescriptorPtr samp
     return NS::TransferPtr(backend.getDevice()->newSamplerState(samplerDescriptor.get()));
 }
 
+void Context::performCleanup() {
+    clipMaskUniformsBufferUsed = false;
+}
+
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
@@ -311,19 +315,22 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Create a buffer for the UBO data.
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
     const auto bufferSize = tileUBOs.size() * uboSize;
-    if (!clipMaskUniformsBuffer || clipMaskUniformsBuffer.getSizeInBytes() < bufferSize) {
-        clipMaskUniformsBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
-        if (!clipMaskUniformsBuffer) {
+
+    BufferResource tempBuffer;
+    auto& uboBuffer = clipMaskUniformsBufferUsed ? tempBuffer : clipMaskUniformsBuffer;
+    clipMaskUniformsBufferUsed = true;
+    if (!uboBuffer || uboBuffer.getSizeInBytes() < bufferSize) {
+        uboBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
+        if (!uboBuffer) {
             return false;
         }
     } else {
-        clipMaskUniformsBuffer.update(tileUBOs.data(), bufferSize, /*offset=*/0);
+        uboBuffer.update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
     encoder->setCullMode(MTL::CullModeNone);
     encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
-    encoder->setVertexBuffer(
-        clipMaskUniformsBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
+    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,

@@ -144,21 +144,32 @@ void PaintParameters::clearStencil() {
     tileClippingMaskIDs.clear();
 
 #if MLN_RENDER_BACKEND_METAL
+    auto& mtlContext = static_cast<mtl::Context&>(context);
+
     // Metal doesn't have an equivalent of `glClear`, so we clear the buffer by drawing zero to (0:0,0)
-    static const std::set<UnwrappedTileID> ids{{0, 0, 0}};
-    renderTileClippingMasks(ids.cbegin(), ids.cend(), &unwrapIdentity, /*clear=*/true);
-#else
+#if !defined(NDEBUG)
+    const auto debugGroup = renderPass->createDebugGroup("tile-clip-mask-clear");
+#endif
+
+    const std::vector<shaders::ClipUBO> tileUBO = {
+        shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile({0, 0, 0})),
+                         /*.stencil_ref=*/0,
+                         /*.pad=*/0,
+                         0,
+                         0}};
+    mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+#else // !MLN_RENDER_BACKEND_METAL
     context.clearStencilBuffer(0b00000000);
 #endif
 }
 
 #if MLN_LEGACY_RENDERER
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), &unwrapRenderTiles, /*clear=*/false);
+    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), &unwrapRenderTiles);
 }
 #else  // !MLN_LEGACY_RENDERER
 void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
-    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), &unwrapIdentity, /*clear=*/false);
+    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), &unwrapIdentity);
 }
 #endif // MLN_LEGACY_RENDERER
 
@@ -169,23 +180,21 @@ void PaintParameters::clearTileClippingMasks() {
 }
 
 template <typename TIter>
-void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap, bool clear) {
+void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap) {
     if (!renderPass) {
         assert(false);
         return;
     }
 
-    if (!clear) {
-        if (tileIDsCovered(beg, end, unwrap, tileClippingMaskIDs)) {
-            // The current stencil mask is for this source already; no need to draw another one.
-            return;
-        }
+    if (tileIDsCovered(beg, end, unwrap, tileClippingMaskIDs)) {
+        // The current stencil mask is for this source already; no need to draw another one.
+        return;
+    }
 
-        const auto count = std::distance(beg, end);
-        if (nextStencilID + count > maxStencilValue) {
-            // we'll run out of fresh IDs so we need to clear and start from scratch
-            clearStencil();
-        }
+    const auto count = std::distance(beg, end);
+    if (nextStencilID + count > maxStencilValue) {
+        // we'll run out of fresh IDs so we need to clear and start from scratch
+        clearStencil();
     }
 
 #if MLN_RENDER_BACKEND_METAL
@@ -194,16 +203,14 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
     for (auto i = beg; i != end; ++i) {
         const auto& tileID = unwrap(*i);
 
-        const int32_t stencilID = clear ? 0 : nextStencilID;
-        if (!clear) {
-            const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
-            if (result.second) {
-                // inserted
-                nextStencilID++;
-            } else {
-                // already present
-                continue;
-            }
+        const int32_t stencilID = nextStencilID;
+        const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
+        if (result.second) {
+            // inserted
+            nextStencilID++;
+        } else {
+            // already present
+            continue;
         }
 
         if (tileUBOs.empty()) {

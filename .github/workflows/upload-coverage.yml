@@ -1,0 +1,29 @@
+name: upload-coverage
+
+on:
+  workflow_run:
+    workflows: [linux-ci]
+    types:
+      - completed
+
+jobs:
+  upload-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: coverage-report
+          expect-files: "_coverage_report.dat"
+
+      - name: Upload coverage report
+        if: '!cancelled()'
+        uses: codecov/codecov-action@v3
+        with:
+          override_commit: ${{ github.event.workflow_run.head_sha }}
+          override_pr: ${{ github.event.workflow_run.pull_requests[0].number }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: "_coverage_report.dat"
+          fail_ci_if_error: true
+          verbose: true
