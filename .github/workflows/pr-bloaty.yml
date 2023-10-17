@@ -1,0 +1,50 @@
+
+
+name: pr-bloaty
+
+on:
+  workflow_run:
+    workflows: [linux-ci]
+    types:
+      - completed
+env:
+  # built with commit d38709084a9865fe0bb8300aec70ebf8243b3d43
+  # in the future we should probably use whatever was built last in main
+  legacy_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render
+
+permissions:
+  pull-requests: write
+
+jobs:
+  pr-bloaty:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: mbgl-render
+          expect-files: "mbgl-render"
+
+      - name: Download old mbgl-render
+        run: |
+          wget -O mbgl-render-legacy "$legacy_download_url"
+
+      - name: Run Bloaty McBloatface on an ELF file
+        uses: carlosperate/bloaty-action@v1
+        with:
+          bloaty-args: mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff.txt
+
+      - name: Prepare Bloaty message
+        run: |
+          {
+            echo "# Bloaty Results 🐋"
+            echo ""
+            echo '```'
+            cat tlus_diff.txt
+            echo '```'
+          } >> message.md
+
+      - name: Leave a comment with Bloaty results
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: bloaty
+          path: message.md
