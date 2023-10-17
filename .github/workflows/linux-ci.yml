@@ -97,7 +97,7 @@ jobs:
       - name: Build mbgl-render
         if: matrix.renderer == 'drawable'
         run: |
-          cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -B build-size -GNinja -DCMAKE_BUILD_TYPE=MinSizeRel -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_DRAWABLE_RENDERER=ON -DCMAKE_CXX_FLAGS="-Oz -g"
+          cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -B build-size -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_DRAWABLE_RENDERER=ON
           cmake --build build-size --target mbgl-render
 
       - name: Upload mbgl-render
