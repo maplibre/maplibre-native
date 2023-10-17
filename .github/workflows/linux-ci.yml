@@ -150,6 +150,9 @@ jobs:
       - name: Run expression test
         run: build/expression-test/mbgl-expression-test
 
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
   linux-coverage:
     runs-on: ubuntu-22.04
     steps:
@@ -199,9 +202,6 @@ jobs:
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}
-  
-      - if: github.event_name == 'pull_request'
-        uses: ./.github/actions/save-pr-number
 
   linux-ci-result:
     name: Linux CI Result
