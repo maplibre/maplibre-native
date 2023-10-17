@@ -9,8 +9,8 @@ on:
       - completed
 env:
   # built with commit d38709084a9865fe0bb8300aec70ebf8243b3d43
-  # in the future we should probably use whatever was built last in main
-  legacy_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render
+  legacy_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-legacy
+  main_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-main
 
 permissions:
   pull-requests: write
@@ -19,30 +19,40 @@ jobs:
   pr-bloaty:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: mbgl-render
           expect-files: "mbgl-render"
 
-      - name: Download old mbgl-render
+      - name: Download legacy and main mbgl-render
         run: |
           wget -O mbgl-render-legacy "$legacy_download_url"
+          wget -O mbgl-render-main "$main_download_url"
 
-      - name: Run Bloaty McBloatface on an ELF file
+      - name: Run Bloaty McBloatface on legacy
         uses: carlosperate/bloaty-action@v1
+        id: bloaty-legacy
         with:
-          bloaty-args: mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff.txt
+          bloaty-args: mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits
+
+      - name: Run Bloaty McBloatface on main
+        uses: carlosperate/bloaty-action@v1
+        id: bloaty-main
+        with:
+          bloaty-args: mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits
 
       - name: Prepare Bloaty message
         run: |
           {
             echo "# Bloaty Results 🐋"
-            echo ""
+            echo '<details><summary>Compared to d38709084a9865fe0bb8300aec70ebf8243b3d43</summary>'
             echo '```'
-            cat tlus_diff.txt
+            ${{ steps.bloaty-legacy.outputs.bloaty-output }}
+            echo '```</details>'
+            echo '<details><summary>Compared to main</summary>'
             echo '```'
+            ${{ steps.bloaty-main.outputs.bloaty-output }}
+            echo '```</details>'
           } >> message.md
 
       - name: Leave a comment with Bloaty results
