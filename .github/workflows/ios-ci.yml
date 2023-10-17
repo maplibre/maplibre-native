@@ -49,6 +49,18 @@ jobs:
               - '.bazelrc'
               - '.bazelversion'
 
+
+      - name: Run step if test file(s) change
+        if: steps.changed-files-yaml.outputs.ios_any_changed == 'true'  
+        run: |
+          echo "One or more iOS file(s) has changed."
+          echo "List all the files that have changed: ${{ steps.changed-files-yaml.outputs.test_all_changed_files }}"
+
+      - name: Skipping
+        run: |
+          echo "skipping ${{ steps.changed-files-yaml.outputs.ios_any_changed }}"
+
+      
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
