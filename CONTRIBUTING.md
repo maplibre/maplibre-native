@@ -37,7 +37,7 @@ If you want to contribute code:
 
 4. Prefix your commit messages with the platform(s) your changes affect, e.g. `[ios]`.
 
-Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/ios/platform/macos/DEVELOPING.md).
+Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/macos/DEVELOPING.md).
 
 ## Design Proposals
 
