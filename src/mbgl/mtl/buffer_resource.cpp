@@ -17,7 +17,8 @@ BufferResource::BufferResource(MTLDevicePtr device_, const void* data, std::size
     }
 }
 
-BufferResource::BufferResource(MTLDevicePtr device_, MTLHeapPtr heap, const void* data, std::size_t size, MTL::ResourceOptions usage_)
+BufferResource::BufferResource(
+    MTLDevicePtr device_, MTLHeapPtr heap, const void* data, std::size_t size, MTL::ResourceOptions usage_)
     : device(std::move(device_)),
       usage(usage_) {
     buffer = NS::TransferPtr(heap->newBuffer(static_cast<NS::UInteger>(size), usage));

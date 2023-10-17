@@ -57,7 +57,7 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
 }
 
 BufferResource Context::createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const {
-    //return {backend.getDevice(), data, size, MTL::ResourceStorageModeShared};
+    // return {backend.getDevice(), data, size, MTL::ResourceStorageModeShared};
     return {backend.getDevice(), heap, data, size, MTL::ResourceStorageModeShared};
 }
 
