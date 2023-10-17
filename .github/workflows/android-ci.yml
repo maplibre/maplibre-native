@@ -74,11 +74,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.14
-        with:
-          cmake-version: "3.19.x"
-
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
       - uses: actions/setup-java@v3
@@ -112,7 +107,7 @@ jobs:
           cache-name: gradle-v1
         with:
           path: ~/.gradle
-          key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
+          key: ${{ env.cache-name }}-${{ hashFiles('platform/android/gradle/dependencies.gradle') }}-${{ hashFiles('platform/android/build.gradle') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             - ${{ env.cache-name }}
 

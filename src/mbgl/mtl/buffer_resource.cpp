@@ -29,6 +29,13 @@ BufferResource::BufferResource(BufferResource&& other)
       buffer(std::move(other.buffer)),
       usage(other.usage) {}
 
+BufferResource& BufferResource::operator=(BufferResource&& other) {
+    device = std::move(other.device);
+    buffer = std::move(other.buffer);
+    usage = other.usage;
+    return *this;
+}
+
 void BufferResource::update(const void* data, std::size_t size, std::size_t offset) {
     assert(buffer && (data || size == 0));
     if (buffer && data && size > 0) {

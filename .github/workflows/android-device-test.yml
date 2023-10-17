@@ -17,11 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./.github/actions/download-workflow-run-artifact
-        with:
-          artifact-name: ${{ matrix.test.artifactName }}
-          expect-files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
-
       - name: Generate token
         id: generate_token
         uses: tibdex/github-app-token@v2
@@ -38,7 +33,18 @@ jobs:
           name: ${{ matrix.test.name }}
           sha: ${{ github.event.workflow_run.head_sha }}
 
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: ${{ matrix.test.artifactName }}
+
+      - name: Check if test files exist (otherwise the parent workflow was skipped)
+        id: check_files
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
+
       - uses: ./.github/actions/aws-device-farm-run
+        if: steps.check_files.outputs.files_exists == 'true'
         with:
           name: ${{ matrix.test.name }}
           appType: ANDROID_APP
