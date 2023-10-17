@@ -31,12 +31,18 @@ jobs:
           wget -O mbgl-render-legacy "$legacy_download_url"
           wget -O mbgl-render-main "$main_download_url"
 
+      - name: Get latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latest
+          ninjaVersion: latest
+
       # because Google is not making a release...
       # https://github.com/google/bloaty/issues/334
       - name: Compile Bloaty
         run: |
           git clone https://github.com/google/bloaty.git
-          cmake -B bloaty/build -S bloaty
+          cmake -B bloaty/build -G Ninja -S bloaty
           cmake --build bloaty/build
 
       - name: Download legacy and main mbgl-render
