@@ -10,7 +10,6 @@ runs:
           echo "${{ github.event.number }}" > ./pr_number
 
       - name: Upload pr_number
-        shell: bash
         uses: actions/upload-artifact@v3
         with:
           name: pr-number
