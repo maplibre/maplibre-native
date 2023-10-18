@@ -1,11 +1,4 @@
-#import <Foundation/Foundation.h>
-#import <CoreLocation/CoreLocation.h>
-#import <QuartzCore/QuartzCore.h>
-
-#import "MLNFoundation.h"
-#import "MLNStyleValue.h"
 #import "MLNStyleLayer.h"
-#import "MLNGeometry.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

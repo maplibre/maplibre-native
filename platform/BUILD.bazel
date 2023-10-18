@@ -15,11 +15,6 @@ objc_library(
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_opengl_srcs",
         ],
-    }) + select({
-        "//:legacy_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
-        ],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
@@ -180,6 +175,12 @@ objc_library(
             "//platform/darwin:app/LimeGreenStyleLayer.h",
             "//platform/darwin:app/LimeGreenStyleLayer.m",
         ],
+    }) + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:app/MLNCustomDrawableStyleLayer.h",
+            "//platform/darwin:app/MLNCustomDrawableStyleLayer.mm",
+        ],
     }),
     data = glob([
         "app/Assets.xcassets/**",
@@ -246,11 +247,6 @@ sh_binary(
         "//:metal_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
-        "//:legacy_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
         ],
     }),
     deps = [

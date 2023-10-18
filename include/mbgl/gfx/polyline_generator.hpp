@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/util/geometry.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>

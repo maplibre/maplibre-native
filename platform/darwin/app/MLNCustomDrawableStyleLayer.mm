@@ -1,18 +1,21 @@
 #import "MLNCustomDrawableStyleLayer.h"
-#import "MLNCustomDrawableStyleLayer_Private.h"
+//#import "MLNCustomDrawableStyleLayer_Private.h"
+//
+//#import "MLNMapView_Private.h"
+//#import "MLNStyle_Private.h"
+//#import "MLNStyleLayer_Private.h"
+//#import "MLNGeometry_Private.h"
 
-#import "MLNMapView_Private.h"
-#import "MLNStyle_Private.h"
-#import "MLNStyleLayer_Private.h"
-#import "MLNGeometry_Private.h"
+class MLNCustomDrawableLayerHost;
 
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/util/constants.hpp>
+namespace mbgl {
+    namespace style {
+        class CustomDrawableLayer;
+    }
+}
 
 #include <memory>
 #include <cmath>
-
-class MLNCustomDrawableLayerHost;
 
 @interface MLNCustomDrawableStyleLayer ()
 
@@ -35,6 +38,19 @@ class MLNCustomDrawableLayerHost;
 }
 
 @end
+
+#include <mbgl/style/layers/custom_drawable_layer.hpp>
+#include <mbgl/util/constants.hpp>
+
+namespace mbgl {
+    
+class CustomDrawableStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::CustomDrawableLayerFactory {
+    // LayerPeerFactory overrides.
+    LayerFactory* getCoreLayerFactory() final { return this; }
+    virtual MLNStyleLayer* createPeer(style::Layer*) final;
+};
+    
+}  // namespace mbgl
 
 class MLNCustomDrawableLayerHost : public mbgl::style::CustomDrawableLayerHost {
 public:
