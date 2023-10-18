@@ -6,6 +6,7 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/programs/fill_program.hpp>
+#include <mbgl/programs/line_program.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 
 #include <vector>
@@ -40,19 +41,23 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
+    using LineVertexVector = gfx::VertexVector<LineLayoutVertex>;
+    const std::shared_ptr<LineVertexVector> sharedLineVertices = std::make_shared<LineVertexVector>();
+    LineVertexVector& lineVertices = *sharedLineVertices;
+
+    using LineIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<LineIndexVector> sharedLineIndexes = std::make_shared<LineIndexVector>();
+    LineIndexVector& lineIndexes = *sharedLineIndexes;
+
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
-
-    using LineIndexVector = gfx::IndexVector<gfx::Lines>;
-    const std::shared_ptr<LineIndexVector> sharedLines = std::make_shared<LineIndexVector>();
-    LineIndexVector& lines = *sharedLines;
 
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
 
-    SegmentVector<FillAttributes> lineSegments;
+    SegmentVector<LineAttributes> lineSegments;
     SegmentVector<FillAttributes> triangleSegments;
 
 #if MLN_LEGACY_RENDERER

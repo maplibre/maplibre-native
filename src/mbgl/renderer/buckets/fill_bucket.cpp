@@ -4,6 +4,7 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/util/math.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -70,38 +71,35 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
             if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
         }
 
-        std::size_t startVertices = vertices.elements();
+        // generate outline
+        gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
+            lineVertices,
+            LineProgram::layoutVertex,
+            lineSegments,
+            [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
+                return Segment<LineAttributes>(vertexOffset, indexOffset);
+            },
+            [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+            lineIndexes);
+
+        gfx::PolylineGeneratorOptions options;
+        options.type = FeatureType::Polygon;
+        options.joinType = LineJoinType::Round;
 
         for (const auto& ring : polygon) {
-            std::size_t nVertices = ring.size();
-
-            if (nVertices == 0) continue;
-
-            if (lineSegments.empty() ||
-                lineSegments.back().vertexLength + nVertices > std::numeric_limits<uint16_t>::max()) {
-                lineSegments.emplace_back(vertices.elements(), lines.elements());
-            }
-
-            auto& lineSegment = lineSegments.back();
-            assert(lineSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-            const auto lineIndex = static_cast<uint16_t>(lineSegment.vertexLength);
-
-            vertices.emplace_back(FillProgram::layoutVertex(ring[0]));
-            lines.emplace_back(static_cast<uint16_t>(lineIndex + nVertices - 1), lineIndex);
-
-            for (std::size_t i = 1; i < nVertices; i++) {
-                vertices.emplace_back(FillProgram::layoutVertex(ring[i]));
-                lines.emplace_back(static_cast<uint16_t>(lineIndex + i - 1), static_cast<uint16_t>(lineIndex + i));
-            }
-
-            lineSegment.vertexLength += nVertices;
-            lineSegment.indexLength += nVertices * 2;
+            generator.generate(ring, options);
         }
 
+        // generate fill
+        std::size_t startVertices = vertices.elements();
+        for (const auto& ring : polygon) {
+            for (auto &p : ring) {
+                vertices.emplace_back(FillProgram::layoutVertex(p));
+            }
+        }
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-
-        std::size_t nIndicies = indices.size();
-        assert(nIndicies % 3 == 0);
+        std::size_t nIndices = indices.size();
+        assert(nIndices % 3 == 0);
 
         if (triangleSegments.empty() ||
             triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
@@ -112,13 +110,13 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
         const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
-        for (std::size_t i = 0; i < nIndicies; i += 3) {
+        for (std::size_t i = 0; i < nIndices; i += 3) {
             triangles.emplace_back(
                 triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
         }
 
         triangleSegment.vertexLength += totalVertices;
-        triangleSegment.indexLength += nIndicies;
+        triangleSegment.indexLength += nIndices;
     }
 
     for (auto& pair : paintPropertyBinders) {

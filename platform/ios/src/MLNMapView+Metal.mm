@@ -83,7 +83,7 @@ public:
 
         // Un-comment for synchronous, which can help troubleshoot rendering problems,
         // particularly those related to resource tracking and multiple queued buffers.
-        //[commandBuffer waitUntilCompleted];
+        [commandBuffer waitUntilCompleted];
 
         commandBuffer = nil;
         commandBufferPtr.reset();

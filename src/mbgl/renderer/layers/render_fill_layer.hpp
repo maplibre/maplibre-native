@@ -26,6 +26,9 @@ public:
     ~RenderFillLayer() override;
 
 #if MLN_DRAWABLE_RENDERER
+    std::size_t removeAllDrawables() override;
+    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
+
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,
                 gfx::Context&,
@@ -69,6 +72,9 @@ private:
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
+    
+    LayerGroupBasePtr outlineLayerGroup;
+
 #endif
 };
 
