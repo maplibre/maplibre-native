@@ -12,7 +12,7 @@ class RendererObserver;
 class UpdateParameters;
 
 /// The RenderFrontend is the bridge between the Map and
-/// platform used to update and observer the Renderer
+/// platform used to update and observe the Renderer
 ///
 /// It hides any threading specifics and always replies on
 /// the original thread.

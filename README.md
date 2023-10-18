@@ -22,14 +22,14 @@ The documentation of MapLibre Native is a work in progress. To get an architectu
 
 ## Platforms
 
-- [⭐️ Android](platform/android/README.md) 
+- [⭐️ Android](platform/android/README.md)
 - [⭐️ iOS](platform/ios/README.md)
 - [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
 - [Node.js](platform/node/README.md)
 - [Qt](platform/qt/README.md)
 - [Windows](platform/windows/README.md)
-- [macOS](platform/ios/platform/macos/README.md)
+- [macOS](platform/macos/README.md)
 
 Platforms with a ⭐️ are **MapLibre Core Projects** and have a substantial amount of financial resources allocated to them. Learn about the different [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md#project-tiers).
 
@@ -50,7 +50,7 @@ To contribute to MapLibre Native, see [`CONTRIBUTING.md`](CONTRIBUTING.md) and (
 
 ### Getting Involved
 
-Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/ 
+Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/
 
 ### Bounties 💰
 

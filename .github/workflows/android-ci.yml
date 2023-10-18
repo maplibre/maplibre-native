@@ -1,7 +1,6 @@
 name: android-ci
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -21,27 +20,16 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_changed != 'true' }}
     steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
+      - uses: actions/checkout@v4
+
+      - name: Get all Android files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@v39
         with:
-          paths: |
-            ["CMakeLists.txt",
-            "platform/android/**",
-            ".github/workflows/android-ci.yml",
-            "bin/**",
-            "expression-test/**",
-            "include/**",
-            "metrics/**",
-            "platform/default/**",
-            "render-test/**",
-            "scripts/**",
-            "src/**",
-            "test/**",
-            "vendor/**",
-            ".gitmodules",
-            "!**/*.md"]
+          files_yaml_from_source_file: .github/changed-files.yml
 
   android-build:
     runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}

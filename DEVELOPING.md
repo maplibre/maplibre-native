@@ -18,7 +18,7 @@ To check that the output of the rendering is correct, we compare actual rendered
 The directory sturcture of the render tests looks like:
 
 ```
-maetrics/
+metrics/
   integration/
     render-tests/
       <name-of-style-spec-feature>/
