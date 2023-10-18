@@ -18,9 +18,7 @@ using namespace shaders;
 
 static const StringIdentity idHeatmapTextureDrawableUBOName = stringIndexer().get("HeatmapTextureDrawableUBO");
 
-void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup,
-                                         [[maybe_unused]] const RenderTree& renderTree,
-                                         const PaintParameters& parameters) {
+void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {

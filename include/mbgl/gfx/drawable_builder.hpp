@@ -3,6 +3,9 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/style/types.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 
 #include <array>
 #include <memory>
@@ -154,14 +157,6 @@ public:
     /// Clear the tweaker collection
     void clearTweakers() { tweakers.clear(); }
 
-    /// Add a triangle
-    void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
-    /// Add another triangle based on the previous two points
-    void appendTriangle(int16_t x0, int16_t y0);
-
-    /// Add a rectangle consisting of two triangles
-    void addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
-
     /// A set of attribute values to be added for each vertex
     void setVertexAttributes(const VertexAttributeArray& value);
     void setVertexAttributes(VertexAttributeArray&&);
@@ -180,6 +175,17 @@ public:
     /// Set shared indices and segments
     void setSegments(gfx::DrawMode, gfx::IndexVectorBasePtr, const SegmentBase*, std::size_t segmentCount);
 
+    /// Create a segment wrapper
+    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
+
+    /// Add a triangle
+    void addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2);
+    /// Add another triangle based on the previous two points
+    void appendTriangle(int16_t x0, int16_t y0);
+
+    /// Add a rectangle consisting of two triangles
+    void addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1);
+
     /// Add lines based on existing vertices
     void addLines(const std::vector<uint16_t>& indexes,
                   std::size_t indexOffset,
@@ -192,8 +198,8 @@ public:
                       std::size_t indexLength,
                       std::size_t baseIndex = 0);
 
-    /// Create a segment wrapper
-    virtual std::unique_ptr<Drawable::DrawSegment> createSegment(gfx::DrawMode, SegmentBase&&) = 0;
+    /// Add a polyline. If the last point equals the first it will be closed, otherwise open
+    void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
 protected:
     std::size_t curVertexCount() const;
@@ -224,7 +230,7 @@ protected:
     gfx::Drawable::Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
 
-    struct Impl;
+    class Impl;
     std::unique_ptr<Impl> impl;
 };
 

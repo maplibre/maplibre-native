@@ -406,6 +406,7 @@ platform::GLenum Enum<gfx::TexturePixelType>::sizedFor<>(const gfx::TexturePixel
                 default:
                     break;
             }
+            break;
         }
     }
 

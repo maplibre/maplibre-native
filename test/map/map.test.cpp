@@ -21,6 +21,7 @@
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
+#include <mbgl/style/layers/fill_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
@@ -1675,4 +1676,41 @@ TEST(Map, ResourceError) {
         auto error = std::current_exception(); // captur
         EXPECT_EQ(mbgl::util::toString(error), "Font file Server failed");
     }
+}
+
+TEST(Map, StencilOverflow) {
+    MapTest<> test;
+
+    const auto& backend = test.frontend.getBackend();
+    gfx::BackendScope scope{*backend};
+
+    auto& style = test.map.getStyle();
+    style.loadJSON("{}");
+
+    // Create a tile source with small tiles that produces enough tiles to
+    // exceed the stencil ID limit and causes a clearing of the stencil buffer.
+    CustomGeometrySource::Options options;
+    options.tileOptions.tileSize = util::tileSize_I / 32;
+    options.fetchTileFunction = [&](const CanonicalTileID& tileID) {
+        if (auto* customSrc = static_cast<CustomGeometrySource*>(style.getSource("custom"))) {
+            customSrc->setTileData(tileID, {});
+        }
+    };
+
+    style.addSource(std::make_unique<CustomGeometrySource>("custom", std::move(options)));
+    style.addLayer(std::make_unique<style::FillLayer>("fill", "custom"));
+
+    test.map.jumpTo(CameraOptions().withZoom(5));
+    test.frontend.render(test.map);
+
+    // In drawable builds, no drawables are built because no bucket/tiledata is available.
+#if !MLN_DRAWABLE_RENDERER
+    // TODO: Collect stats on Metal context
+#if MLN_RENDER_BACKEND_OPENGL
+    const auto& context = static_cast<const gl::Context&>(backend->getContext());
+    ASSERT_LT(0, context.renderingStats().stencilClears);
+#endif // MLN_RENDER_BACKEND_OPENGL
+#endif // !MLN_DRAWABLE_RENDERER
+
+    // TODO: confirm that the stencil masking actually worked
 }

@@ -26,7 +26,10 @@ class GeoJSONVTData final : public GeoJSONData {
     void getTile(const CanonicalTileID& id, const std::function<void(TileFeatures)>& fn) final {
         assert(fn);
         scheduler->scheduleAndReplyValue(
-            [id, impl = this->impl]() -> TileFeatures { return impl->getTile(id.z, id.x, id.y).features; }, fn);
+            [id, geoJSONVT_impl = this->impl]() -> TileFeatures {
+                return geoJSONVT_impl->getTile(id.z, id.x, id.y).features;
+            },
+            fn);
     }
 
     Features getChildren(const std::uint32_t) final { return {}; }

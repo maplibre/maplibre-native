@@ -91,8 +91,22 @@ jobs:
           CI: 1
         run: |
           cmake --version
-          CI=1 cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
           cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+
+      - name: Build mbgl-render
+        if: matrix.renderer == 'drawable'
+        run: |
+          cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -B build-size -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_DRAWABLE_RENDERER=ON
+          cmake --build build-size --target mbgl-render
+
+      - name: Upload mbgl-render
+        if: matrix.renderer == 'drawable'
+        uses: actions/upload-artifact@v3
+        with:
+          name: mbgl-render
+          path: |
+            build-size/bin/mbgl-render
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
@@ -171,15 +185,13 @@ jobs:
             --test_output=errors --local_test_jobs=1 \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
             //test:core //render-test:render-test //expression-test:test
+          echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        if: '!cancelled()'
-        uses: codecov/codecov-action@v3
+        uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ env.coverage_report }}
-          fail_ci_if_error: true
-          verbose: true
+          name: coverage-report
+          path: ${{ env.coverage_report }}
 
   linux-ci-result:
     name: Linux CI Result

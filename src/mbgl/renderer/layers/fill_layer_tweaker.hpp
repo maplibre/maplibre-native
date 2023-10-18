@@ -18,7 +18,7 @@ public:
 public:
     ~FillLayerTweaker() override = default;
 
-    void execute(LayerGroupBase&, const RenderTree&, const PaintParameters&) override;
+    void execute(LayerGroupBase&, const PaintParameters&) override;
 
     static const StringIdentity idFillTilePropsUBOName;
     static const StringIdentity idFillInterpolateUBOName;

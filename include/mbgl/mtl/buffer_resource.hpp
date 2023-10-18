@@ -22,6 +22,7 @@ public:
     BufferResource(MTLDevicePtr device, const void* raw, std::size_t size, MTL::ResourceOptions usage);
     BufferResource(const BufferResource&);
     BufferResource(BufferResource&&);
+    BufferResource& operator=(BufferResource&&);
 
     void update(const void* data, std::size_t size, std::size_t offset);
 

@@ -1,0 +1,87 @@
+
+
+name: pr-bloaty
+
+on:
+  workflow_run:
+    workflows: [linux-ci]
+    types:
+      - completed
+env:
+  # built with commit d38709084a9865fe0bb8300aec70ebf8243b3d43
+  legacy_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-legacy
+  main_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-main
+  bloaty_sha: 8be8b448550b37c978e8defd9d421c0464c52cc7
+
+permissions:
+  pull-requests: write
+
+jobs:
+  pr-bloaty:
+    if: github.event.workflow_run.pull_requests.length
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: mbgl-render
+          expect-files: "mbgl-render"
+
+      - name: Download legacy and main mbgl-render
+        run: |
+          wget -O mbgl-render-legacy "$legacy_download_url"
+          wget -O mbgl-render-main "$main_download_url"
+
+      - name: Get latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latest
+          ninjaVersion: latest
+
+      # because Google is not making a release...
+      # https://github.com/google/bloaty/issues/334
+      - name: Compile Bloaty
+        run: |
+          git clone https://github.com/google/bloaty.git
+          git checkout "$bloaty_sha"
+          cmake -B bloaty/build -G Ninja -S bloaty
+          cmake --build bloaty/build
+
+      - name: Cache Bloaty
+        uses: actions/cache@v3
+        with:
+          path: bloaty/build/bloaty
+          key: bloaty-${{ env.bloaty_sha }}
+
+      - name: Download legacy and main mbgl-render
+        run: |
+          wget -O mbgl-render-legacy "$legacy_download_url"
+          wget -O mbgl-render-main "$main_download_url"
+
+      - name: Run Bloaty McBloatface on legacy
+        run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
+
+      - name: Run Bloaty McBloatface on main
+        run: bloaty/build/bloaty mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits > tlus_diff_main.txt
+
+      - name: Prepare Bloaty message
+        run: |
+          {
+            echo "# Bloaty Results 🐋"
+            echo '<details><summary>Compared to d38709084a9865fe0bb8300aec70ebf8243b3d43</summary>'
+            echo '```'
+            cat tlus_diff_legacy.txt
+            echo '```</details>'
+            echo '<details><summary>Compared to main</summary>'
+            echo '```'
+            cat tlus_diff_main.txt
+            echo '```</details>'
+          } >> message.md
+
+      - name: Leave a comment with Bloaty results
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          header: bloaty
+          path: message.md

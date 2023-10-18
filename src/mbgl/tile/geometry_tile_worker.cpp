@@ -387,6 +387,11 @@ void GeometryTileWorker::parse() {
 
     featureIndex = std::make_unique<FeatureIndex>(*data ? (*data)->clone() : nullptr);
 
+    // Avoid small reallocations for populated cells.
+    // If we had a total feature count, this could be based on that and the cell count.
+    constexpr auto estimatedElementsPerCell = 8;
+    featureIndex->reserve(estimatedElementsPerCell);
+
     GlyphDependencies glyphDependencies;
     ImageDependencies imageDependencies;
 

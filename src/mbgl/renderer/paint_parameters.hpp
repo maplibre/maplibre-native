@@ -95,8 +95,11 @@ public:
 
     // Stencil handling
 public:
+#if MLN_LEGACY_RENDERER
     void renderTileClippingMasks(const RenderTiles&);
+#else
     void renderTileClippingMasks(const std::set<UnwrappedTileID>&);
+#endif // MLN_LEGACY_RENDERER
 
     /// Clear any tile masks and the stencil buffer, if necessary
     void clearTileClippingMasks();
@@ -116,9 +119,9 @@ public:
 
 private:
     template <typename TIter>
-    using GetTileIDFunc = std::function<const UnwrappedTileID&(const typename TIter::value_type&)>;
+    using GetTileIDFunc = const UnwrappedTileID& (*)(const typename TIter::value_type&);
     template <typename TIter>
-    void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter>&&, bool clear);
+    void renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap);
 
     // This needs to be an ordered map so that we have the same order as the renderTiles.
     std::map<UnwrappedTileID, int32_t> tileClippingMaskIDs;
