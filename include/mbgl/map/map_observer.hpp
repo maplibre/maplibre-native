@@ -42,7 +42,8 @@ public:
         RenderMode mode;
         bool needsRepaint; // In continous mode, shows that there are ongoig transitions.
         bool placementChanged;
-        double frameTime;
+        double frameEncodingTime;
+        double frameRenderingTime;
     };
 
     virtual void onCameraWillChange(CameraChangeMode) {}

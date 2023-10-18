@@ -110,9 +110,11 @@ NSDate* const currentDate = [NSDate date];
 size_t idx = 0;
 enum class State { None, WaitingForAssets, WarmingUp, Benchmarking } state = State::None;
 int frames = 0;
-double totalFrameTime = 0;
+double totalFrameEncodingTime = 0;
+double totalFrameRenderingTime = 0;
 std::chrono::steady_clock::time_point started;
-std::vector<std::pair<std::string, double> > result;
+std::vector<std::pair<std::string, double> > resultEncodingTime;
+std::vector<std::pair<std::string, double> > resultRenderingTime;
 
 static const int warmupDuration = 20; // frames
 static const int benchmarkDuration = 200; // frames
@@ -133,19 +135,31 @@ namespace  mbgl {
     } else {
         // Do nothing. The benchmark is completed.
         NSLog(@"Benchmark completed.");
-        NSLog(@"Result:");
-        double totalFrameTime = 0;
+        
+        NSLog(@"Result Encoding:");
         size_t colWidth = 0;
-        for (const auto& row : result) {
+        for (const auto& row : resultEncodingTime) {
             colWidth = std::max(row.first.size(), colWidth);
         }
-        for (const auto& row : result) {
+        
+        double totalFrameEncodingTime = 0;
+        for (const auto& row : resultEncodingTime) {
             NSLog(@"| %-*s | %4.1f ms | %4.1f fps |", int(colWidth), row.first.c_str(), 1e3 * row.second, 1.0 / row.second);
-            totalFrameTime += row.second;
+            totalFrameEncodingTime += row.second;
         }
 
-        NSLog(@"Average frame time: %4.1f ms", totalFrameTime * 1e3 / result.size());
-        NSLog(@"Average FPS: %4.1f", result.size() / totalFrameTime);
+        NSLog(@"Average frame encoding time: %4.1f ms", totalFrameEncodingTime * 1e3 / resultEncodingTime.size());
+        NSLog(@"Average Encoding FPS: %4.1f", resultEncodingTime.size() / totalFrameEncodingTime);
+        
+        NSLog(@"Result Rendering:");
+        double totalFrameRenderingTime = 0;
+        for (const auto& row : resultRenderingTime) {
+            NSLog(@"| %-*s | %4.1f ms | %4.1f fps |", int(colWidth), row.first.c_str(), 1e3 * row.second, 1.0 / row.second);
+            totalFrameRenderingTime += row.second;
+        }
+
+        NSLog(@"Average frame rendering time: %4.1f ms", totalFrameRenderingTime * 1e3 / resultRenderingTime.size());
+        NSLog(@"Average Rendering FPS: %4.1f", resultRenderingTime.size() / totalFrameRenderingTime);
         
         // NSLog(@"Total uploads: %zu", mbgl::uploadCount);
         // NSLog(@"Total uploads with dirty vattr: %zu", mbgl::uploadVertextAttrsDirty);
@@ -174,12 +188,14 @@ namespace  mbgl {
 
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
                          fullyRendered:(__unused BOOL)fullyRendered
-                        frameTime:(double)frameTime
+                     frameEncodingTime:(double)frameEncodingTime
+                    frameRenderingTime:(double)frameRenderingTime
 {
     if (state == State::Benchmarking)
     {
         frames++;
-        totalFrameTime += frameTime;
+        totalFrameEncodingTime += frameEncodingTime;
+        totalFrameRenderingTime += frameRenderingTime;
         if (frames >= benchmarkDuration)
         {
             state = State::None;
@@ -187,10 +203,13 @@ namespace  mbgl {
             // Report FPS
             const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count();
             const auto wallClockFPS = double(frames * 1e6) / duration;
-            const auto frameTime = static_cast<double>(totalFrameTime) / frames;
-            const auto potentialFPS = 1.0 / frameTime;
-            result.emplace_back(mbgl::bench::locations[idx].name, frameTime);
-            NSLog(@"- Frame time: %.1f ms, FPS: %.1f (%.1f sync FPS)", frameTime * 1e3, potentialFPS, wallClockFPS);
+            const auto frameEncodingTime = static_cast<double>(totalFrameEncodingTime) / frames;
+            const auto frameRenderingTime = static_cast<double>(totalFrameRenderingTime) / frames;
+            const auto potentialEncondingFPS = 1.0 / frameEncodingTime;
+            const auto potentialRenderingFPS = 1.0 / frameRenderingTime;
+            resultEncodingTime.emplace_back(mbgl::bench::locations[idx].name, frameEncodingTime);
+            resultRenderingTime.emplace_back(mbgl::bench::locations[idx].name, frameRenderingTime);
+            NSLog(@"- Frame encoding time: %.1f ms, Encoding FPS: %.1f | Frame rendering time: %.1f ms, Rendering FPS: %.1f (%.1f sync FPS)", frameEncodingTime * 1e3, potentialEncondingFPS, frameRenderingTime * 1e3, potentialRenderingFPS, wallClockFPS);
 
             // Start benchmarking the next location.
             idx++;
@@ -207,7 +226,8 @@ namespace  mbgl {
         if (frames >= warmupDuration)
         {
             frames = 0;
-            totalFrameTime = 0;
+            totalFrameEncodingTime = 0;
+            totalFrameRenderingTime = 0;
             state = State::Benchmarking;
             started = std::chrono::steady_clock::now();
             NSLog(@"- Benchmarking for %d frames...", benchmarkDuration);
