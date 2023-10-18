@@ -11,6 +11,7 @@ env:
   # built with commit d38709084a9865fe0bb8300aec70ebf8243b3d43
   legacy_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-legacy
   main_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-main
+  bloaty_sha: 8be8b448550b37c978e8defd9d421c0464c52cc7
 
 permissions:
   pull-requests: write
@@ -20,6 +21,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
@@ -42,8 +46,16 @@ jobs:
       - name: Compile Bloaty
         run: |
           git clone https://github.com/google/bloaty.git
-          cmake -B bloaty/build -G Ninja -S bloaty
-          cmake --build bloaty/build
+          cd bloaty
+          git checkout "$bloaty_sha"
+          cmake -B build -G Ninja -S .
+          cmake --build build
+
+      - name: Cache Bloaty
+        uses: actions/cache@v3
+        with:
+          path: bloaty/build/bloaty
+          key: bloaty-${{ env.bloaty_sha }}
 
       - name: Download legacy and main mbgl-render
         run: |
@@ -73,5 +85,6 @@ jobs:
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@v2
         with:
+          number: ${{ steps.get-pr-number.outputs.pr-number }}
           header: bloaty
           path: message.md

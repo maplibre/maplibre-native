@@ -64,15 +64,6 @@ Finally, build:
 cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
 
-
-If you are rebuilding after time has passed.
-
-Then do:
-
-```bash
-make node
-```
-
 ## Testing
 
 To test the Node.js bindings:
@@ -80,7 +71,6 @@ To test the Node.js bindings:
 ```bash
 npm test
 ```
-
 
 ## Merging your pull request
 
