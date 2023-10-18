@@ -13,14 +13,18 @@ on:
 jobs:
   upload-render-test-result:
     runs-on: ubuntu-22.04
-    if: github.event.workflow_run.event == 'pull_request'
+    env:
+      html_filename: "linux-drawable.html"
     steps:
       - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
 
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: render-test-result
-          expect-files: "metrics/linux-gcc8-release-style.html"
+          expect-files: ${{ env.html_filename }}
   
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -32,14 +36,14 @@ jobs:
       - name: Upload render test results to S3
         id: upload_render_test_results
         run: |
-          aws s3 cp metrics/linux-gcc8-release-style.html \
-            s3://maplibre-native-test-artifacts/${{ github.run_id	}}-linux-gcc8-release-style.html \
+          aws s3 cp metrics/${{ env.html_filename }} \
+            s3://maplibre-native-test-artifacts/${{ github.run_id	}}-${{ env.html_filename }} \
             --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')"
 
       - name: 'Leave comment on PR with test results'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: render-test-result
-          number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          number: ${{ steps.get-pr-number.outputs.pr-number }}
           message: |
-            Render test results at https://maplibre-native-test-artifacts.s3.eu-central-1.amazonaws.com/${{ github.run_id }}-linux-gcc8-release-style.html
+            Render test results at https://maplibre-native-test-artifacts.s3.eu-central-1.amazonaws.com/${{ github.run_id }}-${{ env.html_filename }}
