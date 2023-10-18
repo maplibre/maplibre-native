@@ -46,9 +46,10 @@ jobs:
       - name: Compile Bloaty
         run: |
           git clone https://github.com/google/bloaty.git
+          cd bloaty
           git checkout "$bloaty_sha"
-          cmake -B bloaty/build -G Ninja -S bloaty
-          cmake --build bloaty/build
+          cmake -B build -G Ninja -S .
+          cmake --build build
 
       - name: Cache Bloaty
         uses: actions/cache@v3
