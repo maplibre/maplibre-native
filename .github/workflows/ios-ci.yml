@@ -24,7 +24,6 @@ jobs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_changed != 'true' }}
     steps:
       - uses: actions/checkout@v4
-        if: github.event_name == 'push'
 
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
