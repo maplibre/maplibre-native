@@ -19,25 +19,36 @@ jobs:
   pre_job:
     runs-on: ubuntu-22.04
     outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+      should_skip: github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_changed != 'true'
     steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
+      - uses: actions/checkout@v4
+        if: github.event_name == 'push'
+
+      - name: Get all Linux files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@v39
         with:
-          paths: |
-            ["src/**",
-            "test/**",
-            "render-test/**",
-            "expression-test/**",
-            "include/**",
-            ".github/workflows/linux-ci.yml",
-            "vendor/**",
-            "CMakeLists.txt",
-            "metrics/linux-gcc8-release-style.json",
-            "WORKSPACE",
-            "BUILD.bazel",
-            ".bazelrc",
-            ".bazelversion"]
+          files_yaml: |
+            linux:
+              - 'src/**'
+              - 'test/**'
+              - 'render-test/**'
+              - 'expression-test/**'
+              - 'include/**'
+              - '.github/workflows/linux-ci.yml'
+              - 'vendor/**'
+              - 'CMakeLists.txt'
+              - 'metrics/linux-gcc8-release-style.json'
+              - 'WORKSPACE'
+              - 'BUILD.bazel'
+              - '.bazelrc'
+              - '.bazelversion'
+
+      - name: List changed files
+        if: steps.changed-files.outputs.linux_any_changed == 'true'  
+        run: |
+          echo "Changed file(s): ${{ steps.changed-files.outputs.linux_all_changed_files }}"
 
   linux-build-and-test:
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -142,6 +153,9 @@ jobs:
 
       - name: Run expression test
         run: build/expression-test/mbgl-expression-test
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
 
   linux-coverage:
     runs-on: ubuntu-22.04
