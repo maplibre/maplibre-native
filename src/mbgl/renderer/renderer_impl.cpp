@@ -382,14 +382,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Ends the RenderPass
     parameters.renderPass.reset();
-    
+
     const auto startRendering = util::MonotonicTimer::now().count();
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
-    
+
     const auto encodingTime = renderTree.getElapsedTime() - renderingTime;
 
     observer->onDidFinishRenderingFrame(
