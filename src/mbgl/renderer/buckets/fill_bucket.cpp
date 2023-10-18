@@ -93,7 +93,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         // generate fill
         std::size_t startVertices = vertices.elements();
         for (const auto& ring : polygon) {
-            for (auto &p : ring) {
+            for (auto& p : ring) {
                 vertices.emplace_back(FillProgram::layoutVertex(p));
             }
         }

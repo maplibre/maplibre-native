@@ -477,7 +477,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return tileID && !hasRenderTile(*tileID);
         });
     }
-    
+
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -666,9 +666,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
-            
+
             const auto outlineShader = [&doOutline, &context, this]() -> gfx::ShaderProgramBasePtr {
-                if(doOutline){
+                if (doOutline) {
                     static const std::unordered_set<StringIdentity> linePropertiesAsUniforms{
                         stringIndexer().get("a_color"),
                         stringIndexer().get("a_blur"),
@@ -677,7 +677,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                         stringIndexer().get("a_offset"),
                         stringIndexer().get("a_width"),
                     };
-                    return std::static_pointer_cast<gfx::ShaderProgramBase>(outlineShaderGroup->getOrCreateShader(context, linePropertiesAsUniforms));
+                    return std::static_pointer_cast<gfx::ShaderProgramBase>(
+                        outlineShaderGroup->getOrCreateShader(context, linePropertiesAsUniforms));
                 }
                 return nullptr;
             }();
@@ -758,7 +759,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     gfx::Triangles(), bucket.sharedLineIndexes, bucket.lineSegments.data(), bucket.lineSegments.size());
 
                 auto tweaker = std::make_shared<OutlineDrawableTweaker>();
-                
+
                 // finish
                 outlineBuilder->flush();
                 for (auto& drawable : outlineBuilder->clearDrawables()) {

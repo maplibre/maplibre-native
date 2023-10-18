@@ -72,7 +72,7 @@ private:
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
-    
+
     LayerGroupBasePtr outlineLayerGroup;
 
 #endif
