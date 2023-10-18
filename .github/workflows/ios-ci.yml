@@ -21,7 +21,7 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_skip: github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_changed != 'true'
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_changed != 'true' }}
     steps:
       - uses: actions/checkout@v4
         if: github.event_name == 'push'
@@ -31,27 +31,7 @@ jobs:
         id: changed-files-yaml
         uses: tj-actions/changed-files@v39
         with:
-          files_yaml: |
-            ios:
-              - 'platform/ios/**'
-              - 'platform/darwin/**'
-              - '.github/workflows/ios-ci.yml'
-              - 'bin/**'
-              - 'expression-test/**'
-              - 'include/**'
-              - 'metrics/**'
-              - 'platform/default/**'
-              - 'render-test/**'
-              - 'scripts/**'
-              - 'src/**'
-              - 'test/**'
-              - 'vendor/**'
-              - '.gitmodules'
-              - '!**/*.md'
-              - 'WORKSPACE'
-              - 'BUILD.bazel'
-              - '.bazelrc'
-              - '.bazelversion'
+          files_yaml_from_source_file: .github/changed-files.yml
 
       - name: Run step if test file(s) change
         if: steps.changed-files-yaml.outputs.ios_any_changed == 'true'  
