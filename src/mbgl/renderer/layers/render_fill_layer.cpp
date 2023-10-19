@@ -308,7 +308,9 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 #if MLN_DRAWABLE_RENDERER
 class OutlineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    OutlineDrawableTweaker(Color color_, float opacity_) {}
+    OutlineDrawableTweaker(Color color_, float opacity_)
+        : color(color_),
+          opacity(opacity_) {}
     ~OutlineDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
