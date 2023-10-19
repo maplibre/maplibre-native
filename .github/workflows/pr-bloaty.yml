@@ -8,9 +8,8 @@ on:
     types:
       - completed
 env:
-  # built with commit d38709084a9865fe0bb8300aec70ebf8243b3d43
-  legacy_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-legacy
-  main_download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render-main
+  download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render
+  legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43
   bloaty_sha: 8be8b448550b37c978e8defd9d421c0464c52cc7
 
 permissions:
@@ -30,10 +29,13 @@ jobs:
           artifact-name: mbgl-render
           expect-files: "mbgl-render"
 
-      - name: Download legacy and main mbgl-render
-        run: |
-          wget -O mbgl-render-legacy "$legacy_download_url"
-          wget -O mbgl-render-main "$main_download_url"
+      - name: Download mbgl-render-main
+        run: wget -O mbgl-render-main "${download_url}-main"
+
+      - name: Download mbgl-render-legacy
+        id: download-mbgl-render-legacy
+        run: wget -O mbgl-render-legacy "${download_url}-${legacy_maplibre_sha}"
+        continue-on-error: true
 
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -56,30 +58,40 @@ jobs:
           path: bloaty/build/bloaty
           key: bloaty-${{ env.bloaty_sha }}
 
-      - name: Download legacy and main mbgl-render
-        run: |
-          wget -O mbgl-render-legacy "$legacy_download_url"
-          wget -O mbgl-render-main "$main_download_url"
-
-      - name: Run Bloaty McBloatface on legacy
-        run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
-
       - name: Run Bloaty McBloatface on main
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits > tlus_diff_main.txt
 
-      - name: Prepare Bloaty message
+      - name: Run Bloaty McBloatface on legacy
+        if: steps.download-mbgl-render-legacy.outcome == 'success'
+        run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
+
+      - name: Prepare Bloaty message (main)
         run: |
+          gist_url="$(gh gist create tlus_diff_main.txt)"
           {
             echo "# Bloaty Results 🐋"
-            echo '<details><summary>Compared to d38709084a9865fe0bb8300aec70ebf8243b3d43</summary>'
+            echo 'Compared to main'
             echo '```'
-            cat tlus_diff_legacy.txt
-            echo '```</details>'
-            echo '<details><summary>Compared to main</summary>'
+            awk 'NR <= 2; END { print }' tlus_diff_main.txt
             echo '```'
-            cat tlus_diff_main.txt
-            echo '```</details>'
+            echo "Full report: $gist_url"
           } >> message.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare Bloaty message (legacy)
+        if: steps.download-mbgl-render-legacy.outcome == 'success'
+        run: |
+          gist_url="$(gh gist create tlus_diff_legacy.txt)"
+          {
+            echo "Compared to $legacy_maplibre_sha"
+            echo '```'
+            awk 'NR <= 2; END { print }' tlus_diff_legacy.txt
+            echo '```'
+            echo "Full report: $gist_url"
+          } >> message.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@v2
