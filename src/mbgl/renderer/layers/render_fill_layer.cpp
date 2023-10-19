@@ -687,7 +687,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        static const std::unordered_set<StringIdentity> linePropertiesAsUniforms{
+        static const std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
             stringIndexer().get("a_color"),
             stringIndexer().get("a_blur"),
             stringIndexer().get("a_opacity"),
@@ -695,22 +695,62 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             stringIndexer().get("a_offset"),
             stringIndexer().get("a_width"),
         };
+        
+        // Outline always occurs in translucent pass, defaults to fill color
+        // Outline does not default to fill in the pattern case
+        const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() || unevaluated.get<FillOutlineColor>().isUndefined());
+        if (!outlineShader && doOutline) {
+            outlineShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                outlineShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
+        }
+        
+        auto createOutline = [&](auto& builder) {
+            if (builder && bucket.sharedLineIndexes->elements()) {
+                static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
+                static const StringIdentity idDataAttribName = stringIndexer().get("a_data");
+                builder->setVertexAttrNameId(idVertexAttribName);
+                builder->setShader(outlineShader);
+                builder->setRawVertices({}, bucket.lineVertices.elements(), gfx::AttributeDataType::Short2);
+                gfx::VertexAttributeArray attrs;
+                if (const auto& attr = attrs.add(idVertexAttribName)) {
+                    attr->setSharedRawData(bucket.sharedLineVertices,
+                                           offsetof(LineLayoutVertex, a1),
+                                           /*vertexOffset=*/0,
+                                           sizeof(LineLayoutVertex),
+                                           gfx::AttributeDataType::Short2);
+                }
+                if (const auto& attr = attrs.add(idDataAttribName)) {
+                    attr->setSharedRawData(bucket.sharedLineVertices,
+                                           offsetof(LineLayoutVertex, a2),
+                                           /*vertexOffset=*/0,
+                                           sizeof(LineLayoutVertex),
+                                           gfx::AttributeDataType::UByte4);
+                }
+                builder->setVertexAttributes(std::move(attrs));
+                builder->setSegments(
+                    gfx::Triangles(), bucket.sharedLineIndexes, bucket.lineSegments.data(), bucket.lineSegments.size());
+
+                auto tweaker = std::make_shared<OutlineDrawableTweaker>(
+                    evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+                    evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+
+                // finish
+                builder->flush();
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setTileID(tileID);
+                    drawable->addTweaker(tweaker);
+                    outlineTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
+                }
+            }
+        };
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
-            // Fill will occur in opaque or translucent pass based on `opaquePassCutoff`.
-            // Outline always occurs in translucent pass, defaults to fill color
-            const auto doOutline = evaluated.get<FillAntialias>();
-
             if (!fillShaderGroup || (doOutline && !outlineShaderGroup)) {
                 continue;
             }
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
-
-            if (!outlineShader && doOutline) {
-                outlineShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    outlineShaderGroup->getOrCreateShader(context, linePropertiesAsUniforms));
-            }
 
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
@@ -762,51 +802,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*fillBuilder, FillLayerTweaker::idFillInterpolateUBOName, getFillInterpolateUBO());
             }
 
-            if (outlineBuilder && bucket.sharedLineIndexes->elements()) {
-                static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
-                static const StringIdentity idDataAttribName = stringIndexer().get("a_data");
-                outlineBuilder->setVertexAttrNameId(idVertexAttribName);
-                outlineBuilder->setShader(outlineShader);
-                outlineBuilder->setRawVertices({}, bucket.lineVertices.elements(), gfx::AttributeDataType::Short2);
-                gfx::VertexAttributeArray attrs;
-                if (const auto& attr = attrs.add(idVertexAttribName)) {
-                    attr->setSharedRawData(bucket.sharedLineVertices,
-                                           offsetof(LineLayoutVertex, a1),
-                                           /*vertexOffset=*/0,
-                                           sizeof(LineLayoutVertex),
-                                           gfx::AttributeDataType::Short2);
-                }
-                if (const auto& attr = attrs.add(idDataAttribName)) {
-                    attr->setSharedRawData(bucket.sharedLineVertices,
-                                           offsetof(LineLayoutVertex, a2),
-                                           /*vertexOffset=*/0,
-                                           sizeof(LineLayoutVertex),
-                                           gfx::AttributeDataType::UByte4);
-                }
-                outlineBuilder->setVertexAttributes(std::move(attrs));
-                outlineBuilder->setSegments(
-                    gfx::Triangles(), bucket.sharedLineIndexes, bucket.lineSegments.data(), bucket.lineSegments.size());
-
-                auto tweaker = std::make_shared<OutlineDrawableTweaker>(
-                    evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-                    evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
-
-                // finish
-                outlineBuilder->flush();
-                for (auto& drawable : outlineBuilder->clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    drawable->addTweaker(tweaker);
-                    outlineTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
-                }
-            }
+            createOutline(outlineBuilder);
+            
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {
                 continue;
             }
-
-            // Outline does not default to fill in the pattern case
-            const auto doOutline = evaluated.get<FillAntialias>() && unevaluated.get<FillOutlineColor>().isUndefined();
 
             if (!patternShaderGroup || (doOutline && !outlinePatternShaderGroup)) {
                 continue;
@@ -814,11 +815,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
-
-            if (!outlineShader && doOutline) {
-                outlineShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    outlineShaderGroup->getOrCreateShader(context, linePropertiesAsUniforms));
-            }
 
             if (!patternBuilder) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-pattern")) {
@@ -834,8 +830,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (doOutline && !outlinePatternBuilder) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline-pattern")) {
                     commonInit(*builder);
-                    builder->setShader(outlineShader);
-                    builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
@@ -884,21 +878,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                        idFillPatternTilePropsUBOName,
                        getFillPatternTilePropsUBO());
             }
-            /*
-            if (outlinePatternBuilder && bucket.sharedLines->elements()) {
-                outlinePatternBuilder->setShader(outlineShader);
-                outlinePatternBuilder->setRenderPass(renderPass);
-                outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
-                outlinePatternBuilder->setSegments(
-                    gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
-
-                finish(*outlinePatternBuilder,
-                       idFillOutlinePatternInterpolateUBOName,
-                       getFillOutlinePatternInterpolateUBO(),
-                       idFillOutlinePatternTilePropsUBOName,
-                       getFillOutlinePatternTilePropsUBO());
-            }
-            */
+            
+            createOutline(outlinePatternBuilder);
         }
     }
 }

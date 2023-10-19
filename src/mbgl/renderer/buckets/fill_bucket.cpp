@@ -60,6 +60,19 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const PatternLayerMap& patternDependencies,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
+    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
+        lineVertices,
+        LineProgram::layoutVertex,
+        lineSegments,
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
+            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        },
+        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        lineIndexes);
+
+    gfx::PolylineGeneratorOptions options;
+    options.type = FeatureType::Polygon;
+
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
@@ -72,19 +85,6 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         }
 
         // generate outline
-        gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
-            lineVertices,
-            LineProgram::layoutVertex,
-            lineSegments,
-            [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-                return Segment<LineAttributes>(vertexOffset, indexOffset);
-            },
-            [](auto& seg) -> Segment<LineAttributes>& { return seg; },
-            lineIndexes);
-
-        gfx::PolylineGeneratorOptions options;
-        options.type = FeatureType::Polygon;
-
         for (const auto& ring : polygon) {
             generator.generate(ring, options);
         }
