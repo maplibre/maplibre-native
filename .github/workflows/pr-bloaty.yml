@@ -8,7 +8,7 @@ on:
     types:
       - completed
 env:
-  download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com/mbgl-render
+  download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com
   legacy_maplibre_sha: d38709084a9865fe0bb8300aec70ebf8243b3d43
   bloaty_sha: 8be8b448550b37c978e8defd9d421c0464c52cc7
 
@@ -30,11 +30,11 @@ jobs:
           expect-files: "mbgl-render"
 
       - name: Download mbgl-render-main
-        run: wget -O mbgl-render-main "${download_url}-main"
+        run: wget -O mbgl-render-main "${download_url}/mbgl-render-main"
 
       - name: Download mbgl-render-legacy
         id: download-mbgl-render-legacy
-        run: wget -O mbgl-render-legacy "${download_url}-${legacy_maplibre_sha}"
+        run: wget -O mbgl-render-legacy "${download_url}/mbgl-render-${legacy_maplibre_sha}"
         continue-on-error: true
 
       - name: Get latest CMake and Ninja
@@ -65,9 +65,18 @@ jobs:
         if: steps.download-mbgl-render-legacy.outcome == 'success'
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-legacy -n 0 -s vm -d compileunits > tlus_diff_legacy.txt
 
+      - name: Configure AWS Credentials
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
       - name: Prepare Bloaty message (main)
         run: |
-          gist_url="$(gh gist create tlus_diff_main.txt)"
+          report_path=bloaty-results/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
+          aws s3 cp tlus_diff_main.txt s3://maplibre-native/"$report_path"
           {
             echo "# Bloaty Results 🐋"
             echo 'Compared to main'
@@ -80,15 +89,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare Bloaty message (legacy)
-        if: steps.download-mbgl-render-legacy.outcome == 'success'
         run: |
-          gist_url="$(gh gist create tlus_diff_legacy.txt)"
+          report_path=bloaty-results/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-legacy.txt
+          aws s3 cp tlus_diff_legacy.txt s3://maplibre-native/"$report_path"
           {
             echo "Compared to $legacy_maplibre_sha"
             echo '```'
             awk 'NR <= 2; END { print }' tlus_diff_legacy.txt
             echo '```'
-            echo "Full report: $gist_url"
+            echo "Full report: $download_url/$report_path"
           } >> message.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
