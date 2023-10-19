@@ -55,7 +55,7 @@ public:
 
     SegmentVector<LineAttributes> lineSegments;
 #endif
-    
+
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
@@ -72,7 +72,7 @@ public:
     LineIndexVector& lines = *sharedLines;
 
     SegmentVector<FillAttributes> lineSegments;
-    
+
     std::optional<gfx::VertexBuffer<FillLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> lineIndexBuffer;
     std::optional<gfx::IndexBuffer> triangleIndexBuffer;
