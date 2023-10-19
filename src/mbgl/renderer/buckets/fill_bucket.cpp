@@ -84,7 +84,6 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
 
         gfx::PolylineGeneratorOptions options;
         options.type = FeatureType::Polygon;
-        options.joinType = LineJoinType::Round;
 
         for (const auto& ring : polygon) {
             generator.generate(ring, options);

@@ -74,6 +74,10 @@ private:
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
 
     LayerGroupBasePtr outlineLayerGroup;
+    gfx::ShaderProgramBasePtr outlineShader;
+    
+    class OulineDrawableTweaker;
+    
 
 #endif
 };
