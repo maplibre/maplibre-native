@@ -615,14 +615,6 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<gl::CommandEncoder>(*this);
 }
 
-gfx::RenderingStats& Context::renderingStats() {
-    return stats;
-}
-
-const gfx::RenderingStats& Context::renderingStats() const {
-    return stats;
-}
-
 void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
