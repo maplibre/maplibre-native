@@ -1,6 +1,7 @@
 #include <mbgl/gfx/rendering_stats.hpp>
 
 #include <initializer_list>
+#include <sstream>
 
 namespace mbgl {
 namespace gfx {
@@ -52,6 +53,25 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     stencilUpdates += r.stencilUpdates;
     return *this;
 }
+
+#if !defined(NDEBUG)
+std::string RenderingStats::toString(std::string_view sep) const {
+    std::stringstream ss;
+    ss << "numFrames = " << numFrames << sep << "numDrawCalls = " << numDrawCalls << sep
+       << "totalDrawCalls = " << totalDrawCalls << sep << "numCreatedTextures = " << numCreatedTextures << sep
+       << "numActiveTextures = " << numActiveTextures << sep << "numTextureBindings = " << numTextureBindings << sep
+       << "numTextureUpdates = " << numTextureUpdates << sep << "textureUpdateBytes = " << textureUpdateBytes << sep
+       << "numBuffers = " << numBuffers << sep << "numFrameBuffers = " << numFrameBuffers << sep
+       << "numIndexBuffers = " << numIndexBuffers << sep << "indexUpdateBytes = " << indexUpdateBytes << sep
+       << "numVertexBuffers = " << numVertexBuffers << sep << "vertexUpdateBytes = " << vertexUpdateBytes << sep
+       << "numUniformBuffers = " << numUniformBuffers << sep << "numUniformUpdates = " << numUniformUpdates << sep
+       << "uniformUpdateBytes = " << uniformUpdateBytes << sep << "memTextures = " << memTextures << sep
+       << "memBuffers = " << memBuffers << sep << "memIndexBuffers = " << memIndexBuffers << sep
+       << "memVertexBuffers = " << memVertexBuffers << sep << "memUniformBuffers = " << memUniformBuffers << sep
+       << "stencilClears = " << stencilClears << sep << "stencilUpdates = " << stencilUpdates << sep;
+    return ss.str();
+}
+#endif
 
 } // namespace gfx
 } // namespace mbgl

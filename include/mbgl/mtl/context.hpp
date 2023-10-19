@@ -118,6 +118,9 @@ public:
     /// Get a reusable buffer containing the standard fixed tile indexes
     const BufferResource& getTileIndexBuffer();
 
+    /// Get a buffer to be bound to unused vertex buffers
+    const gfx::UniqueVertexBufferResource& getEmptyVertexBuffer();
+
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
@@ -128,6 +131,8 @@ private:
 
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
+
+    gfx::UniqueVertexBufferResource emptyVertexBuffer;
 
     gfx::ShaderProgramBasePtr clipMaskShader;
     MTLDepthStencilStatePtr clipMaskDepthStencilState;

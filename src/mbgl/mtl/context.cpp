@@ -12,6 +12,7 @@
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
+#include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -42,6 +43,19 @@ Context::Context(RendererBackend& backend_)
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         performCleanup();
+
+        emptyVertexBuffer.reset();
+        tileVertexBuffer.reset();
+        tileIndexBuffer.reset();
+        clipMaskShader.reset();
+        clipMaskDepthStencilState.reset();
+        clipMaskPipelineState.reset();
+        clipMaskUniformsBuffer.reset();
+        stencilStateRenderable = nullptr;
+
+#if !defined(NDEBUG)
+        Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
         assert(stats.isZero());
     }
 }
@@ -205,6 +219,20 @@ const BufferResource& Context::getTileIndexBuffer() {
         tileIndexBuffer.emplace(createBuffer(indexes.data(), indexes.bytes(), gfx::BufferUsageType::StaticDraw));
     }
     return *tileIndexBuffer;
+}
+
+const gfx::UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
+    if (!emptyVertexBuffer) {
+        // This buffer is bound to vertex attribtue indexes when the uniforms are used instead and
+        // shaders are expected not to access the attribute values, but Metal requires a binding.
+        // This buffer could also hold a single default value applied for all vertices, in which case
+        // it could not be shared (See `MTL::VertexStepFunctionConstant` in the vertex attribute
+        // descriptors, but that isn't currently being used.
+        constexpr std::size_t size = 32;
+        constexpr auto usage = gfx::BufferUsageType::StaticDraw;
+        emptyVertexBuffer = std::make_unique<VertexBufferResource>(createBuffer(nullptr, size, usage));
+    }
+    return emptyVertexBuffer;
 }
 
 namespace {

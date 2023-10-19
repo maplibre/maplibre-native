@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <string>
 
 namespace mbgl {
 namespace gfx {
@@ -42,6 +43,10 @@ struct RenderingStats {
     int stencilUpdates = 0;
 
     RenderingStats& operator+=(const RenderingStats&);
+
+#if !defined(NDEBUG)
+    std::string toString(std::string_view separator) const;
+#endif
 };
 
 } // namespace gfx

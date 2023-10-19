@@ -16,7 +16,7 @@ Texture2D::Texture2D(Context& context_)
 Texture2D::~Texture2D() {
     if (metalTexture) {
         context.renderingStats().numActiveTextures--;
-        context.renderingStats().memTextures += getDataSize();
+        context.renderingStats().memTextures -= getDataSize();
     }
 }
 

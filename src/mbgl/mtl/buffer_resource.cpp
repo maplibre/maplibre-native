@@ -22,6 +22,12 @@ BufferResource::BufferResource(Context& context_, const void* data, std::size_t 
     }
 }
 
+BufferResource::BufferResource(BufferResource&& other)
+    : context(other.context),
+      buffer(std::move(other.buffer)),
+      size(other.size),
+      usage(other.usage) {}
+
 BufferResource::~BufferResource() {
     if (buffer) {
         context.renderingStats().numBuffers--;
@@ -33,14 +39,14 @@ BufferResource BufferResource::clone() const {
     return {context, buffer->contents(), size, usage};
 }
 
-BufferResource::BufferResource(BufferResource&& other)
-    : context(other.context),
-      buffer(std::move(other.buffer)),
-      usage(other.usage) {}
-
 BufferResource& BufferResource::operator=(BufferResource&& other) {
     assert(&context == &other.context);
+    if (buffer) {
+        context.renderingStats().numBuffers--;
+        context.renderingStats().memBuffers -= size;
+    }
     buffer = std::move(other.buffer);
+    size = other.size;
     usage = other.usage;
     return *this;
 }

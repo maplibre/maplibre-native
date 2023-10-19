@@ -14,7 +14,7 @@ class Context;
 
 class BufferResource {
 public:
-    BufferResource() = default;
+    BufferResource() = delete;
     /** @brief Create a new Metal buffer
         @param device The Metal device on which to create the buffer.
         @param raw Data to use for the contents of the new buffer.  May be null.

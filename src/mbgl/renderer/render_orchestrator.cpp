@@ -136,7 +136,7 @@ RenderOrchestrator::~RenderOrchestrator() {
             layer.markContextDestroyed();
         }
     }
-};
+}
 
 void RenderOrchestrator::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
