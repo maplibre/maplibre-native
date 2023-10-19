@@ -1,5 +1,6 @@
 #include <mbgl/gfx/rendering_stats.hpp>
 
+#include <algorithm>
 #include <initializer_list>
 #include <sstream>
 
