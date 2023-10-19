@@ -44,6 +44,12 @@ jobs:
           cmakeVersion: latest
           ninjaVersion: latest
 
+      - name: Cache Bloaty
+        uses: actions/cache@v3
+        with:
+          path: bloaty/build/bloaty
+          key: bloaty-${{ env.bloaty_sha }}
+
       # because Google is not making a release...
       # https://github.com/google/bloaty/issues/334
       - name: Compile Bloaty
@@ -53,12 +59,6 @@ jobs:
           git checkout "$bloaty_sha"
           cmake -B build -G Ninja -S .
           cmake --build build
-
-      - name: Cache Bloaty
-        uses: actions/cache@v3
-        with:
-          path: bloaty/build/bloaty
-          key: bloaty-${{ env.bloaty_sha }}
 
       - name: Run Bloaty McBloatface on main
         run: bloaty/build/bloaty mbgl-render -- mbgl-render-main -n 0 -s vm -d compileunits > tlus_diff_main.txt
