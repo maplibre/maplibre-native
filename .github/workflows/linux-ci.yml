@@ -16,7 +16,10 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
-  id-token: write      # This is required for requesting the AWS JWT
+  id-token: write         # needed for AWS
+  actions: read           # needed for CodeQL
+  contents: read          # needed for CodeQL
+  security-events: write  # needed for CodeQL
 
 jobs:
   pre_job:
