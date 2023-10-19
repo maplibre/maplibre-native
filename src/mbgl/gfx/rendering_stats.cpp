@@ -7,23 +7,19 @@ namespace mbgl {
 namespace gfx {
 
 bool RenderingStats::isZero() const {
-    for (const auto& n : {numActiveTextures,
-                          numTextureBindings,
-                          numBuffers,
-                          numVertexBuffers,
-                          numIndexBuffers,
-                          numUniformBuffers,
-                          numFrameBuffers,
-                          memTextures,
-                          memBuffers,
-                          memIndexBuffers,
-                          memVertexBuffers,
-                          memUniformBuffers}) {
-        if (n != 0) {
-            return false;
-        }
-    }
-    return true;
+    const auto expectedZeros = {numActiveTextures,
+                                numTextureBindings,
+                                numBuffers,
+                                numVertexBuffers,
+                                numIndexBuffers,
+                                numUniformBuffers,
+                                numFrameBuffers,
+                                memTextures,
+                                memBuffers,
+                                memIndexBuffers,
+                                memVertexBuffers,
+                                memUniformBuffers};
+    return std::all_of(expectedZeros.begin(), expectedZeros.end(), [](auto x) { return x == 0; });
 }
 
 RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {

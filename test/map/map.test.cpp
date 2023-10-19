@@ -1607,6 +1607,7 @@ TEST(Map, StencilOverflow) {
 
     const auto& backend = test.frontend.getBackend();
     gfx::BackendScope scope{*backend};
+    const auto& context = backend->getContext();
 
     auto& style = test.map.getStyle();
     style.loadJSON("{}");
@@ -1628,10 +1629,11 @@ TEST(Map, StencilOverflow) {
     test.frontend.render(test.map);
 
     // In drawable builds, no drawables are built because no bucket/tiledata is available.
-#if !MLN_DRAWABLE_RENDERER
-    const auto& context = backend->getContext();
+#if MLN_DRAWABLE_RENDERER
+    ASSERT_LT(0, context.renderingStats().stencilUpdates);
+#else
     ASSERT_LT(0, context.renderingStats().stencilClears);
-#endif // !MLN_DRAWABLE_RENDERER
+#endif // MLN_DRAWABLE_RENDERER
 
     // TODO: confirm that the stencil masking actually worked
 }
