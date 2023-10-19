@@ -15,6 +15,7 @@ env:
 
 permissions:
   pull-requests: write
+  id-token: write      # This is required for requesting the AWS JWT
 
 jobs:
   pr-bloaty:
