@@ -695,15 +695,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             stringIndexer().get("a_offset"),
             stringIndexer().get("a_width"),
         };
-        
+
         // Outline always occurs in translucent pass, defaults to fill color
         // Outline does not default to fill in the pattern case
-        const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() || unevaluated.get<FillOutlineColor>().isUndefined());
+        const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
+                                                                  unevaluated.get<FillOutlineColor>().isUndefined());
         if (!outlineShader && doOutline) {
             outlineShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 outlineShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
         }
-        
+
         auto createOutline = [&](auto& builder) {
             if (builder && bucket.sharedLineIndexes->elements()) {
                 static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
@@ -803,7 +804,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             createOutline(outlineBuilder);
-            
+
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {
                 continue;
@@ -878,7 +879,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                        idFillPatternTilePropsUBOName,
                        getFillPatternTilePropsUBO());
             }
-            
+
             createOutline(outlinePatternBuilder);
         }
     }
