@@ -1607,7 +1607,6 @@ TEST(Map, StencilOverflow) {
 
     const auto& backend = test.frontend.getBackend();
     gfx::BackendScope scope{*backend};
-    const auto& context = backend->getContext();
 
     auto& style = test.map.getStyle();
     style.loadJSON("{}");
@@ -1630,6 +1629,7 @@ TEST(Map, StencilOverflow) {
 
     // In drawable builds, no drawables are built because no bucket/tiledata is available.
 #if !MLN_DRAWABLE_RENDERER
+    const auto& context = backend->getContext();
     ASSERT_LT(0, context.renderingStats().stencilClears);
 #endif // !MLN_DRAWABLE_RENDERER
 
