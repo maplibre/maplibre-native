@@ -21,7 +21,7 @@ UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_)
 }
 
 UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
-    : UniformBuffer(other.size),
+    : UniformBuffer(other),
       hash(other.hash) {
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     MBGL_CHECK_ERROR(glCopyBufferSubData(other.id, id, 0, 0, size));

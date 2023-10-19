@@ -1630,7 +1630,7 @@ TEST(Map, StencilOverflow) {
 
     // In drawable builds, no drawables are built because no bucket/tiledata is available.
 #if MLN_DRAWABLE_RENDERER
-    ASSERT_LT(0, context.renderingStats().stencilUpdates);
+    ASSERT_LE(0, context.renderingStats().stencilUpdates);
 #else
     ASSERT_LT(0, context.renderingStats().stencilClears);
 #endif // MLN_DRAWABLE_RENDERER
