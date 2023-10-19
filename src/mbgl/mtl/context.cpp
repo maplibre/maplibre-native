@@ -162,6 +162,10 @@ void Context::clear() {
     stats.numFrames++;
 }
 
+void Context::performCleanup() {
+    clipMaskUniformsBufferUsed = false;
+}
+
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
@@ -343,19 +347,29 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Create a buffer for the UBO data.
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
     const auto bufferSize = tileUBOs.size() * uboSize;
-    if (!clipMaskUniformsBuffer || clipMaskUniformsBuffer->getSizeInBytes() < bufferSize) {
-        clipMaskUniformsBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
-        if (!*clipMaskUniformsBuffer) {
+
+    std::optional<BufferResource> tempBuffer;
+    auto& uboBuffer = clipMaskUniformsBufferUsed ? tempBuffer : clipMaskUniformsBuffer;
+    clipMaskUniformsBufferUsed = true;
+    if (!uboBuffer || !*uboBuffer || uboBuffer->getSizeInBytes() < bufferSize) {
+        uboBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
+        if (!uboBuffer) {
             return false;
         }
     } else {
-        clipMaskUniformsBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
+        uboBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
     encoder->setCullMode(MTL::CullModeNone);
     encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
-    encoder->setVertexBuffer(
-        clipMaskUniformsBuffer->getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
+
+    // Instancing is disabled for now because the `[[stencil]]` attribute in the fragment shader output
+    // that we need to apply a different stencil value for each tile causes a problem on some older (A8-A11)
+    // devices, specifically `XPC_ERROR_CONNECTION_INTERRUPTED` when creating a render pipeline state.
+    // Adding a `[[depth(...)]]` output to the shader prevents this error, but the stencil value is
+    // still not written to the stencil attachment on those same devices.
+#if STENCIL_INSTANCING
+    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,
@@ -364,6 +378,22 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()),
                                    /*baseVertex=*/0,
                                    /*baseInstance=*/0);
+#else
+    for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
+        encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
+        encoder->setVertexBuffer(
+            uboBuffer->getMetalBuffer().get(), /*offset=*/ii * uboSize, ShaderClass::uniforms[0].index);
+        encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
+                                       indexCount,
+                                       MTL::IndexType::IndexTypeUInt16,
+                                       indexRes->getMetalBuffer().get(),
+                                       /*indexOffset=*/0,
+                                       /*instanceCount=*/1,
+                                       /*baseVertex=*/0,
+                                       /*baseInstance=*/0);
+    }
+#endif
+
     stats.numDrawCalls++;
     stats.totalDrawCalls++;
     return true;

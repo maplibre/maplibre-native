@@ -25,7 +25,6 @@ Further platforms might work [with additional libraries installed](https://githu
 
 ```
 npm test
-npm run test-suite
 ```
 
 ## Rendering a map tile

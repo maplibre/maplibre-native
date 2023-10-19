@@ -59,7 +59,7 @@ public:
     void clear();
 
     // Actually remove the objects we marked as abandoned with the above methods.
-    void performCleanup() override {}
+    void performCleanup() override;
 
     void reduceMemoryUsage() override {}
 
@@ -138,6 +138,7 @@ private:
     MTLDepthStencilStatePtr clipMaskDepthStencilState;
     MTLRenderPipelineStatePtr clipMaskPipelineState;
     std::optional<BufferResource> clipMaskUniformsBuffer;
+    bool clipMaskUniformsBufferUsed = false;
     const gfx::Renderable* stencilStateRenderable = nullptr;
 };
 
