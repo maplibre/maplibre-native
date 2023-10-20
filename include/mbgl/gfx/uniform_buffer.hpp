@@ -33,8 +33,9 @@ public:
 
     std::size_t getSize() const { return size; }
 
-protected:
     UniformBuffer& operator=(const UniformBuffer&) = delete;
+
+protected:
     UniformBuffer& operator=(UniformBuffer&& other) {
         size = other.size;
         return *this;
