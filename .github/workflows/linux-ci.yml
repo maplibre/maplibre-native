@@ -15,6 +15,12 @@ concurrency:
   # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  id-token: write         # needed for AWS
+  actions: read           # needed for CodeQL
+  contents: read          # needed for CodeQL
+  security-events: write  # needed for CodeQL
+
 jobs:
   pre_job:
     runs-on: ubuntu-22.04
