@@ -45,6 +45,7 @@ jobs:
           ninjaVersion: latest
 
       - name: Cache Bloaty
+        id: cache-bloaty
         uses: actions/cache@v3
         with:
           path: bloaty/build/bloaty
@@ -53,6 +54,7 @@ jobs:
       # because Google is not making a release...
       # https://github.com/google/bloaty/issues/334
       - name: Compile Bloaty
+        if: ${{ !steps.cache-bloaty.outputs.cache-hit }}
         run: |
           git clone https://github.com/google/bloaty.git
           cd bloaty
