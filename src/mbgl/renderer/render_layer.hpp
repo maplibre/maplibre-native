@@ -261,9 +261,11 @@ protected:
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;
 
-    // The set of Tile IDs in `renderTiles`, along with the
-    // identity of the bucket from which they were built.
-    std::unordered_map<OverscaledTileID, util::SimpleIdentity> renderTileIDs;
+    // A sorted set of tile IDs in `renderTiles`, along with
+    // the identity of the bucket from which they were built.
+    using RenderTileIDMap = std::vector<std::pair<OverscaledTileID, util::SimpleIdentity>>;
+    RenderTileIDMap renderTileIDs;
+    RenderTileIDMap newRenderTileIDs;
 #endif
 
     // Current layer index as specified by the layerIndexChanged event
