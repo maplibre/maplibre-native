@@ -87,7 +87,7 @@ jobs:
             echo '```'
             awk 'NR <= 2; END { print }' tlus_diff_main.txt
             echo '```'
-            echo "Full report: $report_path"
+            echo "Full report: $download_url/$report_path"
           } >> message.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
