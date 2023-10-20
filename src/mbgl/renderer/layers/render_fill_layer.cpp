@@ -813,7 +813,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (doOutline && outlineBuilder) {
                 outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
-                createOutline(outlineBuilder, evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()), evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+                createOutline(outlineBuilder,
+                              evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+                              evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
             }
 
         } else { // FillPattern is defined
@@ -893,7 +895,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (doOutline) {
                 // TODO: pattern outlines
-//                createOutline(outlinePatternBuilder, evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()), evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+                //                createOutline(outlinePatternBuilder,
+                //                evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+                //                evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
             }
         }
     }
