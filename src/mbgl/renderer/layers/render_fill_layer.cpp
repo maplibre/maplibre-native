@@ -110,6 +110,28 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
+#if MLN_DRAWABLE_RENDERER
+void RenderFillLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    RenderLayer::markLayerRenderable(willRender, changes);
+    if (outlineLayerGroup) {
+        activateLayerGroup(outlineLayerGroup, willRender, changes);
+    }
+}
+
+void RenderFillLayer::layerRemoved(UniqueChangeRequestVec& changes) {
+    RenderLayer::layerRemoved(changes);
+    if (outlineLayerGroup) {
+        activateLayerGroup(outlineLayerGroup, false, changes);
+    }
+}
+
+void RenderFillLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
+    RenderLayer::layerIndexChanged(newLayerIndex, changes);
+
+    changeLayerIndex(outlineLayerGroup, newLayerIndex, changes);
+}
+#endif
+
 #if MLN_LEGACY_RENDERER
 void RenderFillLayer::render(PaintParameters& parameters) {
     assert(renderTiles);
@@ -317,22 +339,22 @@ public:
         const auto zoom = parameters.state.getZoom();
         auto& uniforms = drawable.mutableUniformBuffers();
 
-        if (!lineUniformBuffer || currentZoom != zoom) {
+        static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
+        {
             const auto matrix = LayerTweaker::getTileMatrix(
                 tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
-            static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
             const shaders::LineUBO lineUBO{
                 /*matrix = */ util::cast<float>(matrix),
                 /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                 /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                 /*device_pixel_ratio = */ parameters.pixelRatio};
             parameters.context.emplaceOrUpdateUniformBuffer(lineUniformBuffer, &lineUBO);
-            uniforms.addOrReplace(idLineUBOName, lineUniformBuffer);
         }
+        uniforms.addOrReplace(idLineUBOName, lineUniformBuffer);
 
+        static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
         if (!linePropertiesUniformBuffer) {
-            static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
             const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/color,
                                                                /*blur =*/0.f,
                                                                /*opacity =*/opacity,
@@ -343,11 +365,11 @@ public:
                                                                0,
                                                                0};
             parameters.context.emplaceOrUpdateUniformBuffer(linePropertiesUniformBuffer, &linePropertiesUBO);
-            uniforms.addOrReplace(idLinePropertiesUBOName, linePropertiesUniformBuffer);
         }
+        uniforms.addOrReplace(idLinePropertiesUBOName, linePropertiesUniformBuffer);
 
+        static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
         if (!lineInterpolationUniformBuffer) {
-            static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
             const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
                                                                      /*blur_t =*/0.f,
                                                                      /*opacity_t =*/0.f,
@@ -357,19 +379,19 @@ public:
                                                                      0,
                                                                      0};
             parameters.context.emplaceOrUpdateUniformBuffer(lineInterpolationUniformBuffer, &lineInterpolationUBO);
-            uniforms.addOrReplace(idLineInterpolationUBOName, lineInterpolationUniformBuffer);
         }
+        uniforms.addOrReplace(idLineInterpolationUBOName, lineInterpolationUniformBuffer);
 
 #if MLN_RENDER_BACKEND_METAL
-        if (!expressionUniformBuffer || currentFrameCount != parameters.frameCount) {
-            static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+        static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+        if (!expressionUniformBuffer) {
             const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
             parameters.context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &expressionUBO);
-            uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
         }
+        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
 
+        static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
         if (!permutationUniformBuffer) {
-            static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
             const shaders::LinePermutationUBO permutationUBO = {
                 /* .color = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
                 /* .blur = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
@@ -386,19 +408,14 @@ public:
                 0,
                 0};
             parameters.context.emplaceOrUpdateUniformBuffer(permutationUniformBuffer, &permutationUBO);
-            uniforms.addOrReplace(idLinePermutationUBOName, permutationUniformBuffer);
         }
+        uniforms.addOrReplace(idLinePermutationUBOName, permutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
-
-        currentZoom = zoom;
-        currentFrameCount = parameters.frameCount;
     };
 
 private:
     Color color;
     float opacity;
-    std::optional<double> currentZoom;
-    std::optional<uint64_t> currentFrameCount;
 
     gfx::UniformBufferPtr lineUniformBuffer;
     gfx::UniformBufferPtr linePropertiesUniformBuffer;
@@ -682,26 +699,25 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        static const std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
-            stringIndexer().get("a_color"),
-            stringIndexer().get("a_blur"),
-            stringIndexer().get("a_opacity"),
-            stringIndexer().get("a_gapwidth"),
-            stringIndexer().get("a_offset"),
-            stringIndexer().get("a_width"),
-        };
-
         // Outline always occurs in translucent pass, defaults to fill color
         // Outline does not default to fill in the pattern case
         const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
                                                                   unevaluated.get<FillOutlineColor>().isUndefined());
         if (!outlineShader && doOutline) {
+            static const std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
+                stringIndexer().get("a_color"),
+                stringIndexer().get("a_blur"),
+                stringIndexer().get("a_opacity"),
+                stringIndexer().get("a_gapwidth"),
+                stringIndexer().get("a_offset"),
+                stringIndexer().get("a_width"),
+            };
             outlineShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 outlineShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
         }
 
-        auto createOutline = [&](auto& builder) {
-            if (builder && bucket.sharedLineIndexes->elements()) {
+        auto createOutline = [&](auto& builder, Color color, float opacity) {
+            if (doOutline && builder && bucket.sharedLineIndexes->elements()) {
                 static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
                 static const StringIdentity idDataAttribName = stringIndexer().get("a_data");
                 builder->setVertexAttrNameId(idVertexAttribName);
@@ -726,9 +742,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setSegments(
                     gfx::Triangles(), bucket.sharedLineIndexes, bucket.lineSegments.data(), bucket.lineSegments.size());
 
-                auto tweaker = std::make_shared<OutlineDrawableTweaker>(
-                    evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-                    evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+                auto tweaker = std::make_shared<OutlineDrawableTweaker>(color, opacity);
 
                 // finish
                 builder->flush();
@@ -765,7 +779,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
-                    builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setRenderPass(RenderPass::Translucent);
                     outlineBuilder = std::move(builder);
                 }
@@ -798,7 +811,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*fillBuilder, FillLayerTweaker::idFillInterpolateUBOName, getFillInterpolateUBO());
             }
 
-            createOutline(outlineBuilder);
+            if (doOutline && outlineBuilder) {
+                outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
+                createOutline(outlineBuilder, evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()), evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+            }
 
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {
@@ -875,7 +891,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                        getFillPatternTilePropsUBO());
             }
 
-            createOutline(outlinePatternBuilder);
+            if (doOutline) {
+                // TODO: pattern outlines
+//                createOutline(outlinePatternBuilder, evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()), evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+            }
         }
     }
 }

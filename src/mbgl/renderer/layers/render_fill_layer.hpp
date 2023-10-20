@@ -38,6 +38,13 @@ public:
                 UniqueChangeRequestVec&) override;
 #endif
 
+protected:
+#if MLN_DRAWABLE_RENDERER
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
+    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
+    void layerRemoved(UniqueChangeRequestVec&) override;
+#endif // MLN_DRAWABLE_RENDERER
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
