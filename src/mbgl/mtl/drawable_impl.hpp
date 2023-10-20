@@ -55,7 +55,7 @@ public:
     // GLfloat pointSize = 0.0f;
     StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
 
-    gfx::UniqueVertexBufferResource noBindingBuffer;
+    MTL::Buffer* noBindingBuffer = nullptr;
 
     gfx::AttributeBindingArray attributeBindings;
 

@@ -7,16 +7,18 @@ namespace mbgl {
 namespace gl {
 
 class UniformBufferGL final : public gfx::UniformBuffer {
+    UniformBufferGL(const UniformBufferGL&);
+
 public:
     UniformBufferGL(const void* data, std::size_t size_);
-    UniformBufferGL(const UniformBufferGL& other)
-        : UniformBuffer(other) {}
     UniformBufferGL(UniformBufferGL&& other)
         : UniformBuffer(std::move(other)) {}
     ~UniformBufferGL() override;
 
     BufferID getID() const { return id; }
     void update(const void* data, std::size_t size_) override;
+
+    UniformBufferGL clone() const { return {*this}; }
 
 protected:
     BufferID id = 0;
@@ -42,7 +44,7 @@ public:
 
 private:
     std::unique_ptr<gfx::UniformBuffer> copy(const gfx::UniformBuffer& uniformBuffers) override {
-        return std::make_unique<UniformBufferGL>(static_cast<const UniformBufferGL&>(uniformBuffers));
+        return std::make_unique<UniformBufferGL>(static_cast<const UniformBufferGL&>(uniformBuffers).clone());
     }
 };
 
