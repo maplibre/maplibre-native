@@ -48,13 +48,6 @@ RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
 
 RenderHeatmapLayer::~RenderHeatmapLayer() = default;
 
-void RenderHeatmapLayer::prepare(const LayerPrepareParameters& parameters) {
-    RenderLayer::prepare(parameters);
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
-}
-
 void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     updateColorRamp();
