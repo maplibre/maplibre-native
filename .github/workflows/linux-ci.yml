@@ -113,7 +113,7 @@ jobs:
             build-size/bin/mbgl-render
 
       - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
@@ -121,7 +121,7 @@ jobs:
           role-session-name: ${{ github.run_id }}
 
       - name: Upload mbgl-render to S3
-        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
         run: aws s3 cp build-size/bin/mbgl-render s3://maplibre-native/mbgl-render-main
 
       # CodeQL
@@ -147,12 +147,12 @@ jobs:
         run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
 
       - name: Upload render test result
-        if: always() && steps.render_test.outcome == 'failure'
+        if: always() && steps.render_test.outcome == 'failure' && matrix.renderer == 'drawable'
         uses: actions/upload-artifact@v3
         with:
           name: render-test-result
           path: |
-            metrics/linux-gcc8-release-style.html
+            metrics/linux-drawable.html
       
       # expression tests
 
