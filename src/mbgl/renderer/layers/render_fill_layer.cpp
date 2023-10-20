@@ -360,7 +360,7 @@ public:
                                                                /*opacity =*/opacity,
                                                                /*gapwidth =*/0.f,
                                                                /*offset =*/0.f,
-                                                               /*width =*/2.f,
+                                                               /*width =*/1.f,
                                                                0,
                                                                0,
                                                                0};
