@@ -87,7 +87,7 @@ jobs:
             echo '```'
             awk 'NR <= 2; END { print }' tlus_diff_main.txt
             echo '```'
-            echo "Full report: $gist_url"
+            echo "Full report: $report_path"
           } >> message.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,7 +97,7 @@ jobs:
           report_path=bloaty-results/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-legacy.txt
           aws s3 cp tlus_diff_legacy.txt s3://maplibre-native/"$report_path"
           {
-            echo "Compared to $legacy_maplibre_sha"
+            echo "Compared to $legacy_maplibre_sha (legacy)"
             echo '```'
             awk 'NR <= 2; END { print }' tlus_diff_legacy.txt
             echo '```'
