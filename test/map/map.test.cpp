@@ -34,6 +34,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/run_loop.hpp>
 
 #include <atomic>
@@ -1634,6 +1635,10 @@ TEST(Map, StencilOverflow) {
 #else
     ASSERT_LT(0, context.renderingStats().stencilClears);
 #endif // MLN_DRAWABLE_RENDERER
+
+#if !defined(NDEBUG)
+    Log::Info(Event::General, context.renderingStats().toString("\n"));
+#endif // !defined(NDEBUG)
 
     // TODO: confirm that the stencil masking actually worked
 }
