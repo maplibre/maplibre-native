@@ -199,7 +199,9 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=OFF \
+            -DMLN_LEGACY_RENDERER=OFF
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
