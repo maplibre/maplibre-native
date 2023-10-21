@@ -3,9 +3,9 @@
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
-#include <Metal/MTLBuffer.hpp>
-#include <Metal/MTLDevice.hpp>
+#include <vendor/metal-cpp/Foundation/NSSharedPtr.hpp>
+#include <vendor/metal-cpp/Metal/MTLBuffer.hpp>
+#include <vendor/metal-cpp/Metal/MTLDevice.hpp>
 
 namespace mbgl {
 namespace mtl {

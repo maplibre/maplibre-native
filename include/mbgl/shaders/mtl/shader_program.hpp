@@ -5,8 +5,8 @@
 #include <mbgl/mtl/uniform_block.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
-#include <Metal/MTLLibrary.hpp>
+#include <vendor/metal-cpp/Foundation/NSSharedPtr.hpp>
+#include <vendor/metal-cpp/Metal/MTLLibrary.hpp>
 
 #include <optional>
 #include <string>

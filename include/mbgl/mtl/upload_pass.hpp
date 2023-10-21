@@ -7,7 +7,7 @@
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
+#include <vendor/metal-cpp/Foundation/NSSharedPtr.hpp>
 
 #include <vector>
 

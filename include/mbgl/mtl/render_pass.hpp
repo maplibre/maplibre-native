@@ -3,8 +3,8 @@
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
-#include <Metal/MTLCommandEncoder.hpp>
+#include <vendor/metal-cpp/Foundation/NSSharedPtr.hpp>
+#include <vendor/metal-cpp/Metal/MTLCommandEncoder.hpp>
 
 #include <memory>
 #include <optional>
