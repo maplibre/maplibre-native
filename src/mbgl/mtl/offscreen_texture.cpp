@@ -44,9 +44,10 @@ public:
             static_cast<Texture2D*>(stencilTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
+        context.renderingStats().numFrameBuffers++;
     }
 
-    ~OffscreenTextureResource() noexcept override = default;
+    ~OffscreenTextureResource() noexcept override { context.renderingStats().numFrameBuffers--; }
 
     void bind() override {
         assert(context.getBackend().getCommandQueue());

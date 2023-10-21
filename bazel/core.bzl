@@ -897,7 +897,7 @@ MLN_OPENGL_HEADERS = [
     "include/mbgl/gl/renderable_resource.hpp",
     "include/mbgl/gl/renderer_backend.hpp",
     "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
-    "include/mbgl/platform/gl_functions.hpp"
+    "include/mbgl/platform/gl_functions.hpp",
 ]
 
 MLN_DRAWABLES_SOURCE = [
@@ -1011,7 +1011,7 @@ MLN_DRAWABLES_GL_HEADERS = [
     "include/mbgl/gl/vertex_attribute_gl.hpp",
     "include/mbgl/gl/texture2d.hpp",
     "include/mbgl/shaders/gl/shader_program_gl.hpp",
-    "include/mbgl/shaders/gl/shader_group_gl.hpp"
+    "include/mbgl/shaders/gl/shader_group_gl.hpp",
 ]
 
 MLN_DRAWABLES_MTL_SOURCE = [
@@ -1021,6 +1021,7 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/mtl/drawable.cpp",
     "src/mbgl/mtl/drawable_impl.hpp",
     "src/mbgl/mtl/drawable_builder.cpp",
+    "src/mbgl/mtl/index_buffer_resource.cpp",
     "src/mbgl/mtl/layer_group.cpp",
     "src/mbgl/mtl/mtl.cpp",
     "src/mbgl/mtl/offscreen_texture.cpp",
@@ -1032,6 +1033,7 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/mtl/uniform_buffer.cpp",
     "src/mbgl/mtl/upload_pass.cpp",
     "src/mbgl/mtl/vertex_attribute.cpp",
+    "src/mbgl/mtl/vertex_buffer_resource.cpp",
     "src/mbgl/shaders/mtl/shader_program.cpp",
     "src/mbgl/shaders/mtl/background.cpp",
     "src/mbgl/shaders/mtl/background_pattern.cpp",
