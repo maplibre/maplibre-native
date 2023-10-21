@@ -12,6 +12,7 @@ add_node_module(
         47
         48
         51
+        120
 )
 
 if(WIN32)
