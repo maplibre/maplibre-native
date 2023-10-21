@@ -1270,6 +1270,8 @@ if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
+message("${SRC_FILES}")
+
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
 source_group(TREE ${PROJECT_SOURCE_DIR}/src FILES ${SRC_FILES})
 
