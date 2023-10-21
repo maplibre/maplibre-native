@@ -3,10 +3,10 @@
 cmake_minimum_required(VERSION 3.9)
 
 if (NOT NODE_MODULE_MINIMUM_ABI)
-    set(NODE_MODULE_MINIMUM_ABI 46) # Don't build node modules for versions earlier than Node 4
+    set(NODE_MODULE_MINIMUM_ABI 83) # Don't build node modules for versions earlier than Node 14
 endif()
 if (NOT NODE_MODULE_MAXIMUM_ABI)
-    set(NODE_MODULE_MAXIMUM_ABI 115) # Don't build node modules for versions earlier than Node 4
+    set(NODE_MODULE_MAXIMUM_ABI 115) # Don't build node modules for versions later than Node 20
 endif()
 if (NOT NODE_MODULE_CACHE_DIR)
     set(NODE_MODULE_CACHE_DIR "${CMAKE_BINARY_DIR}")
@@ -17,7 +17,7 @@ function(_node_module_download _TYPE _URL _FILE)
     file(REMOVE_RECURSE "${_FILE}")
     string(RANDOM LENGTH 32 _TMP)
     set(_TMP "${CMAKE_BINARY_DIR}/${_TMP}")
-    message(STATUS "[Node.js] Downloading ${_TYPE}...")
+    message(STATUS "[Node.js] Downloading ${_TYPE} ${_URL}...")
     file(DOWNLOAD "${_URL}" "${_TMP}" STATUS _STATUS TLS_VERIFY ON)
     list(GET _STATUS 0 _STATUS_CODE)
     if(NOT _STATUS_CODE EQUAL 0)
