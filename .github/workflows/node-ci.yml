@@ -71,6 +71,10 @@ jobs:
         include:
           - runs-on: ubuntu-22.04
             arch: x86_64
+          - runs-on: macos-12
+            arch: x86_64
+          - runs-on: macos-12-arm
+            arch: arm64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
           - runs-on: windows-2022
