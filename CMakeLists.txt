@@ -1165,8 +1165,7 @@ if(MLN_WITH_METAL)
         mbgl-core
         PRIVATE MLN_RENDER_BACKEND_METAL=1
     )
-    list(APPEND 
-        INCLUDE_FILES
+        list(APPEND INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/context.hpp
@@ -1209,8 +1208,7 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_sdf.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_text_and_icon.hpp
             )
-    list(APPEND 
-        SRC_FILES
+        list(APPEND SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
@@ -1254,13 +1252,13 @@ if(MLN_WITH_METAL)
     )
 endif()
 
-if(MLN_WITH_METAL)
-    message(STATUS "Configuring Metal renderer backend")
-    target_compile_definitions(
-        mbgl-core
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
-    )
-endif()
+#if(MLN_WITH_METAL)
+#    message(STATUS "Configuring Metal renderer backend")
+#    target_compile_definitions(
+#        mbgl-core
+#        PRIVATE MLN_RENDER_BACKEND_METAL=1
+#    )
+#endif()
 
 target_sources(
     mbgl-core PRIVATE
