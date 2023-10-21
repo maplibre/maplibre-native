@@ -1,4 +1,4 @@
-set(NODE_MODULE_MINIMUM_ABI 93) # Minimum supported Node.js version: 16
+set(NODE_MODULE_MINIMUM_ABI 83) # Minimum supported Node.js version: 14
 set(NODE_MODULE_MAXIMUM_ABI 115) # Maximum supported Node.js version: 20
 set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
 
