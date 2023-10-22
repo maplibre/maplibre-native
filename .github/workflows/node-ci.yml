@@ -146,6 +146,14 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
+      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
+      - name: Remove Strawberry Perl from PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
+          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Setup cmake (Linux)
         if: runner.os == 'Linux' && runner.arch != 'arm64'
         uses: jwlawson/actions-setup-cmake@v1.14
