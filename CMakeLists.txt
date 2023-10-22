@@ -1249,119 +1249,13 @@ if(MLN_WITH_METAL)
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_sdf.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     )
-    list(APPEND METAL_FILES
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSNumber.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSObjCRuntime.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSObject.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSPrivate.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSProcessInfo.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSRange.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSSet.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSSharedPtr.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSString.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSTypes.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSURL.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/Foundation.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSArray.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSAutoreleasePool.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSBundle.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSData.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSDate.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSDefines.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSDictionary.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSEnumerator.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSError.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSLock.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Foundation/NSNotification.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLSampler.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLStageInputOutputDescriptor.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLTexture.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLTypes.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLVersion.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLVertexDescriptor.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLVisibleFunctionTable.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/Metal.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLAccelerationStructure.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLAccelerationStructureCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLAccelerationStructureTypes.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLArgument.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLArgumentEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLBinaryArchive.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLBlitCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLBlitPass.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLBuffer.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLCaptureManager.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLCaptureScope.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLCommandBuffer.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLCommandQueue.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLComputeCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLComputePass.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLComputePipeline.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLCounters.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLDefines.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLDepthStencil.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLDevice.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLDrawable.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLDynamicLibrary.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLEvent.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLFence.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLFunctionConstantValues.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLFunctionDescriptor.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLFunctionHandle.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLFunctionLog.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLFunctionStitching.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLHeaderBridge.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLHeap.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLIndirectCommandBuffer.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLIndirectCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLIntersectionFunctionTable.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLIOCommandBuffer.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLIOCommandQueue.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLIOCompressor.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLLibrary.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLLinkedFunctions.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLParallelRenderCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLPipeline.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLPixelFormat.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLPrivate.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLRasterizationRate.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLRenderCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLRenderPass.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLRenderPipeline.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLResource.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLResourceStateCommandEncoder.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/Metal/MTLResourceStatePass.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/QuartzCore/CAMetalLayer.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/QuartzCore/CAPrivate.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/QuartzCore/QuartzCore.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/QuartzCore/CADefines.hpp
-        ${PROJECT_SOURCE_DIR}/vendor/metal-cpp/QuartzCore/CAMetalDrawable.hpp
-    )
 endif()
 
-#if(MLN_WITH_METAL)
-#    message(STATUS "Configuring Metal renderer backend")
-#    target_compile_definitions(
-#        mbgl-core
-#        PRIVATE MLN_RENDER_BACKEND_METAL=1
-#    )
-#endif()
-
-if(MLN_WITH_METAL)
-    target_sources(
-        mbgl-core PRIVATE
-        ${INCLUDE_FILES}
-        ${SRC_FILES}
-        ${METAL_FILES}
-    )
-else()
-    target_sources(
-        mbgl-core PRIVATE
-        ${INCLUDE_FILES}
-        ${SRC_FILES}
-    )
-endif()
+target_sources(
+	mbgl-core PRIVATE
+	${INCLUDE_FILES}
+	${SRC_FILES}
+)
 
 if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
@@ -1369,9 +1263,6 @@ endif()
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
 source_group(TREE ${PROJECT_SOURCE_DIR}/src FILES ${SRC_FILES})
-if(MLN_WITH_METAL)
-    source_group(TREE ${PROJECT_SOURCE_DIR}/vendor/metal-cpp FILES ${METAL_FILES})
-endif()
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/.git/HEAD)
     execute_process(
