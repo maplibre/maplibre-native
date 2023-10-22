@@ -6,9 +6,9 @@
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/util.hpp>
 
-#include <vendor/metal-cpp/Foundation/NSSharedPtr.hpp>
-#include <vendor/metal-cpp/Metal/MTLDevice.hpp>
-#include <vendor/metal-cpp/Metal/MTLCommandQueue.hpp>
+#include <Foundation/NSSharedPtr.hpp>
+#include <Metal/MTLDevice.hpp>
+#include <Metal/MTLCommandQueue.hpp>
 
 namespace mbgl {
 

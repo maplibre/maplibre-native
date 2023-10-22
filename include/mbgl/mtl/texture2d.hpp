@@ -4,9 +4,9 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/image.hpp>
 
-#include <vendor/metal-cpp/Foundation/NSSharedPtr.hpp>
-#include <vendor/metal-cpp/Metal/MTLPixelFormat.hpp>
-#include <vendor/metal-cpp/Metal/MTLTexture.hpp>
+#include <Foundation/NSSharedPtr.hpp>
+#include <Metal/MTLPixelFormat.hpp>
+#include <Metal/MTLTexture.hpp>
 
 #include <memory>
 
