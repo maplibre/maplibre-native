@@ -69,7 +69,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-20.04
+          - runs-on: ubuntu-22.04
             arch: x86_64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
@@ -128,9 +128,7 @@ jobs:
             libcurl4-openssl-dev \
             libglfw3-dev \
             libuv1-dev \
-            g++-10 \
-            libc++-9-dev \
-            libc++abi-9-dev \
+            g++-12 \
             libjpeg-dev \
             libpng-dev \
             libwebp-dev
@@ -199,8 +197,8 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_C_COMPILER=gcc-10 \
-            -DCMAKE_CXX_COMPILER=g++-10 \
+            -DCMAKE_C_COMPILER=gcc-12 \
+            -DCMAKE_CXX_COMPILER=g++-12 \
             -DMLN_WITH_NODE=ON
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
