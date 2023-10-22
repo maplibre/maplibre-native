@@ -53,7 +53,7 @@ void NodeRequest::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     Nan::Set(info.This(), Nan::New("kind").ToLocalChecked(), info[4]);
     v8::Local<v8::Value> argv[] = {info.This()};
     request->asyncResource->runInAsyncScope(
-        Nan::To<v8::Object>(target->handle()->GetInternalField(1)).ToLocalChecked(), "request", 1, argv);
+        Nan::To<v8::Object>(target->handle()->GetInternalField(1).As<v8::Value>()).ToLocalChecked(), "request", 1, argv);
     info.GetReturnValue().Set(info.This());
 }
 
