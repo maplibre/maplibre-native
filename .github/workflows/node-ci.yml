@@ -200,9 +200,10 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DMLN_WITH_NODE=ON \
-            -DMLN_WITH_METAL=ON \
             -DMLN_WITH_OPENGL=OFF \
+            -DMLN_WITH_METAL=ON \
             -DMLN_LEGACY_RENDERER=OFF \
+            -DMLN_DRAWABLE_RENDERER=ON \
             -DMLN_WITH_WERROR=OFF
 
       - name: Configure maplibre-native (Linux)
