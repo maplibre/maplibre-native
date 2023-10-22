@@ -273,7 +273,7 @@ jobs:
           GALLIUM_DRIVER: softpipe
         run: |
           Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/22.3.5/mesa3d-22.3.5-release-msvc.7z -OutFile mesa3d.7z
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v108 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v115 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
           npm test
 
       # On PRs make sure that the npm package can be packaged.
