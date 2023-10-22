@@ -1405,6 +1405,13 @@ target_include_directories(
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
+if(MLN_WITH_METAL)
+    target_include_directories(
+        mbgl-core
+        PUBLIC ${PROJECT_SOURCE_DIR}/vendor/metal-cpp
+    )
+endif()
+
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
