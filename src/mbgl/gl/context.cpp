@@ -63,14 +63,17 @@ static_assert(underlying_type(UniformDataType::FloatMat4) == GL_FLOAT_MAT4, "Ope
 static_assert(underlying_type(UniformDataType::Sampler2D) == GL_SAMPLER_2D, "OpenGL type mismatch");
 static_assert(underlying_type(UniformDataType::SamplerCube) == GL_SAMPLER_CUBE, "OpenGL type mismatch");
 
+namespace {
+GLint getMaxVertexAttribs() {
+    GLint value = 0;
+    MBGL_CHECK_ERROR(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value));
+    return value;
+}
+} // namespace
+
 Context::Context(RendererBackend& backend_)
-    : gfx::Context([] {
-          GLint value;
-          MBGL_CHECK_ERROR(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value));
-          return value;
-      }()),
-      backend(backend_),
-      stats() {}
+    : gfx::Context(/*maximumVertexBindingCount=*/getMaxVertexAttribs()),
+      backend(backend_) {}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
@@ -614,14 +617,6 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
         setDirtyState();
     }
     return std::make_unique<gl::CommandEncoder>(*this);
-}
-
-gfx::RenderingStats& Context::renderingStats() {
-    return stats;
-}
-
-const gfx::RenderingStats& Context::renderingStats() const {
-    return stats;
 }
 
 void Context::finish() {

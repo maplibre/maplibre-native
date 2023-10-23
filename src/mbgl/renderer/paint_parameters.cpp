@@ -158,6 +158,7 @@ void PaintParameters::clearStencil() {
                          0,
                          0}};
     mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+    context.renderingStats().stencilClears++;
 #else // !MLN_RENDER_BACKEND_METAL
     context.clearStencilBuffer(0b00000000);
 #endif
@@ -231,6 +232,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
 
         auto& mtlContext = static_cast<mtl::Context&>(context);
         mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+
+        mtlContext.renderingStats().stencilUpdates++;
     }
 
 #else  // !MLN_RENDER_BACKEND_METAL

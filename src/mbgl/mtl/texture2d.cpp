@@ -13,7 +13,12 @@ namespace mtl {
 Texture2D::Texture2D(Context& context_)
     : context(context_) {}
 
-Texture2D::~Texture2D() {}
+Texture2D::~Texture2D() {
+    if (metalTexture) {
+        context.renderingStats().numActiveTextures--;
+        context.renderingStats().memTextures -= getDataSize();
+    }
+}
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
     samplerState = samplerState_;
@@ -138,6 +143,8 @@ void Texture2D::createMetalTexture() noexcept {
 
     if (metalTexture) {
         textureDirty = false;
+        context.renderingStats().numCreatedTextures++;
+        context.renderingStats().numActiveTextures++;
         context.renderingStats().memTextures += getDataSize();
     }
 }
@@ -190,12 +197,16 @@ void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
 
     encoder->setFragmentTexture(metalTexture.get(), location);
     encoder->setFragmentSamplerState(metalSamplerState.get(), location);
+
+    context.renderingStats().numTextureBindings++;
 }
 
 void Texture2D::unbind(const RenderPass& renderPass, int32_t location) noexcept {
     const auto& encoder = renderPass.getMetalEncoder();
     encoder->setFragmentTexture(nullptr, location);
     encoder->setFragmentSamplerState(nullptr, location);
+
+    context.renderingStats().numTextureBindings--;
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
@@ -215,9 +226,11 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     assert(metalTexture.get());
     assert(!textureDirty);
 
-    MTL::Region region = MTL::Region::Make2D(xOffset, yOffset, size_.width, size_.height);
-    NS::UInteger bytesPerRow = size_.width * getPixelStride();
+    const MTL::Region region = MTL::Region::Make2D(xOffset, yOffset, size_.width, size_.height);
+    const NS::UInteger bytesPerRow = size_.width * getPixelStride();
     metalTexture->replaceRegion(region, 0, pixelData, bytesPerRow);
+    context.renderingStats().numTextureUpdates++;
+    context.renderingStats().textureUpdateBytes += bytesPerRow * size_.height;
 }
 
 void Texture2D::upload() noexcept {

@@ -103,7 +103,8 @@ protected:
 public:
     virtual std::unique_ptr<CommandEncoder> createCommandEncoder() = 0;
 
-    virtual const RenderingStats& renderingStats() const = 0;
+    gfx::RenderingStats& renderingStats() { return stats; }
+    const gfx::RenderingStats& renderingStats() const { return stats; }
 
 #if !defined(NDEBUG)
 public:
@@ -156,6 +157,9 @@ public:
     }
 
 #endif
+
+protected:
+    gfx::RenderingStats stats;
 };
 
 } // namespace gfx
