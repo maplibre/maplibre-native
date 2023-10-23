@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/util/string.hpp>
-#include <mbgl/util/variant.hpp>
 #include <mapbox/compatibility/value.hpp>
 
 #include <optional>
