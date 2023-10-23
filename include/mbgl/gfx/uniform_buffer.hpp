@@ -48,7 +48,8 @@ protected:
 /// Stores a collection of uniform buffers by name
 class UniformBufferArray {
 public:
-    using UniformBufferMap = std::unordered_map<StringIdentity, std::shared_ptr<UniformBuffer>>;
+    using UniformBufferPair = std::pair<StringIdentity, std::shared_ptr<UniformBuffer>>;
+    using UniformBufferMap = std::vector<UniformBufferPair>;
 
     UniformBufferArray() = default;
     UniformBufferArray(UniformBufferArray&&);
