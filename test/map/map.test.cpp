@@ -34,6 +34,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/run_loop.hpp>
 
 #include <atomic>
@@ -1607,6 +1608,7 @@ TEST(Map, StencilOverflow) {
 
     const auto& backend = test.frontend.getBackend();
     gfx::BackendScope scope{*backend};
+    const auto& context = backend->getContext();
 
     auto& style = test.map.getStyle();
     style.loadJSON("{}");
@@ -1628,13 +1630,15 @@ TEST(Map, StencilOverflow) {
     test.frontend.render(test.map);
 
     // In drawable builds, no drawables are built because no bucket/tiledata is available.
-#if !MLN_DRAWABLE_RENDERER
-    // TODO: Collect stats on Metal context
-#if MLN_RENDER_BACKEND_OPENGL
-    const auto& context = static_cast<const gl::Context&>(backend->getContext());
+#if MLN_DRAWABLE_RENDERER
+    ASSERT_LE(0, context.renderingStats().stencilUpdates);
+#else
     ASSERT_LT(0, context.renderingStats().stencilClears);
-#endif // MLN_RENDER_BACKEND_OPENGL
-#endif // !MLN_DRAWABLE_RENDERER
+#endif // MLN_DRAWABLE_RENDERER
+
+#if !defined(NDEBUG)
+    Log::Info(Event::General, context.renderingStats().toString("\n"));
+#endif // !defined(NDEBUG)
 
     // TODO: confirm that the stencil masking actually worked
 }

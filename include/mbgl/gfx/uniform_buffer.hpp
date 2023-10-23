@@ -22,7 +22,8 @@ class UniformBuffer {
 protected:
     UniformBuffer(std::size_t size_)
         : size(size_) {}
-    UniformBuffer(const UniformBuffer&) = default;
+    UniformBuffer(const UniformBuffer& other)
+        : size(other.size) {}
     UniformBuffer(UniformBuffer&& other)
         : size(other.size) {}
 
@@ -32,8 +33,9 @@ public:
 
     std::size_t getSize() const { return size; }
 
+    UniformBuffer& operator=(const UniformBuffer&) = delete;
+
 protected:
-    UniformBuffer& operator=(const UniformBuffer&) = default;
     UniformBuffer& operator=(UniformBuffer&& other) {
         size = other.size;
         return *this;

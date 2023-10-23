@@ -46,7 +46,7 @@ void main() {
     float b = getElevation(v_pos + vec2(0, -epsilon.y), 0.0);
     float c = getElevation(v_pos + vec2(epsilon.x, -epsilon.y), 0.0);
     float d = getElevation(v_pos + vec2(-epsilon.x, 0), 0.0);
-    float e = getElevation(v_pos, 0.0);
+  //float e = getElevation(v_pos, 0.0);
     float f = getElevation(v_pos + vec2(epsilon.x, 0), 0.0);
     float g = getElevation(v_pos + vec2(-epsilon.x, epsilon.y), 0.0);
     float h = getElevation(v_pos + vec2(0, epsilon.y), 0.0);

@@ -36,7 +36,6 @@ public:
 #endif
 
 private:
-    void prepare(const LayerPrepareParameters&) override;
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;

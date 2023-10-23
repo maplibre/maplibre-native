@@ -20,6 +20,16 @@ UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_)
     MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
 }
 
+UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
+    : UniformBuffer(other),
+      hash(other.hash) {
+    MBGL_CHECK_ERROR(glGenBuffers(1, &id));
+    MBGL_CHECK_ERROR(glCopyBufferSubData(other.id, id, 0, 0, size));
+    MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_READ_BUFFER, other.id));
+    MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_WRITE_BUFFER, id));
+    MBGL_CHECK_ERROR(glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size));
+}
+
 UniformBufferGL::~UniformBufferGL() {
     if (id) {
         MBGL_CHECK_ERROR(glDeleteBuffers(1, &id));
