@@ -366,7 +366,7 @@ public:
                                                                0};
             parameters.context.emplaceOrUpdateUniformBuffer(linePropertiesUniformBuffer, &linePropertiesUBO);
         }
-        if(!uniforms.get(idLinePropertiesUBOName)) {
+        if (!uniforms.get(idLinePropertiesUBOName)) {
             uniforms.addOrReplace(idLinePropertiesUBOName, linePropertiesUniformBuffer);
         }
 
@@ -382,7 +382,7 @@ public:
                                                                      0};
             parameters.context.emplaceOrUpdateUniformBuffer(lineInterpolationUniformBuffer, &lineInterpolationUBO);
         }
-        if(!uniforms.get(idLineInterpolationUBOName)) {
+        if (!uniforms.get(idLineInterpolationUBOName)) {
             uniforms.addOrReplace(idLineInterpolationUBOName, lineInterpolationUniformBuffer);
         }
 
@@ -392,10 +392,9 @@ public:
             const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
             parameters.context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &expressionUBO);
         }
-        if(!uniforms.get(idExpressionInputsUBOName)) {
+        if (!uniforms.get(idExpressionInputsUBOName)) {
             uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
         }
-
 
         static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
         if (!permutationUniformBuffer) {
