@@ -366,7 +366,9 @@ public:
                                                                0};
             parameters.context.emplaceOrUpdateUniformBuffer(linePropertiesUniformBuffer, &linePropertiesUBO);
         }
-        uniforms.addOrReplace(idLinePropertiesUBOName, linePropertiesUniformBuffer);
+        if(!uniforms.get(idLinePropertiesUBOName)) {
+            uniforms.addOrReplace(idLinePropertiesUBOName, linePropertiesUniformBuffer);
+        }
 
         static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
         if (!lineInterpolationUniformBuffer) {
@@ -380,7 +382,9 @@ public:
                                                                      0};
             parameters.context.emplaceOrUpdateUniformBuffer(lineInterpolationUniformBuffer, &lineInterpolationUBO);
         }
-        uniforms.addOrReplace(idLineInterpolationUBOName, lineInterpolationUniformBuffer);
+        if(!uniforms.get(idLineInterpolationUBOName)) {
+            uniforms.addOrReplace(idLineInterpolationUBOName, lineInterpolationUniformBuffer);
+        }
 
 #if MLN_RENDER_BACKEND_METAL
         static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
@@ -388,7 +392,10 @@ public:
             const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
             parameters.context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &expressionUBO);
         }
-        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
+        if(!uniforms.get(idExpressionInputsUBOName)) {
+            uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
+        }
+
 
         static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
         if (!permutationUniformBuffer) {
@@ -409,7 +416,9 @@ public:
                 0};
             parameters.context.emplaceOrUpdateUniformBuffer(permutationUniformBuffer, &permutationUBO);
         }
-        uniforms.addOrReplace(idLinePermutationUBOName, permutationUniformBuffer);
+        if (!uniforms.get(idLinePermutationUBOName)) {
+            uniforms.addOrReplace(idLinePermutationUBOName, permutationUniformBuffer);
+        }
 #endif // MLN_RENDER_BACKEND_METAL
     };
 
