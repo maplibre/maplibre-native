@@ -24,10 +24,6 @@ struct TinyMapCompare : public C {
 
 /// A key-value map based on vectors, optimized for small collections.
 /// Loosly based on Andrei Alexandrescu's `loki::AssocVector`
-/// @details Similar interface to `std::map`, but not identical, e.g.:
-/// - iterators are invalidated by insert and erase operations
-/// - the complexity of insert/erase is O(N) not O(log N)
-/// - value_type is std::pair<K, V> not std::pair<const K, V>
 template <typename K, typename V, typename C = std::less<K>>
 class TinyMap {
     using KeyVec = std::vector<K>;
@@ -39,8 +35,16 @@ class TinyMap {
     using KeyCRIter = typename KeyVec::const_reverse_iterator;
     using ValueIter = typename ValueVec::iterator;
     using ValueCIter = typename ValueVec::const_iterator;
-    using ValueRIter = typename ValueVec::reverse_iterator;
-    using ValueCRIter = typename ValueVec::const_reverse_iterator;
+
+private:
+    // Find the item, returning where the item should be if missing in sorted mode
+    // Templated to handle `iterator` vs. `const_iterator` with less duplication.
+    template <typename T>
+    static auto find(T& map, const K&);
+
+    // Find the item, returning `end()` if not found
+    template <typename T>
+    static auto find_eq(T& map, const K&);
 
 public:
     using A = std::allocator<K>;
@@ -55,12 +59,17 @@ public:
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    explicit TinyMap(const key_compare& comp_ = key_compare())
-        : comp(comp_) {}
+    explicit TinyMap(bool sorted_, const key_compare& comp_ = key_compare())
+        : sorted(sorted_),
+          comp(comp_) {}
 
     template <typename InputIterator>
-    TinyMap(InputIterator firstKeyValuePair, InputIterator lastKeyValuePair, const key_compare& comp_ = key_compare())
-        : comp(comp_) {
+    TinyMap(bool sorted_,
+            InputIterator firstKeyValuePair,
+            InputIterator lastKeyValuePair,
+            const key_compare& comp_ = key_compare())
+        : sorted(sorted_),
+          comp(comp_) {
         reserve(std::distance(firstKeyValuePair, lastKeyValuePair));
         while (firstKeyValuePair != lastKeyValuePair) {
             insert(*firstKeyValuePair++);
@@ -68,34 +77,39 @@ public:
     }
 
     template <typename KeyInputIterator, typename ValueInputIterator>
-    TinyMap(KeyInputIterator firstKey,
+    TinyMap(bool sorted_,
+            KeyInputIterator firstKey,
             KeyInputIterator lastKey,
             ValueInputIterator firstValue,
             ValueInputIterator lastValue,
             const key_compare& comp_ = key_compare())
-        : comp(comp_) {
+        : sorted(sorted_),
+          comp(comp_) {
         reserve(std::distance(firstKey, lastKey));
         while (firstKey != lastKey) {
             insert(*firstKey++, *firstValue++);
         }
     }
 
-    TinyMap(std::initializer_list<value_type> list, const key_compare& comp_ = key_compare())
-        : TinyMap(list.begin(), list.end(), comp) {}
+    TinyMap(bool sorted_, std::initializer_list<value_type> list, const key_compare& comp_ = key_compare())
+        : TinyMap(sorted_, list.begin(), list.end(), comp) {}
 
     template <typename KeyInput, typename ValueInput>
-    TinyMap(std::initializer_list<KeyInput> keys,
+    TinyMap(bool sorted_,
+            std::initializer_list<KeyInput> keys,
             std::initializer_list<ValueInput> values,
             const key_compare& comp_ = key_compare())
-        : TinyMap(keys.begin(), keys.end(), values.begin(), values.end(), comp) {}
+        : TinyMap(sorted_, keys.begin(), keys.end(), values.begin(), values.end(), comp) {}
 
     TinyMap(const TinyMap& rhs)
         : keys(rhs.keys),
           values(rhs.values),
+          sorted(rhs.sorted),
           comp(rhs.comp) {}
     TinyMap(TinyMap&& rhs)
         : keys(std::move(rhs.keys)),
           values(std::move(rhs.values)),
+          sorted(rhs.sorted),
           comp(std::move(rhs.comp)) {}
 
     TinyMap& operator=(const TinyMap& rhs) {
@@ -150,8 +164,8 @@ public:
     /// @return as `std::map::insert`
     /// Invalidates all iterators.
     std::pair<iterator, bool> insert(const key_type& key, mapped_type value) {
-        auto i = std::lower_bound(keys.begin(), keys.end(), key, comp);
-        if (i == keys.end() || comp(key, *i)) {
+        auto i = find(*this, key);
+        if (i == keys.end() || (sorted && comp(key, *i))) {
             values.insert(keyToValueIter(i), std::move(value));
             return std::make_pair(makeIter(keys.insert(i, key)), true);
         } else {
@@ -163,6 +177,7 @@ public:
     /// Invalidates all iterators.
     iterator insert(iterator pos, const value_type& val);
 
+    /// Insert a range of values
     template <class InputIterator>
     void insert(InputIterator first, InputIterator last) {
         for (; first != last; ++first) {
@@ -188,6 +203,7 @@ public:
     void swap(TinyMap& other) {
         std::swap(keys, other.keys);
         std::swap(values, other.values);
+        std::swap(sorted, other.sorted);
         std::swap(comp, other.comp);
         return *this;
     }
@@ -197,43 +213,11 @@ public:
         values.clear();
     }
 
-    iterator find(const key_type& k) {
-        const auto i = std::lower_bound(keys.begin(), keys.end(), k, comp);
-        return (i != keys.end() && comp(k, *i)) ? end() : makeIter(i);
-    }
+    iterator find(const key_type& k) { return find_eq(*this, k); }
 
-    const_iterator find(const key_type& k) const {
-        const auto i = std::lower_bound(keys.begin(), keys.end(), k, comp);
-        return (i != keys.end() && comp(k, *i)) ? end() : makeIter(i);
-    }
+    const_iterator find(const key_type& k) const { return find_eq(*this, k); }
 
-    size_type count(const key_type& k) const { return (keys.find(k, comp) != keys.end()) ? 1 : 0; }
-
-    iterator lower_bound(const key_type& k) { return makeIter(std::lower_bound(keys.begin(), keys.end(), k, comp)); }
-
-    const_iterator lower_bound(const key_type& k) const {
-        return makeIter(std::lower_bound(keys.begin(), keys.end(), k, comp));
-    }
-
-    iterator upper_bound(const key_type& k) { return makeIter(std::upper_bound(keys.begin(), keys.end(), k, comp)); }
-
-    const_iterator upper_bound(const key_type& k) const {
-        return makeIter(std::upper_bound(keys.begin(), keys.end(), k, comp));
-    }
-
-    std::pair<iterator, iterator> equal_range(const key_type& k) {
-        const auto i = std::equal_range(keys.begin(), keys.end(), k, comp);
-        return std::make_pair(makeIter(i.first), makeIter(i.second));
-    }
-
-    std::pair<const_iterator, const_iterator> equal_range(const key_type& k) const {
-        const auto i = std::equal_range(keys.begin(), keys.end(), k, comp);
-        return std::make_pair(makeIter(i.first), makeIter(i.second));
-    }
-
-    friend bool operator==(const TinyMap& lhs, const TinyMap& rhs) {
-        return lhs.keys == rhs.keys && lhs.keys == rhs.keys;
-    }
+    size_type count(const key_type& k) const { return (find(k) != end()) ? 1 : 0; }
 
 private:
     /// Make an underlying value iterator from an underlying key iterator using `key[N]=value[N]`
@@ -255,13 +239,14 @@ private:
 
     std::vector<K> keys;
     std::vector<V> values;
+    bool sorted;
     detail::TinyMapCompare<V, C> comp;
 };
 
 template <typename K, typename V, typename C>
 struct TinyMap<K, V, C>::iterator
     : std::iterator<std::bidirectional_iterator_tag,
-                    typename KeyValueVec::iterator::value_type,
+                    typename KeyValueVec::value_type,
                     typename KeyValueVec::iterator::difference_type,
                     /*pointer_type=*/std::pair<std::reference_wrapper<K>, std::reference_wrapper<V>>*,
                     /*reference_type=*/std::pair<K&, V&>> {
@@ -307,7 +292,7 @@ private:
 template <typename K, typename V, typename C>
 struct TinyMap<K, V, C>::const_iterator
     : std::iterator<std::bidirectional_iterator_tag,
-                    typename KeyValueVec::const_iterator::value_type,
+                    typename KeyValueVec::value_type,
                     typename KeyValueVec::const_iterator::difference_type,
                     /*pointer_type=*/std::pair<std::reference_wrapper<const K>, std::reference_wrapper<const V>>*,
                     /*reference_type=*/std::pair<const K&, const V&>> {
@@ -351,8 +336,26 @@ private:
 };
 
 template <typename K, typename V, typename C>
+template <typename T>
+auto TinyMap<K, V, C>::find(T& map, const key_type& k) {
+    if (map.sorted) {
+        return std::lower_bound(map.keys.begin(), map.keys.end(), k, map.comp);
+    } else {
+        return std::find_if(
+            map.keys.begin(), map.keys.end(), [&](const auto& i) { return !map.comp(k, i) && !map.comp(i, k); });
+    }
+}
+
+template <typename K, typename V, typename C>
+template <typename T>
+auto TinyMap<K, V, C>::find_eq(T& map, const key_type& k) {
+    const auto i = find(map, k);
+    return (map.sorted && i != map.keys.end() && map.comp(k, *i)) ? map.end() : map.makeIter(i);
+}
+
+template <typename K, typename V, typename C>
 TinyMap<K, V, C>::iterator TinyMap<K, V, C>::insert(iterator pos, const value_type& val) {
-    if (pos.first != keys.end() && comp(*pos.first, val.first) &&
+    if (sorted && pos.first != keys.end() && comp(*pos.first, val.first) &&
         (pos == std::prev(end()) || !comp(val, pos.second.first) && comp(pos.second.first, val))) {
         return std::make_pair(keys.insert(pos.first, val.first), keys.insert(keyToValueIter(pos.first), val.second));
     }

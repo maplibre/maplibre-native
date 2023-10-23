@@ -2,79 +2,82 @@
 
 #include <mbgl/util/tiny_map.hpp>
 
-using namespace mbgl::util;
+using namespace mbgl;
 
-TEST(TinyMap, Init) {
+struct TinyMap : public testing::TestWithParam<bool> {};
+
+template <typename TMapIter, typename TMap2>
+void testSetDiff(TMapIter beg, TMapIter end, TMap2& map2) {
+    while (beg != end) {
+        auto item = *beg++;
+        auto i = map2.find(item.first);
+        EXPECT_NE(i, map2.end());
+        EXPECT_EQ(i->second, item.second);
+    }
+}
+template <typename TMap1, typename TMap2>
+void testSetDiff(TMap1 map1, TMap2& map2) {
+    testSetDiff(map1.begin(), map1.end(), map2);
+    testSetDiff(map2.begin(), map2.end(), map1);
+}
+
+TEST_P(TinyMap, Init) {
     // Construct from separate initializer lists
-    const auto map = TinyMap<int, int>{{1, 2, 3}, {3, 2, 1}};
+    const auto map = util::TinyMap<int, int>{GetParam(), {1, 2, 3}, {3, 2, 1}};
     EXPECT_EQ(3, map.size());
     EXPECT_LT(1 << 16, map.max_size());
 
     // Construct from list of pairs
-    const auto map2 = TinyMap<int, int>{{1, 3}, {2, 2}, {3, 1}};
-    EXPECT_EQ(map, map2);
+    const auto map2 = util::TinyMap<int, int>{GetParam(), {{1, 3}, {2, 2}, {3, 1}}};
+    EXPECT_EQ(map.size(), map2.size());
+    testSetDiff(map, map2);
 
     // Construct in a different order
-    const auto map3 = TinyMap<int, int>{{2, 3, 1}, {2, 1, 3}};
-    EXPECT_EQ(map, map3);
+    const auto map3 = util::TinyMap<int, int>{GetParam(), {2, 3, 1}, {2, 1, 3}};
+    testSetDiff(map, map3);
 }
 
-TEST(TinyMap, Copy) {
-    const auto map = TinyMap<int, int>{{1, 2, 3}, {3, 2, 1}};
+TEST_P(TinyMap, Copy) {
+    const auto map = util::TinyMap<int, int>{GetParam(), {1, 2, 3}, {3, 2, 1}};
     decltype(map) map2(map);
 
-    std::remove_const_t<decltype(map)> map3;
+    std::remove_const_t<decltype(map)> map3(GetParam());
     map3 = map2;
 
-    EXPECT_EQ(map, map2);
-    EXPECT_EQ(map, map3);
+    testSetDiff(map, map2);
+    testSetDiff(map, map3);
 }
 
-TEST(TinyMap, Move) {
-    const auto map = TinyMap<int, int>{{1, 2, 3}, {3, 2, 1}};
+TEST_P(TinyMap, Move) {
+    const auto map = util::TinyMap<int, int>{GetParam(), {1, 2, 3}, {3, 2, 1}};
     std::remove_const_t<decltype(map)> map2(map);
 
     // move constructor
     decltype(map2) map3(std::move(map2));
     EXPECT_TRUE(map2.empty());
-    EXPECT_EQ(map, map3);
+    testSetDiff(map, map3);
 
     // move assignment
-    decltype(map2) map4;
+    decltype(map2) map4(GetParam());
     map4 = std::move(map3);
     EXPECT_TRUE(map3.empty());
-    EXPECT_EQ(map, map4);
+    testSetDiff(map, map4);
 }
 
-template <typename T>
-void testLookup(T& map) {
+TEST_P(TinyMap, ConstLookup) {
+    const auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6}, {3, 2, 1}};
+
     EXPECT_EQ(3, map.find(2)->second);
     EXPECT_EQ(2, map.find(4)->second);
     EXPECT_EQ(1, map.find(6)->second);
-
-    EXPECT_EQ(map.begin(), map.lower_bound(1));
-    EXPECT_EQ(map.begin(), map.lower_bound(2));
-    EXPECT_EQ(--map.end(), map.upper_bound(5));
-    EXPECT_EQ(map.end()--, map.upper_bound(6));
-
-    auto range = map.equal_range(4);
-    EXPECT_EQ(1, std::distance(range.first, range.second));
-    EXPECT_EQ(4, range.first->first);
-    EXPECT_EQ(2, range.first->second);
-
-    range = map.equal_range(999);
-    EXPECT_EQ(range.first, range.second);
-    EXPECT_EQ(0, std::distance(range.first, range.second));
 }
 
-TEST(TinyMap, ConstLookup) {
-    const auto map = TinyMap<int, int>{{2, 4, 6}, {3, 2, 1}};
-    testLookup(map);
-}
+TEST_P(TinyMap, MutableLookup) {
+    auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6}, {3, 2, 1}};
 
-TEST(TinyMap, MutableLookup) {
-    auto map = TinyMap<int, int>{{2, 4, 6}, {3, 2, 1}};
-    testLookup(map);
+    EXPECT_EQ(3, map.find(2)->second);
+    EXPECT_EQ(2, map.find(4)->second);
+    EXPECT_EQ(1, map.find(6)->second);
 
     // `[]` inserts a default value
     EXPECT_EQ(0, map[7]);
@@ -86,51 +89,35 @@ TEST(TinyMap, MutableLookup) {
     EXPECT_EQ(3, map[2]);
     EXPECT_EQ(2, map[4]);
     EXPECT_EQ(1, map[6]);
-
-    map.erase(0);
-    map.erase(3);
-    map.erase(5);
-    map.erase(7);
-
-    testLookup(map);
 }
 
-template <typename A, typename B, typename C, typename D>
-bool equal(const std::pair<A, B>& a, const std::pair<C, D>& b) {
-    return a.first == b.first && a.second == b.second;
-}
-const auto IntPairEq = equal<const int&, const int&, int, int>; // Why isn't this inferred?
-
-TEST(TinyMap, Iterate) {
+// Check that symmetric set difference is empty using const, mutable, and reverse iterators
+TEST_P(TinyMap, Iterate) {
     // Iterate as map
-    const auto map = TinyMap<int, int>{{2, 4, 6}, {3, 2, 1}};
-    const auto map2 = std::map<int, int>{{2, 3}, {4, 2}, {6, 1}};
-    EXPECT_TRUE(std::equal(map.begin(), map.end(), map2.begin(), map2.end(), IntPairEq));
-    EXPECT_TRUE(std::equal(map.rbegin(), map.rend(), map2.rbegin(), map2.rend(), IntPairEq));
-}
-
-TEST(TinyMap, IterateMutable) {
-    // Iterate as map
-    auto map = TinyMap<int, int>{{2, 4, 6}, {3, 2, 1}};
+    auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6}, {3, 2, 1}};
     auto map2 = std::map<int, int>{{2, 3}, {4, 2}, {6, 1}};
-    EXPECT_TRUE(std::equal(map.begin(), map.end(), map2.begin(), map2.end(), IntPairEq));
-    EXPECT_TRUE(std::equal(map.rbegin(), map.rend(), map2.rbegin(), map2.rend(), IntPairEq));
+
+    testSetDiff(map.begin(), map.end(), map2);
+    testSetDiff(map2.begin(), map2.end(), map);
+    testSetDiff(map.rbegin(), map.rend(), map2);
+    testSetDiff(map2.rbegin(), map2.rend(), map);
+
+    const auto& cmap = map;
+    const auto& cmap2 = map2;
+    testSetDiff(cmap.begin(), cmap.end(), cmap2);
+    testSetDiff(cmap2.begin(), cmap2.end(), cmap);
+    testSetDiff(cmap.rbegin(), cmap.rend(), cmap2);
+    testSetDiff(cmap2.rbegin(), cmap2.rend(), cmap);
 }
 
-TEST(TinyMap, Erase) {
-    auto map = TinyMap<int, int>{{2, 4, 6, 8, 10, 12}, {1, 2, 3, 4, 5, 6}};
+TEST_P(TinyMap, Erase) {
+    auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6, 8, 10, 12}, {1, 2, 3, 4, 5, 6}};
 
     map.erase(6);
     EXPECT_EQ(5, map.size());
 
     map.erase(map.find(2));
     EXPECT_EQ(4, map.size());
-
-    map.erase(map.lower_bound(10), map.upper_bound(12));
-    EXPECT_EQ(2, map.size());
-
-    map.erase(map.equal_range(8).first, map.equal_range(8).second);
-    EXPECT_EQ(1, map.size());
 
     EXPECT_EQ(2, map[4]);
 
@@ -139,7 +126,18 @@ TEST(TinyMap, Erase) {
     EXPECT_TRUE(map.empty());
 }
 
-TEST(TinyMap, StringKey) {
-    auto map = TinyMap<std::string, int>{{"a", "b", "c"}, {1, 2, 3}};
+TEST_P(TinyMap, StringKey) {
+    auto map = util::TinyMap<std::string, int>{GetParam(), {"a", "b", "c"}, {1, 2, 3}};
     EXPECT_EQ(2, map["b"]);
 }
+
+TEST_P(TinyMap, StringVal) {
+    auto map = util::TinyMap<int, std::string>{GetParam(), {1, 2, 3}, {"a", "b", "c"}};
+
+    std::string s = "d";
+    map.insert(4, std::move(s));
+    EXPECT_TRUE(s.empty());
+    EXPECT_EQ("d", map[4]);
+}
+
+INSTANTIATE_TEST_SUITE_P(Sort, TinyMap, testing::Values(true, false));
