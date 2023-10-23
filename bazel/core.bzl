@@ -831,6 +831,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/thread.hpp",
     "include/mbgl/util/tileset.hpp",
     "include/mbgl/util/timer.hpp",
+    "include/mbgl/util/tiny_map.hpp",
     "include/mbgl/util/traits.hpp",
     "include/mbgl/util/type_list.hpp",
     "include/mbgl/util/unitbezier.hpp",
