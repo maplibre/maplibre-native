@@ -1,10 +1,18 @@
 #import "MLNCustomDrawableStyleLayer.h"
-//#import "MLNCustomDrawableStyleLayer_Private.h"
-//
-//#import "MLNMapView_Private.h"
-//#import "MLNStyle_Private.h"
-//#import "MLNStyleLayer_Private.h"
-//#import "MLNGeometry_Private.h"
+#import "MLNCustomDrawableStyleLayer_Private.h"
+#import "MLNStyleLayer.h"
+
+#import "MLNStyle_Private.h"
+#import "MLNStyleLayer_Private.h"
+#import "MLNGeometry_Private.h"
+
+#include <mbgl/layermanager/layer_factory.hpp>
+#include <mbgl/style/layer.hpp>
+#include <mbgl/style/layers/custom_drawable_layer.hpp>
+#include <mbgl/util/constants.hpp>
+
+#include <memory>
+#include <cmath>
 
 class MLNCustomDrawableLayerHost;
 
@@ -14,17 +22,6 @@ namespace mbgl {
     }
 }
 
-#include <memory>
-#include <cmath>
-
-@interface MLNCustomDrawableStyleLayer ()
-
-@property (nonatomic, readonly) mbgl::style::CustomDrawableLayer *rawLayer;
-
-@property (nonatomic, weak, readwrite) MLNStyle *style;
-
-@end
-
 @implementation MLNCustomDrawableStyleLayer
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
@@ -33,24 +30,8 @@ namespace mbgl {
     return self = [super initWithPendingLayer:std::move(layer)];
 }
 
-- (mbgl::style::CustomDrawableLayer *)rawLayer {
-    return (mbgl::style::CustomDrawableLayer *)super.rawLayer;
-}
 
 @end
-
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/util/constants.hpp>
-
-namespace mbgl {
-    
-class CustomDrawableStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::CustomDrawableLayerFactory {
-    // LayerPeerFactory overrides.
-    LayerFactory* getCoreLayerFactory() final { return this; }
-    virtual MLNStyleLayer* createPeer(style::Layer*) final;
-};
-    
-}  // namespace mbgl
 
 class MLNCustomDrawableLayerHost : public mbgl::style::CustomDrawableLayerHost {
 public:
@@ -134,4 +115,3 @@ MLNStyleLayer* CustomDrawableStyleLayerPeerFactory::createPeer(style::Layer* raw
 }
 
 }  // namespace mbgl
-
