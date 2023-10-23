@@ -24,15 +24,18 @@ UniformBufferArray& UniformBufferArray::operator=(const UniformBufferArray& othe
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const StringIdentity id) const {
-    const auto result = std::find_if(uniformBufferMap.begin(), uniformBufferMap.end(), [&id](const auto& element) { return element.first == id; });
+    const auto result = std::find_if(
+        uniformBufferMap.begin(), uniformBufferMap.end(), [&id](const auto& element) { return element.first == id; });
     return (result != uniformBufferMap.end()) ? result->second : nullref;
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::addOrReplace(const StringIdentity id,
                                                                        std::shared_ptr<UniformBuffer> uniformBuffer) {
-    
-    if(auto it = std::find_if(uniformBufferMap.begin(), uniformBufferMap.end(), [&id](const auto& element) { return element.first == id; }); it != uniformBufferMap.end()) {
-        it->second =  std::move(uniformBuffer);
+    if (auto it = std::find_if(uniformBufferMap.begin(),
+                               uniformBufferMap.end(),
+                               [&id](const auto& element) { return element.first == id; });
+        it != uniformBufferMap.end()) {
+        it->second = std::move(uniformBuffer);
         return it->second;
     } else {
         uniformBufferMap.emplace_back(std::make_pair(id, std::move(uniformBuffer)));
@@ -59,7 +62,10 @@ void UniformBufferArray::createOrUpdate(const StringIdentity id,
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::add(const StringIdentity id,
                                                               std::shared_ptr<UniformBuffer>&& uniformBuffer) {
-    if(auto it = std::find_if(uniformBufferMap.begin(), uniformBufferMap.end(), [&id](const auto& element) { return element.first == id; }); it == uniformBufferMap.end()) {
+    if (auto it = std::find_if(uniformBufferMap.begin(),
+                               uniformBufferMap.end(),
+                               [&id](const auto& element) { return element.first == id; });
+        it == uniformBufferMap.end()) {
         uniformBufferMap.emplace_back(std::make_pair(id, std::move(uniformBuffer)));
         return uniformBufferMap.back().second;
     } else {
