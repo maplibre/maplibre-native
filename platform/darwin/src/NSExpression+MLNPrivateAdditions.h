@@ -7,7 +7,7 @@
 
 #import "NSExpression+MLNAdditions.h"
 
-//#include <mbgl/style/filter.hpp>
+#include <mbgl/style/filter.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/feature.hpp>
 
