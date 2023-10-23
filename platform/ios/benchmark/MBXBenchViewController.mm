@@ -203,7 +203,9 @@ namespace  mbgl {
             idx++;
             [self startBenchmarkIteration];
         } else {
-            [mapView setNeedsRerender];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [mapView setNeedsRerender];
+            });
         }
         return;
     }
@@ -220,7 +222,9 @@ namespace  mbgl {
             started = std::chrono::steady_clock::now();
             NSLog(@"- Benchmarking for %d frames...", benchmarkDuration);
         }
-        [mapView setNeedsRerender];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [mapView setNeedsRerender];
+        });
         return;
     }
 
@@ -232,7 +236,9 @@ namespace  mbgl {
             state = State::WarmingUp;
             [self.mapView didReceiveMemoryWarning];
             NSLog(@"- Warming up for %d frames...", warmupDuration);
-            [mapView setNeedsRerender];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [mapView setNeedsRerender];
+            });
         }
         return;
     }
