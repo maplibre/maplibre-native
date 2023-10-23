@@ -12,6 +12,7 @@
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
+#include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -37,12 +38,24 @@ constexpr uint32_t maximumVertexBindingCount = 31;
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(mtl::maximumVertexBindingCount),
-      backend(backend_),
-      stats() {}
+      backend(backend_) {}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         performCleanup();
+
+        emptyVertexBuffer.reset();
+        tileVertexBuffer.reset();
+        tileIndexBuffer.reset();
+        clipMaskShader.reset();
+        clipMaskDepthStencilState.reset();
+        clipMaskPipelineState.reset();
+        clipMaskUniformsBuffer.reset();
+        stencilStateRenderable = nullptr;
+
+#if !defined(NDEBUG)
+        Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
         assert(stats.isZero());
     }
 }
@@ -52,7 +65,7 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
 }
 
 BufferResource Context::createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const {
-    return {backend.getDevice(), data, size, MTL::ResourceStorageModeShared};
+    return {const_cast<Context&>(*this), data, size, MTL::ResourceStorageModeShared};
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
@@ -144,6 +157,11 @@ MTLSamplerStatePtr Context::createMetalSamplerState(MTLSamplerDescriptorPtr samp
     return NS::TransferPtr(backend.getDevice()->newSamplerState(samplerDescriptor.get()));
 }
 
+void Context::clear() {
+    stats.numDrawCalls = 0;
+    stats.numFrames++;
+}
+
 void Context::performCleanup() {
     clipMaskUniformsBufferUsed = false;
 }
@@ -205,6 +223,20 @@ const BufferResource& Context::getTileIndexBuffer() {
         tileIndexBuffer.emplace(createBuffer(indexes.data(), indexes.bytes(), gfx::BufferUsageType::StaticDraw));
     }
     return *tileIndexBuffer;
+}
+
+const gfx::UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
+    if (!emptyVertexBuffer) {
+        // This buffer is bound to vertex attribtue indexes when the uniforms are used instead and
+        // shaders are expected not to access the attribute values, but Metal requires a binding.
+        // This buffer could also hold a single default value applied for all vertices, in which case
+        // it could not be shared (See `MTL::VertexStepFunctionConstant` in the vertex attribute
+        // descriptors, but that isn't currently being used.
+        constexpr std::size_t size = 32;
+        constexpr auto usage = gfx::BufferUsageType::StaticDraw;
+        emptyVertexBuffer = std::make_unique<VertexBufferResource>(createBuffer(nullptr, size, usage));
+    }
+    return emptyVertexBuffer;
 }
 
 namespace {
@@ -316,16 +348,16 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
     const auto bufferSize = tileUBOs.size() * uboSize;
 
-    BufferResource tempBuffer;
+    std::optional<BufferResource> tempBuffer;
     auto& uboBuffer = clipMaskUniformsBufferUsed ? tempBuffer : clipMaskUniformsBuffer;
     clipMaskUniformsBufferUsed = true;
-    if (!uboBuffer || uboBuffer.getSizeInBytes() < bufferSize) {
+    if (!uboBuffer || !*uboBuffer || uboBuffer->getSizeInBytes() < bufferSize) {
         uboBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
         if (!uboBuffer) {
             return false;
         }
     } else {
-        uboBuffer.update(tileUBOs.data(), bufferSize, /*offset=*/0);
+        uboBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
     }
 
     encoder->setCullMode(MTL::CullModeNone);
@@ -350,7 +382,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
         encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
         encoder->setVertexBuffer(
-            uboBuffer.getMetalBuffer().get(), /*offset=*/ii * uboSize, ShaderClass::uniforms[0].index);
+            uboBuffer->getMetalBuffer().get(), /*offset=*/ii * uboSize, ShaderClass::uniforms[0].index);
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                        indexCount,
                                        MTL::IndexType::IndexTypeUInt16,
@@ -362,6 +394,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     }
 #endif
 
+    stats.numDrawCalls++;
+    stats.totalDrawCalls++;
     return true;
 }
 
