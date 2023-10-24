@@ -173,8 +173,8 @@ objc_library(
 objc_library(
     name = "app_custom_drawable_layer_objcpp_srcs",
     srcs = [
-            "//platform/darwin:app/MLNCustomDrawableStyleLayer.h",
-            "//platform/darwin:app/MLNCustomDrawableStyleLayer.mm",
+            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
+            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.mm",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + [
         "-fcxx-modules",

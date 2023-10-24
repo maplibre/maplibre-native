@@ -1,5 +1,3 @@
-#import "Mapbox.h"
-
 #import "MLNFoundation.h"
 #import "MLNStyleValue.h"
 #import "MLNStyleLayer.h"

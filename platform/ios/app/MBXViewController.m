@@ -18,7 +18,7 @@
 #endif
 
 #if MLN_DRAWABLE_RENDERER
-#import "MLNCustomDrawableStyleLayer.h"
+#import "ExampleCustomDrawableStyleLayer.h"
 #endif
 
 #import "MBXFrameTimeGraphView.h"
@@ -1583,7 +1583,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 - (void)addCustomDrawableLayer
 {
     // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
-    MLNCustomDrawableStyleLayer* layer = [[MLNCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
+    ExampleCustomDrawableStyleLayer* layer = [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
 
     if (layer) {
         [self.mapView.style addLayer:layer];

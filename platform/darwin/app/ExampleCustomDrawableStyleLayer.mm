@@ -1,7 +1,7 @@
-#import "MLNCustomDrawableStyleLayer.h"
-#import "MLNCustomDrawableStyleLayer_Private.h"
+#import "ExampleCustomDrawableStyleLayer.h"
 #import "MLNStyleLayer.h"
 
+#import "MLNCustomDrawableStyleLayer_Private.h"
 #import "MLNStyle_Private.h"
 #import "MLNStyleLayer_Private.h"
 #import "MLNGeometry_Private.h"
@@ -14,28 +14,22 @@
 #include <memory>
 #include <cmath>
 
-class MLNCustomDrawableLayerHost;
+class ExampleCustomDrawableStyleLayerHost;
 
-namespace mbgl {
-    namespace style {
-        class CustomDrawableLayer;
-    }
-}
-
-@implementation MLNCustomDrawableStyleLayer
+@implementation ExampleCustomDrawableStyleLayer
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
     auto layer = std::make_unique<mbgl::style::CustomDrawableLayer>(identifier.UTF8String,
-                                                            std::make_unique<MLNCustomDrawableLayerHost>(self));
+                                                            std::make_unique<ExampleCustomDrawableStyleLayerHost>(self));
     return self = [super initWithPendingLayer:std::move(layer)];
 }
 
 
 @end
 
-class MLNCustomDrawableLayerHost : public mbgl::style::CustomDrawableLayerHost {
+class ExampleCustomDrawableStyleLayerHost : public mbgl::style::CustomDrawableLayerHost {
 public:
-    MLNCustomDrawableLayerHost(MLNCustomDrawableStyleLayer *styleLayer) {
+    ExampleCustomDrawableStyleLayerHost(ExampleCustomDrawableStyleLayer *styleLayer) {
         layerRef = styleLayer;
         layer = nil;
     }
@@ -104,14 +98,6 @@ public:
         layer = nil;
     }
 private:
-    __weak MLNCustomDrawableStyleLayer * layerRef;
-    MLNCustomDrawableStyleLayer * layer = nil;
+    __weak ExampleCustomDrawableStyleLayer * layerRef;
+    ExampleCustomDrawableStyleLayer * layer = nil;
 };
-
-namespace mbgl {
-
-MLNStyleLayer* CustomDrawableStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
-    return [[MLNCustomDrawableStyleLayer alloc] initWithRawLayer:rawLayer];
-}
-
-}  // namespace mbgl
