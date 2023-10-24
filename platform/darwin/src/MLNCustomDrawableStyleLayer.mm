@@ -17,9 +17,11 @@
 /// @note
 /// Inherit MLNCustomDrawableStyleLayer class and override initWithIdentifier method to create and attach a valid CustomDrawableLayerHost instance
 /// Example:
+/// - (instancetype)initWithIdentifier:(NSString *)identifier {
 ///    auto layer = std::make_unique<mbgl::style::CustomDrawableLayer>(identifier.UTF8String,
 ///                                                            std::make_unique<ExampleCustomDrawableStyleLayerHost>(self));
 ///    return self = [super initWithPendingLayer:std::move(layer)];
+/// }
 ///
 - (instancetype)initWithIdentifier:(NSString *)identifier {
     auto layer = std::make_unique<mbgl::style::CustomDrawableLayer>(identifier.UTF8String, nullptr);

@@ -5,7 +5,7 @@
 #import "MLNStyleLayer.h"
 #import "MLNGeometry.h"
 
-@interface ExampleCustomDrawableStyleLayer : MLNCustomDrawableStyleLayer
+@interface ExampleCustomDrawableStyleLayer : MLNStyleLayer
 
 - (instancetype)initWithIdentifier:(NSString *)identifier;
 

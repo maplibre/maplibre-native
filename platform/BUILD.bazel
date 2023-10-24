@@ -185,15 +185,10 @@ objc_library(
         "-Wno-gnu-statement-expression",
         "-Wno-deprecated-declarations",
     ],
-    includes = [
-        "darwin/include",
-        "darwin/app",
-        "darwin/src",
-        "ios/src",
-    ],
     visibility = ["//visibility:public"],
     deps = [
         "//:mbgl-core",
+        ":ios-sdk",
     ],
 )
 
@@ -215,7 +210,6 @@ objc_library(
     includes = [
         "darwin/app",
         "darwin/src",
-        "ios/src",
     ],
     sdk_frameworks = [
         ] + select({
