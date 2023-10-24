@@ -203,7 +203,6 @@ jobs:
             -DMLN_WITH_OPENGL=OFF \
             -DMLN_WITH_METAL=ON \
             -DMLN_LEGACY_RENDERER=OFF \
-            -DMLN_DRAWABLE_RENDERER=ON \
             -DMLN_WITH_WERROR=OFF
 
       - name: Configure maplibre-native (Linux)
