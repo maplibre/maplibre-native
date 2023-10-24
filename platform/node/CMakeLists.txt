@@ -1,5 +1,4 @@
 set(NODE_MODULE_MINIMUM_ABI 83) # Minimum supported Node.js version: 14
-set(NODE_MODULE_MAXIMUM_ABI 120) # Maximum supported Node.js version: 21
 set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
@@ -9,6 +8,11 @@ add_node_module(
     INSTALL_PATH ${PROJECT_SOURCE_DIR}/lib/{node_abi}/mbgl.node
     NAN_VERSION 2.18.0
     EXCLUDE_NODE_ABIS
+        46
+        47
+        48
+        51
+        120
 )
 
 if(WIN32)
