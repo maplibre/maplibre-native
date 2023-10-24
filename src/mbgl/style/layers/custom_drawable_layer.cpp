@@ -9,7 +9,6 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
