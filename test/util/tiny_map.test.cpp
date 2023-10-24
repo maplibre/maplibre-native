@@ -1,6 +1,15 @@
 #include <mbgl/test/util.hpp>
-
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/chrono.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/tiny_map.hpp>
+
+#include <algorithm>
+#include <iomanip>
+#include <map>
+#include <numeric>
+#include <random>
+#include <unordered_map>
 
 using namespace mbgl;
 
@@ -127,7 +136,7 @@ TEST_P(TinyMap, Erase) {
 }
 
 TEST_P(TinyMap, StringKey) {
-    auto map = util::TinyMap<std::string, int>{GetParam(), {"a", "b", "c"}, {1, 2, 3}};
+    auto map = util::TinyMap<std::string, int>{GetParam(), {"c", "b", "a"}, {1, 2, 3}};
     EXPECT_EQ(2, map["b"]);
 }
 
@@ -135,9 +144,223 @@ TEST_P(TinyMap, StringVal) {
     auto map = util::TinyMap<int, std::string>{GetParam(), {1, 2, 3}, {"a", "b", "c"}};
 
     std::string s = "d";
-    map.insert(4, std::move(s));
+    map.insert(5, std::move(s));
     EXPECT_TRUE(s.empty());
-    EXPECT_EQ("d", map[4]);
+
+    s = "f";
+    map[4] = std::move(s);
+
+    EXPECT_EQ("d", map[5]);
+    EXPECT_EQ("f", map[4]);
 }
 
-INSTANTIATE_TEST_SUITE_P(Sort, TinyMap, testing::Values(true, false));
+TEST_P(TinyMap, TileIDKey) {
+    const bool sorted = GetParam();
+    const std::vector<mbgl::OverscaledTileID> keys = {
+        {2, 0, {2, 0, 0}},
+        {2, 0, {2, 1, 0}},
+        {2, 0, {2, 0, 1}},
+        {2, 0, {2, 1, 1}},
+        {2, 0, {2, 2, 1}},
+        {2, 0, {2, 3, 1}},
+        {2, 0, {2, 2, 2}},
+        {2, 0, {2, 3, 2}},
+
+        {1, 0, {1, 0, 0}},
+        {1, 0, {1, 1, 0}},
+        {1, 0, {1, 0, 1}},
+        {1, 0, {1, 1, 1}},
+
+        {0, 0, {0, 0, 0}},
+    };
+    const std::vector<std::size_t> values(keys.size(), 0);
+    const auto map = util::TinyMap<mbgl::OverscaledTileID, int>{
+        sorted, keys.begin(), keys.end(), values.begin(), values.end()};
+
+    for (const auto& k : keys) {
+        EXPECT_EQ(1, map.count(k));
+        EXPECT_EQ(0, map.count({3, k.wrap, k.canonical}));
+        EXPECT_EQ(0, map.count({k.overscaledZ, 1, k.canonical}));
+    }
+
+    EXPECT_TRUE(!sorted ||
+                std::is_sorted(map.begin(), map.end(), [](const auto& a, const auto& b) { return a.first < b.first; }));
+}
+
+TEST_P(TinyMap, CustomComp) {
+    const bool sorted = GetParam();
+    const auto map = util::TinyMap<int, int>{sorted, {1, 2, 3}, {3, 2, 1}};
+    const auto map2 = util::TinyMap<int, int, std::greater<int>>{sorted, {2, 3, 1}, {2, 1, 3}};
+    testSetDiff(map, map2);
+
+    // First key should be the greatest if we're sorted, first-inserted otherwise
+    EXPECT_EQ(GetParam() ? 3 : 2, map2.begin()->first);
+}
+
+TEST_P(TinyMap, ChangeSort) {
+    const bool sorted = GetParam();
+    auto map = util::TinyMap<int, int>{sorted, {3, 2, 1}, {1, 2, 3}};
+    auto map2 = util::TinyMap<int, int>{!sorted, {2, 3, 1}, {2, 1, 3}};
+    testSetDiff(map, map2);
+    EXPECT_EQ(sorted ? 1 : 3, map.begin()->first);
+    EXPECT_EQ(sorted ? 2 : 1, map2.begin()->first);
+
+    map.setSorted(!sorted);
+    map2.setSorted(sorted);
+    testSetDiff(map, map2);
+
+    EXPECT_EQ(1, map.begin()->first);
+    EXPECT_EQ(1, map2.begin()->first);
+}
+
+template <typename T>
+using TIter = typename std::vector<T>::const_iterator;
+template <typename TMap, typename TKey>
+using TMakeMap = std::function<TMap(TIter<TKey>, TIter<TKey>, TIter<std::size_t>, TIter<std::size_t>)>;
+
+template <typename TKey, // key type
+          typename TMap,
+          std::size_t max,     // largest number of elements to consider
+          std::size_t lookups, // number of searches for each item (~ read/write ratio)
+          std::size_t reports  // number of items reported from `max` (should divide evenly)
+          >
+void benchmark(bool sorted,
+               std::string_view label,
+               TMakeMap<TMap, TKey> make,
+               std::function<TKey()> generate,
+               std::size_t seed = 0xf00dLL) {
+    static_assert((max / reports) * reports == max);
+
+    std::vector<TKey> keys;
+    keys.reserve(max);
+    std::generate_n(std::back_inserter(keys), max, std::move(generate));
+
+    std::vector<size_t> values(keys.size());
+    std::iota(values.begin(), values.end(), 0);
+
+    std::seed_seq seed_seq{0xf00dLL};
+    std::default_random_engine engine(seed_seq);
+    std::shuffle(keys.begin(), keys.end(), engine);
+
+    using Clock = std::chrono::steady_clock;
+    using Usec = std::chrono::microseconds;
+    Usec::rep cumulative[reports + 1] = {0};
+
+    const auto startTime = Clock::now();
+    for (std::size_t i = 0; i <= max; ++i) {
+        const auto map = make(keys.begin(), keys.begin() + i, values.begin(), values.begin() + i);
+        for (std::size_t j = 0; j < lookups; ++j) {
+            for (std::size_t k = 0; k <= i; ++k) {
+                map.find(keys[k]);
+            }
+        }
+        if ((i % (max / reports)) == 0) {
+            const auto elapsed = std::chrono::duration_cast<Usec>(Clock::now() - startTime);
+            cumulative[i / (max / reports)] = elapsed.count();
+        }
+    }
+
+    std::stringstream ss;
+    ss << std::setw(20) << label << " keysize=" << std::setw(2) << sizeof(TKey) << " sorted=" << (sorted ? "T" : "F")
+       << " : ";
+    for (std::size_t i = 0; i <= reports; ++i) {
+        ss << (i * (max / reports)) << "=" << cumulative[i] << ", ";
+    }
+    Log::Info(Event::Timing, ss.str());
+}
+
+TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
+    const bool sorted = GetParam();
+    constexpr std::size_t lookups = 50;
+
+    std::size_t n = 0;
+    const auto genInts = [&] {
+        return n += 3821; // arbitrary value
+    };
+
+    // TinyMap with size_t keys
+    benchmark<std::size_t, util::TinyMap<std::size_t, size_t>, 50, lookups, 10>(
+        sorted,
+        "TinyMap",
+        [&](auto kb, auto ke, auto vb, auto ve) {
+            return util::TinyMap<std::size_t, size_t>{sorted, kb, ke, vb, ve};
+        },
+        genInts);
+
+    if (sorted) {
+        // std::map with size_t keys
+        n = 0;
+        benchmark<std::size_t, std::map<std::size_t, size_t>, 50, lookups, 10>(
+            sorted,
+            "map",
+            [&](auto kb, auto ke, auto vb, auto ve) {
+                std::map<std::size_t, size_t> m;
+                while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
+                return m;
+            },
+            genInts);
+    } else {
+        // std::unordered_map with size_t keys
+        n = 0;
+        benchmark<std::size_t, std::unordered_map<std::size_t, size_t>, 50, lookups, 10>(
+            sorted,
+            "unordered_map",
+            [&](auto kb, auto ke, auto vb, auto ve) {
+                std::unordered_map<std::size_t, size_t> m;
+                m.reserve(std::distance(kb, ke));
+                while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
+                return m;
+            },
+            genInts);
+    }
+
+    auto t = mbgl::OverscaledTileID{0, 0, {0, 0, 0}};
+    const auto genTileID = [&] {
+        t.canonical.y++;
+        if (t.canonical.y == 1 << t.canonical.z) {
+            t.canonical.y = 0;
+            t.canonical.x++;
+        }
+        if (t.canonical.x == 1 << t.canonical.z) {
+            t.canonical.x = 0;
+            t.canonical.z++;
+        }
+        return t;
+    };
+
+    benchmark<mbgl::OverscaledTileID, util::TinyMap<mbgl::OverscaledTileID, size_t>, 10, lookups, 10>(
+        sorted,
+        "TinyMap",
+        [&](auto kb, auto ke, auto vb, auto ve) {
+            return util::TinyMap<mbgl::OverscaledTileID, size_t>{sorted, kb, ke, vb, ve};
+        },
+        genTileID);
+
+    if (sorted) {
+        t = mbgl::OverscaledTileID{0, 0, {0, 0, 0}};
+        benchmark<mbgl::OverscaledTileID, std::map<mbgl::OverscaledTileID, size_t>, 10, lookups, 10>(
+            sorted,
+            "map",
+            [&](auto kb, auto ke, auto vb, auto ve) {
+                std::map<mbgl::OverscaledTileID, size_t> m;
+                while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
+                return m;
+            },
+            genTileID);
+    } else {
+        t = mbgl::OverscaledTileID{0, 0, {0, 0, 0}};
+        benchmark<mbgl::OverscaledTileID, std::unordered_map<mbgl::OverscaledTileID, size_t>, 10, lookups, 10>(
+            sorted,
+            "unordered_map",
+            [&](auto kb, auto ke, auto vb, auto ve) {
+                std::unordered_map<mbgl::OverscaledTileID, size_t> m;
+                m.reserve(std::distance(kb, ke));
+                while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
+                return m;
+            },
+            genTileID);
+    }
+}
+
+// Use `testing::GTEST_FLAG(filter) = "Sort/TinyMap.*/*"` to run these alone
+INSTANTIATE_TEST_SUITE_P(Sort, TinyMap, testing::Values(false, true));
