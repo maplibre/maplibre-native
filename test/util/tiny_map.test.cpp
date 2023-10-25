@@ -241,6 +241,8 @@ std::function<OverscaledTileID()> makeGenTileID() {
     };
 }
 
+static volatile int do_not_optimize_away = 0;
+
 template <typename TKey,       // key type
           typename TMap,       // map type
           std::size_t max,     // largest number of elements to consider
@@ -271,8 +273,6 @@ void benchmark(bool sorted,
     std::vector<double> times(reports);
 
     constexpr std::size_t timingIterations = 50;
-    static int dummy = 0;
-    volatile int* do_not_optimize_away = &dummy;
 
     // test each size from 1 to max
     int x = 0;
@@ -290,7 +290,7 @@ void benchmark(bool sorted,
             for (std::size_t j = 0; j < lookups; ++j) {
                 for (const auto& k : testKeys) {
                     if (map.find(k) != map.end()) {
-                        (*do_not_optimize_away)++;
+                        do_not_optimize_away++;
                     }
                 }
             }
@@ -305,16 +305,26 @@ void benchmark(bool sorted,
 
     std::stringstream ss;
     ss << std::setw(15) << label << " keysize=" << std::setw(2) << sizeof(TKey);
-    ss << " sort=" << (sorted ? "T" : "F") << " (x" << (max / reports) << "): ";
+    ss << " sort=" << (sorted ? "T" : "F");
+    ss << " ratio=" << lookups;
+    ss << " (x" << (max / reports) << "): ";
     for (std::size_t i = 0; i < reports; ++i) {
-        ss << std::setw(6) << std::round(times[i]);
+        ss << std::setw(6) << std::round(times[i] * 10);
     }
     Log::Info(Event::Timing, ss.str());
 }
 
 TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
+#if defined(DEBUG)
+    Log::Info(Event::General, "Build Type: Debug");
+#elif defined(NDEBUG)
+    Log::Info(Event::General, "Build Type: Release");
+#else
+    Log::Info(Event::General, "Build Type: ?");
+#endif
+
     const bool sorted = GetParam();
-    constexpr std::size_t lookups = 50;
+    constexpr std::size_t lookups = 100;
 
     std::size_t n = 0;
     const auto genInts = [&] {
@@ -322,7 +332,7 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
     };
 
     // TinyMap with size_t keys
-    benchmark<std::size_t, util::TinyMap<std::size_t, size_t>, 50, lookups, 10>(
+    benchmark<std::size_t, util::TinyMap<std::size_t, size_t>, 60, lookups, 20>(
         sorted,
         "TinyMap",
         [&](auto kb, auto ke, auto vb, auto ve) {
@@ -333,7 +343,7 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
     if (sorted) {
         // std::map with size_t keys
         n = 0;
-        benchmark<std::size_t, std::map<std::size_t, size_t>, 50, lookups, 10>(
+        benchmark<std::size_t, std::map<std::size_t, size_t>, 60, lookups, 20>(
             sorted,
             "map",
             [&](auto kb, auto ke, auto vb, auto ve) {
@@ -345,7 +355,7 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
     } else {
         // std::unordered_map with size_t keys
         n = 0;
-        benchmark<std::size_t, std::unordered_map<std::size_t, size_t>, 50, lookups, 10>(
+        benchmark<std::size_t, std::unordered_map<std::size_t, size_t>, 60, lookups, 20>(
             sorted,
             "unordered_map",
             [&](auto kb, auto ke, auto vb, auto ve) {
@@ -357,7 +367,7 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
             genInts);
     }
 
-    benchmark<OverscaledTileID, util::TinyMap<OverscaledTileID, size_t>, 10, lookups, 10>(
+    benchmark<OverscaledTileID, util::TinyMap<OverscaledTileID, size_t>, 20, lookups, 20>(
         sorted,
         "TinyMap",
         [&](auto kb, auto ke, auto vb, auto ve) {
@@ -366,7 +376,7 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
         makeGenTileID());
 
     if (sorted) {
-        benchmark<OverscaledTileID, std::map<OverscaledTileID, size_t>, 10, lookups, 10>(
+        benchmark<OverscaledTileID, std::map<OverscaledTileID, size_t>, 20, lookups, 20>(
             sorted,
             "map",
             [&](auto kb, auto ke, auto vb, auto ve) {
@@ -376,7 +386,7 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
             },
             makeGenTileID());
     } else {
-        benchmark<OverscaledTileID, std::unordered_map<OverscaledTileID, size_t>, 10, lookups, 10>(
+        benchmark<OverscaledTileID, std::unordered_map<OverscaledTileID, size_t>, 20, lookups, 20>(
             sorted,
             "unordered_map",
             [&](auto kb, auto ke, auto vb, auto ve) {
