@@ -271,6 +271,8 @@ void benchmark(bool sorted,
     std::vector<double> times(reports);
 
     constexpr std::size_t timingIterations = 50;
+    static int dummy = 0;
+    volatile int* do_not_optimize_away = &dummy;
 
     // test each size from 1 to max
     int x = 0;
@@ -288,7 +290,7 @@ void benchmark(bool sorted,
             for (std::size_t j = 0; j < lookups; ++j) {
                 for (const auto& k : testKeys) {
                     if (map.find(k) != map.end()) {
-                        x++;
+                        (*do_not_optimize_away)++;
                     }
                 }
             }
@@ -299,11 +301,6 @@ void benchmark(bool sorted,
             const auto elapsed = static_cast<double>(totalElapsed.count()) / timingIterations;
             times[i / (max / reports) - 1] = elapsed;
         }
-    }
-
-    // don't optimize away the work
-    if (x) {
-        printf("");
     }
 
     std::stringstream ss;
