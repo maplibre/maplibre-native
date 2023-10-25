@@ -52,7 +52,7 @@ private:
 public:
     using key_type = K;
     using mapped_type = V;
-    using value_type = KeyValueVec::value_type;
+    using value_type = typename KeyValueVec::value_type;
     using key_compare = C;
     using size_type = typename KeyVec::size_type;
 
@@ -400,7 +400,7 @@ inline auto TinyMap<K, V, C>::find_eq(T& map, const key_type& k) {
 }
 
 template <typename K, typename V, typename C>
-inline TinyMap<K, V, C>::iterator TinyMap<K, V, C>::insert(iterator pos, const value_type& val) {
+inline typename TinyMap<K, V, C>::iterator TinyMap<K, V, C>::insert(iterator pos, const value_type& val) {
     if (sorted && pos.first != keys.end() && comp(*pos.first, val.first) &&
         (pos == std::prev(end()) || !comp(val, pos.second.first) && comp(pos.second.first, val))) {
         return std::make_pair(keys.insert(pos.first, val.first), keys.insert(keyToValueIter(pos.first), val.second));
@@ -409,7 +409,7 @@ inline TinyMap<K, V, C>::iterator TinyMap<K, V, C>::insert(iterator pos, const v
 }
 
 template <typename K, typename V, typename C>
-inline TinyMap<K, V, C>::iterator TinyMap<K, V, C>::erase(iterator pos) {
+inline typename TinyMap<K, V, C>::iterator TinyMap<K, V, C>::erase(iterator pos) {
     values.erase(keyToValueIter(pos.keyIter()));
     return makeIter(keys.erase(pos.keyIter()));
 }
