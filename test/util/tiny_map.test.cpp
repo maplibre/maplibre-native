@@ -31,35 +31,46 @@ void testSetDiff(TMap1 map1, TMap2& map2) {
     testSetDiff(map2.begin(), map2.end(), map1);
 }
 
-TEST_P(TinyMap, Init) {
+template <bool Sort>
+void testInit() {
     // Construct from separate initializer lists
-    const auto map = util::TinyMap<int, int>{GetParam(), {1, 2, 3}, {3, 2, 1}};
+    const auto map = util::TinyMap<int, int, Sort>{{1, 2, 3}, {3, 2, 1}};
     EXPECT_EQ(3, map.size());
     EXPECT_LT(1 << 16, map.max_size());
 
     // Construct from list of pairs
-    const auto map2 = util::TinyMap<int, int>{GetParam(), {{1, 3}, {2, 2}, {3, 1}}};
+    const auto map2 = util::TinyMap<int, int, Sort>{{{1, 3}, {2, 2}, {3, 1}}};
     EXPECT_EQ(map.size(), map2.size());
     testSetDiff(map, map2);
 
     // Construct in a different order
-    const auto map3 = util::TinyMap<int, int>{GetParam(), {2, 3, 1}, {2, 1, 3}};
+    const auto map3 = util::TinyMap<int, int, Sort>{{2, 3, 1}, {2, 1, 3}};
     testSetDiff(map, map3);
 }
+TEST(TinyMap, Init) {
+    testInit<false>();
+    testInit<true>();
+}
 
-TEST_P(TinyMap, Copy) {
-    const auto map = util::TinyMap<int, int>{GetParam(), {1, 2, 3}, {3, 2, 1}};
+template <bool Sort>
+void testCopy() {
+    const auto map = util::TinyMap<int, int, Sort>{{1, 2, 3}, {3, 2, 1}};
     decltype(map) map2(map);
 
-    std::remove_const_t<decltype(map)> map3(GetParam());
+    std::remove_const_t<decltype(map)> map3;
     map3 = map2;
 
     testSetDiff(map, map2);
     testSetDiff(map, map3);
 }
+TEST(TinyMap, Copy) {
+    testCopy<false>();
+    testCopy<true>();
+}
 
-TEST_P(TinyMap, Move) {
-    const auto map = util::TinyMap<int, int>{GetParam(), {1, 2, 3}, {3, 2, 1}};
+template <bool Sort>
+void testMove() {
+    const auto map = util::TinyMap<int, int, Sort>{{1, 2, 3}, {3, 2, 1}};
     std::remove_const_t<decltype(map)> map2(map);
 
     // move constructor
@@ -68,22 +79,32 @@ TEST_P(TinyMap, Move) {
     testSetDiff(map, map3);
 
     // move assignment
-    decltype(map2) map4(GetParam());
+    decltype(map2) map4;
     map4 = std::move(map3);
     EXPECT_TRUE(map3.empty());
     testSetDiff(map, map4);
 }
+TEST(TinyMap, Move) {
+    testMove<false>();
+    testMove<true>();
+}
 
-TEST_P(TinyMap, ConstLookup) {
-    const auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6}, {3, 2, 1}};
+template <bool Sort>
+void testConstLookup() {
+    const auto map = util::TinyMap<int, int, Sort>{{2, 4, 6}, {3, 2, 1}};
 
     EXPECT_EQ(3, map.find(2)->second);
     EXPECT_EQ(2, map.find(4)->second);
     EXPECT_EQ(1, map.find(6)->second);
 }
+TEST(TinyMap, ConstLookup) {
+    testConstLookup<false>();
+    testConstLookup<true>();
+}
 
-TEST_P(TinyMap, MutableLookup) {
-    auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6}, {3, 2, 1}};
+template <bool Sort>
+void testMutableLookup() {
+    auto map = util::TinyMap<int, int, Sort>{{2, 4, 6}, {3, 2, 1}};
 
     EXPECT_EQ(3, map.find(2)->second);
     EXPECT_EQ(2, map.find(4)->second);
@@ -100,11 +121,16 @@ TEST_P(TinyMap, MutableLookup) {
     EXPECT_EQ(2, map[4]);
     EXPECT_EQ(1, map[6]);
 }
+TEST(TinyMap, MutableLookup) {
+    testMutableLookup<false>();
+    testMutableLookup<true>();
+}
 
 // Check that symmetric set difference is empty using const, mutable, and reverse iterators
-TEST_P(TinyMap, Iterate) {
+template <bool Sort>
+void testIterate() {
     // Iterate as map
-    auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6}, {3, 2, 1}};
+    auto map = util::TinyMap<int, int, Sort>{{2, 4, 6}, {3, 2, 1}};
     auto map2 = std::map<int, int>{{2, 3}, {4, 2}, {6, 1}};
 
     testSetDiff(map.begin(), map.end(), map2);
@@ -119,9 +145,14 @@ TEST_P(TinyMap, Iterate) {
     testSetDiff(cmap.rbegin(), cmap.rend(), cmap2);
     testSetDiff(cmap2.rbegin(), cmap2.rend(), cmap);
 }
+TEST(TinyMap, Iterate) {
+    testIterate<false>();
+    testIterate<true>();
+}
 
-TEST_P(TinyMap, Erase) {
-    auto map = util::TinyMap<int, int>{GetParam(), {2, 4, 6, 8, 10, 12}, {1, 2, 3, 4, 5, 6}};
+template <bool Sort>
+void testErase() {
+    auto map = util::TinyMap<int, int, Sort>{{2, 4, 6, 8, 10, 12}, {1, 2, 3, 4, 5, 6}};
 
     map.erase(6);
     EXPECT_EQ(5, map.size());
@@ -135,14 +166,24 @@ TEST_P(TinyMap, Erase) {
     map.clear();
     EXPECT_TRUE(map.empty());
 }
-
-TEST_P(TinyMap, StringKey) {
-    auto map = util::TinyMap<std::string, int>{GetParam(), {"c", "b", "a"}, {1, 2, 3}};
-    EXPECT_EQ(2, map["b"]);
+TEST(TinyMap, Erase) {
+    testErase<false>();
+    testErase<true>();
 }
 
-TEST_P(TinyMap, StringVal) {
-    auto map = util::TinyMap<int, std::string>{GetParam(), {1, 2, 3}, {"a", "b", "c"}};
+template <bool Sort>
+void testStringKey() {
+    auto map = util::TinyMap<std::string, int, Sort>{{"c", "b", "a"}, {1, 2, 3}};
+    EXPECT_EQ(2, map["b"]);
+}
+TEST(TinyMap, StringKey) {
+    testStringKey<false>();
+    testStringKey<true>();
+}
+
+template <bool Sort>
+void testStringVal() {
+    auto map = util::TinyMap<int, std::string, Sort>{{1, 2, 3}, {"a", "b", "c"}};
 
     std::string s = "d";
     map.insert(5, std::move(s));
@@ -154,10 +195,19 @@ TEST_P(TinyMap, StringVal) {
     EXPECT_EQ("d", map[5]);
     EXPECT_EQ("f", map[4]);
 }
+TEST(TinyMap, StringVal) {
+    testStringVal<false>();
+    testStringVal<true>();
+}
 
-TEST_P(TinyMap, TileIDKey) {
-    const bool sorted = GetParam();
+template <bool Sort>
+void testTileIDKey() {
     const std::vector<OverscaledTileID> keys = {
+        {1, 0, {1, 0, 0}},
+        {1, 0, {1, 1, 0}},
+        {1, 0, {1, 0, 1}},
+        {1, 0, {1, 1, 1}},
+
         {2, 0, {2, 0, 0}},
         {2, 0, {2, 1, 0}},
         {2, 0, {2, 0, 1}},
@@ -167,16 +217,10 @@ TEST_P(TinyMap, TileIDKey) {
         {2, 0, {2, 2, 2}},
         {2, 0, {2, 3, 2}},
 
-        {1, 0, {1, 0, 0}},
-        {1, 0, {1, 1, 0}},
-        {1, 0, {1, 0, 1}},
-        {1, 0, {1, 1, 1}},
-
         {0, 0, {0, 0, 0}},
     };
     const std::vector<std::size_t> values(keys.size(), 0);
-    const auto map = util::TinyMap<OverscaledTileID, int>{
-        sorted, keys.begin(), keys.end(), values.begin(), values.end()};
+    const auto map = util::TinyMap<OverscaledTileID, int, Sort>{keys.begin(), keys.end(), values.begin(), values.end()};
 
     for (const auto& k : keys) {
         EXPECT_EQ(1, map.count(k));
@@ -184,34 +228,30 @@ TEST_P(TinyMap, TileIDKey) {
         EXPECT_EQ(0, map.count({k.overscaledZ, 1, k.canonical}));
     }
 
-    EXPECT_TRUE(!sorted ||
-                std::is_sorted(map.begin(), map.end(), [](const auto& a, const auto& b) { return a.first < b.first; }));
+    if (Sort) {
+        auto comp = [](const auto& a, const auto& b) {
+            return a.first < b.first;
+        };
+        EXPECT_TRUE(std::is_sorted(map.begin(), map.end(), comp));
+    }
+}
+TEST(TinyMap, TileIDKey) {
+    testTileIDKey<false>();
+    testTileIDKey<true>();
 }
 
-TEST_P(TinyMap, CustomComp) {
-    const bool sorted = GetParam();
-    const auto map = util::TinyMap<int, int>{sorted, {1, 2, 3}, {3, 2, 1}};
-    const auto map2 = util::TinyMap<int, int, std::greater<int>>{sorted, {2, 3, 1}, {2, 1, 3}};
+template <bool Sort>
+void testCustomComp() {
+    const auto map = util::TinyMap<int, int, Sort>{{1, 2, 3}, {3, 2, 1}};
+    const auto map2 = util::TinyMap<int, int, Sort, std::greater<int>>{{2, 3, 1}, {2, 1, 3}};
     testSetDiff(map, map2);
 
     // First key should be the greatest if we're sorted, first-inserted otherwise
-    EXPECT_EQ(GetParam() ? 3 : 2, map2.begin()->first);
+    EXPECT_EQ(Sort ? 3 : 2, map2.begin()->first);
 }
-
-TEST_P(TinyMap, ChangeSort) {
-    const bool sorted = GetParam();
-    auto map = util::TinyMap<int, int>{sorted, {3, 2, 1}, {1, 2, 3}};
-    auto map2 = util::TinyMap<int, int>{!sorted, {2, 3, 1}, {2, 1, 3}};
-    testSetDiff(map, map2);
-    EXPECT_EQ(sorted ? 1 : 3, map.begin()->first);
-    EXPECT_EQ(sorted ? 2 : 1, map2.begin()->first);
-
-    map.setSorted(!sorted);
-    map2.setSorted(sorted);
-    testSetDiff(map, map2);
-
-    EXPECT_EQ(1, map.begin()->first);
-    EXPECT_EQ(1, map2.begin()->first);
+TEST(TinyMap, CustomComp) {
+    testCustomComp<false>();
+    testCustomComp<true>();
 }
 
 template <typename T>
@@ -243,18 +283,17 @@ std::function<OverscaledTileID()> makeGenTileID() {
 
 static volatile int do_not_optimize_away = 0;
 
-template <typename TKey,       // key type
-          typename TMap,       // map type
-          std::size_t max,     // largest number of elements to consider
-          std::size_t lookups, // number of searches for each item (~ read/write ratio)
-          std::size_t reports  // number of items reported from `max` (should divide evenly)
-          >
-void benchmark(bool sorted,
-               std::string_view label,
-               TMakeMap<TMap, TKey> make,
-               std::function<TKey()> generate,
-               std::size_t seed = 0xf00dLL) {
-    static_assert((max / reports) * reports == max);
+template <typename TKey, // key type
+          typename TMap, // map type
+          bool Sorted>
+void benchmark(const std::string_view label,
+               const std::size_t max,     // largest number of elements to consider
+               const std::size_t lookups, // number of searches for each item (~ read/write ratio)
+               const std::size_t reports, // number of items reported from `max` (should divide evenly)
+               const TMakeMap<TMap, TKey> make,
+               const std::function<TKey()> generate,
+               const std::size_t seed = 0xf00dLL) {
+    assert((max / reports) * reports == max);
 
     std::seed_seq seed_seq{0xf00dLL};
     std::default_random_engine engine(seed_seq);
@@ -305,7 +344,7 @@ void benchmark(bool sorted,
 
     std::stringstream ss;
     ss << std::setw(15) << label << " keysize=" << std::setw(2) << sizeof(TKey);
-    ss << " sort=" << (sorted ? "T" : "F");
+    ss << " sort=" << (Sorted ? "T" : "F");
     ss << " ratio=" << lookups;
     ss << " (x" << (max / reports) << "): ";
     for (std::size_t i = 0; i < reports; ++i) {
@@ -314,7 +353,8 @@ void benchmark(bool sorted,
     Log::Info(Event::Timing, ss.str());
 }
 
-TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
+template <bool Sorted>
+void testBenchmark() {
 #if defined(DEBUG)
     Log::Info(Event::General, "Build Type: Debug");
 #elif defined(NDEBUG)
@@ -323,7 +363,6 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
     Log::Info(Event::General, "Build Type: ?");
 #endif
 
-    const bool sorted = GetParam();
     constexpr std::size_t lookups = 100;
 
     std::size_t n = 0;
@@ -332,20 +371,24 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
     };
 
     // TinyMap with size_t keys
-    benchmark<std::size_t, util::TinyMap<std::size_t, size_t>, 60, lookups, 20>(
-        sorted,
+    benchmark<std::size_t, util::TinyMap<std::size_t, size_t, Sorted>, Sorted>(
         "TinyMap",
+        100,
+        lookups,
+        20,
         [&](auto kb, auto ke, auto vb, auto ve) {
-            return util::TinyMap<std::size_t, size_t>{sorted, kb, ke, vb, ve};
+            return util::TinyMap<std::size_t, size_t, Sorted>{kb, ke, vb, ve};
         },
         genInts);
 
-    if (sorted) {
+    if constexpr (Sorted) {
         // std::map with size_t keys
         n = 0;
-        benchmark<std::size_t, std::map<std::size_t, size_t>, 60, lookups, 20>(
-            sorted,
+        benchmark<std::size_t, std::map<std::size_t, size_t>, true>(
             "map",
+            100,
+            lookups,
+            20,
             [&](auto kb, auto ke, auto vb, auto ve) {
                 std::map<std::size_t, size_t> m;
                 while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
@@ -355,9 +398,11 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
     } else {
         // std::unordered_map with size_t keys
         n = 0;
-        benchmark<std::size_t, std::unordered_map<std::size_t, size_t>, 60, lookups, 20>(
-            sorted,
+        benchmark<std::size_t, std::unordered_map<std::size_t, size_t>, false>(
             "unordered_map",
+            100,
+            lookups,
+            20,
             [&](auto kb, auto ke, auto vb, auto ve) {
                 std::unordered_map<std::size_t, size_t> m;
                 m.reserve(std::distance(kb, ke));
@@ -367,18 +412,22 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
             genInts);
     }
 
-    benchmark<OverscaledTileID, util::TinyMap<OverscaledTileID, size_t>, 20, lookups, 20>(
-        sorted,
+    benchmark<OverscaledTileID, util::TinyMap<OverscaledTileID, size_t, Sorted>, Sorted>(
         "TinyMap",
+        Sorted ? 100 : 20,
+        lookups,
+        20,
         [&](auto kb, auto ke, auto vb, auto ve) {
-            return util::TinyMap<OverscaledTileID, size_t>{sorted, kb, ke, vb, ve};
+            return util::TinyMap<OverscaledTileID, size_t, Sorted>{kb, ke, vb, ve};
         },
         makeGenTileID());
 
-    if (sorted) {
-        benchmark<OverscaledTileID, std::map<OverscaledTileID, size_t>, 20, lookups, 20>(
-            sorted,
+    if constexpr (Sorted) {
+        benchmark<OverscaledTileID, std::map<OverscaledTileID, size_t>, true>(
             "map",
+            100,
+            lookups,
+            20,
             [&](auto kb, auto ke, auto vb, auto ve) {
                 std::map<OverscaledTileID, size_t> m;
                 while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
@@ -386,9 +435,11 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
             },
             makeGenTileID());
     } else {
-        benchmark<OverscaledTileID, std::unordered_map<OverscaledTileID, size_t>, 20, lookups, 20>(
-            sorted,
+        benchmark<OverscaledTileID, std::unordered_map<OverscaledTileID, size_t>, false>(
             "unordered_map",
+            20,
+            lookups,
+            20,
             [&](auto kb, auto ke, auto vb, auto ve) {
                 std::unordered_map<OverscaledTileID, size_t> m;
                 m.reserve(std::distance(kb, ke));
@@ -398,6 +449,7 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
             makeGenTileID());
     }
 }
-
-// Use `testing::GTEST_FLAG(filter) = "Sort/TinyMap.*/*"` to run these alone
-INSTANTIATE_TEST_SUITE_P(Sort, TinyMap, testing::Values(false, true));
+TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
+    testBenchmark<false>();
+    testBenchmark<true>();
+}
