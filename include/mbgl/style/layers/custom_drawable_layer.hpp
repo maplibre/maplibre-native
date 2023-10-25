@@ -69,16 +69,13 @@ public:
      */
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions& options);
 
+    void addFill(const GeometryCollection& geometry);
+
     /**
-     * @brief Finishe the current drawable building session
+     * @brief Finish the current drawable building session
      *
      */
     void finish();
-
-protected:
-    gfx::ShaderPtr lineShaderDefault() const;
-
-    std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
 
 public:
     RenderLayer& layer;
@@ -91,6 +88,13 @@ public:
     UniqueChangeRequestVec& changes;
 
 private:
+    gfx::ShaderPtr lineShaderDefault() const;
+    gfx::ShaderPtr fillShaderDefault() const;
+
+    std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
+
+    gfx::ShaderPtr lineShader;
+    gfx::ShaderPtr fillShader;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
     Color currentColor;

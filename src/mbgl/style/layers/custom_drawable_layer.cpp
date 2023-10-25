@@ -15,8 +15,33 @@
 #include <mbgl/util/string_indexer.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/geometry.hpp>
+#include <mbgl/programs/fill_program.hpp>
+#include <mbgl/util/math.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
+
+// fill_bucket.cpp
+#include <mbgl/renderer/buckets/fill_bucket.hpp>
+#include <mbgl/programs/fill_program.hpp>
+#include <mbgl/renderer/bucket_parameters.hpp>
+#include <mbgl/style/layers/fill_layer_impl.hpp>
+#include <mbgl/renderer/layers/render_fill_layer.hpp>
+#include <mbgl/util/math.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
+#include <mapbox/earcut.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+#include <cassert>
 
 namespace mbgl {
+
 namespace style {
 
 namespace {
@@ -207,31 +232,117 @@ void CustomDrawableLayerHost::Interface::setWidth(float width) {
 
 void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
                                                      const gfx::PolylineGeneratorOptions& options) {
-    if (!builder) {
-        builder = createBuilder("thick-lines", lineShaderDefault());
-    } else {
-        // TODO: check builder
+    if (!lineShader) lineShader = lineShaderDefault();
+    assert(lineShader);
+    if (!builder || builder->getShader() != lineShader) {
+        builder = createBuilder("lines", lineShader);
     }
+    assert(builder);
+    assert(builder->getShader() == lineShader);
     builder->addPolyline(coordinates, options);
 }
 
+void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
+    if (!fillShader) fillShader = fillShaderDefault();
+    assert(fillShader);
+    if (!builder || builder->getShader() != fillShader) {
+        builder = createBuilder("fill", fillShader);
+    }
+    assert(builder);
+    assert(builder->getShader() == fillShader);
+
+    // build the fill vertices, indexes and segments
+    using VertexVector = gfx::VertexVector<FillLayoutVertex>;
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+    TriangleIndexVector& triangles = *sharedTriangles;
+
+    SegmentVector<FillAttributes> triangleSegments;
+
+    for (auto& polygon : classifyRings(geometry)) {
+        std::size_t startVertices = vertices.elements();
+        std::size_t totalVertices = 0;
+
+        for (const auto& ring : polygon) {
+            std::size_t nVertices = ring.size();
+            if (nVertices == 0) continue;
+
+            for (std::size_t i = 0; i < nVertices; ++i) {
+                vertices.emplace_back(FillProgram::layoutVertex(ring[i]));
+            }
+        }
+
+        std::vector<uint32_t> indices = mapbox::earcut(polygon);
+
+        std::size_t nIndices = indices.size();
+        assert(nIndices % 3 == 0);
+
+        if (triangleSegments.empty() ||
+            triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
+            triangleSegments.emplace_back(startVertices, triangles.elements());
+        }
+
+        auto& triangleSegment = triangleSegments.back();
+        assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
+        const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
+
+        for (std::size_t i = 0; i < nIndices; i += 3) {
+            triangles.emplace_back(
+                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
+        }
+
+        triangleSegment.vertexLength += totalVertices;
+        triangleSegment.indexLength += nIndices;
+    }
+
+    // add to builder
+    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
+    builder->setVertexAttrNameId(idVertexAttribName);
+    gfx::VertexAttributeArray attrs;
+    if (const auto& attr = attrs.add(idVertexAttribName)) {
+        attr->setSharedRawData(sharedVertices,
+                               offsetof(FillLayoutVertex, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(FillLayoutVertex),
+                               gfx::AttributeDataType::Short2);
+    }
+    builder->setVertexAttributes(std::move(attrs));
+    builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Short2);
+    builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
+
+    // flush current builder drawable
+    builder->flush();
+}
+
 void CustomDrawableLayerHost::Interface::finish() {
-    if (builder && builder->curVertexCount()) {
-        // create tweaker
-        const shaders::LinePropertiesUBO linePropertiesUBO{
-            currentColor, currentBlur, currentOpacity, currentGapWidth, currentOffset, currentWidth, 0, 0, 0};
+    if (builder && !builder->empty()) {
+        if (builder->getShader() == lineShader) {
+            // finish building lines
 
-        auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
+            // create line tweaker
+            const shaders::LinePropertiesUBO linePropertiesUBO{
+                currentColor, currentBlur, currentOpacity, currentGapWidth, currentOffset, currentWidth, 0, 0, 0};
+            auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 
-        // finish
-        builder->flush();
-        for (auto& drawable : builder->clearDrawables()) {
-            assert(tileID.has_value());
-            drawable->setTileID(tileID.value());
-            drawable->addTweaker(tweaker);
+            // finish drawables
+            builder->flush();
+            for (auto& drawable : builder->clearDrawables()) {
+                assert(tileID.has_value());
+                drawable->setTileID(tileID.value());
+                drawable->addTweaker(tweaker);
 
-            TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-            tileLayerGroup->addDrawable(RenderPass::Translucent, tileID.value(), std::move(drawable));
+                TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+                tileLayerGroup->addDrawable(RenderPass::Translucent, tileID.value(), std::move(drawable));
+            }
+        } else if (builder->getShader() == fillShader) {
+            // finish building fills
+
+            // TODO: create fill tweaker
+
+            // TODO: finish emitting drawables
         }
     }
 }
@@ -249,6 +360,17 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     };
 
     return lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+}
+
+gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
+    gfx::ShaderGroupPtr fillShaderGroup = shaders.getShaderGroup("FillShader");
+
+    const std::unordered_set<StringIdentity> propertiesAsUniforms{
+        stringIndexer().get("a_color"),
+        stringIndexer().get("a_opacity"),
+    };
+
+    return fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
 }
 
 std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::createBuilder(const std::string& name,
