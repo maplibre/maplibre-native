@@ -277,9 +277,10 @@ void GeometryTileWorker::coalesce() {
 
 void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-                                           , HBShapeResults results
+                                           ,
+                                           HBShapeResults results
 #endif
-                                           ) {
+) {
     for (auto& newFontGlyphs : newGlyphMap) {
         FontStackHash fontStack = newFontGlyphs.first;
         Glyphs& newGlyphs = newFontGlyphs.second;
@@ -337,7 +338,7 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap
             }
         }
     }
-        
+
 #endif
     symbolDependenciesChanged();
 }
@@ -382,17 +383,17 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
 }
 #else
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
-   for (auto& fontDependencies : glyphDependencies) {
-       auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
-       for (auto glyphID : fontDependencies.second) {
-           if (fontGlyphs == glyphMap.end() || fontGlyphs->second.find(glyphID) == fontGlyphs->second.end()) {
-               pendingGlyphDependencies[fontDependencies.first].insert(glyphID);
-           }
-       }
-   }
-   if (!pendingGlyphDependencies.empty()) {
-       parent.invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
-   }
+    for (auto& fontDependencies : glyphDependencies) {
+        auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
+        for (auto glyphID : fontDependencies.second) {
+            if (fontGlyphs == glyphMap.end() || fontGlyphs->second.find(glyphID) == fontGlyphs->second.end()) {
+                pendingGlyphDependencies[fontDependencies.first].insert(glyphID);
+            }
+        }
+    }
+    if (!pendingGlyphDependencies.empty()) {
+        parent.invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
+    }
 }
 #endif
 
@@ -543,7 +544,7 @@ void GeometryTileWorker::finalizeLayout() {
             if (obsolete) {
                 return;
             }
-            
+
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
             if (layout->needfinalizeSymbols()) {
                 continue;

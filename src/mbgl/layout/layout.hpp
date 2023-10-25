@@ -30,7 +30,7 @@ public:
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     virtual void finalizeSymbols(HBShapeResults&) {}
-    
+
     virtual bool needfinalizeSymbols() { return false; }
 #endif
 

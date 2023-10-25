@@ -33,7 +33,7 @@ public:
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     bool needfinalizeSymbols() override { return needfinalizeSymbolsVal; }
-    
+
     void finalizeSymbols(HBShapeResults&) override;
 #endif
 

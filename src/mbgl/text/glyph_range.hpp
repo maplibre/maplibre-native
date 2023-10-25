@@ -23,7 +23,7 @@ class GlyphRange {
 public:
     uint16_t first = 0;
     uint16_t second = 0;
-    
+
     GlyphIDType type = GlyphIDType::FontPBF;
 
     GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_);

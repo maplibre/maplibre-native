@@ -24,7 +24,6 @@ bool GlyphRange::operator<(const GlyphRange &other) const {
     return type < other.type;
 }
 
-
 const std::string getGlyphRangeName(GlyphIDType type) {
     switch (type) {
         case GlyphIDType::Khmer:

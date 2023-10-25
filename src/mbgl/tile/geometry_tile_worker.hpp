@@ -52,7 +52,7 @@ public:
 #else
     void onGlyphsAvailable(GlyphMap glyphs);
 #endif
-    
+
     void onImagesAvailable(ImageMap newIconMap,
                            ImageMap newPatternMap,
                            ImageVersionMap versionMap,

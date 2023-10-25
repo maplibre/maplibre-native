@@ -208,11 +208,11 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                     }
 #else
                     ft.formattedText->addTextSection(applyArabicShaping(util::convertUTF8ToUTF16(u8string)),
-                                                                        section.fontScale ? *section.fontScale : 1.0,
-                                                                        section.fontStack ? *section.fontStack : baseFontStack,
-                                                                        section.textColor);
+                                                     section.fontScale ? *section.fontScale : 1.0,
+                                                     section.fontStack ? *section.fontStack : baseFontStack,
+                                                     section.textColor);
 #endif
-                    
+
                 } else {
                     layoutParameters.imageDependencies.emplace(section.image->id(), ImageType::Icon);
                     ft.formattedText->addImageSection(section.image->id());

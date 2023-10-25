@@ -26,7 +26,8 @@ struct SectionOptions {
           type(type_),
           startIndex(startIndex_),
 #endif
-          textColor(std::move(textColor_)) {}
+          textColor(std::move(textColor_)) {
+    }
 
     SectionOptions(double scale_,
                    FontStackHash fontStackHash_,
@@ -41,19 +42,21 @@ struct SectionOptions {
           type(type_),
           startIndex(startIndex_),
 #endif
-          textColor(std::move(textColor_)) {}
+          textColor(std::move(textColor_)) {
+    }
 
     explicit SectionOptions(std::string imageID_)
         : scale(1.0),
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
           type(GlyphIDType::FontPBF),
 #endif
-          imageID(std::move(imageID_)) {}
+          imageID(std::move(imageID_)) {
+    }
 
     double scale;
     FontStack fontStack;
     FontStackHash fontStackHash;
-    
+
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     GlyphIDType type;
 
@@ -117,7 +120,7 @@ struct TaggedString {
                         bool keySection = true,
 #endif
                         std::optional<Color> textColor_ = std::nullopt);
-    
+
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     void addTextSection(const std::u16string& text,
                         double scale,

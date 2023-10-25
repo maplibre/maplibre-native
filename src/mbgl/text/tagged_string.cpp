@@ -77,7 +77,7 @@ std::optional<char16_t> TaggedString::getNextImageSectionCharCode() {
 
 void TaggedString::trim() {
     std::size_t beginningWhitespace = styledText.first.find_first_not_of(u" \t\n\v\f\r");
-    
+
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     for (size_t i = 0; (i < beginningWhitespace) && i < styledText.first.length(); ++i) {
         auto &sec = getSection(i);
@@ -131,7 +131,6 @@ void TaggedString::verticalizePunctuation() {
 #else
     styledText.first = util::i18n::verticalizePunctuation(styledText.first);
 #endif
-    
 }
 
 bool TaggedString::allowsVerticalWritingMode() {
@@ -152,7 +151,6 @@ bool TaggedString::allowsVerticalWritingMode() {
 #endif
     }
     return *supportsVerticalWritingMode;
-
 }
 
 } // namespace mbgl

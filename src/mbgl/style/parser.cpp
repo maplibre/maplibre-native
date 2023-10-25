@@ -124,7 +124,7 @@ StyleParseResult Parser::parse(const std::string& json) {
         }
     }
 #endif
-    
+
     // Call for side effect of logging warnings for invalid values.
     fontStacks();
 

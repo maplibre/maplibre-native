@@ -101,8 +101,8 @@ void GlyphManager::requestRange(GlyphRequest& request,
         res, [this, fontStack, range](const Response& response) { processResponse(response, fontStack, range); });
 #else
     request.req = fileSource.request(
-          Resource::glyphs(glyphURL, fontStack, range),
-          [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
+        Resource::glyphs(glyphURL, fontStack, range),
+        [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
 #endif
 }
 
@@ -192,7 +192,7 @@ void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& gl
             }
         }
     }
-        
+
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     requestor.onGlyphsAvailable(response, glyphDependencies.shapes);
 #else
@@ -261,7 +261,7 @@ void GlyphManager::hbShaping(const std::u16string& text,
         shaper->CreateComplexGlyphIDs(text, glyphIDs, adjusts);
     }
 }
-    
+
 #endif
 
 } // namespace mbgl
