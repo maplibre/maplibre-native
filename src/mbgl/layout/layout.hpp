@@ -28,9 +28,11 @@ public:
 
     virtual void prepareSymbols(const GlyphMap&, const GlyphPositions&, const ImageMap&, const ImagePositions&){};
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     virtual void finalizeSymbols(HBShapeResults&) {}
-
+    
     virtual bool needfinalizeSymbols() { return false; }
+#endif
 
     virtual bool hasSymbolInstances() const { return true; };
 

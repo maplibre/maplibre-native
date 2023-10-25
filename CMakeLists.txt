@@ -13,6 +13,7 @@ option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
+option(MLN_TEXT_SHAPING_HARFBUZZ "Use haffbuzz to shape complex text" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -871,8 +872,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/shaping.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/tagged_string.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/tagged_string.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_geometry_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_geometry_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/geojson_tile.cpp
@@ -1263,6 +1262,20 @@ if(MBGL_WITH_METAL)
     )
 endif()
 
+if (MLN_TEXT_SHAPING_HARFBUZZ) 
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE MLN_TEXT_SHAPING_HARFBUZZ=1
+    )
+    list(APPEND 
+        SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
+    )
+
+    add_subdirectory(vendor/harfbuzzFreetype)
+endif()
+
 target_sources(
     mbgl-core PRIVATE
     ${INCLUDE_FILES}
@@ -1319,7 +1332,6 @@ include(${PROJECT_SOURCE_DIR}/vendor/protozero.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
-add_subdirectory(vendor/harfbuzzFreetype)
 
 target_link_libraries(
     mbgl-core
@@ -1340,9 +1352,6 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
-        harfbuzzFreetype
-        freetype
-        harfbuzz
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1380,12 +1389,28 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
-    harfbuzzFreetype
-    freetype
-    harfbuzz
 
     FILE MapboxCoreTargets.cmake
 )
+
+
+if (MLN_TEXT_SHAPING_HARFBUZZ) 
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            harfbuzzFreetype
+            freetype
+            harfbuzz
+    )
+
+    export(TARGETS
+        mbgl-core
+
+        harfbuzzFreetype
+        freetype
+        harfbuzz
+    )
+endif()
 
 set_target_properties(
     mbgl-core

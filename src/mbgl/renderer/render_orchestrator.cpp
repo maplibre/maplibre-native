@@ -979,11 +979,15 @@ void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        std::exception_ptr error) {
     std::stringstream ss;
     ss << "Failed to load glyph range ";
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     if (glyphRange.type == FontPBF) {
         ss << glyphRange.first << "-" << glyphRange.second;
     } else {
         ss << (int)glyphRange.type << "(font file)";
     }
+#else
+    ss << glyphRange.first << "-" << glyphRange.second;
+#endif
     ss << " for font stack " << fontStackToString(fontStack) << ":( " << util::toString(error) << ")";
     auto errorDetail = ss.str();
     Log::Error(Event::Style, errorDetail);

@@ -275,13 +275,21 @@ void GeometryTileWorker::coalesce() {
     self.invoke(&GeometryTileWorker::coalesced);
 }
 
-void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults results) {
+void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+                                           , HBShapeResults results
+#endif
+                                           ) {
     for (auto& newFontGlyphs : newGlyphMap) {
         FontStackHash fontStack = newFontGlyphs.first;
         Glyphs& newGlyphs = newFontGlyphs.second;
 
         Glyphs& glyphs = glyphMap[fontStack];
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
         for (auto& pendingGlyphDependency : pendingGlyphDependencies.glyphs) {
+#else
+        for (auto& pendingGlyphDependency : pendingGlyphDependencies) {
+#endif
             // Linear lookup here to handle reverse of FontStackHash -> FontStack,
             // since dependencies need the full font stack name to make a request
             // There should not be many fontstacks to look through
@@ -292,15 +300,20 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
                     std::optional<Immutable<Glyph>>& glyph = newGlyph.second;
 
                     if (pendingGlyphIDs.erase(glyphID)) {
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                         if (!(glyphID.complex.code == 0 && glyphID.complex.type != GlyphIDType::FontPBF)) {
                             glyphs.emplace(glyphID, std::move(glyph));
                         }
+#else
+                        glyphs.emplace(glyphID, std::move(glyph));
+#endif
                     }
                 }
             }
         }
     }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     if (!results.empty()) {
         pendingGlyphDependencies.shapes.clear();
 
@@ -324,6 +337,8 @@ void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap, HBShapeResults 
             }
         }
     }
+        
+#endif
     symbolDependenciesChanged();
 }
 
@@ -341,6 +356,7 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
     symbolDependenciesChanged();
 }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
     for (auto& fontDependencies : glyphDependencies.glyphs) {
         auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
@@ -364,6 +380,21 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
         parent.invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
     }
 }
+#else
+void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
+   for (auto& fontDependencies : glyphDependencies) {
+       auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
+       for (auto glyphID : fontDependencies.second) {
+           if (fontGlyphs == glyphMap.end() || fontGlyphs->second.find(glyphID) == fontGlyphs->second.end()) {
+               pendingGlyphDependencies[fontDependencies.first].insert(glyphID);
+           }
+       }
+   }
+   if (!pendingGlyphDependencies.empty()) {
+       parent.invoke(&GeometryTile::getGlyphs, pendingGlyphDependencies);
+   }
+}
+#endif
 
 void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependencies) {
     pendingImageDependencies = imageDependencies;
@@ -480,7 +511,11 @@ void GeometryTileWorker::parse() {
 }
 
 bool GeometryTileWorker::hasPendingDependencies() const {
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     for (auto& glyphDependency : pendingGlyphDependencies.glyphs) {
+#else
+    for (auto& glyphDependency : pendingGlyphDependencies) {
+#endif
         if (!glyphDependency.second.empty()) {
             return true;
         }
@@ -508,9 +543,12 @@ void GeometryTileWorker::finalizeLayout() {
             if (obsolete) {
                 return;
             }
+            
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
             if (layout->needfinalizeSymbols()) {
                 continue;
             }
+#endif
 
             layout->prepareSymbols(glyphMap, glyphAtlas.positions, imageMap, iconAtlas.iconPositions);
 

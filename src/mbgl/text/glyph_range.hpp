@@ -7,6 +7,8 @@
 
 namespace mbgl {
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+
 enum GlyphIDType : short {
     FontPBF = 0x00,
     Khmer = 0x01,
@@ -14,10 +16,14 @@ enum GlyphIDType : short {
     Devanagari = 0x03,
 };
 
+#endif
+
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 class GlyphRange {
 public:
     uint16_t first = 0;
     uint16_t second = 0;
+    
     GlyphIDType type = GlyphIDType::FontPBF;
 
     GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_);
@@ -25,6 +31,9 @@ public:
     bool operator==(const GlyphRange &other) const;
     bool operator<(const GlyphRange &other) const;
 };
+#else
+using GlyphRange = std::pair<uint16_t, uint16_t>;
+#endif
 
 constexpr uint32_t GLYPHS_PER_GLYPH_RANGE = 256;
 constexpr uint32_t GLYPH_RANGES_PER_FONT_STACK = 256;

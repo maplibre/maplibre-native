@@ -40,8 +40,12 @@ public:
     std::unique_ptr<TileRenderData> createRenderData() override;
     void setLayers(const std::vector<Immutable<style::LayerProperties>>&) override;
     void setShowCollisionBoxes(bool showCollisionBoxes) override;
-
+    
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     void onGlyphsAvailable(GlyphMap, HBShapeRequests) override;
+#else
+    void onGlyphsAvailable(GlyphMap) override;
+#endif
     void onImagesAvailable(ImageMap, ImageMap, ImageVersionMap versionMap, uint64_t imageCorrelationID) override;
 
     void getGlyphs(GlyphDependencies);

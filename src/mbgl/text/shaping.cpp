@@ -207,9 +207,11 @@ float determineAverageLineWidth(const TaggedString& logicalInput,
 
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
         const SectionOptions& section = logicalInput.getSection(i);
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
         if (section.type != GlyphIDType::FontPBF) {
             continue;
         }
+#endif
         char16_t codePoint = logicalInput.getCharCodeAt(i);
         totalWidth += getGlyphAdvance(codePoint, section, glyphMap, imagePositions, layoutTextSize, spacing);
     }
@@ -404,24 +406,34 @@ void shapeLines(Shaping& shaping,
         for (std::size_t i = 0; i < line.length(); i++) {
             const std::size_t sectionIndex = line.getSectionIndex(i);
             const SectionOptions& section = line.sectionAt(sectionIndex);
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
             const HBShapeAdjust* adjust = nullptr;
             if (section.adjusts) {
                 assert(section.startIndex >= 0);
                 adjust = &((*section.adjusts)[i - section.startIndex]);
             }
             GlyphID codePoint(line.getCharCodeAt(i), section.type);
+#else
+            char16_t codePoint = line.getCharCodeAt(i);
+#endif
             double baselineOffset = 0.0;
             Rect<uint16_t> rect;
             GlyphMetrics metrics;
             float advance = 0.0f;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
             float xHBOffset = 0.0f;
             float yHBOffset = 0.0f;
+#endif
             float verticalAdvance = util::ONE_EM;
             double sectionScale = section.scale;
             assert(sectionScale);
 
             const bool vertical = !(
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                 writingMode == WritingModeType::Horizontal || codePoint.complex.type != GlyphIDType::FontPBF ||
+#else
+                writingMode == WritingModeType::Horizontal ||
+#endif
                 // Don't verticalize glyphs that have no upright orientation
                 // if vertical placement is disabled.
                 (!allowVerticalPlacement && !util::i18n::hasUprightVerticalOrientation(codePoint)) ||
@@ -454,6 +466,7 @@ void shapeLines(Shaping& shaping,
                 }
                 advance = static_cast<float>(metrics.advance);
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                 if (adjust) advance = adjust->advance;
                 if (adjust) {
                     xHBOffset = (float)(adjust->x_offset * section.scale);
@@ -463,6 +476,7 @@ void shapeLines(Shaping& shaping,
                     // Advance is 0, this glyph should align to the preview glyph remove spacing
                     xHBOffset -= spacing;
                 }
+#endif
 
                 // We don't know the baseline, but since we're laying out
                 // at 24 points, we can calculate how much it will move when
@@ -504,8 +518,13 @@ void shapeLines(Shaping& shaping,
 
             if (!vertical) {
                 positionedGlyphs.emplace_back(codePoint,
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                                               x + xHBOffset,
                                               y + static_cast<float>(baselineOffset) + yHBOffset,
+#else
+                                              x,
+                                              y + static_cast<float>(baselineOffset),
+#endif
                                               vertical,
                                               section.fontStackHash,
                                               static_cast<float>(sectionScale),
@@ -513,10 +532,14 @@ void shapeLines(Shaping& shaping,
                                               metrics,
                                               section.imageID,
                                               sectionIndex);
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                 if (advance > 0.01f) {
                     // Only thce glyph with advance should increase spacing
                     x += advance * static_cast<float>(sectionScale) + spacing;
                 }
+#else
+                x += advance * static_cast<float>(sectionScale) + spacing;
+#endif
             } else {
                 positionedGlyphs.emplace_back(codePoint,
                                               x,
@@ -585,6 +608,7 @@ Shaping getShaping(const TaggedString& formattedString,
     std::vector<TaggedString> reorderedLines;
     if (formattedString.rawText().length()) {
         if (formattedString.sectionCount() == 1) {
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
             if (formattedString.getSection(0).type != GlyphIDType::FontPBF) {
                 reorderedLines.emplace_back(formattedString);
             } else {
@@ -595,7 +619,16 @@ Shaping getShaping(const TaggedString& formattedString,
                     reorderedLines.emplace_back(line, formattedString.sectionAt(0));
                 }
             }
+#else
+            auto untaggedLines = bidi.processText(
+                formattedString.rawText(),
+                determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
+            for (const auto& line : untaggedLines) {
+                reorderedLines.emplace_back(line, formattedString.sectionAt(0));
+            }
+#endif
         } else {
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
             StyledText subString;
             GlyphIDType sectionType = GlyphIDType::FontPBF;
             auto strLen = formattedString.getStyledText().first.length();
@@ -697,6 +730,14 @@ Shaping getShaping(const TaggedString& formattedString,
                 pendStrings.clear();
                 processAline(combine);
             }
+#else
+            auto processedLines = bidi.processStyledText(
+                formattedString.getStyledText(),
+                determineLineBreaks(formattedString, spacing, maxWidth, glyphMap, imagePositions, layoutTextSize));
+            for (const auto& line : processedLines) {
+                reorderedLines.emplace_back(line, formattedString.getSections());
+            }
+#endif
         }
     }
 

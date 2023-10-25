@@ -10,7 +10,9 @@
 #include <string>
 #include <unordered_map>
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 #include "harfbuzz.hpp"
+#endif
 
 namespace mbgl {
 
@@ -18,6 +20,7 @@ class FileSource;
 class AsyncRequest;
 class Response;
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 struct HBShapeResult {
     std::u16string str;
 
@@ -30,10 +33,14 @@ struct HBShapeResult {
           adjusts(adjusts_) {}
 };
 using HBShapeResults = std::map<FontStack, std::map<GlyphIDType, std::map<std::u16string, HBShapeResult>>>;
-
+#endif
 class GlyphRequestor {
 public:
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     virtual void onGlyphsAvailable(GlyphMap, HBShapeRequests) = 0;
+#else
+    virtual void onGlyphsAvailable(GlyphMap) = 0;
+#endif
 
 protected:
     virtual ~GlyphRequestor() = default;
@@ -63,15 +70,17 @@ public:
     // Remove glyphs for all but the supplied font stacks.
     void evict(const std::set<FontStack> &);
 
-    std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
-
     Immutable<Glyph> getGlyph(const FontStack &, GlyphID);
+
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
 
     void hbShaping(const std::u16string &text,
                    const FontStack &font,
                    GlyphIDType type,
                    std::vector<GlyphID> &glyphIDs,
                    std::vector<HBShapeAdjust> &adjusts);
+#endif
 
 private:
     Glyph generateLocalSDF(const FontStack &fontStack, GlyphID glyphID);
@@ -99,10 +108,12 @@ private:
 
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     FreeTypeLibrary ftLibrary;
     std::map<FontStack, std::map<GlyphIDType, std::shared_ptr<HBShaper>>> hbShapers;
 
     bool loadHBShaper(const FontStack &fontStack, GlyphIDType type, const std::string &data);
+#endif
 };
 
 } // namespace mbgl

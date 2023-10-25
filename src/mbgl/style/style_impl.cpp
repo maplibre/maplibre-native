@@ -125,7 +125,9 @@ void Style::Impl::parse(const std::string& json_) {
         onSpriteError(std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
     glyphURL = parser.glyphURL;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     fontURL = parser.fontURL;
+#endif
 
     loaded = true;
     observer->onStyleLoaded();

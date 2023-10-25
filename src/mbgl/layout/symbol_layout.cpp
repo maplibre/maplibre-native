@@ -159,8 +159,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                         u8string = platform::lowercase(u8string);
                     }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                     auto u16String = applyArabicShaping(util::convertUTF8ToUTF16(u8string));
-
                     const char16_t* u16Char = u16String.data();
                     std::u16string subString;
                     GlyphIDType subStringtype = charGlyphIDType(*u16Char, GlyphIDType::FontPBF);
@@ -206,6 +206,13 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                                 .insert(subString);
                         }
                     }
+#else
+                    ft.formattedText->addTextSection(applyArabicShaping(util::convertUTF8ToUTF16(u8string)),
+                                                                        section.fontScale ? *section.fontScale : 1.0,
+                                                                        section.fontStack ? *section.fontStack : baseFontStack,
+                                                                        section.textColor);
+#endif
+                    
                 } else {
                     layoutParameters.imageDependencies.emplace(section.image->id(), ImageType::Icon);
                     ft.formattedText->addImageSection(section.image->id());
@@ -218,6 +225,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
 
             // Loop through all characters of this text and collect unique codepoints.
             for (std::size_t j = 0; j < ft.formattedText->length(); j++) {
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                 uint8_t sectionIndex = ft.formattedText->getSectionIndex(j);
                 auto& section = ft.formattedText->getSections()[sectionIndex];
                 if (section.imageID) continue;
@@ -237,6 +245,21 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                         }
                     }
                 }
+#else
+                const auto& section = formatted.sections[ft.formattedText->getSectionIndex(j)];
+                if (section.image) continue;
+
+                const auto& sectionFontStack = section.fontStack;
+                GlyphIDs& dependencies =
+                    layoutParameters.glyphDependencies[sectionFontStack ? *sectionFontStack : baseFontStack];
+                char16_t codePoint = ft.formattedText->getCharCodeAt(j);
+                dependencies.insert(codePoint);
+                if (canVerticalizeText || (allowVerticalPlacement && ft.formattedText->allowsVerticalWritingMode())) {
+                    if (char16_t verticalChr = util::i18n::verticalizePunctuation(codePoint)) {
+                        dependencies.insert(verticalChr);
+                    }
+                }
+#endif
             }
         }
 
@@ -261,6 +284,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
     }
 }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
     for (auto& feature : features) {
         if (feature.geometry.empty()) {
@@ -328,6 +352,8 @@ void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
 
     needfinalizeSymbolsVal = false;
 } // SymbolLayout::finalizeSymbols
+
+#endif
 
 bool SymbolLayout::hasDependencies() const {
     return !features.empty();

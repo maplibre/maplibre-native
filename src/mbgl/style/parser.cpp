@@ -116,13 +116,15 @@ StyleParseResult Parser::parse(const std::string& json) {
         }
     }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     if (document.HasMember("fonts")) {
         const JSValue& fonts = document["fonts"];
         if (fonts.IsString()) {
             fontURL = {fonts.GetString(), fonts.GetStringLength()};
         }
     }
-
+#endif
+    
     // Call for side effect of logging warnings for invalid values.
     fontStacks();
 

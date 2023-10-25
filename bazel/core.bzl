@@ -533,8 +533,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/text/shaping.hpp",
     "src/mbgl/text/tagged_string.cpp",
     "src/mbgl/text/tagged_string.hpp",
-    "src/mbgl/text/harfbuzz.cpp",
-    "src/mbgl/text/harfbuzz.hpp",
     "src/mbgl/tile/custom_geometry_tile.cpp",
     "src/mbgl/tile/custom_geometry_tile.hpp",
     "src/mbgl/tile/geojson_tile.cpp",
@@ -1098,4 +1096,9 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/symbol_icon.hpp",
     "include/mbgl/shaders/mtl/symbol_sdf.hpp",
     "include/mbgl/shaders/mtl/symbol_text_and_icon.hpp",
+]
+
+MLN_TEXT_SHAPING_HARFBUZZ_SOURCE = [
+    "src/mbgl/text/harfbuzz.cpp",
+    "src/mbgl/text/harfbuzz.hpp",
 ]

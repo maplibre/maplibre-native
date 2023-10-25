@@ -47,8 +47,12 @@ public:
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     void onGlyphsAvailable(GlyphMap glyphs, HBShapeResults requests);
-    ;
+#else
+    void onGlyphsAvailable(GlyphMap glyphs);
+#endif
+    
     void onImagesAvailable(ImageMap newIconMap,
                            ImageMap newPatternMap,
                            ImageVersionMap versionMap,

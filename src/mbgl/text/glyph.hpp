@@ -17,6 +17,7 @@
 
 namespace mbgl {
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 union GlyphID {
     char32_t hash;
     struct {
@@ -53,12 +54,18 @@ union GlyphID {
 
 GlyphIDType charGlyphIDType(char16_t ch, GlyphIDType lastChType);
 
+#else
+using GlyphID = char16_t;
+#endif
+
 using GlyphIDs = std::set<GlyphID>;
 
 // Note: this only works for the BMP
 GlyphRange getGlyphRange(GlyphID glyph);
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 const std::string getGlyphRangeName(GlyphIDType type);
+#endif
 
 struct GlyphMetrics {
     uint32_t width = 0;
@@ -166,6 +173,7 @@ enum class WritingModeType : uint8_t {
     Vertical = 1 << 1,
 };
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 struct HBShapeRequest {
     std::u16string str;
     FontStack fontStack;
@@ -183,6 +191,9 @@ struct GlyphDependencies {
     std::map<FontStack, GlyphIDs> glyphs;
     HBShapeRequests shapes;
 };
+#else
+using GlyphDependencies = std::map<FontStack, GlyphIDs>;
+#endif
 using GlyphRangeDependencies = std::map<FontStack, std::unordered_set<GlyphRange>>;
 
 } // end namespace mbgl

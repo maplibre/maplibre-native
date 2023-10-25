@@ -218,7 +218,9 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     if (!parser.glyphURL.empty()) {
         uint32_t ttfCount = 0;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
         if (!parser.fontURL.empty()) ttfCount = 2; // khmer + myanmar
+#endif
         result->requiredResourceCount += parser.fontStacks().size() *
                                          (definition.match([](auto& reg) { return reg.includeIdeographs; })
                                               ? GLYPH_RANGES_PER_FONT_STACK + ttfCount
@@ -342,7 +344,7 @@ void OfflineDownload::activateDownload() {
                         queueResource(Resource::glyphs(
                             parser.glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second}));
                     }
-
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                     if (!parser.fontURL.empty()) {
                         queueResource(
                             Resource::fontGlyphs(parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Khmer)));
@@ -351,6 +353,7 @@ void OfflineDownload::activateDownload() {
                         queueResource(Resource::fontGlyphs(
                             parser.fontURL, fontStack, getGlyphRangeName(GlyphIDType::Devanagari)));
                     }
+#endif
                 }
             }
         }
