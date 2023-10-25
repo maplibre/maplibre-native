@@ -21,11 +21,9 @@
 
 // fill_bucket.cpp
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/programs/fill_program.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
-#include <mbgl/util/math.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -39,6 +37,20 @@
 #endif
 
 #include <cassert>
+
+namespace mapbox {
+namespace util {
+template <>
+struct nth<0, mbgl::GeometryCoordinate> {
+    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.x; };
+};
+
+template <>
+struct nth<1, mbgl::GeometryCoordinate> {
+    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
+};
+} // namespace util
+} // namespace mapbox
 
 namespace mbgl {
 
@@ -263,6 +275,7 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     SegmentVector<FillAttributes> triangleSegments;
 
     for (auto& polygon : classifyRings(geometry)) {
+        limitHoles(polygon, 500);
         std::size_t startVertices = vertices.elements();
         std::size_t totalVertices = 0;
 
