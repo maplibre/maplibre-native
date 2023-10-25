@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <map>
+#include <memory>
 #include <numeric>
 #include <random>
 #include <unordered_map>
@@ -156,7 +157,7 @@ TEST_P(TinyMap, StringVal) {
 
 TEST_P(TinyMap, TileIDKey) {
     const bool sorted = GetParam();
-    const std::vector<mbgl::OverscaledTileID> keys = {
+    const std::vector<OverscaledTileID> keys = {
         {2, 0, {2, 0, 0}},
         {2, 0, {2, 1, 0}},
         {2, 0, {2, 0, 1}},
@@ -174,7 +175,7 @@ TEST_P(TinyMap, TileIDKey) {
         {0, 0, {0, 0, 0}},
     };
     const std::vector<std::size_t> values(keys.size(), 0);
-    const auto map = util::TinyMap<mbgl::OverscaledTileID, int>{
+    const auto map = util::TinyMap<OverscaledTileID, int>{
         sorted, keys.begin(), keys.end(), values.begin(), values.end()};
 
     for (const auto& k : keys) {
@@ -217,9 +218,31 @@ template <typename T>
 using TIter = typename std::vector<T>::const_iterator;
 template <typename TMap, typename TKey>
 using TMakeMap = std::function<TMap(TIter<TKey>, TIter<TKey>, TIter<std::size_t>, TIter<std::size_t>)>;
+using ssize_t = std::ptrdiff_t;
 
-template <typename TKey, // key type
-          typename TMap,
+void incTileID(OverscaledTileID& tid) {
+    tid.canonical.y++;
+    if (tid.canonical.y == 1 << tid.canonical.z) {
+        tid.canonical.y = 0;
+        tid.canonical.x++;
+    }
+    if (tid.canonical.x == 1 << tid.canonical.z) {
+        tid.canonical.x = 0;
+        tid.canonical.z++;
+    }
+}
+// return a function that generate successive tile IDs
+std::function<OverscaledTileID()> makeGenTileID() {
+    auto tid = std::make_shared<OverscaledTileID>(0, 0, 0, 0, 0);
+    return [=] {
+        auto v = *tid;
+        incTileID(*tid);
+        return v;
+    };
+}
+
+template <typename TKey,       // key type
+          typename TMap,       // map type
           std::size_t max,     // largest number of elements to consider
           std::size_t lookups, // number of searches for each item (~ read/write ratio)
           std::size_t reports  // number of items reported from `max` (should divide evenly)
@@ -231,40 +254,63 @@ void benchmark(bool sorted,
                std::size_t seed = 0xf00dLL) {
     static_assert((max / reports) * reports == max);
 
+    std::seed_seq seed_seq{0xf00dLL};
+    std::default_random_engine engine(seed_seq);
+
+    // build keys
     std::vector<TKey> keys;
     keys.reserve(max);
     std::generate_n(std::back_inserter(keys), max, std::move(generate));
 
+    // build values
     std::vector<size_t> values(keys.size());
     std::iota(values.begin(), values.end(), 0);
 
-    std::seed_seq seed_seq{0xf00dLL};
-    std::default_random_engine engine(seed_seq);
-    std::shuffle(keys.begin(), keys.end(), engine);
-
     using Clock = std::chrono::steady_clock;
     using Usec = std::chrono::microseconds;
-    Usec::rep cumulative[reports + 1] = {0};
+    std::vector<double> times(reports);
 
-    const auto startTime = Clock::now();
-    for (std::size_t i = 0; i <= max; ++i) {
-        const auto map = make(keys.begin(), keys.begin() + i, values.begin(), values.begin() + i);
-        for (std::size_t j = 0; j < lookups; ++j) {
-            for (std::size_t k = 0; k <= i; ++k) {
-                map.find(keys[k]);
+    constexpr std::size_t timingIterations = 50;
+
+    // test each size from 1 to max
+    int x = 0;
+    for (std::size_t i = 1; i <= max; ++i) {
+        // Build and lookup keys in different random orders
+        std::vector<TKey> buildKeys(keys.begin(), keys.begin() + i);
+        std::vector<TKey> testKeys(keys.begin(), keys.begin() + i);
+        std::shuffle(buildKeys.begin(), buildKeys.end(), engine);
+        std::shuffle(testKeys.begin(), testKeys.end(), engine);
+
+        // (build a map and look up the keys many times) many times
+        const auto startTime = Clock::now();
+        for (std::size_t tt = 0; tt < timingIterations; ++tt) {
+            const auto map = make(buildKeys.begin(), buildKeys.end(), values.begin(), values.begin() + i);
+            for (std::size_t j = 0; j < lookups; ++j) {
+                for (const auto& k : testKeys) {
+                    if (map.find(k) != map.end()) {
+                        x++;
+                    }
+                }
             }
         }
+
         if ((i % (max / reports)) == 0) {
-            const auto elapsed = std::chrono::duration_cast<Usec>(Clock::now() - startTime);
-            cumulative[i / (max / reports)] = elapsed.count();
+            const auto totalElapsed = std::chrono::duration_cast<Usec>(Clock::now() - startTime);
+            const auto elapsed = static_cast<double>(totalElapsed.count()) / timingIterations;
+            times[i / (max / reports) - 1] = elapsed;
         }
     }
 
+    // don't optimize away the work
+    if (x) {
+        printf("");
+    }
+
     std::stringstream ss;
-    ss << std::setw(20) << label << " keysize=" << std::setw(2) << sizeof(TKey) << " sorted=" << (sorted ? "T" : "F")
-       << " : ";
-    for (std::size_t i = 0; i <= reports; ++i) {
-        ss << (i * (max / reports)) << "=" << cumulative[i] << ", ";
+    ss << std::setw(15) << label << " keysize=" << std::setw(2) << sizeof(TKey);
+    ss << " sort=" << (sorted ? "T" : "F") << " (x" << (max / reports) << "): ";
+    for (std::size_t i = 0; i < reports; ++i) {
+        ss << std::setw(6) << std::round(times[i]);
     }
     Log::Info(Event::Timing, ss.str());
 }
@@ -314,51 +360,35 @@ TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(Benchmark)) {
             genInts);
     }
 
-    auto t = mbgl::OverscaledTileID{0, 0, {0, 0, 0}};
-    const auto genTileID = [&] {
-        t.canonical.y++;
-        if (t.canonical.y == 1 << t.canonical.z) {
-            t.canonical.y = 0;
-            t.canonical.x++;
-        }
-        if (t.canonical.x == 1 << t.canonical.z) {
-            t.canonical.x = 0;
-            t.canonical.z++;
-        }
-        return t;
-    };
-
-    benchmark<mbgl::OverscaledTileID, util::TinyMap<mbgl::OverscaledTileID, size_t>, 10, lookups, 10>(
+    benchmark<OverscaledTileID, util::TinyMap<OverscaledTileID, size_t>, 10, lookups, 10>(
         sorted,
         "TinyMap",
         [&](auto kb, auto ke, auto vb, auto ve) {
-            return util::TinyMap<mbgl::OverscaledTileID, size_t>{sorted, kb, ke, vb, ve};
+            return util::TinyMap<OverscaledTileID, size_t>{sorted, kb, ke, vb, ve};
         },
-        genTileID);
+        makeGenTileID());
 
     if (sorted) {
-        t = mbgl::OverscaledTileID{0, 0, {0, 0, 0}};
-        benchmark<mbgl::OverscaledTileID, std::map<mbgl::OverscaledTileID, size_t>, 10, lookups, 10>(
+        benchmark<OverscaledTileID, std::map<OverscaledTileID, size_t>, 10, lookups, 10>(
             sorted,
             "map",
             [&](auto kb, auto ke, auto vb, auto ve) {
-                std::map<mbgl::OverscaledTileID, size_t> m;
+                std::map<OverscaledTileID, size_t> m;
                 while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
                 return m;
             },
-            genTileID);
+            makeGenTileID());
     } else {
-        t = mbgl::OverscaledTileID{0, 0, {0, 0, 0}};
-        benchmark<mbgl::OverscaledTileID, std::unordered_map<mbgl::OverscaledTileID, size_t>, 10, lookups, 10>(
+        benchmark<OverscaledTileID, std::unordered_map<OverscaledTileID, size_t>, 10, lookups, 10>(
             sorted,
             "unordered_map",
             [&](auto kb, auto ke, auto vb, auto ve) {
-                std::unordered_map<mbgl::OverscaledTileID, size_t> m;
+                std::unordered_map<OverscaledTileID, size_t> m;
                 m.reserve(std::distance(kb, ke));
                 while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
                 return m;
             },
-            genTileID);
+            makeGenTileID());
     }
 }
 

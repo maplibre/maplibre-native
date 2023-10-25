@@ -384,7 +384,7 @@ private:
 
 template <typename K, typename V, typename C>
 template <typename T>
-auto TinyMap<K, V, C>::find(T& map, const key_type& k) {
+inline auto TinyMap<K, V, C>::find(T& map, const key_type& k) {
     if (map.sorted) {
         return std::lower_bound(map.keys.begin(), map.keys.end(), k, map.comp);
     } else {
@@ -394,13 +394,13 @@ auto TinyMap<K, V, C>::find(T& map, const key_type& k) {
 
 template <typename K, typename V, typename C>
 template <typename T>
-auto TinyMap<K, V, C>::find_eq(T& map, const key_type& k) {
+inline auto TinyMap<K, V, C>::find_eq(T& map, const key_type& k) {
     const auto i = find(map, k);
     return (map.sorted && i != map.keys.end() && map.comp(k, *i)) ? map.end() : map.makeIter(i);
 }
 
 template <typename K, typename V, typename C>
-TinyMap<K, V, C>::iterator TinyMap<K, V, C>::insert(iterator pos, const value_type& val) {
+inline TinyMap<K, V, C>::iterator TinyMap<K, V, C>::insert(iterator pos, const value_type& val) {
     if (sorted && pos.first != keys.end() && comp(*pos.first, val.first) &&
         (pos == std::prev(end()) || !comp(val, pos.second.first) && comp(pos.second.first, val))) {
         return std::make_pair(keys.insert(pos.first, val.first), keys.insert(keyToValueIter(pos.first), val.second));
@@ -409,13 +409,13 @@ TinyMap<K, V, C>::iterator TinyMap<K, V, C>::insert(iterator pos, const value_ty
 }
 
 template <typename K, typename V, typename C>
-TinyMap<K, V, C>::iterator TinyMap<K, V, C>::erase(iterator pos) {
+inline TinyMap<K, V, C>::iterator TinyMap<K, V, C>::erase(iterator pos) {
     values.erase(keyToValueIter(pos.keyIter()));
     return makeIter(keys.erase(pos.keyIter()));
 }
 
 template <typename K, typename V, typename C>
-void TinyMap<K, V, C>::erase(iterator first, iterator last) {
+inline void TinyMap<K, V, C>::erase(iterator first, iterator last) {
     values.erase(keyToValueIter(first.keyIter()), keyToValueIter(last.keyIter()));
     keys.erase(first.keyIter(), last.keyIter());
 }
