@@ -28,6 +28,7 @@ public:
 
         // set tile
         interface.setTileID({11, 327, 791});
+        constexpr float extent = mbgl::util::EXTENT;
 
         // add polylines
         {
@@ -49,8 +50,8 @@ public:
             constexpr auto numPoints = 100;
             GeometryCoordinates polyline;
             for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
-                polyline.emplace_back(ipoint * util::EXTENT / numPoints,
-                                      std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f);
+                polyline.emplace_back(ipoint * extent / numPoints,
+                                      std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f);
             }
 
             gfx::PolylineGeneratorOptions options;
@@ -60,7 +61,7 @@ public:
 
             for (auto index{0}; index < numLines; ++index) {
                 for (auto& p : polyline) {
-                    p.y += util::EXTENT / numLines;
+                    p.y += extent / numLines;
                 }
 
                 // set property values
@@ -83,24 +84,24 @@ public:
             GeometryCollection geometry{
                 {
                     // ring 1
-                    {util::EXTENT * 0.1f, util::EXTENT * 0.2f},
-                    {util::EXTENT * 0.5f, util::EXTENT * 0.5f},
-                    {util::EXTENT * 0.7f, util::EXTENT * 0.5f},
-                    {util::EXTENT * 0.5f, util::EXTENT * 1.0f},
-                    {util::EXTENT * 0.0f, util::EXTENT * 0.5f},
-                    {util::EXTENT * 0.1f, util::EXTENT * 0.2f},
+                    {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.2f)},
+                    {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)},
+                    {static_cast<int16_t>(extent* 0.7f), static_cast<int16_t>(extent* 0.5f)},
+                    {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 1.0f)},
+                    {static_cast<int16_t>(extent* 0.0f), static_cast<int16_t>(extent* 0.5f)},
+                    {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.2f)},
                 },
                 {
                     // ring 2
-                    {util::EXTENT * 0.1f, util::EXTENT * 0.25f},
-                    {util::EXTENT * 0.15f, util::EXTENT * 0.5f},
-                    {util::EXTENT * 0.25f, util::EXTENT * 0.45f},
-                    {util::EXTENT * 0.1f, util::EXTENT * 0.25f},
+                    {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.25f)},
+                    {static_cast<int16_t>(extent* 0.15f), static_cast<int16_t>(extent* 0.5f)},
+                    {static_cast<int16_t>(extent* 0.25f), static_cast<int16_t>(extent* 0.45f)},
+                    {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.25f)},
                 },
             };
 
             // set properties
-            interface.setColor(Color::red());
+            interface.setColor(Color::green());
             interface.setOpacity(0.5f);
 
             // add fill

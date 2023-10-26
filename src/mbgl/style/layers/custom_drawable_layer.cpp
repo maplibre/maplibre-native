@@ -194,7 +194,6 @@ public:
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto zoom = parameters.state.getZoom();
         mat4 tileMatrix;
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
