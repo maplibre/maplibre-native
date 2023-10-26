@@ -201,9 +201,10 @@ public:
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
-protected:
+    /// return the curent vertex count
     std::size_t curVertexCount() const;
 
+protected:
     /// Create an instance of the appropriate drawable type
     virtual UniqueDrawable createDrawable() const = 0;
 

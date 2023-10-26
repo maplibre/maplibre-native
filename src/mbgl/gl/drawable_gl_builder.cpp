@@ -39,11 +39,10 @@ void DrawableGLBuilder::init() {
     if (!impl->sharedIndexes && !impl->buildIndexes.empty()) {
         impl->sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(impl->buildIndexes));
     }
+    assert(impl->sharedIndexes && impl->sharedIndexes->elements());
     drawableGL.setIndexData(std::move(impl->sharedIndexes), std::move(impl->segments));
 
-    impl->buildIndexes.clear();
-    impl->segments.clear();
-    impl->vertices.clear();
+    impl->clear();
     textures.clear();
 }
 

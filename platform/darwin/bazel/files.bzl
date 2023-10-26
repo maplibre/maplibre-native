@@ -208,6 +208,11 @@ MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE = [
     "src/MLNOpenGLStyleLayer.h",
     "src/MLNOpenGLStyleLayer.mm",
 ]
+MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
+    "src/MLNCustomDrawableStyleLayer_Private.h",
+    "src/MLNCustomDrawableStyleLayer.h",
+    "src/MLNCustomDrawableStyleLayer.mm",
+]
 MLN_DARWIN_PUBLIC_OBJC_SOURCE = [
     "src/MLNAttributedExpression.m",
     "src/MLNClockDirectionFormatter.m",

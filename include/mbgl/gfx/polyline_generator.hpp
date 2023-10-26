@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/util/geometry.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/vertex_vector.hpp>
@@ -40,8 +41,8 @@ struct PolylineGeneratorOptions {
     style::LineCapType beginCap{style::LineCapType::Butt};
     style::LineCapType endCap{style::LineCapType::Butt};
     float roundLimit{1.f};
-    uint32_t overscaling{1}; // TODO: what is this???
-    std::optional<PolylineGeneratorDistances> lineDistances;
+    uint32_t overscaling{1};
+    std::optional<PolylineGeneratorDistances> clipDistances;
 };
 
 template <class PolylineLayoutVertex, class PolylineSegment>

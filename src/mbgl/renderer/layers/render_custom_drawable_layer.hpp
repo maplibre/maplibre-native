@@ -25,14 +25,12 @@ private:
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-    void markContextDestroyed() override;
     void prepare(const LayerPrepareParameters&) override;
 
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
 #endif
 
-    bool contextDestroyed = false;
     std::shared_ptr<style::CustomDrawableLayerHost> host;
 };
 
