@@ -40,7 +40,7 @@ public:
         float width = 1.f;
         gfx::PolylineGeneratorOptions geometry;
     };
-    
+
     struct FillOptions {
         Color color;
         float opacity = 1.f;
