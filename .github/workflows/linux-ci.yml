@@ -93,16 +93,10 @@ jobs:
           CI: 1
         run: |
           cmake --version
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
-          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
       # mbgl-render (used for size test) & mbgl-benchmark-runner
-
-      - name: Build mbgl-render & mbgl-benchmark-runner
-        if: matrix.renderer == 'drawable'
-        run: |
-          cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -B build-release -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_DRAWABLE_RENDERER=ON
-          cmake --build build-release --target mbgl-render mbgl-benchmark-runner
 
       - name: Upload mbgl-render as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
@@ -110,7 +104,7 @@ jobs:
         with:
           name: mbgl-render
           path: |
-            build-release/bin/mbgl-render
+            build/bin/mbgl-render
   
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
@@ -118,7 +112,7 @@ jobs:
         with:
           name: mbgl-benchmark-runner
           path: |
-            build-release/mbgl-benchmark-runner
+            build/mbgl-benchmark-runner
 
       - name: Configure AWS Credentials
         if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
@@ -131,8 +125,8 @@ jobs:
       - name: Upload mbgl-render & mbgl-benchmark-runner to S3
         if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
         run: | 
-          aws s3 cp build-release/bin/mbgl-render s3://maplibre-native/mbgl-render-main
-          aws s3 cp build-release/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
+          aws s3 cp build/bin/mbgl-render s3://maplibre-native/mbgl-render-main
+          aws s3 cp build/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
 
       # CodeQL
 
