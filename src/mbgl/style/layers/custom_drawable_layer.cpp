@@ -16,6 +16,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/programs/fill_program.hpp>
+#include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
@@ -178,6 +179,78 @@ private:
     shaders::LinePropertiesUBO linePropertiesUBO;
 };
 
+class FillDrawableTweaker : public gfx::DrawableTweaker {
+public:
+    FillDrawableTweaker(const Color& color_, float opacity_)
+        : color(color_),
+          opacity(opacity_) {}
+    ~FillDrawableTweaker() override = default;
+
+    void init(gfx::Drawable&) override{};
+
+    void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
+        if (!drawable.getTileID().has_value()) {
+            return;
+        }
+
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        const auto zoom = parameters.state.getZoom();
+        mat4 tileMatrix;
+        parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+
+        const auto matrix = LayerTweaker::getTileMatrix(
+            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+
+        static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
+        const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
+
+        static const StringIdentity idFillEvaluatedPropsUBOName = stringIndexer().get("FillEvaluatedPropsUBO");
+        const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
+            /* .color = */ color,
+            /* .opacity = */ opacity,
+            0,
+            0,
+            0,
+        };
+
+        static const StringIdentity idFillInterpolateUBOName = stringIndexer().get("FillInterpolateUBO");
+        const shaders::FillInterpolateUBO fillInterpolateUBO{
+            /* .color_t = */ 0.f,
+            /* .opacity_t = */ 0.f,
+            0,
+            0,
+        };
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.createOrUpdate(idFillDrawableUBOName, &fillUBO, parameters.context);
+        uniforms.createOrUpdate(idFillEvaluatedPropsUBOName, &fillPropertiesUBO, parameters.context);
+        uniforms.createOrUpdate(idFillInterpolateUBOName, &fillInterpolateUBO, parameters.context);
+
+#if MLN_RENDER_BACKEND_METAL
+        static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
+        const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
+        uniforms.createOrUpdate(idExpressionInputsUBOName, &expressionUBO, parameters.context);
+
+        static const StringIdentity idFillPermutationUBOName = stringIndexer().get("FillPermutationUBO");
+        const shaders::FillPermutationUBO permutationUBO = {
+            /* .color = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
+            /* .opacity = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
+            /* .overdrawInspector = */ false,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        };
+        uniforms.createOrUpdate(idFillPermutationUBOName, &permutationUBO, parameters.context);
+#endif // MLN_RENDER_BACKEND_METAL
+    };
+
+private:
+    Color color;
+    float opacity;
+};
+
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
                                               LayerGroupBasePtr& layerGroup_,
                                               gfx::ShaderRegistry& shaders_,
@@ -282,6 +355,7 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
         for (const auto& ring : polygon) {
             std::size_t nVertices = ring.size();
             if (nVertices == 0) continue;
+            totalVertices += nVertices;
 
             for (std::size_t i = 0; i < nVertices; ++i) {
                 vertices.emplace_back(FillProgram::layoutVertex(ring[i]));
@@ -332,15 +406,8 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
 
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
-        if (builder->getShader() == lineShader) {
-            // finish building lines
-
-            // create line tweaker
-            const shaders::LinePropertiesUBO linePropertiesUBO{
-                currentColor, currentBlur, currentOpacity, currentGapWidth, currentOffset, currentWidth, 0, 0, 0};
-            auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
-
-            // finish drawables
+        // finish
+        const auto finish_ = [this](auto& tweaker) {
             builder->flush();
             for (auto& drawable : builder->clearDrawables()) {
                 assert(tileID.has_value());
@@ -350,12 +417,26 @@ void CustomDrawableLayerHost::Interface::finish() {
                 TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
                 tileLayerGroup->addDrawable(RenderPass::Translucent, tileID.value(), std::move(drawable));
             }
+        };
+
+        if (builder->getShader() == lineShader) {
+            // finish building lines
+
+            // create line tweaker
+            const shaders::LinePropertiesUBO linePropertiesUBO{
+                currentColor, currentBlur, currentOpacity, currentGapWidth, currentOffset, currentWidth, 0, 0, 0};
+            auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
+
+            // finish drawables
+            finish_(tweaker);
         } else if (builder->getShader() == fillShader) {
             // finish building fills
 
-            // TODO: create fill tweaker
+            // create fill tweaker
+            auto tweaker = std::make_shared<FillDrawableTweaker>(currentColor, currentOpacity);
 
-            // TODO: finish emitting drawables
+            // finish drawables
+            finish_(tweaker);
         }
     }
 }

@@ -204,7 +204,7 @@ public:
     /// return the curent vertex count
     std::size_t curVertexCount() const;
 
-    bool empty() const { return drawables.size() || curVertexCount(); }
+    bool empty() const { return !(drawables.size() || curVertexCount()); }
 
 protected:
     /// Create an instance of the appropriate drawable type

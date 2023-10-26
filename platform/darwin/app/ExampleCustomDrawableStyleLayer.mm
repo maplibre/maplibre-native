@@ -94,16 +94,27 @@ public:
             using namespace mbgl;
             
             GeometryCollection geometry {
-                // ring 1
-                { 
+                {
+                    // ring 1
                     {util::EXTENT * 0.1f, util::EXTENT * 0.2f},
                     {util::EXTENT * 0.5f, util::EXTENT * 0.5f},
                     {util::EXTENT * 0.7f, util::EXTENT * 0.5f},
                     {util::EXTENT * 0.5f, util::EXTENT * 1.0f},
                     {util::EXTENT * 0.0f, util::EXTENT * 0.5f},
                     {util::EXTENT * 0.1f, util::EXTENT * 0.2f},
-                }
+                },
+                {
+                    // ring 2
+                    {util::EXTENT * 0.1f, util::EXTENT * 0.25f},
+                    {util::EXTENT * 0.15f, util::EXTENT * 0.5f},
+                    {util::EXTENT * 0.25f, util::EXTENT * 0.45f},
+                    {util::EXTENT * 0.1f, util::EXTENT * 0.25f},
+                },
             };
+            
+            // set properties
+            interface.setColor(Color::red());
+            interface.setOpacity(0.5f);
             
             // add fill
             interface.addFill(geometry);
