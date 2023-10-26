@@ -40,6 +40,7 @@ public:
         float width = 1.f;
         gfx::PolylineGeneratorOptions geometry;
     };
+
 public:
     /// @brief Construct a new Interface object (internal core use only)
     Interface(RenderLayer& layer,

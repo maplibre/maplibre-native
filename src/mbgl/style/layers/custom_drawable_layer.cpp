@@ -192,8 +192,15 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && builder->curVertexCount()) {
         // create tweaker
-        const shaders::LinePropertiesUBO linePropertiesUBO{
-            lineOptions.color, lineOptions.blur, lineOptions.opacity, lineOptions.gapWidth, lineOptions.offset, lineOptions.width, 0, 0, 0};
+        const shaders::LinePropertiesUBO linePropertiesUBO{lineOptions.color,
+                                                           lineOptions.blur,
+                                                           lineOptions.opacity,
+                                                           lineOptions.gapWidth,
+                                                           lineOptions.offset,
+                                                           lineOptions.width,
+                                                           0,
+                                                           0,
+                                                           0};
 
         auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 
