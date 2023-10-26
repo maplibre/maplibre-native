@@ -225,6 +225,7 @@ public:
         uniforms.createOrUpdate(idFillInterpolateUBOName, &fillInterpolateUBO, parameters.context);
 
 #if MLN_RENDER_BACKEND_METAL
+        const auto zoom = parameters.state.getZoom();
         static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
         const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
         uniforms.createOrUpdate(idExpressionInputsUBOName, &expressionUBO, parameters.context);
