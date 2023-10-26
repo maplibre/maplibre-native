@@ -18,9 +18,9 @@ void TaggedString::addTextSection(const std::u16string &sectionText,
                                   bool keySection,
 #endif
                                   std::optional<Color> textColor) {
-    auto startIndex = static_cast<uint32_t>(styledText.first.size());
     styledText.first += sectionText;
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    auto startIndex = static_cast<uint32_t>(styledText.first.size());
     sections.emplace_back(scale, fontStack, type, startIndex, std::move(textColor));
 #else
     sections.emplace_back(scale, fontStack, std::move(textColor));

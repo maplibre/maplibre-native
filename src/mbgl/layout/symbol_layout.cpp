@@ -149,8 +149,12 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
 
             ft.formattedText = TaggedString();
             std::map<std::size_t, std::size_t> sectionTable;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
             for (std::size_t sectionIndex = 0; sectionIndex < formatted.sections.size(); sectionIndex++) {
                 const auto& section = formatted.sections[sectionIndex];
+#else
+            for (auto & section : formatted.sections) {
+#endif
                 if (!section.image) {
                     std::string u8string = section.text;
                     if (textTransform == TextTransformType::Uppercase) {
