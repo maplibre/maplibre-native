@@ -81,14 +81,7 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
     // delegate the call to the custom layer
     if (host) {
         CustomDrawableLayerHost::Interface interface(
-            /*RenderLayer& layer = */ *this,
-            /*LayerGroupBasePtr& layerGroup = */ layerGroup,
-            /*gfx::ShaderRegistry &shaders = */ shaders,
-            /*gfx::Context &context = */ context,
-            /*const TransformState &state = */ state,
-            /*const std::shared_ptr<UpdateParameters> &updateParameters = */ updateParameters,
-            /*const RenderTree &renderTree = */ renderTree,
-            /*UniqueChangeRequestVec &changes = */ changes);
+            *this, layerGroup, shaders, context, state, updateParameters, renderTree, changes);
         host->update(interface);
     }
 }

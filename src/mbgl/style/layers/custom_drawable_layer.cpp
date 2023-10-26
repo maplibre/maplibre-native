@@ -285,38 +285,12 @@ void CustomDrawableLayerHost::Interface::setTileID(OverscaledTileID tileID_) {
     tileID = tileID_;
 }
 
-void CustomDrawableLayerHost::Interface::setColor(Color color) {
-    if (currentColor != color) finish();
-    currentColor = color;
+void CustomDrawableLayerHost::Interface::setLineOptions(const LineOptions& options) {
+    finish();
+    lineOptions = options;
 }
 
-void CustomDrawableLayerHost::Interface::setBlur(float blur) {
-    if (currentBlur != blur) finish();
-    currentBlur = blur;
-}
-
-void CustomDrawableLayerHost::Interface::setOpacity(float opacity) {
-    if (currentOpacity != opacity) finish();
-    currentOpacity = opacity;
-}
-
-void CustomDrawableLayerHost::Interface::setGapWidth(float gapWidth) {
-    if (currentGapWidth != gapWidth) finish();
-    currentGapWidth = gapWidth;
-}
-
-void CustomDrawableLayerHost::Interface::setOffset(float offset) {
-    if (currentOffset != offset) finish();
-    currentOffset = offset;
-}
-
-void CustomDrawableLayerHost::Interface::setWidth(float width) {
-    if (currentWidth != width) finish();
-    currentWidth = width;
-}
-
-void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates,
-                                                     const gfx::PolylineGeneratorOptions& options) {
+void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
     if (!lineShader) lineShader = lineShaderDefault();
     assert(lineShader);
     if (!builder || builder->getShader() != lineShader) {
@@ -324,7 +298,7 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
     }
     assert(builder);
     assert(builder->getShader() == lineShader);
-    builder->addPolyline(coordinates, options);
+    builder->addPolyline(coordinates, lineOptions.geometry);
 }
 
 void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
@@ -423,8 +397,15 @@ void CustomDrawableLayerHost::Interface::finish() {
             // finish building lines
 
             // create line tweaker
-            const shaders::LinePropertiesUBO linePropertiesUBO{
-                currentColor, currentBlur, currentOpacity, currentGapWidth, currentOffset, currentWidth, 0, 0, 0};
+            const shaders::LinePropertiesUBO linePropertiesUBO{lineOptions.color,
+                                                               lineOptions.blur,
+                                                               lineOptions.opacity,
+                                                               lineOptions.gapWidth,
+                                                               lineOptions.offset,
+                                                               lineOptions.width,
+                                                               0,
+                                                               0,
+                                                               0};
             auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 
             // finish drawables
