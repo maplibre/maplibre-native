@@ -157,7 +157,7 @@ TEST_P(TinyMap, CustomComp) {
     const auto threshold = GetParam().threshold;
 
     const auto map = TinyUnorderedMap<int, int>{threshold, {1, 2, 3}, {3, 2, 1}};
-    const auto map2 = TinyUnorderedMap<int, int, std::hash<int>, std::equal_to<int>>{threshold, {2, 3, 1}, {2, 1, 3}};
+    const auto map2 = TinyUnorderedMap<int, int, std::hash<int>, std::equal_to<>>{threshold, {2, 3, 1}, {2, 1, 3}};
     testSetDiff(map, map2);
 }
 
@@ -216,7 +216,7 @@ void benchmark(const std::string_view label,
                const std::size_t seed = 0xf00dLL) {
     assert((max / reports) * reports == max);
 
-    std::seed_seq seed_seq{0xf00dLL};
+    std::seed_seq seed_seq{seed};
     std::default_random_engine engine(seed_seq);
 
     // build keys
@@ -228,7 +228,7 @@ void benchmark(const std::string_view label,
     std::vector<size_t> values(keys.size());
     std::iota(values.begin(), values.end(), 0);
 
-    using Clock = std::chrono::steady_clock;
+    using SteadyClock = std::chrono::steady_clock;
     using Usec = std::chrono::microseconds;
     std::vector<double> times(reports);
 
@@ -243,7 +243,7 @@ void benchmark(const std::string_view label,
         std::shuffle(testKeys.begin(), testKeys.end(), engine);
 
         // (build a map and look up the keys many times) many times
-        const auto startTime = Clock::now();
+        const auto startTime = SteadyClock::now();
         for (std::size_t tt = 0; tt < timingIterations; ++tt) {
             const auto map = make(buildKeys.begin(), buildKeys.end(), values.begin(), values.begin() + i);
             for (std::size_t j = 0; j < lookups; ++j) {
@@ -256,7 +256,7 @@ void benchmark(const std::string_view label,
         }
 
         if ((i % (max / reports)) == 0) {
-            const auto totalElapsed = std::chrono::duration_cast<Usec>(Clock::now() - startTime);
+            const auto totalElapsed = std::chrono::duration_cast<Usec>(SteadyClock::now() - startTime);
             const auto elapsed = static_cast<double>(totalElapsed.count()) / timingIterations;
             times[i / (max / reports) - 1] = elapsed;
         }
@@ -291,7 +291,7 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
         100,
         lookups,
         20,
-        [&](auto kb, auto ke, auto vb, auto ve) {
+        [&](auto kb, auto ke, auto vb, auto) {
             std::unordered_map<std::size_t, size_t> m;
             m.reserve(std::distance(kb, ke));
             while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
@@ -306,7 +306,7 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
         100,
         lookups,
         20,
-        [&](auto kb, auto ke, auto vb, auto ve) {
+        [&](auto kb, auto ke, auto vb, auto) {
             std::unordered_map<std::string, size_t> m;
             m.reserve(std::distance(kb, ke));
             while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
@@ -320,7 +320,7 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
         100,
         lookups,
         20,
-        [&](auto kb, auto ke, auto vb, auto ve) {
+        [&](auto kb, auto ke, auto vb, auto) {
             std::unordered_map<OverscaledTileID, size_t> m;
             m.reserve(std::distance(kb, ke));
             while (kb != ke) m.insert(std::make_pair(*kb++, *vb++));
