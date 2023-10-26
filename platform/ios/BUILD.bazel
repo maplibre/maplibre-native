@@ -39,7 +39,7 @@ genrule(
         echo "#define MLN_RENDER_BACKEND_METAL 1" > $@;
         cat $(location src/Mapbox.template.h) >> $@;
     """,
-        "//conditions:default": "cat $(location src/Mapbox.template.h) >> $@"
+        "//conditions:default": "cat $(location src/Mapbox.template.h) >> $@",
     }),
 )
 
@@ -235,21 +235,6 @@ ios_application(
         "//platform:ios-benchapp",
         "//platform:ios-sdk",
     ],
-)
-
-# Outputs a file with the size of MapLibre as a dynamic library in bytes
-genrule(
-    name = "size",
-    srcs = [
-        "AppDynamicLib",
-    ],
-    outs = [
-        "size-out",
-    ],
-    cmd = """
-        unzip $(location AppDynamicLib)
-        stat -f%z ./Payload/AppDynamicLib.app/Frameworks/MapLibre.link.framework/MapLibre.link > $@
-    """,
 )
 
 xcodeproj(

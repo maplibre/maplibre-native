@@ -227,7 +227,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
                 prevCoordinate = newPrevVertex;
             }
         }
@@ -279,7 +279,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                              false,
                              startVertex,
                              triangleStore,
-                             options.lineDistances);
+                             options.clipDistances);
 
         } else if (middleVertex && currentJoin == style::LineJoinType::FlipBevel) {
             // miter is too big, flip the direction to make a beveled join
@@ -302,7 +302,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                              false,
                              startVertex,
                              triangleStore,
-                             options.lineDistances);
+                             options.clipDistances);
 
             addCurrentVertex(*currentCoordinate,
                              distance,
@@ -312,7 +312,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                              false,
                              startVertex,
                              triangleStore,
-                             options.lineDistances);
+                             options.clipDistances);
         } else if (middleVertex &&
                    (currentJoin == style::LineJoinType::Bevel || currentJoin == style::LineJoinType::FakeRound)) {
             const bool lineTurnsLeft = (prevNormal->x * nextNormal->y - prevNormal->y * nextNormal->x) > 0;
@@ -338,7 +338,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
             }
 
             if (currentJoin == style::LineJoinType::FakeRound) {
@@ -369,7 +369,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                       lineTurnsLeft,
                                       startVertex,
                                       triangleStore,
-                                      options.lineDistances);
+                                      options.clipDistances);
                 }
             }
 
@@ -383,7 +383,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
             }
 
         } else if (!middleVertex && currentCap == style::LineCapType::Butt) {
@@ -397,7 +397,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
             }
 
             // Start next segment with a butt
@@ -410,7 +410,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
             }
 
         } else if (!middleVertex && currentCap == style::LineCapType::Square) {
@@ -424,7 +424,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
 
                 // The segment is done. Unset vertices to disconnect segments.
                 e1 = e2 = -1;
@@ -440,7 +440,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
             }
 
         } else if (middleVertex ? currentJoin == style::LineJoinType::Round : currentCap == style::LineCapType::Round) {
@@ -454,7 +454,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
 
                 // Add round cap or linejoin at end of segment
                 addCurrentVertex(*currentCoordinate,
@@ -465,7 +465,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  true,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
 
                 // The segment is done. Unset vertices to disconnect segments.
                 e1 = e2 = -1;
@@ -482,7 +482,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  true,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
 
                 addCurrentVertex(*currentCoordinate,
                                  distance,
@@ -492,7 +492,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
             }
         }
 
@@ -512,7 +512,7 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
                                  false,
                                  startVertex,
                                  triangleStore,
-                                 options.lineDistances);
+                                 options.clipDistances);
                 currentCoordinate = newCurrentVertex;
             }
         }

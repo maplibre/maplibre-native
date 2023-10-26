@@ -15,6 +15,11 @@ objc_library(
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_opengl_srcs",
         ],
+    }) + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
+        ],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
@@ -166,6 +171,28 @@ objc_library(
 )
 
 objc_library(
+    name = "app_custom_drawable_layer_objcpp_srcs",
+    srcs = [
+            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
+            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.mm",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + [
+        "-fcxx-modules",
+        "-fmodules",
+        "-Wno-c99-extensions",
+        "-Wno-gnu-zero-variadic-macro-arguments",
+        "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-gnu-statement-expression",
+        "-Wno-deprecated-declarations",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+        ":ios-sdk",
+    ],
+)
+
+objc_library(
     name = "iosapp",
     srcs = [
         "//platform/ios:ios_app_srcs",
@@ -183,7 +210,6 @@ objc_library(
     includes = [
         "darwin/app",
         "darwin/src",
-        "ios/src",
     ],
     sdk_frameworks = [
         ] + select({
@@ -196,7 +222,12 @@ objc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":ios-sdk",
-    ],
+    ] + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            ":app_custom_drawable_layer_objcpp_srcs",
+        ],
+    }),
 )
 
 objc_library(
@@ -241,6 +272,11 @@ sh_binary(
         "//:metal_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_opengl_srcs",
+        ],
+    }) + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
         ],
     }),
     deps = [
