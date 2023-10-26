@@ -106,24 +106,6 @@ jobs:
       - name: Running iOS UI tests
         run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=${{ matrix.renderer }}
 
-      # size test
-
-      - name: Build app for size test & output size
-        if: matrix.renderer == 'legacy'
-        working-directory: ./
-        run: | 
-          bazel build --compilation_mode=opt //platform/ios:size --//:maplibre_platform=ios
-          cp "$(bazel cquery --compilation_mode=opt --output=files //platform/ios:size --//:maplibre_platform=ios)" ./size
-
-      - name: Upload size test result
-        if: matrix.renderer == 'legacy'
-        uses: actions/upload-artifact@v3
-        with:
-          if-no-files-found: error
-          name: size-test-result
-          path: |
-            ./size
-
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
