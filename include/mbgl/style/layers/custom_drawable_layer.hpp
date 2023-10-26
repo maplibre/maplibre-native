@@ -31,6 +31,16 @@ public:
 
 class CustomDrawableLayerHost::Interface {
 public:
+    struct LineOptions {
+        Color color;
+        float blur = 0.f;
+        float opacity = 1.f;
+        float gapWidth = 0.f;
+        float offset = 0.f;
+        float width = 1.f;
+        gfx::PolylineGeneratorOptions geometry;
+    };
+public:
     /// @brief Construct a new Interface object (internal core use only)
     Interface(RenderLayer& layer,
               LayerGroupBasePtr& layerGroup,
@@ -54,12 +64,12 @@ public:
      */
     void setTileID(OverscaledTileID tileID);
 
-    void setColor(Color color);
-    void setBlur(float blur);
-    void setOpacity(float opacity);
-    void setGapWidth(float gapWidth);
-    void setOffset(float offset);
-    void setWidth(float width);
+    /**
+     * @brief Set the line options
+     *
+     * @param options
+     */
+    void setLineOptions(const LineOptions& options);
 
     /**
      * @brief Add a polyline
@@ -67,7 +77,7 @@ public:
      * @param coordinates
      * @param options Polyline options
      */
-    void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions& options);
+    void addPolyline(const GeometryCoordinates& coordinates);
 
     /**
      * @brief Finishe the current drawable building session
@@ -93,12 +103,7 @@ public:
 private:
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
-    Color currentColor;
-    float currentBlur = 0.f;
-    float currentOpacity = 1.f;
-    float currentGapWidth = 0.f;
-    float currentOffset = 0.f;
-    float currentWidth = 1.f;
+    LineOptions lineOptions;
 };
 
 class CustomDrawableLayer final : public Layer {

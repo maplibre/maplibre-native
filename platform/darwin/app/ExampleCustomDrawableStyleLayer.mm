@@ -52,39 +52,36 @@ public:
         using namespace mbgl;
         
         constexpr auto numLines = 6;
-        Color colors[numLines] {Color::red(), Color::blue(), Color(1.f, 0.5f, 0, 0.5f), Color(1.f, 1.f, 0, 0.3f), Color::black(),  Color(1.f, 0, 1.f, 0.2f)};
-        float blurs[numLines] {0.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
-        float opacities[numLines] {1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f};
-        float gapWidths[numLines] {0.0f, 2.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-        float offsets[numLines] {0.0f, -1.0f, 2.0f, -2.0f, 0.5f, -5.0f};
-        float widths[numLines] {8.0f, 4.0f, 16.0f, 2.0f, 0.5f, 24.0f};
+        Interface::LineOptions options[numLines] {
+            {/*color=*/Color::red(),                /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     {} },
+            {/*color=*/Color::blue(),               /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     {} },
+            {/*color=*/Color(1.f, 0.5f, 0, 0.5f),   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    {} },
+            {/*color=*/Color(1.f, 1.f, 0, 0.3f),    /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     {} },
+            {/*color=*/Color::black(),              /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     {} },
+            {/*color=*/Color(1.f, 0, 1.f, 0.2f),    /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    {} },
+        };
+        for(auto& opt: options) {
+            opt.geometry.beginCap = style::LineCapType::Round;
+            opt.geometry.endCap = style::LineCapType::Round;
+            opt.geometry.joinType = style::LineJoinType::Round;
+        }
 
         constexpr auto numPoints = 100;
         GeometryCoordinates polyline;
         for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
             polyline.emplace_back(ipoint * util::EXTENT / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f);
         }
-        
-        gfx::PolylineGeneratorOptions options;
-        options.beginCap = style::LineCapType::Round;
-        options.endCap = style::LineCapType::Round;
-        options.joinType = style::LineJoinType::Round;
-        
+                
         for (auto index {0}; index <  numLines; ++index) {
             for(auto &p : polyline) {
                 p.y += util::EXTENT / numLines;
             }
             
             // set property values
-            interface.setColor(colors[index]);
-            interface.setBlur(blurs[index]);
-            interface.setOpacity(opacities[index]);
-            interface.setGapWidth(gapWidths[index]);
-            interface.setOffset(offsets[index]);
-            interface.setWidth(widths[index]);
+            interface.setLineOptions(options[index]);
             
             // add polyline
-            interface.addPolyline(polyline, options);
+            interface.addPolyline(polyline);
         }
         
         // finish
