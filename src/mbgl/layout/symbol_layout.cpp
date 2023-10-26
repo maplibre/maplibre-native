@@ -153,7 +153,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
             for (std::size_t sectionIndex = 0; sectionIndex < formatted.sections.size(); sectionIndex++) {
                 const auto& section = formatted.sections[sectionIndex];
 #else
-            for (auto & section : formatted.sections) {
+            for (auto& section : formatted.sections) {
 #endif
                 if (!section.image) {
                     std::string u8string = section.text;
