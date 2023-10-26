@@ -40,8 +40,13 @@ LocalGlyphRasterizer::LocalGlyphRasterizer(const std::optional<std::string>& fon
 LocalGlyphRasterizer::~LocalGlyphRasterizer() {}
 
 bool LocalGlyphRasterizer::canRasterizeGlyph(const FontStack&, GlyphID glyphID) {
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     return impl->isConfigured() && impl->metrics->inFont(glyphID.complex.code) &&
            util::i18n::allowsFixedWidthGlyphGeneration(glyphID);
+#else
+    return impl->isConfigured() && impl->metrics->inFont(glyphID) &&
+           util::i18n::allowsFixedWidthGlyphGeneration(glyphID);
+#endif
 }
 
 Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
@@ -53,10 +58,18 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
         return glyph;
     }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 #if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
     glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID.complex.code);
 #else
     glyph.metrics.width = impl->metrics->width(glyphID.complex.code);
+#endif
+#else
+#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+    glyph.metrics.width = impl->metrics->horizontalAdvance(glyphID);
+#else
+    glyph.metrics.width = impl->metrics->width(glyphID);
+#endif
 #endif
     glyph.metrics.height = impl->metrics->height();
     glyph.metrics.left = 3;
@@ -70,8 +83,13 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     QPainter painter(&image);
     painter.setFont(impl->font);
     painter.setRenderHints(QPainter::TextAntialiasing);
+
     // Render at constant baseline, to align with glyphs that are rendered by node-fontnik.
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     painter.drawText(QPointF(0, 20), QString(QChar(glyphID.complex.code)));
+#else
+    painter.drawText(QPointF(0, 20), QString(QChar(glyphID)));
+#endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     auto img = std::make_unique<uint8_t[]>(image.sizeInBytes());
