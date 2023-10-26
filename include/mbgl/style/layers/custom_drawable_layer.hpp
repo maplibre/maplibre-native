@@ -40,6 +40,11 @@ public:
         float width = 1.f;
         gfx::PolylineGeneratorOptions geometry;
     };
+    
+    struct FillOptions {
+        Color color;
+        float opacity = 1.f;
+    };
 
 public:
     /// @brief Construct a new Interface object (internal core use only)
@@ -71,6 +76,13 @@ public:
      * @param options
      */
     void setLineOptions(const LineOptions& options);
+
+    /**
+     * @brief Set the fill options
+     *
+     * @param options
+     */
+    void setFillOptions(const FillOptions& options);
 
     /**
      * @brief Add a polyline
@@ -109,6 +121,7 @@ private:
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
     LineOptions lineOptions;
+    FillOptions fillOptions;
 };
 
 class CustomDrawableLayer final : public Layer {

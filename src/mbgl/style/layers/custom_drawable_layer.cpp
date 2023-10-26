@@ -290,6 +290,11 @@ void CustomDrawableLayerHost::Interface::setLineOptions(const LineOptions& optio
     lineOptions = options;
 }
 
+void CustomDrawableLayerHost::Interface::setFillOptions(const FillOptions& options) {
+    finish();
+    fillOptions = options;
+}
+
 void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
     if (!lineShader) lineShader = lineShaderDefault();
     assert(lineShader);
@@ -414,7 +419,7 @@ void CustomDrawableLayerHost::Interface::finish() {
             // finish building fills
 
             // create fill tweaker
-            auto tweaker = std::make_shared<FillDrawableTweaker>(currentColor, currentOpacity);
+            auto tweaker = std::make_shared<FillDrawableTweaker>(fillOptions.color, fillOptions.opacity);
 
             // finish drawables
             finish_(tweaker);
