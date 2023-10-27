@@ -58,42 +58,44 @@ void addFillIndices(SegmentVector<FillAttributes>& triangleSegments,
                     std::size_t totalVertices) {
     std::size_t nIndices = indices.size();
     assert(nIndices % 3 == 0);
-    
+
     if (triangleSegments.empty() ||
         triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
         triangleSegments.emplace_back(startVertices, triangles.elements());
     }
-    
+
     auto& triangleSegment = triangleSegments.back();
     assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
     const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
-    
+
     for (std::size_t i = 0; i < nIndices; i += 3) {
         triangles.emplace_back(
-                               triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
+            triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
     }
-    
+
     triangleSegment.vertexLength += totalVertices;
     triangleSegment.indexLength += nIndices;
 }
 
-void addOutlineIndices(std::size_t base, std::size_t nVertices, SegmentVector<FillAttributes>& lineSegments, gfx::IndexVector<gfx::Lines>& lines) {
+void addOutlineIndices(std::size_t base,
+                       std::size_t nVertices,
+                       SegmentVector<FillAttributes>& lineSegments,
+                       gfx::IndexVector<gfx::Lines>& lines) {
     if (nVertices == 0) return;
-    
-    if (lineSegments.empty() ||
-        lineSegments.back().vertexLength + nVertices > std::numeric_limits<uint16_t>::max()) {
+
+    if (lineSegments.empty() || lineSegments.back().vertexLength + nVertices > std::numeric_limits<uint16_t>::max()) {
         lineSegments.emplace_back(base, lines.elements());
     }
-    
+
     auto& lineSegment = lineSegments.back();
     assert(lineSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
     const auto lineIndex = static_cast<uint16_t>(lineSegment.vertexLength);
-    
+
     lines.emplace_back(static_cast<uint16_t>(lineIndex + nVertices - 1), lineIndex);
     for (std::size_t i = 1; i < nVertices; i++) {
         lines.emplace_back(static_cast<uint16_t>(lineIndex + i - 1), static_cast<uint16_t>(lineIndex + i));
     }
-    
+
     lineSegment.vertexLength += nVertices;
     lineSegment.indexLength += nVertices * 2;
 }
@@ -101,9 +103,9 @@ void addOutlineIndices(std::size_t base, std::size_t nVertices, SegmentVector<Fi
 } // namespace
 
 void generateFillBuffers(const GeometryCollection& geometry,
-                  gfx::VertexVector<FillLayoutVertex>& vertices,
-                  SegmentVector<FillAttributes>& triangleSegments,
-                  gfx::IndexVector<gfx::Triangles>& triangles) {
+                         gfx::VertexVector<FillLayoutVertex>& vertices,
+                         SegmentVector<FillAttributes>& triangleSegments,
+                         gfx::IndexVector<gfx::Triangles>& triangles) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);
@@ -121,11 +123,11 @@ void generateFillBuffers(const GeometryCollection& geometry,
 }
 
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
-                            gfx::VertexVector<FillLayoutVertex>& vertices,
-                            SegmentVector<FillAttributes>& lineSegments,
-                            gfx::IndexVector<gfx::Lines>& lines,
-                            SegmentVector<FillAttributes>& triangleSegments,
-                            gfx::IndexVector<gfx::Triangles>& triangles) {
+                                  gfx::VertexVector<FillLayoutVertex>& vertices,
+                                  SegmentVector<FillAttributes>& lineSegments,
+                                  gfx::IndexVector<gfx::Lines>& lines,
+                                  SegmentVector<FillAttributes>& triangleSegments,
+                                  gfx::IndexVector<gfx::Triangles>& triangles) {
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tesselation.
         limitHoles(polygon, 500);

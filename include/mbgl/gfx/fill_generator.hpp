@@ -10,16 +10,16 @@ namespace mbgl {
 namespace gfx {
 
 void generateFillBuffers(const GeometryCollection& geometry,
-                  gfx::VertexVector<FillLayoutVertex>& vertices,
-                  SegmentVector<FillAttributes>& triangleSegments,
-                  gfx::IndexVector<Triangles>& triangles);
+                         gfx::VertexVector<FillLayoutVertex>& vertices,
+                         SegmentVector<FillAttributes>& triangleSegments,
+                         gfx::IndexVector<Triangles>& triangles);
 
 void generateFillAndOutineBuffers(const GeometryCollection& geometry,
-                            gfx::VertexVector<FillLayoutVertex>& vertices,
-                            SegmentVector<FillAttributes>& lineSegments,
-                            gfx::IndexVector<gfx::Lines>& lines,
-                            SegmentVector<FillAttributes>& triangleSegments,
-                            gfx::IndexVector<gfx::Triangles>& triangles);
+                                  gfx::VertexVector<FillLayoutVertex>& vertices,
+                                  SegmentVector<FillAttributes>& lineSegments,
+                                  gfx::IndexVector<gfx::Lines>& lines,
+                                  SegmentVector<FillAttributes>& triangleSegments,
+                                  gfx::IndexVector<gfx::Triangles>& triangles);
 
 } // namespace gfx
 } // namespace mbgl
