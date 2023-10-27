@@ -1262,6 +1262,8 @@ if(MBGL_WITH_METAL)
     )
 endif()
 
+
+set(SHAPE_TARGETS, "")
 if (MLN_TEXT_SHAPING_HARFBUZZ) 
     target_compile_definitions(
         mbgl-core
@@ -1272,6 +1274,12 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
     )
+
+    set(SHAPE_TARGETS
+        harfbuzzFreetype
+        freetype
+        harfbuzz
+    ) 
 
     add_subdirectory(vendor/harfbuzzFreetype)
 endif()
@@ -1352,6 +1360,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+        ${SHAPE_TARGETS}
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1389,28 +1398,10 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    ${SHAPE_TARGETS}
 
     FILE MapboxCoreTargets.cmake
 )
-
-
-if (MLN_TEXT_SHAPING_HARFBUZZ) 
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            harfbuzzFreetype
-            freetype
-            harfbuzz
-    )
-
-    export(TARGETS
-        mbgl-core
-
-        harfbuzzFreetype
-        freetype
-        harfbuzz
-    )
-endif()
 
 set_target_properties(
     mbgl-core
