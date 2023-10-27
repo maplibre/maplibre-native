@@ -27,6 +27,7 @@ void DrawableBuilder::init() {
     if (impl->rawVerticesCount) {
         auto raw = impl->rawVertices;
         drawable.setVertices(std::move(raw), impl->rawVerticesCount, impl->rawVerticesType);
+        impl->rawVerticesCount = 0;
     } else {
         const auto& verts = impl->vertices.vector();
         constexpr auto vertSize = sizeof(std::remove_reference<decltype(verts)>::type::value_type);
@@ -41,9 +42,7 @@ void DrawableBuilder::init() {
     assert(impl->sharedIndexes && impl->sharedIndexes->elements());
     drawable.setIndexData(std::move(impl->sharedIndexes), std::move(impl->segments));
 
-    impl->buildIndexes.clear();
-    impl->segments.clear();
-    impl->vertices.clear();
+    impl->clear();
     textures.clear();
 }
 

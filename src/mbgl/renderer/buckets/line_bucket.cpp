@@ -99,7 +99,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
             total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
         }
 
-        options.lineDistances = gfx::PolylineGeneratorDistances{
+        options.clipDistances = gfx::PolylineGeneratorDistances{
             *numericValue<double>(clip_start_it->second), *numericValue<double>(clip_end_it->second), total_length};
     }
 
