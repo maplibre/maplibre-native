@@ -143,7 +143,6 @@ jobs:
       DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
       DEPLOYMENT_ARCH: ${{ matrix.deployment_arch }}
       QT_VERSION: ${{ matrix.qt_version }}
-      CCACHE_LOGFILE: ../ccache.log
 
     steps:
       - name: Checkout
@@ -159,19 +158,6 @@ jobs:
           auth_header="$(git config --local --get http.https://github.com/.extraheader)"
           git submodule sync --recursive
           git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
-
-      - name: Download Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          aqtversion: ==2.1.*
-          version: ${{ env.QT_VERSION }}
-          dir: ${{ github.workspace }}
-          target: ${{ matrix.qt_target }}
-          arch: ${{ matrix.qt_arch }}
-          tools: ${{ matrix.qt_tools }}
-
-      - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v4
 
       - name: Install compiler
         id: install_compiler
@@ -196,6 +182,7 @@ jobs:
         env:
           MLN_COMPILER: ${{ matrix.compiler }}
         run: |
+          brew install --overwrite python@3.11
           brew install "$MLN_COMPILER"
           echo "/usr/local/opt/${MLN_COMPILER}/bin" >> "$GITHUB_PATH"
           {
@@ -218,6 +205,19 @@ jobs:
           arch: ${{ matrix.compiler_type }}
           toolset: ${{ matrix.compiler_version }}
 
+      - name: Setup ninja
+        uses: seanmiddleditch/gha-setup-ninja@v4
+
+      - name: Download Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: ==3.1.*
+          version: ${{ env.QT_VERSION }}
+          dir: ${{ github.workspace }}
+          target: ${{ matrix.qt_target }}
+          arch: ${{ matrix.qt_arch }}
+          tools: ${{ matrix.qt_tools }}
+
       - name: Update ccache
         if: runner.os == 'Windows'
         shell: bash
@@ -231,6 +231,7 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1
         with:
           key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
+          max-size: 200M
 
       - name: Build maplibre-native (macOS)
         if: runner.os == 'macOS' && matrix.qt_target == 'desktop'
@@ -291,12 +292,6 @@ jobs:
             -DMLN_QT_DEPLOYMENT=ON
           ninja.exe
           ninja.exe install
-
-      - name: Upload ccache.log
-        uses: actions/upload-artifact@v3
-        with:
-          name: ccache_${{ matrix.name }}_Qt${{ matrix.qt_version }}
-          path: ccache.log
 
       - name: Create artifacts
         shell: bash
