@@ -78,8 +78,8 @@ public:
     TinyUnorderedMap(std::initializer_list<KeyInput> keys_, std::initializer_list<ValueInput> values_)
         : TinyUnorderedMap(keys_.begin(), keys_.end(), values_.begin(), values_.end()) {}
 
-    TinyUnorderedMap(std::initializer_list<value_type> values)
-        : TinyUnorderedMap(values.begin(), values.end()) {}
+    TinyUnorderedMap(std::initializer_list<value_type> values_)
+        : TinyUnorderedMap(values_.begin(), values_.end()) {}
 
     /// Move constructor
     TinyUnorderedMap(TinyUnorderedMap&& rhs)
