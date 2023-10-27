@@ -70,7 +70,7 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
 
     gfx::VertexAttributeArray attrs;
     using VertexVector = gfx::VertexVector<LineLayoutVertex>;
-    std::shared_ptr<VertexVector> verts = std::make_shared<VertexVector>(polylineVertices);
+    std::shared_ptr<VertexVector> verts = std::make_shared<VertexVector>(std::move(polylineVertices));
 
     if (const auto& attr = attrs.add(idVertexAttribName)) {
         attr->setSharedRawData(verts,
