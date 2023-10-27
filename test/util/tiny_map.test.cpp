@@ -34,7 +34,7 @@ void testSetDiff(TMapIter beg, TMapIter end, TMap2& map2) {
 
 template <std::size_t Threshold>
 void testInit() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     // Construct from separate initializer lists
     const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
@@ -65,7 +65,7 @@ TEST(TinyMap, Init) {
 
 template <std::size_t Threshold>
 void testCopy() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
     decltype(map) map2(map);
@@ -90,7 +90,7 @@ TEST(TinyMap, Copy) {
 
 template <std::size_t Threshold>
 void testMove() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
     std::remove_const_t<decltype(map)> map2(map);
@@ -121,7 +121,7 @@ TEST(TinyMap, Move) {
 
 template <std::size_t Threshold>
 void testConstLookup() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     const auto map = TinyUnorderedMap<int, int, Threshold>{{2, 4, 6}, {3, 2, 1}};
 
@@ -138,7 +138,7 @@ TEST(TinyMap, ConstLookup) {
 
 template <std::size_t Threshold>
 void testMutableLookup() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     auto map = TinyUnorderedMap<int, int, Threshold>{{2, 4, 6}, {3, 2, 1}};
 
@@ -166,7 +166,7 @@ TEST(TinyMap, MutableLookup) {
 
 template <std::size_t Threshold>
 void testTileIDKey() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     const std::vector<OverscaledTileID> keys = {
         {1, 0, {1, 0, 0}},
@@ -204,7 +204,7 @@ TEST(TinyMap, TileIDKey) {
 
 template <std::size_t Threshold>
 void testCustomComp() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
     const auto map2 = TinyUnorderedMap<int, int, Threshold, std::hash<int>, std::equal_to<>>{{2, 3, 1}, {2, 1, 3}};
@@ -390,7 +390,7 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
 
 template <std::size_t Threshold>
 void testBenchmarkTinyMap() {
-    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
     // TinyMap with int keys
     benchmark<std::size_t, TinyUnorderedMap<std::size_t, size_t, Threshold>, Threshold>(
