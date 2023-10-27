@@ -229,11 +229,11 @@ using ssize_t = std::ptrdiff_t;
 
 void incTileID(OverscaledTileID& tid) {
     tid.canonical.y++;
-    if (tid.canonical.y == 1 << tid.canonical.z) {
+    if (tid.canonical.y == 1U << tid.canonical.z) {
         tid.canonical.y = 0;
         tid.canonical.x++;
     }
-    if (tid.canonical.x == 1 << tid.canonical.z) {
+    if (tid.canonical.x == 1U << tid.canonical.z) {
         tid.canonical.x = 0;
         tid.canonical.z++;
     }
