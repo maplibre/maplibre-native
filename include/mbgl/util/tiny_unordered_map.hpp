@@ -75,11 +75,11 @@ public:
 
     /// Construct from  initializer lists
     template <typename KeyInput, typename ValueInput>
-    TinyUnorderedMap(std::initializer_list<KeyInput> keys, std::initializer_list<ValueInput> values)
-        : TinyUnorderedMap(keys.begin(), keys.end(), values.begin(), values.end()) {}
+    TinyUnorderedMap(std::initializer_list<KeyInput> keys_, std::initializer_list<ValueInput> values_)
+        : TinyUnorderedMap(keys_.begin(), keys_.end(), values_.begin(), values_.end()) {}
 
-    TinyUnorderedMap(std::initializer_list<value_type> list)
-        : TinyUnorderedMap(list.begin(), list.end()) {}
+    TinyUnorderedMap(std::initializer_list<value_type> values)
+        : TinyUnorderedMap(values.begin(), values.end()) {}
 
     /// Move constructor
     TinyUnorderedMap(TinyUnorderedMap&& rhs)
