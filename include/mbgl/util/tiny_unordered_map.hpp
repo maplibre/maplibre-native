@@ -16,32 +16,31 @@ template <typename Key,
           typename KeyEqual = std::equal_to<Key>,
           typename Allocator = std::allocator<std::pair<const Key, T>>>
 struct TinyUnorderedMap : private std::unordered_map<Key, T, Hash, KeyEqual, Allocator> {
-    using This = TinyUnorderedMap;
     using Super = std::unordered_map<Key, T, Hash, KeyEqual, Allocator>;
 
 public:
-    using value_type = Super::value_type;
+    using value_type = typename Super::value_type;
 
     TinyUnorderedMap() = default;
 
     TinyUnorderedMap(TinyUnorderedMap&& rhs)
         : Super(std::move(rhs)),
+          linearSize(rhs.linearSize),
           keys(std::move(rhs.keys)),
-          values(std::move(rhs.values)),
-          linearSize(rhs.linearSize) {
+          values(std::move(rhs.values)) {
         rhs.linearSize = 0;
     }
     TinyUnorderedMap(const TinyUnorderedMap& rhs)
         : Super(rhs),
+          linearSize(rhs.linearSize),
           keys(rhs.keys),
-          values(rhs.values),
-          linearSize(rhs.linearSize) {}
+          values(rhs.values) {}
 
     /// Construct from a range of key-value pairs
     template <typename InputIterator>
     TinyUnorderedMap(InputIterator first, InputIterator last) {
         const auto n = std::distance(first, last);
-        if (n <= LinearThreshold) {
+        if (n <= static_cast<decltype(n)>(LinearThreshold)) {
             for (std::size_t i = 0; first != last; i++) {
                 keys[i].emplace(first->first);
                 values[i].emplace(first->second);
@@ -61,7 +60,7 @@ public:
                      [[maybe_unused]] ValueInputIterator lastValue) {
         const auto n = std::distance(firstKey, lastKey);
         assert(n == std::distance(firstValue, lastValue));
-        if (n <= LinearThreshold) {
+        if (n <= static_cast<decltype(n)>(LinearThreshold)) {
             for (std::size_t i = 0; firstKey != lastKey; i++) {
                 keys[i].emplace(*firstKey++);
                 values[i].emplace(*firstValue++);
@@ -95,7 +94,7 @@ public:
     }
 
     /// Swap all contents with another instance
-    void swap(TinyUnorderedMap& other) {
+    TinyUnorderedMap& swap(TinyUnorderedMap& other) {
         this->Super::swap(other);
         std::swap(keys, other.keys);
         std::swap(values, other.values);
