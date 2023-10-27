@@ -77,3 +77,6 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "NSPredicate+MLNAdditions.h"
 #import "NSValue+MLNAdditions.h"
 #import "MLNUserLocationAnnotationViewStyle.h"
+#if MLN_DRAWABLE_RENDERER
+#import "MLNCustomDrawableStyleLayer.h"
+#endif
