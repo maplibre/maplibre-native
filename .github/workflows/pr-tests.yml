@@ -1,6 +1,5 @@
-
-
-name: pr-bloaty
+# Runs Bloaty (size test) and Google Benchmark and reports results on PR
+name: pr-tests
 
 on:
   workflow_run:
@@ -88,9 +87,8 @@ jobs:
             awk 'NR <= 2; END { print }' tlus_diff_main.txt
             echo '```'
             echo "Full report: $download_url/$report_path"
+            echo "---"
           } >> message.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare Bloaty message (legacy)
         run: |
@@ -103,12 +101,62 @@ jobs:
             echo '```'
             echo "Full report: $download_url/$report_path"
           } >> message.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Leave a comment with Bloaty results
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           number: ${{ steps.get-pr-number.outputs.pr-number }}
           header: bloaty
+          path: message.md
+
+  pr-benchmark:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
+
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: mbgl-benchmark-runner
+          expect-files: "mbgl-benchmark-runner"
+
+      - name: Download mbgl-benchmark-runner-main
+        run: wget -O mbgl-benchmark-runner-main "${download_url}/mbgl-benchmark-runner-main"
+
+      # needed for compare.py
+      - name: Install scipy
+        run: pip3 install scipy
+
+      - name: Run Benchmarks
+        # excluding the API tests because they hang https://github.com/maplibre/maplibre-native/issues/1808
+        run: python3 vendor/benchmark/tools/compare.py benchmarks mbgl-benchmark-runner-main mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
+
+      - name: Configure AWS Credentials
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Prepare Benchmark message
+        run: |
+          sed -n '/Comparing/,$p' benchmark_out.txt | tail -n +2 > benchmark_diff.txt
+          report_path=benchmark-results/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
+          aws s3 cp benchmark_diff.txt s3://maplibre-native/"$report_path"
+          {
+            echo "Benchmark Results ⚡"
+            echo '```'
+            awk 'NR <= 2; END { print }' benchmark_diff.txt
+            echo '```'
+            echo "Full report: $download_url/$report_path"
+          } >> message.md
+
+      - name: Leave a comment with Benchmark results
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ steps.get-pr-number.outputs.pr-number }}
+          header: benchmark
           path: message.md
