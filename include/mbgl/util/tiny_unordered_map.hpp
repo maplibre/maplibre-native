@@ -33,7 +33,7 @@ struct TinyUnorderedMap : private std::unordered_map<Key, T, Hash, KeyEqual, All
 public:
     using value_type = typename Super::value_type;
 
-    TinyUnorderedMap() = default;
+    TinyUnorderedMap() noexcept = default;
 
     /// Construct from a range of key-value pairs
     template <typename InputIterator>
@@ -82,7 +82,7 @@ public:
         : TinyUnorderedMap(values_.begin(), values_.end()) {}
 
     /// Move constructor
-    TinyUnorderedMap(TinyUnorderedMap&& rhs)
+    TinyUnorderedMap(TinyUnorderedMap&& rhs) noexcept
         : Super(std::move(rhs)),
           linearSize(rhs.linearSize),
           keys(std::move(rhs.keys)),
@@ -104,7 +104,7 @@ public:
     }
 
     /// Move assignment
-    TinyUnorderedMap& operator=(TinyUnorderedMap&& rhs) {
+    TinyUnorderedMap& operator=(TinyUnorderedMap&& rhs) noexcept {
         TinyUnorderedMap{std::move(rhs)}.swap(*this);
         return *this;
     }
@@ -118,31 +118,31 @@ public:
         return *this;
     }
 
-    std::size_t size() const { return linearSize ? linearSize : Super::size(); }
-    bool empty() const { return !size(); }
+    std::size_t size() const noexcept { return linearSize ? linearSize : Super::size(); }
+    bool empty() const noexcept { return !size(); }
 
-    std::optional<std::reference_wrapper<T>> find(const Key& key) {
+    std::optional<std::reference_wrapper<T>> find(const Key& key) noexcept {
         return TinyUnorderedMap::find<TinyUnorderedMap, T>(*this, key);
     }
-    std::optional<std::reference_wrapper<const T>> find(const Key& key) const {
+    std::optional<std::reference_wrapper<const T>> find(const Key& key) const noexcept {
         return TinyUnorderedMap::find<const TinyUnorderedMap, const T>(*this, key);
     }
 
-    std::optional<std::reference_wrapper<T>> operator[](const Key& key) {
+    std::optional<std::reference_wrapper<T>> operator[](const Key& key) noexcept {
         return TinyUnorderedMap::find<TinyUnorderedMap, T>(*this, key);
     }
-    std::optional<std::reference_wrapper<const T>> operator[](const Key& key) const {
+    std::optional<std::reference_wrapper<const T>> operator[](const Key& key) const noexcept {
         return TinyUnorderedMap::find<const TinyUnorderedMap, const T>(*this, key);
     }
 
-    std::size_t count(const Key& key) const { return find(key) ? 1 : 0; }
+    std::size_t count(const Key& key) const noexcept { return find(key) ? 1 : 0; }
 
 private:
     std::size_t linearSize = 0;
     std::array<std::optional<Key>, LinearThreshold> keys;
     std::array<std::optional<T>, LinearThreshold> values;
 
-    auto makeFindPredicate(const Key& key) const {
+    auto makeFindPredicate(const Key& key) const noexcept {
         return [&, eq = this->Super::key_eq()](const auto& x) {
             return eq(key, *x);
         };
@@ -150,7 +150,7 @@ private:
 
     /// Search the small-map storage for a key.
     /// @return A pair of `bool found` and `size_t index`
-    auto findLinear(const Key& key) const {
+    auto findLinear(const Key& key) const noexcept {
         const auto beg = keys.begin();
         const auto end = beg + linearSize;
         const auto hit = std::find_if(beg, end, makeFindPredicate(key));
@@ -159,7 +159,7 @@ private:
 
     // templated to provide `iterator` and `const_iterator` return values without duplication
     template <typename TThis, typename TRet>
-    static std::optional<std::reference_wrapper<TRet>> find(TThis& map, const Key& key) {
+    static std::optional<std::reference_wrapper<TRet>> find(TThis& map, const Key& key) noexcept {
         if (map.linearSize) {
             if (const auto result = map.findLinear(key); result.first) {
                 // Return a reference to the value at the same index

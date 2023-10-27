@@ -186,7 +186,7 @@ void testTileIDKey() {
         {0, 0, {0, 0, 0}},
     };
     const std::vector<std::size_t> values(keys.size(), 0);
-    const auto map = TinyUnorderedMap<OverscaledTileID, int, Threshold>{
+    const auto map = TinyUnorderedMap<OverscaledTileID, std::size_t, Threshold>{
         keys.begin(), keys.end(), values.begin(), values.end()};
 
     for (const auto& k : keys) {
