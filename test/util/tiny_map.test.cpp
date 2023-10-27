@@ -2,6 +2,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/string.hpp>
 #include <mbgl/util/tiny_unordered_map.hpp>
 
 #include <algorithm>
@@ -15,18 +16,13 @@
 using namespace mbgl;
 using namespace mbgl::util;
 
-struct Params {
-    std::size_t threshold;
-};
-struct TinyMap : public testing::TestWithParam<Params> {};
-
 template <typename TMapIter, typename TMap2>
 void testSetDiff(TMapIter beg, TMapIter end, TMap2& map2) {
     while (beg != end) {
         auto item = *beg++;
         auto i = map2.find(item.first);
-        EXPECT_NE(i, map2.end());
-        EXPECT_EQ(i->second, item.second);
+        EXPECT_TRUE(i);
+        EXPECT_EQ(*i, item.second);
     }
 }
 template <typename TMap1, typename TMap2>
@@ -35,95 +31,125 @@ void testSetDiff(TMap1 map1, TMap2& map2) {
     testSetDiff(map2.begin(), map2.end(), map1);
 }
 
-TEST_P(TinyMap, Init) {
-    const auto threshold = GetParam().threshold;
-
+template <std::size_t Threshold>
+void testInit() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
     // Construct from separate initializer lists
-    const auto map = TinyUnorderedMap<int, int>{threshold, {1, 2, 3}, {3, 2, 1}};
+    const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
     EXPECT_EQ(3, map.size());
-    EXPECT_EQ(threshold, map.getThreshold());
+    EXPECT_EQ(Threshold, map.getThreshold());
 
     // Construct from list of pairs
-    const auto map2 = TinyUnorderedMap<int, int>{threshold, {{1, 3}, {2, 2}, {3, 1}}};
+    const auto map2 = TinyUnorderedMap<int, int, Threshold>{{{1, 3}, {2, 2}, {3, 1}}};
     EXPECT_EQ(map.size(), map2.size());
     testSetDiff(map, map2);
 
     // Construct in a different order
-    const auto map3 = TinyUnorderedMap<int, int>{threshold, {2, 3, 1}, {2, 1, 3}};
+    const auto map3 = TinyUnorderedMap<int, int, Threshold>{{2, 3, 1}, {2, 1, 3}};
     testSetDiff(map, map3);
 }
+TEST(TinyMap, Init) {
+    testInit<0>();
+    testInit<2>();
+    testInit<5>();
+    testInit<10>();
+}
 
-TEST_P(TinyMap, Copy) {
-    const auto threshold = GetParam().threshold;
+template <std::size_t Threshold>
+void testCopy() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
 
-    const auto map = TinyUnorderedMap<int, int>{threshold, {1, 2, 3}, {3, 2, 1}};
+    const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
     decltype(map) map2(map);
-    EXPECT_EQ(threshold, map2.getThreshold());
+    EXPECT_EQ(Threshold, map2.getThreshold());
 
     std::remove_const_t<decltype(map)> map3;
     map3 = map2;
-    EXPECT_EQ(threshold, map3.getThreshold());
-
-    map3.setThreshold(2 * threshold);
-    EXPECT_EQ(2 * threshold, map3.getThreshold());
+    EXPECT_EQ(Threshold, map3.getThreshold());
 
     testSetDiff(map, map2);
     testSetDiff(map, map3);
 }
+TEST(TinyMap, Copy) {
+    testCopy<0>();
+    testCopy<2>();
+    testCopy<5>();
+    testCopy<10>();
+}
 
-TEST_P(TinyMap, Move) {
-    const auto threshold = GetParam().threshold;
+template <std::size_t Threshold>
+void testMove() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
 
-    const auto map = TinyUnorderedMap<int, int>{threshold, {1, 2, 3}, {3, 2, 1}};
+    const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
     std::remove_const_t<decltype(map)> map2(map);
 
     // move constructor
     decltype(map2) map3(std::move(map2));
     EXPECT_TRUE(map2.empty());
-    EXPECT_EQ(threshold, map3.getThreshold());
     testSetDiff(map, map3);
 
     // move assignment
     decltype(map2) map4;
     map4 = std::move(map3);
     EXPECT_TRUE(map3.empty());
-    EXPECT_EQ(threshold, map4.getThreshold());
     testSetDiff(map, map4);
 }
-
-TEST_P(TinyMap, ConstLookup) {
-    const auto threshold = GetParam().threshold;
-
-    const auto map = TinyUnorderedMap<int, int>{threshold, {2, 4, 6}, {3, 2, 1}};
-
-    EXPECT_EQ(3, map.find(2)->second);
-    EXPECT_EQ(2, map.find(4)->second);
-    EXPECT_EQ(1, map.find(6)->second);
+TEST(TinyMap, Move) {
+    testMove<0>();
+    testMove<2>();
+    testMove<5>();
+    testMove<10>();
 }
 
-TEST_P(TinyMap, MutableLookup) {
-    const auto threshold = GetParam().threshold;
+template <std::size_t Threshold>
+void testConstLookup() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
 
-    auto map = TinyUnorderedMap<int, int>{threshold, {2, 4, 6}, {3, 2, 1}};
+    const auto map = TinyUnorderedMap<int, int, Threshold>{{2, 4, 6}, {3, 2, 1}};
 
-    EXPECT_EQ(3, map.find(2)->second);
-    EXPECT_EQ(2, map.find(4)->second);
-    EXPECT_EQ(1, map.find(6)->second);
+    EXPECT_EQ(3, *map.find(2));
+    EXPECT_EQ(2, *map.find(4));
+    EXPECT_EQ(1, *map.find(6));
+}
+TEST(TinyMap, ConstLookup) {
+    testConstLookup<0>();
+    testConstLookup<2>();
+    testConstLookup<5>();
+    testConstLookup<10>();
+}
 
-    // `[]` inserts a default value
-    EXPECT_EQ(0, map[7]);
-    EXPECT_EQ(0, map[5]);
-    EXPECT_EQ(0, map[0]);
-    EXPECT_EQ(0, map[3]);
+template <std::size_t Threshold>
+void testMutableLookup() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
 
-    // Lookups still work
+    auto map = TinyUnorderedMap<int, int, Threshold>{{2, 4, 6}, {3, 2, 1}};
+
+    EXPECT_EQ(3, *map.find(2));
+    EXPECT_EQ(2, *map.find(4));
+    EXPECT_EQ(1, *map.find(6));
+
+    // operator[] doesn't insert... for now
+    EXPECT_FALSE(map[7]);
+    EXPECT_FALSE(map[5]);
+    EXPECT_FALSE(map[0]);
+    EXPECT_FALSE(map[3]);
+    EXPECT_EQ(3, map.size());
+
     EXPECT_EQ(3, map[2]);
     EXPECT_EQ(2, map[4]);
     EXPECT_EQ(1, map[6]);
 }
+TEST(TinyMap, MutableLookup) {
+    testMutableLookup<0>();
+    testMutableLookup<2>();
+    testMutableLookup<5>();
+    testMutableLookup<10>();
+}
 
-TEST_P(TinyMap, TileIDKey) {
-    const auto threshold = GetParam().threshold;
+template <std::size_t Threshold>
+void testTileIDKey() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
 
     const std::vector<OverscaledTileID> keys = {
         {1, 0, {1, 0, 0}},
@@ -143,22 +169,35 @@ TEST_P(TinyMap, TileIDKey) {
         {0, 0, {0, 0, 0}},
     };
     const std::vector<std::size_t> values(keys.size(), 0);
-    const auto map = TinyUnorderedMap<OverscaledTileID, int>{
-        threshold, keys.begin(), keys.end(), values.begin(), values.end()};
+    const auto map = TinyUnorderedMap<OverscaledTileID, int, Threshold>{
+        keys.begin(), keys.end(), values.begin(), values.end()};
 
     for (const auto& k : keys) {
-        EXPECT_EQ(1, map.count(k));
-        EXPECT_EQ(0, map.count({3, k.wrap, k.canonical}));
-        EXPECT_EQ(0, map.count({k.overscaledZ, 1, k.canonical}));
+        EXPECT_TRUE(map.find(k));
+        EXPECT_FALSE(map.find({3, k.wrap, k.canonical}));
+        EXPECT_FALSE(map.find({k.overscaledZ, 1, k.canonical}));
     }
 }
+TEST(TinyMap, TileIDKey) {
+    testTileIDKey<0>();
+    testTileIDKey<2>();
+    testTileIDKey<5>();
+    testTileIDKey<10>();
+}
 
-TEST_P(TinyMap, CustomComp) {
-    const auto threshold = GetParam().threshold;
+template <std::size_t Threshold>
+void testCustomComp() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
 
-    const auto map = TinyUnorderedMap<int, int>{threshold, {1, 2, 3}, {3, 2, 1}};
-    const auto map2 = TinyUnorderedMap<int, int, std::hash<int>, std::equal_to<>>{threshold, {2, 3, 1}, {2, 1, 3}};
+    const auto map = TinyUnorderedMap<int, int, Threshold>{{1, 2, 3}, {3, 2, 1}};
+    const auto map2 = TinyUnorderedMap<int, int, Threshold, std::hash<int>, std::equal_to<>>{{2, 3, 1}, {2, 1, 3}};
     testSetDiff(map, map2);
+}
+TEST(TinyMap, CustomComp) {
+    testCustomComp<0>();
+    testCustomComp<2>();
+    testCustomComp<5>();
+    testCustomComp<10>();
 }
 
 template <typename T>
@@ -205,16 +244,19 @@ std::function<std::string()> makeGenStringID() {
 static volatile int do_not_optimize_away = 0;
 
 template <typename TKey, // key type
-          typename TMap> // map type
+          typename TMap, // map type
+          std::size_t Threshold = 0>
 void benchmark(const std::string_view label,
-               const std::size_t threshold,
                const std::size_t max,     // largest number of elements to consider
                const std::size_t lookups, // number of searches for each item (~ read/write ratio)
                const std::size_t reports, // number of items reported from `max` (should divide evenly)
                const TMakeMap<TMap, TKey> make,
                const std::function<TKey()> generate,
                const std::size_t seed = 0xf00dLL) {
-    assert((max / reports) * reports == max);
+    if ((max / reports) * reports != max) {
+        assert(false);
+        return;
+    }
 
     std::seed_seq seed_seq{seed};
     std::default_random_engine engine(seed_seq);
@@ -248,7 +290,7 @@ void benchmark(const std::string_view label,
             const auto map = make(buildKeys.begin(), buildKeys.end(), values.begin(), values.begin() + i);
             for (std::size_t j = 0; j < lookups; ++j) {
                 for (const auto& k : testKeys) {
-                    if (map.find(k) != map.end()) {
+                    if (map.count(k)) {
                         do_not_optimize_away++;
                     }
                 }
@@ -264,9 +306,8 @@ void benchmark(const std::string_view label,
 
     std::stringstream ss;
     ss << std::setw(10) << std::left << label;
-    ss << " threshold=" << std::setw(2) << threshold;
-    ss << " ratio=" << lookups;
-    ss << " (x" << (max / reports) << "): ";
+    ss << " threshold=" << std::setw(3) << std::setfill('0') << std::right << Threshold << std::setfill(' ');
+    ss << " (x" << std::setw(2) << (max / reports) << "): ";
     for (std::size_t i = 0; i < reports; ++i) {
         ss << std::setw(6) << std::round(times[i] * 10);
     }
@@ -287,10 +328,9 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
     // std::unordered_map with size_t keys
     benchmark<std::size_t, std::unordered_map<std::size_t, size_t>>(
         "int:stl",
-        0,
-        100,
-        lookups,
         20,
+        lookups,
+        10,
         [&](auto kb, auto ke, auto vb, auto) {
             std::unordered_map<std::size_t, size_t> m;
             m.reserve(std::distance(kb, ke));
@@ -301,11 +341,10 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
 
     // std::unordered_map with string keys
     benchmark<std::string, std::unordered_map<std::string, size_t>>(
-        "str:map",
-        0,
-        100,
+        "str:stl",
+        10,
         lookups,
-        20,
+        10,
         [&](auto kb, auto ke, auto vb, auto) {
             std::unordered_map<std::string, size_t> m;
             m.reserve(std::distance(kb, ke));
@@ -315,11 +354,10 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
         makeGenStringID());
 
     benchmark<OverscaledTileID, std::unordered_map<OverscaledTileID, size_t>>(
-        "tile:map",
-        0,
-        100,
-        lookups,
+        "tile:stl",
         20,
+        lookups,
+        10,
         [&](auto kb, auto ke, auto vb, auto) {
             std::unordered_map<OverscaledTileID, size_t> m;
             m.reserve(std::distance(kb, ke));
@@ -329,44 +367,44 @@ TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkRef)) {
         makeGenTileID());
 }
 
-TEST_P(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkTinyMap)) {
-    const auto threshold = GetParam().threshold;
+template <std::size_t Threshold>
+void testBenchmarkTinyMap() {
+    testing::ScopedTrace trace(__FILE_NAME__, __LINE__, Threshold);
 
     // TinyMap with int keys
-    benchmark<std::size_t, TinyUnorderedMap<std::size_t, size_t>>(
+    benchmark<std::size_t, TinyUnorderedMap<std::size_t, size_t, Threshold>, Threshold>(
         "int:tiny",
-        threshold,
-        100,
-        lookups,
         20,
+        lookups,
+        10,
         [&](auto kb, auto ke, auto vb, auto ve) {
-            return TinyUnorderedMap<std::size_t, size_t>{threshold, kb, ke, vb, ve};
+            return TinyUnorderedMap<std::size_t, size_t, Threshold>{kb, ke, vb, ve};
         },
         makeGenIntID());
 
     // TinyMap with string keys
-    benchmark<std::string, TinyUnorderedMap<std::string, size_t>>(
+    benchmark<std::string, TinyUnorderedMap<std::string, size_t, Threshold>, Threshold>(
         "str:tiny",
-        threshold,
-        100,
+        10,
         lookups,
-        20,
+        10,
         [&](auto kb, auto ke, auto vb, auto ve) {
-            return TinyUnorderedMap<std::string, size_t>{threshold, kb, ke, vb, ve};
+            return TinyUnorderedMap<std::string, size_t, Threshold>{kb, ke, vb, ve};
         },
         makeGenStringID());
 
-    benchmark<OverscaledTileID, TinyUnorderedMap<OverscaledTileID, size_t>>(
+    benchmark<OverscaledTileID, TinyUnorderedMap<OverscaledTileID, size_t, Threshold>, Threshold>(
         "tile:tiny",
-        threshold,
-        100,
-        lookups,
         20,
+        lookups,
+        10,
         [&](auto kb, auto ke, auto vb, auto ve) {
-            return TinyUnorderedMap<OverscaledTileID, size_t>{threshold, kb, ke, vb, ve};
+            return TinyUnorderedMap<OverscaledTileID, size_t, Threshold>{kb, ke, vb, ve};
         },
         makeGenTileID());
 }
-
-// Use `testing::GTEST_FLAG(filter) = "Threshold/TinyMap.*/*"` to run these alone
-INSTANTIATE_TEST_SUITE_P(Threshold, TinyMap, testing::Values(Params{0}, Params{2}, Params{5}, Params{10}));
+TEST(TinyMap, TEST_REQUIRES_ACCURATE_TIMING(BenchmarkTinyMap)) {
+    testBenchmarkTinyMap<4>();
+    testBenchmarkTinyMap<8>();
+    testBenchmarkTinyMap<16>();
+}
