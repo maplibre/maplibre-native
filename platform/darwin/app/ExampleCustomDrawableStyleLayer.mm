@@ -70,12 +70,12 @@ public:
             constexpr auto numPoints = 100;
             GeometryCoordinates polyline;
             for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
-                polyline.emplace_back(ipoint * util::EXTENT / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f);
+                polyline.emplace_back(ipoint * extent / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f);
             }
             
             for (auto index {0}; index <  numLines; ++index) {
                 for(auto &p : polyline) {
-                    p.y += util::EXTENT / numLines;
+                    p.y += extent / numLines;
                 }
                 
                 // set property values

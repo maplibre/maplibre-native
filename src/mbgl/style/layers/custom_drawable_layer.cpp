@@ -20,38 +20,7 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-// fill_bucket.cpp
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/style/layers/fill_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_fill_layer.hpp>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#endif
-
-#include <mapbox/earcut.hpp>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-#include <cassert>
-
-namespace mapbox {
-namespace util {
-template <>
-struct nth<0, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.x; };
-};
-
-template <>
-struct nth<1, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
-};
-} // namespace util
-} // namespace mapbox
+#include <mbgl/gfx/fill_generator.hpp>
 
 namespace mbgl {
 
@@ -315,7 +284,7 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     assert(builder);
     assert(builder->getShader() == fillShader);
 
-    // build the fill vertices, indexes and segments
+    // provision buffers for fill vertices, indexes and segments
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
@@ -326,43 +295,8 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
 
     SegmentVector<FillAttributes> triangleSegments;
 
-    for (auto& polygon : classifyRings(geometry)) {
-        limitHoles(polygon, 500);
-        std::size_t startVertices = vertices.elements();
-        std::size_t totalVertices = 0;
-
-        for (const auto& ring : polygon) {
-            std::size_t nVertices = ring.size();
-            if (nVertices == 0) continue;
-            totalVertices += nVertices;
-
-            for (std::size_t i = 0; i < nVertices; ++i) {
-                vertices.emplace_back(FillProgram::layoutVertex(ring[i]));
-            }
-        }
-
-        std::vector<uint32_t> indices = mapbox::earcut(polygon);
-
-        std::size_t nIndices = indices.size();
-        assert(nIndices % 3 == 0);
-
-        if (triangleSegments.empty() ||
-            triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
-            triangleSegments.emplace_back(startVertices, triangles.elements());
-        }
-
-        auto& triangleSegment = triangleSegments.back();
-        assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
-
-        for (std::size_t i = 0; i < nIndices; i += 3) {
-            triangles.emplace_back(
-                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
-        }
-
-        triangleSegment.vertexLength += totalVertices;
-        triangleSegment.indexLength += nIndices;
-    }
+    // generate fill geometry into buffers
+    gfx::generateFillBuffers(geometry, vertices, triangleSegments, triangles);
 
     // add to builder
     static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
