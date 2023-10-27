@@ -8,7 +8,19 @@
 namespace mbgl {
 namespace util {
 
-/// A wrapper around `unordered_map` which uses linear search below some threshold of size
+/// A wrapper around `unordered_map` which uses linear search below some threshold of size.
+///
+/// Currently an immutable map, not allowing insert or delete, but could be extended to allow that, with extra cost when
+/// transitioning over the threshold value, of course. The maped values can be modified via reference accessors, just
+/// not the set of keys or the keys themselves. Since the small-case elements are stored separately from
+/// `unordered_map`, we can't use that class' iterators, and its interface is private.  A wrapper iterator might allow
+/// for a better and more complete public interface.
+/// @tparam Key The key type
+/// @tparam T The mapped type
+/// @tparam LinearThreshold The count of elements above which a dynamically allocated hashtable is used
+/// @tparam Hash The hash implementation
+/// @tparam KeyEqual The key equality implementation
+/// @tparam Allocator The allocator used for dynamic key-value-pair allocations only
 template <typename Key,
           typename T,
           std::size_t LinearThreshold,
@@ -22,19 +34,6 @@ public:
     using value_type = typename Super::value_type;
 
     TinyUnorderedMap() = default;
-
-    TinyUnorderedMap(TinyUnorderedMap&& rhs)
-        : Super(std::move(rhs)),
-          linearSize(rhs.linearSize),
-          keys(std::move(rhs.keys)),
-          values(std::move(rhs.values)) {
-        rhs.linearSize = 0;
-    }
-    TinyUnorderedMap(const TinyUnorderedMap& rhs)
-        : Super(rhs),
-          linearSize(rhs.linearSize),
-          keys(rhs.keys),
-          values(rhs.values) {}
 
     /// Construct from a range of key-value pairs
     template <typename InputIterator>
@@ -82,12 +81,29 @@ public:
     TinyUnorderedMap(std::initializer_list<value_type> list)
         : TinyUnorderedMap(list.begin(), list.end()) {}
 
-    /// copy assignment
+    /// Move constructor
+    TinyUnorderedMap(TinyUnorderedMap&& rhs)
+        : Super(std::move(rhs)),
+          linearSize(rhs.linearSize),
+          keys(std::move(rhs.keys)),
+          values(std::move(rhs.values)) {
+        rhs.linearSize = 0;
+    }
+
+    /// Copy constructor
+    TinyUnorderedMap(const TinyUnorderedMap& rhs)
+        : Super(rhs),
+          linearSize(rhs.linearSize),
+          keys(rhs.keys),
+          values(rhs.values) {}
+
+    /// Copy assignment
     TinyUnorderedMap& operator=(const TinyUnorderedMap& rhs) {
         TinyUnorderedMap{rhs}.swap(*this);
         return *this;
     }
-    /// move assignment
+
+    /// Move assignment
     TinyUnorderedMap& operator=(TinyUnorderedMap&& rhs) {
         TinyUnorderedMap{std::move(rhs)}.swap(*this);
         return *this;
@@ -102,13 +118,8 @@ public:
         return *this;
     }
 
-    std::size_t getThreshold() const { return LinearThreshold; }
-
     std::size_t size() const { return linearSize ? linearSize : Super::size(); }
     bool empty() const { return !size(); }
-
-    using Super::begin;
-    using Super::end;
 
     std::optional<std::reference_wrapper<T>> find(const Key& key) {
         return TinyUnorderedMap::find<TinyUnorderedMap, T>(*this, key);
@@ -131,17 +142,29 @@ private:
     std::array<std::optional<Key>, LinearThreshold> keys;
     std::array<std::optional<T>, LinearThreshold> values;
 
-    // templated to generalize `iterator` and `const_iterator` return values
+    auto makeFindPredicate(const Key& key) const {
+        return [&, eq = this->Super::key_eq()](const auto& x) {
+            return eq(key, *x);
+        };
+    }
+
+    /// Search the small-map storage for a key.
+    /// @return A pair of `bool found` and `size_t index`
+    auto findLinear(const Key& key) const {
+        const auto beg = keys.begin();
+        const auto end = beg + linearSize;
+        const auto hit = std::find_if(beg, end, makeFindPredicate(key));
+        return std::make_pair(hit != end, hit != end ? std::distance(beg, hit) : 0);
+    }
+
+    // templated to provide `iterator` and `const_iterator` return values without duplication
     template <typename TThis, typename TRet>
     static std::optional<std::reference_wrapper<TRet>> find(TThis& map, const Key& key) {
         if (map.linearSize) {
-            const auto eq = map.key_eq();
-            const auto end = map.keys.begin() + map.linearSize;
-            auto pred = [&](const auto& x) {
-                return eq(key, *x);
-            };
-            if (const auto hit = std::find_if(map.keys.begin(), end, std::move(pred)); hit != end) {
-                return **std::next(map.values.begin(), std::distance(map.keys.begin(), hit));
+            if (const auto result = map.findLinear(key); result.first) {
+                // Return a reference to the value at the same index
+                assert(map.values[result.second]);
+                return *map.values[result.second];
             }
         } else if (const auto hit = map.Super::find(key); hit != map.end()) {
             return hit->second;
