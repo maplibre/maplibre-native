@@ -37,18 +37,13 @@ public:
 
     /// Construct from a range of key-value pairs
     template <typename InputIterator>
-    TinyUnorderedMap(InputIterator first, InputIterator last) {
-        const auto n = std::distance(first, last);
-        if (n <= static_cast<decltype(n)>(LinearThreshold)) {
-            for (std::size_t i = 0; first != last; i++) {
-                keys[i].emplace(first->first);
-                values[i].emplace(first->second);
-                ++first;
-            }
-            linearSize = n;
-        } else {
-            Super{first, last}.swap(*this);
-        }
+    TinyUnorderedMap(InputIterator first, InputIterator last)
+        : TinyUnorderedMap(first, last, [](auto& x) { return x; }) {}
+
+    /// Construct from a generator
+    template <typename InputIterator, typename GeneratorFunction>
+    TinyUnorderedMap(InputIterator first, InputIterator last, GeneratorFunction gen) {
+        assign(first, last, gen);
     }
 
     /// Construct from a range of keys and a range of values.
@@ -97,6 +92,28 @@ public:
           keys(rhs.keys),
           values(rhs.values) {}
 
+    /// Replace contents from generator
+    template <typename InputIterator, typename GeneratorFunction>
+    TinyUnorderedMap& assign(InputIterator first, InputIterator last, GeneratorFunction gen) {
+        const auto n = std::distance(first, last);
+        if (n <= static_cast<decltype(n)>(LinearThreshold)) {
+            this->Super::clear();
+            for (std::size_t i = 0; first != last; i++) {
+                auto result = gen(*first++);
+                keys[i].emplace(std::move(result.first));
+                values[i].emplace(std::move(result.second));
+            }
+            linearSize = n;
+        } else {
+            linearSize = 0;
+            this->reserve(n);
+            while (first != last) {
+                this->Super::insert(gen(*first++));
+            }
+        }
+        return *this;
+    }
+
     /// Copy assignment
     TinyUnorderedMap& operator=(const TinyUnorderedMap& rhs) {
         TinyUnorderedMap{rhs}.swap(*this);
@@ -136,6 +153,11 @@ public:
     }
 
     std::size_t count(const Key& key) const noexcept { return find(key) ? 1 : 0; }
+
+    void clear() {
+        linearSize = 0;
+        this->Super::clear();
+    }
 
 private:
     std::size_t linearSize = 0;

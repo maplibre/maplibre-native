@@ -9,8 +9,7 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/change_request.hpp>
-
-#include <unordered_map>
+#include <mbgl/util/tiny_unordered_map.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <list>
@@ -263,7 +262,9 @@ protected:
 
     // A sorted set of tile IDs in `renderTiles`, along with
     // the identity of the bucket from which they were built.
-    using RenderTileIDMap = std::vector<std::pair<OverscaledTileID, util::SimpleIdentity>>;
+    // We swap between two instances to minimize reallocations.
+    static constexpr auto LinearTileIDs = 12; // From benchmarking, see #1805
+    using RenderTileIDMap = util::TinyUnorderedMap<OverscaledTileID, util::SimpleIdentity, LinearTileIDs>;
     RenderTileIDMap renderTileIDs;
     RenderTileIDMap newRenderTileIDs;
 #endif

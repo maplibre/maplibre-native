@@ -89,6 +89,27 @@ TEST(TinyMap, Copy) {
 }
 
 template <std::size_t Threshold>
+void testGenInit() {
+    testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
+
+    const auto input = std::vector<int>{1, 2, 3};
+    const auto map = TinyUnorderedMap<int, int, Threshold>{input.begin(), input.end(), [](const auto& x) {
+                                                               return std::make_pair(x, 4 - x);
+                                                           }};
+
+    EXPECT_EQ(3, map.size());
+    EXPECT_EQ(3, map[1]);
+    EXPECT_EQ(2, map[2]);
+    EXPECT_EQ(1, map[3]);
+}
+TEST(TinyMap, GenInit) {
+    testGenInit<0>();
+    testGenInit<2>();
+    testGenInit<5>();
+    testGenInit<10>();
+}
+
+template <std::size_t Threshold>
 void testMove() {
     testing::ScopedTrace trace(__FILE__, __LINE__, Threshold);
 
@@ -111,6 +132,9 @@ void testMove() {
     EXPECT_TRUE(map4[1]);
     EXPECT_TRUE(map4[2]);
     EXPECT_TRUE(map4[3]);
+
+    map4.clear();
+    EXPECT_TRUE(map4.empty());
 }
 TEST(TinyMap, Move) {
     testMove<0>();

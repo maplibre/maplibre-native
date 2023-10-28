@@ -185,54 +185,31 @@ std::size_t RenderLayer::removeAllDrawables() {
     return 0;
 }
 
-namespace {
-using RenderTileIDMap = std::vector<std::pair<OverscaledTileID, util::SimpleIdentity>>;
-/// Find the position of a given tile ID.
-/// @param match if true, require that the item exist or return `end()`, otherwise return the location after which the
-/// item should be inserted
-auto findTile(RenderTileIDMap& map, const OverscaledTileID& tileID, bool match) {
-    const auto hit = std::lower_bound(
-        map.begin(), map.end(), tileID, [](const auto& a, const auto& b) { return a.first < b; });
-    return (hit != map.end() && (!match || hit->first == tileID)) ? hit : map.end();
-}
-} // namespace
-
 void RenderLayer::updateRenderTileIDs() {
     if (!renderTiles || renderTiles->empty()) {
         renderTileIDs.clear();
         return;
     }
 
-    if (newRenderTileIDs.empty()) {
-        newRenderTileIDs.reserve(renderTiles->size());
-    }
-
-    for (const auto& tileRef : *renderTiles) {
-        const auto& tileID = tileRef.get().getOverscaledTileID();
-        const auto ii = findTile(newRenderTileIDs, tileID, /*match=*/false);
-        if (ii != newRenderTileIDs.end() && ii->first == tileID) {
-            assert(!"Unexpected duplicate TileID in renderTiles");
-            continue;
-        }
-        newRenderTileIDs.emplace(ii, std::make_pair(tileID, getRenderTileBucketID(tileID)));
-    }
-    std::swap(renderTileIDs, newRenderTileIDs);
-    newRenderTileIDs.clear();
+    newRenderTileIDs.assign(renderTiles->begin(), renderTiles->end(), [&](const auto& tile) {
+        const auto& tileID = tile.get().getOverscaledTileID();
+        return std::make_pair(tileID, getRenderTileBucketID(tileID));
+    });
+    renderTileIDs.swap(newRenderTileIDs);
 }
 
 bool RenderLayer::hasRenderTile(const OverscaledTileID& tileID) const {
-    return findTile(const_cast<RenderTileIDMap&>(renderTileIDs), tileID, /*match=*/true) != renderTileIDs.end();
+    return renderTileIDs.find(tileID).has_value();
 }
 
 util::SimpleIdentity RenderLayer::getRenderTileBucketID(const OverscaledTileID& tileID) const {
-    const auto hit = findTile(const_cast<RenderTileIDMap&>(renderTileIDs), tileID, /*match=*/true);
-    return (hit != renderTileIDs.end()) ? hit->second : util::SimpleIdentity::Empty;
+    const auto result = renderTileIDs.find(tileID);
+    return result.has_value() ? result->get() : util::SimpleIdentity::Empty;
 }
 
 bool RenderLayer::setRenderTileBucketID(const OverscaledTileID& tileID, util::SimpleIdentity bucketID) {
-    const auto hit = findTile(renderTileIDs, tileID, /*match=*/true);
-    if (hit != renderTileIDs.end() && hit->second != bucketID) {
-        hit->second = bucketID;
+    if (auto result = renderTileIDs.find(tileID); result && result->get() != bucketID) {
+        result->get() = bucketID;
         return true;
     }
     return false;
