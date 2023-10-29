@@ -8,25 +8,25 @@ using namespace mbgl;
 
 TEST(LatLng, InvalidLatLng) {
     try {
-        LatLng { NAN };
+        LatLng{NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "latitude must not be NaN");
     }
     try {
-        LatLng { 0, NAN };
+        LatLng{0, NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "longitude must not be NaN");
     }
     try {
-        LatLng { 91.0 };
+        LatLng{91.0};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "latitude must be between -90 and 90");
     }
     try {
-        LatLng { 0, std::numeric_limits<double>::infinity() };
+        LatLng{0, std::numeric_limits<double>::infinity()};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "longitude must not be infinite");
@@ -35,25 +35,25 @@ TEST(LatLng, InvalidLatLng) {
 
 TEST(EdgeInsets, InvalidEdgeInsets) {
     try {
-        EdgeInsets { NAN };
+        EdgeInsets{NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "top must not be NaN");
     }
     try {
-        EdgeInsets { 0, NAN };
+        EdgeInsets{0, NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "left must not be NaN");
     }
     try {
-        EdgeInsets { 0, 0, NAN };
+        EdgeInsets{0, 0, NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "bottom must not be NaN");
     }
     try {
-        EdgeInsets { 0, 0, 0, NAN };
+        EdgeInsets{0, 0, 0, NAN};
         ASSERT_TRUE(false) << "should throw";
     } catch (const std::domain_error& error) {
         ASSERT_EQ(std::string(error.what()), "right must not be NaN");
@@ -62,10 +62,10 @@ TEST(EdgeInsets, InvalidEdgeInsets) {
 
 TEST(LatLngBounds, World) {
     auto result = LatLngBounds::world();
-    ASSERT_DOUBLE_EQ(-90,  result.south());
-    ASSERT_DOUBLE_EQ( 90,  result.north());
+    ASSERT_DOUBLE_EQ(-90, result.south());
+    ASSERT_DOUBLE_EQ(90, result.north());
     ASSERT_DOUBLE_EQ(-180, result.west());
-    ASSERT_DOUBLE_EQ( 180, result.east());
+    ASSERT_DOUBLE_EQ(180, result.east());
 }
 
 TEST(LatLngBounds, Singleton) {
@@ -141,19 +141,19 @@ TEST(LatLngBounds, Northwest) {
 
 TEST(LatLng, FromTileID) {
     for (int i = 0; i < 20; i++) {
-        const LatLng ll{ CanonicalTileID(i, 0, 0) };
+        const LatLng ll{CanonicalTileID(i, 0, 0)};
         ASSERT_DOUBLE_EQ(-util::LONGITUDE_MAX, ll.longitude());
         ASSERT_DOUBLE_EQ(util::LATITUDE_MAX, ll.latitude());
     }
 
     {
-        const LatLng ll{ UnwrappedTileID(0, 1, 0) };
+        const LatLng ll{UnwrappedTileID(0, 1, 0)};
         ASSERT_DOUBLE_EQ(util::LONGITUDE_MAX, ll.longitude());
         ASSERT_DOUBLE_EQ(util::LATITUDE_MAX, ll.latitude());
     }
 
     {
-        const LatLng ll{ UnwrappedTileID(0, -1, 0) };
+        const LatLng ll{UnwrappedTileID(0, -1, 0)};
         ASSERT_DOUBLE_EQ(-540, ll.longitude());
         ASSERT_DOUBLE_EQ(util::LATITUDE_MAX, ll.latitude());
     }
@@ -189,7 +189,7 @@ TEST(LatLng, Boundaries) {
 
 TEST(LatLngBounds, FromTileID) {
     {
-        const LatLngBounds bounds{ CanonicalTileID(0, 0, 0) };
+        const LatLngBounds bounds{CanonicalTileID(0, 0, 0)};
         ASSERT_DOUBLE_EQ(-util::LONGITUDE_MAX, bounds.west());
         ASSERT_DOUBLE_EQ(-util::LATITUDE_MAX, bounds.south());
         ASSERT_DOUBLE_EQ(util::LONGITUDE_MAX, bounds.east());
@@ -197,7 +197,7 @@ TEST(LatLngBounds, FromTileID) {
     }
 
     {
-        const LatLngBounds bounds{ CanonicalTileID(1, 0, 1) };
+        const LatLngBounds bounds{CanonicalTileID(1, 0, 1)};
         ASSERT_DOUBLE_EQ(-util::LONGITUDE_MAX, bounds.west());
         ASSERT_DOUBLE_EQ(-util::LATITUDE_MAX, bounds.south());
         ASSERT_DOUBLE_EQ(0, bounds.east());
@@ -205,7 +205,7 @@ TEST(LatLngBounds, FromTileID) {
     }
 
     {
-        const LatLngBounds bounds{ CanonicalTileID(1, 1, 1) };
+        const LatLngBounds bounds{CanonicalTileID(1, 1, 1)};
         ASSERT_DOUBLE_EQ(0, bounds.west());
         ASSERT_DOUBLE_EQ(-util::LATITUDE_MAX, bounds.south());
         ASSERT_DOUBLE_EQ(util::LONGITUDE_MAX, bounds.east());
@@ -213,7 +213,7 @@ TEST(LatLngBounds, FromTileID) {
     }
 
     {
-        const LatLngBounds bounds{ CanonicalTileID(1, 0, 0) };
+        const LatLngBounds bounds{CanonicalTileID(1, 0, 0)};
         ASSERT_DOUBLE_EQ(-util::LONGITUDE_MAX, bounds.west());
         ASSERT_DOUBLE_EQ(0, bounds.south());
         ASSERT_DOUBLE_EQ(0, bounds.east());
@@ -222,7 +222,7 @@ TEST(LatLngBounds, FromTileID) {
 }
 
 TEST(LatLngBounds, ContainsPoint) {
-    auto bounds = LatLngBounds::hull({50.0, -100.0},{-50.0, 100.0});
+    auto bounds = LatLngBounds::hull({50.0, -100.0}, {-50.0, 100.0});
 
     EXPECT_FALSE(bounds.contains(LatLng{0.0, 170.0}));
     EXPECT_FALSE(bounds.contains(LatLng{0.0, -170.0}));
@@ -248,7 +248,7 @@ TEST(LatLngBounds, ContainsPoint_Wrapped) {
 }
 
 TEST(LatLngBounds, ContainsBounds) {
-    auto bounds = LatLngBounds::hull({ 50.0, -160.0 }, {-50.0, 160.0});
+    auto bounds = LatLngBounds::hull({50.0, -160.0}, {-50.0, 160.0});
     EXPECT_TRUE(bounds.contains(bounds));
 
     auto innerBounds = LatLngBounds::hull({10.0, -180.0}, {-10.0, -170.0});
@@ -262,7 +262,6 @@ TEST(LatLngBounds, ContainsBounds) {
     innerBounds = LatLngBounds::hull({10, 120.0}, {-10, 125.0});
     EXPECT_TRUE(bounds.contains(innerBounds));
     EXPECT_FALSE(innerBounds.contains(bounds));
-
 }
 
 TEST(LatLngBounds, ContainsBounds_Wrapped) {
@@ -280,14 +279,14 @@ TEST(LatLngBounds, ContainsBounds_Wrapped) {
     EXPECT_FALSE(bounds.contains(inner));
     EXPECT_FALSE(bounds.contains(inner, LatLng::Wrapped));
 
-    auto unwrapped = LatLngBounds::hull({10.0, 170.0}, { -10.0, -175.0});
+    auto unwrapped = LatLngBounds::hull({10.0, 170.0}, {-10.0, -175.0});
     EXPECT_FALSE(bounds.contains(unwrapped));
     EXPECT_FALSE(bounds.contains(unwrapped, LatLng::Wrapped));
-    
-    unwrapped = LatLngBounds::hull({10.0, 0.0} , {-10.0, -10.0});
+
+    unwrapped = LatLngBounds::hull({10.0, 0.0}, {-10.0, -10.0});
     EXPECT_FALSE(bounds.contains(unwrapped));
     EXPECT_FALSE(bounds.contains(unwrapped, LatLng::Wrapped));
-    
+
     unwrapped = LatLngBounds::hull({10.0, -165.0}, {-10.0, -180.0});
     EXPECT_TRUE(bounds.contains(unwrapped));
     EXPECT_TRUE(bounds.contains(unwrapped, LatLng::Wrapped));
@@ -302,14 +301,14 @@ TEST(LatLngBounds, ContainsBounds_Wrapped) {
 }
 
 TEST(LatLngBounds, ContainsTileIDs) {
-    LatLngBounds bounds(CanonicalTileID(4,2,6));
-    LatLngBounds innerBounds(CanonicalTileID(9,82,197));
+    LatLngBounds bounds(CanonicalTileID(4, 2, 6));
+    LatLngBounds innerBounds(CanonicalTileID(9, 82, 197));
     EXPECT_TRUE(bounds.contains(innerBounds));
-    EXPECT_FALSE(bounds.contains(LatLngBounds{ CanonicalTileID(3, 1, 0) }));
+    EXPECT_FALSE(bounds.contains(LatLngBounds{CanonicalTileID(3, 1, 0)}));
 }
 
 TEST(LatLngBounds, Intersects) {
-    auto bounds = LatLngBounds::hull({ 50.0, -160.0 }, { -50.0, 160.0 });
+    auto bounds = LatLngBounds::hull({50.0, -160.0}, {-50.0, 160.0});
     EXPECT_TRUE(bounds.intersects(bounds));
 
     auto other = LatLngBounds::hull({50.0, -160.0}, {10, 160.0});

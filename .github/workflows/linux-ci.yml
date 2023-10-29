@@ -2,32 +2,67 @@ name: linux-ci
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
     branches:
       - main
-    paths:
-      - "src/**"
-      - "include/**"
-      - ".github/workflows/linux-ci.yml"
-      - "vendor/**"
-      - "CMakeLists.txt"
-      - metrics/linux-gcc8-release-style.json
+
+  pull_request:
+    branches:
+      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  id-token: write         # needed for AWS
+  actions: read           # needed for CodeQL
+  contents: read          # needed for CodeQL
+  security-events: write  # needed for CodeQL
+
 jobs:
-  build:
+  pre_job:
     runs-on: ubuntu-22.04
+    outputs:
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_changed != 'true' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Get all Linux files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files_yaml_from_source_file: .github/changed-files.yml
+
+      - name: List changed files
+        if: steps.changed-files.outputs.linux_any_changed == 'true'  
+        run: |
+          echo "Changed file(s): ${{ steps.changed-files.outputs.linux_all_changed_files }}"
+
+  linux-build-and-test:
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: pre_job
+    strategy:
+      fail-fast: true
+      matrix:
+        renderer: [legacy, drawable]
+    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
+    steps:
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+
       - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}
 
       - name: Get latest CMake and Ninja
         uses: lukka/get-cmake@latest
@@ -43,89 +78,155 @@ jobs:
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
-            libglfw3-dev
+            libglfw3-dev \
+            libwebp-dev \
+            libopengl0
 
-      - name: Build Maplibre GL Core
+      - if: matrix.renderer == 'drawable'
+        run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'legacy'
+        run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
+
+      - name: Build MapLibre Native Core
+        env:
+          CI: 1
         run: |
           cmake --version
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
-          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner
+          cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
-      - name: Archive mbgl-test-runner
+      # mbgl-render (used for size test) & mbgl-benchmark-runner
+
+      - name: Upload mbgl-render as artifact
+        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
         uses: actions/upload-artifact@v3
         with:
-          name: mbgl-test-runner
-          path: build/mbgl-test-runner
-          retention-days: 1
-
-      - name: Archive mbgl-render-test-runner
-        uses: actions/upload-artifact@v3
-        with:
-          name: mbgl-render-test-runner
-          path: build/mbgl-render-test-runner
-          retention-days: 1
+          name: mbgl-render
+          path: |
+            build/bin/mbgl-render
   
-  test:
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
-
-      - name: Download mbgl-test-runner
-        uses: actions/download-artifact@v3
+      - name: Upload mbgl-benchmark-runner as artifact
+        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
+        uses: actions/upload-artifact@v3
         with:
-          name: mbgl-test-runner
+          name: mbgl-benchmark-runner
+          path: |
+            build/mbgl-benchmark-runner
 
-      - run: chmod +x ./mbgl-test-runner
-      
-      - name: Install npm packages and run test server in background
-        run: |
-          npm install
-          node test/storage/server.js &
+      - name: Configure AWS Credentials
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Upload mbgl-render & mbgl-benchmark-runner to S3
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        run: | 
+          aws s3 cp build/bin/mbgl-render s3://maplibre-native/mbgl-render-main
+          aws s3 cp build/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
+
+      # CodeQL
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:cpp"
+
+      # unit tests
+
+      - run: chmod +x build/mbgl-test-runner
 
       - name: Run C++ tests
-        run: xvfb-run -a ./mbgl-test-runner
+        run: xvfb-run -a build/mbgl-test-runner
 
-  render-test:
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libopengl0
+      # render tests
 
-      - uses: actions/checkout@v3
-
-      - name: Download mbgl-render-test-runner
-        uses: actions/download-artifact@v3
-        with:
-          name: mbgl-render-test-runner
-      
-      - run: chmod +x ./mbgl-render-test-runner
+      - run: chmod +x build/mbgl-render-test-runner
 
       - name: Run render test
-        continue-on-error: true
         id: render_test
-        run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
-
-      - name: Save PR number
-        env:
-          PR_NUMBER: ${{ github.event.number }}
-        run: |
-          echo $PR_NUMBER > ./pr_number
+        run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
 
       - name: Upload render test result
+        if: always() && steps.render_test.outcome == 'failure' && matrix.renderer == 'drawable'
         uses: actions/upload-artifact@v3
         with:
           name: render-test-result
           path: |
-            metrics/linux-gcc8-release-style.html
-            ./pr_number
+            metrics/linux-drawable.html
+      
+      # expression tests
+
+      - run: chmod +x build/expression-test/mbgl-expression-test
+
+      - name: Run expression test
+        run: build/expression-test/mbgl-expression-test
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
+  linux-coverage:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libuv1-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libwebp-dev \
+            libglfw3-dev \
+            libsqlite3-dev \
+            xvfb \
+            x11-xserver-utils
+
+      - name: Cache Bazel
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
+
+      - name: Start server
+        run: |
+          npm install --ignore-scripts
+          node test/storage/server.js &
+
+      - name: Generate coverage report
+        run: |
+          xvfb-run -a \
+            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
+            --test_output=errors --local_test_jobs=1 \
+            --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
+            //test:core //render-test:render-test //expression-test:test
+          echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: ${{ env.coverage_report }}
+
+  linux-ci-result:
+    name: Linux CI Result
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    runs-on: ubuntu-22.04
+    needs:
+      - pre_job
+      - linux-build-and-test
+      - linux-coverage
+    steps:
+      - name: Mark result as failed
+        if: needs.linux-build-and-test.result != 'success' || needs.linux-coverage.result != 'success'
+        run: exit 1

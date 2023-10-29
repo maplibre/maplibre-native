@@ -99,7 +99,7 @@ std::optional<Light> Converter<Light>::operator()(const Convertible& value, Erro
         }
     }
 
-    return { std::move(light) };
+    return {std::move(light)};
 }
 
 } // namespace conversion

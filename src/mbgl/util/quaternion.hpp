@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mat3.hpp"
-#include "mat4.hpp"
+#include <mbgl/util/mat3.hpp>
+#include <mbgl/util/mat4.hpp>
 
 namespace mbgl {
 
@@ -13,9 +13,15 @@ struct Quaternion {
         };
     };
 
-    Quaternion() : Quaternion(0.0, 0.0, 0.0, 0.0) {}
-    Quaternion(double x_, double y_, double z_, double w_) : x(x_), y(y_), z(z_), w(w_) {}
-    Quaternion(const vec4& vec) : m(vec) {}
+    Quaternion()
+        : Quaternion(0.0, 0.0, 0.0, 0.0) {}
+    Quaternion(double x_, double y_, double z_, double w_)
+        : x(x_),
+          y(y_),
+          z(z_),
+          w(w_) {}
+    Quaternion(const vec4& vec)
+        : m(vec) {}
 
     Quaternion conjugate() const;
     Quaternion normalized() const;

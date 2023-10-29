@@ -29,7 +29,8 @@ TEST(AssetFileSource, Load) {
 
     class TestWorker {
     public:
-        TestWorker(ActorRef<TestWorker>, mbgl::AssetFileSource* fs_) : fs(fs_) {}
+        TestWorker(ActorRef<TestWorker>, mbgl::AssetFileSource* fs_)
+            : fs(fs_) {}
 
         void run(std::function<void()> endCallback) {
             const std::string asset("asset://nonempty");
@@ -43,11 +44,11 @@ TEST(AssetFileSource, Load) {
                     endCallback();
                     request.reset();
                 } else {
-                    request = fs->request({ mbgl::Resource::Unknown, asset }, requestCallback);
+                    request = fs->request({mbgl::Resource::Unknown, asset}, requestCallback);
                 }
             };
 
-            request = fs->request({ mbgl::Resource::Unknown, asset }, requestCallback);
+            request = fs->request({mbgl::Resource::Unknown, asset}, requestCallback);
         }
 
     private:
@@ -62,10 +63,11 @@ TEST(AssetFileSource, Load) {
     std::vector<std::unique_ptr<util::Thread<TestWorker>>> threads;
 
     for (unsigned i = 0; i < numThreads; ++i) {
-        std::unique_ptr<util::Thread<TestWorker>> thread =
-            std::make_unique<util::Thread<TestWorker>>("Test", &fs);
+        std::unique_ptr<util::Thread<TestWorker>> thread = std::make_unique<util::Thread<TestWorker>>("Test", &fs);
 
-        thread->actor().invoke(&TestWorker::run, [&] { if (!--completed) loop.stop(); });
+        thread->actor().invoke(&TestWorker::run, [&] {
+            if (!--completed) loop.stop();
+        });
         threads.push_back(std::move(thread));
     }
 
@@ -87,7 +89,7 @@ TEST(AssetFileSource, EmptyFile) {
 
     AssetFileSource fs(ResourceOptions::Default().withAssetPath("test/fixtures/storage/assets"), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "asset://empty" }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, "asset://empty"}, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
         ASSERT_TRUE(res.data.get());
@@ -103,7 +105,7 @@ TEST(AssetFileSource, NonEmptyFile) {
 
     AssetFileSource fs(ResourceOptions::Default().withAssetPath("test/fixtures/storage/assets"), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "asset://nonempty" }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, "asset://nonempty"}, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
         ASSERT_TRUE(res.data.get());
@@ -119,7 +121,7 @@ TEST(AssetFileSource, NonExistentFile) {
 
     AssetFileSource fs(ResourceOptions::Default().withAssetPath("test/fixtures/storage/assets"), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "asset://does_not_exist" }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, "asset://does_not_exist"}, [&](Response res) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
@@ -136,7 +138,7 @@ TEST(AssetFileSource, InvalidURL) {
 
     AssetFileSource fs(ResourceOptions::Default().withAssetPath("test/fixtures/storage/assets"), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "test://wrong-scheme" }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, "test://wrong-scheme"}, [&](Response res) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::Other, res.error->reason);
@@ -153,7 +155,7 @@ TEST(AssetFileSource, ReadDirectory) {
 
     AssetFileSource fs(ResourceOptions::Default().withAssetPath("test/fixtures/storage/assets"), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "asset://directory" }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, "asset://directory"}, [&](Response res) {
         req.reset();
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
@@ -170,7 +172,7 @@ TEST(AssetFileSource, URLEncoding) {
 
     AssetFileSource fs(ResourceOptions::Default().withAssetPath("test/fixtures/storage/assets"), ClientOptions());
 
-    std::unique_ptr<AsyncRequest> req = fs.request({ Resource::Unknown, "asset://%6eonempty" }, [&](Response res) {
+    std::unique_ptr<AsyncRequest> req = fs.request({Resource::Unknown, "asset://%6eonempty"}, [&](Response res) {
         req.reset();
         EXPECT_EQ(nullptr, res.error);
         ASSERT_TRUE(res.data.get());

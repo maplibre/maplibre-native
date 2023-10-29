@@ -30,8 +30,7 @@ T log2(T x) {
 } // namespace mbgl
 
 // log2 is not available on Android before API 18.
-#if defined(__ANDROID__) && defined(__GNUC__) && \
-    defined(__ANDROID_API__) && __ANDROID_API__ < 18
+#if defined(__ANDROID__) && defined(__GNUC__) && defined(__ANDROID_API__) && __ANDROID_API__ < 18
 
 template <typename T>
 typename std::enable_if_t<std::is_floating_point_v<T>, T> log2(T x) {

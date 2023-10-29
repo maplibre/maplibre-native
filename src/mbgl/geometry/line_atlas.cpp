@@ -1,6 +1,7 @@
 #include <cmath>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/math/minmax.hpp>
 #include <mbgl/util/hash.hpp>
@@ -11,8 +12,8 @@ namespace mbgl {
 namespace {
 
 size_t getDashPatternHash(const std::vector<float>& dasharray, const LinePatternCap patternCap) {
-    size_t key =
-        patternCap == LinePatternCap::Round ? std::numeric_limits<size_t>::min() : std::numeric_limits<size_t>::max();
+    size_t key = patternCap == LinePatternCap::Round ? std::numeric_limits<size_t>::min()
+                                                     : std::numeric_limits<size_t>::max();
     for (const float part : dasharray) {
         util::hash_combine<float>(key, part);
     }
@@ -180,19 +181,22 @@ DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
 
     // The OpenGL ES 2.0 spec, section 3.8.2 states:
     //
-    //     Calling a sampler from a fragment shader will return (R,G,B,A) = (0,0,0,1) if any of the
-    //     following conditions are true:
-    //     […]
-    //     - A two-dimensional sampler is called, the corresponding texture image is a
-    //       non-power-of-two image […], and either the texture wrap mode is not CLAMP_TO_EDGE, or
-    //       the minification filter is neither NEAREST nor LINEAR.
+    //     Calling a sampler from a fragment shader will return (R,G,B,A) =
+    //     (0,0,0,1) if any of the following conditions are true: […]
+    //     - A two-dimensional sampler is called, the corresponding texture
+    //     image is a
+    //       non-power-of-two image […], and either the texture wrap mode is not
+    //       CLAMP_TO_EDGE, or the minification filter is neither NEAREST nor
+    //       LINEAR.
     //     […]
     //
-    // This means that texture lookups won't work for NPOT textures unless they use GL_CLAMP_TO_EDGE.
-    // We're using GL_CLAMP_TO_EDGE for the vertical direction, but GL_REPEAT for the horizontal
-    // direction, which means that we need a power-of-two texture for our line dash patterns to work
-    // on OpenGL ES 2.0 conforming implementations. Fortunately, this just means changing the height
-    // from 15 to 16, and from 30 to 32, so we don't waste many pixels.
+    // This means that texture lookups won't work for NPOT textures unless they
+    // use GL_CLAMP_TO_EDGE. We're using GL_CLAMP_TO_EDGE for the vertical
+    // direction, but GL_REPEAT for the horizontal direction, which means that
+    // we need a power-of-two texture for our line dash patterns to work on
+    // OpenGL ES 2.0 conforming implementations. Fortunately, this just means
+    // changing the height from 15 to 16, and from 30 to 32, so we don't waste
+    // many pixels.
     const uint32_t textureHeight = 1 << util::ceil_log2(height);
     AlphaImage image({256, textureHeight});
 
@@ -203,11 +207,22 @@ DashPatternTexture::DashPatternTexture(const std::vector<float>& from_,
 }
 
 void DashPatternTexture::upload(gfx::UploadPass& uploadPass) {
+#if MLN_DRAWABLE_RENDERER
+    if (std::holds_alternative<AlphaImage>(texture)) {
+        auto tempTexture = uploadPass.getContext().createTexture2D();
+        tempTexture->upload(std::get<AlphaImage>(texture));
+        tempTexture->setSamplerConfiguration(
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Repeat, gfx::TextureWrapType::Clamp});
+        texture = std::move(tempTexture);
+    }
+#else
     if (texture.is<AlphaImage>()) {
         texture = uploadPass.createTexture(texture.get<AlphaImage>());
     }
+#endif
 }
 
+#if MLN_LEGACY_RENDERER
 gfx::TextureBinding DashPatternTexture::textureBinding() const {
     // The texture needs to have been uploaded already.
     assert(texture.is<gfx::Texture>());
@@ -217,9 +232,24 @@ gfx::TextureBinding DashPatternTexture::textureBinding() const {
             gfx::TextureWrapType::Repeat,
             gfx::TextureWrapType::Clamp};
 }
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+static const gfx::Texture2DPtr noTexture;
+const std::shared_ptr<gfx::Texture2D>& DashPatternTexture::getTexture() const {
+    return (std::holds_alternative<gfx::Texture2DPtr>(texture)) ? std::get<gfx::Texture2DPtr>(texture) : noTexture;
+}
+#endif
 
 Size DashPatternTexture::getSize() const {
+#if MLN_DRAWABLE_RENDERER
+    if (std::holds_alternative<AlphaImage>(texture)) {
+        return std::get<AlphaImage>(texture).size;
+    }
+    return std::get<gfx::Texture2DPtr>(texture)->getSize();
+#else
     return texture.match([](const auto& obj) { return obj.size; });
+#endif
 }
 
 LineAtlas::LineAtlas() = default;

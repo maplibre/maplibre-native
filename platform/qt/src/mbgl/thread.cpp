@@ -10,19 +10,15 @@ std::string getCurrentThreadName() {
     return "unknown";
 }
 
-void setCurrentThreadName(const std::string&) {
-}
+void setCurrentThreadName(const std::string&) {}
 
-void makeThreadLowPriority() {
-}
+void makeThreadLowPriority() {}
 
 void setCurrentThreadPriority(double) {}
 
-void attachThread() {
-}
+void attachThread() {}
 
-void detachThread() {
-}
+void detachThread() {}
 
 } // namespace platform
 } // namespace mbgl

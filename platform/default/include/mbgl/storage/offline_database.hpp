@@ -32,8 +32,9 @@ namespace util {
 struct IOException;
 } // namespace util
 
-struct MapboxTileLimitExceededException :  util::Exception {
-    MapboxTileLimitExceededException() : util::Exception("Mapbox tile limit exceeded") {}
+struct MapboxTileLimitExceededException : util::Exception {
+    MapboxTileLimitExceededException()
+        : util::Exception("Mapbox tile limit exceeded") {}
 };
 
 class OfflineDatabase {
@@ -66,8 +67,7 @@ public:
     expected<OfflineRegion, std::exception_ptr> createRegion(const OfflineRegionDefinition&,
                                                              const OfflineRegionMetadata&);
 
-    expected<OfflineRegions, std::exception_ptr>
-    mergeDatabase(const std::string& sideDatabasePath);
+    expected<OfflineRegions, std::exception_ptr> mergeDatabase(const std::string& sideDatabasePath);
 
     expected<OfflineRegionMetadata, std::exception_ptr> updateMetadata(int64_t regionID, const OfflineRegionMetadata&);
 
@@ -115,17 +115,15 @@ private:
     void vacuum();
     void checkFlags();
 
-    mapbox::sqlite::Statement& getStatement(const char *);
+    mapbox::sqlite::Statement& getStatement(const char*);
 
     std::optional<std::pair<Response, uint64_t>> getTile(const Resource::TileData&);
     std::optional<int64_t> hasTile(const Resource::TileData&);
-    bool putTile(const Resource::TileData&, const Response&,
-                 const std::string&, bool compressed);
+    bool putTile(const Resource::TileData&, const Response&, const std::string&, bool compressed);
 
     std::optional<std::pair<Response, uint64_t>> getResource(const Resource&);
     std::optional<int64_t> hasResource(const Resource&);
-    bool putResource(const Resource&, const Response&,
-                     const std::string&, bool compressed);
+    bool putResource(const Resource&, const Response&, const std::string&, bool compressed);
 
     uint64_t putRegionResourceInternal(int64_t regionID, const Resource&, const Response&);
 
@@ -144,7 +142,7 @@ private:
     std::map<const char*, const std::unique_ptr<mapbox::sqlite::Statement>> statements;
 
     template <class T>
-    T getPragma(const char *);
+    T getPragma(const char*);
 
     uint64_t maximumAmbientCacheSize = util::DEFAULT_MAX_CACHE_SIZE;
     uint64_t offlineMapboxTileCountLimit = util::mapbox::DEFAULT_OFFLINE_TILE_COUNT_LIMIT;

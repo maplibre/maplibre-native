@@ -27,9 +27,7 @@ TEST(Shaping, ZWSP) {
     const SectionOptions sectionOptions(1.0f, fontStack);
     const float layoutTextSize = 16.0f;
     const float layoutTextSizeAtBucketZoomLevel = 16.0f;
-    GlyphMap glyphs = {
-        { FontStackHasher()(fontStack), {{u'中', std::move(immutableGlyph)}} }
-    };
+    GlyphMap glyphs = {{FontStackHasher()(fontStack), {{u'中', std::move(immutableGlyph)}}}};
     GlyphPositions glyphPositions = {{FontStackHasher()(fontStack), {{u'中', std::move(glyphPosition)}}}};
     ImagePositions imagePositions;
 

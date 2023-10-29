@@ -1,0 +1,38 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+ICU_FLAGS = [
+    "-licuuc ",
+    "-licui18n",
+    "-licudata",
+]
+
+cc_library(
+    name = "impl",
+    srcs = [
+        "src/gl_functions.cpp",
+        "src/headless_backend_glx.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    linkopts = [
+        "-lGL",
+        "-lglfw",
+        "-lX11",
+        "-lsqlite3",
+        "-luv",
+        "-lz",
+        "-lcurl",
+        "-lpng",
+        "-ljpeg",
+        "-lwebp",
+    ] + ICU_FLAGS,
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+        "//platform/default:mbgl-default",
+    ],
+)
+
+sh_binary(
+    name = "startxwrapper",
+    srcs = ["xorg/startxwrapper"],
+)

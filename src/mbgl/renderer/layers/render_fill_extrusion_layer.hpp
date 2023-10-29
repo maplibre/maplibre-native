@@ -7,8 +7,10 @@
 
 namespace mbgl {
 
+#if MLN_LEGACY_RENDERER
 class FillExtrusionProgram;
 class FillExtrusionPatternProgram;
+#endif // MLN_LEGACY_RENDERER
 
 class RenderFillExtrusionLayer final : public RenderLayer {
 public:
@@ -21,7 +23,20 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     bool is3D() const override;
+
+#if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+    /// Generate any changes needed by the layer
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
+#endif // MLN_DRAWABLE_RENDERER
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -34,9 +49,16 @@ private:
     // Paint properties
     style::FillExtrusionPaintProperties::Unevaluated unevaluated;
 
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<FillExtrusionProgram> fillExtrusionProgram;
     std::shared_ptr<FillExtrusionPatternProgram> fillExtrusionPatternProgram;
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+    gfx::ShaderGroupPtr fillExtrusionGroup;
+    gfx::ShaderGroupPtr fillExtrusionPatternGroup;
+#endif // MLN_DRAWABLE_RENDERER
 
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
 };

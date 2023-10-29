@@ -56,12 +56,12 @@ private:
     void coalesced();
     void parse();
     void finalizeLayout();
-    
+
     void coalesce();
 
     void requestNewGlyphs(const GlyphDependencies&);
     void requestNewImages(const ImageDependencies&);
-   
+
     void symbolDependenciesChanged();
     bool hasPendingDependencies() const;
     bool hasPendingParseResult() const;
@@ -76,7 +76,7 @@ private:
     const std::atomic<bool>& obsolete;
     const MapMode mode;
     const float pixelRatio;
-    
+
     std::unique_ptr<FeatureIndex> featureIndex;
     std::unordered_map<std::string, LayerRenderData> renderData;
 

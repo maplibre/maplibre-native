@@ -12,8 +12,10 @@ namespace {
     @param first The first codepoint in the block, inclusive.
     @param last The last codepoint in the block, inclusive.
  */
-#define DEFINE_IS_IN_UNICODE_BLOCK(name, first, last) \
-    inline bool isIn##name(char16_t codepoint) { return codepoint >= (first) && codepoint <= (last); }
+#define DEFINE_IS_IN_UNICODE_BLOCK(name, first, last)       \
+    inline bool isIn##name(char16_t codepoint) {            \
+        return codepoint >= (first) && codepoint <= (last); \
+    }
 
 // The following table comes from <http://www.unicode.org/Public/12.0.0/ucd/Blocks.txt>.
 // Keep it synchronized with <http://www.unicode.org/Public/UCD/latest/ucd/Blocks.txt>.
@@ -86,8 +88,8 @@ DEFINE_IS_IN_UNICODE_BLOCK(UnifiedCanadianAboriginalSyllabicsExtended, 0x18B0, 0
 // DEFINE_IS_IN_UNICODE_BLOCK(VedicExtensions, 0x1CD0, 0x1CFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(PhoneticExtensions, 0x1D00, 0x1D7F)
 // DEFINE_IS_IN_UNICODE_BLOCK(PhoneticExtensionsSupplement, 0x1D80, 0x1DBF)
-// DEFINE_IS_IN_UNICODE_BLOCK(CombiningDiacriticalMarksSupplement, 0x1DC0, 0x1DFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(LatinExtendedAdditional, 0x1E00, 0x1EFF)
+// DEFINE_IS_IN_UNICODE_BLOCK(CombiningDiacriticalMarksSupplement, 0x1DC0,
+// 0x1DFF) DEFINE_IS_IN_UNICODE_BLOCK(LatinExtendedAdditional, 0x1E00, 0x1EFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(GreekExtended, 0x1F00, 0x1FFF)
 DEFINE_IS_IN_UNICODE_BLOCK(GeneralPunctuation, 0x2000, 0x206F)
 // DEFINE_IS_IN_UNICODE_BLOCK(SuperscriptsandSubscripts, 0x2070, 0x209F)
@@ -260,16 +262,16 @@ DEFINE_IS_IN_UNICODE_BLOCK(HalfwidthandFullwidthForms, 0xFF00, 0xFFEF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CuneiformNumbersandPunctuation, 0x12400, 0x1247F)
 // DEFINE_IS_IN_UNICODE_BLOCK(EarlyDynasticCuneiform, 0x12480, 0x1254F)
 // DEFINE_IS_IN_UNICODE_BLOCK(EgyptianHieroglyphs, 0x13000, 0x1342F)
-// DEFINE_IS_IN_UNICODE_BLOCK(EgyptianHieroglyphFormatControls, 0x13430, 0x1343F)
-// DEFINE_IS_IN_UNICODE_BLOCK(AnatolianHieroglyphs, 0x14400, 0x1467F)
+// DEFINE_IS_IN_UNICODE_BLOCK(EgyptianHieroglyphFormatControls, 0x13430,
+// 0x1343F) DEFINE_IS_IN_UNICODE_BLOCK(AnatolianHieroglyphs, 0x14400, 0x1467F)
 // DEFINE_IS_IN_UNICODE_BLOCK(BamumSupplement, 0x16800, 0x16A3F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Mro, 0x16A40, 0x16A6F)
 // DEFINE_IS_IN_UNICODE_BLOCK(BassaVah, 0x16AD0, 0x16AFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(PahawhHmong, 0x16B00, 0x16B8F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Medefaidrin, 0x16E40, 0x16E9F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Miao, 0x16F00, 0x16F9F)
-// DEFINE_IS_IN_UNICODE_BLOCK(IdeographicSymbolsandPunctuation, 0x16FE0, 0x16FFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tangut, 0x17000, 0x187FF)
+// DEFINE_IS_IN_UNICODE_BLOCK(IdeographicSymbolsandPunctuation, 0x16FE0,
+// 0x16FFF) DEFINE_IS_IN_UNICODE_BLOCK(Tangut, 0x17000, 0x187FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(TangutComponents, 0x18800, 0x18AFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(KanaSupplement, 0x1B000, 0x1B0FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(KanaExtendedA, 0x1B100, 0x1B12F)
@@ -292,51 +294,46 @@ DEFINE_IS_IN_UNICODE_BLOCK(HalfwidthandFullwidthForms, 0xFF00, 0xFFEF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Adlam, 0x1E900, 0x1E95F)
 // DEFINE_IS_IN_UNICODE_BLOCK(IndicSiyaqNumbers, 0x1EC70, 0x1ECBF)
 // DEFINE_IS_IN_UNICODE_BLOCK(OttomanSiyaqNumbers, 0x1ED00, 0x1ED4F)
-// DEFINE_IS_IN_UNICODE_BLOCK(ArabicMathematicalAlphabeticSymbols, 0x1EE00, 0x1EEFF)
-// DEFINE_IS_IN_UNICODE_BLOCK(MahjongTiles, 0x1F000, 0x1F02F)
+// DEFINE_IS_IN_UNICODE_BLOCK(ArabicMathematicalAlphabeticSymbols, 0x1EE00,
+// 0x1EEFF) DEFINE_IS_IN_UNICODE_BLOCK(MahjongTiles, 0x1F000, 0x1F02F)
 // DEFINE_IS_IN_UNICODE_BLOCK(DominoTiles, 0x1F030, 0x1F09F)
 // DEFINE_IS_IN_UNICODE_BLOCK(PlayingCards, 0x1F0A0, 0x1F0FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(EnclosedAlphanumericSupplement, 0x1F100, 0x1F1FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(EnclosedIdeographicSupplement, 0x1F200, 0x1F2FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(MiscellaneousSymbolsandPictographs, 0x1F300, 0x1F5FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(Emoticons, 0x1F600, 0x1F64F)
+// DEFINE_IS_IN_UNICODE_BLOCK(MiscellaneousSymbolsandPictographs, 0x1F300,
+// 0x1F5FF) DEFINE_IS_IN_UNICODE_BLOCK(Emoticons, 0x1F600, 0x1F64F)
 // DEFINE_IS_IN_UNICODE_BLOCK(OrnamentalDingbats, 0x1F650, 0x1F67F)
 // DEFINE_IS_IN_UNICODE_BLOCK(TransportandMapSymbols, 0x1F680, 0x1F6FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(AlchemicalSymbols, 0x1F700, 0x1F77F)
 // DEFINE_IS_IN_UNICODE_BLOCK(GeometricShapesExtended, 0x1F780, 0x1F7FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementalArrowsC, 0x1F800, 0x1F8FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(SupplementalSymbolsandPictographs, 0x1F900, 0x1F9FF)
-// DEFINE_IS_IN_UNICODE_BLOCK(ChessSymbols, 0x1FA00, 0x1FA6F)
+// DEFINE_IS_IN_UNICODE_BLOCK(SupplementalSymbolsandPictographs, 0x1F900,
+// 0x1F9FF) DEFINE_IS_IN_UNICODE_BLOCK(ChessSymbols, 0x1FA00, 0x1FA6F)
 // DEFINE_IS_IN_UNICODE_BLOCK(SymbolsandPictographsExtendedA, 0x1FA70, 0x1FAFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionB, 0x20000, 0x2A6DF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionC, 0x2A700, 0x2B73F)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionD, 0x2B740, 0x2B81F)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionE, 0x2B820, 0x2CEAF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CJKUnifiedIdeographsExtensionF, 0x2CEB0, 0x2EBEF)
-// DEFINE_IS_IN_UNICODE_BLOCK(CJKCompatibilityIdeographsSupplement, 0x2F800, 0x2FA1F)
-// DEFINE_IS_IN_UNICODE_BLOCK(Tags, 0xE0000, 0xE007F)
+// DEFINE_IS_IN_UNICODE_BLOCK(CJKCompatibilityIdeographsSupplement, 0x2F800,
+// 0x2FA1F) DEFINE_IS_IN_UNICODE_BLOCK(Tags, 0xE0000, 0xE007F)
 // DEFINE_IS_IN_UNICODE_BLOCK(VariationSelectorsSupplement, 0xE0100, 0xE01EF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementaryPrivateUseAreaA, 0xF0000, 0xFFFFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(SupplementaryPrivateUseAreaB, 0x100000, 0x10FFFF)
 
 MAPBOX_ETERNAL_CONSTEXPR const auto verticalPunctuation = mapbox::eternal::map<char16_t, char16_t>({
-    { u'!', u'︕' },  { u'#', u'＃' },  { u'$', u'＄' },  { u'%', u'％' },  { u'&', u'＆' },
-    { u'(', u'︵' },  { u')', u'︶' },  { u'*', u'＊' },  { u'+', u'＋' },  { u',', u'︐' },
-    { u'-', u'︲' },  { u'.', u'・' },  { u'/', u'／' },  { u':', u'︓' },  { u';', u'︔' },
-    { u'<', u'︿' },  { u'=', u'＝' },  { u'>', u'﹀' },  { u'?', u'︖' },  { u'@', u'＠' },
-    { u'[', u'﹇' },  { u'\\', u'＼' }, { u']', u'﹈' },  { u'^', u'＾' },  { u'_', u'︳' },
-    { u'`', u'｀' },  { u'{', u'︷' },  { u'|', u'―' },   { u'}', u'︸' },  { u'~', u'～' },
-    { u'¢', u'￠' },  { u'£', u'￡' },  { u'¥', u'￥' },  { u'¦', u'￤' },  { u'¬', u'￢' },
-    { u'¯', u'￣' },  { u'–', u'︲' },  { u'—', u'︱' },  { u'‘', u'﹃' },  { u'’', u'﹄' },
-    { u'“', u'﹁' },  { u'”', u'﹂' },  { u'…', u'︙' },  { u'‧', u'・' },  { u'₩', u'￦' },
-    { u'、', u'︑' }, { u'。', u'︒' }, { u'〈', u'︿' }, { u'〉', u'﹀' }, { u'《', u'︽' },
-    { u'》', u'︾' }, { u'「', u'﹁' }, { u'」', u'﹂' }, { u'『', u'﹃' }, { u'』', u'﹄' },
-    { u'【', u'︻' }, { u'】', u'︼' }, { u'〔', u'︹' }, { u'〕', u'︺' }, { u'〖', u'︗' },
-    { u'〗', u'︘' }, { u'！', u'︕' }, { u'（', u'︵' }, { u'）', u'︶' }, { u'，', u'︐' },
-    { u'－', u'︲' }, { u'．', u'・' }, { u'：', u'︓' }, { u'；', u'︔' }, { u'＜', u'︿' },
-    { u'＞', u'﹀' }, { u'？', u'︖' }, { u'［', u'﹇' }, { u'］', u'﹈' }, { u'＿', u'︳' },
-    { u'｛', u'︷' }, { u'｜', u'―' },  { u'｝', u'︸' }, { u'｟', u'︵' }, { u'｠', u'︶' },
-    { u'｡', u'︒' },  { u'｢', u'﹁' },  { u'｣', u'﹂' },
+    {u'!', u'︕'},  {u'#', u'＃'},  {u'$', u'＄'},  {u'%', u'％'},  {u'&', u'＆'},  {u'(', u'︵'},  {u')', u'︶'},
+    {u'*', u'＊'},  {u'+', u'＋'},  {u',', u'︐'},  {u'-', u'︲'},  {u'.', u'・'},  {u'/', u'／'},  {u':', u'︓'},
+    {u';', u'︔'},  {u'<', u'︿'},  {u'=', u'＝'},  {u'>', u'﹀'},  {u'?', u'︖'},  {u'@', u'＠'},  {u'[', u'﹇'},
+    {u'\\', u'＼'}, {u']', u'﹈'},  {u'^', u'＾'},  {u'_', u'︳'},  {u'`', u'｀'},  {u'{', u'︷'},  {u'|', u'―'},
+    {u'}', u'︸'},  {u'~', u'～'},  {u'¢', u'￠'},  {u'£', u'￡'},  {u'¥', u'￥'},  {u'¦', u'￤'},  {u'¬', u'￢'},
+    {u'¯', u'￣'},  {u'–', u'︲'},  {u'—', u'︱'},  {u'‘', u'﹃'},  {u'’', u'﹄'},  {u'“', u'﹁'},  {u'”', u'﹂'},
+    {u'…', u'︙'},  {u'‧', u'・'},  {u'₩', u'￦'},  {u'、', u'︑'}, {u'。', u'︒'}, {u'〈', u'︿'}, {u'〉', u'﹀'},
+    {u'《', u'︽'}, {u'》', u'︾'}, {u'「', u'﹁'}, {u'」', u'﹂'}, {u'『', u'﹃'}, {u'』', u'﹄'}, {u'【', u'︻'},
+    {u'】', u'︼'}, {u'〔', u'︹'}, {u'〕', u'︺'}, {u'〖', u'︗'}, {u'〗', u'︘'}, {u'！', u'︕'}, {u'（', u'︵'},
+    {u'）', u'︶'}, {u'，', u'︐'}, {u'－', u'︲'}, {u'．', u'・'}, {u'：', u'︓'}, {u'；', u'︔'}, {u'＜', u'︿'},
+    {u'＞', u'﹀'}, {u'？', u'︖'}, {u'［', u'﹇'}, {u'］', u'﹈'}, {u'＿', u'︳'}, {u'｛', u'︷'}, {u'｜', u'―'},
+    {u'｝', u'︸'}, {u'｟', u'︵'}, {u'｠', u'︶'}, {u'｡', u'︒'},  {u'｢', u'﹁'},  {u'｣', u'﹂'},
 });
 
 } // namespace
@@ -358,11 +355,13 @@ bool allowsWordBreaking(char16_t chr) {
             || chr == 0xb7   /* middle dot */
             || chr == 0x200b /* zero-width space */
             || chr == 0x2010 /* hyphen */
-            || chr == 0x2013 /* en dash */);
+            || chr == 0x2013 /* en dash */
+    );
 }
 
 bool charAllowsLetterSpacing(char16_t chr) {
-    return !(isInArabic(chr) || isInArabicSupplement(chr) || isInArabicExtendedA(chr) || isInArabicPresentationFormsA(chr) || isInArabicPresentationFormsB(chr));
+    return !(isInArabic(chr) || isInArabicSupplement(chr) || isInArabicExtendedA(chr) ||
+             isInArabicPresentationFormsA(chr) || isInArabicPresentationFormsB(chr));
 }
 
 bool allowsLetterSpacing(const std::u16string& string) {
@@ -380,22 +379,18 @@ bool allowsIdeographicBreaking(const std::u16string& string) {
 
 bool allowsIdeographicBreaking(char16_t chr) {
     // Allow U+2027 "Interpunct" for hyphenation of Chinese words
-    if (chr == 0x2027)
-        return true;
+    if (chr == 0x2027) return true;
 
     // Return early for characters outside all ideographic ranges.
-    if (chr < 0x2E80)
-        return false;
+    if (chr < 0x2E80) return false;
 
     return (isInBopomofo(chr) || isInBopomofoExtended(chr) || isInCJKCompatibility(chr) ||
-            isInCJKCompatibilityForms(chr) || isInCJKCompatibilityIdeographs(chr) ||
-            isInCJKRadicalsSupplement(chr) || isInCJKStrokes(chr) ||
-            isInCJKSymbolsandPunctuation(chr) || isInCJKUnifiedIdeographs(chr) ||
+            isInCJKCompatibilityForms(chr) || isInCJKCompatibilityIdeographs(chr) || isInCJKRadicalsSupplement(chr) ||
+            isInCJKStrokes(chr) || isInCJKSymbolsandPunctuation(chr) || isInCJKUnifiedIdeographs(chr) ||
             isInCJKUnifiedIdeographsExtensionA(chr) || isInEnclosedCJKLettersandMonths(chr) ||
-            isInHalfwidthandFullwidthForms(chr) || isInHiragana(chr) ||
-            isInIdeographicDescriptionCharacters(chr) || isInKangxiRadicals(chr) ||
-            isInKatakana(chr) || isInKatakanaPhoneticExtensions(chr) || isInVerticalForms(chr) ||
-            isInYiRadicals(chr) || isInYiSyllables(chr));
+            isInHalfwidthandFullwidthForms(chr) || isInHiragana(chr) || isInIdeographicDescriptionCharacters(chr) ||
+            isInKangxiRadicals(chr) || isInKatakana(chr) || isInKatakanaPhoneticExtensions(chr) ||
+            isInVerticalForms(chr) || isInYiRadicals(chr) || isInYiSyllables(chr));
 
     // The following blocks also allow ideographic breaking; however, for other
     // reasons, Mapbox GL lacks support for codepoints beyond U+FFFF.
@@ -415,8 +410,7 @@ bool allowsIdeographicBreaking(char16_t chr) {
 
 bool allowsFixedWidthGlyphGeneration(char16_t chr) {
     // Mirrors conservative set of characters used in glyph_manager.js/_tinySDF
-    return isInCJKUnifiedIdeographs(chr) || isInHangulSyllables(chr)
-        || isInKatakana(chr) || isInHiragana(chr);
+    return isInCJKUnifiedIdeographs(chr) || isInHangulSyllables(chr) || isInKatakana(chr) || isInHiragana(chr);
 }
 
 bool allowsVerticalWritingMode(const std::u16string& string) {
@@ -437,52 +431,42 @@ bool allowsVerticalWritingMode(const std::u16string& string) {
 // “neutral” characters.
 
 bool hasUprightVerticalOrientation(char16_t chr) {
-    if (chr == u'˪' || chr == u'˫')
-        return true;
+    if (chr == u'˪' || chr == u'˫') return true;
 
     // Return early for characters outside all ranges whose characters remain
     // upright in vertical writing mode.
-    if (chr < 0x1100)
-        return false;
+    if (chr < 0x1100) return false;
 
-    if (isInBopomofo(chr) || isInBopomofoExtended(chr))
-        return true;
+    if (isInBopomofo(chr) || isInBopomofoExtended(chr)) return true;
     if (isInCJKCompatibilityForms(chr)) {
-        if (!(chr >= u'﹉' && chr <= u'﹏'))
-            return true;
+        if (!(chr >= u'﹉' && chr <= u'﹏')) return true;
     }
-    if (isInCJKCompatibility(chr) || isInCJKCompatibilityIdeographs(chr) ||
-        isInCJKRadicalsSupplement(chr) || isInCJKStrokes(chr))
+    if (isInCJKCompatibility(chr) || isInCJKCompatibilityIdeographs(chr) || isInCJKRadicalsSupplement(chr) ||
+        isInCJKStrokes(chr))
         return true;
     if (isInCJKSymbolsandPunctuation(chr)) {
-        if (!(chr >= u'〈' && chr <= u'】') && !(chr >= u'〔' && chr <= u'〟') && chr != u'〰')
-            return true;
+        if (!(chr >= u'〈' && chr <= u'】') && !(chr >= u'〔' && chr <= u'〟') && chr != u'〰') return true;
     }
     if (isInCJKUnifiedIdeographs(chr) || isInCJKUnifiedIdeographsExtensionA(chr) ||
-        isInEnclosedCJKLettersandMonths(chr) || isInHangulCompatibilityJamo(chr) ||
-        isInHangulJamo(chr) || isInHangulJamoExtendedA(chr) || isInHangulJamoExtendedB(chr) ||
-        isInHangulSyllables(chr) || isInHiragana(chr) ||
+        isInEnclosedCJKLettersandMonths(chr) || isInHangulCompatibilityJamo(chr) || isInHangulJamo(chr) ||
+        isInHangulJamoExtendedA(chr) || isInHangulJamoExtendedB(chr) || isInHangulSyllables(chr) || isInHiragana(chr) ||
         isInIdeographicDescriptionCharacters(chr) || isInKanbun(chr) || isInKangxiRadicals(chr))
         return true;
     if (isInKatakana(chr)) {
-        if (chr != u'ー')
-            return true;
+        if (chr != u'ー') return true;
     }
-    if (isInKatakanaPhoneticExtensions(chr))
-        return true;
+    if (isInKatakanaPhoneticExtensions(chr)) return true;
     if (isInHalfwidthandFullwidthForms(chr)) {
-        if (chr != u'（' && chr != u'）' && chr != u'－' && !(chr >= u'：' && chr <= u'＞') &&
-            chr != u'［' && chr != u'］' && chr != u'＿' && !(chr >= u'｛' && chr <= 0xFFDF) &&
-            chr != u'￣' && !(chr >= u'￨' && chr <= 0xFFEF))
+        if (chr != u'（' && chr != u'）' && chr != u'－' && !(chr >= u'：' && chr <= u'＞') && chr != u'［' &&
+            chr != u'］' && chr != u'＿' && !(chr >= u'｛' && chr <= 0xFFDF) && chr != u'￣' &&
+            !(chr >= u'￨' && chr <= 0xFFEF))
             return true;
     }
     if (isInSmallFormVariants(chr)) {
-        if (!(chr >= u'﹘' && chr <= u'﹞') && !(chr >= u'﹣' && chr <= u'﹦'))
-            return true;
+        if (!(chr >= u'﹘' && chr <= u'﹞') && !(chr >= u'﹣' && chr <= u'﹦')) return true;
     }
-    if (isInUnifiedCanadianAboriginalSyllabics(chr) ||
-        isInUnifiedCanadianAboriginalSyllabicsExtended(chr) || isInVerticalForms(chr) ||
-        isInYijingHexagramSymbols(chr) || isInYiSyllables(chr) || isInYiRadicals(chr))
+    if (isInUnifiedCanadianAboriginalSyllabics(chr) || isInUnifiedCanadianAboriginalSyllabicsExtended(chr) ||
+        isInVerticalForms(chr) || isInYijingHexagramSymbols(chr) || isInYiSyllables(chr) || isInYiRadicals(chr))
         return true;
 
     // https://github.com/mapbox/mapbox-gl/issues/29
@@ -526,15 +510,14 @@ bool hasUprightVerticalOrientation(char16_t chr) {
 
 bool hasNeutralVerticalOrientation(char16_t chr) {
     if (isInLatin1Supplement(chr)) {
-        if (chr == u'§' || chr == u'©' || chr == u'®' || chr == u'±' || chr == u'¼' ||
-            chr == u'½' || chr == u'¾' || chr == u'×' || chr == u'÷') {
+        if (chr == u'§' || chr == u'©' || chr == u'®' || chr == u'±' || chr == u'¼' || chr == u'½' || chr == u'¾' ||
+            chr == u'×' || chr == u'÷') {
             return true;
         }
     }
     if (isInGeneralPunctuation(chr)) {
-        if (chr == u'‖' || chr == u'†' || chr == u'‡' || chr == u'‰' || chr == u'‱' ||
-            chr == u'※' || chr == u'‼' || chr == u'⁂' || chr == u'⁇' || chr == u'⁈' ||
-            chr == u'⁉' || chr == u'⁑') {
+        if (chr == u'‖' || chr == u'†' || chr == u'‡' || chr == u'‰' || chr == u'‱' || chr == u'※' || chr == u'‼' ||
+            chr == u'⁂' || chr == u'⁇' || chr == u'⁈' || chr == u'⁉' || chr == u'⁑') {
             return true;
         }
     }
@@ -542,32 +525,27 @@ bool hasNeutralVerticalOrientation(char16_t chr) {
         return true;
     }
     if (isInMiscellaneousTechnical(chr)) {
-        if ((chr >= u'⌀' && chr <= u'⌇') || (chr >= u'⌌' && chr <= u'⌟') ||
-            (chr >= u'⌤' && chr <= u'⌨') || chr == u'⌫' || (chr >= u'⍽' && chr <= u'⎚') ||
-            (chr >= u'⎾' && chr <= u'⏍') || chr == u'⏏' || (chr >= u'⏑' && chr <= u'⏛') ||
-            (chr >= u'⏢' && chr <= 0x23FF)) {
+        if ((chr >= u'⌀' && chr <= u'⌇') || (chr >= u'⌌' && chr <= u'⌟') || (chr >= u'⌤' && chr <= u'⌨') ||
+            chr == u'⌫' || (chr >= u'⍽' && chr <= u'⎚') || (chr >= u'⎾' && chr <= u'⏍') || chr == u'⏏' ||
+            (chr >= u'⏑' && chr <= u'⏛') || (chr >= u'⏢' && chr <= 0x23FF)) {
             return true;
         }
     }
-    if (isInControlPictures(chr) || isInOpticalCharacterRecognition(chr) ||
-        isInEnclosedAlphanumerics(chr) || isInGeometricShapes(chr)) {
+    if (isInControlPictures(chr) || isInOpticalCharacterRecognition(chr) || isInEnclosedAlphanumerics(chr) ||
+        isInGeometricShapes(chr)) {
         return true;
     }
     if (isInMiscellaneousSymbols(chr)) {
-        if ((chr >= u'⬒' && chr <= u'⬯') ||
-            (chr >= u'⭐' && chr <= 0x2B59 /* heavy circled saltire */) ||
-            (chr >= 0x2BB8 /* upwards white arrow from bar with horizontal bar */ &&
-             chr <= 0x2BEB)) {
+        if ((chr >= u'⬒' && chr <= u'⬯') || (chr >= u'⭐' && chr <= 0x2B59 /* heavy circled saltire */) ||
+            (chr >= 0x2BB8 /* upwards white arrow from bar with horizontal bar */ && chr <= 0x2BEB)) {
             return true;
         }
     }
     if (isInCJKSymbolsandPunctuation(chr) || isInKatakana(chr) || isInPrivateUseArea(chr) ||
-        isInCJKCompatibilityForms(chr) || isInSmallFormVariants(chr) ||
-        isInHalfwidthandFullwidthForms(chr)) {
+        isInCJKCompatibilityForms(chr) || isInSmallFormVariants(chr) || isInHalfwidthandFullwidthForms(chr)) {
         return true;
     }
-    if (chr == u'∞' || chr == u'∴' || chr == u'∵' ||
-        (chr >= 0x2700 /* black safety scissors */ && chr <= u'❧') ||
+    if (chr == u'∞' || chr == u'∴' || chr == u'∵' || (chr >= 0x2700 /* black safety scissors */ && chr <= u'❧') ||
         (chr >= u'❶' && chr <= u'➓') || chr == 0xFFFC /* object replacement character */ ||
         chr == 0xFFFD /* replacement character */) {
         return true;
@@ -589,11 +567,10 @@ std::u16string verticalizePunctuation(const std::u16string& input) {
         char16_t nextCharCode = i < input.size() - 1 ? input[i + 1] : 0;
         char16_t prevCharCode = i ? input[i - 1] : 0;
 
-        bool canReplacePunctuation =
-            ((!nextCharCode || !hasRotatedVerticalOrientation(nextCharCode) ||
-              verticalPunctuation.count(input[i + 1])) &&
-             (!prevCharCode || !hasRotatedVerticalOrientation(prevCharCode) ||
-              verticalPunctuation.count(input[i - 1])));
+        bool canReplacePunctuation = ((!nextCharCode || !hasRotatedVerticalOrientation(nextCharCode) ||
+                                       verticalPunctuation.count(input[i + 1])) &&
+                                      (!prevCharCode || !hasRotatedVerticalOrientation(prevCharCode) ||
+                                       verticalPunctuation.count(input[i - 1])));
 
         if (char16_t repl = canReplacePunctuation ? verticalizePunctuation(input[i]) : 0) {
             output += repl;
@@ -608,7 +585,7 @@ std::u16string verticalizePunctuation(const std::u16string& input) {
 char16_t verticalizePunctuation(char16_t chr) {
     return verticalPunctuation.count(chr) ? verticalPunctuation.at(chr) : 0;
 }
-    
+
 bool charInSupportedScript(char16_t chr) {
     // This is a rough heuristic: whether we "can render" a script
     // actually depends on the properties of the font being used
@@ -628,7 +605,7 @@ bool charInSupportedScript(char16_t chr) {
              // Main blocks for Tibetan and Myanmar
              isInKhmer(chr));
 }
-    
+
 bool isStringInSupportedScript(const std::string& input) {
     auto u16string = util::convertUTF8ToUTF16(input);
     for (char16_t chr : u16string) {
@@ -640,11 +617,8 @@ bool isStringInSupportedScript(const std::string& input) {
 }
 
 bool isCharInComplexShapingScript(char16_t chr) {
-    return isInArabic(chr) ||
-           isInArabicSupplement(chr) ||
-           isInArabicExtendedA(chr) ||
-           isInArabicPresentationFormsA(chr) ||
-           isInArabicPresentationFormsB(chr);
+    return isInArabic(chr) || isInArabicSupplement(chr) || isInArabicExtendedA(chr) ||
+           isInArabicPresentationFormsA(chr) || isInArabicPresentationFormsB(chr);
 }
 
 bool isWhitespace(char16_t chr) {

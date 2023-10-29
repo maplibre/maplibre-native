@@ -1,13 +1,13 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::FillExtrusionPatternProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::FillExtrusionPatternProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "FillExtrusionPatternProgram";
     static constexpr const char* vertex = R"(uniform mat4 u_matrix;
 uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
@@ -43,17 +43,17 @@ uniform lowp float u_height;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
 uniform lowp float u_pattern_from_t;
-layout (location = 4) in lowp vec4 a_pattern_from;
-out lowp vec4 pattern_from;
+layout (location = 4) in mediump vec4 a_pattern_from;
+out mediump vec4 pattern_from;
 #else
-uniform lowp vec4 u_pattern_from;
+uniform mediump vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
 uniform lowp float u_pattern_to_t;
-layout (location = 5) in lowp vec4 a_pattern_to;
-out lowp vec4 pattern_to;
+layout (location = 5) in mediump vec4 a_pattern_to;
+out mediump vec4 pattern_to;
 #else
-uniform lowp vec4 u_pattern_to;
+uniform mediump vec4 u_pattern_to;
 #endif
 
 void main() {
@@ -145,14 +145,14 @@ in lowp float height;
 uniform lowp float u_height;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-in lowp vec4 pattern_from;
+in mediump vec4 pattern_from;
 #else
-uniform lowp vec4 u_pattern_from;
+uniform mediump vec4 u_pattern_from;
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-in lowp vec4 pattern_to;
+in mediump vec4 pattern_to;
 #else
-uniform lowp vec4 u_pattern_to;
+uniform mediump vec4 u_pattern_to;
 #endif
 
 void main() {

@@ -39,22 +39,28 @@ public:
 TEST(MergeLines, SameText) {
     // merges lines with the same text
     std::vector<mbgl::SymbolFeature> input1;
-    input1.push_back(SymbolFeatureStub({}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0));
-    input1.push_back(SymbolFeatureStub({}, FeatureType::LineString, {{{4, 0}, {5, 0}, {6, 0}}}, properties, bbb, {}, 0));
+    input1.push_back(
+        SymbolFeatureStub({}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0));
+    input1.push_back(
+        SymbolFeatureStub({}, FeatureType::LineString, {{{4, 0}, {5, 0}, {6, 0}}}, properties, bbb, {}, 0));
     input1.push_back(SymbolFeatureStub({}, FeatureType::LineString, {{{8, 0}, {9, 0}}}, properties, aaa, {}, 0));
-    input1.push_back(SymbolFeatureStub({}, FeatureType::LineString, {{{2, 0}, {3, 0}, {4, 0}}}, properties, aaa, {}, 0));
-    input1.push_back(SymbolFeatureStub({}, FeatureType::LineString, {{{6, 0}, {7, 0}, {8, 0}}}, properties, aaa, {}, 0));
+    input1.push_back(
+        SymbolFeatureStub({}, FeatureType::LineString, {{{2, 0}, {3, 0}, {4, 0}}}, properties, aaa, {}, 0));
+    input1.push_back(
+        SymbolFeatureStub({}, FeatureType::LineString, {{{6, 0}, {7, 0}, {8, 0}}}, properties, aaa, {}, 0));
     input1.push_back(SymbolFeatureStub({}, FeatureType::LineString, {{{5, 0}, {6, 0}}}, properties, aaa, {}, 0));
 
     std::vector<StubGeometryTileFeature> expected1;
-    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}}}, properties));
-    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {{{4, 0}, {5, 0}, {6, 0}}}, properties));
-    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {{{5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}}}, properties));
-    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, { emptyLine }, properties));
-    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, { emptyLine }, properties));
-    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, { emptyLine }, properties));
-    
-    
+    expected1.emplace_back(
+        StubGeometryTileFeature({}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}}}, properties));
+    expected1.emplace_back(
+        StubGeometryTileFeature({}, FeatureType::LineString, {{{4, 0}, {5, 0}, {6, 0}}}, properties));
+    expected1.emplace_back(
+        StubGeometryTileFeature({}, FeatureType::LineString, {{{5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}}}, properties));
+    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
+    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
+    expected1.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
+
     mbgl::util::mergeLines(input1);
 
     for (int i = 0; i < 6; i++) {
@@ -65,15 +71,18 @@ TEST(MergeLines, SameText) {
 TEST(MergeLines, BothEnds) {
     // mergeLines handles merge from both ends
     std::vector<mbgl::SymbolFeature> input2;
-    input2.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0 });
-    input2.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {{{4, 0}, {5, 0}, {6, 0}}}, properties, aaa, {}, 0 });
-    input2.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {{{2, 0}, {3, 0}, {4, 0}}}, properties, aaa, {}, 0 });
+    input2.push_back(
+        SymbolFeatureStub{{}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0});
+    input2.push_back(
+        SymbolFeatureStub{{}, FeatureType::LineString, {{{4, 0}, {5, 0}, {6, 0}}}, properties, aaa, {}, 0});
+    input2.push_back(
+        SymbolFeatureStub{{}, FeatureType::LineString, {{{2, 0}, {3, 0}, {4, 0}}}, properties, aaa, {}, 0});
 
     std::vector<StubGeometryTileFeature> expected2;
-    expected2.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}}}, properties));
-    expected2.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, { emptyLine }, properties));
-    expected2.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, { emptyLine }, properties));
-
+    expected2.emplace_back(StubGeometryTileFeature(
+        {}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}}}, properties));
+    expected2.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
+    expected2.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
 
     mbgl::util::mergeLines(input2);
 
@@ -85,15 +94,17 @@ TEST(MergeLines, BothEnds) {
 TEST(MergeLines, CircularLines) {
     // mergeLines handles circular lines
     std::vector<mbgl::SymbolFeature> input3;
-    input3.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0 });
-    input3.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {{{2, 0}, {3, 0}, {4, 0}}}, properties, aaa, {}, 0 });
-    input3.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {{{4, 0}, {0, 0}}}, properties, aaa, {}, 0 });
+    input3.push_back(
+        SymbolFeatureStub{{}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}}}, properties, aaa, {}, 0});
+    input3.push_back(
+        SymbolFeatureStub{{}, FeatureType::LineString, {{{2, 0}, {3, 0}, {4, 0}}}, properties, aaa, {}, 0});
+    input3.push_back(SymbolFeatureStub{{}, FeatureType::LineString, {{{4, 0}, {0, 0}}}, properties, aaa, {}, 0});
 
     std::vector<StubGeometryTileFeature> expected3;
-    expected3.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {0, 0}}}, properties));
-    expected3.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, { emptyLine }, properties));
-    expected3.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, { emptyLine }, properties));
-
+    expected3.emplace_back(StubGeometryTileFeature(
+        {}, FeatureType::LineString, {{{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {0, 0}}}, properties));
+    expected3.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
+    expected3.emplace_back(StubGeometryTileFeature({}, FeatureType::LineString, {emptyLine}, properties));
 
     mbgl::util::mergeLines(input3);
 
@@ -104,9 +115,9 @@ TEST(MergeLines, CircularLines) {
 
 TEST(MergeLines, EmptyOuterGeometry) {
     std::vector<mbgl::SymbolFeature> input;
-    input.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {}, properties, aaa, {}, 0 });
+    input.push_back(SymbolFeatureStub{{}, FeatureType::LineString, {}, properties, aaa, {}, 0});
 
-    const StubGeometryTileFeature expected{ {}, FeatureType::LineString, {}, properties };
+    const StubGeometryTileFeature expected{{}, FeatureType::LineString, {}, properties};
 
     mbgl::util::mergeLines(input);
 
@@ -115,9 +126,9 @@ TEST(MergeLines, EmptyOuterGeometry) {
 
 TEST(MergeLines, EmptyInnerGeometry) {
     std::vector<mbgl::SymbolFeature> input;
-    input.push_back(SymbolFeatureStub { {}, FeatureType::LineString, {}, properties, aaa, {}, 0 });
+    input.push_back(SymbolFeatureStub{{}, FeatureType::LineString, {}, properties, aaa, {}, 0});
 
-    const StubGeometryTileFeature expected{ {}, FeatureType::LineString, {}, properties };
+    const StubGeometryTileFeature expected{{}, FeatureType::LineString, {}, properties};
 
     mbgl::util::mergeLines(input);
 

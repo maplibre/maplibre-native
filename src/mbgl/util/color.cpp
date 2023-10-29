@@ -11,12 +11,7 @@ std::optional<Color> Color::parse(const std::string& s) {
     // Premultiply the color.
     if (css_color) {
         const float factor = css_color->a / 255;
-        return {{
-            css_color->r * factor,
-            css_color->g * factor,
-            css_color->b * factor,
-            css_color->a
-        }};
+        return {{css_color->r * factor, css_color->g * factor, css_color->b * factor, css_color->a}};
     } else {
         return {};
     }
@@ -24,16 +19,13 @@ std::optional<Color> Color::parse(const std::string& s) {
 
 std::string Color::stringify() const {
     std::array<double, 4> array = toArray();
-    return "rgba(" +
-        util::toString(array[0]) + "," +
-        util::toString(array[1]) + "," +
-        util::toString(array[2]) + "," +
-        util::toString(array[3]) + ")";
+    return "rgba(" + util::toString(array[0]) + "," + util::toString(array[1]) + "," + util::toString(array[2]) + "," +
+           util::toString(array[3]) + ")";
 }
 
 std::array<double, 4> Color::toArray() const {
     if (a == 0) {
-        return {{ 0, 0, 0, 0 }};
+        return {{0, 0, 0, 0}};
     } else {
         return {{
             r * 255 / a,
@@ -45,7 +37,10 @@ std::array<double, 4> Color::toArray() const {
 }
 
 mbgl::Value Color::toObject() const {
-    return mapbox::base::ValueObject{{"r", static_cast<double>(r)}, {"g", static_cast<double>(g)}, {"b", static_cast<double>(b)}, {"a", static_cast<double>(a)}};
+    return mapbox::base::ValueObject{{"r", static_cast<double>(r)},
+                                     {"g", static_cast<double>(g)},
+                                     {"b", static_cast<double>(b)},
+                                     {"a", static_cast<double>(a)}};
 }
 
 mbgl::Value Color::serialize() const {

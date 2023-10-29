@@ -1,0 +1,70 @@
+name: ios-device-test
+
+on:
+  workflow_run:
+    workflows: [ios-ci]
+    types:
+      - completed
+
+jobs:
+  ios-device-test:
+    strategy:
+      matrix:
+        test: [
+          {artifactName: ios-render-test, xcTestFile: RenderTest.xctest.zip, ipaFile: RenderTestApp.ipa, name: "iOS Render Tests"},
+          {artifactName: ios-cpp-unit-tests, xcTestFile: CppUnitTests.xctest.zip, ipaFile: CppUnitTestsApp.ipa, name: "iOS C++ Unit Tests"},
+        ]
+      fail-fast: true
+    runs-on: ubuntu-22.04
+    if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+
+      - uses: LouisBrunner/checks-action@v1.6.2
+        id: create_check
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          details_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          status: in_progress
+          name: ${{ matrix.test.name }}
+          sha: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: ${{ matrix.test.artifactName }}
+
+      - name: Check if test files exist (otherwise the parent workflow was skipped)
+        id: check_files
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
+
+      - uses: ./.github/actions/aws-device-farm-run
+        if: steps.check_files.outputs.files_exists == 'true'
+        with:
+          name: ${{ matrix.test.name }}
+          appType: IOS_APP
+          appFile: ${{ matrix.test.ipaFile }}
+          testFile: ${{ matrix.test.xcTestFile }}
+          testPackageType: XCTEST_TEST_PACKAGE
+          testType: XCTEST
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ vars.AWS_DEVICE_FARM_IPHONE_DEVICE_POOL_ARN }}
+
+      - uses: LouisBrunner/checks-action@v1.6.2
+        if: always()
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          check_id: ${{ steps.create_check.outputs.check_id }}
+          conclusion: ${{ job.status }}
+          sha: ${{ github.event.workflow_run.sha }}

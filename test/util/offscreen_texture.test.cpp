@@ -4,12 +4,16 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gl/context.hpp>
-#include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/headless_backend.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
 
+#if MLN_LEGACY_RENDERER
+#include <mbgl/gl/texture.hpp>
+#else
+#include <mbgl/gl/texture2d.hpp>
+#endif
 
 using namespace mbgl;
 using namespace mbgl::platform;
@@ -19,8 +23,8 @@ TEST(OffscreenTexture, EmptyRed) {
         return;
     }
 
-    gl::HeadlessBackend backend({ 512, 256 });
-    gfx::BackendScope scope { backend };
+    gl::HeadlessBackend backend({512, 256});
+    gfx::BackendScope scope{backend};
 
     // Scissor test shouldn't leak after gl::HeadlessBackend::bind().
     MBGL_CHECK_ERROR(glScissor(64, 64, 128, 128));
@@ -68,31 +72,28 @@ struct Buffer {
     Buffer(std::vector<GLfloat> data) {
         MBGL_CHECK_ERROR(glGenBuffers(1, &buffer));
         MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, buffer));
-        MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), data.data(),
-                                      GL_STATIC_DRAW));
+        MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(GLfloat), data.data(), GL_STATIC_DRAW));
     }
 
-    ~Buffer() {
-        MBGL_CHECK_ERROR(glDeleteBuffers(1, &buffer));
-    }
+    ~Buffer() { MBGL_CHECK_ERROR(glDeleteBuffers(1, &buffer)); }
 
     GLuint buffer = 0;
 };
-
 
 TEST(OffscreenTexture, RenderToTexture) {
     if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {
         return;
     }
 
-    gl::HeadlessBackend backend({ 512, 256 });
-    gfx::BackendScope scope { backend };
+    gl::HeadlessBackend backend({512, 256});
+    gfx::BackendScope scope{backend};
     auto& context = static_cast<gl::Context&>(backend.getContext());
 
     MBGL_CHECK_ERROR(glEnable(GL_BLEND));
     MBGL_CHECK_ERROR(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-    Shader paintShader(R"MBGL_SHADER(
+    Shader paintShader(
+        R"MBGL_SHADER(
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -100,7 +101,8 @@ attribute vec2 a_pos;
 void main() {
     gl_Position = vec4(a_pos, 0, 1);
 }
-)MBGL_SHADER", R"MBGL_SHADER(
+)MBGL_SHADER",
+        R"MBGL_SHADER(
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -109,7 +111,8 @@ void main() {
 }
 )MBGL_SHADER");
 
-        Shader compositeShader(R"MBGL_SHADER(
+    Shader compositeShader(
+        R"MBGL_SHADER(
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -119,7 +122,8 @@ void main() {
     gl_Position = vec4(a_pos, 0, 1);
     v_texcoord = (a_pos + 1.0) / 2.0;
 }
-)MBGL_SHADER", R"MBGL_SHADER(
+)MBGL_SHADER",
+        R"MBGL_SHADER(
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -132,34 +136,33 @@ void main() {
 
     GLuint u_texture = MBGL_CHECK_ERROR(glGetUniformLocation(compositeShader.program, "u_texture"));
 
-    Buffer triangleBuffer({ 0, 0.5, 0.5, -0.5, -0.5, -0.5 });
-    Buffer viewportBuffer({ -1, -1, 1, -1, -1, 1, 1, 1 });
+    Buffer triangleBuffer({0, 0.5, 0.5, -0.5, -0.5, -0.5});
+    Buffer viewportBuffer({-1, -1, 1, -1, -1, 1, 1, 1});
 
     backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
 
     // First, draw red to the bound FBO.
     context.clear(Color::red(), {}, {});
 
-    // Then, create a texture, bind it, and render yellow to that texture. This should not
-    // affect the originally bound FBO.
-    gl::OffscreenTexture texture(context, { 128, 128 });
+    // Then, create a texture, bind it, and render yellow to that texture. This
+    // should not affect the originally bound FBO.
+    gl::OffscreenTexture offscreenTexture(context, {128, 128});
 
     // Scissor test shouldn't leak after OffscreenTexture::bind().
     MBGL_CHECK_ERROR(glScissor(32, 32, 64, 64));
     context.scissorTest.setCurrentValue(true);
 
-    texture.getResource<gl::RenderableResource>().bind();
+    offscreenTexture.getResource<gl::RenderableResource>().bind();
 
     context.clear(Color(), {}, {});
 
     MBGL_CHECK_ERROR(glUseProgram(paintShader.program));
     MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, triangleBuffer.buffer));
     MBGL_CHECK_ERROR(glEnableVertexAttribArray(paintShader.a_pos));
-    MBGL_CHECK_ERROR(
-        glVertexAttribPointer(paintShader.a_pos, 2, GL_FLOAT, GL_FALSE, 0, nullptr));
+    MBGL_CHECK_ERROR(glVertexAttribPointer(paintShader.a_pos, 2, GL_FLOAT, GL_FALSE, 0, nullptr));
     MBGL_CHECK_ERROR(glDrawArrays(GL_TRIANGLE_STRIP, 0, 3));
 
-    auto image = texture.readStillImage();
+    auto image = offscreenTexture.readStillImage();
     test::checkImage("test/fixtures/offscreen_texture/render-to-texture", image, 0, 0);
 
     // Now reset the FBO back to normal and retrieve the original (restored) framebuffer.
@@ -169,13 +172,17 @@ void main() {
     test::checkImage("test/fixtures/offscreen_texture/render-to-fbo", image, 0, 0);
 
     // Now, composite the Framebuffer texture we've rendered to onto the main FBO.
-    gl::bindTexture(context, 0, { texture.getTexture().getResource(), gfx::TextureFilterType::Linear });
-    MBGL_CHECK_ERROR(glUseProgram(compositeShader.program));
+#if MLN_LEGACY_RENDERER
+    gl::bindTexture(context, 0, {offscreenTexture.getTexture().getResource(), gfx::TextureFilterType::Linear});
     MBGL_CHECK_ERROR(glUniform1i(u_texture, 0));
+#else
+    offscreenTexture.getTexture()->setSamplerConfiguration({gfx::TextureFilterType::Linear});
+    std::static_pointer_cast<gl::Texture2D>(offscreenTexture.getTexture())->bind(u_texture, 0);
+#endif
+    MBGL_CHECK_ERROR(glUseProgram(compositeShader.program));
     MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, viewportBuffer.buffer));
     MBGL_CHECK_ERROR(glEnableVertexAttribArray(compositeShader.a_pos));
-    MBGL_CHECK_ERROR(
-        glVertexAttribPointer(compositeShader.a_pos, 2, GL_FLOAT, GL_FALSE, 0, nullptr));
+    MBGL_CHECK_ERROR(glVertexAttribPointer(compositeShader.a_pos, 2, GL_FLOAT, GL_FALSE, 0, nullptr));
     MBGL_CHECK_ERROR(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 
     image = backend.readStillImage();
@@ -183,13 +190,13 @@ void main() {
 }
 
 TEST(OffscreenTexture, ClearRenderPassColor) {
-    auto backend = gfx::HeadlessBackend::Create({ 128, 256 });
-    gfx::BackendScope scope { *backend->getRendererBackend() };
+    auto backend = gfx::HeadlessBackend::Create({128, 256});
+    gfx::BackendScope scope{*backend->getRendererBackend()};
     auto& context = backend->getRendererBackend()->getContext();
     auto encoder = context.createCommandEncoder();
     auto offscreenTexture = context.createOffscreenTexture({128, 256}, gfx::TextureChannelDataType::UnsignedByte);
-    auto renderPass = encoder->createRenderPass(
-        "offscreen texture", { *offscreenTexture, Color{ 1.0f, 0.0f, 0.0f, 1.0f }, {}, {} });
+    auto renderPass = encoder->createRenderPass("offscreen texture",
+                                                {*offscreenTexture, Color{1.0f, 0.0f, 0.0f, 1.0f}, {}, {}});
     renderPass.reset();
     encoder.reset();
 

@@ -40,8 +40,8 @@ void matrix::rotate(mat2& out, const mat2& a, double rad) {
     double a3 = a[3];
     double s = std::sin(rad);
     double c = std::cos(rad);
-    out[0] = a0 *  c + a2 * s;
-    out[1] = a1 *  c + a3 * s;
+    out[0] = a0 * c + a2 * s;
+    out[1] = a1 * c + a3 * s;
     out[2] = a0 * -s + a2 * c;
     out[3] = a1 * -s + a3 * c;
 }

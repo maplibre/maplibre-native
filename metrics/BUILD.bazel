@@ -1,0 +1,41 @@
+filegroup(
+    name = "render-test-files",
+    srcs = glob(
+        [
+            "integration/**",
+            "tests/**",
+            "linux-gcc8-release/**",
+            "expectations/platform-all/**",
+            "ignores/**",
+            "ios-render-test-runner/**",  # iOS only
+            "expectations/platform-ios/**",  # iOS only
+        ],
+        allow_empty = False,
+    ) + [
+        "cache-metrics.db",
+        "cache-style.db",
+        "ios-render-test-runner-metrics.json",  # iOS only
+        "ios-render-test-runner-style.json",  # iOS only
+        "linux-gcc8-release-metrics.json",
+        "linux-gcc8-release-style.json",
+    ],
+    visibility = [
+        "//platform/ios/test/common:__pkg__",
+        "//render-test:__subpackages__",
+    ],
+)
+
+filegroup(
+    name = "expression-test-files",
+    srcs = glob(
+        [
+            "integration/expression-tests/**",
+        ],
+        allow_empty = False,
+    ) + [
+        "ignores/platform-all.json",
+    ],
+    visibility = [
+        "//expression-test:__pkg__",
+    ],
+)

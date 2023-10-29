@@ -14,50 +14,39 @@ jni::Local<jni::Object<JsonElement>> JsonElement::New(jni::JNIEnv& env, const mb
     static auto booleanConstructor = primitive.GetConstructor<jni::Boolean>(env);
 
     return value.match(
-        [&] (const mbgl::NullValue&) {
-            return jni::Local<jni::Object<JsonElement>>();
-        },
-        [&] (const std::string& value) {
+        [&](const mbgl::NullValue&) { return jni::Local<jni::Object<JsonElement>>(); },
+        [&](const std::string& value) {
             return primitive.New(env, stringConstructor, jni::Make<jni::String>(env, value));
         },
-        [&] (const double value) {
-            return primitive.New(env, numberConstructor, jni::Box(env, value));
-        },
-        [&] (const int64_t value) {
-            return primitive.New(env, numberConstructor, jni::Box(env, value));
-        },
-        [&] (const uint64_t value) {
+        [&](const double value) { return primitive.New(env, numberConstructor, jni::Box(env, value)); },
+        [&](const int64_t value) { return primitive.New(env, numberConstructor, jni::Box(env, value)); },
+        [&](const uint64_t value) {
             return primitive.New(env, numberConstructor, jni::Box(env, int64_t(value))); // TODO: should use BigInteger
         },
-        [&] (const bool value) {
+        [&](const bool value) {
             return primitive.New(env, booleanConstructor, jni::Box(env, value ? jni::jni_true : jni::jni_false));
         },
-        [&] (const std::vector<mbgl::Value>& values) {
-            return JsonArray::New(env, values);
-        },
-        [&] (const mbgl::PropertyMap& values) {
-            return JsonObject::New(env, values);
-        }
-    );
+        [&](const std::vector<mbgl::Value>& values) { return JsonArray::New(env, values); },
+        [&](const mbgl::PropertyMap& values) { return JsonObject::New(env, values); });
 }
 
-mbgl::Value JsonElement::convert(jni::JNIEnv &env, const jni::Object<JsonElement>& jsonElement) {
+mbgl::Value JsonElement::convert(jni::JNIEnv& env, const jni::Object<JsonElement>& jsonElement) {
     if (!jsonElement) {
         return mbgl::NullValue();
     }
 
     static auto& elementClass = jni::Class<JsonElement>::Singleton(env);
-    static auto isJsonObject = elementClass.GetMethod<jni::jboolean ()>(env, "isJsonObject");
-    static auto isJsonArray = elementClass.GetMethod<jni::jboolean ()>(env, "isJsonArray");
-    static auto isJsonPrimitive = elementClass.GetMethod<jni::jboolean ()>(env, "isJsonPrimitive");
+    static auto isJsonObject = elementClass.GetMethod<jni::jboolean()>(env, "isJsonObject");
+    static auto isJsonArray = elementClass.GetMethod<jni::jboolean()>(env, "isJsonArray");
+    static auto isJsonPrimitive = elementClass.GetMethod<jni::jboolean()>(env, "isJsonPrimitive");
 
     static auto& primitiveClass = jni::Class<JsonPrimitive>::Singleton(env);
-    static auto isBoolean = primitiveClass.GetMethod<jni::jboolean ()>(env, "isBoolean");
-    static auto isString = primitiveClass.GetMethod<jni::jboolean ()>(env, "isString");
-    static auto isNumber = primitiveClass.GetMethod<jni::jboolean ()>(env, "isNumber");
-    static auto getAsBoolean = primitiveClass.GetMethod<jni::jboolean ()>(env, "getAsBoolean");
-    static auto getAsString = primitiveClass.GetMethod<jni::String ()>(env, "getAsString");
-    static auto getAsDouble = primitiveClass.GetMethod<jni::jdouble ()>(env, "getAsDouble");
+    static auto isBoolean = primitiveClass.GetMethod<jni::jboolean()>(env, "isBoolean");
+    static auto isString = primitiveClass.GetMethod<jni::jboolean()>(env, "isString");
+    static auto isNumber = primitiveClass.GetMethod<jni::jboolean()>(env, "isNumber");
+    static auto getAsBoolean = primitiveClass.GetMethod<jni::jboolean()>(env, "getAsBoolean");
+    static auto getAsString = primitiveClass.GetMethod<jni::String()>(env, "getAsString");
+    static auto getAsDouble = primitiveClass.GetMethod<jni::jdouble()>(env, "getAsDouble");
 
     if (jsonElement.Call(env, isJsonPrimitive)) {
         auto primitive = jni::Cast(env, primitiveClass, jsonElement);
@@ -79,7 +68,7 @@ mbgl::Value JsonElement::convert(jni::JNIEnv &env, const jni::Object<JsonElement
     }
 }
 
-void JsonElement::registerNative(jni::JNIEnv &env) {
+void JsonElement::registerNative(jni::JNIEnv& env) {
     jni::Class<JsonElement>::Singleton(env);
 }
 

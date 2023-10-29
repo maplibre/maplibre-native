@@ -18,6 +18,7 @@ cc_library(
             "mapbox-base/extras/filesystem/include/ghc/*.hpp",
             "mapbox-base/extras/kdbush.hpp/include/*.hpp",
             "mapbox-base/extras/rapidjson/include/**/*.h",
+            "mapbox-base/extras/args/args.hxx",
             "mapbox-base/include/mapbox/**/*.hpp",
         ],
         allow_empty = False,
@@ -35,6 +36,7 @@ cc_library(
         "mapbox-base/deps/shelf-pack-cpp/include",
         "mapbox-base/deps/supercluster.hpp/include",
         "mapbox-base/deps/variant/include",
+        "mapbox-base/extras/args",
         "mapbox-base/extras/expected-lite/include",
         "mapbox-base/extras/filesystem/include",
         "mapbox-base/extras/kdbush.hpp/include",
@@ -102,6 +104,24 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+objc_library(
+    name = "zip-archive",
+    srcs = [
+        "zip-archive/SSZipArchive/SSZipArchive.h",
+        "zip-archive/SSZipArchive/SSZipArchive.m",
+        "zip-archive/SSZipArchive/SSZipCommon.h",
+    ] + glob(
+        [
+            "zip-archive/SSZipArchive/minizip/*.c",
+            "zip-archive/SSZipArchive/minizip/*.h",
+        ],
+        allow_empty = False,
+    ),
+    defines = ["ZLIB_COMPAT"],
+    includes = ["zip-archive/SSZipArchive"],
+    visibility = ["//visibility:public"],
+)
+
 # vendor/boost-files.json
 cc_library(
     name = "boost",
@@ -114,6 +134,14 @@ cc_library(
     ),
     copts = CPP_FLAGS,
     includes = ["boost/include"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "httplib",
+    hdrs = ["cpp-httplib/httplib.h"],
+    copts = CPP_FLAGS,
+    includes = ["cpp-httplib"],
     visibility = ["//visibility:public"],
 )
 
@@ -144,6 +172,18 @@ cc_library(
     hdrs = ["eternal/include/mapbox/eternal.hpp"],
     copts = CPP_FLAGS,
     includes = ["eternal/include"],
+    visibility = ["//visibility:public"],
+)
+
+# vendor/metal-cpp.json
+cc_library(
+    name = "metal-cpp",
+    hdrs = glob(
+        ["metal-cpp/**/*.hpp"],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS,
+    includes = ["metal-cpp"],
     visibility = ["//visibility:public"],
 )
 
@@ -190,7 +230,27 @@ cc_library(
     hdrs = glob(["icu/include/unicode/*.h"]),
     copts = CPP_FLAGS + [
         "-Wno-c11-extensions",
+        "-Wno-conversion",
     ],
     includes = ["icu/include"],
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "nunicode-gen",
+    hdrs = glob(["nunicode/src/libnu/gen/*.c"]),
+    include_prefix = "gen",
+    strip_include_prefix = "nunicode/src/libnu/gen",
+)
+
+cc_library(
+    name = "nunicode",
+    srcs = glob(["nunicode/src/libnu/*.c"]),
+    hdrs = glob(["nunicode/include/libnu/*.h"]),
+    include_prefix = "libnu",
+    strip_include_prefix = "nunicode/include/libnu",
+    visibility = ["//visibility:public"],
+    deps = [
+        "nunicode-gen",
+    ],
 )

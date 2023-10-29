@@ -42,7 +42,7 @@ It is useful to split our goals into three sections to articulate what this prop
 ### <a name="core">Core Functionality</a>
 
 1. Shader (program) code will be implemented in a modular fashion, such that replacement of any given shader can happen without impacting other shaders.
-2. Shader (program) code may no longer be compiled from the [webgl source](https://github.com/maplibre/maplibre-gl-js/tree/main/src/shaders), and should be organized within the maplibre-gl-native repo (as a compile time option).
+2. Shader (program) code may no longer be compiled from the [webgl source](https://github.com/maplibre/maplibre-gl-js/tree/main/src/shaders), and should be organized within the maplibre-native repo (as a compile time option).
 3. Layer rendering logic should be replaceable at the dev level.  All the necessary support should be exposed and a developer should be able to take over representation of any given layer.
 4. Developers should be able to associate specific styles with specific layer rendering.  The style sheet should be able to call out the type of representation it would like beyond the default.
 5. Developers should be able to add new visual representations fed by existing geometry types.  Such as data display driven by tile sets or animated markers.

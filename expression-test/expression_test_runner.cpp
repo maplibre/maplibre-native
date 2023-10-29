@@ -1,7 +1,6 @@
 #include "expression_test_runner.hpp"
 #include "expression_test_logger.hpp"
 #include "expression_test_parser.hpp"
-#include "filesystem.hpp"
 #include "test_runner_common.hpp"
 
 #include <mbgl/util/io.hpp>
@@ -12,21 +11,23 @@
 
 #include <sstream>
 #include <regex>
+#include <filesystem>
 
 using namespace std::literals;
 
 namespace {
 
 std::string simpleDiff(const Value& result, const Value& expected) {
-    std::vector<std::string> resultTokens {tokenize(toJSON(result, 2, true))};
-    std::vector<std::string> expectedTokens {tokenize(toJSON(expected, 2, true))};
+    std::vector<std::string> resultTokens{tokenize(toJSON(result, 2, true))};
+    std::vector<std::string> expectedTokens{tokenize(toJSON(expected, 2, true))};
     std::size_t maxLength = std::max(resultTokens.size(), expectedTokens.size());
     std::ostringstream diff;
-    const auto flush = [] (const std::vector<std::string>& vec, std::size_t pos, std::ostringstream& out, std::string separator) {
-        for (std::size_t j = pos; j < vec.size(); ++j) {
-            out << separator << vec[j] << std::endl;
-        }
-    };
+    const auto flush =
+        [](const std::vector<std::string>& vec, std::size_t pos, std::ostringstream& out, std::string separator) {
+            for (std::size_t j = pos; j < vec.size(); ++j) {
+                out << separator << vec[j] << std::endl;
+            }
+        };
 
     for (std::size_t i = 0; i < maxLength; ++i) {
         if (resultTokens.size() <= i) {
@@ -86,7 +87,7 @@ void writeTestData(const JSDocument& document, const std::string& rootPath, cons
     writer.SetIndent(' ', 2);
     document.Accept(writer);
     buffer.Put('\n');
-    filesystem::path path = filesystem::path(rootPath) / id / "test.json"s;
+    std::filesystem::path path = std::filesystem::path(rootPath) / id / "test.json"s;
     try {
         util::write_file(path.string(), {buffer.GetString(), buffer.GetSize()});
     } catch (std::exception&) {
@@ -109,8 +110,8 @@ TestRunOutput runExpressionTest(TestData& data, const std::string& rootPath, con
                     evaluationResult = expression->evaluate(
                         input.zoom, input.feature, input.heatmapDensity, input.availableImages, *input.canonical);
                 } else {
-                    evaluationResult =
-                        expression->evaluate(input.zoom, input.feature, input.heatmapDensity, input.availableImages);
+                    evaluationResult = expression->evaluate(
+                        input.zoom, input.feature, input.heatmapDensity, input.availableImages);
                 }
                 if (!evaluationResult) {
                     std::unordered_map<std::string, Value> error{{"error", Value{evaluationResult.error().message}}};
@@ -138,8 +139,7 @@ TestRunOutput runExpressionTest(TestData& data, const std::string& rootPath, con
         auto recompiledExpression = parseExpression(data.result.serialized, data.spec, data.recompiled);
         if (recompiledExpression) {
             evaluateExpression(recompiledExpression, data.recompiled);
-            rewriteRoundtrippedType(data.expected.compiled.serializedType,
-                                    data.recompiled.compiled.serializedType);
+            rewriteRoundtrippedType(data.expected.compiled.serializedType, data.recompiled.compiled.serializedType);
         }
     }
 
@@ -159,7 +159,7 @@ TestRunOutput runExpressionTest(TestData& data, const std::string& rootPath, con
 
     if (data.expected.compiled.success) {
         serializationOk = compileOk && deepEqual(data.result.serialized, data.expected.serialized);
-        recompileOk = compileOk &&  data.recompiled.compiled == data.expected.compiled;
+        recompileOk = compileOk && data.recompiled.compiled == data.expected.compiled;
         roundTripOk = recompileOk && deepEqual(data.recompiled.outputs, data.expected.outputs);
     }
 
@@ -168,36 +168,28 @@ TestRunOutput runExpressionTest(TestData& data, const std::string& rootPath, con
     if (!compileOk) {
         auto resultValue = toValue(data.result.compiled);
         auto expectedValue = toValue(data.expected.compiled);
-        output.text += "Compiled expression difference:\n"s +
-                        simpleDiff(resultValue, expectedValue) +
-                        "\n"s;
+        output.text += "Compiled expression difference:\n"s + simpleDiff(resultValue, expectedValue) + "\n"s;
     }
 
     if (compileOk && !serializationOk) {
-        auto diff = simpleDiff(data.expected.serialized.value_or(Value{}),
-                               data.result.serialized.value_or(Value{}));
+        auto diff = simpleDiff(data.expected.serialized.value_or(Value{}), data.result.serialized.value_or(Value{}));
         output.text += "Serialized expression difference:\n"s + diff + "\n"s;
     }
 
     if (compileOk && !recompileOk) {
         auto recompiledValue = toValue(data.recompiled.compiled);
         auto expectedValue = toValue(data.expected.compiled);
-        output.text += "Recompiled expression difference:\n"s +
-                        simpleDiff(recompiledValue, expectedValue) +
-                        "\n"s;
+        output.text += "Recompiled expression difference:\n"s + simpleDiff(recompiledValue, expectedValue) + "\n"s;
     }
 
     if (compileOk && !evalOk) {
-        auto diff = simpleDiff(data.expected.outputs.value_or(Value{}),
-                               data.result.outputs.value_or(Value{}));
+        auto diff = simpleDiff(data.expected.outputs.value_or(Value{}), data.result.outputs.value_or(Value{}));
         output.text += "Expression outputs difference:\n"s + diff + "\n"s;
     }
 
     if (recompileOk && !roundTripOk) {
-        auto diff = simpleDiff(data.expected.outputs.value_or(Value{}),
-                               data.recompiled.outputs.value_or(Value{}));
-        output.text += "Roundtripped through serialize expression outputs difference:\n"s +
-                        diff + "\n"s;
+        auto diff = simpleDiff(data.expected.outputs.value_or(Value{}), data.recompiled.outputs.value_or(Value{}));
+        output.text += "Roundtripped through serialize expression outputs difference:\n"s + diff + "\n"s;
     }
 
     return output;

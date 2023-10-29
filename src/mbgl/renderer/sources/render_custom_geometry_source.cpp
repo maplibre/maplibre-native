@@ -17,10 +17,10 @@ const style::CustomGeometrySource::Impl& RenderCustomGeometrySource::impl() cons
 }
 
 void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_,
-                                 const std::vector<Immutable<style::LayerProperties>>& layers,
-                                 const bool needsRendering,
-                                 const bool needsRelayout,
-                                 const TileParameters& parameters) {
+                                        const std::vector<Immutable<style::LayerProperties>>& layers,
+                                        const bool needsRendering,
+                                        const bool needsRelayout,
+                                        const TileParameters& parameters) {
     if (baseImpl != baseImpl_) {
         std::swap(baseImpl, baseImpl_);
 
@@ -45,7 +45,7 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
                        needsRelayout,
                        parameters,
                        *baseImpl,
-                       util::tileSize_I,
+                       impl().getTileOptions()->tileSize,
                        impl().getZoomRange(),
                        {},
                        [&](const OverscaledTileID& tileID) {

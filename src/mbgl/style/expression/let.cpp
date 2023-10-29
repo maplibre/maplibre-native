@@ -35,26 +35,28 @@ ParseResult Let::parse(const Convertible& value, ParsingContext& ctx) {
     }
 
     std::map<std::string, std::shared_ptr<Expression>> bindings_;
-    for(std::size_t i = 1; i < length - 1; i += 2) {
+    for (std::size_t i = 1; i < length - 1; i += 2) {
         std::optional<std::string> name = toString(arrayMember(value, i));
         if (!name) {
             ctx.error("Expected string, but found " + getJSONType(arrayMember(value, i)) + " instead.", i);
             return ParseResult();
         }
-        
-        bool isValidName = std::all_of(name->begin(), name->end(), [](unsigned char c) {
-            return ::isalnum(c) || c == '_';
-        });
+
+        bool isValidName = std::all_of(
+            name->begin(), name->end(), [](unsigned char c) { return ::isalnum(c) || c == '_'; });
         if (!isValidName) {
-            ctx.error("Variable names must contain only alphanumeric characters or '_'.", 1);
+            ctx.error(
+                "Variable names must contain only alphanumeric characters or "
+                "'_'.",
+                1);
             return ParseResult();
         }
-        
+
         ParseResult bindingValue = ctx.parse(arrayMember(value, i + 1), i + 1);
         if (!bindingValue) {
             return ParseResult();
         }
-        
+
         bindings_.emplace(*name, std::move(*bindingValue));
     }
 
@@ -84,7 +86,7 @@ EvaluationResult Var::evaluate(const EvaluationContext& params) const {
 void Var::eachChild(const std::function<void(const Expression&)>&) const {}
 
 std::vector<std::optional<Value>> Var::possibleOutputs() const {
-    return { std::nullopt };
+    return {std::nullopt};
 }
 
 ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {
@@ -99,8 +101,9 @@ ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {
 
     std::optional<std::shared_ptr<Expression>> bindingValue = ctx.getBinding(name_);
     if (!bindingValue) {
-        ctx.error(R"(Unknown variable ")" + name_ +  R"(". Make sure ")" +
-            name_ + R"(" has been bound in an enclosing "let" expression before using it.)", 1);
+        ctx.error(R"(Unknown variable ")" + name_ + R"(". Make sure ")" + name_ +
+                      R"(" has been bound in an enclosing "let" expression before using it.)",
+                  1);
         return ParseResult();
     }
 
@@ -108,7 +111,7 @@ ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {
 }
 
 mbgl::Value Var::serialize() const {
-    return std::vector<mbgl::Value>{{ getOperator(), name }};
+    return std::vector<mbgl::Value>{{getOperator(), name}};
 }
 
 } // namespace expression

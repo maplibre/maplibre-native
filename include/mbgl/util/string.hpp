@@ -11,8 +11,7 @@
 
 namespace std {
 
-inline int stoi(const std::string &str)
-{
+inline int stoi(const std::string &str) {
     return atoi(str.c_str());
 }
 
@@ -85,7 +84,7 @@ std::string toString(T) = delete;
 std::string toHex(uint32_t);
 std::string toHex(uint64_t);
 
-inline float stof(const std::string& str) {
+inline float stof(const std::string &str) {
     return std::stof(str);
 }
 

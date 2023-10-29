@@ -8,17 +8,44 @@
 #include <mbgl/layout/pattern_layout.hpp>
 #include <mbgl/gfx/texture.hpp>
 
+#include <optional>
+#include <memory>
+
 namespace mbgl {
 
+#if MLN_LEGACY_RENDERER
 class LineProgram;
 class LineGradientProgram;
 class LineSDFProgram;
 class LinePatternProgram;
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+namespace gfx {
+class ShaderGroup;
+class UniformBuffer;
+using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+} // namespace gfx
+
+class LineLayerTweaker;
+using LineLayerTweakerPtr = std::shared_ptr<LineLayerTweaker>;
+#endif
 
 class RenderLineLayer final : public RenderLayer {
 public:
     explicit RenderLineLayer(Immutable<style::LineLayer::Impl>);
     ~RenderLineLayer() override;
+
+#if MLN_DRAWABLE_RENDERER
+    /// Generate any changes needed by the layer
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
+#endif
 
 private:
     void transition(const TransitionParameters&) override;
@@ -26,8 +53,11 @@ private:
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     void prepare(const LayerPrepareParameters&) override;
+
+#if MLN_LEGACY_RENDERER
     void upload(gfx::UploadPass&) override;
     void render(PaintParameters&) override;
+#endif
 
     bool queryIntersectsFeature(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
@@ -43,14 +73,28 @@ private:
     float getLineWidth(const GeometryTileFeature&, float, const FeatureState&) const;
     void updateColorRamp();
 
-    PremultipliedImage colorRamp;
+    std::shared_ptr<PremultipliedImage> colorRamp;
     std::optional<gfx::Texture> colorRampTexture;
 
+#if MLN_DRAWABLE_RENDERER
+    gfx::Texture2DPtr colorRampTexture2D;
+#endif
+
+#if MLN_LEGACY_RENDERER
     // Programs
     std::shared_ptr<LineProgram> lineProgram;
     std::shared_ptr<LineGradientProgram> lineGradientProgram;
     std::shared_ptr<LineSDFProgram> lineSDFProgram;
     std::shared_ptr<LinePatternProgram> linePatternProgram;
+#endif
+#if MLN_DRAWABLE_RENDERER
+    gfx::ShaderGroupPtr lineShaderGroup;
+    gfx::ShaderGroupPtr lineGradientShaderGroup;
+    gfx::ShaderGroupPtr lineSDFShaderGroup;
+    gfx::ShaderGroupPtr linePatternShaderGroup;
+
+    gfx::DrawableTweakerPtr iconTweaker;
+#endif
 };
 
 } // namespace mbgl

@@ -11,19 +11,16 @@ const style::LayerTypeInfo* FillLayerFactory::getTypeInfo() const noexcept {
     return style::FillLayer::Impl::staticTypeInfo();
 }
 
-std::unique_ptr<style::Layer> FillLayerFactory::createLayer(const std::string& id, const style::conversion::Convertible& value) noexcept {
-    std::optional<std::string> source = getSource(value);
-    if (!source) {
-        return nullptr;
-    }
-
-    return std::unique_ptr<style::Layer>(new style::FillLayer(id, *source));
+std::unique_ptr<style::Layer> FillLayerFactory::createLayer(const std::string& id,
+                                                            const style::conversion::Convertible& value) noexcept {
+    const auto source = getSource(value);
+    return std::unique_ptr<style::Layer>(source ? new (std::nothrow) style::FillLayer(id, *source) : nullptr);
 }
 
-std::unique_ptr<Layout>
-FillLayerFactory::createLayout(const LayoutParameters& parameters,
-                               std::unique_ptr<GeometryTileLayer> layer,
-                               const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
+std::unique_ptr<Layout> FillLayerFactory::createLayout(
+    const LayoutParameters& parameters,
+    std::unique_ptr<GeometryTileLayer> layer,
+    const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
     using namespace style;
     using LayoutTypeUnsorted = PatternLayout<FillBucket, FillLayerProperties, FillPattern, FillLayoutProperties>;
     using LayoutTypeSorted =

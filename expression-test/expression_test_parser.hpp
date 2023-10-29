@@ -1,7 +1,5 @@
 #pragma once
 
-#include "filesystem.hpp"
-
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/rapidjson.hpp>
@@ -9,6 +7,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 using namespace mbgl;
 
@@ -32,10 +31,8 @@ struct Input {
 
 struct Compiled {
     bool operator==(const Compiled& other) const {
-        bool typeEqual = success == other.success &&
-                         isFeatureConstant == other.isFeatureConstant &&
-                         isZoomConstant == other.isZoomConstant &&
-                         serializedType == other.serializedType &&
+        bool typeEqual = success == other.success && isFeatureConstant == other.isFeatureConstant &&
+                         isZoomConstant == other.isZoomConstant && serializedType == other.serializedType &&
                          errors == other.errors;
         return typeEqual;
     }
@@ -81,12 +78,12 @@ struct Ignore {
     std::string reason;
 };
 
-using Arguments = std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t>;
+using Arguments = std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint32_t>;
 Arguments parseArguments(int argc, char** argv);
 
 using Ignores = std::vector<Ignore>;
 Ignores parseExpressionIgnores();
-std::optional<TestData> parseTestData(const filesystem::path&);
+std::optional<TestData> parseTestData(const std::filesystem::path&);
 
 std::string toJSON(const Value& value, unsigned indent = 0, bool singleLine = false);
 JSDocument toDocument(const Value&);
@@ -99,4 +96,3 @@ std::unique_ptr<style::expression::Expression> parseExpression(const JSValue&,
 std::unique_ptr<style::expression::Expression> parseExpression(const std::optional<Value>&,
                                                                std::optional<PropertySpec>&,
                                                                TestResult&);
-

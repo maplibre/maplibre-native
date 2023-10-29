@@ -21,8 +21,7 @@ class MapPrivate;
 
 // This header follows the Qt coding style: https://wiki.qt.io/Qt_Coding_Style
 
-class Q_MAPLIBREGL_EXPORT Map : public QObject
-{
+class Q_MAPLIBREGL_EXPORT Map : public QObject {
     Q_OBJECT
     Q_PROPERTY(double latitude READ latitude WRITE setLatitude)
     Q_PROPERTY(double longitude READ longitude WRITE setLongitude)
@@ -70,10 +69,7 @@ public:
         NorthLeftwards,
     };
 
-    Map(QObject* parent = 0,
-        const Settings& = Settings(),
-        const QSize& size = QSize(),
-        qreal pixelRatio = 1);
+    Map(QObject *parent = 0, const Settings & = Settings(), const QSize &size = QSize(), qreal pixelRatio = 1);
     virtual ~Map();
 
     QString styleJson() const;
@@ -112,7 +108,7 @@ public:
     void setCoordinate(const Coordinate &);
     void setCoordinateZoom(const Coordinate &, double zoom);
 
-    void jumpTo(const CameraOptions&);
+    void jumpTo(const CameraOptions &);
 
     void setGestureInProgress(bool inProgress);
 
@@ -139,26 +135,23 @@ public:
     Coordinate coordinateForPixel(const QPointF &) const;
 
     CoordinateZoom coordinateZoomForBounds(const Coordinate &sw, const Coordinate &ne) const;
-    CoordinateZoom coordinateZoomForBounds(const Coordinate &sw,
-                                           const Coordinate &ne,
-                                           double bearing,
-                                           double pitch);
+    CoordinateZoom coordinateZoomForBounds(const Coordinate &sw, const Coordinate &ne, double bearing, double pitch);
 
     void setMargins(const QMargins &margins);
     QMargins margins() const;
 
-    void addSource(const QString &sourceID, const QVariantMap& params);
+    void addSource(const QString &sourceID, const QVariantMap &params);
     bool sourceExists(const QString &sourceID);
-    void updateSource(const QString &sourceID, const QVariantMap& params);
+    void updateSource(const QString &sourceID, const QVariantMap &params);
     void removeSource(const QString &sourceID);
 
     void addImage(const QString &name, const QImage &sprite);
     void removeImage(const QString &name);
 
     void addCustomLayer(const QString &id,
-        std::unique_ptr<CustomLayerHostInterface> host,
-        const QString &before = QString());
-    void addLayer(const QVariantMap &params, const QString& before = QString());
+                        std::unique_ptr<CustomLayerHostInterface> host,
+                        const QString &before = QString());
+    void addLayer(const QVariantMap &params, const QString &before = QString());
     bool layerExists(const QString &id);
     void removeLayer(const QString &id);
 

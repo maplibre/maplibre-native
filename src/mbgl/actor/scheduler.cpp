@@ -68,4 +68,4 @@ std::shared_ptr<Scheduler> Scheduler::GetSequenced() {
     return result;
 }
 
-} //namespace mbgl
+} // namespace mbgl

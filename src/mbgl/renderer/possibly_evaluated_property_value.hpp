@@ -12,9 +12,7 @@ namespace mbgl {
 template <class T>
 class PossiblyEvaluatedPropertyValue {
 private:
-    using Value = variant<
-        T,
-        style::PropertyExpression<T>>;
+    using Value = variant<T, style::PropertyExpression<T>>;
 
     Value value;
 
@@ -23,19 +21,13 @@ public:
     PossiblyEvaluatedPropertyValue(Value v)
         : value(std::move(v)) {}
 
-    bool isConstant() const {
-        return value.template is<T>();
-    }
+    bool isConstant() const { return value.template is<T>(); }
 
     std::optional<T> constant() const {
-        return value.match(
-            [&] (const T& t) { return std::optional<T>(t); },
-            [&] (const auto&) { return std::optional<T>(); });
+        return value.match([&](const T& t) { return std::optional<T>(t); }, [&](const auto&) { return std::nullopt; });
     }
 
-    T constantOr(const T& t) const {
-        return constant().value_or(t);
-    }
+    T constantOr(const T& t) const { return constant().value_or(t); }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
@@ -44,12 +36,10 @@ public:
 
     template <class Feature>
     T evaluate(const Feature& feature, float zoom, T defaultValue) const {
-        return this->match(
-            [&] (const T& constant_) { return constant_; },
-            [&] (const style::PropertyExpression<T>& expression) {
-                return expression.evaluate(zoom, feature, defaultValue);
-            }
-        );
+        return this->match([&](const T& constant_) { return constant_; },
+                           [&](const style::PropertyExpression<T>& expression) {
+                               return expression.evaluate(zoom, feature, defaultValue);
+                           });
     }
 
     template <class Feature>
@@ -72,9 +62,7 @@ public:
 template <class T>
 class PossiblyEvaluatedPropertyValue<Faded<T>> {
 private:
-    using Value = variant<
-        Faded<T>,
-        style::PropertyExpression<T>>;
+    using Value = variant<Faded<T>, style::PropertyExpression<T>>;
 
     Value value;
 
@@ -83,19 +71,14 @@ public:
     PossiblyEvaluatedPropertyValue(Value v)
         : value(std::move(v)) {}
 
-    bool isConstant() const {
-        return value.template is<Faded<T>>();
-    }
+    bool isConstant() const { return value.template is<Faded<T>>(); }
 
     std::optional<Faded<T>> constant() const {
-        return value.match(
-            [&] (const Faded<T>& t) { return std::optional<Faded<T>>(t); },
-            [&] (const auto&) { return std::optional<Faded<T>>(); });
+        return value.match([&](const Faded<T>& t) { return std::optional<Faded<T>>(t); },
+                           [&](const auto&) { return std::optional<Faded<T>>(); });
     }
 
-    Faded<T> constantOr(const Faded<T>& t) const {
-        return constant().value_or(t);
-    }
+    Faded<T> constantOr(const Faded<T>& t) const { return constant().value_or(t); }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
@@ -108,24 +91,21 @@ public:
                       const std::set<std::string>& availableImages,
                       const CanonicalTileID& canonical,
                       T defaultValue) const {
-        return this->match(
-            [&] (const Faded<T>& constant_) { return constant_; },
-            [&] (const style::PropertyExpression<T>& expression) {
-                if (!expression.isZoomConstant()) {
-                    const T min =
-                        expression.evaluate(std::floor(zoom), feature, availableImages, canonical, defaultValue);
-                    const T max =
-                        expression.evaluate(std::floor(zoom) + 1, feature, availableImages, canonical, defaultValue);
-                    return Faded<T> {min, max};
-                } else {
-                    const T evaluated = expression.evaluate(feature, availableImages, defaultValue);
-                    return Faded<T> {evaluated, evaluated};
-                }
-            }
-        );
+        return this->match([&](const Faded<T>& constant_) { return constant_; },
+                           [&](const style::PropertyExpression<T>& expression) {
+                               if (!expression.isZoomConstant()) {
+                                   const T min = expression.evaluate(
+                                       std::floor(zoom), feature, availableImages, canonical, defaultValue);
+                                   const T max = expression.evaluate(
+                                       std::floor(zoom) + 1, feature, availableImages, canonical, defaultValue);
+                                   return Faded<T>{min, max};
+                               } else {
+                                   const T evaluated = expression.evaluate(feature, availableImages, defaultValue);
+                                   return Faded<T>{evaluated, evaluated};
+                               }
+                           });
     }
 };
-
 
 namespace util {
 
@@ -135,9 +115,9 @@ struct Interpolator<PossiblyEvaluatedPropertyValue<T>> {
                                                  const PossiblyEvaluatedPropertyValue<T>& b,
                                                  const double t) const {
         if (a.isConstant() && b.isConstant()) {
-            return { interpolate(*a.constant(), *b.constant(), t) };
+            return {interpolate(*a.constant(), *b.constant(), t)};
         } else {
-            return { a };
+            return {a};
         }
     }
 
@@ -145,9 +125,9 @@ struct Interpolator<PossiblyEvaluatedPropertyValue<T>> {
                                                  const PossiblyEvaluatedPropertyValue<T>& b,
                                                  const float t) const {
         if (a.isConstant() && b.isConstant()) {
-            return { interpolate(*a.constant(), *b.constant(), t) };
+            return {interpolate(*a.constant(), *b.constant(), t)};
         } else {
-            return { a };
+            return {a};
         }
     }
 };

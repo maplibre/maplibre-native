@@ -20,13 +20,15 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::Ca
     const double size = util::EXTENT * std::pow(2, canonical.z);
 
     auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
-    auto y =
-        (util::LONGITUDE_MAX - util::rad2deg(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))) *
-        size / util::DEGREES_MAX;
+    auto y = (util::LONGITUDE_MAX -
+              util::rad2deg(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))) *
+             size / util::DEGREES_MAX;
 
     Point<int64_t> p;
-    p.x = (util::clamp<int64_t>(static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
-    p.y = (util::clamp<int64_t>(static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
+    p.x = (util::clamp<int64_t>(
+        static_cast<int64_t>(x), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
+    p.y = (util::clamp<int64_t>(
+        static_cast<int64_t>(y), std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max()));
 
     return p;
 };
@@ -171,7 +173,7 @@ bool featureWithinPolygons(const GeometryTileFeature& feature,
 }
 
 std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertible& value_,
-                                         mbgl::style::expression::ParsingContext& ctx) {
+                                        mbgl::style::expression::ParsingContext& ctx) {
     if (isObject(value_)) {
         mbgl::style::conversion::Error error;
         auto geojson = toGeoJSON(value_, error);
@@ -181,17 +183,21 @@ std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertib
         ctx.error(error.message);
     }
 
-    ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
+    ctx.error(
+        "'within' expression requires valid geojson source that contains "
+        "polygon geometry type.");
     return std::nullopt;
 }
 
 std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
-                                                      mbgl::style::expression::ParsingContext& ctx) {
+                                                     mbgl::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), polyFeature.geometry);
     if (type == FeatureType::Polygon) {
         return polyFeature.geometry;
     }
-    ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
+    ctx.error(
+        "'within' expression requires valid geojson source that contains "
+        "polygon geometry type.");
     return std::nullopt;
 }
 } // namespace
@@ -200,7 +206,9 @@ namespace style {
 namespace expression {
 
 Within::Within(GeoJSON geojson, Feature::geometry_type geometries_)
-    : Expression(Kind::Within, type::Boolean), geoJSONSource(std::move(geojson)), geometries(std::move(geometries_)) {}
+    : Expression(Kind::Within, type::Boolean),
+      geoJSONSource(std::move(geojson)),
+      geometries(std::move(geometries_)) {}
 
 Within::~Within() = default;
 
@@ -216,7 +224,8 @@ EvaluationResult Within::evaluate(const EvaluationContext& params) const {
         return featureWithinPolygons(*params.feature, *params.canonical, geometries);
     }
     mbgl::Log::Warning(mbgl::Event::General,
-                       "within expression currently only support Point/LineString geometry type.");
+                       "within expression currently only support Point/LineString geometry "
+                       "type.");
 
     return false;
 }
@@ -225,8 +234,10 @@ ParseResult Within::parse(const Convertible& value, ParsingContext& ctx) {
     if (isArray(value)) {
         // object value, quoted with ["within", value]
         if (arrayLength(value) != 2) {
-            ctx.error("'within' expression requires exactly one argument, but found " +
-                      util::toString(arrayLength(value) - 1) + " instead.");
+            ctx.error(
+                "'within' expression requires exactly one argument, but "
+                "found " +
+                util::toString(arrayLength(value) - 1) + " instead.");
             return ParseResult();
         }
 
@@ -257,7 +268,9 @@ ParseResult Within::parse(const Convertible& value, ParsingContext& ctx) {
                 return ParseResult();
             },
             [&ctx](const auto&) {
-                ctx.error("'within' expression requires valid geojson source that contains polygon geometry type.");
+                ctx.error(
+                    "'within' expression requires valid geojson source that "
+                    "contains polygon geometry type.");
                 return ParseResult();
             });
     }
@@ -306,7 +319,8 @@ mbgl::Value Within::serialize() const {
         }
     } else {
         mbgl::Log::Error(mbgl::Event::General,
-                         "Failed to serialize 'within' expression, converted rapidJSON is not an object");
+                         "Failed to serialize 'within' expression, converted rapidJSON is "
+                         "not an object");
     }
     return std::vector<mbgl::Value>{{getOperator(), serialized}};
 }

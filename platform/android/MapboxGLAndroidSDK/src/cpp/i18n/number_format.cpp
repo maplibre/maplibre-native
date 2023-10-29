@@ -15,31 +15,35 @@ void NumberFormat::registerNative(jni::JNIEnv& env) {
 
 jni::Local<jni::Object<NumberFormat>> NumberFormat::getInstance(jni::JNIEnv& env, const jni::Object<Locale>& locale) {
     static auto& javaClass = jni::Class<NumberFormat>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<NumberFormat> (jni::Object<Locale>)>(env, "getInstance");
+    static auto method = javaClass.GetStaticMethod<jni::Object<NumberFormat>(jni::Object<Locale>)>(env, "getInstance");
     return javaClass.Call(env, method, locale);
 }
 
-jni::Local<jni::Object<NumberFormat>> NumberFormat::getCurrencyInstance(jni::JNIEnv& env, const jni::Object<Locale>& locale) {
+jni::Local<jni::Object<NumberFormat>> NumberFormat::getCurrencyInstance(jni::JNIEnv& env,
+                                                                        const jni::Object<Locale>& locale) {
     static auto& javaClass = jni::Class<NumberFormat>::Singleton(env);
-    static auto method = javaClass.GetStaticMethod<jni::Object<NumberFormat> (jni::Object<Locale>)>(env, "getCurrencyInstance");
+    static auto method = javaClass.GetStaticMethod<jni::Object<NumberFormat>(jni::Object<Locale>)>(
+        env, "getCurrencyInstance");
     return javaClass.Call(env, method, locale);
 }
 
-jni::Local<jni::String> NumberFormat::format(jni::JNIEnv& env, const jni::Object<NumberFormat>& nf, jni::jdouble number) {
+jni::Local<jni::String> NumberFormat::format(jni::JNIEnv& env,
+                                             const jni::Object<NumberFormat>& nf,
+                                             jni::jdouble number) {
     static auto& javaClass = jni::Class<NumberFormat>::Singleton(env);
-    static auto method = javaClass.GetMethod<jni::String (jni::jdouble)>(env, "format");
+    static auto method = javaClass.GetMethod<jni::String(jni::jdouble)>(env, "format");
     return nf.Call(env, method, number);
 }
 
 void NumberFormat::setMinimumFractionDigits(jni::JNIEnv& env, const jni::Object<NumberFormat>& nf, jni::jint value) {
     static auto& javaClass = jni::Class<NumberFormat>::Singleton(env);
-    static auto method = javaClass.GetMethod<void (jni::jint)>(env, "setMinimumFractionDigits");
+    static auto method = javaClass.GetMethod<void(jni::jint)>(env, "setMinimumFractionDigits");
     return nf.Call(env, method, value);
 }
 
 void NumberFormat::setMaximumFractionDigits(jni::JNIEnv& env, const jni::Object<NumberFormat>& nf, jni::jint value) {
     static auto& javaClass = jni::Class<NumberFormat>::Singleton(env);
-    static auto method = javaClass.GetMethod<void (jni::jint)>(env, "setMaximumFractionDigits");
+    static auto method = javaClass.GetMethod<void(jni::jint)>(env, "setMaximumFractionDigits");
     return nf.Call(env, method, value);
 }
 
@@ -47,10 +51,12 @@ void NumberFormat::setMaximumFractionDigits(jni::JNIEnv& env, const jni::Object<
 
 namespace platform {
 
-std::string formatNumber(double number, const std::string& localeId, const std::string& currency,
-                         uint8_t minFractionDigits, uint8_t maxFractionDigits) {
-
-    auto env{ android::AttachEnv() };
+std::string formatNumber(double number,
+                         const std::string& localeId,
+                         const std::string& currency,
+                         uint8_t minFractionDigits,
+                         uint8_t maxFractionDigits) {
+    auto env{android::AttachEnv()};
 
     jni::Global<jni::Object<android::Locale>> locale;
     LanguageTag languageTag = !localeId.empty() ? LanguageTag::fromBCP47(localeId) : LanguageTag();
@@ -59,8 +65,10 @@ std::string formatNumber(double number, const std::string& localeId, const std::
     } else if (!languageTag.region) {
         locale = jni::NewGlobal(*env, android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language)));
     } else {
-        locale = jni::NewGlobal(*env, android::Locale::New(*env, jni::Make<jni::String>(*env, *languageTag.language),
-                                                                 jni::Make<jni::String>(*env, *languageTag.region)));
+        locale = jni::NewGlobal(*env,
+                                android::Locale::New(*env,
+                                                     jni::Make<jni::String>(*env, *languageTag.language),
+                                                     jni::Make<jni::String>(*env, *languageTag.region)));
     }
 
     jni::Global<jni::Object<android::NumberFormat>> formatter;

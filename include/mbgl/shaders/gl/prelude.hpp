@@ -1,13 +1,13 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "Prelude";
     static constexpr const char* vertex = R"(#ifdef GL_ES
 precision highp float;
 #else
@@ -25,6 +25,8 @@ precision highp float;
 #endif
 
 #endif
+
+const float PI = 3.141592653589793;
 
 // Unpack a pair of values that have been packed into a single float.
 // The packed values are assumed to be 8-bit unsigned integers, and are

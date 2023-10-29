@@ -14,8 +14,7 @@ namespace android {
 
 class Source : private mbgl::util::noncopyable {
 public:
-
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/sources/Source"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/sources/Source"; };
 
     static void registerNative(jni::JNIEnv&);
 
@@ -28,7 +27,8 @@ public:
     Source(jni::JNIEnv&, mbgl::style::Source&, const jni::Object<Source>&, AndroidRendererFrontend*);
 
     /*
-     * Called when a Java object is created for a new core source that does not belong to a map.
+     * Called when a Java object is created for a new core source that does not
+     * belong to a map.
      */
     Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source>);
 
@@ -54,11 +54,11 @@ public:
 
     void addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style::Style& style);
 
-    jni::Local<jni::Boolean > isVolatile(JNIEnv&);
+    jni::Local<jni::Boolean> isVolatile(JNIEnv&);
 
     void setVolatile(JNIEnv&, jni::Boolean&);
 
-    void setMinimumTileUpdateInterval(JNIEnv&, jni::Long &);
+    void setMinimumTileUpdateInterval(JNIEnv&, jni::Long&);
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
 
@@ -73,7 +73,7 @@ protected:
     jni::Global<jni::Object<Source>> javaPeer;
 
     // RendererFrontend pointer is valid only when added to the map.
-    AndroidRendererFrontend* rendererFrontend { nullptr };
+    AndroidRendererFrontend* rendererFrontend{nullptr};
 };
 
 } // namespace android

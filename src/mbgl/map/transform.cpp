@@ -18,9 +18,9 @@
 
 namespace mbgl {
 
-/** Converts the given angle (in radians) to be numerically close to the anchor angle, allowing it to be interpolated properly without sudden jumps. */
-static double _normalizeAngle(double angle, double anchorAngle)
-{
+/** Converts the given angle (in radians) to be numerically close to the anchor
+ * angle, allowing it to be interpolated properly without sudden jumps. */
+static double _normalizeAngle(double angle, double anchorAngle) {
     if (std::isnan(angle) || std::isnan(anchorAngle)) {
         return 0;
     }
@@ -38,11 +38,9 @@ static double _normalizeAngle(double angle, double anchorAngle)
     return angle;
 }
 
-Transform::Transform(MapObserver& observer_,
-                     ConstrainMode constrainMode,
-                     ViewportMode viewportMode)
-    : observer(observer_), state(constrainMode, viewportMode) {
-}
+Transform::Transform(MapObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
+    : observer(observer_),
+      state(constrainMode, viewportMode) {}
 
 // MARK: - Map View
 
@@ -109,9 +107,10 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
 
     if (state.getLatLngBounds() == LatLngBounds()) {
         if (isGestureInProgress()) {
-            // If gesture in progress, we transfer the wrap rounds from the end longitude into
-            // start, so the "scroll effect" of rounding the world is the same while assuring the
-            // end longitude remains wrapped.
+            // If gesture in progress, we transfer the wrap rounds from the end
+            // longitude into start, so the "scroll effect" of rounding the
+            // world is the same while assuring the end longitude remains
+            // wrapped.
             const double wrap = unwrappedLatLng.longitude() - latLng.longitude();
             startLatLng = LatLng(startLatLng.latitude(), startLatLng.longitude() - wrap);
         } else {
@@ -260,19 +259,16 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
         Assumes an angular field of view of 2 arctan ½ ≈ 53°. */
     auto w = [=](double s) {
-        return (isClose ? std::exp((w1 < w0 ? -1 : 1) * rho * s)
-                : (std::cosh(r0) / std::cosh(r0 + rho * s)));
+        return (isClose ? std::exp((w1 < w0 ? -1 : 1) * rho * s) : (std::cosh(r0) / std::cosh(r0 + rho * s)));
     };
     /// u(s): Returns the distance along the flight path as projected onto the
     /// ground plane, measured in pixels from the world image origin at the
     /// initial scale.
     auto u = [=](double s) {
-        return (isClose ? 0.
-                : (w0 * (std::cosh(r0) * std::tanh(r0 + rho * s) - std::sinh(r0)) / rho2 / u1));
+        return (isClose ? 0. : (w0 * (std::cosh(r0) * std::tanh(r0 + rho * s) - std::sinh(r0)) / rho2 / u1));
     };
     /// S: Total length of the flight path, measured in ρ-screenfuls.
-    double S = (isClose ? (std::abs(std::log(w1 / w0)) / rho)
-                : ((r1 - r0) / rho));
+    double S = (isClose ? (std::abs(std::log(w1 / w0)) / rho) : ((r1 - r0) / rho));
 
     Duration duration;
     if (animation.duration) {
@@ -311,8 +307,8 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
             // Calculate the current point and zoom level along the flight path.
             Point<double> framePoint = util::interpolate(startPoint, endPoint, us);
-            double frameZoom =
-                linearZoomInterpolation ? util::interpolate(startZoom, zoom, k) : startZoom + state.scaleZoom(1 / w(s));
+            double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, k)
+                                                       : startZoom + state.scaleZoom(1 / w(s));
 
             // Zoom can be NaN if size is empty.
             if (std::isnan(frameZoom)) {
@@ -346,8 +342,8 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
 void Transform::moveBy(const ScreenCoordinate& offset, const AnimationOptions& animation) {
     ScreenCoordinate centerOffset = {offset.x, offset.y};
-    ScreenCoordinate pointOnScreen =
-        state.getEdgeInsets().getCenter(state.getSize().width, state.getSize().height) - centerOffset;
+    ScreenCoordinate pointOnScreen = state.getEdgeInsets().getCenter(state.getSize().width, state.getSize().height) -
+                                     centerOffset;
     // Use unwrapped LatLng to carry information about moveBy direction.
     easeTo(CameraOptions().withCenter(screenCoordinateToLatLng(pointOnScreen, LatLng::Unwrapped)), animation);
 }
@@ -386,7 +382,7 @@ void Transform::setMinPitch(const double minPitch) {
     if (util::deg2rad(minPitch) < util::PITCH_MIN) {
         Log::Warning(Event::General,
                      "Trying to set minimum pitch below the limit (" + std::to_string(util::rad2deg(util::PITCH_MIN)) +
-                     " degrees), the value will be clamped.");
+                         " degrees), the value will be clamped.");
     }
     state.setMinPitch(util::deg2rad(minPitch));
 }
@@ -396,7 +392,7 @@ void Transform::setMaxPitch(const double maxPitch) {
     if (util::deg2rad(maxPitch) > util::PITCH_MAX) {
         Log::Warning(Event::General,
                      "Trying to set maximum pitch above the limit (" + std::to_string(util::rad2deg(util::PITCH_MAX)) +
-                     " degrees), the value will be clamped.");
+                         " degrees), the value will be clamped.");
     }
     state.setMaxPitch(util::deg2rad(maxPitch));
 }
@@ -410,8 +406,8 @@ void Transform::rotateBy(const ScreenCoordinate& first,
     const ScreenCoordinate offset = first - center;
     const double distance = std::sqrt(std::pow(2, offset.x) + std::pow(2, offset.y));
 
-    // If the first click was too close to the center, move the center of rotation by 200 pixels
-    // in the direction of the click.
+    // If the first click was too close to the center, move the center of
+    // rotation by 200 pixels in the direction of the click.
     if (distance < 200) {
         const double heightOffset = -200;
         const double rotateBearing = std::atan2(offset.y, offset.x);
@@ -568,15 +564,15 @@ bool Transform::inTransition() const {
 }
 
 void Transform::updateTransitions(const TimePoint& now) {
-
     // Use a temporary function to ensure that the transitionFrameFn lambda is
     // called only once per update.
 
-    // This addresses the symptoms of https://github.com/mapbox/mapbox-gl-native/issues/11180
-    // where setting a shape source to nil (or similar) in the `onCameraIsChanging`
-    // observer function causes `Map::Impl::onUpdate()` to be called which
-    // in turn calls this function (before the current iteration has completed),
-    // leading to an infinite loop. See https://github.com/mapbox/mapbox-gl-native/issues/5833
+    // This addresses the symptoms of
+    // https://github.com/mapbox/mapbox-gl-native/issues/11180 where setting a
+    // shape source to nil (or similar) in the `onCameraIsChanging` observer
+    // function causes `Map::Impl::onUpdate()` to be called which in turn calls
+    // this function (before the current iteration has completed), leading to an
+    // infinite loop. See https://github.com/mapbox/mapbox-gl-native/issues/5833
     // for a similar, related, issue.
     //
     // By temporarily nulling the `transitionFrameFn` (and then restoring it
@@ -601,9 +597,9 @@ void Transform::updateTransitions(const TimePoint& now) {
             finish();
         }
     } else if (!transitionFrameFn) {
-        // We have to check `transitionFrameFn` is nil here, since a new transition
-        // may have been triggered in a user callback (from the transition call
-        // above)
+        // We have to check `transitionFrameFn` is nil here, since a new
+        // transition may have been triggered in a user callback (from the
+        // transition call above)
         transitionFrameFn = std::move(transition);
     }
 }
@@ -640,15 +636,19 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
 
     const auto height = state.getSize().height;
     assert(height);
-    // For details, see description at https://github.com/mapbox/mapbox-gl-native/pull/15195
-    // The definition of half of TransformState::fov with no inset, is: fov = arctan((height / 2) / (height * 1.5)).
-    // We use half of fov, as it is field of view above perspective center.
-    // With inset, this angle changes and tangentOfFovAboveCenterAngle = (h/2 + centerOffsetY) / (height * 1.5).
-    // 1.03 is a bit extra added to prevent parallel ground to viewport clipping plane.
+    // For details, see description at
+    // https://github.com/mapbox/mapbox-gl-native/pull/15195 The definition of
+    // half of TransformState::fov with no inset, is: fov = arctan((height / 2)
+    // / (height * 1.5)). We use half of fov, as it is field of view above
+    // perspective center. With inset, this angle changes and
+    // tangentOfFovAboveCenterAngle = (h/2 + centerOffsetY) / (height
+    // * 1.5). 1.03 is a bit extra added to prevent parallel ground to viewport
+    // clipping plane.
     const double tangentOfFovAboveCenterAngle = 1.03 * (height / 2.0 + centerOffsetY) / (1.5 * height);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
     return M_PI * 0.5 - fovAboveCenter;
-    // e.g. Maximum pitch of 60 degrees is when perspective center's offset from the top is 84% of screen height.
+    // e.g. Maximum pitch of 60 degrees is when perspective center's offset from
+    // the top is 84% of screen height.
 }
 
 FreeCameraOptions Transform::getFreeCameraOptions() const {

@@ -26,19 +26,19 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: npm version
         run: |
-          echo "NPM_VERSION=$(npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version)" >> $GITHUB_ENV
+          echo "NPM_VERSION=$(npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version)" >> "$GITHUB_ENV"
 
       - name: Push version to git
         run: |
@@ -53,7 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-20.04
+          - runs-on: ubuntu-22.04
             arch: x86_64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
@@ -69,7 +69,7 @@ jobs:
     needs: bump_version
     continue-on-error: true
     env:
-      BUILDTYPE: 'Release'
+      BUILDTYPE: "Release"
 
     defaults:
       run:
@@ -78,7 +78,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -117,24 +117,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             ccache \
-            cmake \
             ninja-build \
             pkg-config \
             xvfb \
             libcurl4-openssl-dev \
             libglfw3-dev \
             libuv1-dev \
-            g++-10 \
-            libc++-9-dev \
-            libc++abi-9-dev \
+            g++-12 \
             libjpeg-dev \
-            libpng-dev
+            libpng-dev \
+            libwebp-dev
           /usr/sbin/update-ccache-symlinks
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -142,6 +140,20 @@ jobs:
       - name: Set up msvc dev cmd (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
+
+      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
+      - name: Remove Strawberry Perl from PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
+          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Setup cmake (Linux)
+        if: runner.os == 'Linux' && runner.arch != 'arm64'
+        uses: jwlawson/actions-setup-cmake@v1.14
+        with:
+          cmake-version: "3.19.x"
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -157,30 +169,40 @@ jobs:
         if: runner.os == 'Windows'
         uses: hendrikmuhs/ccache-action@v1
         with:
-          variant: 'sccache'
+          variant: "sccache"
           key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
-      - name: Configure maplibre-gl-native (MacOS)
+      - name: Cache cmake-node-module deps
+        uses: actions/cache@v3
+        with:
+          # downloaded with platform/node/cmake/module.cmake
+          path: build/headers
+          key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
+
+      - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DMLN_WITH_NODE=ON
 
-      - name: Configure maplibre-gl-native (Linux)
+      - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
+        shell: bash -leo pipefail {0}
         run: |
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_C_COMPILER=gcc-10 \
-            -DCMAKE_CXX_COMPILER=g++-10
+            -DCMAKE_C_COMPILER=gcc-12 \
+            -DCMAKE_CXX_COMPILER=g++-12 \
+            -DMLN_WITH_NODE=ON
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
         if: runner.os == 'Windows'
@@ -200,20 +222,21 @@ jobs:
           key: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
 
-      - name: Configure maplibre-gl-native (Windows)
+      - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
         run: |
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+            -DMLN_WITH_NODE=ON
 
-      - name: Build maplibre-gl-native (MacOS/Linux)
+      - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
-      - name: Build maplibre-gl-native (Windows)
+      - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
         run: |
           cmake --build build
@@ -237,7 +260,7 @@ jobs:
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
   publish_npm:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: publish_binaries
 
     defaults:
@@ -246,7 +269,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -254,14 +277,14 @@ jobs:
         run: git pull
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Publish to NPM (release)
         if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major')
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
@@ -269,7 +292,7 @@ jobs:
       - name: Publish to NPM (prerelease)
         if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'prerelease' || github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor')
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}

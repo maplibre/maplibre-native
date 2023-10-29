@@ -14,16 +14,22 @@ jobs:
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
     steps:
-
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
 
+      - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Ensure source code revision
-        run: scripts/ensure-code-revision.sh        
+        run: scripts/ensure-code-revision.sh
         working-directory: platform/android
-        shell: bash 
+        shell: bash
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -38,51 +44,51 @@ jobs:
             ${{ runner.os }}-
 
       - name: npm install
-        run: npm install --ignore-scripts          
+        run: npm install --ignore-scripts
         working-directory: platform/android
 
       - name: Install ccache
         run: sudo apt-get install -y ccache
 
       - name: Prepare ccache
-        run: ccache --clear       
+        run: ccache --clear
 
       - name: Cache ccache
         uses: actions/cache@v3
         env:
-          cache-name: ccache-v1     
+          cache-name: ccache-v1
         with:
           path: ~/.ccache'
           key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
           restore-keys: |
             ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
             ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}  
+            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
 
       - name: Clear ccache statistics
         run: |
           ccache --zero-stats
           ccache --max-size=2G
-          ccache --show-stats   
+          ccache --show-stats
 
       - name: restore-gradle-cache
         uses: actions/cache@v3
         env:
           cache-name: gradle-v1
         with:
-          path: ~/.gradle'     
-          key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
+          path: ~/.gradle'
+          key: ${{ env.cache-name }}-${{ hashFiles('platform/android/gradle/dependencies.gradle') }}-${{ hashFiles('platform/android/build.gradle') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
-            - ${{ env.cache-name }}   
+            - ${{ env.cache-name }}
 
       - name: Android nitpick
         run: make run-android-nitpick
-        
+
       - name: Update version name
         run: |
           RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
           echo "Latest version from tag: $RELEASE_VERSION"
-          if [ ! -z "$RELEASE_VERSION" ]; then
+          if [ -n "$RELEASE_VERSION" ]; then
             sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapboxGLAndroidSDK/gradle.properties
             echo "MapboxGLAndroidSDK/gradle.properties:"
             cat MapboxGLAndroidSDK/gradle.properties
@@ -102,19 +108,19 @@ jobs:
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
           fi
         shell: bash
-      
+
       - name: Generate javadoc
-        run: make android-javadoc  
+        run: make android-javadoc
 
       # create github release
       - name: Prepare release
         id: prepare_release
         run: |
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          ./scripts/release-notes.js > ${RELEASE_NOTES_PATH}
-          echo ::set-output name=release_notes::${RELEASE_NOTES_PATH}
-          echo ::set-output name=version_tag::$( git describe --tags --match=android-v*.*.* --abbrev=0 )
-        shell: bash          
+          ./scripts/release-notes.js > "${RELEASE_NOTES_PATH}"
+          echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
+          echo version_tag="$( git describe --tags --match=android-v*.*.* --abbrev=0 )" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - name: Create release
         id: create_release
@@ -129,7 +135,7 @@ jobs:
           prerelease: false
 
       - name: Upload aar
-        id: upload-release-asset 
+        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -137,12 +143,12 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar
           asset_name: MapboxGLAndroidSDK-release.aar
-          asset_content_type: application/zip 
+          asset_content_type: application/zip
 
       - name: Clean release
         run: |
           rm -f ${{ steps.prepare_release.outputs.release_notes }}
-        shell: bash                    
+        shell: bash
 
       - name: Prepare MavenCentral release
         env:
@@ -158,4 +164,4 @@ jobs:
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}         
+          SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}

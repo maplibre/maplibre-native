@@ -1,32 +1,41 @@
 name: android-ci
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
     tags:
-      - 'android-*'
-    paths:
-      - CMakeLists.txt
-      - 'platform/android/**'
-      - ".github/workflows/android-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
+      - "android-*"
+
+  pull_request:
+    branches:
+      - "*"
+
+concurrency:
+  # cancel jobs on PRs only
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_changed != 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get all Android files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files_yaml_from_source_file: .github/changed-files.yml
+
+  android-build:
+    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
+    needs:
+      - pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     defaults:
       run:
         working-directory: platform/android
@@ -36,12 +45,30 @@ jobs:
       IS_LOCAL_DEVELOPMENT: false
       MLN_ANDROID_STL: c++_static
     steps:
+      - name: Free Disk Space (Ubuntu)
+        if: startsWith(runner.name, 'GitHub Actions')
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-      
+
+      - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Cache node modules
         uses: actions/cache@v3
         env:
@@ -56,38 +83,19 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts
+        working-directory: platform/android
 
-      - name: Install ccache
-        run: sudo apt-get install -y ccache
-
-      - name: Prepare ccache
-        run: ccache --clear
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
+      - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
+          key: ${{ github.job }}
 
       - name: restore-gradle-cache
         uses: actions/cache@v3
         env:
           cache-name: gradle-v1
         with:
-          path: ~/.gradle'
-          key: ${{ env.cache-name }}-{{ hashFiles 'gradle/dependencies.gradle' }}-{{ hashFiles 'build.gradle' }}-{{ hashFiles 'gradle/wrapper/gradle-wrapper.properties' }}'
+          path: ~/.gradle
+          key: ${{ env.cache-name }}-${{ hashFiles('platform/android/gradle/dependencies.gradle') }}-${{ hashFiles('platform/android/build.gradle') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             - ${{ env.cache-name }}
 
@@ -101,6 +109,7 @@ jobs:
         run: make android-lib-arm-v8
 
       - name: Copy developer config with API key for UI tests
+        if: github.ref == 'refs/heads/main'
         run: |
           MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
           if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
@@ -108,19 +117,19 @@ jobs:
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
-    
+
       - name: Build UI tests
         run: make android-ui-test-arm-v8
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main'
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 21600
           role-session-name: MySessionName
 
       - name: Create upload
@@ -144,8 +153,8 @@ jobs:
       - name: Upload Android UI test
         if: github.ref == 'refs/heads/main'
         run: |
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/debug/MapboxGLAndroidSDKTestApp-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/debug/MapboxGLAndroidSDKTestApp-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
@@ -157,8 +166,26 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:
+          if-no-files-found: error
           name: uploadsEnv
           path: uploads.env
+
+      # render test
+      - name: Build Render Test App
+        run: |
+          ./gradlew assemble assembleAndroidTest
+          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
+          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
+        working-directory: ./render-test/android
+
+      - name: Store Render Test .apk files
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-render-tests
+          if-no-files-found: error
+          path: |
+            ./render-test/android/RenderTestsApp.apk
+            ./render-test/android/RenderTests.apk
 
       - name: Store debug artifacts
         uses: actions/upload-artifact@v3
@@ -173,24 +200,21 @@ jobs:
             MapboxGLAndroidSDKTestApp/lint-baseline.xml
             MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
 
-  instrumentation-test:
-    needs: build
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: false
+  android-instrumentation-test:
+    needs: android-build
 
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
     steps:
       - uses: actions/download-artifact@v3
         with:
           name: uploadsEnv
 
       - name: Read uploads.env
-        run: cat uploads.env >> $GITHUB_ENV
+        run: cat uploads.env >> "$GITHUB_ENV"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -210,3 +234,14 @@ jobs:
           test_type: INSTRUMENTATION
           test_package_arn: ${{ env.ANDROID_TEST_ARN }}
           timeout: 28800
+
+  android-ci-result:
+    runs-on: ubuntu-latest
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    needs:
+      - pre_job
+      - android-build
+    steps:
+      - name: Mark result as failed
+        if: needs.android-build.result != 'success'
+        run: exit 1

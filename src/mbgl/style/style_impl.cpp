@@ -1,4 +1,4 @@
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/sprite/sprite_loader.hpp>
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/resource.hpp>
@@ -161,7 +161,7 @@ void Style::Impl::addSource(std::unique_ptr<Source> source) {
 
 std::unique_ptr<Source> Style::Impl::removeSource(const std::string& id) {
     // Check if source is in use
-    for (const auto& layer: layers) {
+    for (const auto& layer : layers) {
         if (layer->getSourceID() == id) {
             Log::Warning(Event::General, "Source '" + id + "' is in use, cannot remove");
             return nullptr;
@@ -264,7 +264,7 @@ bool Style::Impl::isLoaded() const {
         return false;
     }
 
-    for (const auto& source: sources) {
+    for (const auto& source : sources) {
         if (!source->loaded) {
             return false;
         }
@@ -275,8 +275,8 @@ bool Style::Impl::isLoaded() const {
 
 void Style::Impl::addImage(std::unique_ptr<style::Image> image) {
     auto newImages = makeMutable<ImageImpls>(*images);
-    auto it =
-        std::lower_bound(newImages->begin(), newImages->end(), image->getID(), [](const auto& a, const std::string& b) {
+    auto it = std::lower_bound(
+        newImages->begin(), newImages->end(), image->getID(), [](const auto& a, const std::string& b) {
             return a->id < b;
         });
     if (it != newImages->end() && (*it)->id == image->getID()) {
@@ -291,8 +291,8 @@ void Style::Impl::addImage(std::unique_ptr<style::Image> image) {
 
 void Style::Impl::removeImage(const std::string& id) {
     auto newImages = makeMutable<ImageImpls>(*images);
-    auto found =
-        std::find_if(newImages->begin(), newImages->end(), [&id](const auto& image) { return image->id == id; });
+    auto found = std::find_if(
+        newImages->begin(), newImages->end(), [&id](const auto& image) { return image->id == id; });
     if (found == newImages->end()) {
         Log::Warning(Event::General, "Image '" + id + "' is not present in style, cannot remove");
         return;

@@ -1,13 +1,13 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "LineGradientProgram";
     static constexpr const char* vertex = R"(
 // the attribute conveying progress along a line is scaled to [0, 2^15)
 #define MAX_LINE_DISTANCE 32767.0

@@ -25,23 +25,20 @@ class IndexedSubfeature {
 public:
     IndexedSubfeature() = delete;
     IndexedSubfeature(std::size_t index_, std::string sourceLayerName_, std::string bucketName_, size_t sortIndex_)
-        : index(index_)
-        , sourceLayerName(std::move(sourceLayerName_))
-        , bucketLeaderID(std::move(bucketName_))
-        , sortIndex(sortIndex_)
-        , bucketInstanceId(0)
-        , collisionGroupId(0)
-    {}
-    
-    
+        : index(index_),
+          sourceLayerName(std::move(sourceLayerName_)),
+          bucketLeaderID(std::move(bucketName_)),
+          sortIndex(sortIndex_),
+          bucketInstanceId(0),
+          collisionGroupId(0) {}
+
     IndexedSubfeature(const IndexedSubfeature& other, uint32_t bucketInstanceId_, uint16_t collisionGroupId_)
-        : index(other.index)
-        , sourceLayerName(other.sourceLayerName)
-        , bucketLeaderID(other.bucketLeaderID)
-        , sortIndex(other.sortIndex)
-        , bucketInstanceId(bucketInstanceId_)
-        , collisionGroupId(collisionGroupId_)
-    {}
+        : index(other.index),
+          sourceLayerName(other.sourceLayerName),
+          bucketLeaderID(other.bucketLeaderID),
+          sortIndex(other.sortIndex),
+          bucketInstanceId(bucketInstanceId_),
+          collisionGroupId(collisionGroupId_) {}
     size_t index;
     std::string sourceLayerName;
     std::string bucketLeaderID;
@@ -77,8 +74,14 @@ public:
     FeatureIndex(std::unique_ptr<const GeometryTileData> tileData_);
 
     const GeometryTileData* getData() { return tileData.get(); }
-    
-    void insert(const GeometryCollection&, std::size_t index, const std::string& sourceLayerName, const std::string& bucketLeaderID);
+
+    /// Set the expected number of elements per cell to avoid small re-allocations for populated cells
+    void reserve(std::size_t value) { grid.reserve(value); }
+
+    void insert(const GeometryCollection&,
+                std::size_t index,
+                const std::string& sourceLayerName,
+                const std::string& bucketLeaderID);
 
     void query(std::unordered_map<std::string, std::vector<Feature>>& result,
                const GeometryCoordinates& queryGeometry,
@@ -93,10 +96,10 @@ public:
                const SourceFeatureState& sourceFeatureState) const;
 
     static std::optional<GeometryCoordinates> translateQueryGeometry(const GeometryCoordinates& queryGeometry,
-                                                                const std::array<float, 2>& translate,
-                                                                style::TranslateAnchorType,
-                                                                float bearing,
-                                                                float pixelsToTileUnits);
+                                                                     const std::array<float, 2>& translate,
+                                                                     style::TranslateAnchorType,
+                                                                     float bearing,
+                                                                     float pixelsToTileUnits);
 
     void setBucketLayerIDs(const std::string& bucketLeaderID, const std::vector<std::string>& layerIDs);
 

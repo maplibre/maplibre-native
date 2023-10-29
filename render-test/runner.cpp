@@ -18,7 +18,7 @@
 
 #include <mapbox/pixelmatch.hpp>
 
-#include <../expression-test/test_runner_common.hpp>
+#include "test_runner_common.hpp"
 #include "allocation_index.hpp"
 #include "file_source.hpp"
 #include "metadata.hpp"
@@ -90,7 +90,8 @@ std::string simpleDiff(const Value& result, const Value& expected) {
 }
 
 TestRunner::TestRunner(Manifest manifest_, UpdateResults updateResults_)
-    : manifest(std::move(manifest_)), updateResults(updateResults_) {
+    : manifest(std::move(manifest_)),
+      updateResults(updateResults_) {
     registerProxyFileSource();
 }
 
@@ -99,9 +100,10 @@ void TestRunner::registerProxyFileSource() {
     std::call_once(registerProxyFlag, [] {
         auto* fileSourceManager = mbgl::FileSourceManager::get();
 
-        auto resourceLoaderFactory =
-            fileSourceManager->unRegisterFileSourceFactory(mbgl::FileSourceType::ResourceLoader);
-        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
+        auto resourceLoaderFactory = fileSourceManager->unRegisterFileSourceFactory(
+            mbgl::FileSourceType::ResourceLoader);
+        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions,
+                                                                           const mbgl::ClientOptions& clientOptions) {
             assert(defaultFactory);
             std::shared_ptr<FileSource> fileSource = defaultFactory(resourceOptions, clientOptions);
             return std::make_unique<ProxyFileSource>(std::move(fileSource), resourceOptions, clientOptions);
@@ -257,13 +259,12 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
 
             expectedImage = mbgl::decodeImage(*maybeExpectedImage);
 
-            pixels = static_cast<double>(
-                mapbox::pixelmatch(actualImage.data.get(),
-                                   expectedImage.data.get(),
-                                   expectedImage.size.width,
-                                   expectedImage.size.height,
-                                   imageDiff.data.get(),
-                                   0.1285) // Defined in GL JS
+            pixels = static_cast<double>(mapbox::pixelmatch(actualImage.data.get(),
+                                                            expectedImage.data.get(),
+                                                            expectedImage.size.width,
+                                                            expectedImage.size.height,
+                                                            imageDiff.data.get(),
+                                                            0.1285) // Defined in GL JS
             );
 
             metadata.diff = mbgl::encodePNG(imageDiff);
@@ -298,8 +299,8 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
         return;
     }
 
-    // Check the possible paths in reverse order, so that the default path with the test style will only be checked in
-    // the very end.
+    // Check the possible paths in reverse order, so that the default path with
+    // the test style will only be checked in the very end.
     std::vector<std::string> expectedMetricsPaths;
     for (auto rit = expectedMetrics.rbegin(); rit != expectedMetrics.rend(); ++rit) {
         if (mbgl::filesystem::exists(*rit)) {
@@ -308,8 +309,8 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
         }
     }
 
-    // In case no metrics.json is found, skip assigning the expectedMetrics to metadata, otherwise, take the first found
-    // metrics.
+    // In case no metrics.json is found, skip assigning the expectedMetrics to
+    // metadata, otherwise, take the first found metrics.
     for (const auto& entry : expectedMetricsPaths) {
         auto maybeExpectedMetrics = readExpectedMetrics(entry);
         if (maybeExpectedMetrics.isEmpty()) {
@@ -322,8 +323,8 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     }
 
     if (resultMetadata.expectedMetrics.isEmpty()) {
-        resultMetadata.errorMessage =
-            "Failed to find metric expectations for: " + resultMetadata.paths.stylePath.string();
+        resultMetadata.errorMessage = "Failed to find metric expectations for: " +
+                                      resultMetadata.paths.stylePath.string();
         if (updateResults == UpdateResults::REBASELINE && !resultMetadata.ignoredTest) {
             writeMetrics(expectedMetrics.back(), ". Created baseline for missing metrics.");
         }
@@ -350,7 +351,9 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
                 return;
             }
 
-            auto result = checkValue(static_cast<float>(expected.second.size), static_cast<float>(actual->second.size), actual->second.tolerance);
+            auto result = checkValue(static_cast<float>(expected.second.size),
+                                     static_cast<float>(actual->second.size),
+                                     actual->second.tolerance);
             if (!std::get<bool>(result)) {
                 std::stringstream ss;
                 ss << "File size does not match at probe \"" << expected.first << "\" for file \""
@@ -658,7 +661,8 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
 
 LatLng getTileCenterCoordinates(const UnwrappedTileID& tileId) {
     double scale = (1 << tileId.canonical.z);
-    Point<double> tileCenter{(tileId.canonical.x + 0.5) * util::tileSize_D, (tileId.canonical.y + 0.5) * util::tileSize_D};
+    Point<double> tileCenter{(tileId.canonical.x + 0.5) * util::tileSize_D,
+                             (tileId.canonical.y + 0.5) * util::tileSize_D};
     return Projection::unproject(tileCenter, scale);
 }
 
@@ -677,12 +681,15 @@ uint32_t getImageTileOffset(const std::set<uint32_t>& dims, uint32_t dim, float 
 
 } // namespace
 
-TestRunner::Impl::Impl(const TestMetadata& metadata, const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions)
+TestRunner::Impl::Impl(const TestMetadata& metadata,
+                       const mbgl::ResourceOptions& resourceOptions,
+                       const mbgl::ClientOptions& clientOptions)
     : observer(std::make_unique<TestRunnerMapObserver>()),
       frontend(metadata.size, metadata.pixelRatio, swapBehavior(metadata.mapMode)),
-      fileSource(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
+      fileSource(mbgl::FileSourceManager::get()->getFileSource(
+          mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
       map(frontend,
-          *observer.get(),
+          *observer,
           mbgl::MapOptions()
               .withMapMode(metadata.mapMode)
               .withSize(metadata.size)
@@ -699,7 +706,8 @@ void TestRunner::run(TestMetadata& metadata) {
     ProxyFileSource::setTrackingActive(false);
 
     struct ContextImpl final : public TestContext {
-        ContextImpl(TestMetadata& metadata_) : metadata(metadata_) {}
+        ContextImpl(TestMetadata& metadata_)
+            : metadata(metadata_) {}
         HeadlessFrontend& getFrontend() override {
             assert(runnerImpl);
             return runnerImpl->frontend;
@@ -776,8 +784,8 @@ void TestRunner::run(TestMetadata& metadata) {
         }
         auto tileScreenSize = getTileScreenPixelSize(metadata.pixelRatio);
 
-        result.image =
-            PremultipliedImage({uint32_t(xDims.size()) * tileScreenSize, uint32_t(yDims.size()) * tileScreenSize});
+        result.image = PremultipliedImage(
+            {uint32_t(xDims.size()) * tileScreenSize, uint32_t(yDims.size()) * tileScreenSize});
         for (const auto& tileId : tileIds) {
             resetContext(metadata, ctx);
             ctx.getFrontend().getRenderer()->collectPlacedSymbolData(true);
@@ -806,7 +814,17 @@ void TestRunner::run(TestMetadata& metadata) {
                     auto it = std::find_if(symbols.begin(), symbols.end(), [isIcon, box](const auto& a) {
                         return a.isIcon == isIcon && a.location.min == box.min && a.location.max == box.max;
                     });
+
+// TODO: remove usage of std::codecvt_utf8
+// https://github.com/maplibre/maplibre-native/issues/1269
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
                     static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cv;
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
                     if (it == symbols.end()) {
                         symbols.push_back({tileId, box, placed, isIcon});
                         return;
@@ -837,11 +855,13 @@ void TestRunner::run(TestMetadata& metadata) {
                 if (placedSymbol.intersectsTileBorder) {
                     if (placedSymbol.textCollisionBox) {
                         findCutOffs(
-                            placedSymbol, *placedSymbol.textCollisionBox, placedSymbol.textPlaced, false /*isIcon*/);
+                            placedSymbol, *placedSymbol.textCollisionBox, placedSymbol.textPlaced, false /*isIcon*/
+                        );
                     }
                     if (placedSymbol.iconCollisionBox) {
                         findCutOffs(
-                            placedSymbol, *placedSymbol.iconCollisionBox, placedSymbol.iconPlaced, true /*isIcon*/);
+                            placedSymbol, *placedSymbol.iconCollisionBox, placedSymbol.iconPlaced, true /*isIcon*/
+                        );
                     }
                 }
             }

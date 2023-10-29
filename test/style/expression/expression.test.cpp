@@ -19,7 +19,6 @@
 #include <dirent.h>
 #endif
 
-
 using namespace mbgl;
 using namespace mbgl::style;
 
@@ -27,16 +26,13 @@ TEST(Expression, IsExpression) {
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> spec;
     spec.Parse<0>(util::read_file("scripts/style-spec-reference/v8.json").c_str());
     ASSERT_FALSE(spec.HasParseError());
-    ASSERT_TRUE(spec.IsObject() &&
-                spec.HasMember("expression_name") &&
-                spec["expression_name"].IsObject() &&
-                spec["expression_name"].HasMember("values") &&
-                spec["expression_name"]["values"].IsObject());
+    ASSERT_TRUE(spec.IsObject() && spec.HasMember("expression_name") && spec["expression_name"].IsObject() &&
+                spec["expression_name"].HasMember("values") && spec["expression_name"]["values"].IsObject());
 
     const auto& allExpressions = spec["expression_name"]["values"];
 
-    for(auto& entry : allExpressions.GetObject()) {
-        const std::string name { entry.name.GetString(), entry.name.GetStringLength() };
+    for (auto& entry : allExpressions.GetObject()) {
+        const std::string name{entry.name.GetString(), entry.name.GetStringLength()};
         JSDocument document;
         document.Parse<0>(R"([")" + name + R"("])");
         const JSValue* expression = &document;
@@ -45,7 +41,8 @@ TEST(Expression, IsExpression) {
         // TODO: "interpolate-lab": https://github.com/mapbox/mapbox-gl-native/issues/8720
         if (name == "interpolate-hcl" || name == "interpolate-lab") {
             if (expression::isExpression(conversion::Convertible(expression))) {
-                ASSERT_TRUE(false) << "Expression name" << name << "is implemented - please update Expression.IsExpression test.";
+                ASSERT_TRUE(false) << "Expression name" << name
+                                   << "is implemented - please update Expression.IsExpression test.";
             }
             continue;
         }
@@ -81,7 +78,6 @@ TEST_P(ExpressionEqualityTest, ExpressionEquality) {
 
     std::unique_ptr<expression::Expression> expression_b = parse(base + ".b.json", error);
     ASSERT_TRUE(expression_b) << GetParam() << ": " << error;
-
 
     EXPECT_TRUE(*expression_a1 == *expression_a2);
     EXPECT_TRUE(*expression_a1 != *expression_b);

@@ -5,7 +5,7 @@
 
 namespace mbgl {
 namespace style {
-    struct LayerTypeInfo;
+struct LayerTypeInfo;
 } // namespace style
 
 class BucketParameters {

@@ -13,8 +13,8 @@ public:
     QtBackendImpl() {
         // QtBackendImpl must be created in the main/GUI thread on platforms
         // that have a QWindow-based QOffscreenSurface.
-        surface.create();
         context.create();
+        surface.create();
     }
     ~QtBackendImpl() = default;
 
@@ -23,13 +23,11 @@ public:
         return thisContext->getProcAddress(name);
     }
 
-    void activateContext() {
-        context.makeCurrent(&surface);
-    }
+    void activateContext() { context.makeCurrent(&surface); }
 
-    void deactivateContext() {
-        context.doneCurrent();
-    }
+    void deactivateContext() { context.doneCurrent(); }
+
+    bool glNeedsActiveContextOnDestruction() const { return true; }
 
 private:
     QOpenGLContext context;

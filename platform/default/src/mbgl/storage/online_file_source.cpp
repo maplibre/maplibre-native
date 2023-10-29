@@ -61,13 +61,13 @@ struct OnlineFileRequest {
     std::function<void()> cancelCallback = nullptr;
     std::shared_ptr<Mailbox> mailbox;
 
-    // Counts the number of times a response was already expired when received. We're using
-    // this to add a delay when making a new request so we don't keep retrying immediately
-    // in case of a server serving expired tiles.
+    // Counts the number of times a response was already expired when received.
+    // We're using this to add a delay when making a new request so we don't
+    // keep retrying immediately in case of a server serving expired tiles.
     uint32_t expiredRequests = 0;
 
-    // Counts the number of subsequent failed requests. We're using this value for exponential
-    // backoff when retrying requests.
+    // Counts the number of subsequent failed requests. We're using this value
+    // for exponential backoff when retrying requests.
     uint32_t failedRequests = 0;
     Response::Error::Reason failedRequestReason = Response::Error::Reason::Success;
     std::optional<Timestamp> retryAfter;
@@ -76,7 +76,9 @@ struct OnlineFileRequest {
 class OnlineFileSourceThread {
 public:
     OnlineFileSourceThread(const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
-        : resourceOptions(resourceOptions_.clone()), clientOptions(clientOptions_.clone()), httpFileSource(resourceOptions_, clientOptions_) {
+        : resourceOptions(resourceOptions_.clone()),
+          clientOptions(clientOptions_.clone()),
+          httpFileSource(resourceOptions_, clientOptions_) {
         NetworkStatus::Subscribe(&reachability);
         setMaximumConcurrentRequests(util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS);
     }
@@ -84,7 +86,9 @@ public:
     ~OnlineFileSourceThread() { NetworkStatus::Unsubscribe(&reachability); }
 
     void request(AsyncRequest* req, Resource resource, const ActorRef<FileSourceRequest>& ref) {
-        auto callback = [ref](const Response& res) { ref.invoke(&FileSourceRequest::setResponse, res); };
+        auto callback = [ref](const Response& res) {
+            ref.invoke(&FileSourceRequest::setResponse, res);
+        };
         tasks[req] = std::make_unique<OnlineFileRequest>(std::move(resource), std::move(callback), *this);
     }
 
@@ -98,8 +102,9 @@ public:
     void add(OnlineFileRequest* req) {
         allRequests.insert(req);
         if (resourceTransform) {
-            // Request the ResourceTransform actor a new url and replace the resource url with the
-            // transformed one before proceeding to schedule the request.
+            // Request the ResourceTransform actor a new url and replace the
+            // resource url with the transformed one before proceeding to
+            // schedule the request.
             resourceTransform.transform(
                 req->resource.kind, req->resource.url, [ref = req->actor()](const std::string& url) {
                     ref.invoke(&OnlineFileRequest::setTransformedURL, url);
@@ -166,21 +171,13 @@ public:
 
     void setResourceTransform(ResourceTransform transform) { resourceTransform = std::move(transform); }
 
-    void setResourceOptions(ResourceOptions options) {
-        resourceOptions = options;
-    }
+    void setResourceOptions(ResourceOptions options) { resourceOptions = options; }
 
-    const ResourceOptions& getResourceOptions() const {
-        return resourceOptions;
-    }
+    const ResourceOptions& getResourceOptions() const { return resourceOptions; }
 
-    void setClientOptions(ClientOptions options) {
-        clientOptions = options;
-    }
+    void setClientOptions(ClientOptions options) { clientOptions = options; }
 
-    const ClientOptions& getClientOptions() const {
-        return clientOptions;
-    }
+    const ClientOptions& getClientOptions() const { return clientOptions; }
 
     void setOnlineStatus(bool status) {
         online = status;
@@ -189,9 +186,7 @@ public:
         }
     }
 
-    uint32_t getMaximumConcurrentRequests() const {
-        return maximumConcurrentRequests;
-    }
+    uint32_t getMaximumConcurrentRequests() const { return maximumConcurrentRequests; }
 
     void setMaximumConcurrentRequests(uint32_t maximumConcurrentRequests_) {
         maximumConcurrentRequests = maximumConcurrentRequests_;
@@ -237,7 +232,8 @@ private:
     //                              firstLowPriorityRequest
 
     struct PendingRequests {
-        PendingRequests() : firstLowPriorityRequest(queue.begin()) {}
+        PendingRequests()
+            : firstLowPriorityRequest(queue.begin()) {}
 
         std::list<OnlineFileRequest*> queue;
         std::list<OnlineFileRequest*>::iterator firstLowPriorityRequest;
@@ -256,12 +252,10 @@ private:
             if (request->resource.priority == Resource::Priority::Regular) {
                 firstLowPriorityRequest = queue.insert(firstLowPriorityRequest, request);
                 firstLowPriorityRequest++;
-            }
-            else {
+            } else {
                 if (firstLowPriorityRequest == queue.end()) {
                     firstLowPriorityRequest = queue.insert(queue.end(), request);
-                }
-                else {
+                } else {
                     queue.insert(queue.end(), request);
                 }
             }
@@ -284,7 +278,6 @@ private:
         bool contains(OnlineFileRequest* request) const {
             return (std::find(queue.begin(), queue.end(), request) != queue.end());
         }
-
     };
 
     ResourceTransform resourceTransform;
@@ -318,11 +311,14 @@ private:
 
 class OnlineFileSource::Impl {
 public:
-    Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) :
-        cachedResourceOptions(resourceOptions.clone()),
-        cachedClientOptions(clientOptions.clone()),
-        thread(std::make_unique<util::Thread<OnlineFileSourceThread>>(
-              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK), "OnlineFileSource", resourceOptions.clone(), clientOptions.clone())) {}
+    Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+        : cachedResourceOptions(resourceOptions.clone()),
+          cachedClientOptions(clientOptions.clone()),
+          thread(std::make_unique<util::Thread<OnlineFileSourceThread>>(
+              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_NETWORK),
+              "OnlineFileSource",
+              resourceOptions.clone(),
+              clientOptions.clone())) {}
 
     std::unique_ptr<AsyncRequest> request(Callback callback, Resource res) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -331,7 +327,7 @@ public:
         thread->actor().invoke(&OnlineFileSourceThread::request, req.get(), std::move(res), req->actor());
         return req;
     }
- 
+
     void pause() { thread->pause(); }
 
     void resume() { thread->resume(); }
@@ -409,7 +405,8 @@ public:
             thread->actor().invoke(&OnlineFileSourceThread::setAPIBaseURL, *baseURL);
             {
                 std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-                cachedResourceOptions.withTileServerOptions(cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL));
+                cachedResourceOptions.withTileServerOptions(
+                    cachedResourceOptions.tileServerOptions().clone().withBaseURL(*baseURL));
             }
         } else {
             Log::Error(Event::General, "Invalid base-url property value type.");
@@ -433,7 +430,9 @@ private:
 };
 
 OnlineFileRequest::OnlineFileRequest(Resource resource_, Callback callback_, OnlineFileSourceThread& impl_)
-    : impl(impl_), resource(std::move(resource_)), callback(std::move(callback_)) {
+    : impl(impl_),
+      resource(std::move(resource_)),
+      callback(std::move(callback_)) {
     impl.add(this);
 }
 
@@ -504,17 +503,15 @@ void OnlineFileRequest::schedule(Duration timeout) {
         timeout = Duration::max();
     }
 
-    timer.start(timeout, Duration::zero(), [&] {
-        impl.activateOrQueueRequest(this);
-    });
+    timer.start(timeout, Duration::zero(), [&] { impl.activateOrQueueRequest(this); });
 }
 
 Duration OnlineFileRequest::getUpdateInterval(std::optional<Timestamp> expires) const {
     // Calculate a timeout that depends on how many
     // consecutive errors we've encountered, and on the expiration time, if present.
     Duration errorRetryTimeout = http::errorRetryTimeout(failedRequestReason, failedRequests, retryAfter);
-    Duration expirationTimeout =
-        std::max(http::expirationTimeout(std::move(expires), expiredRequests), resource.minimumUpdateInterval);
+    Duration expirationTimeout = std::max(http::expirationTimeout(std::move(expires), expiredRequests),
+                                          resource.minimumUpdateInterval);
     return std::min(errorRetryTimeout, expirationTimeout);
 }
 
@@ -538,9 +535,10 @@ void OnlineFileRequest::completed(Response response) {
     }
 
     if (response.notModified && resource.priorData) {
-        // When the priorData field is set, it indicates that we had to revalidate the request and
-        // that the requestor hasn't gotten data yet. If we get a 304 response, this means that we
-        // have send the cached data to give the requestor a chance to actually obtain the data.
+        // When the priorData field is set, it indicates that we had to
+        // revalidate the request and that the requestor hasn't gotten data yet.
+        // If we get a 304 response, this means that we have send the cached
+        // data to give the requestor a chance to actually obtain the data.
         response.data = std::move(resource.priorData);
         response.notModified = false;
     }
@@ -579,9 +577,9 @@ void OnlineFileRequest::completed(Response response) {
 
     schedule(getUpdateInterval(response.expires));
 
-    // Calling the callback may result in `this` being deleted. It needs to be done last,
-    // and needs to make a local copy of the callback to ensure that it remains valid for
-    // the duration of the call.
+    // Calling the callback may result in `this` being deleted. It needs to be
+    // done last, and needs to make a local copy of the callback to ensure that
+    // it remains valid for the duration of the call.
     auto callback_ = callback;
     callback_(response);
 }
@@ -628,8 +626,7 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
             break;
 
         case Resource::Kind::Style:
-            res.url =
-                mbgl::util::mapbox::normalizeStyleURL(options, resource.url, impl->getApiKey());
+            res.url = mbgl::util::mapbox::normalizeStyleURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Source:

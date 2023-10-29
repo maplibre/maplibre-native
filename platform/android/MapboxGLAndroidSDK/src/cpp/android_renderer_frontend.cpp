@@ -18,37 +18,28 @@ namespace android {
 class ForwardingRendererObserver : public RendererObserver {
 public:
     ForwardingRendererObserver(util::RunLoop& mapRunLoop, RendererObserver& delegate_)
-            : mailbox(std::make_shared<Mailbox>(mapRunLoop))
-            , delegate(delegate_, mailbox) {
+        : mailbox(std::make_shared<Mailbox>(mapRunLoop)),
+          delegate(delegate_, mailbox) {}
+
+    ~ForwardingRendererObserver() { mailbox->close(); }
+
+    void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
+
+    void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
+
+    void onWillStartRenderingMap() override { delegate.invoke(&RendererObserver::onWillStartRenderingMap); }
+
+    void onWillStartRenderingFrame() override { delegate.invoke(&RendererObserver::onWillStartRenderingFrame); }
+
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   double frameTime) override {
+        void (RendererObserver::*f)(RenderMode, bool, bool, double) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTime);
     }
 
-    ~ForwardingRendererObserver() {
-        mailbox->close();
-    }
-
-    void onInvalidate() override {
-        delegate.invoke(&RendererObserver::onInvalidate);
-    }
-
-    void onResourceError(std::exception_ptr err) override {
-        delegate.invoke(&RendererObserver::onResourceError, err);
-    }
-
-    void onWillStartRenderingMap() override {
-        delegate.invoke(&RendererObserver::onWillStartRenderingMap);
-    }
-
-    void onWillStartRenderingFrame() override {
-        delegate.invoke(&RendererObserver::onWillStartRenderingFrame);
-    }
-
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) override {
-        delegate.invoke(&RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
-    }
-
-    void onDidFinishRenderingMap() override {
-        delegate.invoke(&RendererObserver::onDidFinishRenderingMap);
-    }
+    void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }
 
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         delegate.invoke(&RendererObserver::onStyleImageMissing, id, done);
@@ -64,13 +55,12 @@ private:
 };
 
 AndroidRendererFrontend::AndroidRendererFrontend(MapRenderer& mapRenderer_)
-        : mapRenderer(mapRenderer_)
-        , mapRunLoop(util::RunLoop::Get())
-        , updateAsyncTask(std::make_unique<util::AsyncTask>([this]() {
-              mapRenderer.update(std::move(updateParams));
-              mapRenderer.requestRender();
-          })) {
-}
+    : mapRenderer(mapRenderer_),
+      mapRunLoop(util::RunLoop::Get()),
+      updateAsyncTask(std::make_unique<util::AsyncTask>([this]() {
+          mapRenderer.update(std::move(updateParams));
+          mapRenderer.requestRender();
+      })) {}
 
 AndroidRendererFrontend::~AndroidRendererFrontend() = default;
 
@@ -79,7 +69,7 @@ void AndroidRendererFrontend::reset() {
 }
 
 void AndroidRendererFrontend::setObserver(RendererObserver& observer) {
-    assert (util::RunLoop::Get());
+    assert(util::RunLoop::Get());
     // Don't call the Renderer directly, but use MapRenderer#setObserver to make sure
     // the Renderer may be re-initialised without losing the RendererObserver reference.
     mapRenderer.setObserver(std::make_unique<ForwardingRendererObserver>(*mapRunLoop, observer));
@@ -102,9 +92,9 @@ std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::str
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenBox& box,
                                                                     const RenderedQueryOptions& options) const {
-
     // Select the right overloaded method
-    std::vector<Feature> (Renderer::*fn)(const ScreenBox&, const RenderedQueryOptions&) const = &Renderer::queryRenderedFeatures;
+    std::vector<Feature> (Renderer::*fn)(const ScreenBox&, const RenderedQueryOptions&)
+        const = &Renderer::queryRenderedFeatures;
 
     // Waits for the result from the orchestration thread and returns
     return mapRenderer.actor().ask(fn, box, options).get();
@@ -112,9 +102,9 @@ std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const Screen
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenCoordinate& point,
                                                                     const RenderedQueryOptions& options) const {
-
     // Select the right overloaded method
-    std::vector<Feature> (Renderer::*fn)(const ScreenCoordinate&, const RenderedQueryOptions&) const = &Renderer::queryRenderedFeatures;
+    std::vector<Feature> (Renderer::*fn)(const ScreenCoordinate&, const RenderedQueryOptions&)
+        const = &Renderer::queryRenderedFeatures;
 
     // Waits for the result from the orchestration thread and returns
     return mapRenderer.actor().ask(fn, point, options).get();
@@ -130,14 +120,16 @@ AnnotationIDs AndroidRendererFrontend::queryShapeAnnotations(const ScreenBox& bo
     return mapRenderer.actor().ask(&Renderer::queryShapeAnnotations, box).get();
 }
 
-FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(const std::string& sourceID,
-                                                     const Feature& feature,
-                                                     const std::string& extension,
-                                                     const std::string& extensionField,
-                                                     const std::optional<std::map<std::string, mbgl::Value>>& args) const {
-    return mapRenderer.actor().ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args).get();
+FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
+    const std::string& sourceID,
+    const Feature& feature,
+    const std::string& extension,
+    const std::string& extensionField,
+    const std::optional<std::map<std::string, mbgl::Value>>& args) const {
+    return mapRenderer.actor()
+        .ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args)
+        .get();
 }
 
 } // namespace android
 } // namespace mbgl
-

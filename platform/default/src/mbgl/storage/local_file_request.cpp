@@ -23,9 +23,8 @@ void requestLocalFile(const std::string& path, const ActorRef<FileSourceRequest>
     } else {
         auto data = util::readFile(path);
         if (!data) {
-            response.error = std::make_unique<Response::Error>(
-                Response::Error::Reason::Other,
-                std::string("Cannot read file ") + path);
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                               std::string("Cannot read file ") + path);
         } else {
             response.data = std::make_shared<std::string>(std::move(*data));
         }

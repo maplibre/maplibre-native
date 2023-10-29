@@ -17,25 +17,18 @@ namespace conversion {
 template <>
 class ConversionTraits<mbgl::android::Value> {
 public:
-    static bool isUndefined(const mbgl::android::Value& value) {
-        return value.isNull();
-    }
+    static bool isUndefined(const mbgl::android::Value& value) { return value.isNull(); }
 
-    static bool isArray(const mbgl::android::Value& value) {
-        return value.isArray();
-    }
+    static bool isArray(const mbgl::android::Value& value) { return value.isArray(); }
 
-    static bool isObject(const mbgl::android::Value& value) {
-        return value.isObject();
-    }
+    static bool isObject(const mbgl::android::Value& value) { return value.isObject(); }
 
     static std::size_t arrayLength(const mbgl::android::Value& value) {
-        return value.getLength();;
+        return value.getLength();
+        ;
     }
 
-    static mbgl::android::Value arrayMember(const mbgl::android::Value& value, std::size_t i) {
-        return value.get(i);
-    }
+    static mbgl::android::Value arrayMember(const mbgl::android::Value& value, std::size_t i) { return value.get(i); }
 
     static std::optional<mbgl::android::Value> objectMember(const mbgl::android::Value& value, const char* key) {
         mbgl::android::Value member = value.get(key);
@@ -51,7 +44,7 @@ public:
         assert(value.isObject());
         mbgl::android::Value keys = value.keyArray();
         std::size_t length = arrayLength(keys);
-        for(std::size_t i = 0; i < length; ++i){
+        for (std::size_t i = 0; i < length; ++i) {
             const auto k = keys.get(i).toString();
             auto v = value.get(k.c_str());
             std::optional<Error> result = fn(k, std::move(v));
@@ -99,19 +92,19 @@ public:
         if (value.isNull()) {
             return {};
         } else if (value.isBool()) {
-            return { value.toBool() };
+            return {value.toBool()};
         } else if (value.isString()) {
-            return { value.toString() };
+            return {value.toString()};
         } else if (value.isNumber()) {
-            return { value.toDouble() };
+            return {value.toDouble()};
         } else {
             return {};
         }
     }
 
-    static std::optional<GeoJSON> toGeoJSON(const mbgl::android::Value &value, Error &error) {
+    static std::optional<GeoJSON> toGeoJSON(const mbgl::android::Value& value, Error& error) {
         if (value.isNull()) {
-            error = { "no json data found" };
+            error = {"no json data found"};
             return {};
         }
 
@@ -138,8 +131,8 @@ public:
     }
 };
 
-template <class T, class...Args>
-std::optional<T> convert(mbgl::android::Value&& value, Error& error, Args&&...args) {
+template <class T, class... Args>
+std::optional<T> convert(mbgl::android::Value&& value, Error& error, Args&&... args) {
     return convert<T>(Convertible(std::move(value)), error, std::forward<Args>(args)...);
 }
 

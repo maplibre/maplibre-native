@@ -9,13 +9,12 @@ namespace android {
 
 class Polygon : private MultiPoint {
 public:
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/annotations/Polygon"; };
+    static constexpr auto Name() { return "org/maplibre/android/annotations/Polygon"; };
 
     static mbgl::FillAnnotation toAnnotation(jni::JNIEnv&, const jni::Object<Polygon>&);
 
     static void registerNative(jni::JNIEnv&);
 };
-
 
 } // namespace android
 } // namespace mbgl

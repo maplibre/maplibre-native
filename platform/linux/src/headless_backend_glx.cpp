@@ -4,17 +4,25 @@
 
 #include <cassert>
 
+#ifdef CI_BUILD
+#include <chrono>
+#include <thread>
+#include <iostream>
+#endif
+
 #include <GL/glx.h>
 
 namespace mbgl {
 namespace gl {
 
-// This class provides a singleton that contains information about the configuration used for
-// instantiating new headless rendering contexts.
+// This class provides a singleton that contains information about the
+// configuration used for instantiating new headless rendering contexts.
 class GLXDisplayConfig {
 private:
     // Key for singleton construction.
-    struct Key { explicit Key() = default; };
+    struct Key {
+        explicit Key() = default;
+    };
 
 public:
     explicit GLXDisplayConfig(Key) {
@@ -22,7 +30,21 @@ public:
             throw std::runtime_error("Failed to XInitThreads.");
         }
 
-        xDisplay = XOpenDisplay(nullptr);
+#ifdef CI_BUILD
+        // XOpenDisplay has proven very unreliable on CI, perform some retries if it fails
+        constexpr auto CI_RETRIES = 20;
+        for (int i = 0; i < CI_RETRIES; i++) {
+#endif
+            xDisplay = XOpenDisplay(nullptr);
+#ifdef CI_BUILD
+            if (xDisplay != nullptr) {
+                break;
+            }
+            // std::cerr is used because the tests expect logging to be deterministic
+            std::cerr << "[CI] Failed to open X display, retrying..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+#endif
         if (xDisplay == nullptr) {
             throw std::runtime_error("Failed to open X display.");
         }
@@ -40,7 +62,7 @@ public:
         }
 
         // We're creating a dummy pbuffer anyway that we're not using.
-        static int pixelFormat[] = { GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None };
+        static int pixelFormat[] = {GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, None};
 
         int configs = 0;
         fbConfigs = glXChooseFBConfig(xDisplay, DefaultScreen(xDisplay), pixelFormat, &configs);
@@ -75,8 +97,7 @@ class GLXBackendImpl final : public HeadlessBackend::Impl {
 public:
     GLXBackendImpl() {
         // Try to create a legacy context.
-        glContext = glXCreateNewContext(glxDisplay->xDisplay, glxDisplay->fbConfigs[0],
-                                        GLX_RGBA_TYPE, None, True);
+        glContext = glXCreateNewContext(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], GLX_RGBA_TYPE, None, True);
         if (glContext && !glXIsDirect(glxDisplay->xDisplay, glContext)) {
             Log::Error(Event::OpenGL, "failed to create direct OpenGL Legacy context");
             glXDestroyContext(glxDisplay->xDisplay, glContext);
@@ -86,11 +107,10 @@ public:
             throw std::runtime_error("Error creating GL context object.");
         }
 
-        // Create a dummy pbuffer. We will render to framebuffers anyway, but we need a pbuffer to
-        // activate the context.
-        int pbufferAttributes[] = { GLX_PBUFFER_WIDTH, 8, GLX_PBUFFER_HEIGHT, 8, None };
-        glxPbuffer =
-            glXCreatePbuffer(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], pbufferAttributes);
+        // Create a dummy pbuffer. We will render to framebuffers anyway, but we
+        // need a pbuffer to activate the context.
+        int pbufferAttributes[] = {GLX_PBUFFER_WIDTH, 8, GLX_PBUFFER_HEIGHT, 8, None};
+        glxPbuffer = glXCreatePbuffer(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], pbufferAttributes);
     }
 
     ~GLXBackendImpl() final {

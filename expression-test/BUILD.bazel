@@ -1,0 +1,39 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+cc_library(
+    name = "test_runner_common",
+    srcs = [
+        "test_runner_common.cpp",
+        "test_runner_common.hpp",
+    ],
+    hdrs = [
+        "test_runner_common.hpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    includes = [
+        ".",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+    ],
+)
+
+cc_test(
+    name = "test",
+    size = "small",
+    srcs = glob(
+        [
+            "*.cpp",
+            "*.hpp",
+        ],
+        allow_empty = False,
+    ),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = [
+        "//metrics:expression-test-files",
+    ],
+    deps = [
+        "//platform/linux:impl",
+    ],
+)

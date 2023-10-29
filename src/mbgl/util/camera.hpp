@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mbgl/util/size.hpp>
-#include "quaternion.hpp"
+#include <mbgl/util/quaternion.hpp>
 
 #include <optional>
 
@@ -30,8 +30,9 @@ public:
     void setOrientation(const Quaternion& orientation_);
     void setPosition(const vec3& position);
 
-    // Computes orientation using forward and up vectors of the provided coordinate frame.
-    // Only bearing and pitch components will be used. Does not return a value if input is invalid
+    // Computes orientation using forward and up vectors of the provided
+    // coordinate frame. Only bearing and pitch components will be used. Does
+    // not return a value if input is invalid
     static std::optional<Quaternion> orientationFromFrame(const vec3& forward, const vec3& up);
 
 private:

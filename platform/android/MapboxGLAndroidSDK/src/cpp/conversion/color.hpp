@@ -14,5 +14,5 @@ struct Converter<mbgl::Color, int> {
 };
 
 } // namespace conversion
-} // namespace style
+} // namespace android
 } // namespace mbgl

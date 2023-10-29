@@ -9,11 +9,10 @@
 namespace mbgl {
 
 PremultipliedImage decodeImage(const std::string& string) {
-    auto env{ android::AttachEnv() };
+    auto env{android::AttachEnv()};
 
     auto array = jni::Array<jni::jbyte>::New(*env, string.size());
-    jni::SetArrayRegion(*env, *array, 0, string.size(),
-                        reinterpret_cast<const signed char*>(string.data()));
+    jni::SetArrayRegion(*env, *array, 0, string.size(), reinterpret_cast<const signed char*>(string.data()));
 
     return android::Bitmap::GetImage(*env, android::BitmapFactory::DecodeByteArray(*env, array, 0, string.size()));
 }

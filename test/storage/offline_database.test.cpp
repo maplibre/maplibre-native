@@ -47,41 +47,41 @@ static std::shared_ptr<std::string> randomString(size_t size) {
 }
 
 static FixtureLog::Message error(ResultCode code, const char* message) {
-    return { EventSeverity::Error, Event::Database, static_cast<int64_t>(code), message };
+    return {EventSeverity::Error, Event::Database, static_cast<int64_t>(code), message};
 }
 
 static MBGL_UNUSED FixtureLog::Message warning(ResultCode code, const char* message) {
-    return { EventSeverity::Warning, Event::Database, static_cast<int64_t>(code), message };
+    return {EventSeverity::Warning, Event::Database, static_cast<int64_t>(code), message};
 }
 
 static int databasePageCount(const std::string& path) {
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
-    mapbox::sqlite::Statement stmt{ db, "pragma page_count" };
-    mapbox::sqlite::Query query{ stmt };
+    mapbox::sqlite::Statement stmt{db, "pragma page_count"};
+    mapbox::sqlite::Query query{stmt};
     query.run();
     return query.get<int>(0);
 }
 
 static int databaseUserVersion(const std::string& path) {
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
-    mapbox::sqlite::Statement stmt{ db, "pragma user_version" };
-    mapbox::sqlite::Query query{ stmt };
+    mapbox::sqlite::Statement stmt{db, "pragma user_version"};
+    mapbox::sqlite::Query query{stmt};
     query.run();
     return query.get<int>(0);
 }
 
 static std::string databaseJournalMode(const std::string& path) {
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
-    mapbox::sqlite::Statement stmt{ db, "pragma journal_mode" };
-    mapbox::sqlite::Query query{ stmt };
+    mapbox::sqlite::Statement stmt{db, "pragma journal_mode"};
+    mapbox::sqlite::Query query{stmt};
     query.run();
     return query.get<std::string>(0);
 }
 
 static int databaseSyncMode(const std::string& path) {
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
-    mapbox::sqlite::Statement stmt{ db, "pragma synchronous" };
-    mapbox::sqlite::Query query{ stmt };
+    mapbox::sqlite::Statement stmt{db, "pragma synchronous"};
+    mapbox::sqlite::Query query{stmt};
     query.run();
     return query.get<int>(0);
 }
@@ -89,8 +89,8 @@ static int databaseSyncMode(const std::string& path) {
 static std::vector<std::string> databaseTableColumns(const std::string& path, const std::string& name) {
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
     const auto sql = std::string("pragma table_info(") + name + ")";
-    mapbox::sqlite::Statement stmt{ db, sql.c_str() };
-    mapbox::sqlite::Query query{ stmt };
+    mapbox::sqlite::Statement stmt{db, sql.c_str()};
+    mapbox::sqlite::Query query{stmt};
     std::vector<std::string> columns;
     while (query.run()) {
         columns.push_back(query.get<std::string>(1));
@@ -108,7 +108,7 @@ static int databaseAutoVacuum(const std::string& path) {
 
 namespace fixture {
 
-const Resource resource{ Resource::Style, "maptiler://test" };
+const Resource resource{Resource::Style, "maptiler://test"};
 const Resource tile = Resource::tile("maptiler://test", 1, 0, 0, 0, Tileset::Scheme::XYZ);
 const Response response = [] {
     Response res;
@@ -124,7 +124,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Create)) {
     FixtureLog log;
     deleteDatabaseFiles();
     OfflineDatabase db(filename, fixture::tileServerOptions);
-    EXPECT_FALSE(bool(db.get({ Resource::Unknown, "maptiler://test" })));
+    EXPECT_FALSE(bool(db.get({Resource::Unknown, "maptiler://test"})));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -135,34 +135,38 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     deleteDatabaseFiles();
     test::SQLite3TestFS fs;
 
-    // Opening the database will fail because our mock VFS returns a SQLITE_CANTOPEN error because
-    // it is not allowed to create the file. The OfflineDatabase object should handle this gracefully
-    // and treat it like an empty cache that can't be written to.
+    // Opening the database will fail because our mock VFS returns a
+    // SQLITE_CANTOPEN error because it is not allowed to create the file. The
+    // OfflineDatabase object should handle this gracefully and treat it like an
+    // empty cache that can't be written to.
     fs.allowFileCreate(false);
     OfflineDatabase db(filename_test_fs, fixture::tileServerOptions);
     EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't open database: unable to open database file")));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 
-    // We can try to insert things into the cache, but since the cache database isn't open, it won't be stored.
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    // We can try to insert things into the cache, but since the cache database
+    // isn't open, it won't be stored.
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(false, uint64_t(0)), db.put(res, fixture::response));
         EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't write resource: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
     }
 
-    // We can also still "query" the database even though it is not open, and we will always get an empty result.
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    // We can also still "query" the database even though it is not open, and we
+    // will always get an empty result.
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_FALSE(bool(db.get(res)));
         EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
         EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't read resource: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
     }
 
-    // Now, we're "freeing up" some space on the disk, and try to insert and query again. This time, we should
-    // be opening the datbase, creating the schema, and writing the data so that we can retrieve it again.
+    // Now, we're "freeing up" some space on the disk, and try to insert and
+    // query again. This time, we should be opening the datbase, creating the
+    // schema, and writing the data so that we can retrieve it again.
     fs.allowFileCreate(true);
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(true, uint64_t(5)), db.put(res, fixture::response));
         auto result = db.get(res);
         EXPECT_EQ(0u, log.uncheckedCount());
@@ -170,12 +174,13 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
         EXPECT_EQ("first", *result->data);
     }
 
-    // Next, set the file system to read only mode and try to read the data again. While we can't
-    // write anymore, we should still be able to read, and the query that tries to update the last
-    // accessed timestamp may fail without crashing.
+    // Next, set the file system to read only mode and try to read the data
+    // again. While we can't write anymore, we should still be able to read, and
+    // the query that tries to update the last accessed timestamp may fail
+    // without crashing.
     fs.allowFileCreate(false);
     fs.setWriteLimit(0);
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         auto result = db.get(res);
         EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
@@ -185,12 +190,12 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     }
     fs.setDebug(false);
 
-    // We're allowing SQLite to create a journal file, but restrict the number of bytes it
-    // can write so that it can start writing the journal file, but eventually fails during the
-    // timestamp update.
+    // We're allowing SQLite to create a journal file, but restrict the number
+    // of bytes it can write so that it can start writing the journal file, but
+    // eventually fails during the timestamp update.
     fs.allowFileCreate(true);
     fs.setWriteLimit(8192);
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         auto result = db.get(res);
         EXPECT_EQ(1u, log.count(warning(ResultCode::Full, "Can't update timestamp: database or disk is full")));
         EXPECT_EQ(0u, log.uncheckedCount());
@@ -198,11 +203,11 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
         EXPECT_EQ("first", *result->data);
     }
 
-    // Lastly, we're disabling all I/O to simulate a backgrounded app that is restricted from doing
-    // any disk I/O at all.
+    // Lastly, we're disabling all I/O to simulate a backgrounded app that is
+    // restricted from doing any disk I/O at all.
     fs.setWriteLimit(-1);
     fs.allowIO(false);
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         // First, try reading.
         auto result = db.get(res);
         EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
@@ -231,15 +236,13 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(SchemaVersion)) {
         db.exec("PRAGMA user_version = 1");
     }
 
-    {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
-    }
+    { OfflineDatabase db(filename, fixture::tileServerOptions); }
 
     EXPECT_EQ(6, databaseUserVersion(filename));
 
     OfflineDatabase db(filename, fixture::tileServerOptions);
     // Now try inserting and reading back to make sure we have a valid database.
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(true, uint64_t(5)), db.put(res, fixture::response));
         EXPECT_EQ(0u, log.uncheckedCount());
         auto result = db.get(res);
@@ -257,13 +260,18 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Invalid)) {
     util::write_file(filename, "this is an invalid file");
 
     OfflineDatabase db(filename, fixture::tileServerOptions);
-    // Checking two possibilities for the error string because it apparently changes between SQLite versions.
-    EXPECT_EQ(1u, log.count(error(ResultCode::NotADB, "Can't open database: file is encrypted or is not a database"), true) +
-                  log.count(error(ResultCode::NotADB, "Can't open database: file is not a database"), true));
-    EXPECT_EQ(1u, log.count({ EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database" }));
+    // Checking two possibilities for the error string because it apparently
+    // changes between SQLite versions.
+    EXPECT_EQ(
+        1u,
+        log.count(error(ResultCode::NotADB, "Can't open database: file is encrypted or is not a database"), true) +
+            log.count(error(ResultCode::NotADB, "Can't open database: file is not a database"), true));
+    EXPECT_EQ(
+        1u,
+        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
 
     // Now try inserting and reading back to make sure we have a valid database.
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(true, uint64_t(5)), db.put(res, fixture::response));
         EXPECT_EQ(0u, log.uncheckedCount());
         auto result = db.get(res);
@@ -277,7 +285,7 @@ TEST(OfflineDatabase, PutDoesNotStoreConnectionErrors) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
-    Resource resource { Resource::Unknown, "http://example.com/" };
+    Resource resource{Resource::Unknown, "http://example.com/"};
     Response response;
     response.error = std::make_unique<Response::Error>(Response::Error::Reason::Connection);
 
@@ -291,7 +299,7 @@ TEST(OfflineDatabase, PutDoesNotStoreServerErrors) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
-    Resource resource { Resource::Unknown, "http://example.com/" };
+    Resource resource{Resource::Unknown, "http://example.com/"};
     Response response;
     response.error = std::make_unique<Response::Error>(Response::Error::Reason::Server);
 
@@ -305,7 +313,7 @@ TEST(OfflineDatabase, PutResource) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
-    Resource resource { Resource::Style, "http://example.com/" };
+    Resource resource{Resource::Style, "http://example.com/"};
     Response response;
 
     response.data = std::make_shared<std::string>("first");
@@ -364,14 +372,8 @@ TEST(OfflineDatabase, PutTile) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
-    Resource resource { Resource::Tile, "http://example.com/" };
-    resource.tileData = Resource::TileData {
-        "http://example.com/",
-        1,
-        0,
-        0,
-        0
-    };
+    Resource resource{Resource::Tile, "http://example.com/"};
+    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
     Response response;
 
     response.data = std::make_shared<std::string>("first");
@@ -399,7 +401,7 @@ TEST(OfflineDatabase, PutResourceNoContent) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
-    Resource resource { Resource::Style, "http://example.com/" };
+    Resource resource{Resource::Style, "http://example.com/"};
     Response response;
     response.noContent = true;
 
@@ -416,14 +418,8 @@ TEST(OfflineDatabase, PutTileNotFound) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
 
-    Resource resource { Resource::Tile, "http://example.com/" };
-    resource.tileData = Resource::TileData {
-        "http://example.com/",
-        1,
-        0,
-        0,
-        0
-    };
+    Resource resource{Resource::Tile, "http://example.com/"};
+    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
     Response response;
     response.noContent = true;
 
@@ -439,37 +435,37 @@ TEST(OfflineDatabase, PutTileNotFound) {
 TEST(OfflineDatabase, CreateRegion) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-    OfflineRegionMetadata metadata {{ 1, 2, 3 }};
+    OfflineTilePyramidRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+    OfflineRegionMetadata metadata{{1, 2, 3}};
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
 
     EXPECT_EQ(0u, log.uncheckedCount());
 
     region->getDefinition().match(
-            [&](OfflineTilePyramidRegionDefinition& def) {
-                EXPECT_EQ(definition.styleURL, def.styleURL);
-                EXPECT_EQ(definition.bounds, def.bounds);
-                EXPECT_EQ(definition.minZoom, def.minZoom);
-                EXPECT_EQ(definition.maxZoom, def.maxZoom);
-                EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
-                EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
-            }, [](auto&) {
-                EXPECT_FALSE(false);
-            }
-    );
+        [&](OfflineTilePyramidRegionDefinition& def) {
+            EXPECT_EQ(definition.styleURL, def.styleURL);
+            EXPECT_EQ(definition.bounds, def.bounds);
+            EXPECT_EQ(definition.minZoom, def.minZoom);
+            EXPECT_EQ(definition.maxZoom, def.maxZoom);
+            EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
+            EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
+        },
+        [](auto&) { EXPECT_FALSE(false); });
     EXPECT_EQ(metadata, region->getMetadata());
 }
 
 TEST(OfflineDatabase, UpdateMetadata) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-    OfflineRegionMetadata metadata {{ 1, 2, 3 }};
+    OfflineTilePyramidRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+    OfflineRegionMetadata metadata{{1, 2, 3}};
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
 
-    OfflineRegionMetadata newmetadata {{ 4, 5, 6 }};
+    OfflineRegionMetadata newmetadata{{4, 5, 6}};
     db.updateMetadata(region->getID(), newmetadata);
     auto regions = db.listRegions().value();
     EXPECT_EQ(regions.at(0).getMetadata(), newmetadata);
@@ -480,8 +476,9 @@ TEST(OfflineDatabase, UpdateMetadata) {
 TEST(OfflineDatabase, ListRegions) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false };
-    OfflineRegionMetadata metadata {{ 1, 2, 3 }};
+    OfflineTilePyramidRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
+    OfflineRegionMetadata metadata{{1, 2, 3}};
 
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
@@ -491,17 +488,15 @@ TEST(OfflineDatabase, ListRegions) {
 
     EXPECT_EQ(region->getID(), regions.at(0).getID());
     regions.at(0).getDefinition().match(
-            [&](OfflineTilePyramidRegionDefinition& def) {
-                EXPECT_EQ(definition.styleURL, def.styleURL);
-                EXPECT_EQ(definition.bounds, def.bounds);
-                EXPECT_EQ(definition.minZoom, def.minZoom);
-                EXPECT_EQ(definition.maxZoom, def.maxZoom);
-                EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
-                EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
-            },
-            [&](auto&) {
-                EXPECT_FALSE(false);
-            });
+        [&](OfflineTilePyramidRegionDefinition& def) {
+            EXPECT_EQ(definition.styleURL, def.styleURL);
+            EXPECT_EQ(definition.bounds, def.bounds);
+            EXPECT_EQ(definition.minZoom, def.minZoom);
+            EXPECT_EQ(definition.maxZoom, def.maxZoom);
+            EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
+            EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
+        },
+        [&](auto&) { EXPECT_FALSE(false); });
     EXPECT_EQ(metadata, regions.at(0).getMetadata());
 
     EXPECT_EQ(0u, log.uncheckedCount());
@@ -510,13 +505,15 @@ TEST(OfflineDatabase, ListRegions) {
 TEST(OfflineDatabase, GetRegionDefinition) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false };
-    OfflineRegionMetadata metadata {{ 1, 2, 3 }};
+    OfflineTilePyramidRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
+    OfflineRegionMetadata metadata{{1, 2, 3}};
 
     EXPECT_EQ(0u, log.uncheckedCount());
 
     auto region = db.createRegion(definition, metadata);
-    db.getRegionDefinition(region->getID())->match(
+    db.getRegionDefinition(region->getID())
+        ->match(
             [&](OfflineTilePyramidRegionDefinition& result) {
                 EXPECT_EQ(definition.styleURL, result.styleURL);
                 EXPECT_EQ(definition.bounds, result.bounds);
@@ -525,10 +522,7 @@ TEST(OfflineDatabase, GetRegionDefinition) {
                 EXPECT_EQ(definition.pixelRatio, result.pixelRatio);
                 EXPECT_EQ(definition.includeIdeographs, result.includeIdeographs);
             },
-            [&](auto&) {
-                EXPECT_FALSE(false);
-            }
-    );
+            [&](auto&) { EXPECT_FALSE(false); });
 }
 
 // Disabled due to flakiness: https://github.com/mapbox/mapbox-gl-native/issues/14966
@@ -540,9 +534,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
         return util::read_file(filename).size();
     };
 
-    {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
-    }
+    { OfflineDatabase db(filename, fixture::tileServerOptions); }
 
     size_t initialSize = util::read_file(filename).size();
     size_t maximumSize = 50 * 1024 * 1024;
@@ -554,20 +546,23 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
         OfflineDatabase db(filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(maximumSize); // 50 MB
 
-        OfflineTilePyramidRegionDefinition definition{ "maptiler://masp/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-        OfflineRegionMetadata metadata{{ 1, 2, 3 }};
+        OfflineTilePyramidRegionDefinition definition{
+            "maptiler://masp/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+        OfflineRegionMetadata metadata{{1, 2, 3}};
 
         auto region = db.createRegion(definition, metadata);
 
         // Add 100 MB of resources (50/50 ambient/region)
         for (unsigned i = 0; i < 250; ++i) {
-            const Resource ambientTile = Resource::tile("maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+            const Resource ambientTile = Resource::tile(
+                "maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
             db.put(ambientTile, response);
 
             const Resource ambientStyle = Resource::style("maptiler://maps/ambient_style_" + std::to_string(i));
             db.put(ambientStyle, response);
 
-            const Resource regionTile = Resource::tile("maptiler://tiles/tiles/region_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+            const Resource regionTile = Resource::tile(
+                "maptiler://tiles/tiles/region_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
             db.putRegionResource(region->getID(), regionTile, response);
 
             const Resource regionStyle = Resource::style("maptiler://maps/region_style_" + std::to_string(i));
@@ -622,7 +617,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
 
         // Add ~50 MB in ambient cache data.
         for (unsigned i = 0; i < 250; ++i) {
-            const Resource ambientTile = Resource::tile("maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+            const Resource ambientTile = Resource::tile(
+                "maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
             db.put(ambientTile, response);
 
             const Resource ambientStyle = Resource::style("maptiler://mas/ambient_style_" + std::to_string(i));
@@ -651,7 +647,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
         db.setMaximumAmbientCacheSize(0);
 
         for (unsigned i = 0; i < 5; ++i) {
-            const Resource ambientTile = Resource::tile("maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+            const Resource ambientTile = Resource::tile(
+                "maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
             db.put(ambientTile, response);
             ASSERT_FALSE(db.get(ambientTile));
 
@@ -686,11 +683,11 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
     FixtureLog log;
     deleteDatabaseFiles();
 
-    {
-        OfflineDatabase dbCreate(filename, fixture::tileServerOptions);
-    }
+    { OfflineDatabase dbCreate(filename, fixture::tileServerOptions); }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     size_t initialSize = util::read_file(filename).size();
+#endif
 
     {
         Response response;
@@ -698,15 +695,18 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
 
         OfflineDatabase db(filename, fixture::tileServerOptions);
 
-        OfflineTilePyramidRegionDefinition definition{ "maptiler://maps/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-        OfflineRegionMetadata metadata{{ 1, 2, 3 }};
+        OfflineTilePyramidRegionDefinition definition{
+            "maptiler://maps/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+        OfflineRegionMetadata metadata{{1, 2, 3}};
 
         auto region1 = db.createRegion(definition, metadata);
         auto region2 = db.createRegion(definition, metadata);
 
         OfflineRegionStatus status;
-        db.putRegionResources(region1->getID(), generateResources("maptiler://tiles/tiles/tile_1", "maptiler://maps/style_1"), status);
-        db.putRegionResources(region2->getID(), generateResources("maptiler://tiles/tiles/tile_2", "maptiler://maps/style_2"), status);
+        db.putRegionResources(
+            region1->getID(), generateResources("maptiler://tiles/tiles/tile_1", "maptiler://maps/style_1"), status);
+        db.putRegionResources(
+            region2->getID(), generateResources("maptiler://tiles/tiles/tile_2", "maptiler://maps/style_2"), status);
         const size_t sizeWithTwoRegions = util::read_file(filename).size();
 
         db.runPackDatabaseAutomatically(false);
@@ -734,13 +734,17 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
         // The tiles from the offline region will migrate to the
         // ambient cache and shrink the database to the maximum
         // size defined by default.
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
         EXPECT_LE(sizeWithoutRegions, util::DEFAULT_MAX_CACHE_SIZE);
+#endif
 
         ASSERT_EQ(0u, db.listRegions().value().size());
         EXPECT_LT(sizeWithoutRegions, sizeWithOneRegion);
     }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     EXPECT_EQ(initialSize, util::read_file(filename).size());
+#endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -756,7 +760,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Pack)) {
     response.data = randomString(512 * 1024);
 
     for (unsigned i = 0; i < 50; ++i) {
-        const Resource tile = Resource::tile("maptiler://tiles/tiles/tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource tile = Resource::tile(
+            "maptiler://tiles/tiles/tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(tile, response);
 
         const Resource style = Resource::style("maptiler://maps/style_" + std::to_string(i));
@@ -770,7 +775,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Pack)) {
     EXPECT_EQ(0u, log.uncheckedCount());
 
     db.pack();
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     EXPECT_EQ(initialSize, util::read_file(filename).size());
+#endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -786,20 +793,24 @@ TEST(OfflineDatabase, MapboxTileLimitExceeded) {
     response.data = randomString(4096);
 
     auto insertAmbientTile = [&](unsigned i) {
-        const Resource ambientTile = Resource::tile("maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource ambientTile = Resource::tile(
+            "maptiler://tiles/tiles/ambient_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.put(ambientTile, response);
     };
 
     auto insertRegionTile = [&](int64_t regionID, uint64_t i) {
-        const Resource tile = Resource::tile("maptiler://tiles/tiles/region_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource tile = Resource::tile(
+            "maptiler://tiles/tiles/region_tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.putRegionResource(regionID, tile, response);
     };
 
-    OfflineTilePyramidRegionDefinition definition1{ "maptiler://maps/style1", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-    OfflineRegionMetadata metadata1{{ 1, 2, 3 }};
+    OfflineTilePyramidRegionDefinition definition1{
+        "maptiler://maps/style1", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+    OfflineRegionMetadata metadata1{{1, 2, 3}};
 
-    OfflineTilePyramidRegionDefinition definition2{ "maptiler://maps/style2", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-    OfflineRegionMetadata metadata2{{ 1, 2, 3 }};
+    OfflineTilePyramidRegionDefinition definition2{
+        "maptiler://maps/style2", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+    OfflineRegionMetadata metadata2{{1, 2, 3}};
 
     auto region1 = db.createRegion(definition1, metadata1);
     auto region2 = db.createRegion(definition2, metadata2);
@@ -883,24 +894,28 @@ TEST(OfflineDatabase, Invalidate) {
     response.mustRevalidate = false;
     response.expires = util::now() + 1h;
 
-    const Resource ambientTile = Resource::tile("maptiler://tiles/tiles/tile_ambient", 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    const Resource ambientTile = Resource::tile(
+        "maptiler://tiles/tiles/tile_ambient", 1, 0, 0, 0, Tileset::Scheme::XYZ);
     db.put(ambientTile, response);
 
-    const Resource ambientStyle  = Resource::style("maptiler://maps/style_ambient");
+    const Resource ambientStyle = Resource::style("maptiler://maps/style_ambient");
     db.put(ambientStyle, response);
 
-    OfflineTilePyramidRegionDefinition definition { "maptiler://maps/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true };
-    OfflineRegionMetadata metadata {{ 1, 2, 3 }};
+    OfflineTilePyramidRegionDefinition definition{
+        "maptiler://maps/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
+    OfflineRegionMetadata metadata{{1, 2, 3}};
 
     auto region1 = db.createRegion(definition, metadata);
-    const Resource region1Tile = Resource::tile("maptiler://tiles/tiles/tile_offline_region1", 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
+    const Resource region1Tile = Resource::tile(
+        "maptiler://tiles/tiles/tile_offline_region1", 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
     db.putRegionResource(region1->getID(), region1Tile, response);
 
     const Resource region1Style = Resource::style("maptiler://maps/style_offline_region1");
     db.putRegionResource(region1->getID(), region1Style, response);
 
     auto region2 = db.createRegion(definition, metadata);
-    const Resource region2Tile = Resource::tile("maptiler://tiles/tiles/tile_offline_region2", 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
+    const Resource region2Tile = Resource::tile(
+        "maptiler://tiles/tiles/tile_offline_region2", 1.0, 0, 0, 0, Tileset::Scheme::XYZ);
     db.putRegionResource(region2->getID(), region2Tile, response);
 
     const Resource region2Style = Resource::style("maptiler://maps/style_offline_region2");
@@ -967,11 +982,11 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
     FixtureLog log;
     deleteDatabaseFiles();
 
-    {
-        OfflineDatabase dbCreate(filename, fixture::tileServerOptions);
-    }
+    { OfflineDatabase dbCreate(filename, fixture::tileServerOptions); }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     size_t initialSize = util::read_file(filename).size();
+#endif
 
     {
         Response response;
@@ -980,7 +995,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
         OfflineDatabase db(filename, fixture::tileServerOptions);
 
         for (unsigned i = 0; i < 50; ++i) {
-            const Resource tile = Resource::tile("maptiler://tiles/tiles/tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+            const Resource tile = Resource::tile(
+                "maptiler://tiles/tiles/tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
             db.put(tile, response);
 
             const Resource style = Resource::style("maptiler://maps/style_" + std::to_string(i));
@@ -990,14 +1006,16 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
         db.clearAmbientCache();
     }
 
+#ifndef __QT__ // Qt doesn't decrease the size of the database file.
     EXPECT_EQ(initialSize, util::read_file(filename).size());
+#endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
 TEST(OfflineDatabase, CreateRegionInfiniteMaxZoom) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, false };
+    OfflineTilePyramidRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, false};
     OfflineRegionMetadata metadata;
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
@@ -1010,6 +1028,7 @@ TEST(OfflineDatabase, CreateRegionInfiniteMaxZoom) {
     });
 }
 
+#ifndef __QT__ // Qt doesn't support concurrent access to the same database.
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ConcurrentUse)) {
     FixtureLog log;
     deleteDatabaseFiles();
@@ -1042,6 +1061,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ConcurrentUse)) {
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
+#endif
 
 TEST(OfflineDatabase, PutReturnsSize) {
     FixtureLog log;
@@ -1105,7 +1125,8 @@ TEST(OfflineDatabase, OfflineRegionDoesNotAffectAmbientCacheSize) {
 
     // 1MB of offline region data.
     for (std::size_t i = 0; i < 5; ++i) {
-        const Resource tile = Resource::tile("maptiler://tiles/tiles/tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
+        const Resource tile = Resource::tile(
+            "maptiler://tiles/tiles/tile_" + std::to_string(i), 1, 0, 0, 0, Tileset::Scheme::XYZ);
         db.putRegionResource(region->getID(), tile, response);
 
         const Resource style = Resource::style("maptiler://maps/style_" + std::to_string(i));
@@ -1126,7 +1147,7 @@ TEST(OfflineDatabase, PutRegionResourceDoesNotEvict) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, true };
+    OfflineTilePyramidRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, true};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1154,7 +1175,7 @@ TEST(OfflineDatabase, PutFailsWhenEvictionInsuffices) {
 
     EXPECT_FALSE(db.put(Resource::style("http://example.com/big"), big).first);
 
-    EXPECT_EQ(1u, log.count({ EventSeverity::Info, Event::Database, -1, "Unable to make space for entry" }));
+    EXPECT_EQ(1u, log.count({EventSeverity::Info, Event::Database, -1, "Unable to make space for entry"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_FALSE(bool(db.get(Resource::style("http://example.com/big"))));
@@ -1165,7 +1186,8 @@ TEST(OfflineDatabase, PutFailsWhenEvictionInsuffices) {
 TEST(OfflineDatabase, GetRegionCompletedStatus) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false };
+    OfflineTilePyramidRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
     OfflineRegionMetadata metadata;
     auto region = db.createRegion(definition, metadata);
     ASSERT_TRUE(region);
@@ -1189,7 +1211,8 @@ TEST(OfflineDatabase, GetRegionCompletedStatus) {
     EXPECT_EQ(0u, status2->completedTileCount);
     EXPECT_EQ(0u, status2->completedTileSize);
 
-    uint64_t tileSize = db.putRegionResource(region->getID(), Resource::tile("http://example.com/", 1.0, 0, 0, 0, Tileset::Scheme::XYZ), response);
+    uint64_t tileSize = db.putRegionResource(
+        region->getID(), Resource::tile("http://example.com/", 1.0, 0, 0, 0, Tileset::Scheme::XYZ), response);
 
     auto status3 = db.getRegionCompletedStatus(region->getID());
     ASSERT_TRUE(status3);
@@ -1206,7 +1229,7 @@ TEST(OfflineDatabase, HasRegionResource) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, true };
+    OfflineTilePyramidRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, true};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1232,18 +1255,12 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, false };
+    OfflineTilePyramidRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, false};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
-    Resource resource { Resource::Tile, "http://example.com/" };
-    resource.tileData = Resource::TileData {
-        "http://example.com/",
-        1,
-        0,
-        0,
-        0
-    };
+    Resource resource{Resource::Tile, "http://example.com/"};
+    resource.tileData = Resource::TileData{"http://example.com/", 1, 0, 0, 0};
     Response response;
 
     response.data = std::make_shared<std::string>("first");
@@ -1260,13 +1277,13 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
     EXPECT_EQ(5, *(db.hasRegionResource(resource)));
 
     EXPECT_EQ(0u, log.uncheckedCount());
-
 }
 
 TEST(OfflineDatabase, OfflineMapboxTileCount) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    OfflineTilePyramidRegionDefinition definition { "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0 , true};
+    OfflineTilePyramidRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
     OfflineRegionMetadata metadata;
 
     auto region1 = db.createRegion(definition, metadata);
@@ -1323,13 +1340,12 @@ TEST(OfflineDatabase, OfflineMapboxTileCount) {
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
-
 TEST(OfflineDatabase, BatchInsertion) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, true };
+    OfflineTilePyramidRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, true};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1357,7 +1373,7 @@ TEST(OfflineDatabase, BatchInsertionMapboxTileCountExceeded) {
     db.setOfflineMapboxTileCountLimit(1);
     db.setMaximumAmbientCacheSize(1024 * 100);
 
-    OfflineTilePyramidRegionDefinition definition { "", LatLngBounds::world(), 0, INFINITY, 1.0, false };
+    OfflineTilePyramidRegionDefinition definition{"", LatLngBounds::world(), 0, INFINITY, 1.0, false};
     auto region = db.createRegion(definition, OfflineRegionMetadata());
     ASSERT_TRUE(region);
 
@@ -1404,8 +1420,7 @@ TEST(OfflineDatabase, MigrateFromV2Schema) {
     }
 
     EXPECT_EQ(6, databaseUserVersion(filename));
-    EXPECT_LT(databasePageCount(filename),
-              databasePageCount("test/fixtures/offline_database/v2.db"));
+    EXPECT_LT(databasePageCount(filename), databasePageCount("test/fixtures/offline_database/v2.db"));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1432,7 +1447,8 @@ TEST(OfflineDatabase, MigrateFromV3Schema) {
 }
 
 TEST(OfflineDatabase, MigrateFromV4Schema) {
-    // v4.db is a v4 database, migrated from v2 & v3. This database used `journal_mode = WAL` and `synchronous = NORMAL`.
+    // v4.db is a v4 database, migrated from v2 & v3. This database used
+    // `journal_mode = WAL` and `synchronous = NORMAL`.
     FixtureLog log;
     deleteDatabaseFiles();
     util::copyFile(filename, "test/fixtures/offline_database/v4.db");
@@ -1457,7 +1473,6 @@ TEST(OfflineDatabase, MigrateFromV4Schema) {
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
-
 
 TEST(OfflineDatabase, MigrateFromV5Schema) {
     // v5.db is a v5 database, migrated from v2, v3 & v4.
@@ -1534,15 +1549,28 @@ TEST(OfflineDatabase, DowngradeSchema) {
 
     EXPECT_EQ(6, databaseUserVersion(filename));
 
-    EXPECT_EQ((std::vector<std::string>{ "id", "url_template", "pixel_ratio", "z", "x", "y",
-                                         "expires", "modified", "etag", "data", "compressed",
-                                         "accessed", "must_revalidate" }),
+    EXPECT_EQ((std::vector<std::string>{"id",
+                                        "url_template",
+                                        "pixel_ratio",
+                                        "z",
+                                        "x",
+                                        "y",
+                                        "expires",
+                                        "modified",
+                                        "etag",
+                                        "data",
+                                        "compressed",
+                                        "accessed",
+                                        "must_revalidate"}),
               databaseTableColumns(filename, "tiles"));
-    EXPECT_EQ((std::vector<std::string>{ "id", "url", "kind", "expires", "modified", "etag", "data",
-                                         "compressed", "accessed", "must_revalidate" }),
-              databaseTableColumns(filename, "resources"));
+    EXPECT_EQ(
+        (std::vector<std::string>{
+            "id", "url", "kind", "expires", "modified", "etag", "data", "compressed", "accessed", "must_revalidate"}),
+        databaseTableColumns(filename, "resources"));
 
-    EXPECT_EQ(1u, log.count({ EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database" }));
+    EXPECT_EQ(
+        1u,
+        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -1554,11 +1582,13 @@ TEST(OfflineDatabase, CorruptDatabaseOnOpen) {
     // This database is corrupt in a way that will prevent opening the database.
     OfflineDatabase db(filename, fixture::tileServerOptions);
     EXPECT_EQ(1u, log.count(error(ResultCode::Corrupt, "Can't open database: database disk image is malformed"), true));
-    EXPECT_EQ(1u, log.count({ EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database" }));
+    EXPECT_EQ(
+        1u,
+        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     // Now try inserting and reading back to make sure we have a valid database.
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(true, uint64_t(5)), db.put(res, fixture::response));
         EXPECT_EQ(0u, log.uncheckedCount());
         auto result = db.get(res);
@@ -1573,22 +1603,24 @@ TEST(OfflineDatabase, CorruptDatabaseOnQuery) {
     util::deleteFile(filename);
     util::copyFile(filename, "test/fixtures/offline_database/corrupt-delayed.db");
 
-    // This database is corrupt in a way that won't manifest itself until we start querying it,
-    // so just opening it will not cause an error.
+    // This database is corrupt in a way that won't manifest itself until we
+    // start querying it, so just opening it will not cause an error.
     OfflineDatabase db(filename, fixture::tileServerOptions);
 
-    // Just opening this corrupt database should not have produced an error yet, since
-    // PRAGMA user_version still succeeds with this database.
+    // Just opening this corrupt database should not have produced an error yet,
+    // since PRAGMA user_version still succeeds with this database.
     EXPECT_EQ(0u, log.uncheckedCount());
 
     // The first request fails because the database is corrupt and has to be recreated.
     EXPECT_EQ(std::nullopt, db.get(fixture::tile));
     EXPECT_EQ(1u, log.count(error(ResultCode::Corrupt, "Can't read resource: database disk image is malformed"), true));
-    EXPECT_EQ(1u, log.count({ EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database" }));
+    EXPECT_EQ(
+        1u,
+        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     // Now try inserting and reading back to make sure we have a valid database.
-    for (const auto& res : { fixture::resource, fixture::tile }) {
+    for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(true, uint64_t(5)), db.put(res, fixture::response));
         EXPECT_EQ(0u, log.uncheckedCount());
         auto result = db.get(res);
@@ -1609,7 +1641,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
 
     // First, create a region object so that we can try deleting it later.
     OfflineTilePyramidRegionDefinition definition(
-        "maptiler://maps/style", LatLngBounds::hull({ 37.66, -122.57 }, { 37.83, -122.32 }), 0, 8, 2, false);
+        "maptiler://maps/style", LatLngBounds::hull({37.66, -122.57}, {37.83, -122.32}), 0, 8, 2, false);
     auto region = db.createRegion(definition, {});
     ASSERT_TRUE(region);
 
@@ -1651,7 +1683,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     EXPECT_EQ(0u, log.uncheckedCount());
 
     OfflineRegionStatus status;
-    db.putRegionResources(region->getID(), { std::make_tuple(fixture::resource, fixture::response) }, status);
+    db.putRegionResources(region->getID(), {std::make_tuple(fixture::resource, fixture::response)}, status);
     EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't write region resources: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
@@ -1681,15 +1713,15 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_New) {
 
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     EXPECT_EQ(0u, db.listRegions()->size());
-    
+
     OfflineDatabase db_sideload(filename_sideload, fixture::tileServerOptions);
     auto newRegionsCount = db_sideload.listRegions()->size();
-    
+
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_EQ(newRegionsCount, db.listRegions()->size());
 
     auto regionId = result->front().getID();
-    auto status =  db.getRegionCompletedStatus(regionId);
+    auto status = db.getRegionCompletedStatus(regionId);
     EXPECT_EQ(398u, status->completedResourceCount);
     EXPECT_EQ(5u, status->completedTileCount);
 }
@@ -1704,10 +1736,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
     {
         std::string tileURL = "maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg";
         OfflineDatabase db1(filename_sideload, fixture::tileServerOptions);
-        auto originalTile = db1.getRegionResource(
-            Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
+        auto originalTile = db1.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
         auto originalStamp = originalTile->first.modified;
-        
+
         OfflineDatabase db(filename, fixture::tileServerOptions);
         auto regions = db.listRegions();
         EXPECT_EQ(1u, db.listRegions()->size());
@@ -1720,10 +1751,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
         EXPECT_EQ(395u, status->completedResourceCount);
         EXPECT_EQ(2u, status->completedTileCount);
 
-        //Verify the modified timestamp matches the tile in the sideloaded db.
-        auto updatedTile = db.getRegionResource(
-            Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
-        
+        // Verify the modified timestamp matches the tile in the sideloaded db.
+        auto updatedTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
+
         auto updatedStamp = updatedTile->first.modified;
         EXPECT_EQ(*originalStamp, *updatedStamp);
     }
@@ -1732,24 +1762,24 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
 TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_NoUpdate) {
     deleteDatabaseFiles();
     util::deleteFile(filename_sideload);
-    
-    //Swap sideload/main database from update test and ensure that an older tile is not copied over
+
+    // Swap sideload/main database from update test and ensure that an older tile is not copied over
     util::copyFile(filename_sideload, "test/fixtures/offline_database/satellite_test.db");
     util::copyFile(filename, "test/fixtures/offline_database/sideload_sat.db");
 
     OfflineDatabase db(filename, fixture::tileServerOptions);
-    
+
     std::string tileURL = "maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg";
     auto originalTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
     auto originalStamp = originalTile->first.modified;
-    
+
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_EQ(1u, result->size());
     EXPECT_EQ(2u, db.listRegions()->size());
 
-    auto updatedTile = db.getRegionResource(Resource::tile(tileURL,1, 0, 0, 1, Tileset::Scheme::XYZ));
+    auto updatedTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
 
-    //Verify the modified timestamp matches the tile in the main db.
+    // Verify the modified timestamp matches the tile in the main db.
     EXPECT_EQ(originalStamp, updatedTile->first.modified);
 }
 
@@ -1760,12 +1790,15 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_AmbientTiles) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     auto result = db.mergeDatabase(filename_sideload);
 
-    EXPECT_TRUE(bool(db.hasRegionResource(Resource::tile("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", 1, 0, 0, 1, Tileset::Scheme::XYZ))));
+    EXPECT_TRUE(bool(db.hasRegionResource(
+        Resource::tile("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", 1, 0, 0, 1, Tileset::Scheme::XYZ))));
 
-    //Ambient resources should not be copied
+    // Ambient resources should not be copied
     EXPECT_FALSE(bool(db.hasRegionResource(Resource::style("maptiler://maps/streets"))));
-    EXPECT_FALSE(bool(db.hasRegionResource(Resource::tile("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", 1, 0, 1, 2, Tileset::Scheme::XYZ))));
-    EXPECT_FALSE(bool(db.hasRegionResource(Resource::tile("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", 1, 1, 1, 2, Tileset::Scheme::XYZ))));
+    EXPECT_FALSE(bool(db.hasRegionResource(
+        Resource::tile("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", 1, 0, 1, 2, Tileset::Scheme::XYZ))));
+    EXPECT_FALSE(bool(db.hasRegionResource(
+        Resource::tile("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", 1, 1, 1, 2, Tileset::Scheme::XYZ))));
 }
 
 TEST(OfflineDatabase, MergeDatabaseWithMultipleRegions_New) {
@@ -1778,7 +1811,7 @@ TEST(OfflineDatabase, MergeDatabaseWithMultipleRegions_New) {
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_EQ(2u, result->size());
     EXPECT_EQ(2u, db.listRegions()->size());
-    
+
     auto region1Id = result->front().getID();
     auto status = db.getRegionCompletedStatus(region1Id);
     EXPECT_EQ(398u, status->completedResourceCount);
@@ -1812,7 +1845,7 @@ TEST(OfflineDatabase, MergeDatabaseWithMultipleRegionsWithOverlap) {
                                         "FROM region_tiles "
                                         "JOIN tiles WHERE tile_id = id" };
         // clang-format on
-        mapbox::sqlite::Query query { stmt };
+        mapbox::sqlite::Query query{stmt};
         query.run();
 
         // Ensure multiple entries for tiles shared between regions
@@ -1824,7 +1857,7 @@ TEST(OfflineDatabase, MergeDatabaseWithMultipleRegionsWithOverlap) {
                                         "FROM region_resources "
                                         "JOIN resources WHERE resource_id = id" };
         // clang-format on
-        mapbox::sqlite::Query query { stmt };
+        mapbox::sqlite::Query query{stmt};
         query.run();
 
         // Ensure multiple entries for resources shared between regions
@@ -1842,7 +1875,7 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegionTooManyNewTiles) {
 
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_FALSE(result);
-    EXPECT_EQ(1u, log.count({ EventSeverity::Error, Event::Database, -1, "Mapbox tile limit exceeded" }));
+    EXPECT_EQ(1u, log.count({EventSeverity::Error, Event::Database, -1, "Mapbox tile limit exceeded"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -1859,7 +1892,7 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegionTooManyExistingTiles) {
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_THROW(std::rethrow_exception(result.error()), MapboxTileLimitExceededException);
 
-    EXPECT_EQ(1u, log.count({ EventSeverity::Error, Event::Database, -1, "Mapbox tile limit exceeded" }));
+    EXPECT_EQ(1u, log.count({EventSeverity::Error, Event::Database, -1, "Mapbox tile limit exceeded"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -1875,7 +1908,7 @@ TEST(OfflineDatabase, MergeDatabaseWithInvalidPath) {
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_FALSE(result);
 
-    EXPECT_EQ(1u, log.count({ EventSeverity::Error, Event::Database, -1, "Merge database has incorrect user_version" }));
+    EXPECT_EQ(1u, log.count({EventSeverity::Error, Event::Database, -1, "Merge database has incorrect user_version"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 #endif
@@ -1891,7 +1924,11 @@ TEST(OfflineDatabase, MergeDatabaseWithInvalidDb) {
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_FALSE(result);
 
-    EXPECT_EQ(1u, log.count(error(ResultCode::Corrupt, "Can't attach database (test/fixtures/offline_database/offline_sideload.db) for merge: database disk image is malformed")));
+    EXPECT_EQ(1u,
+              log.count(error(ResultCode::Corrupt,
+                              "Can't attach database "
+                              "(test/fixtures/offline_database/offline_sideload.db) for merge: "
+                              "database disk image is malformed")));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -1899,7 +1936,7 @@ TEST(OfflineDatabase, MergeDatabaseWithInvalidDb) {
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithDiskFull)) {
     FixtureLog log;
     test::SQLite3TestFS fs;
-    
+
     deleteDatabaseFiles();
     util::deleteFile(filename_sideload);
     util::copyFile(filename, "test/fixtures/offline_database/satellite_test.db");
@@ -1912,7 +1949,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithDiskFull)) {
     auto result = db.mergeDatabase(filename_sideload);
     EXPECT_FALSE(result.has_value());
 
-    EXPECT_EQ(1u, log.count({ EventSeverity::Error, Event::Database, -1, "database or disk is full"}));
+    EXPECT_EQ(1u, log.count({EventSeverity::Error, Event::Database, -1, "database or disk is full"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 #endif // __QT__
@@ -1938,7 +1975,9 @@ TEST(OfflineDatabase, ResetDatabase) {
 
     auto regions = db.listRegions().value();
     EXPECT_EQ(0u, regions.size());
-    EXPECT_EQ(1u, log.count({ EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database" }));
+    EXPECT_EQ(
+        1u,
+        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
@@ -1980,7 +2019,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(UpdateDatabaseReadOnlyMode)) {
               log.count({EventSeverity::Error,
                          Event::Database,
                          -1,
-                         "Can't clear ambient cache: Cannot modify database in read-only mode"}));
+                         "Can't clear ambient cache: Cannot modify database in read-only "
+                         "mode"}));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }

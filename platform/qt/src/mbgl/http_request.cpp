@@ -14,43 +14,40 @@
 namespace mbgl {
 
 HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context, const Resource& resource, FileSource::Callback callback)
-    : m_context(context)
-    , m_resource(resource)
-    , m_callback(callback)
-{
+    : m_context(context),
+      m_resource(resource),
+      m_callback(callback) {
     m_context->request(this);
 }
 
-HTTPRequest::~HTTPRequest()
-{
+HTTPRequest::~HTTPRequest() {
     if (!m_handled) {
         m_context->cancel(this);
     }
 }
 
-QUrl HTTPRequest::requestUrl() const
-{
+QUrl HTTPRequest::requestUrl() const {
     return QUrl::fromPercentEncoding(QByteArray(m_resource.url.data(), static_cast<int>(m_resource.url.size())));
 }
 
-QNetworkRequest HTTPRequest::networkRequest() const
-{
+QNetworkRequest HTTPRequest::networkRequest() const {
     QNetworkRequest req = QNetworkRequest(requestUrl());
     req.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
 
-    static const QByteArray agent = !m_context->getClientOptions().name().empty()
-        ? QString("%1/%2 (%3) MapLibreGL/%4 (Qt %5)")
-            .arg(QString::fromStdString(m_context->getClientOptions().name()))
-            .arg(QString::fromStdString(m_context->getClientOptions().version()))
-            .arg(QSysInfo::prettyProductName())
-            .arg(version::revision)
-            .arg(QT_VERSION_STR)
-            .toLatin1()
-        : QString("MapLibreGL/%1 (Qt %2)")
-            .arg(version::revision)
-            .arg(QT_VERSION_STR)
-            .toLatin1();
+    // User-Agent can not be set on WASM
+#ifndef Q_OS_WASM
+    static const QByteArray agent =
+        !m_context->getClientOptions().name().empty()
+            ? QString("%1/%2 (%3) MapLibreGL/%4 (Qt %5)")
+                  .arg(QString::fromStdString(m_context->getClientOptions().name()))
+                  .arg(QString::fromStdString(m_context->getClientOptions().version()))
+                  .arg(QSysInfo::prettyProductName())
+                  .arg(version::revision)
+                  .arg(QT_VERSION_STR)
+                  .toLatin1()
+            : QString("MapLibreGL/%1 (Qt %2)").arg(version::revision).arg(QT_VERSION_STR).toLatin1();
     req.setRawHeader("User-Agent", agent);
+#endif
 
     if (m_resource.priorEtag) {
         const auto etag = m_resource.priorEtag;
@@ -62,8 +59,7 @@ QNetworkRequest HTTPRequest::networkRequest() const
     return req;
 }
 
-void HTTPRequest::handleNetworkReply(QNetworkReply *reply, const QByteArray& data)
-{
+void HTTPRequest::handleNetworkReply(QNetworkReply* reply, const QByteArray& data) {
     m_handled = true;
 
     // Calling `callback` may result in deleting `this`.
@@ -75,8 +71,7 @@ void HTTPRequest::handleNetworkReply(QNetworkReply *reply, const QByteArray& dat
 
     // Handle non-HTTP errors (i.e. like connection).
     if (reply->error() && reply->error() < 100) {
-        response.error = std::make_unique<Error>(
-            Error::Reason::Connection, reply->errorString().toStdString());
+        response.error = std::make_unique<Error>(Error::Reason::Connection, reply->errorString().toStdString());
         callback(response);
         return;
     }
@@ -84,7 +79,7 @@ void HTTPRequest::handleNetworkReply(QNetworkReply *reply, const QByteArray& dat
     QPair<QByteArray, QByteArray> line;
     std::optional<std::string> retryAfter;
     std::optional<std::string> xRateLimitReset;
-    foreach(line, reply->rawHeaderPairs()) {
+    foreach (line, reply->rawHeaderPairs()) {
         QString header = QString(line.first).toLower();
 
         if (header == "last-modified") {
@@ -116,41 +111,38 @@ void HTTPRequest::handleNetworkReply(QNetworkReply *reply, const QByteArray& dat
 
     int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-    switch(responseCode) {
-    case 200: {
-        if (data.isEmpty()) {
-            response.data = std::make_shared<std::string>();
-        } else {
-            response.data = std::make_shared<std::string>(data.constData(), data.size());
+    switch (responseCode) {
+        case 200: {
+            if (data.isEmpty()) {
+                response.data = std::make_shared<std::string>();
+            } else {
+                response.data = std::make_shared<std::string>(data.constData(), data.size());
+            }
+            break;
         }
-        break;
-    }
-    case 204:
-        response.noContent = true;
-        break;
-    case 304:
-        response.notModified = true;
-        break;
-    case 404: {
-        if (m_resource.kind == Resource::Kind::Tile) {
+        case 204:
             response.noContent = true;
-        } else {
-            response.error = std::make_unique<Error>(
-                Error::Reason::NotFound, "HTTP status code 404");
+            break;
+        case 304:
+            response.notModified = true;
+            break;
+        case 404: {
+            if (m_resource.kind == Resource::Kind::Tile) {
+                response.noContent = true;
+            } else {
+                response.error = std::make_unique<Error>(Error::Reason::NotFound, "HTTP status code 404");
+            }
+            break;
         }
-        break;
-    }
-    case 429:
-        response.error = std::make_unique<Error>(
-                Error::Reason::RateLimit, "HTTP status code 429",
-                http::parseRetryHeaders(retryAfter, xRateLimitReset));
-        break;
-    default:
-        Response::Error::Reason reason = (responseCode >= 500 && responseCode < 600) ?
-            Error::Reason::Server : Error::Reason::Other;
+        case 429:
+            response.error = std::make_unique<Error>(
+                Error::Reason::RateLimit, "HTTP status code 429", http::parseRetryHeaders(retryAfter, xRateLimitReset));
+            break;
+        default:
+            Response::Error::Reason reason = (responseCode >= 500 && responseCode < 600) ? Error::Reason::Server
+                                                                                         : Error::Reason::Other;
 
-        response.error = std::make_unique<Error>(
-            reason, "HTTP status code " + util::toString(responseCode));
+            response.error = std::make_unique<Error>(reason, "HTTP status code " + util::toString(responseCode));
     }
 
     callback(response);

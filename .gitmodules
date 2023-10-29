@@ -16,9 +16,6 @@
 [submodule "vendor/unique_resource"]
 	path = vendor/unique_resource
 	url = https://github.com/okdshin/unique_resource.git
-[submodule "vendor/boost"]
-	path = vendor/boost
-	url = https://github.com/maplibre/maplibre-gl-native-boost.git
 [submodule "vendor/benchmark"]
 	path = vendor/benchmark
 	url = https://github.com/google/benchmark.git
@@ -37,9 +34,6 @@
 [submodule "vendor/cpp-httplib"]
 	path = vendor/cpp-httplib
 	url = https://github.com/yhirose/cpp-httplib.git
-[submodule "vendor/mapbox-gl-native-curl"]
-	path = vendor/mapbox-gl-native-curl
-	url = https://github.com/mapbox/mapbox-gl-native-curl.git
 [submodule "platform/android/vendor/maplibre-java"]
 	path = platform/android/vendor/maplibre-java
 	url = https://github.com/maplibre/maplibre-java
@@ -52,3 +46,6 @@
 [submodule "platform/windows/vendor/vcpkg"]
 	path = platform/windows/vendor/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "vendor/boost"]
+	path = vendor/boost
+	url = https://github.com/maplibre/maplibre-gl-native-boost.git

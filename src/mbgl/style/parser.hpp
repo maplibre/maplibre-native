@@ -33,7 +33,7 @@ public:
     std::vector<std::unique_ptr<Source>> sources;
     std::vector<std::unique_ptr<Layer>> layers;
 
-    TransitionOptions transition { { util::DEFAULT_TRANSITION_DURATION } };
+    TransitionOptions transition{{util::DEFAULT_TRANSITION_DURATION}};
     Light light;
 
     std::string name;

@@ -7,7 +7,7 @@ namespace android {
 
 JavaVM* theJVM;
 
-//TODO: remove
+// TODO: remove
 bool attach_jni_thread(JavaVM* vm, JNIEnv** env, std::string threadName) {
     assert(vm != nullptr);
     assert(env != nullptr);
@@ -17,7 +17,7 @@ bool attach_jni_thread(JavaVM* vm, JNIEnv** env, std::string threadName) {
     jint ret;
     *env = nullptr;
     bool detach = false;
-    ret = vm->GetEnv(reinterpret_cast<void **>(env), JNI_VERSION_1_6);
+    ret = vm->GetEnv(reinterpret_cast<void**>(env), JNI_VERSION_1_6);
     if (ret != JNI_OK) {
         if (ret != JNI_EDETACHED) {
             mbgl::Log::Error(mbgl::Event::JNI, "GetEnv() failed with " + std::to_string(ret));
@@ -35,7 +35,7 @@ bool attach_jni_thread(JavaVM* vm, JNIEnv** env, std::string threadName) {
     return detach;
 }
 
-//TODO: remove
+// TODO: remove
 void detach_jni_thread(JavaVM* vm, JNIEnv** env, bool detach) {
     if (detach) {
         assert(vm != nullptr);

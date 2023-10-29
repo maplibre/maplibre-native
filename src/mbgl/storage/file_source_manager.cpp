@@ -13,7 +13,9 @@ namespace mbgl {
 
 struct FileSourceInfo {
     FileSourceInfo(FileSourceType type_, std::string id_, std::weak_ptr<FileSource> fileSource_)
-        : type(type_), id(std::move(id_)), fileSource(std::move(fileSource_)) {}
+        : type(type_),
+          id(std::move(id_)),
+          fileSource(std::move(fileSource_)) {}
 
     FileSourceType type;
     std::string id;
@@ -27,11 +29,14 @@ public:
     std::recursive_mutex mutex;
 };
 
-FileSourceManager::FileSourceManager() : impl(std::make_unique<Impl>()) {}
+FileSourceManager::FileSourceManager()
+    : impl(std::make_unique<Impl>()) {}
 
 FileSourceManager::~FileSourceManager() = default;
 
-std::shared_ptr<FileSource>  FileSourceManager::getFileSource(FileSourceType type, const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) noexcept {
+std::shared_ptr<FileSource> FileSourceManager::getFileSource(FileSourceType type,
+                                                             const ResourceOptions& resourceOptions,
+                                                             const ClientOptions& clientOptions) noexcept {
     std::lock_guard<std::recursive_mutex> lock(impl->mutex);
 
     // Remove released file sources.
@@ -41,8 +46,8 @@ std::shared_ptr<FileSource>  FileSourceManager::getFileSource(FileSourceType typ
 
     const auto context = reinterpret_cast<uint64_t>(resourceOptions.platformContext());
     std::string baseURL = resourceOptions.tileServerOptions().baseURL();
-    std::string id =
-        baseURL + '|' + resourceOptions.apiKey() + '|' + resourceOptions.cachePath() + '|' + util::toString(context);
+    std::string id = baseURL + '|' + resourceOptions.apiKey() + '|' + resourceOptions.cachePath() + '|' +
+                     util::toString(context);
 
     std::shared_ptr<FileSource> fileSource;
     auto fileSourceIt = std::find_if(impl->fileSources.begin(), impl->fileSources.end(), [type, &id](const auto& info) {

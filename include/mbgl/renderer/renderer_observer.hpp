@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <exception>
+#include <functional>
+#include <string>
 
 namespace mbgl {
 
@@ -33,6 +35,11 @@ public:
     /// End of frame, booleans flags that a repaint is required and that placement changed.
     virtual void onDidFinishRenderingFrame(RenderMode, bool /*repaint*/, bool /*placementChanged*/) {}
 
+    /// End of frame, booleans flags that a repaint is required and that placement changed.
+    virtual void onDidFinishRenderingFrame(RenderMode mode, bool repaint, bool placementChanged, double /*frameTime*/) {
+        onDidFinishRenderingFrame(mode, repaint, placementChanged);
+    }
+
     /// Final frame
     virtual void onDidFinishRenderingMap() {}
 
@@ -42,7 +49,7 @@ public:
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 
     // Entry point for custom shader registration
-    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onRegisterShaders(gfx::ShaderRegistry&){};
 };
 
 } // namespace mbgl

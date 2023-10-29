@@ -13,7 +13,7 @@
 #include <iostream>
 #include <fstream>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     args::ArgumentParser argumentParser("Mapbox GL render tool");
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {"help"});
 
@@ -22,7 +22,8 @@ int main(int argc, char *argv[]) {
     args::ValueFlag<std::string> styleValue(argumentParser, "URL", "Map stylesheet", {'s', "style"});
     args::ValueFlag<std::string> outputValue(argumentParser, "file", "Output file name", {'o', "output"});
     args::ValueFlag<std::string> cacheValue(argumentParser, "file", "Cache database file name", {'c', "cache"});
-    args::ValueFlag<std::string> assetsValue(argumentParser, "file", "Directory to which asset:// URLs will resolve", {'a', "assets"});
+    args::ValueFlag<std::string> assetsValue(
+        argumentParser, "file", "Directory to which asset:// URLs will resolve", {'a', "assets"});
 
     args::Flag debugFlag(argumentParser, "debug", "Debug mode", {"debug"});
 
@@ -78,31 +79,36 @@ int main(int argc, char *argv[]) {
 
     util::RunLoop loop;
 
-    HeadlessFrontend frontend({ width, height }, static_cast<float>(pixelRatio));
-    Map map(frontend, MapObserver::nullObserver(),
-            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()).withPixelRatio(static_cast<float>(pixelRatio)),
-            ResourceOptions().withCachePath(cache_file).withAssetPath(asset_root).withApiKey(apikey).withTileServerOptions(mapTilerConfiguration));
+    HeadlessFrontend frontend({width, height}, static_cast<float>(pixelRatio));
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions()
+                .withMapMode(MapMode::Static)
+                .withSize(frontend.getSize())
+                .withPixelRatio(static_cast<float>(pixelRatio)),
+            ResourceOptions()
+                .withCachePath(cache_file)
+                .withAssetPath(asset_root)
+                .withApiKey(apikey)
+                .withTileServerOptions(mapTilerConfiguration));
 
     if (style.find("://") == std::string::npos) {
         style = std::string("file://") + style;
     }
 
     map.getStyle().loadURL(style);
-    map.jumpTo(CameraOptions()
-                   .withCenter(LatLng { lat, lon })
-                   .withZoom(zoom)
-                   .withBearing(bearing)
-                   .withPitch(pitch));
+    map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
 
     if (debug) {
-        map.setDebug(debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus : mbgl::MapDebugOptions::NoDebug);
+        map.setDebug(debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus
+                           : mbgl::MapDebugOptions::NoDebug);
     }
 
     try {
         std::ofstream out(output, std::ios::binary);
         out << encodePNG(frontend.render(map).image);
         out.close();
-    } catch(std::exception& e) {
+    } catch (std::exception& e) {
         std::cout << "Error: " << e.what() << std::endl;
         exit(1);
     }

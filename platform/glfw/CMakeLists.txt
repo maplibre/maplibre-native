@@ -36,7 +36,7 @@ if(MLN_WITH_OPENGL)
     )
     target_compile_definitions(
         mbgl-glfw
-        PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
+        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
     )
 endif()
 
@@ -73,7 +73,7 @@ if(WIN32)
         mbgl-glfw
         PRIVATE
             glfw
-            uv_a
+            $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
     )
 else()
     target_link_libraries(

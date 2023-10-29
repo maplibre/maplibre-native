@@ -6,9 +6,8 @@
 namespace mbgl {
 
 FileSourceRequest::FileSourceRequest(FileSource::Callback&& callback)
-    : responseCallback(callback)
-    , mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())) {
-}
+    : responseCallback(callback),
+      mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())) {}
 
 FileSourceRequest::~FileSourceRequest() {
     if (cancelCallback) {

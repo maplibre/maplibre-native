@@ -27,18 +27,21 @@ MapSnapshotterObserver& MapSnapshotterObserver::nullObserver() {
 class ForwardingRendererObserver final : public RendererObserver {
 public:
     explicit ForwardingRendererObserver(RendererObserver& delegate_)
-        : mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())), delegate(delegate_, mailbox) {}
+        : mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
+          delegate(delegate_, mailbox) {}
 
     ~ForwardingRendererObserver() override { mailbox->close(); }
 
-    void onInvalidate() override {
-      delegate.invoke(&RendererObserver::onInvalidate);
-    }
+    void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
 
     void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
 
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) override {
-        delegate.invoke(&RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   double frameTime) override {
+        void (RendererObserver::*f)(RenderMode, bool, bool, double) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTime);
     }
 
     void onStyleImageMissing(const std::string& image, const StyleImageMissingCallback& cb) override {
@@ -64,9 +67,7 @@ public:
         frontend.reset();
     }
 
-    void onInvalidate() override {
-      rendererObserver->onInvalidate();
-    }
+    void onInvalidate() override { rendererObserver->onInvalidate(); }
 
     void onResourceError(std::exception_ptr err) override {
         hasPendingStillImageRequest = false;
@@ -78,6 +79,16 @@ public:
             stillImage = frontend.readStillImage();
         }
         rendererObserver->onDidFinishRenderingFrame(mode, repaintNeeded, placementChanged);
+    }
+
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   double frameTime) override {
+        if (mode == RenderMode::Full && hasPendingStillImageRequest) {
+            stillImage = frontend.readStillImage();
+        }
+        rendererObserver->onDidFinishRenderingFrame(mode, repaintNeeded, placementChanged, frameTime);
     }
 
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
@@ -209,11 +220,11 @@ public:
             // Create lambda that captures the current transform state
             // and can be used to translate for geographic to screen
             // coordinates
-            LatLngForFn latLngForFn = [transformState =
-                                           frontend.getTransformState()](const ScreenCoordinate& screenCoordinate) {
-                Transform transform{transformState};
-                return transform.screenCoordinateToLatLng(screenCoordinate);
-            };
+            LatLngForFn latLngForFn =
+                [transformState = frontend.getTransformState()](const ScreenCoordinate& screenCoordinate) {
+                    Transform transform{transformState};
+                    return transform.screenCoordinateToLatLng(screenCoordinate);
+                };
 
             // Collect all source attributions
             std::vector<std::string> attributions;
@@ -260,7 +271,10 @@ MapSnapshotter::MapSnapshotter(Size size,
     : impl(std::make_unique<MapSnapshotter::Impl>(
           size, pixelRatio, resourceOptions, clientOptions, observer, std::move(localFontFamily))) {}
 
-MapSnapshotter::MapSnapshotter(Size size, float pixelRatio, const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+MapSnapshotter::MapSnapshotter(Size size,
+                               float pixelRatio,
+                               const ResourceOptions& resourceOptions,
+                               const ClientOptions& clientOptions)
     : MapSnapshotter(size, pixelRatio, resourceOptions, clientOptions, MapSnapshotterObserver::nullObserver()) {}
 
 MapSnapshotter::~MapSnapshotter() = default;

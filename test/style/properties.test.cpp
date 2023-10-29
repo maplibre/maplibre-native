@@ -13,34 +13,21 @@ float evaluate(Transitioning<PropertyValue<float>>& property, Duration delta = D
     ZoomHistory zoomHistory;
     zoomHistory.update(0, TimePoint::min() + delta);
 
-    PropertyEvaluationParameters parameters {
-        zoomHistory,
-        TimePoint::min() + delta,
-        Duration::zero()
-    };
+    PropertyEvaluationParameters parameters{zoomHistory, TimePoint::min() + delta, Duration::zero()};
 
-    PropertyEvaluator<float> evaluator {
-        parameters,
-        0.0f
-    };
+    PropertyEvaluator<float> evaluator{parameters, 0.0f};
 
     return property.evaluate(evaluator, parameters.now);
 }
 
-PossiblyEvaluatedPropertyValue<float> evaluateDataExpression(Transitioning<PropertyValue<float>>& property, Duration delta = Duration::zero()) {
+PossiblyEvaluatedPropertyValue<float> evaluateDataExpression(Transitioning<PropertyValue<float>>& property,
+                                                             Duration delta = Duration::zero()) {
     ZoomHistory zoomHistory;
     zoomHistory.update(0, TimePoint::min() + delta);
 
-    PropertyEvaluationParameters parameters {
-        zoomHistory,
-        TimePoint::min() + delta,
-        Duration::zero()
-    };
+    PropertyEvaluationParameters parameters{zoomHistory, TimePoint::min() + delta, Duration::zero()};
 
-    DataDrivenPropertyEvaluator<float> evaluator {
-        parameters,
-        0.0f
-    };
+    DataDrivenPropertyEvaluator<float> evaluator{parameters, 0.0f};
 
     return property.evaluate(evaluator, parameters.now);
 }
@@ -51,33 +38,20 @@ TEST(TransitioningPropertyValue, EvaluateDefaultValue) {
 }
 
 TEST(TransitioningPropertyValue, EvaluateUntransitionedConstant) {
-    Transitioning<PropertyValue<float>> property {
-        PropertyValue<float>(1.0f),
-        Transitioning<PropertyValue<float>>(),
-        TransitionOptions(),
-        TimePoint::min()
-    };
+    Transitioning<PropertyValue<float>> property{
+        PropertyValue<float>(1.0f), Transitioning<PropertyValue<float>>(), TransitionOptions(), TimePoint::min()};
 
     ASSERT_EQ(1.0f, evaluate(property));
 }
 
 TEST(TransitioningPropertyValue, EvaluateTransitionedConstantWithoutDelay) {
     TransitionOptions transition;
-    transition.duration = { 1000ms };
+    transition.duration = {1000ms};
 
-    Transitioning<PropertyValue<float>> t0 {
-        PropertyValue<float>(0.0f),
-        Transitioning<PropertyValue<float>>(),
-        TransitionOptions(),
-        TimePoint::min()
-    };
+    Transitioning<PropertyValue<float>> t0{
+        PropertyValue<float>(0.0f), Transitioning<PropertyValue<float>>(), TransitionOptions(), TimePoint::min()};
 
-    Transitioning<PropertyValue<float>> t1 {
-        PropertyValue<float>(1.0f),
-        t0,
-        transition,
-        TimePoint::min()
-    };
+    Transitioning<PropertyValue<float>> t1{PropertyValue<float>(1.0f), t0, transition, TimePoint::min()};
 
     ASSERT_FLOAT_EQ(0.0f, evaluate(t1, 0ms));
     ASSERT_FLOAT_EQ(0.823099f, evaluate(t1, 500ms));
@@ -86,22 +60,13 @@ TEST(TransitioningPropertyValue, EvaluateTransitionedConstantWithoutDelay) {
 
 TEST(TransitioningPropertyValue, EvaluateTransitionedConstantWithDelay) {
     TransitionOptions transition;
-    transition.delay = { 1000ms };
-    transition.duration = { 1000ms };
+    transition.delay = {1000ms};
+    transition.duration = {1000ms};
 
-    Transitioning<PropertyValue<float>> t0 {
-        PropertyValue<float>(0.0f),
-        Transitioning<PropertyValue<float>>(),
-        TransitionOptions(),
-        TimePoint::min()
-    };
+    Transitioning<PropertyValue<float>> t0{
+        PropertyValue<float>(0.0f), Transitioning<PropertyValue<float>>(), TransitionOptions(), TimePoint::min()};
 
-    Transitioning<PropertyValue<float>> t1 {
-        PropertyValue<float>(1.0f),
-        t0,
-        transition,
-        TimePoint::min()
-    };
+    Transitioning<PropertyValue<float>> t1{PropertyValue<float>(1.0f), t0, transition, TimePoint::min()};
 
     ASSERT_FLOAT_EQ(0.0f, evaluate(t1, 0ms));
     ASSERT_FLOAT_EQ(0.0f, evaluate(t1, 500ms));
@@ -112,27 +77,20 @@ TEST(TransitioningPropertyValue, EvaluateTransitionedConstantWithDelay) {
 
 TEST(TransitioningDataDrivenPropertyValue, Evaluate) {
     TransitionOptions transition;
-    transition.delay = { 1000ms };
-    transition.duration = { 1000ms };
+    transition.delay = {1000ms};
+    transition.duration = {1000ms};
 
-    Transitioning<PropertyValue<float>> t0 {
-        PropertyValue<float>(0.0f),
-        Transitioning<PropertyValue<float>>(),
-        TransitionOptions(),
-        TimePoint::min()
-    };
+    Transitioning<PropertyValue<float>> t0{
+        PropertyValue<float>(0.0f), Transitioning<PropertyValue<float>>(), TransitionOptions(), TimePoint::min()};
 
     using namespace mbgl::style::expression::dsl;
     PropertyExpression<float> expression(number(get("property_name")));
 
-    Transitioning<PropertyValue<float>> t1 {
-        PropertyValue<float>(expression),
-        t0,
-        transition,
-        TimePoint::min()
-    };
+    Transitioning<PropertyValue<float>> t1{PropertyValue<float>(expression), t0, transition, TimePoint::min()};
 
     ASSERT_TRUE(evaluateDataExpression(t0, 0ms).isConstant());
-    ASSERT_FALSE(evaluateDataExpression(t1, 0ms).isConstant()) <<
-        "A paint property transition to a data-driven evaluates immediately to the final value (see https://github.com/mapbox/mapbox-gl-native/issues/8237).";
+    ASSERT_FALSE(evaluateDataExpression(t1, 0ms).isConstant())
+        << "A paint property transition to a data-driven evaluates immediately "
+           "to the final value (see "
+           "https://github.com/mapbox/mapbox-gl-native/issues/8237).";
 }

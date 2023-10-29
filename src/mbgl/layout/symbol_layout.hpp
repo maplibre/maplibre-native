@@ -55,9 +55,10 @@ public:
     static constexpr float INVALID_OFFSET_VALUE = std::numeric_limits<float>::max();
     /**
      * @brief Calculates variable text offset.
-     * 
+     *
      * @param anchor text anchor
-     * @param textOffset Either `text-offset` or [ `text-radial-offset`, INVALID_OFFSET_VALUE ]
+     * @param textOffset Either `text-offset` or [ `text-radial-offset`,
+     * INVALID_OFFSET_VALUE ]
      * @return std::array<float, 2> offset along x- and y- axis correspondingly.
      */
     static std::array<float, 2> evaluateVariableOffset(style::SymbolAnchorType anchor, std::array<float, 2> textOffset);
@@ -110,8 +111,8 @@ private:
                                          std::size_t sectionIndex,
                                          const CanonicalTileID& canonical);
 
-    // Stores the layer so that we can hold on to GeometryTileFeature instances in SymbolFeature,
-    // which may reference data from this object.
+    // Stores the layer so that we can hold on to GeometryTileFeature instances
+    // in SymbolFeature, which may reference data from this object.
     const std::unique_ptr<GeometryTileLayer> sourceLayer;
     const float overscaling;
     const float zoom;
@@ -135,7 +136,9 @@ private:
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     std::vector<SymbolFeature> features;
 
-    BiDi bidi; // Consider moving this up to geometry tile worker to reduce reinstantiation costs; use of BiDi/ubiditransform object must be constrained to one thread
+    BiDi bidi; // Consider moving this up to geometry tile worker to reduce
+               // reinstantiation costs; use of BiDi/ubiditransform object must
+               // be constrained to one thread
 };
 
 } // namespace mbgl

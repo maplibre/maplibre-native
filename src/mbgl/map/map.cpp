@@ -32,15 +32,16 @@ Map::Map(RendererFrontend& frontend,
          const MapOptions& mapOptions,
          const ResourceOptions& resourceOptions,
          const ClientOptions& clientOptions)
-    : impl(std::make_unique<Impl>(
-          frontend,
-          observer,
-          FileSourceManager::get()
-              ? std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(ResourceLoader, resourceOptions, clientOptions))
-              : nullptr,
-          mapOptions)) {}
+    : impl(std::make_unique<Impl>(frontend,
+                                  observer,
+                                  FileSourceManager::get()
+                                      ? std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
+                                            ResourceLoader, resourceOptions, clientOptions))
+                                      : nullptr,
+                                  mapOptions)) {}
 
-Map::Map(std::unique_ptr<Impl> impl_) : impl(std::move(impl_)) {}
+Map::Map(std::unique_ptr<Impl> impl_)
+    : impl(std::move(impl_)) {}
 
 Map::~Map() = default;
 
@@ -187,7 +188,9 @@ CameraOptions Map::cameraForLatLngBounds(const LatLngBounds& bounds,
         pitch);
 }
 
-CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs, const Transform& transform, const EdgeInsets& padding) {
+CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
+                               const Transform& transform,
+                               const EdgeInsets& padding) {
     if (latLngs.empty()) {
         return {};
     }
@@ -217,9 +220,13 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs, const Transfo
 
     double zoom = transform.getZoom();
     if (minScale > 0) {
-        zoom = util::clamp(zoom + util::log2(minScale), transform.getState().getMinZoom(), transform.getState().getMaxZoom());
+        zoom = util::clamp(
+            zoom + util::log2(minScale), transform.getState().getMinZoom(), transform.getState().getMaxZoom());
     } else {
-        Log::Error(Event::General, "Unable to calculate appropriate zoom level for bounds. Vertical or horizontal padding is greater than map's height or width.");
+        Log::Error(Event::General,
+                   "Unable to calculate appropriate zoom level for bounds. Vertical "
+                   "or horizontal padding is greater "
+                   "than map's height or width.");
     }
 
     // Calculate the center point of a virtual bounds that is extended in all directions by padding.
@@ -256,21 +263,18 @@ CameraOptions Map::cameraForGeometry(const Geometry<double>& geometry,
                                      const std::optional<double>& bearing,
                                      const std::optional<double>& pitch) const {
     std::vector<LatLng> latLngs;
-    forEachPoint(geometry, [&](const Point<double>& pt) {
-        latLngs.emplace_back(pt.y, pt.x);
-    });
+    forEachPoint(geometry, [&](const Point<double>& pt) { latLngs.emplace_back(pt.y, pt.x); });
     return cameraForLatLngs(latLngs, padding, bearing, pitch);
 }
 
 LatLngBounds Map::latLngBoundsForCamera(const CameraOptions& camera) const {
-    Transform shallow { impl->transform.getState() };
+    Transform shallow{impl->transform.getState()};
     Size size = shallow.getState().getSize();
 
     shallow.jumpTo(camera);
     return LatLngBounds::hull(
         shallow.screenCoordinateToLatLng({}),
-        shallow.screenCoordinateToLatLng({ static_cast<double>(size.width), static_cast<double>(size.height) })
-    );
+        shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)}));
 }
 
 LatLngBounds Map::latLngBoundsForCameraUnwrapped(const CameraOptions& camera) const {
@@ -282,7 +286,8 @@ LatLngBounds Map::latLngBoundsForCameraUnwrapped(const CameraOptions& camera) co
     LatLng se = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), static_cast<double>(size.height)});
     LatLng ne = shallow.screenCoordinateToLatLng({static_cast<double>(size.width), 0.0});
     LatLng sw = shallow.screenCoordinateToLatLng({0.0, static_cast<double>(size.height)});
-    LatLng center = shallow.screenCoordinateToLatLng({static_cast<double>(size.width) / 2, static_cast<double>(size.height) / 2});
+    LatLng center = shallow.screenCoordinateToLatLng(
+        {static_cast<double>(size.width) / 2, static_cast<double>(size.height) / 2});
     nw.unwrapForShortestPath(center);
     se.unwrapForShortestPath(center);
     ne.unwrapForShortestPath(center);
@@ -375,13 +380,13 @@ void Map::setViewportMode(mbgl::ViewportMode mode) {
 
 MapOptions Map::getMapOptions() const {
     return std::move(MapOptions()
-        .withMapMode(impl->mode)
-        .withConstrainMode(impl->transform.getConstrainMode())
-        .withViewportMode(impl->transform.getViewportMode())
-        .withCrossSourceCollisions(impl->crossSourceCollisions)
-        .withNorthOrientation(impl->transform.getNorthOrientation())
-        .withSize(impl->transform.getState().getSize())
-        .withPixelRatio(impl->pixelRatio));
+                         .withMapMode(impl->mode)
+                         .withConstrainMode(impl->transform.getConstrainMode())
+                         .withViewportMode(impl->transform.getViewportMode())
+                         .withCrossSourceCollisions(impl->crossSourceCollisions)
+                         .withNorthOrientation(impl->transform.getNorthOrientation())
+                         .withSize(impl->transform.getState().getSize())
+                         .withPixelRatio(impl->pixelRatio));
 }
 
 // MARK: - Projection mode
@@ -503,9 +508,13 @@ bool Map::isFullyLoaded() const {
 }
 
 void Map::dumpDebugLogs() const {
-    Log::Info(Event::General, "--------------------------------------------------------------------------------");
+    Log::Info(Event::General,
+              "----------------------------------------------------------------------"
+              "----------");
     impl->style->impl->dumpDebugLogs();
-    Log::Info(Event::General, "--------------------------------------------------------------------------------");
+    Log::Info(Event::General,
+              "----------------------------------------------------------------------"
+              "----------");
 }
 
 void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {

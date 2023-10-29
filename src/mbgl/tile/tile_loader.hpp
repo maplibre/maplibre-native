@@ -16,18 +16,16 @@ class TileLoader {
 public:
     TileLoader(const TileLoader&) = delete;
     TileLoader& operator=(const TileLoader&) = delete;
-    TileLoader(T&,
-               const OverscaledTileID&,
-               const TileParameters&,
-               const Tileset&);
+    TileLoader(T&, const OverscaledTileID&, const TileParameters&, const Tileset&);
     ~TileLoader();
 
     void setNecessity(TileNecessity newNecessity);
     void setUpdateParameters(const TileUpdateParameters&);
 
 private:
-    // called when the tile is one of the ideal tiles that we want to show definitely. the tile source
-    // should try to make every effort (e.g. fetch from internet, or revalidate existing resources).
+    // called when the tile is one of the ideal tiles that we want to show
+    // definitely. the tile source should try to make every effort (e.g. fetch
+    // from internet, or revalidate existing resources).
     void makeRequired();
 
     // called when the zoom level no longer corresponds to the displayed one, but

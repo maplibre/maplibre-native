@@ -27,6 +27,6 @@ jni::Local<jni::Array<jni::String>> toArray(JNIEnv& env, const std::vector<std::
     return result;
 }
 
-}
-}
-}
+} // namespace conversion
+} // namespace android
+} // namespace mbgl

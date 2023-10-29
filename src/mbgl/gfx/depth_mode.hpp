@@ -12,9 +12,7 @@ public:
     DepthMaskType mask;
     Range<float> range;
 
-    static DepthMode disabled() {
-       return DepthMode { DepthFunctionType::Always, DepthMaskType::ReadOnly, { 0.0, 1.0 } };
-    }
+    static DepthMode disabled() { return DepthMode{DepthFunctionType::Always, DepthMaskType::ReadOnly, {0.0, 1.0}}; }
 };
 
 } // namespace gfx

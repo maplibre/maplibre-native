@@ -27,7 +27,8 @@ $ ./gradlew formatKotlin
 Clone the git repository and pull in submodules:
 
 ```bash
-git clone git@github.com:maplibre/maplibre-gl-native.git
+git clone git@github.com:maplibre/maplibre-native.git
+cd maplibre-native
 git submodule update --init --recursive
 cd platform/android
 ```

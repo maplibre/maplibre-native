@@ -1,10 +1,10 @@
 #pragma once
 
 #include <mbgl/util/string.hpp>
-
 #include <mapbox/compatibility/value.hpp>
 
 #include <optional>
+#include <unordered_map>
 
 namespace mbgl {
 
@@ -26,9 +26,12 @@ public:
     using GeometryType = mapbox::geometry::geometry<double>;
 
     Feature() = default;
-    Feature(const GeoJSONFeature& f) : GeoJSONFeature(f) {}
-    Feature(const GeometryType& geom_) : GeoJSONFeature(geom_) {}
-    Feature(GeometryType&& geom_) : GeoJSONFeature(std::move(geom_)) {}
+    Feature(const GeoJSONFeature& f)
+        : GeoJSONFeature(f) {}
+    Feature(const GeometryType& geom_)
+        : GeoJSONFeature(geom_) {}
+    Feature(GeometryType&& geom_)
+        : GeoJSONFeature(std::move(geom_)) {}
 };
 
 template <class T>
@@ -44,10 +47,11 @@ inline std::optional<std::string> featureIDtoString(const FeatureIdentifier& id)
         return std::nullopt;
     }
 
-    return id.match(
-        [](const std::string& value_) { return value_; }, [](uint64_t value_) { return util::toString(value_); },
-        [](int64_t value_) { return util::toString(value_); }, [](double value_) { return util::toString(value_); },
-[](const auto&) -> std::optional<std::string> { return std::nullopt; });
+    return id.match([](const std::string& value_) { return value_; },
+                    [](uint64_t value_) { return util::toString(value_); },
+                    [](int64_t value_) { return util::toString(value_); },
+                    [](double value_) { return util::toString(value_); },
+                    [](const auto&) -> std::optional<std::string> { return std::nullopt; });
 }
 
 } // namespace mbgl

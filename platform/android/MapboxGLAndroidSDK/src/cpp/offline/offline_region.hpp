@@ -14,23 +14,32 @@ class OfflineRegion {
 public:
     class OfflineRegionObserver {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion$OfflineRegionObserver"; };
+        static constexpr auto Name() {
+            return "org/maplibre/android/offline/"
+                   "OfflineRegion$OfflineRegionObserver";
+        };
     };
 
     class OfflineRegionStatusCallback {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion$OfflineRegionStatusCallback"; };
+        static constexpr auto Name() {
+            return "org/maplibre/android/offline/"
+                   "OfflineRegion$OfflineRegionStatusCallback";
+        };
 
         static void onError(jni::JNIEnv&, const jni::Object<OfflineRegionStatusCallback>&, std::exception_ptr);
 
         static void onStatus(jni::JNIEnv&,
-                            const jni::Object<OfflineRegionStatusCallback>&,
-                            std::optional<mbgl::OfflineRegionStatus>);
+                             const jni::Object<OfflineRegionStatusCallback>&,
+                             std::optional<mbgl::OfflineRegionStatus>);
     };
 
     class OfflineRegionDeleteCallback {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion$OfflineRegionDeleteCallback"; };
+        static constexpr auto Name() {
+            return "org/maplibre/android/offline/"
+                   "OfflineRegion$OfflineRegionDeleteCallback";
+        };
 
         static void onError(jni::JNIEnv&, const jni::Object<OfflineRegionDeleteCallback>&, std::exception_ptr);
 
@@ -39,7 +48,10 @@ public:
 
     class OfflineRegionInvalidateCallback {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion$OfflineRegionInvalidateCallback"; };
+        static constexpr auto Name() {
+            return "org/maplibre/android/offline/"
+                   "OfflineRegion$OfflineRegionInvalidateCallback";
+        };
 
         static void onError(jni::JNIEnv&, const jni::Object<OfflineRegionInvalidateCallback>&, std::exception_ptr);
 
@@ -48,16 +60,19 @@ public:
 
     class OfflineRegionUpdateMetadataCallback {
     public:
-        static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion$OfflineRegionUpdateMetadataCallback"; };
+        static constexpr auto Name() {
+            return "org/maplibre/android/offline/"
+                   "OfflineRegion$OfflineRegionUpdateMetadataCallback";
+        };
 
         static void onError(jni::JNIEnv&, const jni::Object<OfflineRegionUpdateMetadataCallback>&, std::exception_ptr);
 
         static void onUpdate(jni::JNIEnv&,
-                            const jni::Object<OfflineRegionUpdateMetadataCallback>&,
-                            std::optional<mbgl::OfflineRegionMetadata>);
+                             const jni::Object<OfflineRegionUpdateMetadataCallback>&,
+                             std::optional<mbgl::OfflineRegionMetadata>);
     };
 
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/offline/OfflineRegion"; };
+    static constexpr auto Name() { return "org/maplibre/android/offline/OfflineRegion"; };
 
     OfflineRegion(jni::JNIEnv&, jni::jlong, const jni::Object<FileSource>&);
 
@@ -73,9 +88,13 @@ public:
 
     void invalidateOfflineRegion(jni::JNIEnv&, const jni::Object<OfflineRegionInvalidateCallback>&);
 
-    void updateOfflineRegionMetadata(jni::JNIEnv&, const jni::Array<jni::jbyte>&, const jni::Object<OfflineRegionUpdateMetadataCallback>&);
+    void updateOfflineRegionMetadata(jni::JNIEnv&,
+                                     const jni::Array<jni::jbyte>&,
+                                     const jni::Object<OfflineRegionUpdateMetadataCallback>&);
 
-    static jni::Local<jni::Object<OfflineRegion>> New(jni::JNIEnv&, const jni::Object<FileSource>&, mbgl::OfflineRegion);
+    static jni::Local<jni::Object<OfflineRegion>> New(jni::JNIEnv&,
+                                                      const jni::Object<FileSource>&,
+                                                      mbgl::OfflineRegion);
 
     static jni::Local<jni::Array<jni::jbyte>> metadata(jni::JNIEnv&, mbgl::OfflineRegionMetadata);
 

@@ -27,17 +27,26 @@ public:
 class EvaluationContext {
 public:
     EvaluationContext() = default;
-    explicit EvaluationContext(float zoom_) : zoom(zoom_) {}
-    explicit EvaluationContext(GeometryTileFeature const * feature_) : feature(feature_) {}
-    EvaluationContext(float zoom_, GeometryTileFeature const* feature_) : zoom(zoom_), feature(feature_) {}
-    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const * feature_) :
-        accumulated(std::move(accumulated_)), feature(feature_)
-    {}
+    explicit EvaluationContext(float zoom_)
+        : zoom(zoom_) {}
+    explicit EvaluationContext(GeometryTileFeature const* feature_)
+        : feature(feature_) {}
+    EvaluationContext(float zoom_, GeometryTileFeature const* feature_)
+        : zoom(zoom_),
+          feature(feature_) {}
+    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_)
+        : accumulated(std::move(accumulated_)),
+          feature(feature_) {}
     EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_)
-        : zoom(zoom_), feature(feature_), featureState(state_) {}
-    EvaluationContext(std::optional<float> zoom_, GeometryTileFeature const * feature_, std::optional<double> colorRampParameter_) :
-        zoom(std::move(zoom_)), feature(feature_), colorRampParameter(std::move(colorRampParameter_))
-    {}
+        : zoom(zoom_),
+          feature(feature_),
+          featureState(state_) {}
+    EvaluationContext(std::optional<float> zoom_,
+                      GeometryTileFeature const* feature_,
+                      std::optional<double> colorRampParameter_)
+        : zoom(std::move(zoom_)),
+          feature(feature_),
+          colorRampParameter(std::move(colorRampParameter_)) {}
 
     EvaluationContext& withFormattedSection(const Value* formattedSection_) noexcept {
         formattedSection = formattedSection_;
@@ -75,38 +84,37 @@ class Result : private variant<EvaluationError, T> {
 public:
     using variant<EvaluationError, T>::variant;
     using Value = T;
-    
+
     Result() = default;
 
     template <typename U>
-    VARIANT_INLINE Result(U&& val) : variant<EvaluationError, T>(val) {}
-    
-    explicit operator bool () const {
-        return this->template is<T>();
-    }
-    
+    VARIANT_INLINE Result(U&& val)
+        : variant<EvaluationError, T>(val) {}
+
+    explicit operator bool() const { return this->template is<T>(); }
+
     // optional does some type trait magic for this one, so this might
     // be problematic as is.
     const T* operator->() const {
         assert(this->template is<T>());
         return std::addressof(this->template get<T>());
     }
-    
+
     T* operator->() {
         assert(this->template is<T>());
         return std::addressof(this->template get<T>());
     }
-    
+
     T& operator*() {
         assert(this->template is<T>());
         return this->template get<T>();
     }
-    
+
     const T& operator*() const {
         assert(this->template is<T>());
         return this->template get<T>();
     }
-    
+
     const EvaluationError& error() const {
         assert(this->template is<EvaluationError>());
         return this->template get<EvaluationError>();
@@ -116,17 +124,14 @@ public:
 class EvaluationResult : public Result<Value> {
 public:
     using Result::Result; // NOLINT
-    
+
     EvaluationResult() = default;
 
-    EvaluationResult(const std::array<double, 4>& arr) :
-        Result(toExpressionValue(arr))
-    {}
-    
+    EvaluationResult(const std::array<double, 4>& arr)
+        : Result(toExpressionValue(arr)) {}
+
     // used only for the special (private) "error" expression
-    EvaluationResult(const type::ErrorType&) {
-        assert(false);
-    }
+    EvaluationResult(const type::ErrorType&) { assert(false); }
 };
 
 /**
@@ -137,12 +142,12 @@ public:
     inferring the argument and output from a simple function (const T0& arg0,
     const T1& arg1, ...) -> Result<U> where T0, T1, ..., U are member types of
     mbgl::style::expression::Value.
-    
+
     The other Expression subclasses (Let, Curve, Match, etc.) exist in order to
     implement expressions that need specialized parsing, type checking, or
     evaluation logic that can't be handled by CompoundExpression's inference
     mechanism.
-    
+
     Each Expression subclass also provides a static
     ParseResult ExpressionClass::parse(const V&, ParsingContext),
     which handles parsing a style-spec JSON representation of the expression.
@@ -173,25 +178,29 @@ enum class Kind : int32_t {
     ImageExpression,
     In,
     Within,
-    Distance
+    Distance,
+    IndexOf,
+    Slice
 };
 
 class Expression {
 public:
-    Expression(Kind kind_, type::Type type_) : kind(kind_), type(std::move(type_)) {}
+    Expression(Kind kind_, type::Type type_)
+        : kind(kind_),
+          type(std::move(type_)) {}
     virtual ~Expression() = default;
-    
+
     virtual EvaluationResult evaluate(const EvaluationContext& params) const = 0;
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
     virtual bool operator==(const Expression&) const = 0;
-    bool operator!=(const Expression& rhs) const {
-        return !operator==(rhs);
-    }
+    bool operator!=(const Expression& rhs) const { return !operator==(rhs); }
 
     Kind getKind() const { return kind; };
     type::Type getType() const { return type; };
 
-    EvaluationResult evaluate(std::optional<float> zoom, const Feature& feature, std::optional<double> colorRampParameter) const;
+    EvaluationResult evaluate(std::optional<float> zoom,
+                              const Feature& feature,
+                              std::optional<double> colorRampParameter) const;
     EvaluationResult evaluate(std::optional<float> zoom,
                               const Feature& feature,
                               std::optional<double> colorRampParameter,
@@ -204,52 +213,49 @@ public:
     EvaluationResult evaluate(std::optional<mbgl::Value> accumulated, const Feature& feature) const;
 
     /**
-     * Statically analyze the expression, attempting to enumerate possible outputs. Returns
-     * an array of values plus the sentinel null optional value, used to indicate that the
-     * complete set of outputs is statically undecidable.
+     * Statically analyze the expression, attempting to enumerate possible
+     * outputs. Returns an array of values plus the sentinel null optional
+     * value, used to indicate that the complete set of outputs is statically
+     * undecidable.
      */
     virtual std::vector<std::optional<Value>> possibleOutputs() const = 0;
-    
+
     virtual mbgl::Value serialize() const {
         std::vector<mbgl::Value> serialized;
         serialized.emplace_back(getOperator());
-        eachChild([&](const Expression &child) {
-            serialized.emplace_back(child.serialize());
-        });
+        eachChild([&](const Expression& child) { serialized.emplace_back(child.serialize()); });
         return serialized;
     };
-    
+
     virtual std::string getOperator() const = 0;
 
 protected:
     template <typename T>
     static bool childrenEqual(const T& lhs, const T& rhs) {
         if (lhs.size() != rhs.size()) return false;
-        for (auto leftChild = lhs.begin(), rightChild = rhs.begin();
-             leftChild != lhs.end();
-             leftChild++, rightChild++)
-         {
-             if (!Expression::childEqual(*leftChild, *rightChild)) return false;
-         }
-         return true;
+        for (auto leftChild = lhs.begin(), rightChild = rhs.begin(); leftChild != lhs.end();
+             leftChild++, rightChild++) {
+            if (!Expression::childEqual(*leftChild, *rightChild)) return false;
+        }
+        return true;
     }
-    
+
     static bool childEqual(const std::unique_ptr<Expression>& lhs, const std::unique_ptr<Expression>& rhs) {
         return *lhs == *rhs;
     }
-    
+
     template <typename T>
     static bool childEqual(const std::pair<T, std::unique_ptr<Expression>>& lhs,
                            const std::pair<T, std::unique_ptr<Expression>>& rhs) {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
-    
+
     template <typename T>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
                            const std::pair<T, std::shared_ptr<Expression>>& rhs) {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
-    
+
     static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
                            const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) {
         return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);

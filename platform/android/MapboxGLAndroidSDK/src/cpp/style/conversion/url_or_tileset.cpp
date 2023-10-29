@@ -20,11 +20,11 @@ variant<std::string, Tileset> convertURLOrTileset(mbgl::android::Value&& value) 
         if (!tileset) {
             throw std::logic_error(error.message);
         }
-        return { *tileset };
+        return {*tileset};
     } else {
-        return { *toString(convertible) };
+        return {*toString(convertible)};
     }
 }
 
-}
-}
+} // namespace android
+} // namespace mbgl

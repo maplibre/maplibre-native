@@ -9,8 +9,7 @@ namespace mbgl {
 using namespace style;
 
 RenderRasterSource::RenderRasterSource(Immutable<style::RasterSource::Impl> impl_)
-    : RenderTileSetSource(std::move(impl_)) {
-}
+    : RenderTileSetSource(std::move(impl_)) {}
 
 inline const style::RasterSource::Impl& RenderRasterSource::impl() const {
     return static_cast<const style::RasterSource::Impl&>(*baseImpl);
@@ -42,18 +41,17 @@ void RenderRasterSource::prepare(const SourcePrepareParameters& parameters) {
     RenderTileSource::prepare(parameters);
 }
 
-std::unordered_map<std::string, std::vector<Feature>>
-RenderRasterSource::queryRenderedFeatures(const ScreenLineString&,
-                                          const TransformState&,
-                                          const std::unordered_map<std::string, const RenderLayer*>&,
-                                          const RenderedQueryOptions&,
-                                          const mat4&) const {
+std::unordered_map<std::string, std::vector<Feature>> RenderRasterSource::queryRenderedFeatures(
+    const ScreenLineString&,
+    const TransformState&,
+    const std::unordered_map<std::string, const RenderLayer*>&,
+    const RenderedQueryOptions&,
+    const mat4&) const {
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
 std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOptions&) const {
     return {};
 }
-
 
 } // namespace mbgl

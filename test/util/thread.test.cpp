@@ -20,7 +20,8 @@ public:
     }
 
     ~TestObject() {
-        EXPECT_EQ(tid, std::this_thread::get_id()); // Object is destroyed on child thread
+        EXPECT_EQ(tid,
+                  std::this_thread::get_id()); // Object is destroyed on child thread
     }
 
     void fn1(int val) const {
@@ -28,7 +29,7 @@ public:
         EXPECT_EQ(val, 1);
     }
 
-    void fn2(std::function<void (int)> cb) const {
+    void fn2(std::function<void(int)> cb) const {
         EXPECT_EQ(tid, std::this_thread::get_id());
         cb(1);
     }
@@ -48,13 +49,9 @@ public:
         EXPECT_EQ(string, "test");
     }
 
-    void checkContext(std::promise<bool> result) const {
-        result.set_value(tid == std::this_thread::get_id());
-    }
+    void checkContext(std::promise<bool> result) const { result.set_value(tid == std::this_thread::get_id()); }
 
-    void sync(std::promise<void> result) const {
-        result.set_value();
-    }
+    void sync(std::promise<void> result) const { result.set_value(); }
 
     const std::thread::id tid;
 };
@@ -64,7 +61,7 @@ TEST(Thread, invoke) {
     Thread<TestObject> thread("Test", tid);
 
     thread.actor().invoke(&TestObject::fn1, 1);
-    thread.actor().invoke(&TestObject::fn2, [] (int result) { EXPECT_EQ(result, 1); } );
+    thread.actor().invoke(&TestObject::fn2, [](int result) { EXPECT_EQ(result, 1); });
     thread.actor().invoke(&TestObject::transferIn, std::make_unique<int>(1));
     thread.actor().invoke(&TestObject::transferInShared, std::make_shared<int>(1));
 
@@ -93,14 +90,10 @@ class TestWorker {
 public:
     TestWorker(ActorRef<TestWorker>) {}
 
-    void send(std::function<void ()> cb) {
-        cb();
-    }
+    void send(std::function<void()> cb) { cb(); }
 
-    void sendDelayed(std::function<void ()> cb) {
-        timer.start(Milliseconds(300), mbgl::Duration::zero(), [cb] {
-            cb();
-        });
+    void sendDelayed(std::function<void()> cb) {
+        timer.start(Milliseconds(300), mbgl::Duration::zero(), [cb] { cb(); });
     }
 
 private:
@@ -115,7 +108,10 @@ TEST(Thread, ExecutesAfter) {
     bool didAfter = false;
 
     thread.actor().invoke(&TestWorker::send, [&] { didWork = true; });
-    thread.actor().invoke(&TestWorker::send, [&] { didAfter = true; loop.stop(); });
+    thread.actor().invoke(&TestWorker::send, [&] {
+        didAfter = true;
+        loop.stop();
+    });
 
     loop.run();
 
@@ -127,9 +123,7 @@ TEST(Thread, CanSelfWakeUp) {
     RunLoop loop;
     Thread<TestWorker> thread("Test");
 
-    thread.actor().invoke(&TestWorker::sendDelayed, [&] {
-        loop.stop();
-    });
+    thread.actor().invoke(&TestWorker::sendDelayed, [&] { loop.stop(); });
 
     loop.run();
 }
@@ -150,8 +144,8 @@ TEST(Thread, Concurrency) {
     // idea here is to test if the scheduler is handling concurrency
     // correctly, otherwise this test should crash.
     for (unsigned i = 0; i < numMessages; ++i) {
-        poolWorkerRef.invoke(&TestWorker::send, [threadedObjectRef, loop, &completed] () mutable {
-            threadedObjectRef.invoke(&TestWorker::send, [loop, &completed] () {
+        poolWorkerRef.invoke(&TestWorker::send, [threadedObjectRef, loop, &completed]() mutable {
+            threadedObjectRef.invoke(&TestWorker::send, [loop, &completed]() {
                 if (!--completed) {
                     loop->stop();
                 }
@@ -174,21 +168,25 @@ TEST(Thread, ThreadPoolMessaging) {
     // This is sending a message to the Thread from the main
     // thread. Then the Thread will send another message to
     // a worker on the ThreadPool.
-    threadedObjectRef.invoke(&TestWorker::send, [poolWorkerRef, loop] () mutable {
-        poolWorkerRef.invoke(&TestWorker::send, [loop] () { loop->stop(); });
+    threadedObjectRef.invoke(&TestWorker::send, [poolWorkerRef, loop]() mutable {
+        poolWorkerRef.invoke(&TestWorker::send, [loop]() { loop->stop(); });
     });
 
     loop->run();
 
     // Same as before, but in the opposite direction.
-    poolWorkerRef.invoke(&TestWorker::send, [threadedObjectRef, loop] () mutable {
-        threadedObjectRef.invoke(&TestWorker::send, [loop] () { loop->stop(); });
+    poolWorkerRef.invoke(&TestWorker::send, [threadedObjectRef, loop]() mutable {
+        threadedObjectRef.invoke(&TestWorker::send, [loop]() { loop->stop(); });
     });
 
     loop->run();
 }
 
 TEST(Thread, ReferenceCanOutliveThread) {
+#if defined(__GNUC__) && __GNUC__ >= 12
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuse-after-free" // See AspiringActor<>::object()
+#endif
     auto thread = std::make_unique<Thread<TestWorker>>("Test");
     auto worker = thread->actor();
 
@@ -200,6 +198,9 @@ TEST(Thread, ReferenceCanOutliveThread) {
 
     using namespace std::literals;
     std::this_thread::sleep_for(10s);
+#if defined(__GNUC__) && __GNUC__ >= 12
+#pragma GCC diagnostic pop
+#endif
 }
 
 TEST(Thread, DeletePausedThread) {
@@ -276,16 +277,11 @@ TEST(Thread, PauseResume) {
     loop.run();
 }
 
-
 class TestWorkerDelayedConstruction {
 public:
-    TestWorkerDelayedConstruction(ActorRef<TestWorkerDelayedConstruction>, std::future<void> start) {
-        start.get();
-    }
+    TestWorkerDelayedConstruction(ActorRef<TestWorkerDelayedConstruction>, std::future<void> start) { start.get(); }
 
-    void send(std::function<void ()> cb) {
-        cb();
-    }
+    void send(std::function<void()> cb) { cb(); }
 
 private:
     Timer timer;
@@ -296,9 +292,9 @@ TEST(Thread, InvokeBeforeChildStarts) {
 
     std::promise<void> start;
     Thread<TestWorkerDelayedConstruction> thread("Test", start.get_future());
-    
-    std::atomic<int> count { 0 };
-    
+
+    std::atomic<int> count{0};
+
     for (unsigned i = 0; i < 100; ++i) {
         thread.actor().invoke(&TestWorkerDelayedConstruction::send, [&] { ++count; });
     }
@@ -309,7 +305,7 @@ TEST(Thread, InvokeBeforeChildStarts) {
     ASSERT_EQ(count, 0);
 
     start.set_value();
-    
+
     loop.run();
 
     ASSERT_EQ(count, 100);
@@ -321,7 +317,7 @@ TEST(Thread, DeleteBeforeChildStarts) {
 
     Thread<TestWorker> control("Control");
     auto thread = std::make_unique<Thread<TestWorkerDelayedConstruction>>("Test", start.get_future());
-    
+
     thread->actor().invoke(&TestWorkerDelayedConstruction::send, [&] { flag = true; });
 
     control.actor().invoke(&TestWorker::sendDelayed, [&] { start.set_value(); });

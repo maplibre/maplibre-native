@@ -5,10 +5,11 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
-- [core] All CMake properties are now prefixed `MLN_*` [1054](https://github.com/maplibre/maplibre-gl-native/pull/1054).
-- [windows] Added windows build support for core applications and node [#707](https://github.com/maplibre/maplibre-gl-native/pull/707)
-- [core] Add `ClientOptions` to configure client information [#365](https://github.com/maplibre/maplibre-gl-native/pull/365).
-- [node] Add workflow to create node binary releases for Ubuntu 20.04 x64 and MacOS 12 x64/arm64 [#378](https://github.com/maplibre/maplibre-gl-native/pull/378), [#459](https://github.com/maplibre/maplibre-gl-native/pull/459).
+- [core] Add WebP image decoding support to default platform (Linux, Windows)
+- [core] All CMake properties are now prefixed `MLN_*` [1054](https://github.com/maplibre/maplibre-native/pull/1054).
+- [windows] Added windows build support for core applications and node [#707](https://github.com/maplibre/maplibre-native/pull/707)
+- [core] Add `ClientOptions` to configure client information [#365](https://github.com/maplibre/maplibre-native/pull/365).
+- [node] Add workflow to create node binary releases for Ubuntu 20.04 x64 and MacOS 12 x64/arm64 [#378](https://github.com/maplibre/maplibre-native/pull/378), [#459](https://github.com/maplibre/maplibre-native/pull/459).
 
 ### ✨ Technical Improvements
 

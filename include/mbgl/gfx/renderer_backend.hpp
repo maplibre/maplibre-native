@@ -6,11 +6,15 @@
 #include <mutex>
 
 namespace mbgl {
+
+class ProgramParameters;
+
 namespace gfx {
 
+class BackendScope;
 class Context;
 class Renderable;
-class BackendScope;
+class ShaderRegistry;
 
 // We can make some optimizations if we know that the drawing context is not shared with other code.
 enum class ContextMode : bool {
@@ -35,23 +39,29 @@ public:
         return static_cast<T&>(getContext());
     }
 
-    bool contextIsShared() const {
-        return contextMode == ContextMode::Shared;
-    }
+    bool contextIsShared() const { return contextMode == ContextMode::Shared; }
 
     /// Returns a reference to the default surface that should be rendered on.
     virtual Renderable& getDefaultRenderable() = 0;
 
+#if MLN_DRAWABLE_RENDERER
+    /// One-time shader initialization
+    virtual void initShaders(gfx::ShaderRegistry&, const ProgramParameters&) = 0;
+#endif
+
 protected:
     virtual std::unique_ptr<Context> createContext() = 0;
 
-    /// Called when the backend's GL context needs to be made active or inactive. These are called,
-    /// as a matched pair, exclusively through BackendScope, in two situations:
+    /// Called when the backend's GL context needs to be made active or
+    /// inactive. These are called, as a matched pair, exclusively through
+    /// BackendScope, in two situations:
     ///
     ///   1. When releasing GL resources during Renderer destruction
-    ///      (Including calling CustomLayerHost::deinitialize during RenderCustomLayer destruction)
+    ///      (Including calling CustomLayerHost::deinitialize during
+    ///      RenderCustomLayer destruction)
     ///   2. When renderering through Renderer::render()
-    ///      (Including calling CustomLayerHost::initialize for newly added custom layers and
+    ///      (Including calling CustomLayerHost::initialize for newly added
+    ///      custom layers and
     ///       CustomLayerHost::deinitialize on layer removal)
     virtual void activate() = 0;
     virtual void deactivate() = 0;
@@ -64,7 +74,7 @@ protected:
     friend class BackendScope;
 };
 
-MBGL_CONSTEXPR bool operator==(const RendererBackend& a, const RendererBackend& b) {
+constexpr bool operator==(const RendererBackend& a, const RendererBackend& b) {
     return &a == &b;
 }
 

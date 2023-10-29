@@ -14,7 +14,7 @@ namespace android {
 class LineLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/style/layers/LineLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/style/layers/LineLayer"; };
 
     LineLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
@@ -78,7 +78,7 @@ public:
 
 }; // class LineLayer
 
-class LineJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::LineLayerFactory {
+class LineJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::LineLayerFactory {
 public:
     ~LineJavaLayerPeerFactory() override;
 
@@ -90,7 +90,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class LineJavaLayerPeerFactory
+}; // class LineJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

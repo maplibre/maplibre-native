@@ -14,22 +14,18 @@
 
 namespace mbgl {
 
-RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
-                       const TileParameters& parameters,
-                       const Tileset& tileset)
+RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
     : Tile(Kind::RasterDEM, id_),
       loader(*this, id_, parameters, tileset),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(Scheduler::GetBackground(),
-             ActorRef<RasterDEMTile>(*this, mailbox)) {
-
+      worker(Scheduler::GetBackground(), ActorRef<RasterDEMTile>(*this, mailbox)) {
     encoding = tileset.encoding;
-    if ( id.canonical.y == 0 ){
+    if (id.canonical.y == 0) {
         // this tile doesn't have upper neighboring tiles so marked those as backfilled
         neighboringTiles = neighboringTiles | DEMTileNeighbors::NoUpper;
     }
 
-    if (id.canonical.y + 1 == std::pow(2, id.canonical.z)){
+    if (id.canonical.y + 1 == std::pow(2, id.canonical.z)) {
         // this tile doesn't have lower neighboring tiles so marked those as backfilled
         neighboringTiles = neighboringTiles | DEMTileNeighbors::NoLower;
     }
@@ -85,8 +81,8 @@ HillshadeBucket* RasterDEMTile::getBucket() const {
 
 void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTileNeighbors mask) {
     int32_t dx = static_cast<int32_t>(borderTile.id.canonical.x) - static_cast<int32_t>(id.canonical.x);
-    const auto dy =
-        static_cast<int8_t>(static_cast<int32_t>(borderTile.id.canonical.y) - static_cast<int32_t>(id.canonical.y));
+    const auto dy = static_cast<int8_t>(static_cast<int32_t>(borderTile.id.canonical.y) -
+                                        static_cast<int32_t>(id.canonical.y));
     const auto dim = static_cast<uint32_t>(pow(2, id.canonical.z));
     if (dx == 0 && dy == 0) return;
     if (std::abs(dy) > 1) return;
@@ -106,9 +102,12 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         tileDEM.backfillBorder(borderDEM, dx, dy);
         // update the bitmask to indicate that this tiles have been backfilled by flipping the relevant bit
         this->neighboringTiles = this->neighboringTiles | mask;
-        // mark HillshadeBucket.prepared as false so it runs through the prepare render pass
-        // with the new texture data we just backfilled
+        // mark HillshadeBucket.prepared as false so it runs through the prepare
+        // render pass with the new texture data we just backfilled
         bucket->setPrepared(false);
+#if MLN_DRAWABLE_RENDERER
+        bucket->renderTargetPrepared = false;
+#endif
     }
 }
 

@@ -73,8 +73,6 @@ jobs:
         include:
           - runs-on: macos-12
             arch: x86_64
-          - runs-on: macos-12-arm
-            arch: arm64
     continue-on-error: true
     env:
       BUILDTYPE: 'Release'
@@ -86,7 +84,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -137,7 +135,7 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -169,7 +167,7 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
-      - name: Configure maplibre-gl-native (MacOS)
+      - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
           cmake . -B build \
@@ -177,7 +175,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
 
-      - name: Configure maplibre-gl-native (Linux)
+      - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'
         run: |
           cmake . -B build \
@@ -205,7 +203,7 @@ jobs:
           key: |
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
 
-      - name: Configure maplibre-gl-native (Windows)
+      - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
         run: |
           cmake . -B build \
@@ -213,12 +211,12 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
-      - name: Build maplibre-gl-native (MacOS/Linux)
+      - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
-      - name: Build maplibre-gl-native (Windows)
+      - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
         run: |
           cmake --build build

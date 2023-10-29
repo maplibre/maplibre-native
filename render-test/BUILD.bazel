@@ -1,0 +1,57 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+cc_library(
+    name = "render-test-lib",
+    hdrs = [
+        "include/mbgl/render_test.hpp",
+    ],
+    includes = [
+        "include",
+    ],
+    visibility = [
+        "//platform/default:__pkg__",
+        "//render-test/ios:__pkg__",
+    ],
+)
+
+cc_library(
+    name = "render-test-srcs",
+    srcs = glob(
+        [
+            "*.cpp",
+            "*.hpp",
+        ],
+    ) + [
+        "include/mbgl/render_test.hpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    includes = [
+        "include",
+    ],
+    visibility = [
+        "//render-test/ios:__pkg__",
+    ],
+    deps = [
+        "//expression-test:test_runner_common",
+    ] + select({
+        "//:ios": ["//platform:ios-sdk"],
+        "//:linux": ["//platform/linux:impl"],
+    }),
+)
+
+cc_test(
+    name = "render-test",
+    timeout = "long",
+    args = [
+        "--manifestPath",
+        "metrics/linux-gcc8-release-style.json",
+    ],
+    data = [
+        "//metrics:render-test-files",
+    ],
+    deps = [
+        "render-test-srcs",
+        "//platform/default:render-test-bin",
+        "//vendor:mapbox-base",
+    ],
+)

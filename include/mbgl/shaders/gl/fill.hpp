@@ -1,13 +1,13 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
 namespace mbgl {
 namespace shaders {
 
-template <> struct ShaderSource<BuiltIn::FillProgram, gfx::Backend::Type::OpenGL> {
+template <>
+struct ShaderSource<BuiltIn::FillProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "FillProgram";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 
 uniform mat4 u_matrix;

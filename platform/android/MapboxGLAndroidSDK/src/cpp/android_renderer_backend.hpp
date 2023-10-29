@@ -21,9 +21,7 @@ public:
 
     // mbgl::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override {
-        return *this;
-    }
+    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 protected:
     void activate() override {

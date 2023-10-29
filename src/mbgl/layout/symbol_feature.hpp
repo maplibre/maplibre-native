@@ -23,9 +23,7 @@ public:
     FeatureIdentifier getID() const override { return feature->getID(); };
     const GeometryCollection& getGeometries() const override { return feature->getGeometries(); }
 
-    friend bool operator < (const SymbolFeature& lhs, const SymbolFeature& rhs) {
-        return lhs.sortKey <  rhs.sortKey;
-    }
+    friend bool operator<(const SymbolFeature& lhs, const SymbolFeature& rhs) { return lhs.sortKey < rhs.sortKey; }
 
     std::unique_ptr<GeometryTileFeature> feature;
     GeometryCollection geometry;

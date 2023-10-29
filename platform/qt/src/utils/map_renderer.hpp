@@ -23,8 +23,7 @@ namespace QMapLibreGL {
 
 class RendererBackend;
 
-class MapRenderer : public QObject
-{
+class MapRenderer : public QObject {
     Q_OBJECT
 
 public:

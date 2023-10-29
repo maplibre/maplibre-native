@@ -1,7 +1,7 @@
 {
   "name": "@maplibre/maplibre-gl-native",
   "version": "5.2.0",
-  "description": "Renders map tiles with Maplibre GL",
+  "description": "Renders map tiles with MapLibre Native",
   "keywords": [
     "maplibre",
     "gl"
@@ -48,7 +48,7 @@
     "pngjs": "^6.0.0",
     "pretty-bytes": "^6.1.0",
     "request": "^2.88.0",
-    "semver": "^7.3.8",
+    "semver": "^7.5.2",
     "shuffle-seed": "1.1.6",
     "st": "3.0.0",
     "tape": "^5.6.3",

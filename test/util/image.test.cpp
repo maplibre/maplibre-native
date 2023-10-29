@@ -7,7 +7,7 @@
 using namespace mbgl;
 
 TEST(Image, PNGRoundTrip) {
-    PremultipliedImage rgba({ 1, 1 });
+    PremultipliedImage rgba({1, 1});
     rgba.data[0] = 128;
     rgba.data[1] = 0;
     rgba.data[2] = 0;
@@ -21,7 +21,7 @@ TEST(Image, PNGRoundTrip) {
 }
 
 TEST(Image, PNGRoundTripAlpha) {
-    PremultipliedImage rgba({ 1, 1 });
+    PremultipliedImage rgba({1, 1});
     rgba.data[0] = 128;
     rgba.data[1] = 0;
     rgba.data[2] = 0;
@@ -78,6 +78,12 @@ TEST(Image, JPEGTile) {
     EXPECT_EQ(256u, image.size.height);
 }
 
+TEST(Image, WebPTile) {
+    PremultipliedImage image = decodeImage(util::read_file("test/fixtures/image/tile.webp"));
+    EXPECT_EQ(256u, image.size.width);
+    EXPECT_EQ(256u, image.size.height);
+}
+
 TEST(Image, Resize) {
     AlphaImage image({0, 0});
 
@@ -124,7 +130,7 @@ TEST(Image, Copy) {
 }
 
 TEST(Image, Move) {
-    UnassociatedImage rgba({ 1, 1 });
+    UnassociatedImage rgba({1, 1});
     rgba.data[0] = 255;
     rgba.data[1] = 254;
     rgba.data[2] = 253;
@@ -139,7 +145,7 @@ TEST(Image, Move) {
 }
 
 TEST(Image, Premultiply) {
-    UnassociatedImage rgba({ 1, 1 });
+    UnassociatedImage rgba({1, 1});
     rgba.data[0] = 255;
     rgba.data[1] = 254;
     rgba.data[2] = 253;

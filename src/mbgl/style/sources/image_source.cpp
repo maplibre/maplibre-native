@@ -12,8 +12,7 @@ namespace mbgl {
 namespace style {
 
 ImageSource::ImageSource(std::string id, const std::array<LatLng, 4> coords_)
-    : Source(makeMutable<Impl>(std::move(id), coords_)) {
-}
+    : Source(makeMutable<Impl>(std::move(id), coords_)) {}
 
 ImageSource::~ImageSource() = default;
 
@@ -59,10 +58,10 @@ void ImageSource::loadDescription(FileSource& fileSource) {
         loaded = true;
     }
 
-    if (req ||  loaded) {
+    if (req || loaded) {
         return;
     }
-    const Resource imageResource { Resource::Image, *url, {} };
+    const Resource imageResource{Resource::Image, *url, {}};
 
     req = fileSource.request(imageResource, [this](const Response& res) {
         if (res.error) {

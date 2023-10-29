@@ -1,0 +1,43 @@
+load("//platform/ios/bazel:macros.bzl", "info_plist")
+
+filegroup(
+    name = "ios_benchmark_srcs",
+    srcs = [
+        "main.m",
+        "MBXBenchAppDelegate.m",
+        "MBXBenchViewController.mm",
+        "locations.cpp",
+    ],
+    visibility = ["//platform:__pkg__"],
+)
+
+filegroup(
+    name = "ios_benchmark_hdrs",
+    srcs = [
+        "MBXBenchAppDelegate.h",
+        "MBXBenchViewController.h",
+        "locations.hpp",
+    ],
+    visibility = ["//platform:__pkg__"],
+)
+
+filegroup(
+    name = "bundle_resources",
+    srcs = glob([
+        "benchmark/*.lproj/**",
+        "benchmark/Assets.xcassets/**",
+        "benchmark/assets/**/*.pbf",
+        "benchmark/assets/**/*.json",
+        "benchmark/assets/**/*.png",
+    ]),
+    visibility = ["//platform/ios:__pkg__"],
+)
+
+info_plist(
+    name = "info_benchmark_plist",
+    out = "Info-benchmark.plist",
+    base_info_plist = "Info.plist",
+    visibility = ["//platform/ios:__pkg__"],
+)
+
+exports_files(["Info.plist"])

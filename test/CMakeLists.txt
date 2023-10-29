@@ -61,7 +61,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/style_image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/style_parser.test.cpp
-    $<$<NOT:$<PLATFORM_ID:Windows>>:${PROJECT_SOURCE_DIR}/test/text/bidi.test.cpp>
+    $<$<AND:$<NOT:$<BOOL:MBGL_WITH_QT>>,$<NOT:$<PLATFORM_ID:Windows>>>:${PROJECT_SOURCE_DIR}/test/text/bidi.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/text/calculate_tile_distances.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/cross_tile_symbol_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/text/formatted.test.cpp
@@ -88,6 +88,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/dtoa.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/geo.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/grid_index.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/hash.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/http_timeout.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/mapbox.test.cpp
@@ -99,6 +100,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/rotation.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/run_loop.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/string.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/string_indexer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/text_conversions.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/thread.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/thread_local.test.cpp
@@ -126,7 +128,9 @@ if(MLN_WITH_OPENGL)
         mbgl-test
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp
@@ -135,7 +139,7 @@ if(MLN_WITH_OPENGL)
     )
     target_compile_definitions(
         mbgl-test
-        PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
+        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
     )
 endif()
 
@@ -187,18 +191,6 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
 
-if(CMAKE_SYSTEM_NAME STREQUAL iOS)
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE bitcode)
-    set_target_properties(mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE bitcode)
-    set_target_properties(mbgl-test PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
-endif()
-
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
     set_target_properties(mbgl-test mbgl-vendor-googletest
@@ -240,4 +232,11 @@ set_property(TARGET mbgl-test PROPERTY FOLDER Core)
 
 if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE USE_CPP_TEST_SERVER
+    )
 endif()

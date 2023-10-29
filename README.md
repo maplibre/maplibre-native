@@ -2,6 +2,8 @@
 
 # MapLibre Native
 
+[![codecov](https://codecov.io/github/maplibre/maplibre-native/branch/main/graph/badge.svg?token=8ZQRRY56ZA)](https://codecov.io/github/maplibre/maplibre-native) [![](https://img.shields.io/badge/Slack-%23maplibre--native-2EB67D?logo=slack)](https://slack.openstreetmap.us/)
+
 MapLibre Native is a free and open-source library for publishing maps in your apps and desktop applications on various platforms. Fast displaying of maps is possible thanks to GPU-accelerated vector tile rendering.
 
 This project originated as a fork of Mapbox GL Native, before their switch to a non-OSS license in December 2020. For more information, see: [`FORK.md`](./FORK.md).
@@ -20,14 +22,14 @@ The documentation of MapLibre Native is a work in progress. To get an architectu
 
 ## Platforms
 
-- [⭐️ Android](platform/android/README.md) 
-- [⭐️ iOS](platform/ios/platform/ios/README.md)
+- [⭐️ Android](platform/android/README.md)
+- [⭐️ iOS](platform/ios/README.md)
 - [GLFW](platform/glfw)
 - [Linux](platform/linux/README.md)
 - [Node.js](platform/node/README.md)
 - [Qt](platform/qt/README.md)
 - [Windows](platform/windows/README.md)
-- [macOS](platform/ios/platform/macos/README.md)
+- [macOS](platform/macos/README.md)
 
 Platforms with a ⭐️ are **MapLibre Core Projects** and have a substantial amount of financial resources allocated to them. Learn about the different [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md#project-tiers).
 
@@ -40,7 +42,7 @@ MapLibre Native is being actively developed. Our big goal for 2023 is to modular
 Your help in preparing the codebase for the latest graphics backends is more than welcome. Feel free to reach out if you are interested in joining the effort!
 
 - Check out the [news](https://maplibre.org/news/) on MapLibre's website.
-- See the [Design Proposals](https://github.com/louwers/maplibre-gl-native/tree/main/design-proposals) that have been accepted and are being worked on, the most recent ones being the [Rendering Modularization Design Proposal](design-proposals/2022-10-27-rendering-modularization.md) and the [Metal Port Design Proposal](design-proposals/2022-11-29-metal-port.md).
+- See the [Design Proposals](https://github.com/maplibre/maplibre-native/tree/main/design-proposals) that have been accepted and are being worked on, the most recent ones being the [Rendering Modularization Design Proposal](design-proposals/2022-10-27-rendering-modularization.md) and the [Metal Port Design Proposal](design-proposals/2022-11-29-metal-port.md).
 
 ## Contributing
 
@@ -48,13 +50,11 @@ To contribute to MapLibre Native, see [`CONTRIBUTING.md`](CONTRIBUTING.md) and (
 
 ### Getting Involved
 
-Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/ 
+Join the `#maplibre-native` Slack channel at OSMUS. Get an invite at https://slack.openstreetmap.us/
 
 ### Bounties 💰
 
 Thanks to our sponsors, we are able to award bounties to developers making contributions toward certain [bounty directions](https://github.com/maplibre/maplibre/issues?q=is%3Aissue+is%3Aopen+label%3A%22bounty+direction%22). To get started doing bounties, refer to the [step-by-step bounties guide](https://maplibre.org/roadmap/step-by-step-bounties-guide/).
-
-## Sponsors
 
 We thank everyone who supported us financially in the past and special thanks to the people and organizations who support us with recurring donations!
 
@@ -71,6 +71,10 @@ Silver:
 <a href="https://www.mierune.co.jp/?lang=en"><img src="https://maplibre.org/img/mierune-logo.svg" alt="Logo MIERUNE" width="25%"/></a>
 
 <a href="https://komoot.com/"><img src="https://maplibre.org/img/komoot-logo.svg" alt="Logo komoot" width="25%"/></a>
+
+<a href="https://www.jawg.io/"><img src="https://maplibre.org/img/jawgmaps-logo.svg" alt="Logo JawgMaps" width="25%"/></a>
+
+<a href="https://www.radar.com/"><img src="https://maplibre.org/img/radar-logo.svg" alt="Logo Radar" width="25%"/></a>
 
 Backers and Supporters:
 

@@ -2,12 +2,12 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4828)
+#pragma warning(disable : 4828)
 #endif
 
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -100,80 +100,56 @@ namespace phoenix = boost::phoenix;
 namespace ascii = boost::spirit::ascii;
 
 template <typename Iterator>
-struct bcp47_parser : qi::grammar<Iterator>
-{
-    bcp47_parser() : bcp47_parser::base_type(start)
-    {
-        using qi::lit;
-        using qi::repeat;
-        using qi::inf;
-        using qi::eoi;
-        using ascii::char_;
-        using ascii::no_case;
-        using ascii::digit;
+struct bcp47_parser : qi::grammar<Iterator> {
+    bcp47_parser()
+        : bcp47_parser::base_type(start) {
         using ascii::alnum;
         using ascii::alpha;
+        using ascii::char_;
+        using ascii::digit;
+        using ascii::no_case;
+        using qi::eoi;
+        using qi::inf;
+        using qi::lit;
+        using qi::repeat;
 
         using boost::spirit::qi::_1;
 
         start %= no_case[langtag | privateuse | grandfathered];
 
-        langtag %= (language) [phoenix::ref(languageTag.language) = _1]
-            >> -("-" >> (script)[phoenix::ref(languageTag.script) = _1])
-            >> -("-" >> (region)[phoenix::ref(languageTag.region) = _1])
-            >> *("-" >> variant)
-            >> *("-" >> extension)
-            >> -("-" >> privateuse);
+        langtag %= (language)[phoenix::ref(languageTag.language) = _1] >>
+                   -("-" >> (script)[phoenix::ref(languageTag.script) = _1]) >>
+                   -("-" >> (region)[phoenix::ref(languageTag.region) = _1]) >> *("-" >> variant) >>
+                   *("-" >> extension) >> -("-" >> privateuse);
 
-        language %= (repeat(2,3)[alpha] >> -("-" >> extlang))     // shortest ISO 639 code
-                                                                  // sometimes followed by extended language subtags
-            | repeat(4)[alpha]                                    // or reserved for future use
-            | repeat(5,8)[alpha];                                 // or registered language subtag
+        language %= (repeat(2, 3)[alpha] >> -("-" >> extlang)) // shortest ISO 639 code
+                                                               // sometimes followed by extended language subtags
+                    | repeat(4)[alpha]                         // or reserved for future use
+                    | repeat(5, 8)[alpha];                     // or registered language subtag
 
         // We add lookaheads for "-"/eoi so that spurious matches on subtags don't prevent backtracking
-        extlang = repeat(3)[alpha] >> (&lit('-') | eoi) >> repeat(0,2)["-" >> repeat(3)[alpha] >> (&lit('-') | eoi)];
+        extlang = repeat(3)[alpha] >> (&lit('-') | eoi) >> repeat(0, 2)["-" >> repeat(3)[alpha] >> (&lit('-') | eoi)];
 
         script = repeat(4)[alpha] >> (&lit('-') | eoi);
 
         region = (repeat(2)[alpha] | repeat(3)[digit]) >> (&lit('-') | eoi);
 
-        variant = (repeat(5,8)[alnum] | (digit >> repeat(3,inf)[alnum])) >> (&lit('-') | eoi);
+        variant = (repeat(5, 8)[alnum] | (digit >> repeat(3, inf)[alnum])) >> (&lit('-') | eoi);
 
-        extension = singleton >> +("-" >> repeat(2,8)[alnum]) >> (&lit('-') | eoi);
+        extension = singleton >> +("-" >> repeat(2, 8)[alnum]) >> (&lit('-') | eoi);
 
-        singleton = digit | char_('a','w') | char_('y','z'); // "no-case" handles A-W and Y-Z
+        singleton = digit | char_('a', 'w') | char_('y', 'z'); // "no-case" handles A-W and Y-Z
 
-        privateuse = "x" >> +("-" >> repeat(1,8)[alnum]) >> (&lit('-') | eoi);
+        privateuse = "x" >> +("-" >> repeat(1, 8)[alnum]) >> (&lit('-') | eoi);
 
         grandfathered = regular | irregular;
 
-        irregular = lit("en-GB-oed")
-            | "i-ami"
-            | "i-bnn"
-            | "i-default"
-            | "i-enochian"
-            | "i-hak"
-            | "i-klingon"
-            | "i-lux"
-            | "i-mingo"
-            | "i-navajo"
-            | "i-pwn"
-            | "i-tao"
-            | "i-tay"
-            | "i-tsu"
-            | "sgn-BE-FR"
-            | "sgn-BE-NL"
-            | "sgn-CH-DE";
+        irregular = lit("en-GB-oed") | "i-ami" | "i-bnn" | "i-default" | "i-enochian" | "i-hak" | "i-klingon" |
+                    "i-lux" | "i-mingo" | "i-navajo" | "i-pwn" | "i-tao" | "i-tay" | "i-tsu" | "sgn-BE-FR" |
+                    "sgn-BE-NL" | "sgn-CH-DE";
 
-        regular = lit("art-lojban")
-            | "cel-gaulish"
-            | "no-bok"
-            | "no-nyn"
-            | "zh-guoyu"
-            | "zh-hakka"
-            | "zh-min"
-            | "zh-min-nan"
-            | "zh-xiang";
+        regular = lit("art-lojban") | "cel-gaulish" | "no-bok" | "no-nyn" | "zh-guoyu" | "zh-hakka" | "zh-min" |
+                  "zh-min-nan" | "zh-xiang";
     }
 
     qi::rule<Iterator> start;
@@ -209,17 +185,18 @@ LanguageTag LanguageTag::fromBCP47(const std::string& bcp47Tag) {
     }
 }
 
-LanguageTag::LanguageTag(std::optional<std::string> language_, std::optional<std::string> script_, std::optional<std::string> region_)
-    : language(std::move(language_))
-    , script(std::move(script_))
-    , region(std::move(region_))
-{}
+LanguageTag::LanguageTag(std::optional<std::string> language_,
+                         std::optional<std::string> script_,
+                         std::optional<std::string> region_)
+    : language(std::move(language_)),
+      script(std::move(script_)),
+      region(std::move(region_)) {}
 
 std::string LanguageTag::toBCP47() const {
     std::stringstream bcp47;
     if (!language) {
-        // BCP 47 requires a language, but we're matching implementations that accept ""
-        // to mean something like "default"
+        // BCP 47 requires a language, but we're matching implementations that
+        // accept "" to mean something like "default"
         return bcp47.str();
     } else {
         bcp47 << *language;

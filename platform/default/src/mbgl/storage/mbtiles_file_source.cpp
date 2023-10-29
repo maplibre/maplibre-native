@@ -14,6 +14,7 @@
 #include <mbgl/util/url.hpp>
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/compression.hpp>
+#include <mbgl/util/filesystem.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
 
@@ -27,7 +28,7 @@
 #endif
 
 namespace {
-bool acceptsURL(const std::string& url) {
+bool acceptsURL(const std::string &url) {
     return 0 == url.rfind(mbgl::util::MBTILES_PROTOCOL, 0);
 }
 
@@ -39,11 +40,11 @@ std::string url_to_path(const std::string &url) {
 namespace mbgl {
 using namespace rapidjson;
 
-
 class MBTilesFileSource::Impl {
 public:
-    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
-        : resourceOptions (resourceOptions_.clone()), clientOptions (clientOptions_.clone()) {}
+    explicit Impl(const ActorRef<Impl> &, const ResourceOptions &resourceOptions_, const ClientOptions &clientOptions_)
+        : resourceOptions(resourceOptions_.clone()),
+          clientOptions(clientOptions_.clone()) {}
 
     std::vector<double> &split(const std::string &s, char delim, std::vector<double> &elems) {
         std::stringstream ss(s);
@@ -62,7 +63,6 @@ public:
     }
 
     std::string serialize(Document &doc) {
-
         StringBuffer buffer;
         Writer<StringBuffer> writer(buffer);
         doc.Accept(writer);
@@ -70,15 +70,9 @@ public:
         return std::string(buffer.GetString(), buffer.GetSize());
     }
 
+    std::string db_path(const std::string &path) { return path.substr(0, path.find('?')); }
 
-
-    std::string db_path(const std::string &path) {
-        return path.substr(0, path.find('?'));
-    }
-
-    bool is_compressed(const std::string &v) {
-        return (((uint8_t) v[0]) == 0x1f) && (((uint8_t) v[1]) == 0x8b);
-    }
+    bool is_compressed(const std::string &v) { return (((uint8_t)v[0]) == 0x1f) && (((uint8_t)v[1]) == 0x8b); }
 
     // Generate a tilejson resource from .mbtiles file
     void request_tilejson(const Resource &resource, ActorRef<FileSourceRequest> req) {
@@ -140,8 +134,7 @@ public:
 
             values["minzoom"] = minz;
             values["maxzoom"] = maxz;
-        }
-        else {
+        } else {
             minz = minzoom_ptr->second;
             maxz = maxzoom_ptr->second;
         }
@@ -202,15 +195,14 @@ public:
         auto y = std::to_string((int)(pow(2, iz) - 1) - iy);
         auto z = std::to_string(iz);
 
-        std::string sql = "SELECT tile_data FROM tiles where zoom_level = " + z +
-                          " AND tile_column = " + x + " AND tile_row = " + y;
+        std::string sql = "SELECT tile_data FROM tiles where zoom_level = " + z + " AND tile_column = " + x +
+                          " AND tile_row = " + y;
         mapbox::sqlite::Statement stmt(db, sql.c_str());
 
         Response response;
         response.noContent = true;
 
         for (mapbox::sqlite::Query q(stmt); q.run();) {
-
             std::optional<std::string> data = q.get<std::optional<std::string>>(0);
             if (data) {
                 response.data = std::make_shared<std::string>(*data);
@@ -227,8 +219,8 @@ public:
     }
 
     void setResourceOptions(ResourceOptions options) {
-            std::lock_guard<std::mutex> lock(resourceOptionsMutex);
-            resourceOptions = options;
+        std::lock_guard<std::mutex> lock(resourceOptionsMutex);
+        resourceOptions = options;
     }
 
     ResourceOptions getResourceOptions() {
@@ -246,7 +238,6 @@ public:
         return clientOptions.clone();
     }
 
-
 private:
     std::map<std::string, mapbox::sqlite::Database> db_cache;
 
@@ -257,9 +248,7 @@ private:
         }
     }
 
-    void close_all() {
-        db_cache.clear();
-    }
+    void close_all() { db_cache.clear(); }
 
     // Multiple databases open simultaneoulsy, to effectively support multiple .mbtiles maps
     mapbox::sqlite::Database &get_db(const std::string &path) {
@@ -268,7 +257,8 @@ private:
             return ptr->second;
         };
 
-        auto ptr2 = db_cache.insert(std::pair<std::string, mapbox::sqlite::Database>(path, mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly)));
+        auto ptr2 = db_cache.insert(std::pair<std::string, mapbox::sqlite::Database>(
+            path, mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly)));
         return ptr2.first->second;
     }
 
@@ -278,10 +268,12 @@ private:
     ClientOptions clientOptions;
 };
 
-
-MBTilesFileSource::MBTilesFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) :
-    thread(std::make_unique<util::Thread<Impl>>(
-        util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE), "MBTilesFileSource", resourceOptions.clone(), clientOptions.clone())) {}
+MBTilesFileSource::MBTilesFileSource(const ResourceOptions &resourceOptions, const ClientOptions &clientOptions)
+    : thread(std::make_unique<util::Thread<Impl>>(
+          util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
+          "MBTilesFileSource",
+          resourceOptions.clone(),
+          clientOptions.clone())) {}
 
 std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -292,11 +284,12 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
         return req;
     }
 
-    if (resource.url.find(":///") == std::string::npos) {
+    if (resource.url.find("://") == std::string::npos ||
+        !util::is_absolute_path(resource.url.substr(resource.url.find("://") + 3))) {
         Response response;
         response.noContent = true;
-        response.error = std::make_unique<Response::Error>(
-            Response::Error::Reason::Other, "MBTilesFileSource only supports absolute path urls");
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                           "MBTilesFileSource only supports absolute path urls");
         req->actor().invoke(&FileSourceRequest::setResponse, response);
         return req;
     }
@@ -308,7 +301,8 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
     if (result == -1 && errno == ENOENT) {
         Response response;
         response.noContent = true;
-        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound, "path not found: "+path);
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
+                                                           "path not found: " + path);
         req->actor().invoke(&FileSourceRequest::setResponse, response);
         return req;
     }
@@ -318,7 +312,7 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
     return req;
 }
 
-bool MBTilesFileSource::canRequest(const Resource& resource) const {
+bool MBTilesFileSource::canRequest(const Resource &resource) const {
     return acceptsURL(resource.url);
 }
 
@@ -340,4 +334,4 @@ ClientOptions MBTilesFileSource::getClientOptions() {
     return thread->actor().ask(&Impl::getClientOptions).get();
 }
 
-}
+} // namespace mbgl

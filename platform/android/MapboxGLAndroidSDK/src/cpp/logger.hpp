@@ -9,12 +9,10 @@ namespace android {
 
 class Logger {
 public:
-   static constexpr auto Name() {
-       return "com/mapbox/mapboxsdk/log/Logger";
-   };
-   static void registerNative(jni::JNIEnv&);
+    static constexpr auto Name() { return "org/maplibre/android/log/Logger"; };
+    static void registerNative(jni::JNIEnv &);
 
-   static void log(jni::JNIEnv&, EventSeverity severity, const std::string &msg);
+    static void log(jni::JNIEnv &, EventSeverity severity, const std::string &msg);
 };
 
 } // namespace android

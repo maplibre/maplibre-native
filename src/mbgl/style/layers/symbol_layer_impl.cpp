@@ -14,11 +14,10 @@ bool SymbolLayer::Impl::hasFormatSectionOverrides() const {
 bool SymbolLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     assert(other.getTypeInfo() == getTypeInfo());
     const auto& impl = static_cast<const style::SymbolLayer::Impl&>(other);
-    return filter     != impl.filter ||
-           visibility != impl.visibility ||
-           layout     != impl.layout ||
+    return filter != impl.filter || visibility != impl.visibility || layout != impl.layout ||
            paint.hasDataDrivenPropertyDifference(impl.paint) ||
-           (hasFormatSectionOverrides() && SymbolLayerPaintPropertyOverrides::hasPaintPropertyDifference(paint, impl.paint));
+           (hasFormatSectionOverrides() &&
+            SymbolLayerPaintPropertyOverrides::hasPaintPropertyDifference(paint, impl.paint));
 }
 
 void SymbolLayer::Impl::populateFontStack(std::set<FontStack>& fontStack) const {
@@ -36,7 +35,12 @@ void SymbolLayer::Impl::populateFontStack(std::set<FontStack>& fontStack) const 
                 if (value) {
                     fontStack.insert(*value);
                 } else {
-                    Log::Warning(Event::ParseStyle, "Layer '" + id + "' has an invalid value for text-font and will not render text. Output values must be contained as literals within the expression.");
+                    Log::Warning(Event::ParseStyle,
+                                 "Layer '" + id +
+                                     "' has an invalid value for text-font and will not "
+                                     "render text. Output values "
+                                     "must be contained as literals within the "
+                                     "expression.");
                     break;
                 }
             }

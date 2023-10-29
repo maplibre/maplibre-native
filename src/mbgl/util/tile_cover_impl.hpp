@@ -49,7 +49,7 @@ struct Bound {
         auto x = p0.x;
         if (dx == 0) {
             return x;
-        } else if (dy == 0){
+        } else if (dy == 0) {
             return y <= p0.y ? p0.x : p1.x;
         }
         if (y < p0.y) return x;
@@ -59,20 +59,19 @@ struct Bound {
     }
 };
 
-// Implements a modified scan-line algorithm to provide a streaming interface for
-// tile cover on arbitrary shapes.
-// A `BoundsMap` is genereted from the input geometry where each tuple indicates
-// the set of Bounds that start at a y tile coordinate. Each bound represents
-// a chain of edges from a local y-minima to a local y-maxima.
-// For each row, the activeBounds list aggregates all bounds that enter into or
-// begin in that row. This running list of bounds is scanned, capturing the
-// x-coordinates spanned by edges in a bound until the bound exits the row (or
-// ends). The result is a set of (possibly overlapping) min,max pairs of x coordinates
-// (spans). In the simplest case a span represents the x-coordinates at which a
-// single edge intersects the top and bottom of a tile row. Interior tiles of a
-// polygon are captured by merging spans using the non-zero rule.
-// The result of a scan using `nextRow()` is a list of spans (tileXSpans) of x-coordinates
-// that includes edges and interiors of polygons.
+// Implements a modified scan-line algorithm to provide a streaming interface
+// for tile cover on arbitrary shapes. A `BoundsMap` is genereted from the input
+// geometry where each tuple indicates the set of Bounds that start at a y tile
+// coordinate. Each bound represents a chain of edges from a local y-minima to a
+// local y-maxima. For each row, the activeBounds list aggregates all bounds
+// that enter into or begin in that row. This running list of bounds is scanned,
+// capturing the x-coordinates spanned by edges in a bound until the bound exits
+// the row (or ends). The result is a set of (possibly overlapping) min,max
+// pairs of x coordinates (spans). In the simplest case a span represents the
+// x-coordinates at which a single edge intersects the top and bottom of a tile
+// row. Interior tiles of a polygon are captured by merging spans using the
+// non-zero rule. The result of a scan using `nextRow()` is a list of spans
+// (tileXSpans) of x-coordinates that includes edges and interiors of polygons.
 // next() returns a tileID for each x-coordinate from (first, second] in each
 // span in tileXSpans.
 class TileCover::Impl {

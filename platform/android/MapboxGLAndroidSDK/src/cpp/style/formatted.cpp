@@ -24,7 +24,7 @@ jni::Local<jni::Object<Formatted>> Formatted::New(jni::JNIEnv& env, const style:
 
         if (section.fontScale) {
             double fontScale = section.fontScale.value();
-            static auto method = formattedSectionClass.GetMethod<void (jni::Number)>(env, "setFontScale");
+            static auto method = formattedSectionClass.GetMethod<void(jni::Number)>(env, "setFontScale");
             formattedSection.Call(env, method, jni::Box(env, fontScale));
         }
 
@@ -33,14 +33,14 @@ jni::Local<jni::Object<Formatted>> Formatted::New(jni::JNIEnv& env, const style:
             for (std::size_t j = 0; j < section.fontStack.value().size(); j++) {
                 fontStack.Set(env, j, jni::Make<jni::String>(env, section.fontStack.value().at(j)));
             }
-            static auto method = formattedSectionClass.GetMethod<void (jni::Array<jni::String>)>(env, "setFontStack");
+            static auto method = formattedSectionClass.GetMethod<void(jni::Array<jni::String>)>(env, "setFontStack");
             formattedSection.Call(env, method, fontStack);
         }
 
         if (section.textColor) {
             using namespace mbgl::android::conversion;
             auto textColor = std::move(*convert<jni::Local<jni::Object<>>>(env, *section.textColor));
-            static auto method = formattedSectionClass.GetMethod<void (jni::Object<>)>(env, "setTextColor");
+            static auto method = formattedSectionClass.GetMethod<void(jni::Object<>)>(env, "setTextColor");
             formattedSection.Call(env, method, textColor);
         }
 

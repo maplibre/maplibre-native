@@ -12,29 +12,35 @@ namespace mbgl {
 class DefaultFileSourceManagerImpl final : public FileSourceManager {
 public:
     DefaultFileSourceManagerImpl() {
-        registerFileSourceFactory(FileSourceType::ResourceLoader, [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
-            return std::make_unique<MainResourceLoader>(resourceOptions, clientOptions);
-        });
+        registerFileSourceFactory(FileSourceType::ResourceLoader,
+                                  [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
+                                      return std::make_unique<MainResourceLoader>(resourceOptions, clientOptions);
+                                  });
 
-        registerFileSourceFactory(FileSourceType::Asset, [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
-            return std::make_unique<AssetFileSource>(resourceOptions, clientOptions);
-        });
+        registerFileSourceFactory(FileSourceType::Asset,
+                                  [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
+                                      return std::make_unique<AssetFileSource>(resourceOptions, clientOptions);
+                                  });
 
-        registerFileSourceFactory(FileSourceType::Database, [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
-            return std::make_unique<DatabaseFileSource>(resourceOptions, clientOptions);
-        });
+        registerFileSourceFactory(FileSourceType::Database,
+                                  [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
+                                      return std::make_unique<DatabaseFileSource>(resourceOptions, clientOptions);
+                                  });
 
-        registerFileSourceFactory(FileSourceType::FileSystem, [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
-            return std::make_unique<LocalFileSource>(resourceOptions, clientOptions);
-        });
+        registerFileSourceFactory(FileSourceType::FileSystem,
+                                  [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
+                                      return std::make_unique<LocalFileSource>(resourceOptions, clientOptions);
+                                  });
 
-        registerFileSourceFactory(FileSourceType::Mbtiles, [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
-            return std::make_unique<MBTilesFileSource>(resourceOptions, clientOptions);
-        });
+        registerFileSourceFactory(FileSourceType::Mbtiles,
+                                  [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
+                                      return std::make_unique<MBTilesFileSource>(resourceOptions, clientOptions);
+                                  });
 
-        registerFileSourceFactory(FileSourceType::Network, [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
-            return std::make_unique<OnlineFileSource>(resourceOptions, clientOptions);
-        });
+        registerFileSourceFactory(FileSourceType::Network,
+                                  [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
+                                      return std::make_unique<OnlineFileSource>(resourceOptions, clientOptions);
+                                  });
     }
 };
 

@@ -17,29 +17,10 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: Install macos dependencies
-        run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: /user/local/lib/node_modules
-          key: ${{ runner.macos }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.macos }}-build-${{ env.cache-name }}-
-            ${{ runner.macos }}-build-
-            ${{ runner.macos }}-
 
       - name: npm install
         run: npm install --ignore-scripts
@@ -47,29 +28,11 @@ jobs:
       - name: Prepare ccache
         run: ccache --clear
 
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.macos }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
-
       - name: Build docs
         run: make idocument
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
           branch: gh-pages
           folder: platform/ios/documentation/

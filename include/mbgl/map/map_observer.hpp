@@ -42,6 +42,7 @@ public:
         RenderMode mode;
         bool needsRepaint; // In continous mode, shows that there are ongoig transitions.
         bool placementChanged;
+        double frameTime;
     };
 
     virtual void onCameraWillChange(CameraChangeMode) {}
@@ -63,7 +64,7 @@ public:
     virtual bool onCanRemoveUnusedStyleImage(const std::string&) { return true; }
     // Observe this event to easily mutate or observe shaders as soon
     // as the registry becomes available.
-    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onRegisterShaders(gfx::ShaderRegistry&){};
 };
 
 } // namespace mbgl

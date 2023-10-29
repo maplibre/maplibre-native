@@ -14,7 +14,7 @@ namespace android {
 class LocationIndicatorLayer : public Layer {
 public:
     using SuperTag = Layer;
-    static constexpr auto Name() { return "com/mapbox/mapboxsdk/location/LocationIndicatorLayer"; };
+    static constexpr auto Name() { return "org/maplibre/android/location/LocationIndicatorLayer"; };
 
     LocationIndicatorLayer(jni::JNIEnv&, jni::String&);
 
@@ -68,7 +68,8 @@ public:
 
 }; // class LocationIndicatorLayer
 
-class LocationIndicatorJavaLayerPeerFactory final : public JavaLayerPeerFactory,  public mbgl::LocationIndicatorLayerFactory {
+class LocationIndicatorJavaLayerPeerFactory final : public JavaLayerPeerFactory,
+                                                    public mbgl::LocationIndicatorLayerFactory {
 public:
     ~LocationIndicatorJavaLayerPeerFactory() override;
 
@@ -80,7 +81,7 @@ public:
 
     LayerFactory* getLayerFactory() final { return this; }
 
-};  // class LocationIndicatorJavaLayerPeerFactory
+}; // class LocationIndicatorJavaLayerPeerFactory
 
 } // namespace android
 } // namespace mbgl

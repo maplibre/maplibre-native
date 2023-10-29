@@ -13,10 +13,8 @@ float interpolationFactor(float base, Range<float> range, float z) {
     } else if (base == 1.0f) {
         return zoomProgress / zoomDiff;
     } else {
-        return static_cast<float>(
-            (std::pow(static_cast<double>(base), zoomProgress) - 1) /
-            (std::pow(static_cast<double>(base), zoomDiff) - 1)
-        );
+        return static_cast<float>((std::pow(static_cast<double>(base), zoomProgress) - 1) /
+                                  (std::pow(static_cast<double>(base), zoomDiff) - 1));
     }
 }
 

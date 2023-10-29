@@ -15,37 +15,31 @@ namespace QMapLibreGL {
 class RendererObserver : public mbgl::RendererObserver {
 public:
     RendererObserver(mbgl::util::RunLoop& mapRunLoop, mbgl::RendererObserver& delegate_)
-        : mailbox(std::make_shared<mbgl::Mailbox>(mapRunLoop))
-        , delegate(delegate_, mailbox) {
-    }
+        : mailbox(std::make_shared<mbgl::Mailbox>(mapRunLoop)),
+          delegate(delegate_, mailbox) {}
 
-    ~RendererObserver() {
-        mailbox->close();
-    }
+    ~RendererObserver() { mailbox->close(); }
 
-    void onInvalidate() final {
-        delegate.invoke(&mbgl::RendererObserver::onInvalidate);
-    }
+    void onInvalidate() final { delegate.invoke(&mbgl::RendererObserver::onInvalidate); }
 
     void onResourceError(std::exception_ptr err) final {
         delegate.invoke(&mbgl::RendererObserver::onResourceError, err);
     }
 
-    void onWillStartRenderingMap() final {
-        delegate.invoke(&mbgl::RendererObserver::onWillStartRenderingMap);
+    void onWillStartRenderingMap() final { delegate.invoke(&mbgl::RendererObserver::onWillStartRenderingMap); }
+
+    void onWillStartRenderingFrame() final { delegate.invoke(&mbgl::RendererObserver::onWillStartRenderingFrame); }
+
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   double frameTime) override {
+        void (mbgl::RendererObserver::*f)(
+            RenderMode, bool, bool, double) = &mbgl::RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTime);
     }
 
-    void onWillStartRenderingFrame() final {
-        delegate.invoke(&mbgl::RendererObserver::onWillStartRenderingFrame);
-    }
-
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) final {
-        delegate.invoke(&mbgl::RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
-    }
-
-    void onDidFinishRenderingMap() final {
-        delegate.invoke(&mbgl::RendererObserver::onDidFinishRenderingMap);
-    }
+    void onDidFinishRenderingMap() final { delegate.invoke(&mbgl::RendererObserver::onDidFinishRenderingMap); }
 
 private:
     std::shared_ptr<mbgl::Mailbox> mailbox{};

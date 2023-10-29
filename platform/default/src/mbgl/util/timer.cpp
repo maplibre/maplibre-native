@@ -1,5 +1,7 @@
 #include <mbgl/util/timer.hpp>
 
+#include <stdexcept>
+
 #include <mbgl/util/run_loop.hpp>
 
 #include <uv.h>
@@ -9,7 +11,8 @@ namespace util {
 
 class Timer::Impl {
 public:
-    Impl() : timer(new uv_timer_t) {
+    Impl()
+        : timer(new uv_timer_t) {
         auto* loop = reinterpret_cast<uv_loop_t*>(RunLoop::getLoopHandle());
         if (uv_timer_init(loop, timer) != 0) {
             throw std::runtime_error("Failed to initialize timer.");
@@ -20,12 +23,10 @@ public:
     }
 
     ~Impl() {
-        uv_close(handle(), [](uv_handle_t* h) {
-            delete reinterpret_cast<uv_timer_t*>(h);
-        });
+        uv_close(handle(), [](uv_handle_t* h) { delete reinterpret_cast<uv_timer_t*>(h); });
     }
 
-    void start(uint64_t timeout, uint64_t repeat, std::function<void ()>&& cb_) {
+    void start(uint64_t timeout, uint64_t repeat, std::function<void()>&& cb_) {
         cb = std::move(cb_);
         if (uv_timer_start(timer, timerCallback, timeout, repeat) != 0) {
             throw std::runtime_error("Failed to start timer.");
@@ -40,13 +41,9 @@ public:
     }
 
 private:
-    static void timerCallback(uv_timer_t* handle) {
-        reinterpret_cast<Impl*>(handle->data)->cb();
-    }
+    static void timerCallback(uv_timer_t* handle) { reinterpret_cast<Impl*>(handle->data)->cb(); }
 
-    uv_handle_t* handle() {
-        return reinterpret_cast<uv_handle_t*>(timer);
-    }
+    uv_handle_t* handle() { return reinterpret_cast<uv_handle_t*>(timer); }
 
     uv_timer_t* timer;
 
@@ -54,8 +51,7 @@ private:
 };
 
 Timer::Timer()
-    : impl(std::make_unique<Impl>()) {
-}
+    : impl(std::make_unique<Impl>()) {}
 
 Timer::~Timer() = default;
 

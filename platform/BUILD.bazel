@@ -1,0 +1,285 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
+
+# Objcpp files for the iOS source
+objc_library(
+    name = "objcpp-sdk",
+    srcs = [
+        "//platform/darwin:darwin_objcpp_srcs",
+        "//platform/darwin:generated_style_srcs",
+        "//platform/ios:ios_objcpp_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_opengl_srcs",
+        ],
+    }) + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
+        ],
+    }),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
+        "-fcxx-modules",
+        "-fmodules",
+        "-Wno-c99-extensions",
+        "-Wno-gnu-zero-variadic-macro-arguments",
+        "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-gnu-statement-expression",
+        "-Wno-deprecated-declarations",
+    ],
+    defines = ["GLES_SILENCE_DEPRECATION=1"],
+    includes = [
+        "darwin/include",
+    ],
+    sdk_frameworks = [
+        "CoreImage",
+        "CoreGraphics",
+        "CoreLocation",
+        "QuartzCore",
+    ] + select({
+        "//:metal_renderer": [
+            "MetalKit"
+        ],
+        "//conditions:default": [
+            "OpenGLES",
+            "GLKit"
+        ],
+    }),
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
+        "//platform/darwin:darwin-generated-style-artifacts",
+        "//platform/darwin:darwin-objcpp",
+        "//platform/default:mbgl-default",
+        "//platform/ios/vendor:SMCalloutView",
+    ],
+)
+
+# platform/ios/sdk-files.json
+# Objc files for the iOS source
+objc_library(
+    name = "objc-sdk",
+    srcs = [
+        "//platform/darwin:darwin_objc_srcs",
+        "//platform/ios:ios_objc_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ],
+    hdrs = [
+        "//platform/darwin:include/mbgl/util/image+MLNAdditions.hpp",
+    ],
+    copts = WARNING_FLAGS["ios"] + MAPLIBRE_FLAGS + [
+        "-fmodules",
+        "-Wno-gnu-zero-variadic-macro-arguments",
+        "-Wno-variadic-macros",
+        "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-deprecated-declarations",
+    ],
+    includes = [
+        "darwin/include",
+    ],
+    sdk_frameworks = [
+        "CoreGraphics",
+        "CoreLocation",
+        "QuartzCore",
+    ],
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
+        "//platform/darwin:darwin-generated-style-artifacts",
+        "//platform/darwin:darwin-objc",
+        "//platform/default:mbgl-default",
+        "//platform/ios/vendor:SMCalloutView",
+    ],
+)
+
+# Common headers between objc and objcpp libraries.
+objc_library(
+    name = "objc-headers",
+    srcs = glob([
+        "darwin/src/*.h",
+        "ios/src/*.h",
+    ]),
+    includes = [
+        "darwin/src",
+        "ios/src",
+    ],
+    sdk_frameworks = [
+        "CoreGraphics",
+        "CoreLocation",
+        "QuartzCore",
+    ],
+    deps = [
+        "//platform/darwin:darwin-objc",
+        "//platform/darwin:darwin-objcpp",
+    ],
+)
+
+# sdk for the static target which includes the resources.
+objc_library(
+    name = "ios-sdk",
+    hdrs = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:generated_style_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [],
+    }),
+    data = ["//platform/ios:resources"],
+    module_name = "MapLibre",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "MobileCoreServices",
+        "Security",
+        "WebKit",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":objc-sdk",
+        ":objcpp-sdk",
+    ],
+)
+
+# sdk for the dynamic target. Lacking the resources bundle since for dynamic
+# they are in the main package.
+objc_library(
+    name = "ios-sdk-dynamic",
+    sdk_dylibs = [
+        "libz",
+        "libsqlite3",
+        "libc++",
+    ],
+    sdk_frameworks = [
+        "MobileCoreServices",
+        "Security",
+        "WebKit",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":objc-sdk",
+        ":objcpp-sdk",
+    ],
+)
+
+objc_library(
+    name = "app_custom_drawable_layer_objcpp_srcs",
+    srcs = [
+            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
+            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.mm",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + [
+        "-fcxx-modules",
+        "-fmodules",
+        "-Wno-c99-extensions",
+        "-Wno-gnu-zero-variadic-macro-arguments",
+        "-Wno-gnu-conditional-omitted-operand",
+        "-Wno-gnu-statement-expression",
+        "-Wno-deprecated-declarations",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:mbgl-core",
+        ":ios-sdk",
+    ],
+)
+
+objc_library(
+    name = "iosapp",
+    srcs = [
+        "//platform/ios:ios_app_srcs",
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:app/LimeGreenStyleLayer.h",
+            "//platform/darwin:app/LimeGreenStyleLayer.m",
+        ],
+    }),
+    data = glob([
+        "app/Assets.xcassets/**",
+    ]),
+    defines = ["GLES_SILENCE_DEPRECATION"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+    ],
+    sdk_frameworks = [
+        ] + select({
+        "//:metal_renderer": [
+            "MetalKit"
+        ],
+        "//conditions:default": [
+            "GLKit",  # needed for LimeGreenStyleLayer
+        ]}),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ios-sdk",
+    ] + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            ":app_custom_drawable_layer_objcpp_srcs",
+        ],
+    }),
+)
+
+objc_library(
+    name = "ios-benchapp",
+    copts = MAPLIBRE_FLAGS,
+    srcs = ["//platform/ios/benchmark:ios_benchmark_srcs"],
+    hdrs = ["//platform/ios/benchmark:ios_benchmark_hdrs"],
+    includes = [
+        "darwin/app",
+        "darwin/src",
+        "ios/src",
+    ],
+    visibility = ["//platform/ios:__pkg__"],
+    deps = [
+        ":objc-headers",
+        "//:mbgl-core",
+    ],
+)
+
+sh_binary(
+    name = "check-public-symbols",
+    srcs = ["//platform/darwin:scripts/check-public-symbols.sh"],
+    data = [
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objc_srcs",
+        "//platform/darwin:darwin_objcpp_hdrs",
+        "//platform/darwin:darwin_objcpp_srcs",
+        "//platform/darwin:darwin_private_hdrs",
+        "//platform/darwin:generated_style_hdrs",
+        "//platform/darwin:generated_style_srcs",
+        "//platform/darwin:scripts/check-public-symbols.js",
+        "//platform/ios:ios_objc_srcs",
+        "//platform/ios:ios_objcpp_srcs",
+        "//platform/ios:ios_private_hdrs",
+        "//platform/ios:ios_public_hdrs",
+        "//platform/ios:ios_sdk_hdrs",
+        "//platform/macos:macos_objc_srcs",
+        "//platform/macos:macos_objcpp_srcs",
+        "//platform/macos:macos_private_hdrs",
+        "//platform/macos:macos_public_hdrs",
+    ] + select({
+        "//:metal_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_opengl_srcs",
+        ],
+    }) + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
+        ],
+    }),
+    deps = [
+        "//platform/darwin:generated_code",
+    ],
+)

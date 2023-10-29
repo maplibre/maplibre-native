@@ -9,8 +9,8 @@ using namespace mbgl;
 auto fakeImage = [](Size s) {
     PremultipliedImage img = PremultipliedImage(s);
 
-    for (size_t i = 0; i < img.bytes(); i ++) {
-        img.data[i] = (i+1) % 4 == 0 ? 1 : std::rand() % 255;
+    for (size_t i = 0; i < img.bytes(); i++) {
+        img.data[i] = (i + 1) % 4 == 0 ? 1 : std::rand() % 255;
     }
     return img;
 };
@@ -21,7 +21,7 @@ TEST(DEMData, ConstructorMapbox) {
 
     EXPECT_EQ(demdata.dim, 16);
     EXPECT_EQ(demdata.stride, 18);
-    EXPECT_EQ(demdata.getImage()->bytes(), size_t(18*18*4));
+    EXPECT_EQ(demdata.getImage()->bytes(), size_t(18 * 18 * 4));
 };
 
 TEST(DEMData, ConstructorTerrarium) {
@@ -30,19 +30,18 @@ TEST(DEMData, ConstructorTerrarium) {
 
     EXPECT_EQ(demdata.dim, 16);
     EXPECT_EQ(demdata.stride, 18);
-    EXPECT_EQ(demdata.getImage()->bytes(), size_t(18*18*4));
+    EXPECT_EQ(demdata.getImage()->bytes(), size_t(18 * 18 * 4));
 };
 
 TEST(DEMData, InitialBackfill) {
-
     PremultipliedImage image1 = fakeImage({4, 4});
     DEMData dem1(image1, Tileset::DEMEncoding::Mapbox);
 
     bool nonempty = true;
     // checking that a 1 px border around the fake image has been populated
     // with a non-empty pixel value
-    for (int x = -1; x < 5; x++){
-        for (int y = -1; y < 5; y ++) {
+    for (int x = -1; x < 5; x++) {
+        for (int y = -1; y < 5; y++) {
             if (dem1.get(x, y) == -65536) {
                 nonempty = false;
                 break;
@@ -75,7 +74,7 @@ TEST(DEMData, InitialBackfill) {
             }
         }
     }
-    //horizontal border of DEM data is initially equal to next row of data
+    // horizontal border of DEM data is initially equal to next row of data
 
     EXPECT_TRUE(horizontalBorderMatch);
     // -1, 1 corner initially equal to closest corner data
@@ -97,10 +96,9 @@ TEST(DEMData, BackfillNeighbor) {
 
     dem0.backfillBorder(dem1, -1, 0);
     for (int y = 0; y < 4; y++) {
-        // dx = -1, dy = 0, so the left edge of dem1 should equal the right edge of dem0
-        // backfills Left neighbor
+        // dx = -1, dy = 0, so the left edge of dem1 should equal the right edge
+        // of dem0 backfills Left neighbor
         EXPECT_TRUE(dem0.get(-1, y) == dem1.get(3, y));
-
     }
 
     dem0.backfillBorder(dem1, 0, -1);

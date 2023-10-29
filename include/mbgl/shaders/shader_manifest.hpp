@@ -1,10 +1,32 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-#ifdef MBGL_RENDER_BACKEND_OPENGL
+#if !MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/gl/drawable_background.hpp>
+#include <mbgl/shaders/gl/drawable_background_pattern.hpp>
+#include <mbgl/shaders/gl/drawable_circle.hpp>
+#include <mbgl/shaders/gl/drawable_collision_box.hpp>
+#include <mbgl/shaders/gl/drawable_collision_circle.hpp>
+#include <mbgl/shaders/gl/drawable_debug.hpp>
+#include <mbgl/shaders/gl/drawable_fill.hpp>
+#include <mbgl/shaders/gl/drawable_fill_outline.hpp>
+#include <mbgl/shaders/gl/drawable_line_gradient.hpp>
+#include <mbgl/shaders/gl/drawable_line_pattern.hpp>
+#include <mbgl/shaders/gl/drawable_line_sdf.hpp>
+#include <mbgl/shaders/gl/drawable_line.hpp>
+#include <mbgl/shaders/gl/drawable_fill_pattern.hpp>
+#include <mbgl/shaders/gl/drawable_fill_outline_pattern.hpp>
+#include <mbgl/shaders/gl/drawable_fill_extrusion.hpp>
+#include <mbgl/shaders/gl/drawable_fill_extrusion_pattern.hpp>
+#include <mbgl/shaders/gl/drawable_heatmap.hpp>
+#include <mbgl/shaders/gl/drawable_heatmap_texture.hpp>
+#include <mbgl/shaders/gl/drawable_hillshade_prepare.hpp>
+#include <mbgl/shaders/gl/drawable_hillshade.hpp>
+#include <mbgl/shaders/gl/drawable_raster.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_icon.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_sdf.hpp>
+#include <mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
 #include <mbgl/shaders/gl/background_pattern.hpp>

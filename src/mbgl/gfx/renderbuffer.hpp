@@ -21,20 +21,14 @@ template <RenderbufferPixelType renderbufferType>
 class Renderbuffer final {
 public:
     Renderbuffer(const Size size_, std::unique_ptr<RenderbufferResource> resource_)
-        : size(size_), resource(std::move(resource_)) {
-    }
+        : size(size_),
+          resource(std::move(resource_)) {}
 
-    void setShouldClear(bool clear) {
-        dirty = clear;
-    }
+    void setShouldClear(bool clear) { dirty = clear; }
 
-    bool needsClearing() const {
-        return dirty;
-    }
+    bool needsClearing() const { return dirty; }
 
-    const Size& getSize() const {
-        return size;
-    }
+    const Size& getSize() const { return size; }
 
     template <typename T = RenderbufferResource>
     T& getResource() const {

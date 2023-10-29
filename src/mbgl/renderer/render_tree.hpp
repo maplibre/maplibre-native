@@ -1,6 +1,9 @@
 #pragma once
-
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable.hpp>
+#endif
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <memory>
@@ -15,15 +18,29 @@ class PatternAtlas;
 
 namespace gfx {
 class UploadPass;
+class Context;
 } // namespace gfx
+
+class LayerGroupBase;
+using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 
 class RenderItem {
 public:
+    enum class DebugType {
+        TextOutline,
+        Text,
+        Border
+    };
+    using DebugLayerGroupMap = std::map<DebugType, LayerGroupBasePtr>;
+
     virtual ~RenderItem() = default;
     virtual void upload(gfx::UploadPass&) const = 0;
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
-    virtual const std::string& getName() const = 0; 
+    virtual const std::string& getName() const = 0;
+#if MLN_DRAWABLE_RENDERER
+    virtual void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const = 0;
+#endif
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;
@@ -65,16 +82,19 @@ public:
     virtual LineAtlas& getLineAtlas() const = 0;
     virtual PatternAtlas& getPatternAtlas() const = 0;
     // Parameters
-    const RenderTreeParameters& getParameters() const {
-        return *parameters;
-    }
+    const RenderTreeParameters& getParameters() const { return *parameters; }
+
+    double getElapsedTime() const { return util::MonotonicTimer::now().count() - startTime; }
+
 protected:
-    RenderTree(std::unique_ptr<RenderTreeParameters> parameters_)
-        : parameters(std::move(parameters_)) {
+    RenderTree(std::unique_ptr<RenderTreeParameters> parameters_, double startTime_)
+        : parameters(std::move(parameters_)),
+          startTime(startTime_) {
         assert(parameters);
     }
     std::unique_ptr<RenderTreeParameters> parameters;
-};
 
+    double startTime;
+};
 
 } // namespace mbgl

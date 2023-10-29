@@ -28,51 +28,49 @@ using namespace std::literals;
 namespace {
 
 void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const Value& value) {
-    value.match(
-        [&] (const NullValue&) { writer.Null(); },
-        [&] (bool b) { writer.Bool(b); },
-        [&] (uint64_t u) { writer.Uint64(u); },
-        [&] (int64_t i) { writer.Int64(i); },
-        [&] (double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
-        [&] (const std::string& s) { writer.String(s); },
-        [&] (const std::vector<Value>& arr) {
-            writer.StartArray();
-            for(const auto& item : arr) {
-                writeJSON(writer, item);
-            }
-            writer.EndArray();
-        },
-        [&] (const std::unordered_map<std::string, Value>& obj) {
-            writer.StartObject();
-            for(const auto& entry : obj) {
-                writer.Key(entry.first.c_str());
-                writeJSON(writer, entry.second);
-            }
-            writer.EndObject();
-        }
-    );
+    value.match([&](const NullValue&) { writer.Null(); },
+                [&](bool b) { writer.Bool(b); },
+                [&](uint64_t u) { writer.Uint64(u); },
+                [&](int64_t i) { writer.Int64(i); },
+                [&](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
+                [&](const std::string& s) { writer.String(s); },
+                [&](const std::vector<Value>& arr) {
+                    writer.StartArray();
+                    for (const auto& item : arr) {
+                        writeJSON(writer, item);
+                    }
+                    writer.EndArray();
+                },
+                [&](const std::unordered_map<std::string, Value>& obj) {
+                    writer.StartObject();
+                    for (const auto& entry : obj) {
+                        writer.Key(entry.first.c_str());
+                        writeJSON(writer, entry.second);
+                    }
+                    writer.EndObject();
+                });
 }
 
 using ErrorMessage = std::string;
 using JSONReply = variant<JSDocument, ErrorMessage>;
-JSONReply readJson(const filesystem::path& jsonPath) {
-    auto maybeJSON = util::readFile(jsonPath);
+JSONReply readJson(const std::filesystem::path& jsonPath) {
+    auto maybeJSON = util::readFile(jsonPath.string());
     if (!maybeJSON) {
-        return { "Unable to open file "s + jsonPath.string() };
+        return {"Unable to open file "s + jsonPath.string()};
     }
 
     JSDocument document;
     document.Parse<rapidjson::kParseFullPrecisionFlag>(*maybeJSON);
     if (document.HasParseError()) {
-        return { formatJSONParseError(document) };
+        return {formatJSONParseError(document)};
     }
 
-    return { std::move(document) };
+    return {std::move(document)};
 }
 
 std::string toString(const JSValue& value) {
     assert(value.IsString());
-    return { value.GetString(), value.GetStringLength() };
+    return {value.GetString(), value.GetStringLength()};
 }
 
 std::optional<Value> toValue(const JSValue& jsvalue) {
@@ -311,13 +309,13 @@ bool parseInputs(const JSValue& inputsValue, TestData& data) {
 
 } // namespace
 
-std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> parseArguments(int argc, char** argv) {
-    args::ArgumentParser argumentParser("Mapbox GL Expression Test Runner");
+std::tuple<std::filesystem::path, std::vector<std::filesystem::path>, bool, uint32_t> parseArguments(int argc,
+                                                                                                     char** argv) {
+    args::ArgumentParser argumentParser("MapLibre Native Expression Test Runner");
 
-    args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", { 'h', "help" });
+    args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
     args::Flag shuffleFlag(argumentParser, "shuffle", "Toggle shuffling the tests order", {'s', "shuffle"});
-    args::ValueFlag<uint32_t> seedValue(argumentParser, "seed", "Shuffle seed (default: random)",
-                                        { "seed" });
+    args::ValueFlag<uint32_t> seedValue(argumentParser, "seed", "Shuffle seed (default: random)", {"seed"});
     args::PositionalList<std::string> testNameValues(argumentParser, "URL", "Test name(s)");
     args::ValueFlag<std::string> testFilterValue(argumentParser, "filter", "Test filter regex", {'f', "filter"});
 
@@ -342,13 +340,13 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
         exit(2);
     }
 
-    filesystem::path rootPath {std::string(TEST_RUNNER_ROOT_PATH).append("/metrics/integration/expression-tests")};
-    if (!filesystem::exists(rootPath)) {
+    const auto rootPath = std::filesystem::current_path().append("metrics/integration/expression-tests");
+    if (!std::filesystem::exists(rootPath)) {
         Log::Error(Event::General, "Test path '" + rootPath.string() + "' does not exist.");
         exit(3);
     }
 
-    std::vector<filesystem::path> paths;
+    std::vector<std::filesystem::path> paths;
     for (const auto& testName : args::get(testNameValues)) {
         paths.emplace_back(rootPath.string() + "/" + testName);
     }
@@ -359,15 +357,15 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
 
     auto testFilter = testFilterValue ? args::get(testFilterValue) : std::string{};
     // Recursively traverse through the test paths and collect test directories containing "test.json".
-    std::vector<filesystem::path> testPaths;
+    std::vector<std::filesystem::path> testPaths;
     testPaths.reserve(paths.size());
     for (const auto& path : paths) {
-        if (!filesystem::exists(path)) {
+        if (!std::filesystem::exists(path)) {
             Log::Warning(Event::General, "Provided test folder '" + path.string() + "' does not exist.");
             continue;
         }
 
-        for (auto& testPath : filesystem::recursive_directory_iterator(path)) {
+        for (auto& testPath : std::filesystem::recursive_directory_iterator(path)) {
             if (!testFilter.empty() && !std::regex_search(testPath.path().string(), std::regex(testFilter))) {
                 continue;
             }
@@ -377,65 +375,70 @@ std::tuple<filesystem::path, std::vector<filesystem::path>, bool, uint32_t> pars
         }
     }
 
-    return Arguments{ std::move(rootPath),
-                      std::move(testPaths),
-                      shuffleFlag ? args::get(shuffleFlag) : false,
-                      seedValue ? args::get(seedValue) : 1u };
+    return Arguments{std::move(rootPath),
+                     std::move(testPaths),
+                     shuffleFlag ? args::get(shuffleFlag) : false,
+                     seedValue ? args::get(seedValue) : 1u};
 }
 
 Ignores parseExpressionIgnores() {
     Ignores ignores;
-    const auto mainIgnoresPath = filesystem::path(TEST_RUNNER_ROOT_PATH).append("metrics/ignores/platform-all.json");
+    const auto mainIgnoresPath = std::filesystem::current_path().append("metrics/ignores/platform-all.json");
     auto maybeIgnores = readJson(mainIgnoresPath);
     if (!maybeIgnores.is<JSDocument>()) { // NOLINT
         return {};
     }
 
     for (const auto& property : maybeIgnores.get<JSDocument>().GetObject()) {
-        std::string id{ toString(property.name) };
+        std::string id{toString(property.name)};
         // Keep only expression-test ignores
         if (id.rfind("expression-tests", 0) != 0) {
             continue;
         }
-        std::string reason{ toString(property.value) };
+        std::string reason{toString(property.value)};
         ignores.emplace_back(std::move(id), std::move(reason));
     }
 
     return ignores;
 }
 
-std::optional<TestData> parseTestData(const filesystem::path& path) {
-    TestData data;
-    auto maybeJson = readJson(path.string());
-    if (!maybeJson.is<JSDocument>()) { // NOLINT
-        mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
+std::optional<TestData> parseTestData(const std::filesystem::path& path) {
+    try {
+        TestData data;
+        auto maybeJson = readJson(path.string());
+        if (!maybeJson.is<JSDocument>()) { // NOLINT
+            mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
+            return std::nullopt;
+        }
+
+        data.document = std::move(maybeJson.get<JSDocument>());
+
+        // Check that mandatory test data members are present.
+        if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {
+            Log::Error(Event::General, "Test fixture '" + path.string() + "' does not contain required data.");
+            return std::nullopt;
+        }
+
+        // Parse propertySpec
+        if (data.document.HasMember("propertySpec")) {
+            assert(data.document["propertySpec"].IsObject());
+            parsePropertySpec(data.document["propertySpec"], data);
+        }
+
+        // Parse expected
+        parseExpected(data.document["expected"], data);
+
+        // Parse inputs
+        if (data.document.HasMember("inputs") && !parseInputs(data.document["inputs"], data)) {
+            Log::Error(Event::General, std::string("Can't convert inputs value for '") + path.string() + "'");
+            return std::nullopt;
+        }
+
+        return {std::move(data)};
+    } catch (const std::exception& ex) {
+        Log::Error(Event::General, std::string("Cannot load test data from '" + path.string() + "': " + ex.what()));
         return std::nullopt;
     }
-
-    data.document = std::move(maybeJson.get<JSDocument>());
-
-    // Check that mandatory test data members are present.
-    if (!data.document.HasMember("expression") || !data.document.HasMember("expected")) {
-        Log::Error(Event::General, "Test fixture '" + path.string() + "' does not contain required data.");
-        return std::nullopt;
-    }
-
-    // Parse propertySpec
-    if (data.document.HasMember("propertySpec")) {
-        assert(data.document["propertySpec"].IsObject());
-        parsePropertySpec(data.document["propertySpec"], data);
-    }
-
-    // Parse expected
-    parseExpected(data.document["expected"], data);
-
-    // Parse inputs
-    if (data.document.HasMember("inputs") && !parseInputs(data.document["inputs"], data)) {
-        Log::Error(Event::General, std::string("Can't convert inputs value for '") + path.string() + "'");
-        return std::nullopt;
-    }
-
-    return {std::move(data)};
 }
 
 std::string toJSON(const Value& value, unsigned indent, bool singleLine) {
@@ -474,7 +477,8 @@ Value toValue(const Compiled& compiled) {
 std::optional<Value> toValue(const expression::Value& exprValue) {
     return exprValue.match(
         [](const Color& c) -> std::optional<Value> {
-            std::vector<Value> color { static_cast<double>(c.r), static_cast<double>(c.g), static_cast<double>(c.b), static_cast<double>(c.a) };
+            std::vector<Value> color{
+                static_cast<double>(c.r), static_cast<double>(c.g), static_cast<double>(c.b), static_cast<double>(c.a)};
             return {Value{std::move(color)}};
         },
         [](const expression::Formatted& formatted) -> std::optional<Value> { return {formatted.toObject()}; },
@@ -503,11 +507,10 @@ std::unique_ptr<style::expression::Expression> parseExpression(const JSValue& va
                                                                std::optional<PropertySpec>& spec,
                                                                TestResult& result) {
     std::optional<style::expression::type::Type> expected = spec ? toExpressionType(*spec) : std::nullopt;
-    expression::ParsingContext ctx = expected ? expression::ParsingContext(*expected) :
-                                                expression::ParsingContext();
+    expression::ParsingContext ctx = expected ? expression::ParsingContext(*expected) : expression::ParsingContext();
     Convertible convertible(&value);
     expression::ParseResult parsed;
-    if (value.IsObject() && !value.IsArray() && expected){
+    if (value.IsObject() && !value.IsArray() && expected) {
         Error error;
         parsed = convertFunctionToExpression(*expected, convertible, error, false /*convert tokens*/);
         if (!parsed) {

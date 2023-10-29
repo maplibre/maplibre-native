@@ -12,9 +12,9 @@ std::string errorMessage(const Type& expected, const Type& t) {
 
 std::optional<std::string> checkSubtype(const Type& expected, const Type& t) {
     if (t.is<ErrorType>()) return {};
-    
+
     std::optional<std::string> result = expected.match(
-        [&] (const Array& expectedArray) -> std::optional<std::string> {
+        [&](const Array& expectedArray) -> std::optional<std::string> {
             if (!t.is<Array>()) {
                 return {errorMessage(expected, t)};
             }
@@ -22,15 +22,15 @@ std::optional<std::string> checkSubtype(const Type& expected, const Type& t) {
             if (!actualArray.N || *actualArray.N != 0 || actualArray.itemType != type::Value) {
                 const auto err = checkSubtype(expectedArray.itemType, actualArray.itemType);
                 if (err) {
-                    return { errorMessage(expected, t) };
+                    return {errorMessage(expected, t)};
                 }
             }
             if (expectedArray.N && expectedArray.N != actualArray.N) {
-                return { errorMessage(expected, t) };
+                return {errorMessage(expected, t)};
             }
             return {};
         },
-        [&] (const ValueType&) -> std::optional<std::string> {
+        [&](const ValueType&) -> std::optional<std::string> {
             if (t.is<ValueType>()) return {};
 
             const Type members[] = {Null, Boolean, Number, String, Object, Color, Formatted, Image, Array(Value)};
@@ -41,16 +41,15 @@ std::optional<std::string> checkSubtype(const Type& expected, const Type& t) {
                     return {};
                 }
             }
-            return { errorMessage(expected, t) };
+            return {errorMessage(expected, t)};
         },
-        [&] (const auto&) -> std::optional<std::string> {
+        [&](const auto&) -> std::optional<std::string> {
             if (expected != t) {
-                return { errorMessage(expected, t) };
+                return {errorMessage(expected, t)};
             }
             return {};
-        }
-    );
-    
+        });
+
     return result;
 }
 

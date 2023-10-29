@@ -12,8 +12,10 @@ public:
     const Feature& feature;
     mutable std::optional<GeometryCollection> geometry;
 
-    explicit GeoJSONFeature(const Feature& feature_) : feature(feature_) {}
-    GeoJSONFeature(const Feature& feature_, const CanonicalTileID& canonical) : feature(feature_) {
+    explicit GeoJSONFeature(const Feature& feature_)
+        : feature(feature_) {}
+    GeoJSONFeature(const Feature& feature_, const CanonicalTileID& canonical)
+        : feature(feature_) {
         geometry = convertGeometry(feature.geometry, canonical);
         // https://github.com/mapbox/geojson-vt-cpp/issues/44
         if (getTypeImpl() == FeatureType::Polygon) {

@@ -1,0 +1,96 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+cc_library(
+    name = "testutils",
+    hdrs = [
+        "include/mbgl/test/util.hpp",
+    ],
+    strip_include_prefix = "include",
+    deps = [
+        "//vendor/googletest:gtest",
+    ],
+)
+
+cc_library(
+    name = "testlib",
+    srcs = select({
+        "//:ios": glob(
+            ["src/mbgl/test/*.cpp"],
+            allow_empty = False,
+        ),
+        "//conditions:default": glob(
+            ["src/mbgl/test/*.cpp"],
+            allow_empty = False,
+            exclude = ["src/mbgl/test/http_server.cpp"],
+        ),
+    }) + [
+        "include/mbgl/test.hpp",
+    ],
+    hdrs = glob([
+        "src/mbgl/test/*.hpp",
+    ]),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + select({
+        "//:ios": ["-DUSE_CPP_TEST_SERVER"],
+        "//conditions:default": [],
+    }),
+    includes = [
+        "include",
+    ],
+    strip_include_prefix = "src",
+    visibility = [
+        "//platform/ios/test/core:__pkg__",
+    ],
+    deps = [
+        "testutils",
+        "//:mbgl-core",
+    ] + select({
+        "//:ios": ["//vendor:httplib"],
+        "//conditions:default": [],
+    }),
+)
+
+cc_library(
+    name = "tests",
+    srcs = glob(
+        [
+            "**/*.test.cpp",
+        ],
+    ),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    visibility = [
+        "//platform/ios/test/core:__pkg__",
+    ],
+    deps = [
+        "testlib",
+        "testutils",
+        "//:mbgl-core",
+        "//platform/default:mbgl-default",
+        "//vendor/googletest:gtest_main",
+    ],
+    alwayslink = True,
+)
+
+filegroup(
+    name = "fixtures",
+    srcs = glob(
+        ["fixtures/**/*"],
+        allow_empty = False,
+    ),
+    visibility = [
+        "//platform/ios/test/core:__pkg__",
+    ],
+)
+
+cc_test(
+    name = "core",
+    args = [
+        "--gtest_filter=-Map.StyleNetworkErrorRetry:Map.StyleNotFound:MainResourceLoader.CachedResourceLowPriority",
+    ],
+    data = glob(["fixtures/**/*"]) + [
+        "//:scripts/style-spec-reference/v8.json",
+    ],
+    deps = [
+        "tests",
+        "//platform/linux:impl",
+    ],
+)

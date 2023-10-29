@@ -1,0 +1,67 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
+load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
+
+apple_resource_bundle(
+    name = "TestData",
+    infoplists = [
+        "Empty.plist",
+    ],
+    structured_resources = [
+        "//metrics:render-test-files",
+    ],
+)
+
+objc_library(
+    name = "tests",
+    testonly = True,
+    srcs = [
+        "tests/Tests.m",
+    ],
+    deps = [
+        "render_test_ios_src",
+    ],
+)
+
+objc_library(
+    name = "render_test_ios_src",
+    srcs = [
+        "iosTestRunner.h",
+        "iosTestRunner.mm",
+        "ios_test_runner.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = [
+        "TestData",
+    ],
+    includes = [
+        ".",
+    ],
+    visibility = [
+        "//platform/ios/test/common:__pkg__",
+    ],
+    deps = [
+        "//:mbgl-core",
+        "//platform/ios/test/common:ios_test_runner_lib",
+        "//render-test:render-test-lib",
+        "//render-test:render-test-srcs",
+        "//vendor:zip-archive",
+    ],
+)
+
+ios_unit_test(
+    name = "RenderTest",
+    minimum_os_version = "12.0",
+    provisioning_profile = "//platform/ios:xcode_profile",
+    runner = "@build_bazel_rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
+    test_host = "//platform/ios/test/common:RenderTestApp",
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [":tests"],
+)
+
+exports_files([
+    "Empty.plist",
+    "Info.plist",
+])

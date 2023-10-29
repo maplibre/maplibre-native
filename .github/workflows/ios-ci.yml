@@ -2,56 +2,53 @@ name: ios-ci
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        required: false
+        type: boolean
+        description: Makes a release with version platform/ios/VERSION
   push:
     branches:
       - main
     tags:
       - 'ios-*'
-    paths:
-      - CMakeLists.txt
-      - 'platform/ios/**'
-      - 'platform/darwin/**'
-      - ".github/workflows/ios-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
   
   pull_request:
     branches:
-      - main
-    paths:
-      - CMakeLists.txt
-      - 'platform/ios/**'
-      - 'platform/darwin/**'
-      - ".github/workflows/ios-ci.yml"
-      - "bin/**"
-      - "expression-test/**"
-      - "include/**"
-      - "metrics/**"
-      - "platform/default/**"
-      - "render-test/**"
-      - "scripts/**"
-      - "src/**"
-      - "test/**"
-      - "vendor/**"
-      - ".gitmodules"
-      - "!**/*.md"
+      - '*'
 
 jobs:
-  build:
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_changed != 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get all iOS files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files-yaml
+        uses: tj-actions/changed-files@v40
+        with:
+          files_yaml_from_source_file: .github/changed-files.yml
+
+      - name: Run step if test file(s) change
+        if: steps.changed-files-yaml.outputs.ios_any_changed == 'true'  
+        run: |
+          echo "One or more iOS file(s) has changed."
+          echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
+      
+  ios-build:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [legacy, drawable, metal]
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.renderer }}
       cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILDTYPE: Debug
@@ -62,17 +59,10 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: Install macos dependencies
-        run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list pkg-config || brew install pkg-config
-          brew list glfw || brew install glfw
 
       - name: Cache node modules
         uses: actions/cache@v3
@@ -86,57 +76,134 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      - uses: actions/setup-node@v3
+      - name: Cache Bazel
+        uses: actions/cache@v3
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
-      
+
       - name: npm install
         run: npm ci --ignore-scripts
-
-      - name: Prepare ccache
-        run: ccache --clear
-
-      - name: Cache ccache
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache'
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        run: |
-          ccache --zero-stats
-          ccache --max-size=2G
-          ccache --show-stats
-
-      - name: Install iOS packaging dependencies
-        run: |
-          ./platform/ios/scripts/install-packaging-dependencies.sh
-        env:
-          CILAUNCH: true
+      
+      - run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Check debug symbols
-        run: make darwin-check-public-symbols
+        run: bazel run //platform:check-public-symbols --//:renderer=${{ matrix.renderer }}
 
       - name: Lint plist files
-        run: make ios-lint-plist
+        run: bazel run //platform/ios:lint-plists --//:renderer=${{ matrix.renderer }}
 
-      - name: Running ios unit tests
-        run: make ios-test
+      - name: Running iOS tests
+        if: matrix.renderer != 'metal'
+        run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=${{ matrix.renderer }}
 
-      - name: Running ios UI tests
-        run: make ios-uitest
+      - name: Running iOS UI tests
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=${{ matrix.renderer }}
 
-      - name: Build and run SDK unit tests with thread and undefined behavior sanitizers
-        run: make ios-sanitize
+      # render test
 
-      - name: Build and run SDK unit tests with address sanitizer
-        run: make ios-sanitize-address
+      - name: Build RenderTest .ipa and .xctest for AWS Device Farm
+        if: matrix.renderer == 'legacy'
+        run: |
+          set -e
+          bazel run //platform/ios:xcodeproj
+          build_dir="$(mktemp -d)"
+          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
+          cd "$render_test_app_dir"
+          mkdir Payload
+          mv RenderTestApp.app Payload
+          zip -r RenderTestApp.zip Payload
+          mv RenderTestApp.zip RenderTestApp.ipa
+          cd Payload/RenderTestApp.app/PlugIns
+          zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
+          echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
-      - name: Build and run SDK unit tests with the static analyzer
-        run: make ios-static-analyzer
+      - uses: actions/upload-artifact@v3
+        if: matrix.renderer == 'legacy'
+        with:
+          name: ios-render-test
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
+            ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
+
+      # C++ unit tests
+      
+      - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
+        if: matrix.renderer == 'legacy'
+        run: |
+          set -e
+          bazel run //platform/ios:xcodeproj
+          build_dir="$(mktemp -d)"
+          xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
+          ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
+          cd "$ios_cpp_test_app_dir"
+          mkdir Payload
+          mv CppUnitTestsApp.app Payload
+          zip -r CppUnitTestsApp.zip Payload
+          mv CppUnitTestsApp.zip CppUnitTestsApp.ipa
+          cd Payload/CppUnitTestsApp.app/PlugIns
+          zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
+          echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v3
+        if: matrix.renderer == 'legacy'
+        with:
+          name: ios-cpp-unit-tests
+          retention-days: 3
+          if-no-files-found: error
+          path: |
+            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
+            ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
+
+      # Make Metal XCFramework release
+      - name: Should make release?
+        if: ${{ github.ref == 'refs/heads/main' && matrix.renderer == 'metal' }}
+        run: echo make_release=true >> "$GITHUB_ENV"
+
+      - name: Build XCFramework
+        run: |
+          bazel build --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic
+          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+
+      - name: Get version (release)
+        if: env.make_release && github.event.inputs.release
+        run: echo version="$(cat VERSION)" >> "$GITHUB_ENV"
+
+      - name: Get version (pre-release)
+        if: env.make_release && !github.event.inputs.release
+        run: echo version="$(cat VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
+
+      - name: Create tag
+        if: env.make_release
+        run: |
+          git tag -a ios-v${{ env.version }} -m "Publish ios-v${{ env.version }}" ${{ github.sha }}
+          git push origin ios-v${{ env.version }}
+
+      - name: Release
+        if: env.make_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ios-v${{ env.version }}
+          files: ${{ env.xcframework }}
+          tag_name: ios-v${{ env.version }}
+          prerelease: ${{ !github.event.inputs.release }}
+
+  ios-ci-result:
+    runs-on: ubuntu-latest
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    needs:
+      - pre_job
+      - ios-build
+    steps:
+      - name: Mark result as failed
+        if: needs.ios-build.result != 'success'
+        run: exit 1

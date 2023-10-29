@@ -2,18 +2,22 @@
 
 #include <mbgl/util/immutable.hpp>
 
+#include <algorithm>
+#include <cassert>
 #include <memory>
-#include <string>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace mbgl {
 namespace style {
 
 /*
-    Manages an ordered collection of elements and their `Immutable<Impl>`s. The latter is
-    itself stored in an Immutable container. Using immutability at the collection level
-    allows us to short-circuit significant portions of the RenderStyle update logic via
-    a simple pointer equality check, greatly improving performance.
+    Manages an ordered collection of elements and their `Immutable<Impl>`s. The
+   latter is itself stored in an Immutable container. Using immutability at the
+   collection level allows us to short-circuit significant portions of the
+   RenderStyle update logic via a simple pointer equality check, greatly
+   improving performance.
 
     Element types are required to have:
 
@@ -45,9 +49,9 @@ protected:
     std::size_t index(const std::string&) const;
     T* add(std::size_t wrapperIndex, std::size_t implIndex, std::unique_ptr<T> wrapper);
     std::unique_ptr<T> remove(std::size_t wrapperIndex, std::size_t implIndex);
-    // Must be called whenever an element of the collection is internally mutated.
-    // Typically, each element permits registration of an observer, and the observer
-    // should call this method.
+    // Must be called whenever an element of the collection is internally
+    // mutated. Typically, each element permits registration of an observer, and
+    // the observer should call this method.
     void update(std::size_t implIndex, const T&);
 
     WrapperVector wrappers;
@@ -99,7 +103,8 @@ template <class T>
 using CollectionWithPersistentOrder = Collection<T, true>;
 
 template <class T>
-CollectionBase<T>::CollectionBase() : impls(makeMutable<std::vector<Immutable<Impl>>>()) {}
+CollectionBase<T>::CollectionBase()
+    : impls(makeMutable<std::vector<Immutable<Impl>>>()) {}
 
 template <class T>
 std::size_t CollectionBase<T>::size() const {
@@ -108,9 +113,8 @@ std::size_t CollectionBase<T>::size() const {
 
 template <class T>
 std::size_t CollectionBase<T>::index(const std::string& id) const {
-    return std::find_if(wrappers.begin(), wrappers.end(), [&](const auto& e) {
-        return e->getID() == id;
-    }) - wrappers.begin();
+    return std::find_if(wrappers.begin(), wrappers.end(), [&](const auto& e) { return e->getID() == id; }) -
+           wrappers.begin();
 }
 
 template <class T>
@@ -133,9 +137,7 @@ std::vector<T*> CollectionBase<T>::getWrappers() const {
 
 template <class T>
 void CollectionBase<T>::clear() {
-    mutate(impls, [&] (auto& impls_) {
-        impls_.clear();
-    });
+    mutate(impls, [&](auto& impls_) { impls_.clear(); });
 
     wrappers.clear();
 }

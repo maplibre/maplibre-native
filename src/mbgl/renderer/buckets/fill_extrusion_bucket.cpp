@@ -23,16 +23,12 @@ namespace mapbox {
 namespace util {
 template <>
 struct nth<0, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) {
-        return t.x;
-    };
+    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.x; };
 };
 
 template <>
 struct nth<1, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) {
-        return t.y;
-    };
+    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
 };
 } // namespace util
 } // namespace mapbox
@@ -43,21 +39,22 @@ using namespace style;
 
 struct GeometryTooLongException : std::exception {};
 
-FillExtrusionBucket::FillExtrusionBucket(const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties&,
-                       const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
-                       const float zoom,
-                       const uint32_t) {
+FillExtrusionBucket::FillExtrusionBucket(
+    const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties&,
+    const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
+    const float zoom,
+    const uint32_t) {
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(
             std::piecewise_construct,
             std::forward_as_tuple(pair.first),
-            std::forward_as_tuple(
-                getEvaluated<FillExtrusionLayerProperties>(pair.second),
-                zoom));
+            std::forward_as_tuple(getEvaluated<FillExtrusionLayerProperties>(pair.second), zoom));
     }
 }
 
-FillExtrusionBucket::~FillExtrusionBucket() = default;
+FillExtrusionBucket::~FillExtrusionBucket() {
+    sharedVertices->release();
+}
 
 void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      const GeometryCollection& geometry,
@@ -73,8 +70,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         for (const auto& ring : polygon) {
             totalVertices += ring.size();
-            if (totalVertices > std::numeric_limits<uint16_t>::max())
-                throw GeometryTooLongException();
+            if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
         }
 
         if (totalVertices == 0) continue;
@@ -84,9 +80,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         std::size_t startVertices = vertices.elements();
 
-        if (triangleSegments.empty() ||
-            triangleSegments.back().vertexLength + (5 * (totalVertices - 1) + 1) >
-                std::numeric_limits<uint16_t>::max()) {
+        if (triangleSegments.empty() || triangleSegments.back().vertexLength + (5 * (totalVertices - 1) + 1) >
+                                            std::numeric_limits<uint16_t>::max()) {
             triangleSegments.emplace_back(startVertices, triangles.elements());
         }
 
@@ -94,14 +89,12 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
         auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
-        assert(triangleIndex + (5 * (totalVertices - 1) + 1) <=
-               std::numeric_limits<uint16_t>::max());
+        assert(triangleIndex + (5 * (totalVertices - 1) + 1) <= std::numeric_limits<uint16_t>::max());
 
         for (const auto& ring : polygon) {
             std::size_t nVertices = ring.size();
 
-            if (nVertices == 0)
-                continue;
+            if (nVertices == 0) continue;
 
             std::size_t edgeDistance = 0;
 
@@ -121,22 +114,21 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
                     const Point<double> perp = util::unit(util::perp(d1 - d2));
                     const size_t dist = util::dist<int16_t>(d1, d2);
-                    if (edgeDistance + dist >
-                        static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
+                    if (edgeDistance + dist > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
                         edgeDistance = 0;
                     }
 
-                    vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                    vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                        p1, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                        p1, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     edgeDistance += dist;
 
-                    vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
-                    vertices.emplace_back(
-                        FillExtrusionProgram::layoutVertex(p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
+                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                        p2, perp.x, perp.y, 0, 0, static_cast<uint16_t>(edgeDistance)));
+                    vertices.emplace_back(FillExtrusionProgram::layoutVertex(
+                        p2, perp.x, perp.y, 0, 1, static_cast<uint16_t>(edgeDistance)));
 
                     // ┌──────┐
                     // │ 0  1 │ Counter-Clockwise winding order.
@@ -159,8 +151,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         for (std::size_t i = 0; i < nIndices; i += 3) {
             // Counter-Clockwise winding order.
-            triangles.emplace_back(flatIndices[indices[i]], flatIndices[indices[i + 2]],
-                                   flatIndices[indices[i + 1]]);
+            triangles.emplace_back(flatIndices[indices[i]], flatIndices[indices[i + 2]], flatIndices[indices[i + 1]]);
         }
 
         triangleSegment.vertexLength += totalVertices;
@@ -169,7 +160,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
-        if (it != patternDependencies.end()){
+        if (it != patternDependencies.end()) {
             pair.second.populateVertexVectors(
                 feature, vertices.elements(), index, patternPositions, it->second, canonical);
         } else {
@@ -178,7 +169,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
     }
 }
 
-void FillExtrusionBucket::upload(gfx::UploadPass& uploadPass) {
+void FillExtrusionBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
@@ -187,6 +179,7 @@ void FillExtrusionBucket::upload(gfx::UploadPass& uploadPass) {
     for (auto& pair : paintPropertyBinders) {
         pair.second.upload(uploadPass);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
 }
@@ -201,8 +194,10 @@ float FillExtrusionBucket::getQueryRadius(const RenderLayer& layer) const {
     return util::length(translate[0], translate[1]);
 }
 
-void FillExtrusionBucket::update(const FeatureStates& states, const GeometryTileLayer& layer,
-                                 const std::string& layerID, const ImagePositions& imagePositions) {
+void FillExtrusionBucket::update(const FeatureStates& states,
+                                 const GeometryTileLayer& layer,
+                                 const std::string& layerID,
+                                 const ImagePositions& imagePositions) {
     auto it = paintPropertyBinders.find(layerID);
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);

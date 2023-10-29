@@ -44,7 +44,9 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
         if (encoding && *encoding == "terrarium") {
             result.encoding = Tileset::DEMEncoding::Terrarium;
         } else if (encoding && *encoding != "mapbox") {
-            error.message = "invalid raster-dem encoding type - valid types are 'mapbox' and 'terrarium' ";
+            error.message =
+                "invalid raster-dem encoding type - valid types are 'mapbox' "
+                "and 'terrarium' ";
         }
     }
 
@@ -81,7 +83,9 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
     auto boundsValue = objectMember(value, "bounds");
     if (boundsValue) {
         if (!isArray(*boundsValue) || arrayLength(*boundsValue) != 4) {
-            error.message = "bounds must be an array with left, bottom, top, and right values";
+            error.message =
+                "bounds must be an array with left, bottom, top, and right "
+                "values";
             return std::nullopt;
         }
         std::optional<double> left = toDouble(arrayMember(*boundsValue, 0));
@@ -90,24 +94,30 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
         std::optional<double> top = toDouble(arrayMember(*boundsValue, 3));
 
         if (!left || !right || !bottom || !top) {
-            error.message = "bounds array must contain numeric longitude and latitude values";
+            error.message =
+                "bounds array must contain numeric longitude and latitude "
+                "values";
             return std::nullopt;
         }
 
         bottom = util::clamp(*bottom, -90.0, 90.0);
         top = util::clamp(*top, -90.0, 90.0);
-        if (*top < *bottom){
-            error.message = "bounds bottom latitude must be less than or equal to top latitude";
+        if (*top < *bottom) {
+            error.message =
+                "bounds bottom latitude must be less than or equal to top "
+                "latitude";
             return std::nullopt;
         }
 
-        if(*left > *right) {
-            error.message = "bounds left longitude must be less than or equal to right longitude";
+        if (*left > *right) {
+            error.message =
+                "bounds left longitude must be less than or equal to right "
+                "longitude";
             return std::nullopt;
         }
         left = util::max(-180.0, *left);
         right = util::min(180.0, *right);
-        result.bounds = LatLngBounds::hull({ *bottom, *left }, { *top, *right });
+        result.bounds = LatLngBounds::hull({*bottom, *left}, {*top, *right});
     }
 
     return result;

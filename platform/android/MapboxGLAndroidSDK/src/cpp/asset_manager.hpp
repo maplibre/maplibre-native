@@ -5,9 +5,7 @@ namespace android {
 
 class AssetManager {
 public:
-    static constexpr auto Name() {
-        return "android/content/res/AssetManager";
-    };
+    static constexpr auto Name() { return "android/content/res/AssetManager"; };
 };
 
 } // namespace android
