@@ -270,11 +270,24 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_INSTALL_PREFIX="../install" \
             -DMLN_WITH_QT=ON \
+            -DMLN_QT_DEPLOYMENT=ON
+          ninja
+          ninja install
+
+      - name: Build maplibre-native (Linux, Qt6, custom compiler)
+        if: runner.os == 'Linux' && matrix.qt_version != '5.15.2' && matrix.compiler != ''
+        run: |
+          mkdir build-internal && cd build-internal
+          qt-cmake ../source/ \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
+            -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
+            -DMLN_WITH_QT=ON \
             -DMLN_QT_DEPLOYMENT=ON \
             -DMLN_QT_WITH_INTERNAL_ICU=ON \
             -DMLN_QT_WITH_INTERNAL_SQLITE=ON
           ninja
-          ninja install
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
