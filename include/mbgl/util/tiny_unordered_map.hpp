@@ -33,7 +33,7 @@ struct TinyUnorderedMap : private std::unordered_map<Key, T, Hash, KeyEqual, All
 public:
     using value_type = typename Super::value_type;
 
-    TinyUnorderedMap() noexcept = default;
+    TinyUnorderedMap() = default;
 
     /// Construct from a range of key-value pairs
     template <typename InputIterator>
@@ -77,7 +77,7 @@ public:
         : TinyUnorderedMap(values_.begin(), values_.end()) {}
 
     /// Move constructor
-    TinyUnorderedMap(TinyUnorderedMap&& rhs) noexcept
+    TinyUnorderedMap(TinyUnorderedMap&& rhs)
         : Super(std::move(rhs)),
           linearSize(rhs.linearSize),
           keys(std::move(rhs.keys)),
