@@ -79,7 +79,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(HTTPFileSource::Impl *, Resource, FileSource::Callback);
+    HTTPRequest(HTTPFileSource::Impl *, Resource, ResourceLoader::Callback);
     ~HTTPRequest() override;
 
     void handleResult(CURLcode code);
@@ -90,7 +90,7 @@ private:
 
     HTTPFileSource::Impl *context = nullptr;
     Resource resource;
-    FileSource::Callback callback;
+    ResourceLoader::Callback callback;
 
     // Will store the current response.
     std::shared_ptr<std::string> data;
@@ -258,7 +258,7 @@ ClientOptions HTTPFileSource::Impl::getClientOptions() {
     return clientOptions.clone();
 }
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, FileSource::Callback callback_)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, ResourceLoader::Callback callback_)
     : context(context_),
       resource(std::move(resource_)),
       callback(std::move(callback_)),

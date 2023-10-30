@@ -35,7 +35,7 @@ namespace mbgl {
 namespace android {
 
 class AndroidRendererFrontend;
-class FileSource;
+class ResourceLoader;
 class MapRenderer;
 
 class NativeMapView : public MapObserver {
@@ -46,7 +46,7 @@ public:
 
     NativeMapView(jni::JNIEnv&,
                   const jni::Object<NativeMapView>&,
-                  const jni::Object<FileSource>&,
+                  const jni::Object<ResourceLoader>&,
                   const jni::Object<MapRenderer>&,
                   jni::jfloat,
                   jni::jboolean);

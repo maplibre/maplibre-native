@@ -8,7 +8,7 @@ namespace mbgl {
 class ClientOptions;
 class ResourceOptions;
 
-class HTTPFileSource : public FileSource {
+class HTTPFileSource : public ResourceLoader {
 public:
     HTTPFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~HTTPFileSource() override;

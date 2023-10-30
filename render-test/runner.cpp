@@ -100,16 +100,15 @@ void TestRunner::registerProxyFileSource() {
     std::call_once(registerProxyFlag, [] {
         auto* fileSourceManager = mbgl::FileSourceManager::get();
 
-        auto resourceLoaderFactory = fileSourceManager->unRegisterFileSourceFactory(
-            mbgl::FileSourceType::ResourceLoader);
+        auto resourceLoaderFactory = fileSourceManager->unRegisterFileSourceFactory(mbgl::FileSourceType::Proxy);
         auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions,
                                                                            const mbgl::ClientOptions& clientOptions) {
             assert(defaultFactory);
-            std::shared_ptr<FileSource> fileSource = defaultFactory(resourceOptions, clientOptions);
+            std::shared_ptr<ResourceLoader> fileSource = defaultFactory(resourceOptions, clientOptions);
             return std::make_unique<ProxyFileSource>(std::move(fileSource), resourceOptions, clientOptions);
         };
 
-        fileSourceManager->registerFileSourceFactory(mbgl::FileSourceType::ResourceLoader, std::move(factory));
+        fileSourceManager->registerFileSourceFactory(mbgl::FileSourceType::Proxy, std::move(factory));
     });
 }
 
@@ -686,8 +685,8 @@ TestRunner::Impl::Impl(const TestMetadata& metadata,
                        const mbgl::ClientOptions& clientOptions)
     : observer(std::make_unique<TestRunnerMapObserver>()),
       frontend(metadata.size, metadata.pixelRatio, swapBehavior(metadata.mapMode)),
-      fileSource(mbgl::FileSourceManager::get()->getFileSource(
-          mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
+      fileSource(
+          mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Proxy, resourceOptions, clientOptions)),
       map(frontend,
           *observer,
           mbgl::MapOptions()
@@ -717,7 +716,7 @@ void TestRunner::run(TestMetadata& metadata) {
             return runnerImpl->map;
         }
 
-        FileSource& getFileSource() override {
+        ResourceLoader& getFileSource() override {
             assert(runnerImpl);
             return *runnerImpl->fileSource;
         }

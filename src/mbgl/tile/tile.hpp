@@ -105,7 +105,7 @@ public:
     // be rendered, although layers will be missing.
     bool isRenderable() const { return renderable; }
 
-    // A tile is "Loaded" when we have received a response from a FileSource,
+    // A tile is "Loaded" when we have received a response from a ResourceLoader,
     // and have attempted to parse the tile (if applicable). Tile
     // implementations should set this to true when a load error occurred, or
     // after the tile was parsed successfully.

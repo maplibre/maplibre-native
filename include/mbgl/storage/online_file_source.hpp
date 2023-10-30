@@ -8,7 +8,7 @@
 
 namespace mbgl {
 
-class OnlineFileSource : public FileSource {
+class OnlineFileSource : public ResourceLoader {
 public:
     OnlineFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~OnlineFileSource() override;
@@ -18,7 +18,7 @@ public:
     ClientOptions getClientOptions() override;
 
 private:
-    // FileSource overrides
+    // ResourceLoader overrides
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     bool canRequest(const Resource&) const override;
     void pause() override;

@@ -74,7 +74,7 @@ public:
 
     static constexpr auto Name() { return "org/maplibre/android/offline/OfflineRegion"; };
 
-    OfflineRegion(jni::JNIEnv&, jni::jlong, const jni::Object<FileSource>&);
+    OfflineRegion(jni::JNIEnv&, jni::jlong, const jni::Object<ResourceLoader>&);
 
     ~OfflineRegion();
 
@@ -93,7 +93,7 @@ public:
                                      const jni::Object<OfflineRegionUpdateMetadataCallback>&);
 
     static jni::Local<jni::Object<OfflineRegion>> New(jni::JNIEnv&,
-                                                      const jni::Object<FileSource>&,
+                                                      const jni::Object<ResourceLoader>&,
                                                       mbgl::OfflineRegion);
 
     static jni::Local<jni::Array<jni::jbyte>> metadata(jni::JNIEnv&, mbgl::OfflineRegionMetadata);

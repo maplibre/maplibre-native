@@ -13,7 +13,7 @@
 
 namespace mbgl {
 
-HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context, const Resource& resource, FileSource::Callback callback)
+HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context, const Resource& resource, ResourceLoader::Callback callback)
     : m_context(context),
       m_resource(resource),
       m_callback(callback) {

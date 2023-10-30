@@ -43,17 +43,17 @@ using namespace mbgl;
 using namespace mbgl::style;
 using namespace std::literals::string_literals;
 
-template <class FileSource = StubFileSource, class Frontend = HeadlessFrontend>
+template <class ResourceLoader = StubFileSource, class Frontend = HeadlessFrontend>
 class MapTest {
 public:
     util::RunLoop runLoop;
-    std::shared_ptr<FileSource> fileSource;
+    std::shared_ptr<ResourceLoader> fileSource;
     StubMapObserver observer;
     Frontend frontend;
     MapAdapter map;
 
     MapTest(float pixelRatio = 1, MapMode mode = MapMode::Static)
-        : fileSource(std::make_shared<FileSource>(ResourceOptions::Default(), ClientOptions())),
+        : fileSource(std::make_shared<ResourceLoader>(ResourceOptions::Default(), ClientOptions())),
           frontend(pixelRatio),
           map(frontend,
               observer,
@@ -61,11 +61,11 @@ public:
               MapOptions().withMapMode(mode).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
 
     explicit MapTest(MapOptions options)
-        : fileSource(std::make_shared<FileSource>()),
+        : fileSource(std::make_shared<ResourceLoader>()),
           frontend(options.pixelRatio()),
           map(frontend, observer, fileSource, options.withSize(frontend.getSize())) {}
 
-    template <typename T = FileSource>
+    template <typename T = ResourceLoader>
     MapTest(const std::string& cachePath,
             const std::string& assetPath,
             float pixelRatio = 1,
@@ -79,7 +79,7 @@ public:
               fileSource,
               MapOptions().withMapMode(mode).withSize(frontend.getSize()).withPixelRatio(pixelRatio)) {}
 
-    template <typename T = FileSource>
+    template <typename T = ResourceLoader>
     MapTest(const ResourceOptions& resourceOptions,
             const ClientOptions& clientOptions = ClientOptions(),
             float pixelRatio = 1,
@@ -368,8 +368,8 @@ TEST(Map, Offline) {
 
     NetworkStatus::Set(NetworkStatus::Status::Offline);
     const std::string prefix = "http://127.0.0.1:3000/";
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
-                                                                               ResourceOptions{});
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                                   ResourceOptions{});
     dbfs->forward(Resource::style(prefix + "style.json"), expiredItem("style.json"), [] {});
     dbfs->forward(Resource::source(prefix + "streets.json"), expiredItem("streets.json"), [] {});
     dbfs->forward(Resource::spriteJSON(prefix + "sprite", 1.0), expiredItem("sprite.json"), [] {});
@@ -896,8 +896,8 @@ TEST(Map, NoContentTiles) {
     Response response;
     response.noContent = true;
     response.expires = util::now() + 1h;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
-                                                                               ResourceOptions{});
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                                   ResourceOptions{});
     dbfs->forward(
         Resource::tile("http://example.com/{z}-{x}-{y}.vector.pbf", 1.0, 0, 0, 0, Tileset::Scheme::XYZ), response, [&] {
             test.map.getStyle().loadJSON(R"STYLE({
@@ -1351,8 +1351,8 @@ TEST(Map, TEST_REQUIRES_SERVER(ExpiredSpriteSheet)) {
 
     NetworkStatus::Set(NetworkStatus::Status::Offline);
     const std::string prefix = "http://127.0.0.1:3000/online/";
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
-                                                                               ResourceOptions{});
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(FileSourceType::Database,
+                                                                                   ResourceOptions{});
     dbfs->forward(Resource::style(prefix + "style.json"), makeResponse("style.json"), [] {});
     dbfs->forward(Resource::source(prefix + "streets.json"), makeResponse("streets.json"), [] {});
     dbfs->forward(Resource::spriteJSON(prefix + "sprite", 1.0), makeResponse("sprite.json", true), [] {});

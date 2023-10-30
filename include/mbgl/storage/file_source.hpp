@@ -16,7 +16,7 @@ class AsyncRequest;
 class Resource;
 
 // TODO: Rename to ResourceProviderType
-enum FileSourceType : uint8_t {
+enum class FileSourceType : uint8_t {
     Asset,
     // TODO: split to separate types
     // - Cache for fast KV store (FASTER, LevelDB, RocksDB)
@@ -25,17 +25,17 @@ enum FileSourceType : uint8_t {
     FileSystem,
     Network,
     Mbtiles,
-    ResourceLoader ///< %Resource loader acts as a proxy and has logic
+    Proxy ///< %Resource loader acts as a proxy and has logic
     /// for request delegation to Asset, Cache, and other
     /// file sources.
 };
 
 // TODO: Rename to ResourceProvider to avoid confusion with
 // GeoJSONSource, RasterSource, VectorSource, CustomGeometrySource and other *Sources.
-class FileSource {
+class ResourceLoader {
 public:
-    FileSource& operator=(const FileSource&) = delete;
-    virtual ~FileSource() = default;
+    ResourceLoader& operator=(const ResourceLoader&) = delete;
+    virtual ~ResourceLoader() = default;
 
     using Callback = std::function<void(Response)>;
 
@@ -56,7 +56,7 @@ public:
     /// When a file source supports consulting a local cache only, it must
     /// return true. Cache-only requests are requests that aren't as urgent, but
     /// could be useful, e.g. to cover part of the map while loading. The
-    /// FileSource should only do cheap actions to retrieve the data, e.g. load
+    /// ResourceLoader should only do cheap actions to retrieve the data, e.g. load
     /// it from a cache, but not from the internet.
     virtual bool supportsCacheOnlyRequests() const { return false; }
 
@@ -94,7 +94,7 @@ public:
     virtual ClientOptions getClientOptions() = 0;
 
 protected:
-    FileSource() = default;
+    ResourceLoader() = default;
 };
 
 // Properties that may be supported by online file sources:

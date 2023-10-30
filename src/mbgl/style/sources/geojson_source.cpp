@@ -70,7 +70,7 @@ const GeoJSONOptions& GeoJSONSource::getOptions() const {
     return *impl().getOptions();
 }
 
-void GeoJSONSource::loadDescription(FileSource& fileSource) {
+void GeoJSONSource::loadDescription(ResourceLoader& fileSource) {
     if (!url) {
         loaded = true;
         return;

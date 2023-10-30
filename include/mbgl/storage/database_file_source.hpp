@@ -10,12 +10,12 @@ class ClientOptions;
 class ResourceOptions;
 
 // TODO: Split DatabaseFileSource into Ambient cache and Database interfaces.
-class DatabaseFileSource : public FileSource {
+class DatabaseFileSource : public ResourceLoader {
 public:
     explicit DatabaseFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~DatabaseFileSource() override;
 
-    /// FileSource overrides
+    /// ResourceLoader overrides
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     void forward(const Resource&, const Response&, std::function<void()> callback) override;
     bool canRequest(const Resource&) const override;

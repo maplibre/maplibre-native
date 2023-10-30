@@ -15,7 +15,7 @@ namespace android {
 
 MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
                                const jni::Object<MapSnapshotter>& _obj,
-                               const jni::Object<FileSource>& _jFileSource,
+                               const jni::Object<ResourceLoader>& _jFileSource,
                                jni::jfloat _pixelRatio,
                                jni::jint width,
                                jni::jint height,
@@ -35,7 +35,7 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
 
     weakScheduler = mbgl::Scheduler::GetCurrent()->makeWeakPtr();
 
-    jFileSource = FileSource::getNativePeer(_env, _jFileSource);
+    jFileSource = ResourceLoader::getNativePeer(_env, _jFileSource);
     auto size = mbgl::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
     showLogo = _showLogo;
@@ -44,8 +44,8 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
     snapshotter = std::make_unique<mbgl::MapSnapshotter>(
         size,
         pixelRatio,
-        mbgl::android::FileSource::getSharedResourceOptions(_env, _jFileSource),
-        mbgl::android::FileSource::getSharedClientOptions(_env, _jFileSource),
+        mbgl::android::ResourceLoader::getSharedResourceOptions(_env, _jFileSource),
+        mbgl::android::ResourceLoader::getSharedClientOptions(_env, _jFileSource),
         *this,
         _localIdeographFontFamily ? jni::Make<std::string>(_env, _localIdeographFontFamily)
                                   : std::optional<std::string>{});
@@ -323,7 +323,7 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
                                             "nativePtr",
                                             jni::MakePeer<MapSnapshotter,
                                                           const jni::Object<MapSnapshotter>&,
-                                                          const jni::Object<FileSource>&,
+                                                          const jni::Object<ResourceLoader>&,
                                                           jni::jfloat,
                                                           jni::jint,
                                                           jni::jint,

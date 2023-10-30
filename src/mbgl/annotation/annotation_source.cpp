@@ -16,7 +16,7 @@ const AnnotationSource::Impl& AnnotationSource::impl() const {
     return static_cast<const Impl&>(*baseImpl);
 }
 
-void AnnotationSource::loadDescription(FileSource&) {
+void AnnotationSource::loadDescription(ResourceLoader&) {
     loaded = true;
 }
 

@@ -49,7 +49,7 @@ TileLoader<T>::TileLoader(T& tile_,
         // immediately.
         loadFromNetwork();
     } else {
-        // When the FileSource doesn't support cache-only requests, we do
+        // When the ResourceLoader doesn't support cache-only requests, we do
         // nothing until the data is definitely required.
     }
 }

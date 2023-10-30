@@ -16,7 +16,7 @@ std::atomic_size_t transferredSize{0};
 std::atomic_bool active{false};
 std::atomic_bool offline{true};
 
-ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoader_,
+ProxyFileSource::ProxyFileSource(std::shared_ptr<ResourceLoader> defaultResourceLoader_,
                                  const ResourceOptions& resourceOptions_,
                                  const ClientOptions& clientOptions_)
     : defaultResourceLoader(std::move(defaultResourceLoader_)),
@@ -24,7 +24,7 @@ ProxyFileSource::ProxyFileSource(std::shared_ptr<FileSource> defaultResourceLoad
       clientOptions(clientOptions_.clone()) {
     assert(defaultResourceLoader);
     if (offline) {
-        std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+        std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
             FileSourceType::Database, resourceOptions_, clientOptions_);
         dbfs->setProperty(READ_ONLY_MODE_KEY, true);
     }

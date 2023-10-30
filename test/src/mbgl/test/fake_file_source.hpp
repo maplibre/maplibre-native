@@ -22,7 +22,7 @@ namespace mbgl {
    as part of a resource revalidation flow. StubFileSource allows only a single
    response.
 */
-class FakeFileSource : public FileSource {
+class FakeFileSource : public ResourceLoader {
 public:
     class FakeFileRequest : public AsyncRequest {
     public:
@@ -99,8 +99,8 @@ public:
         return onlineFs->getProperty(property);
     }
 
-    std::unique_ptr<FileSource> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
-                                                                              ClientOptions());
+    std::unique_ptr<ResourceLoader> onlineFs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                                  ClientOptions());
 };
 
 } // namespace mbgl

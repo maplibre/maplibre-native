@@ -30,7 +30,7 @@ namespace style {
 
 static Observer nullObserver;
 
-Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio)
+Style::Impl::Impl(std::shared_ptr<ResourceLoader> fileSource_, float pixelRatio)
     : fileSource(std::move(fileSource_)),
       spriteLoader(std::make_unique<SpriteLoader>(pixelRatio)),
       light(std::make_unique<Light>()),

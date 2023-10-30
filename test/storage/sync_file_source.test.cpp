@@ -16,9 +16,9 @@
 
 using namespace mbgl;
 
-class SyncFileSource : public FileSource {
+class SyncFileSource : public ResourceLoader {
 public:
-    std::unique_ptr<AsyncRequest> request(const Resource& resource, FileSource::Callback callback) override {
+    std::unique_ptr<AsyncRequest> request(const Resource& resource, ResourceLoader::Callback callback) override {
         Response response;
         auto it = assets.find(resource.url);
         if (it == assets.end()) {

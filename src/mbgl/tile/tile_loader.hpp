@@ -5,7 +5,7 @@
 
 namespace mbgl {
 
-class FileSource;
+class ResourceLoader;
 class AsyncRequest;
 class Response;
 class Tileset;
@@ -45,7 +45,7 @@ private:
     T& tile;
     TileNecessity necessity;
     Resource resource;
-    std::shared_ptr<FileSource> fileSource;
+    std::shared_ptr<ResourceLoader> fileSource;
     std::unique_ptr<AsyncRequest> request;
     TileUpdateParameters updateParameters{Duration::zero(), false};
 };

@@ -8,7 +8,7 @@ class ClientOptions;
 class ResourceTransform;
 class ResourceOptions;
 
-class MainResourceLoader final : public FileSource {
+class MainResourceLoader final : public ResourceLoader {
 public:
     explicit MainResourceLoader(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~MainResourceLoader() override;

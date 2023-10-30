@@ -23,8 +23,8 @@ using namespace mbgl;
 
 class VectorTileTest {
 public:
-    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>(ResourceOptions::Default(),
-                                                                              ClientOptions());
+    std::shared_ptr<ResourceLoader> fileSource = std::make_shared<FakeFileSource>(ResourceOptions::Default(),
+                                                                                  ClientOptions());
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};

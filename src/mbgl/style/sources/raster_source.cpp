@@ -42,7 +42,7 @@ uint16_t RasterSource::getTileSize() const {
     return impl().getTileSize();
 }
 
-void RasterSource::loadDescription(FileSource& fileSource) {
+void RasterSource::loadDescription(ResourceLoader& fileSource) {
     if (urlOrTileset.is<Tileset>()) {
         baseImpl = makeMutable<Impl>(impl(), urlOrTileset.get<Tileset>());
         loaded = true;

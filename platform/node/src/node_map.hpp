@@ -99,11 +99,11 @@ public:
     bool loaded = false;
 };
 
-struct NodeFileSource : public mbgl::FileSource {
+struct NodeFileSource : public mbgl::ResourceLoader {
     NodeFileSource(NodeMap* nodeMap_)
         : nodeMap(nodeMap_) {}
     ~NodeFileSource() override = default;
-    std::unique_ptr<mbgl::AsyncRequest> request(const mbgl::Resource&, mbgl::FileSource::Callback) final;
+    std::unique_ptr<mbgl::AsyncRequest> request(const mbgl::Resource&, mbgl::ResourceLoader::Callback) final;
     bool canRequest(const mbgl::Resource&) const override;
     void setResourceOptions(mbgl::ResourceOptions) override;
     mbgl::ResourceOptions getResourceOptions() override;

@@ -24,7 +24,7 @@
 
 namespace mbgl {
 
-class FileSource;
+class ResourceLoader;
 class AsyncRequest;
 class SpriteLoader;
 
@@ -36,7 +36,7 @@ class Style::Impl : public SpriteLoaderObserver,
                     public LightObserver,
                     public util::noncopyable {
 public:
-    Impl(std::shared_ptr<FileSource>, float pixelRatio);
+    Impl(std::shared_ptr<ResourceLoader>, float pixelRatio);
     ~Impl() override;
 
     void loadJSON(const std::string&);
@@ -94,7 +94,7 @@ public:
 private:
     void parse(const std::string&);
 
-    std::shared_ptr<FileSource> fileSource;
+    std::shared_ptr<ResourceLoader> fileSource;
 
     std::string url;
     std::string json;

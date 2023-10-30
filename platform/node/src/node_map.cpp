@@ -207,8 +207,7 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     if (Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust() &&
         Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
         mbgl::FileSourceManager::get()->registerFileSourceFactory(
-            mbgl::FileSourceType::ResourceLoader,
-            [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
+            mbgl::FileSourceType::Proxy, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
                 return std::make_unique<node_mbgl::NodeFileSource>(
                     reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
             });
@@ -1537,7 +1536,7 @@ NodeMap::~NodeMap() {
 }
 
 std::unique_ptr<mbgl::AsyncRequest> NodeFileSource::request(const mbgl::Resource& resource,
-                                                            mbgl::FileSource::Callback callback_) {
+                                                            mbgl::ResourceLoader::Callback callback_) {
     assert(nodeMap);
 
     Nan::HandleScope scope;

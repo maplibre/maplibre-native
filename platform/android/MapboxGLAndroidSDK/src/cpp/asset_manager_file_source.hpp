@@ -15,7 +15,7 @@ template <typename T>
 class Thread;
 } // namespace util
 
-class AssetManagerFileSource : public FileSource {
+class AssetManagerFileSource : public ResourceLoader {
 public:
     AssetManagerFileSource(jni::JNIEnv&,
                            const jni::Object<android::AssetManager>&,

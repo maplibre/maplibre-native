@@ -12,7 +12,7 @@ namespace mbgl {
 class DefaultFileSourceManagerImpl final : public FileSourceManager {
 public:
     DefaultFileSourceManagerImpl() {
-        registerFileSourceFactory(FileSourceType::ResourceLoader,
+        registerFileSourceFactory(FileSourceType::Proxy,
                                   [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
                                       return std::make_unique<MainResourceLoader>(resourceOptions, clientOptions);
                                   });

@@ -59,7 +59,7 @@ namespace android {
 
 NativeMapView::NativeMapView(jni::JNIEnv& _env,
                              const jni::Object<NativeMapView>& _obj,
-                             const jni::Object<FileSource>& jFileSource,
+                             const jni::Object<ResourceLoader>& jFileSource,
                              const jni::Object<MapRenderer>& jMapRenderer,
                              jni::jfloat pixelRatio_,
                              jni::jboolean crossSourceCollisions_)
@@ -88,8 +88,8 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
     map = std::make_unique<mbgl::Map>(*rendererFrontend,
                                       *this,
                                       options,
-                                      mbgl::android::FileSource::getSharedResourceOptions(_env, jFileSource),
-                                      mbgl::android::FileSource::getSharedClientOptions(_env, jFileSource));
+                                      mbgl::android::ResourceLoader::getSharedResourceOptions(_env, jFileSource),
+                                      mbgl::android::ResourceLoader::getSharedClientOptions(_env, jFileSource));
 }
 
 /**
@@ -1231,7 +1231,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         "nativePtr",
         jni::MakePeer<NativeMapView,
                       const jni::Object<NativeMapView>&,
-                      const jni::Object<FileSource>&,
+                      const jni::Object<ResourceLoader>&,
                       const jni::Object<MapRenderer>&,
                       jni::jfloat,
                       jni::jboolean>,

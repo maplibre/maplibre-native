@@ -22,7 +22,7 @@ using namespace mbgl::style;
 
 class CustomTileTest {
 public:
-    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
+    std::shared_ptr<ResourceLoader> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};

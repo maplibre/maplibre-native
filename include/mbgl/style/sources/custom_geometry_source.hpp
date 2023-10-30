@@ -40,7 +40,7 @@ public:
 public:
     CustomGeometrySource(std::string id, const CustomGeometrySource::Options& options);
     ~CustomGeometrySource() final;
-    void loadDescription(FileSource&) final;
+    void loadDescription(ResourceLoader&) final;
     void setTileData(const CanonicalTileID&, const GeoJSON&);
     void invalidateTile(const CanonicalTileID&);
     void invalidateRegion(const LatLngBounds&);

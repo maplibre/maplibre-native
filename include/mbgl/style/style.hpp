@@ -12,7 +12,7 @@
 
 namespace mbgl {
 
-class FileSource;
+class ResourceLoader;
 
 namespace style {
 
@@ -22,7 +22,7 @@ class Layer;
 
 class Style {
 public:
-    Style(std::shared_ptr<FileSource>, float pixelRatio);
+    Style(std::shared_ptr<ResourceLoader>, float pixelRatio);
     ~Style();
 
     void loadJSON(const std::string&);

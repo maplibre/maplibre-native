@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
     GLFWView backend(fullscreen, benchmark, resourceOptions, clientOptions);
     view = &backend;
 
-    std::shared_ptr<mbgl::FileSource> onlineFileSource = mbgl::FileSourceManager::get()->getFileSource(
+    std::shared_ptr<mbgl::ResourceLoader> onlineFileSource = mbgl::FileSourceManager::get()->getFileSource(
         mbgl::FileSourceType::Network, resourceOptions, clientOptions);
     if (!settings.online) {
         if (onlineFileSource) {
@@ -179,8 +179,8 @@ int main(int argc, char* argv[]) {
 
     // Resource loader controls top-level request processing and can resume /
     // pause all managed sources simultaneously.
-    std::shared_ptr<mbgl::FileSource> resourceLoader = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
+    std::shared_ptr<mbgl::ResourceLoader> resourceLoader = mbgl::FileSourceManager::get()->getFileSource(
+        mbgl::FileSourceType::Proxy, resourceOptions, clientOptions);
     view->setPauseResumeCallback([resourceLoader]() {
         static bool isPaused = false;
 
@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
     });
 
     // Database file source.
-    auto databaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
+    auto databaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::ResourceLoader>(
         mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
     view->setResetCacheCallback([databaseFileSource]() {
         databaseFileSource->resetDatabase([](const std::exception_ptr& ex) {

@@ -13,7 +13,7 @@ class Mailbox;
 
 class FileSourceRequest final : public AsyncRequest {
 public:
-    FileSourceRequest(FileSource::Callback&& callback);
+    FileSourceRequest(ResourceLoader::Callback&& callback);
     ~FileSourceRequest() final;
 
     void onCancel(std::function<void()>&& callback);
@@ -22,7 +22,7 @@ public:
     ActorRef<FileSourceRequest> actor();
 
 private:
-    FileSource::Callback responseCallback = nullptr;
+    ResourceLoader::Callback responseCallback = nullptr;
     std::function<void()> cancelCallback = nullptr;
 
     std::shared_ptr<Mailbox> mailbox;

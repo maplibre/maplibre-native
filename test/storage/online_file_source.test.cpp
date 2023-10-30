@@ -15,7 +15,8 @@ using namespace mbgl;
 
 TEST(OnlineFileSource, Cancel) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     fs->request({Resource::Unknown, "http://127.0.0.1:3000/test"},
                 [&](Response) { ADD_FAILURE() << "Callback should not be called"; });
@@ -25,7 +26,8 @@ TEST(OnlineFileSource, Cancel) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(CancelMultiple)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test"};
 
@@ -49,7 +51,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(CancelMultiple)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(TemporaryError)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     const auto start = Clock::now();
     int counter = 0;
@@ -89,7 +92,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(TemporaryError)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ConnectionError)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     const auto start = Clock::now();
     int counter = 0;
@@ -120,7 +124,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(ConnectionError)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Timeout)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     int counter = 0;
 
@@ -147,7 +152,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Timeout)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryDelayOnExpiredTile)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     int counter = 0;
 
@@ -167,7 +173,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryDelayOnExpiredTile)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryOnClockSkew)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     int counter = 0;
 
@@ -196,7 +203,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryOnClockSkew)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RespectPriorExpires)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     // Very long expiration time, should never arrive.
     Resource resource1{Resource::Unknown, "http://127.0.0.1:3000/test"};
@@ -220,7 +228,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RespectPriorExpires)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RespectMinimumUpdateInterval)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     auto start = util::now();
     Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test"};
@@ -238,7 +247,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RespectMinimumUpdateInterval)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Load)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     const int concurrency = 50;
     const int max = 10000;
@@ -283,7 +293,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(Load)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/delayed"};
 
@@ -311,7 +322,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
 // connection or reachability issues.
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
     fs->pause();
 
     const auto start = Clock::now();
@@ -352,7 +364,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusOnlineOffline)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     const Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test"};
 
@@ -379,7 +392,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusOnlineOffline)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitStandard)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     auto req = fs->request({Resource::Unknown, "http://127.0.0.1:3000/rate-limit?std=true"}, [&](Response res) {
         ASSERT_NE(nullptr, res.error);
@@ -394,7 +408,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitStandard)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitMBX)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     auto req = fs->request({Resource::Unknown, "http://127.0.0.1:3000/rate-limit?mbx=true"}, [&](Response res) {
         ASSERT_NE(nullptr, res.error);
@@ -409,7 +424,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitMBX)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitDefault)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     auto req = fs->request({Resource::Unknown, "http://127.0.0.1:3000/rate-limit"}, [&](Response res) {
         ASSERT_NE(nullptr, res.error);
@@ -423,7 +439,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitDefault)) {
 
 TEST(OnlineFileSource, GetBaseURLAndApiKeyWhilePaused) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     fs->pause();
 
@@ -439,7 +456,8 @@ TEST(OnlineFileSource, GetBaseURLAndApiKeyWhilePaused) {
 
 TEST(OnlineFileSource, ChangeAPIBaseURL) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
     EXPECT_EQ(ResourceOptions::Default().tileServerOptions().baseURL(), *fs->getProperty(API_BASE_URL_KEY).getString());
     const std::string customURL = "test.domain";
     fs->setProperty(API_BASE_URL_KEY, customURL);
@@ -451,7 +469,8 @@ TEST(OnlineFileSource, ChangeAPIBaseURL) {
 
 TEST(OnlineFileSource, ChangeTileServerOptions) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     TileServerOptions tileServerOptsChanged;
     tileServerOptsChanged.withApiKeyParameterName("apiKeyChanged")
@@ -495,7 +514,8 @@ TEST(OnlineFileSource, ChangeTileServerOptions) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
     std::size_t response_counter = 0;
     const std::size_t NUM_REQUESTS = 3;
 
@@ -537,7 +557,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequests)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequestsMany)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
     int response_counter = 0;
     int correct_low = 0;
     int correct_regular = 0;
@@ -591,7 +612,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(LowHighPriorityRequestsMany)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(MaximumConcurrentRequests)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     ASSERT_EQ(*fs->getProperty(MAX_CONCURRENT_REQUESTS_KEY).getUint(), 20u);
 
@@ -601,7 +623,8 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(MaximumConcurrentRequests)) {
 
 TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RequestSameUrlMultipleTimes)) {
     util::RunLoop loop;
-    std::unique_ptr<FileSource> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(), ClientOptions());
+    std::unique_ptr<ResourceLoader> fs = std::make_unique<OnlineFileSource>(ResourceOptions::Default(),
+                                                                            ClientOptions());
 
     int count = 0;
     std::vector<std::unique_ptr<AsyncRequest>> requests;

@@ -25,7 +25,7 @@ public:
 
     MapSnapshotter(jni::JNIEnv&,
                    const jni::Object<MapSnapshotter>&,
-                   const jni::Object<FileSource>&,
+                   const jni::Object<ResourceLoader>&,
                    jni::jfloat pixelRatio,
                    jni::jint width,
                    jni::jint height,
@@ -74,7 +74,7 @@ private:
     float pixelRatio;
     bool showLogo;
 
-    FileSource* jFileSource;
+    ResourceLoader* jFileSource;
     void activateFilesource(JNIEnv&);
     void deactivateFilesource(JNIEnv&);
     bool activatedFilesource = false;

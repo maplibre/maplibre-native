@@ -12,7 +12,7 @@
 
 namespace mbgl {
 
-class FileSource;
+class ResourceLoader;
 class AsyncRequest;
 class Response;
 
@@ -35,9 +35,9 @@ public:
     // Workers send a `getGlyphs` message to the main thread once they have
     // determined their `GlyphDependencies`. If all glyphs are already locally
     // available, GlyphManager will provide them to the requestor immediately.
-    // Otherwise, it makes a request on the FileSource is made for each range
+    // Otherwise, it makes a request on the ResourceLoader is made for each range
     // needed, and notifies the observer when all are complete.
-    void getGlyphs(GlyphRequestor&, GlyphDependencies, FileSource&);
+    void getGlyphs(GlyphRequestor&, GlyphDependencies, ResourceLoader&);
     void removeRequestor(GlyphRequestor&);
 
     void setURL(const std::string& url) { glyphURL = url; }
@@ -64,7 +64,7 @@ private:
 
     std::unordered_map<FontStack, Entry, FontStackHasher> entries;
 
-    void requestRange(GlyphRequest&, const FontStack&, const GlyphRange&, FileSource& fileSource);
+    void requestRange(GlyphRequest&, const FontStack&, const GlyphRange&, ResourceLoader& fileSource);
     void processResponse(const Response&, const FontStack&, const GlyphRange&);
     void notify(GlyphRequestor&, const GlyphDependencies&);
 

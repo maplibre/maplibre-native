@@ -68,7 +68,7 @@ private:
 
         std::unique_ptr<TestRunnerMapObserver> observer;
         mbgl::HeadlessFrontend frontend;
-        std::shared_ptr<mbgl::FileSource> fileSource;
+        std::shared_ptr<mbgl::ResourceLoader> fileSource;
         mbgl::Map map;
     };
     std::unordered_map<std::string, std::unique_ptr<Impl>> maps;

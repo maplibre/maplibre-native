@@ -12,7 +12,7 @@
 
 namespace mbgl {
 
-class StubFileSource : public FileSource {
+class StubFileSource : public ResourceLoader {
 public:
     enum class ResponseType {
         Asynchronous = 0,

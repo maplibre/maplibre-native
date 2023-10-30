@@ -21,12 +21,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The shared online file source object owned by the shared offline storage object.
  */
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglOnlineFileSource;
+@property (nonatomic) std::shared_ptr<mbgl::ResourceLoader> mbglOnlineFileSource;
 
 /**
  The shared resource loader file source object owned by the shared offline storage object.
  */
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
+@property (nonatomic) std::shared_ptr<mbgl::ResourceLoader> mbglFileSource;
 
 - (void)getPacksWithCompletionHandler:(void (^)(NSArray<MLNOfflinePack *> *packs, NSError * _Nullable error))completion;
 

@@ -15,7 +15,7 @@
 
 namespace mbgl {
 
-class FileSource;
+class ResourceLoader;
 class ResourceTransform;
 
 namespace gfx {
@@ -31,7 +31,7 @@ struct StillImageRequest {
 
 class Map::Impl final : public style::Observer, public RendererObserver {
 public:
-    Impl(RendererFrontend&, MapObserver&, std::shared_ptr<FileSource>, const MapOptions&);
+    Impl(RendererFrontend&, MapObserver&, std::shared_ptr<ResourceLoader>, const MapOptions&);
     ~Impl() final;
 
     // StyleObserver
@@ -66,7 +66,7 @@ public:
 
     MapDebugOptions debugOptions{MapDebugOptions::NoDebug};
 
-    std::shared_ptr<FileSource> fileSource;
+    std::shared_ptr<ResourceLoader> fileSource;
 
     std::unique_ptr<style::Style> style;
     AnnotationManager annotationManager;

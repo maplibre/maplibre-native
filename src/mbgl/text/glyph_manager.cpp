@@ -18,7 +18,9 @@ GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRaste
 
 GlyphManager::~GlyphManager() = default;
 
-void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphDependencies, FileSource& fileSource) {
+void GlyphManager::getGlyphs(GlyphRequestor& requestor,
+                             GlyphDependencies glyphDependencies,
+                             ResourceLoader& fileSource) {
     auto dependencies = std::make_shared<GlyphDependencies>(std::move(glyphDependencies));
 
     // Figure out which glyph ranges need to be fetched. For each range that
@@ -68,7 +70,7 @@ Glyph GlyphManager::generateLocalSDF(const FontStack& fontStack, GlyphID glyphID
 void GlyphManager::requestRange(GlyphRequest& request,
                                 const FontStack& fontStack,
                                 const GlyphRange& range,
-                                FileSource& fileSource) {
+                                ResourceLoader& fileSource) {
     if (request.req) {
         return;
     }

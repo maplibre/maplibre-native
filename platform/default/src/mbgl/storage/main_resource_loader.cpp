@@ -17,11 +17,11 @@ namespace mbgl {
 
 class MainResourceLoaderThread {
 public:
-    MainResourceLoaderThread(std::shared_ptr<FileSource> assetFileSource_,
-                             std::shared_ptr<FileSource> databaseFileSource_,
-                             std::shared_ptr<FileSource> localFileSource_,
-                             std::shared_ptr<FileSource> onlineFileSource_,
-                             std::shared_ptr<FileSource> mbtilesFileSource_)
+    MainResourceLoaderThread(std::shared_ptr<ResourceLoader> assetFileSource_,
+                             std::shared_ptr<ResourceLoader> databaseFileSource_,
+                             std::shared_ptr<ResourceLoader> localFileSource_,
+                             std::shared_ptr<ResourceLoader> onlineFileSource_,
+                             std::shared_ptr<ResourceLoader> mbtilesFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
@@ -127,11 +127,11 @@ public:
     }
 
 private:
-    const std::shared_ptr<FileSource> assetFileSource;
-    const std::shared_ptr<FileSource> databaseFileSource;
-    const std::shared_ptr<FileSource> localFileSource;
-    const std::shared_ptr<FileSource> onlineFileSource;
-    const std::shared_ptr<FileSource> mbtilesFileSource;
+    const std::shared_ptr<ResourceLoader> assetFileSource;
+    const std::shared_ptr<ResourceLoader> databaseFileSource;
+    const std::shared_ptr<ResourceLoader> localFileSource;
+    const std::shared_ptr<ResourceLoader> onlineFileSource;
+    const std::shared_ptr<ResourceLoader> mbtilesFileSource;
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 };
 
@@ -139,11 +139,11 @@ class MainResourceLoader::Impl {
 public:
     Impl(const ResourceOptions& resourceOptions_,
          const ClientOptions& clientOptions_,
-         std::shared_ptr<FileSource> assetFileSource_,
-         std::shared_ptr<FileSource> databaseFileSource_,
-         std::shared_ptr<FileSource> localFileSource_,
-         std::shared_ptr<FileSource> onlineFileSource_,
-         std::shared_ptr<FileSource> mbtilesFileSource_)
+         std::shared_ptr<ResourceLoader> assetFileSource_,
+         std::shared_ptr<ResourceLoader> databaseFileSource_,
+         std::shared_ptr<ResourceLoader> localFileSource_,
+         std::shared_ptr<ResourceLoader> onlineFileSource_,
+         std::shared_ptr<ResourceLoader> mbtilesFileSource_)
         : assetFileSource(std::move(assetFileSource_)),
           databaseFileSource(std::move(databaseFileSource_)),
           localFileSource(std::move(localFileSource_)),
@@ -216,11 +216,11 @@ public:
     }
 
 private:
-    const std::shared_ptr<FileSource> assetFileSource;
-    const std::shared_ptr<FileSource> databaseFileSource;
-    const std::shared_ptr<FileSource> localFileSource;
-    const std::shared_ptr<FileSource> onlineFileSource;
-    const std::shared_ptr<FileSource> mbtilesFileSource;
+    const std::shared_ptr<ResourceLoader> assetFileSource;
+    const std::shared_ptr<ResourceLoader> databaseFileSource;
+    const std::shared_ptr<ResourceLoader> localFileSource;
+    const std::shared_ptr<ResourceLoader> onlineFileSource;
+    const std::shared_ptr<ResourceLoader> mbtilesFileSource;
     const bool supportsCacheOnlyRequests_;
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
     mutable std::mutex resourceOptionsMutex;

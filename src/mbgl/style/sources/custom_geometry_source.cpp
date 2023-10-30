@@ -25,7 +25,7 @@ const CustomGeometrySource::Impl& CustomGeometrySource::impl() const {
     return static_cast<const CustomGeometrySource::Impl&>(*baseImpl);
 }
 
-void CustomGeometrySource::loadDescription(FileSource&) {
+void CustomGeometrySource::loadDescription(ResourceLoader&) {
     baseImpl = makeMutable<Impl>(impl(), loader->self());
     loaded = true;
     observer->onSourceLoaded(*this);

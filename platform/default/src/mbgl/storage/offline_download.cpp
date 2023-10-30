@@ -93,7 +93,7 @@ uint64_t tileCount(const OfflineRegionDefinition& definition,
 OfflineDownload::OfflineDownload(int64_t id_,
                                  OfflineRegionDefinition definition_,
                                  OfflineDatabase& offlineDatabase_,
-                                 FileSource& onlineFileSource_)
+                                 ResourceLoader& onlineFileSource_)
     : id(id_),
       definition(std::move(definition_)),
       offlineDatabase(offlineDatabase_),

@@ -24,7 +24,7 @@ public:
     class Impl;
     const Impl& impl() const;
 
-    void loadDescription(FileSource&) final;
+    void loadDescription(ResourceLoader&) final;
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 

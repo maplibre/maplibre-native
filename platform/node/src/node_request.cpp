@@ -7,7 +7,7 @@
 
 namespace node_mbgl {
 
-NodeRequest::NodeRequest(mbgl::FileSource::Callback callback_, NodeAsyncRequest* asyncRequest_)
+NodeRequest::NodeRequest(mbgl::ResourceLoader::Callback callback_, NodeAsyncRequest* asyncRequest_)
     : callback(std::move(callback_)),
       asyncRequest(asyncRequest_) {
     asyncRequest->request = this;
@@ -42,7 +42,7 @@ void NodeRequest::Init(v8::Local<v8::Object> target) {
 
 void NodeRequest::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     auto target = reinterpret_cast<NodeMap*>(info[0].As<v8::External>()->Value());
-    auto callback = reinterpret_cast<mbgl::FileSource::Callback*>(info[1].As<v8::External>()->Value());
+    auto callback = reinterpret_cast<mbgl::ResourceLoader::Callback*>(info[1].As<v8::External>()->Value());
     auto asyncRequest = reinterpret_cast<NodeAsyncRequest*>(info[2].As<v8::External>()->Value());
 
     auto request = new NodeRequest(*callback, asyncRequest);

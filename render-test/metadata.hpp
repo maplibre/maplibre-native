@@ -201,7 +201,7 @@ class TestContext {
 public:
     virtual mbgl::HeadlessFrontend& getFrontend() = 0;
     virtual mbgl::Map& getMap() = 0;
-    virtual mbgl::FileSource& getFileSource() = 0;
+    virtual mbgl::ResourceLoader& getFileSource() = 0;
     virtual TestRunnerMapObserver& getObserver() = 0;
     virtual TestMetadata& getMetadata() = 0;
 

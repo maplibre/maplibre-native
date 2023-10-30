@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
 
     util::RunLoop loop;
     std::shared_ptr<DatabaseFileSource> fileSource = std::static_pointer_cast<DatabaseFileSource>(
-        std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
+        std::shared_ptr<ResourceLoader>(FileSourceManager::get()->getFileSource(
             FileSourceType::Database,
             ResourceOptions().withApiKey(apiKey).withTileServerOptions(mapTilerConfiguration).withCachePath(output),
             ClientOptions())));

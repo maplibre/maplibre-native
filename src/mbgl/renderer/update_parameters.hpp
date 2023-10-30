@@ -16,7 +16,7 @@
 namespace mbgl {
 
 class AnnotationManager;
-class FileSource;
+class ResourceLoader;
 
 class UpdateParameters {
 public:
@@ -36,7 +36,7 @@ public:
     const Immutable<std::vector<Immutable<style::Layer::Impl>>> layers;
 
     mapbox::base::WeakPtr<AnnotationManager> annotationManager;
-    std::shared_ptr<FileSource> fileSource;
+    std::shared_ptr<ResourceLoader> fileSource;
 
     const uint8_t prefetchZoomDelta;
 

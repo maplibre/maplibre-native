@@ -16,7 +16,7 @@ using namespace mbgl;
 
 class RasterTileTest {
 public:
-    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
+    std::shared_ptr<ResourceLoader> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
     style::Style style{fileSource, 1};

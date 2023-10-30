@@ -39,7 +39,7 @@ class HTTPRequest : public AsyncRequest {
 public:
     static constexpr auto Name() { return "org/maplibre/android/http/NativeHttpRequest"; };
 
-    HTTPRequest(jni::JNIEnv&, const Resource&, FileSource::Callback);
+    HTTPRequest(jni::JNIEnv&, const Resource&, ResourceLoader::Callback);
     ~HTTPRequest();
 
     void onFailure(jni::JNIEnv&, int type, const jni::String& message);
@@ -57,7 +57,7 @@ public:
 
 private:
     Resource resource;
-    FileSource::Callback callback;
+    ResourceLoader::Callback callback;
     Response response;
 
     util::AsyncTask async{[this] {
@@ -88,7 +88,7 @@ void RegisterNativeHTTPRequest(jni::JNIEnv& env) {
 
 } // namespace android
 
-HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, FileSource::Callback callback_)
+HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, ResourceLoader::Callback callback_)
     : resource(resource_),
       callback(callback_) {
     std::string etagStr;

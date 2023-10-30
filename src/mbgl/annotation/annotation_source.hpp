@@ -16,7 +16,7 @@ protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:
-    void loadDescription(FileSource&) final;
+    void loadDescription(ResourceLoader&) final;
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};

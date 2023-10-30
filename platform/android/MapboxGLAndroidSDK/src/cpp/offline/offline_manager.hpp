@@ -28,7 +28,7 @@ public:
                             std::exception_ptr);
 
         static void onList(jni::JNIEnv&,
-                           const jni::Object<FileSource>&,
+                           const jni::Object<ResourceLoader>&,
                            const jni::Object<OfflineManager::ListOfflineRegionsCallback>&,
                            mbgl::OfflineRegions&);
     };
@@ -45,7 +45,7 @@ public:
                             std::exception_ptr);
 
         static void onCreate(jni::JNIEnv&,
-                             const jni::Object<FileSource>&,
+                             const jni::Object<ResourceLoader>&,
                              const jni::Object<OfflineManager::CreateOfflineRegionCallback>&,
                              mbgl::OfflineRegion&);
     };
@@ -62,7 +62,7 @@ public:
                             std::exception_ptr);
 
         static void onMerge(jni::JNIEnv&,
-                            const jni::Object<FileSource>&,
+                            const jni::Object<ResourceLoader>&,
                             const jni::Object<MergeOfflineRegionsCallback>&,
                             mbgl::OfflineRegions&);
     };
@@ -82,23 +82,23 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    OfflineManager(jni::JNIEnv&, const jni::Object<FileSource>&);
+    OfflineManager(jni::JNIEnv&, const jni::Object<ResourceLoader>&);
     ~OfflineManager();
 
     void setOfflineMapboxTileCountLimit(jni::JNIEnv&, jni::jlong limit);
 
     void listOfflineRegions(jni::JNIEnv&,
-                            const jni::Object<FileSource>&,
+                            const jni::Object<ResourceLoader>&,
                             const jni::Object<ListOfflineRegionsCallback>& callback);
 
     void createOfflineRegion(jni::JNIEnv&,
-                             const jni::Object<FileSource>& jFileSource_,
+                             const jni::Object<ResourceLoader>& jFileSource_,
                              const jni::Object<OfflineRegionDefinition>& definition,
                              const jni::Array<jni::jbyte>& metadata,
                              const jni::Object<OfflineManager::CreateOfflineRegionCallback>& callback);
 
     void mergeOfflineRegions(jni::JNIEnv&,
-                             const jni::Object<FileSource>&,
+                             const jni::Object<ResourceLoader>&,
                              const jni::String&,
                              const jni::Object<MergeOfflineRegionsCallback>&);
 

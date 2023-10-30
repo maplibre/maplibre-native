@@ -12,7 +12,7 @@
 namespace mbgl {
 
 class OfflineDatabase;
-class FileSource;
+class ResourceLoader;
 class AsyncRequest;
 class Response;
 class Tileset;
@@ -28,7 +28,7 @@ class Parser;
  */
 class OfflineDownload {
 public:
-    OfflineDownload(int64_t id, OfflineRegionDefinition, OfflineDatabase& offline, FileSource& online);
+    OfflineDownload(int64_t id, OfflineRegionDefinition, OfflineDatabase& offline, ResourceLoader& online);
     ~OfflineDownload();
 
     void setObserver(std::unique_ptr<OfflineRegionObserver>);
@@ -54,7 +54,7 @@ private:
     int64_t id;
     OfflineRegionDefinition definition;
     OfflineDatabase& offlineDatabase;
-    FileSource& onlineFileSource;
+    ResourceLoader& onlineFileSource;
     OfflineRegionStatus status;
     std::unique_ptr<OfflineRegionObserver> observer;
 

@@ -275,7 +275,7 @@ MBTilesFileSource::MBTilesFileSource(const ResourceOptions &resourceOptions, con
           resourceOptions.clone(),
           clientOptions.clone())) {}
 
-std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
+std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, ResourceLoader::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     // assume if there is a tile request, that the mbtiles file has been validated

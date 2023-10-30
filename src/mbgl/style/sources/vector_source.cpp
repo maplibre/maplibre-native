@@ -41,7 +41,7 @@ std::optional<std::string> VectorSource::getURL() const {
     return urlOrTileset.get<std::string>();
 }
 
-void VectorSource::loadDescription(FileSource& fileSource) {
+void VectorSource::loadDescription(ResourceLoader& fileSource) {
     if (urlOrTileset.is<Tileset>()) {
         baseImpl = makeMutable<Impl>(impl(), urlOrTileset.get<Tileset>());
         loaded = true;

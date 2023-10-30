@@ -18,7 +18,7 @@
 namespace mbgl {
 class DatabaseFileSourceThread {
 public:
-    DatabaseFileSourceThread(std::shared_ptr<FileSource> onlineFileSource_, const std::string& cachePath)
+    DatabaseFileSourceThread(std::shared_ptr<ResourceLoader> onlineFileSource_, const std::string& cachePath)
         : db(std::make_unique<OfflineDatabase>(cachePath, onlineFileSource_->getResourceOptions().tileServerOptions())),
           onlineFileSource(std::move(onlineFileSource_)) {}
 
@@ -149,12 +149,12 @@ private:
 
     std::unique_ptr<OfflineDatabase> db;
     std::map<int64_t, std::unique_ptr<OfflineDownload>> downloads;
-    std::shared_ptr<FileSource> onlineFileSource;
+    std::shared_ptr<ResourceLoader> onlineFileSource;
 };
 
 class DatabaseFileSource::Impl {
 public:
-    Impl(std::shared_ptr<FileSource> onlineFileSource,
+    Impl(std::shared_ptr<ResourceLoader> onlineFileSource,
          const ResourceOptions& resourceOptions_,
          const ClientOptions& clientOptions_)
         : thread(std::make_unique<util::Thread<DatabaseFileSourceThread>>(

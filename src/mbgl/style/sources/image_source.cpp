@@ -53,7 +53,7 @@ std::optional<std::string> ImageSource::getURL() const {
     return url;
 }
 
-void ImageSource::loadDescription(FileSource& fileSource) {
+void ImageSource::loadDescription(ResourceLoader& fileSource) {
     if (!url) {
         loaded = true;
     }

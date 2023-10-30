@@ -14,12 +14,14 @@ namespace android {
 
 // OfflineRegion //
 
-OfflineRegion::OfflineRegion(jni::JNIEnv& env, jni::jlong offlineRegionPtr, const jni::Object<FileSource>& jFileSource)
+OfflineRegion::OfflineRegion(jni::JNIEnv& env,
+                             jni::jlong offlineRegionPtr,
+                             const jni::Object<ResourceLoader>& jFileSource)
     : region(reinterpret_cast<mbgl::OfflineRegion*>(offlineRegionPtr)),
-      fileSource(std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
+      fileSource(std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::ResourceLoader>(
           mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database,
-                                                        FileSource::getSharedResourceOptions(env, jFileSource),
-                                                        FileSource::getSharedClientOptions(env, jFileSource))))) {
+                                                        ResourceLoader::getSharedResourceOptions(env, jFileSource),
+                                                        ResourceLoader::getSharedClientOptions(env, jFileSource))))) {
     if (!fileSource) {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Offline functionality is disabled.");
     }
@@ -177,7 +179,7 @@ void OfflineRegion::updateOfflineRegionMetadata(jni::JNIEnv& env_,
 }
 
 jni::Local<jni::Object<OfflineRegion>> OfflineRegion::New(jni::JNIEnv& env,
-                                                          const jni::Object<FileSource>& jFileSource,
+                                                          const jni::Object<ResourceLoader>& jFileSource,
                                                           mbgl::OfflineRegion region) {
     // Definition
     auto definition = region.getDefinition().match(
@@ -191,7 +193,7 @@ jni::Local<jni::Object<OfflineRegion>> OfflineRegion::New(jni::JNIEnv& env,
     // Create region java object
     static auto& javaClass = jni::Class<OfflineRegion>::Singleton(env);
     static auto constructor = javaClass.GetConstructor<jni::jlong,
-                                                       jni::Object<FileSource>,
+                                                       jni::Object<ResourceLoader>,
                                                        jni::jlong,
                                                        jni::Object<OfflineRegionDefinition>,
                                                        jni::Array<jni::jbyte>>(env);
@@ -238,7 +240,7 @@ void OfflineRegion::registerNative(jni::JNIEnv& env) {
         env,
         javaClass,
         "nativePtr",
-        jni::MakePeer<OfflineRegion, jni::jlong, const jni::Object<FileSource>&>,
+        jni::MakePeer<OfflineRegion, jni::jlong, const jni::Object<ResourceLoader>&>,
         "initialize",
         "finalize",
         METHOD(&OfflineRegion::setOfflineRegionObserver, "setOfflineRegionObserver"),

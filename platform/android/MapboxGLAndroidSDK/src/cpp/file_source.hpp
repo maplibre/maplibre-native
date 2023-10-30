@@ -19,10 +19,10 @@ class Actor;
 namespace android {
 
 /**
- * Peer class for the Android FileSource holder. Ensures that a single core
- * FileSource of a ResourceLoader type is used.
+ * Peer class for the Android ResourceLoader holder. Ensures that a single core
+ * ResourceLoader of a ResourceLoader type is used.
  */
-class FileSource {
+class ResourceLoader {
 public:
     static constexpr auto Name() { return "org/maplibre/android/storage/FileSource"; };
 
@@ -33,7 +33,7 @@ public:
         }
 
         static std::string onURL(jni::JNIEnv&,
-                                 const jni::Object<FileSource::ResourceTransformCallback>&,
+                                 const jni::Object<ResourceLoader::ResourceTransformCallback>&,
                                  int,
                                  std::string);
     };
@@ -45,17 +45,17 @@ public:
         }
 
         static void onSuccess(jni::JNIEnv&,
-                              const jni::Object<FileSource::ResourcesCachePathChangeCallback>&,
+                              const jni::Object<ResourceLoader::ResourcesCachePathChangeCallback>&,
                               const jni::String&);
 
         static void onError(jni::JNIEnv&,
-                            const jni::Object<FileSource::ResourcesCachePathChangeCallback>&,
+                            const jni::Object<ResourceLoader::ResourcesCachePathChangeCallback>&,
                             const jni::String&);
     };
 
-    FileSource(jni::JNIEnv&, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&);
+    ResourceLoader(jni::JNIEnv&, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&);
 
-    ~FileSource();
+    ~ResourceLoader();
 
     void setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileServerOptions>& _options);
 
@@ -67,11 +67,11 @@ public:
 
     void setAPIBaseUrl(jni::JNIEnv&, const jni::String&);
 
-    void setResourceTransform(jni::JNIEnv&, const jni::Object<FileSource::ResourceTransformCallback>&);
+    void setResourceTransform(jni::JNIEnv&, const jni::Object<ResourceLoader::ResourceTransformCallback>&);
 
     void setResourceCachePath(jni::JNIEnv&,
                               const jni::String&,
-                              const jni::Object<FileSource::ResourcesCachePathChangeCallback>&);
+                              const jni::Object<ResourceLoader::ResourcesCachePathChangeCallback>&);
 
     void resume(jni::JNIEnv&);
 
@@ -79,11 +79,11 @@ public:
 
     jni::jboolean isResumed(jni::JNIEnv&);
 
-    static FileSource* getNativePeer(jni::JNIEnv&, const jni::Object<FileSource>&);
+    static ResourceLoader* getNativePeer(jni::JNIEnv&, const jni::Object<ResourceLoader>&);
 
-    static mbgl::ResourceOptions getSharedResourceOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
+    static mbgl::ResourceOptions getSharedResourceOptions(jni::JNIEnv&, const jni::Object<ResourceLoader>&);
 
-    static mbgl::ClientOptions getSharedClientOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
+    static mbgl::ClientOptions getSharedClientOptions(jni::JNIEnv&, const jni::Object<ResourceLoader>&);
 
     static void registerNative(jni::JNIEnv&);
 
@@ -95,8 +95,8 @@ private:
     std::unique_ptr<Actor<ResourceTransform::TransformCallback>> resourceTransform;
     std::function<void()> pathChangeCallback;
     std::shared_ptr<mbgl::DatabaseFileSource> databaseSource;
-    std::shared_ptr<mbgl::FileSource> onlineSource;
-    std::shared_ptr<mbgl::FileSource> resourceLoader;
+    std::shared_ptr<mbgl::ResourceLoader> onlineSource;
+    std::shared_ptr<mbgl::ResourceLoader> resourceLoader;
 };
 
 } // namespace android

@@ -13,7 +13,7 @@
 
 namespace mbgl {
 
-class FileSource;
+class ResourceLoader;
 
 namespace style {
 
@@ -81,7 +81,7 @@ public:
     void setObserver(SourceObserver*);
     SourceObserver* observer = nullptr;
 
-    virtual void loadDescription(FileSource&) = 0;
+    virtual void loadDescription(ResourceLoader&) = 0;
     void setPrefetchZoomDelta(std::optional<uint8_t> delta) noexcept;
     std::optional<uint8_t> getPrefetchZoomDelta() const noexcept;
 

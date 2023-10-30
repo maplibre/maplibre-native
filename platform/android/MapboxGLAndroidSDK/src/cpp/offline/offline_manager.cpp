@@ -24,11 +24,11 @@ void handleException(std::exception_ptr exception,
 } // namespace
 
 // OfflineManager //
-OfflineManager::OfflineManager(jni::JNIEnv& env, const jni::Object<FileSource>& jFileSource)
-    : fileSource(std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
+OfflineManager::OfflineManager(jni::JNIEnv& env, const jni::Object<ResourceLoader>& jFileSource)
+    : fileSource(std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::ResourceLoader>(
           mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database,
-                                                        FileSource::getSharedResourceOptions(env, jFileSource),
-                                                        FileSource::getSharedClientOptions(env, jFileSource))))) {
+                                                        ResourceLoader::getSharedResourceOptions(env, jFileSource),
+                                                        ResourceLoader::getSharedClientOptions(env, jFileSource))))) {
     if (!fileSource) {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Offline functionality is disabled.");
     }
@@ -41,7 +41,7 @@ void OfflineManager::setOfflineMapboxTileCountLimit(jni::JNIEnv&, jni::jlong lim
 }
 
 void OfflineManager::listOfflineRegions(jni::JNIEnv& env_,
-                                        const jni::Object<FileSource>& jFileSource_,
+                                        const jni::Object<ResourceLoader>& jFileSource_,
                                         const jni::Object<ListOfflineRegionsCallback>& callback_) {
     auto globalCallback = jni::NewGlobal<jni::EnvAttachingDeleter>(env_, callback_);
     auto globalFilesource = jni::NewGlobal<jni::EnvAttachingDeleter>(env_, jFileSource_);
@@ -65,7 +65,7 @@ void OfflineManager::listOfflineRegions(jni::JNIEnv& env_,
 }
 
 void OfflineManager::createOfflineRegion(jni::JNIEnv& env_,
-                                         const jni::Object<FileSource>& jFileSource_,
+                                         const jni::Object<ResourceLoader>& jFileSource_,
                                          const jni::Object<OfflineRegionDefinition>& definition_,
                                          const jni::Array<jni::jbyte>& metadata_,
                                          const jni::Object<CreateOfflineRegionCallback>& callback_) {
@@ -102,7 +102,7 @@ void OfflineManager::createOfflineRegion(jni::JNIEnv& env_,
 }
 
 void OfflineManager::mergeOfflineRegions(jni::JNIEnv& env_,
-                                         const jni::Object<FileSource>& jFileSource_,
+                                         const jni::Object<ResourceLoader>& jFileSource_,
                                          const jni::String& jString_,
                                          const jni::Object<MergeOfflineRegionsCallback>& callback_) {
     auto globalCallback = jni::NewGlobal<jni::EnvAttachingDeleter>(env_, callback_);
@@ -187,7 +187,7 @@ void OfflineManager::runPackDatabaseAutomatically(jni::JNIEnv&, jboolean autopac
     fileSource->runPackDatabaseAutomatically(autopack);
 }
 
-// FileSource::FileSourceCallback //
+// ResourceLoader::FileSourceCallback //
 
 void OfflineManager::FileSourceCallback::onSuccess(jni::JNIEnv& env,
                                                    const jni::Object<OfflineManager::FileSourceCallback>& callback) {
@@ -218,7 +218,7 @@ void OfflineManager::registerNative(jni::JNIEnv& env) {
         env,
         javaClass,
         "nativePtr",
-        jni::MakePeer<OfflineManager, const jni::Object<FileSource>&>,
+        jni::MakePeer<OfflineManager, const jni::Object<ResourceLoader>&>,
         "initialize",
         "finalize",
         METHOD(&OfflineManager::setOfflineMapboxTileCountLimit, "setOfflineMapboxTileCountLimit"),
@@ -248,7 +248,7 @@ void OfflineManager::ListOfflineRegionsCallback::onError(
 
 void OfflineManager::ListOfflineRegionsCallback::onList(
     jni::JNIEnv& env,
-    const jni::Object<FileSource>& jFileSource,
+    const jni::Object<ResourceLoader>& jFileSource,
     const jni::Object<OfflineManager::ListOfflineRegionsCallback>& callback,
     mbgl::OfflineRegions& regions) {
     static auto& javaClass = jni::Class<OfflineManager::ListOfflineRegionsCallback>::Singleton(env);
@@ -278,7 +278,7 @@ void OfflineManager::CreateOfflineRegionCallback::onError(
 
 void OfflineManager::CreateOfflineRegionCallback::onCreate(
     jni::JNIEnv& env,
-    const jni::Object<FileSource>& jFileSource,
+    const jni::Object<ResourceLoader>& jFileSource,
     const jni::Object<OfflineManager::CreateOfflineRegionCallback>& callback,
     mbgl::OfflineRegion& region) {
     static auto& javaClass = jni::Class<OfflineManager::CreateOfflineRegionCallback>::Singleton(env);
@@ -300,7 +300,7 @@ void OfflineManager::MergeOfflineRegionsCallback::onError(
 }
 
 void OfflineManager::MergeOfflineRegionsCallback::onMerge(jni::JNIEnv& env,
-                                                          const jni::Object<FileSource>& jFileSource,
+                                                          const jni::Object<ResourceLoader>& jFileSource,
                                                           const jni::Object<MergeOfflineRegionsCallback>& callback,
                                                           mbgl::OfflineRegions& regions) {
     static auto& javaClass = jni::Class<OfflineManager::MergeOfflineRegionsCallback>::Singleton(env);

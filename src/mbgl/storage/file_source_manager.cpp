@@ -12,14 +12,14 @@
 namespace mbgl {
 
 struct FileSourceInfo {
-    FileSourceInfo(FileSourceType type_, std::string id_, std::weak_ptr<FileSource> fileSource_)
+    FileSourceInfo(FileSourceType type_, std::string id_, std::weak_ptr<ResourceLoader> fileSource_)
         : type(type_),
           id(std::move(id_)),
           fileSource(std::move(fileSource_)) {}
 
     FileSourceType type;
     std::string id;
-    std::weak_ptr<FileSource> fileSource;
+    std::weak_ptr<ResourceLoader> fileSource;
 };
 
 class FileSourceManager::Impl {
@@ -34,9 +34,9 @@ FileSourceManager::FileSourceManager()
 
 FileSourceManager::~FileSourceManager() = default;
 
-std::shared_ptr<FileSource> FileSourceManager::getFileSource(FileSourceType type,
-                                                             const ResourceOptions& resourceOptions,
-                                                             const ClientOptions& clientOptions) noexcept {
+std::shared_ptr<ResourceLoader> FileSourceManager::getFileSource(FileSourceType type,
+                                                                 const ResourceOptions& resourceOptions,
+                                                                 const ClientOptions& clientOptions) noexcept {
     std::lock_guard<std::recursive_mutex> lock(impl->mutex);
 
     // Remove released file sources.
@@ -49,7 +49,7 @@ std::shared_ptr<FileSource> FileSourceManager::getFileSource(FileSourceType type
     std::string id = baseURL + '|' + resourceOptions.apiKey() + '|' + resourceOptions.cachePath() + '|' +
                      util::toString(context);
 
-    std::shared_ptr<FileSource> fileSource;
+    std::shared_ptr<ResourceLoader> fileSource;
     auto fileSourceIt = std::find_if(impl->fileSources.begin(), impl->fileSources.end(), [type, &id](const auto& info) {
         return info.type == type && info.id == id;
     });

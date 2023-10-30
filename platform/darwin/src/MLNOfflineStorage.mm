@@ -44,8 +44,8 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
 
 @property (nonatomic, strong, readwrite) NSMutableArray<MLNOfflinePack *> *packs;
 @property (nonatomic) std::shared_ptr<mbgl::DatabaseFileSource> mbglDatabaseFileSource;
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglOnlineFileSource;
-@property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
+@property (nonatomic) std::shared_ptr<mbgl::ResourceLoader> mbglOnlineFileSource;
+@property (nonatomic) std::shared_ptr<mbgl::ResourceLoader> mbglFileSource;
 @property (nonatomic, getter=isPaused) BOOL paused;
 @end
 
@@ -165,9 +165,9 @@ const MLNExceptionName MLNUnsupportedRegionTypeException = @"MLNUnsupportedRegio
                        .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
                        .withTileServerOptions(*tileServerOptions);
         mbgl::ClientOptions clientOptions;
-        _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
+        _mbglFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Proxy, resourceOptions, clientOptions);
         _mbglOnlineFileSource = mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Network, resourceOptions, clientOptions);
-        _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
+        _mbglDatabaseFileSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::ResourceLoader>(mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
         
         // Observe for changes to the tile server options (and find out the current one).
         [[MLNSettings sharedSettings] addObserver:self

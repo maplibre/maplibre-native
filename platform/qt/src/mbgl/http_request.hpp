@@ -14,7 +14,7 @@ class Response;
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(HTTPFileSource::Impl*, const Resource&, FileSource::Callback);
+    HTTPRequest(HTTPFileSource::Impl*, const Resource&, ResourceLoader::Callback);
     virtual ~HTTPRequest();
 
     QUrl requestUrl() const;
@@ -25,7 +25,7 @@ public:
 private:
     HTTPFileSource::Impl* m_context;
     Resource m_resource;
-    FileSource::Callback m_callback;
+    ResourceLoader::Callback m_callback;
 
     bool m_handled = false;
 };

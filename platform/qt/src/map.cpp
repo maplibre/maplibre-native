@@ -1357,7 +1357,7 @@ MapPrivate::MapPrivate(Map *q, const Settings &settings, const QSize &size, qrea
                                               mbgl::ResourceTransform::FinishedCallback onFinished) {
             actorRef.invoke(&mbgl::ResourceTransform::TransformCallback::operator(), kind, url, std::move(onFinished));
         }};
-        std::shared_ptr<mbgl::FileSource> fs = mbgl::FileSourceManager::get()->getFileSource(
+        std::shared_ptr<mbgl::ResourceLoader> fs = mbgl::FileSourceManager::get()->getFileSource(
             mbgl::FileSourceType::Network, resourceOptions, clientOptions);
         fs->setResourceTransform(std::move(transform));
     }

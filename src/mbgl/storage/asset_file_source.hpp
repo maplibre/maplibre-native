@@ -11,7 +11,7 @@ template <typename T>
 class Thread;
 } // namespace util
 
-class AssetFileSource : public FileSource {
+class AssetFileSource : public ResourceLoader {
 public:
     AssetFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~AssetFileSource() override;

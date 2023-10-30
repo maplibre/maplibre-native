@@ -55,7 +55,7 @@ private:
 
 class HTTPRequest : public AsyncRequest {
 public:
-    HTTPRequest(FileSource::Callback callback_)
+    HTTPRequest(ResourceLoader::Callback callback_)
         : shared(std::make_shared<HTTPRequestShared>(response, async)),
           callback(callback_) {
     }
@@ -71,7 +71,7 @@ public:
     NSURLSessionDataTask* task = nil;
 
 private:
-    FileSource::Callback callback;
+    ResourceLoader::Callback callback;
     Response response;
 
     util::AsyncTask async { [this] {

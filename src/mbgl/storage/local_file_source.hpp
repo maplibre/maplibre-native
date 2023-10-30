@@ -11,7 +11,7 @@ template <typename T>
 class Thread;
 } // namespace util
 
-class LocalFileSource : public FileSource {
+class LocalFileSource : public ResourceLoader {
 public:
     LocalFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~LocalFileSource() override;

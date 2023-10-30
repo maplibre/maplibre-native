@@ -35,8 +35,8 @@ Map::Map(RendererFrontend& frontend,
     : impl(std::make_unique<Impl>(frontend,
                                   observer,
                                   FileSourceManager::get()
-                                      ? std::shared_ptr<FileSource>(FileSourceManager::get()->getFileSource(
-                                            ResourceLoader, resourceOptions, clientOptions))
+                                      ? std::shared_ptr<ResourceLoader>(FileSourceManager::get()->getFileSource(
+                                            FileSourceType::Proxy, resourceOptions, clientOptions))
                                       : nullptr,
                                   mapOptions)) {}
 

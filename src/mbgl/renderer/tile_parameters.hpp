@@ -9,7 +9,7 @@
 namespace mbgl {
 
 class TransformState;
-class FileSource;
+class ResourceLoader;
 class AnnotationManager;
 class ImageManager;
 class GlyphManager;
@@ -19,7 +19,7 @@ public:
     const float pixelRatio;
     const MapDebugOptions debugOptions;
     const TransformState& transformState;
-    std::shared_ptr<FileSource> fileSource;
+    std::shared_ptr<ResourceLoader> fileSource;
     const MapMode mode;
     mapbox::base::WeakPtr<AnnotationManager> annotationManager;
     ImageManager& imageManager;

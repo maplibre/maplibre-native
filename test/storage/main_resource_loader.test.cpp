@@ -302,7 +302,7 @@ TEST(MainResourceLoader, OptionalNonExpired) {
     response.expires = util::now() + 1h;
 
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(optionalResource, response, [&] {
         req = fs.request(optionalResource, [&](Response res) {
@@ -334,7 +334,7 @@ TEST(MainResourceLoader, OptionalExpired) {
     Response response;
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() - 1h;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     std::unique_ptr<AsyncRequest> req;
     dbfs->forward(optionalResource, response, [&] {
@@ -397,7 +397,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagNotModified)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
@@ -434,7 +434,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagModified)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
@@ -470,7 +470,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheFull)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
@@ -508,7 +508,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
@@ -546,7 +546,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
     response.data = std::make_shared<std::string>("Cached value");
     response.expires = util::now() + 1h;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
@@ -569,7 +569,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
 TEST(MainResourceLoader, TEST_REQUIRES_SERVER(SetResourceTransform)) {
     util::RunLoop loop;
     MainResourceLoader resourceLoader(ResourceOptions{}, ClientOptions{});
-    std::shared_ptr<FileSource> onlinefs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> onlinefs = FileSourceManager::get()->getFileSource(
         FileSourceType::Network, ResourceOptions{}, ClientOptions{});
 
     // Translates the URL "localhost://test to http://127.0.0.1:3000/test
@@ -625,7 +625,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(SetResourceTransform)) {
 TEST(MainResourceLoader, SetResourceCachePath) {
     util::RunLoop loop;
     MainResourceLoader resourceLoader(ResourceOptions{}, ClientOptions{});
-    std::shared_ptr<FileSource> fs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> fs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     auto dbfs = std::static_pointer_cast<DatabaseFileSource>(fs);
     dbfs->setDatabasePath("./new_offline.db", [&loop] { loop.stop(); });
@@ -650,7 +650,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
     response.mustRevalidate = true;
     response.etag.emplace("snowfall");
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {
@@ -726,9 +726,9 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CachedResourceLowPriority)) {
     using namespace std::chrono_literals;
     response.expires = util::now() - 1h;
 
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
-    std::shared_ptr<FileSource> onlineFs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> onlineFs = FileSourceManager::get()->getFileSource(
         FileSourceType::Network, ResourceOptions{}, ClientOptions{});
 
     // Put existing values into the cache.
@@ -817,7 +817,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoDoubleDispatch)) {
 
     std::unique_ptr<AsyncRequest> req;
     unsigned responseCount = 0u;
-    std::shared_ptr<FileSource> dbfs = FileSourceManager::get()->getFileSource(
+    std::shared_ptr<ResourceLoader> dbfs = FileSourceManager::get()->getFileSource(
         FileSourceType::Database, ResourceOptions{}, ClientOptions{});
     dbfs->forward(resource, response, [&] {
         req = fs.request(resource, [&](Response res) {

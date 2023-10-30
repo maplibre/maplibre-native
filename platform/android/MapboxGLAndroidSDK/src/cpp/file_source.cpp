@@ -18,12 +18,12 @@
 namespace mbgl {
 namespace android {
 
-// FileSource //
+// ResourceLoader //
 
-FileSource::FileSource(jni::JNIEnv& _env,
-                       const jni::String& apiKey,
-                       const jni::String& _cachePath,
-                       const jni::Object<TileServerOptions>& _options)
+ResourceLoader::ResourceLoader(jni::JNIEnv& _env,
+                               const jni::String& apiKey,
+                               const jni::String& _cachePath,
+                               const jni::Object<TileServerOptions>& _options)
     : activationCounter(std::optional<int>(1)) {
     std::string path = jni::Make<std::string>(_env, _cachePath);
     mapbox::sqlite::setTempPath(path);
@@ -32,7 +32,7 @@ FileSource::FileSource(jni::JNIEnv& _env,
         mbgl::FileSourceType::Asset,
         [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
             auto env{android::AttachEnv()};
-            std::unique_ptr<mbgl::FileSource> assetFileSource;
+            std::unique_ptr<mbgl::ResourceLoader> assetFileSource;
             if (android::MapLibre::hasInstance(*env)) {
                 auto assetManager = android::MapLibre::getAssetManager(*env);
                 assetFileSource = std::make_unique<AssetManagerFileSource>(
@@ -47,18 +47,18 @@ FileSource::FileSource(jni::JNIEnv& _env,
         .withCachePath(path + DATABASE_FILE);
 
     // Create a core file sources
-    // TODO: Split Android FileSource API to smaller interfaces
+    // TODO: Split Android ResourceLoader API to smaller interfaces
     resourceLoader = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
-    databaseSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
+        mbgl::FileSourceType::Proxy, resourceOptions, clientOptions);
+    databaseSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::ResourceLoader>(
         mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
     onlineSource = mbgl::FileSourceManager::get()->getFileSource(
         mbgl::FileSourceType::Network, resourceOptions, clientOptions);
 }
 
-FileSource::~FileSource() {}
+ResourceLoader::~ResourceLoader() {}
 
-void FileSource::setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileServerOptions>& _options) {
+void ResourceLoader::setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileServerOptions>& _options) {
     auto tileServerOptions = TileServerOptions::getTileServerOptions(_env, _options);
     resourceOptions.withTileServerOptions(tileServerOptions);
     resourceLoader->setResourceOptions(resourceOptions.clone());
@@ -66,7 +66,7 @@ void FileSource::setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileS
     onlineSource->setResourceOptions(resourceOptions.clone());
 }
 
-jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
+jni::Local<jni::String> ResourceLoader::getApiKey(jni::JNIEnv& env) {
     if (auto* token = onlineSource->getProperty(mbgl::API_KEY_KEY).getString()) {
         return jni::Make<jni::String>(env, *token);
     }
@@ -75,7 +75,7 @@ jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
     return jni::Make<jni::String>(env, "");
 }
 
-void FileSource::setApiKey(jni::JNIEnv& env, const jni::String& token) {
+void ResourceLoader::setApiKey(jni::JNIEnv& env, const jni::String& token) {
     if (onlineSource) {
         onlineSource->setProperty(mbgl::API_KEY_KEY, token ? jni::Make<std::string>(env, token) : "");
     } else {
@@ -83,7 +83,7 @@ void FileSource::setApiKey(jni::JNIEnv& env, const jni::String& token) {
     }
 }
 
-void FileSource::setAPIBaseUrl(jni::JNIEnv& env, const jni::String& url) {
+void ResourceLoader::setAPIBaseUrl(jni::JNIEnv& env, const jni::String& url) {
     if (onlineSource) {
         onlineSource->setProperty(mbgl::API_BASE_URL_KEY, jni::Make<std::string>(env, url));
     } else {
@@ -91,7 +91,7 @@ void FileSource::setAPIBaseUrl(jni::JNIEnv& env, const jni::String& url) {
     }
 }
 
-jni::Local<jni::String> FileSource::getAPIBaseUrl(jni::JNIEnv& env) {
+jni::Local<jni::String> ResourceLoader::getAPIBaseUrl(jni::JNIEnv& env) {
     if (auto* url = onlineSource->getProperty(mbgl::API_BASE_URL_KEY).getString()) {
         return jni::Make<jni::String>(env, *url);
     }
@@ -100,8 +100,8 @@ jni::Local<jni::String> FileSource::getAPIBaseUrl(jni::JNIEnv& env) {
     return jni::Make<jni::String>(env, "");
 }
 
-void FileSource::setResourceTransform(jni::JNIEnv& env,
-                                      const jni::Object<FileSource::ResourceTransformCallback>& transformCallback) {
+void ResourceLoader::setResourceTransform(
+    jni::JNIEnv& env, const jni::Object<ResourceLoader::ResourceTransformCallback>& transformCallback) {
     // Core could be built without support for network resource provider.
     if (!onlineSource) {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
@@ -121,7 +121,7 @@ void FileSource::setResourceTransform(jni::JNIEnv& env,
             [callback = std::make_shared<decltype(global)>(std::move(global))](
                 mbgl::Resource::Kind kind, const std::string& url_, ResourceTransform::FinishedCallback cb) {
                 android::UniqueEnv _env = android::AttachEnv();
-                cb(FileSource::ResourceTransformCallback::onURL(*_env, *callback, int(kind), url_));
+                cb(ResourceLoader::ResourceTransformCallback::onURL(*_env, *callback, int(kind), url_));
             });
         onlineSource->setResourceTransform(
             {[actorRef = resourceTransform->self()](
@@ -135,16 +135,17 @@ void FileSource::setResourceTransform(jni::JNIEnv& env,
     }
 }
 
-void FileSource::setResourceCachePath(jni::JNIEnv& env,
-                                      const jni::String& path,
-                                      const jni::Object<FileSource::ResourcesCachePathChangeCallback>& _callback) {
+void ResourceLoader::setResourceCachePath(
+    jni::JNIEnv& env,
+    const jni::String& path,
+    const jni::Object<ResourceLoader::ResourcesCachePathChangeCallback>& _callback) {
     if (!databaseSource) {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Offline functionality is disabled.");
         return;
     }
 
     if (pathChangeCallback) {
-        FileSource::ResourcesCachePathChangeCallback::onError(
+        ResourceLoader::ResourcesCachePathChangeCallback::onError(
             env, _callback, jni::Make<jni::String>(env, "Another resources cache path change is in progress"));
         return;
     }
@@ -156,7 +157,7 @@ void FileSource::setResourceCachePath(jni::JNIEnv& env,
     pathChangeCallback = Scheduler::GetCurrent()->bindOnce(
         [this, callback = std::make_shared<decltype(global)>(std::move(global)), newPath] {
             android::UniqueEnv _env = android::AttachEnv();
-            FileSource::ResourcesCachePathChangeCallback::onSuccess(
+            ResourceLoader::ResourcesCachePathChangeCallback::onSuccess(
                 *_env, *callback, jni::Make<jni::String>(*_env, newPath));
             pathChangeCallback = {};
         });
@@ -164,7 +165,7 @@ void FileSource::setResourceCachePath(jni::JNIEnv& env,
     databaseSource->setDatabasePath(newPath + DATABASE_FILE, pathChangeCallback);
 }
 
-void FileSource::resume(jni::JNIEnv&) {
+void ResourceLoader::resume(jni::JNIEnv&) {
     if (!resourceLoader) {
         return;
     }
@@ -175,7 +176,7 @@ void FileSource::resume(jni::JNIEnv&) {
     }
 }
 
-void FileSource::pause(jni::JNIEnv&) {
+void ResourceLoader::pause(jni::JNIEnv&) {
     if (!resourceLoader) {
         return;
     }
@@ -186,19 +187,19 @@ void FileSource::pause(jni::JNIEnv&) {
     }
 }
 
-jni::jboolean FileSource::isResumed(jni::JNIEnv&) {
+jni::jboolean ResourceLoader::isResumed(jni::JNIEnv&) {
     return (jboolean)(activationCounter > 0);
 }
 
-FileSource* FileSource::getNativePeer(jni::JNIEnv& env, const jni::Object<FileSource>& jFileSource) {
-    static auto& javaClass = jni::Class<FileSource>::Singleton(env);
+ResourceLoader* ResourceLoader::getNativePeer(jni::JNIEnv& env, const jni::Object<ResourceLoader>& jFileSource) {
+    static auto& javaClass = jni::Class<ResourceLoader>::Singleton(env);
     static auto field = javaClass.GetField<jlong>(env, "nativePtr");
-    return reinterpret_cast<FileSource*>(jFileSource.Get(env, field));
+    return reinterpret_cast<ResourceLoader*>(jFileSource.Get(env, field));
 }
 
-mbgl::ResourceOptions FileSource::getSharedResourceOptions(jni::JNIEnv& env,
-                                                           const jni::Object<FileSource>& jFileSource) {
-    FileSource* fileSource = FileSource::getNativePeer(env, jFileSource);
+mbgl::ResourceOptions ResourceLoader::getSharedResourceOptions(jni::JNIEnv& env,
+                                                               const jni::Object<ResourceLoader>& jFileSource) {
+    ResourceLoader* fileSource = ResourceLoader::getNativePeer(env, jFileSource);
     // Core could be compiled without support for any sources.
     if (fileSource) {
         return fileSource->resourceOptions.clone();
@@ -207,8 +208,9 @@ mbgl::ResourceOptions FileSource::getSharedResourceOptions(jni::JNIEnv& env,
     return {};
 }
 
-mbgl::ClientOptions FileSource::getSharedClientOptions(jni::JNIEnv& env, const jni::Object<FileSource>& jFileSource) {
-    FileSource* fileSource = FileSource::getNativePeer(env, jFileSource);
+mbgl::ClientOptions ResourceLoader::getSharedClientOptions(jni::JNIEnv& env,
+                                                           const jni::Object<ResourceLoader>& jFileSource) {
+    ResourceLoader* fileSource = ResourceLoader::getNativePeer(env, jFileSource);
     // Core could be compiled without support for any sources.
     if (fileSource) {
         return fileSource->clientOptions.clone();
@@ -217,64 +219,67 @@ mbgl::ClientOptions FileSource::getSharedClientOptions(jni::JNIEnv& env, const j
     return {};
 }
 
-// FileSource::ResourcesCachePathChangeCallback //
+// ResourceLoader::ResourcesCachePathChangeCallback //
 
-void FileSource::ResourcesCachePathChangeCallback::onSuccess(
+void ResourceLoader::ResourcesCachePathChangeCallback::onSuccess(
     jni::JNIEnv& env,
-    const jni::Object<FileSource::ResourcesCachePathChangeCallback>& callback,
+    const jni::Object<ResourceLoader::ResourcesCachePathChangeCallback>& callback,
     const jni::String& path) {
-    static auto& javaClass = jni::Class<FileSource::ResourcesCachePathChangeCallback>::Singleton(env);
+    static auto& javaClass = jni::Class<ResourceLoader::ResourcesCachePathChangeCallback>::Singleton(env);
     static auto method = javaClass.GetMethod<void(jni::String)>(env, "onSuccess");
 
     callback.Call(env, method, path);
 }
 
-void FileSource::ResourcesCachePathChangeCallback::onError(
+void ResourceLoader::ResourcesCachePathChangeCallback::onError(
     jni::JNIEnv& env,
-    const jni::Object<FileSource::ResourcesCachePathChangeCallback>& callback,
+    const jni::Object<ResourceLoader::ResourcesCachePathChangeCallback>& callback,
     const jni::String& message) {
-    static auto& javaClass = jni::Class<FileSource::ResourcesCachePathChangeCallback>::Singleton(env);
+    static auto& javaClass = jni::Class<ResourceLoader::ResourcesCachePathChangeCallback>::Singleton(env);
     static auto method = javaClass.GetMethod<void(jni::String)>(env, "onError");
 
     callback.Call(env, method, message);
 }
 
-void FileSource::registerNative(jni::JNIEnv& env) {
+void ResourceLoader::registerNative(jni::JNIEnv& env) {
     // Ensure the classes are cached. If they're requested for the
     // first time on a background thread, Android's class loader heuristics will fail.
     // https://developer.android.com/training/articles/perf-jni#faq_FindClass
     jni::Class<ResourceTransformCallback>::Singleton(env);
     jni::Class<ResourcesCachePathChangeCallback>::Singleton(env);
 
-    static auto& javaClass = jni::Class<FileSource>::Singleton(env);
+    static auto& javaClass = jni::Class<ResourceLoader>::Singleton(env);
 
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
     // Register the peer
-    jni::RegisterNativePeer<FileSource>(
+    jni::RegisterNativePeer<ResourceLoader>(
         env,
         javaClass,
         "nativePtr",
-        jni::MakePeer<FileSource, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&>,
+        jni::MakePeer<ResourceLoader, const jni::String&, const jni::String&, const jni::Object<TileServerOptions>&>,
         "initialize",
         "finalize",
-        METHOD(&FileSource::setTileServerOptions, "setTileServerOptions"),
-        METHOD(&FileSource::getApiKey, "getApiKey"),
-        METHOD(&FileSource::setApiKey, "setApiKey"),
-        METHOD(&FileSource::setAPIBaseUrl, "setApiBaseUrl"),
-        METHOD(&FileSource::getAPIBaseUrl, "getApiBaseUrl"),
-        METHOD(&FileSource::setResourceTransform, "setResourceTransform"),
-        METHOD(&FileSource::setResourceCachePath, "setResourceCachePath"),
-        METHOD(&FileSource::resume, "activate"),
-        METHOD(&FileSource::pause, "deactivate"),
-        METHOD(&FileSource::isResumed, "isActivated"));
+        METHOD(&ResourceLoader::setTileServerOptions, "setTileServerOptions"),
+        METHOD(&ResourceLoader::getApiKey, "getApiKey"),
+        METHOD(&ResourceLoader::setApiKey, "setApiKey"),
+        METHOD(&ResourceLoader::setAPIBaseUrl, "setApiBaseUrl"),
+        METHOD(&ResourceLoader::getAPIBaseUrl, "getApiBaseUrl"),
+        METHOD(&ResourceLoader::setResourceTransform, "setResourceTransform"),
+        METHOD(&ResourceLoader::setResourceCachePath, "setResourceCachePath"),
+        METHOD(&ResourceLoader::resume, "activate"),
+        METHOD(&ResourceLoader::pause, "deactivate"),
+        METHOD(&ResourceLoader::isResumed, "isActivated"));
 }
 
-// FileSource::ResourceTransformCallback //
+// ResourceLoader::ResourceTransformCallback //
 
-std::string FileSource::ResourceTransformCallback::onURL(
-    jni::JNIEnv& env, const jni::Object<FileSource::ResourceTransformCallback>& callback, int kind, std::string url_) {
-    static auto& javaClass = jni::Class<FileSource::ResourceTransformCallback>::Singleton(env);
+std::string ResourceLoader::ResourceTransformCallback::onURL(
+    jni::JNIEnv& env,
+    const jni::Object<ResourceLoader::ResourceTransformCallback>& callback,
+    int kind,
+    std::string url_) {
+    static auto& javaClass = jni::Class<ResourceLoader::ResourceTransformCallback>::Singleton(env);
     static auto method = javaClass.GetMethod<jni::String(jni::jint, jni::String)>(env, "onURL");
 
     return jni::Make<std::string>(env, callback.Call(env, method, kind, jni::Make<jni::String>(env, url_)));

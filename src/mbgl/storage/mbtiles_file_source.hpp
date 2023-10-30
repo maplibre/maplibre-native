@@ -8,7 +8,7 @@
 namespace mbgl {
 // File source for supporting .mbtiles maps.
 // can only load resource URLS that are absolute paths to local files
-class MBTilesFileSource : public FileSource {
+class MBTilesFileSource : public ResourceLoader {
 public:
     MBTilesFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions);
     ~MBTilesFileSource() override;

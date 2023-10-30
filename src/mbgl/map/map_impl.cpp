@@ -9,7 +9,7 @@ namespace mbgl {
 
 Map::Impl::Impl(RendererFrontend& frontend_,
                 MapObserver& observer_,
-                std::shared_ptr<FileSource> fileSource_,
+                std::shared_ptr<ResourceLoader> fileSource_,
                 const MapOptions& mapOptions)
     : observer(observer_),
       rendererFrontend(frontend_),
