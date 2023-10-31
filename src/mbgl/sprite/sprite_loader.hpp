@@ -2,6 +2,7 @@
 
 #include <mbgl/style/image.hpp>
 #include <mapbox/std/weak.hpp>
+#include <mbgl/style/sprite.hpp>
 
 #include <string>
 #include <map>
@@ -21,12 +22,12 @@ public:
     SpriteLoader(float pixelRatio);
     ~SpriteLoader();
 
-    void load(const std::string& url, FileSource&);
+    void load(const std::unique_ptr<style::Sprite> sprite, FileSource&);
 
     void setObserver(SpriteLoaderObserver*);
 
 private:
-    void emitSpriteLoadedIfComplete();
+    void emitSpriteLoadedIfComplete(std::string id);
 
     // Invoked by SpriteAtlasWorker
     friend class SpriteLoaderWorker;

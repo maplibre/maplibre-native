@@ -5,6 +5,7 @@
 #include <mbgl/style/conversion/source.hpp>
 #include <mbgl/style/conversion/layer.hpp>
 #include <mbgl/style/conversion/light.hpp>
+#include <mbgl/style/conversion/sprite.hpp>
 #include <mbgl/style/conversion/transition_options.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
@@ -17,6 +18,7 @@
 #include <rapidjson/error/en.h>
 
 #include <algorithm>
+#include <memory>
 #include <set>
 
 namespace mbgl {
@@ -103,10 +105,7 @@ StyleParseResult Parser::parse(const std::string& json) {
     }
 
     if (document.HasMember("sprite")) {
-        const JSValue& sprite = document["sprite"];
-        if (sprite.IsString()) {
-            spriteURL = {sprite.GetString(), sprite.GetStringLength()};
-        }
+        parseSprites(document["sprite"]);
     }
 
     if (document.HasMember("glyphs")) {
@@ -162,6 +161,35 @@ void Parser::parseSources(const JSValue& value) {
         }
 
         sources.emplace_back(std::move(*source));
+    }
+}
+
+void Parser::parseSprites(const JSValue& value) {
+    if (value.IsString()) {
+        /*std::string url = {value.GetString(), value.GetStringLength()};
+        auto sprite = std::make_unique<Sprite>("default", url);
+        sprites.emplace_back(std::move(sprite));*/
+    }
+    else if (value.IsArray()) {
+        for (auto& spriteValue : value.GetArray()) {
+            if (!spriteValue.IsObject()) {
+                Log::Warning(Event::ParseStyle, "sprite child must be an object");
+                continue;
+            }
+            
+            conversion::Error error;
+            std::optional<std::unique_ptr<Sprite>> sprite = conversion::convert<std::unique_ptr<Sprite>>(spriteValue, error);
+            if (!sprite) {
+                Log::Warning(Event::ParseStyle, error.message);
+                continue;
+            }
+
+            sprites.emplace_back(std::move(*sprite));
+        }
+    }
+    else {
+        Log::Warning(Event::ParseStyle, "sprite must be an object or string");
+        return;
     }
 }
 

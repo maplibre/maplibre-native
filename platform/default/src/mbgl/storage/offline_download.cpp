@@ -11,6 +11,7 @@
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/conversion/tileset.hpp>
+#include <mbgl/style/sprite.hpp>
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/mapbox.hpp>
@@ -223,8 +224,8 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
                                               : NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK);
     }
 
-    if (!parser.spriteURL.empty()) {
-        result->requiredResourceCount += 4;
+    if (!parser.sprites.empty()) {
+        result->requiredResourceCount += 4 * parser.sprites.size();
     }
 
     return *result;
@@ -246,7 +247,6 @@ void OfflineDownload::activateDownload() {
         parser.parse(*styleResponse.data);
 
         auto tileServerOptions = onlineFileSource.getResourceOptions().tileServerOptions();
-        parser.spriteURL = util::mapbox::canonicalizeSpriteURL(tileServerOptions, parser.spriteURL);
         parser.glyphURL = util::mapbox::canonicalizeGlyphURL(tileServerOptions, parser.glyphURL);
 
         for (const auto& source : parser.sources) {
@@ -343,12 +343,16 @@ void OfflineDownload::activateDownload() {
             }
         }
 
-        if (!parser.spriteURL.empty()) {
+        if (!parser.sprites.empty()) {
             // Always request 1x and @2x sprite images for portability.
-            queueResource(Resource::spriteImage(parser.spriteURL, 1));
-            queueResource(Resource::spriteImage(parser.spriteURL, 2));
-            queueResource(Resource::spriteJSON(parser.spriteURL, 1));
-            queueResource(Resource::spriteJSON(parser.spriteURL, 2));
+            for (const auto& sprite : parser.sprites) {
+                std::string spriteURL = util::mapbox::canonicalizeSpriteURL(tileServerOptions, sprite->spriteURL);
+                queueResource(Resource::spriteImage(spriteURL, 1));
+                queueResource(Resource::spriteImage(spriteURL, 2));
+                queueResource(Resource::spriteJSON(spriteURL, 1));
+                queueResource(Resource::spriteJSON(spriteURL, 2));
+            }
+            
         }
 
         continueDownload();

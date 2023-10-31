@@ -33,7 +33,9 @@ SpriteLoader::SpriteLoader(float pixelRatio_)
 
 SpriteLoader::~SpriteLoader() = default;
 
-void SpriteLoader::load(const std::string& url, FileSource& fileSource) {
+void SpriteLoader::load(const std::unique_ptr<style::Sprite> sprite, FileSource& fileSource) {
+    std::string id = sprite->id;
+    std::string url = sprite->spriteURL;
     if (url.empty()) {
         // Treat a non-existent sprite as a successfully loaded empty sprite.
         observer->onSpriteLoaded({});
@@ -41,40 +43,39 @@ void SpriteLoader::load(const std::string& url, FileSource& fileSource) {
     }
 
     data = std::make_unique<Data>();
-
-    data->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this](Response res) {
+    data->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, id](Response res) {
         if (res.error) {
             observer->onSpriteError(std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
             data->json = std::make_shared<std::string>();
-            emitSpriteLoadedIfComplete();
+            emitSpriteLoadedIfComplete(id);
         } else {
             // Only trigger a sprite loaded event we got new data.
             assert(data->json != res.data);
             data->json = std::move(res.data);
-            emitSpriteLoadedIfComplete();
+            emitSpriteLoadedIfComplete(id);
         }
     });
 
-    data->spriteRequest = fileSource.request(Resource::spriteImage(url, pixelRatio), [this](Response res) {
+    data->spriteRequest = fileSource.request(Resource::spriteImage(url, pixelRatio), [this, id](Response res) {
         if (res.error) {
             observer->onSpriteError(std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
             data->image = std::make_shared<std::string>();
-            emitSpriteLoadedIfComplete();
+            emitSpriteLoadedIfComplete(id);
         } else {
             assert(data->image != res.data);
             data->image = std::move(res.data);
-            emitSpriteLoadedIfComplete();
+            emitSpriteLoadedIfComplete(id);
         }
     });
 }
 
-void SpriteLoader::emitSpriteLoadedIfComplete() {
+void SpriteLoader::emitSpriteLoadedIfComplete(std::string id) {
     assert(data);
     if (!data->image || !data->json) {
         return;
@@ -85,9 +86,9 @@ void SpriteLoader::emitSpriteLoadedIfComplete() {
         std::exception_ptr error;
     };
 
-    auto parseClosure = [image = data->image, json = data->json]() -> ParseResult {
+    auto parseClosure = [id = id, image = data->image, json = data->json]() -> ParseResult {
         try {
-            return {parseSprite(*image, *json), nullptr};
+            return {parseSprite(id, *image, *json), nullptr};
         } catch (...) {
             return {{}, std::current_exception()};
         }

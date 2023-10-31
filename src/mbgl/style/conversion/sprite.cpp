@@ -1,0 +1,32 @@
+#include <mbgl/style/conversion/sprite.hpp>
+#include <mbgl/style/conversion/constant.hpp>
+#include <mbgl/style/conversion_impl.hpp>
+
+#include <array>
+
+namespace mbgl {
+namespace style {
+namespace conversion {
+
+std::optional<std::unique_ptr<Sprite>> Converter<std::unique_ptr<Sprite>>::operator()(const Convertible& value, Error& error) const {
+    
+    std::optional<std::string> id;
+    auto idValue = objectMember(value, "id");
+    if (!idValue) {
+        return std::nullopt;
+    }
+    id = toString(*idValue);
+    
+    std::optional<std::string> spriteURL;
+    auto urlValue = objectMember(value, "url");
+    if (!urlValue) {
+        return std::nullopt;
+    }
+    spriteURL = toString(*urlValue);
+    
+    return std::make_unique<Sprite>(*id, *spriteURL);
+}
+
+} // namespace conversion
+} // namespace style
+} // namespace mbgl

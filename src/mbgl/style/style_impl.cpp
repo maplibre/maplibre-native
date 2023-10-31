@@ -118,11 +118,18 @@ void Style::Impl::parse(const std::string& json_) {
 
     setLight(std::make_unique<Light>(parser.light));
 
-    spriteLoaded = false;
+    countOfSprites = parser.sprites.size();
+    countOfSpritesLoaded = 0;
     if (fileSource) {
-        spriteLoader->load(parser.spriteURL, *fileSource);
+        if (!parser.sprites.empty()) {
+            auto& sprite = parser.sprites.at(0);
+            spriteLoader->load(std::move(sprite), *fileSource);
+        }
+        /*for (auto& sprite : parser.sprites) {
+            
+        }*/
     } else {
-        onSpriteError(std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
+        onSpriteError(std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite(s).")));
     }
     glyphURL = parser.glyphURL;
 
@@ -260,7 +267,7 @@ bool Style::Impl::isLoaded() const {
         return false;
     }
 
-    if (!spriteLoaded) {
+    if (countOfSpritesLoaded < countOfSprites) {
         return false;
     }
 
@@ -358,7 +365,7 @@ void Style::Impl::onSpriteLoaded(std::vector<Immutable<style::Image::Impl>> imag
         newImages->end(), std::make_move_iterator(images_.begin()), std::make_move_iterator(images_.end()));
     std::sort(newImages->begin(), newImages->end());
     images = std::move(newImages);
-    spriteLoaded = true;
+    countOfSpritesLoaded += 1;
     observer->onUpdate(); // For *-pattern properties.
 }
 
@@ -367,7 +374,7 @@ void Style::Impl::onSpriteError(std::exception_ptr error) {
     Log::Error(Event::Style, "Failed to load sprite: " + util::toString(error));
     observer->onResourceError(error);
     // Unblock rendering tiles (even though sprite request has failed).
-    spriteLoaded = true;
+    countOfSpritesLoaded += 1;
     observer->onUpdate();
 }
 
