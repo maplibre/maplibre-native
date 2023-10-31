@@ -2066,8 +2066,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     self.styleURLs = [NSMutableArray array];
     
     /// Style that does not require an `apiKey` nor any further configuration
-    [self.styleNames addObject:@"MapLibre Basic"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+    [self.styleNames addObject:@"Geolives Topo World V2"];
+    [self.styleURLs addObject:[NSURL URLWithString:@"https://carto.geolives.com/vector/geolivestopoosm_vector_grey.json"]];
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
