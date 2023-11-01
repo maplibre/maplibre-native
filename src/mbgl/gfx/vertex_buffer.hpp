@@ -8,10 +8,10 @@ namespace gfx {
 
 class VertexBufferResource {
 protected:
-    VertexBufferResource() = default;
+    VertexBufferResource() noexcept = default;
 
 public:
-    virtual ~VertexBufferResource() = default;
+    virtual ~VertexBufferResource() noexcept = default;
 };
 
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;

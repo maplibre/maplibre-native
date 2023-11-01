@@ -7,17 +7,17 @@ namespace mtl {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
-    VertexBufferResource() = default;
-    VertexBufferResource(BufferResource&&);
-    VertexBufferResource(VertexBufferResource&& other)
+    VertexBufferResource() noexcept = default;
+    VertexBufferResource(BufferResource&&) noexcept;
+    VertexBufferResource(VertexBufferResource&& other) noexcept
         : buffer(std::move(other.buffer)) {}
-    ~VertexBufferResource() override;
+    ~VertexBufferResource() noexcept override;
 
-    std::size_t getSizeInBytes() const { return buffer.getSizeInBytes(); }
-    void* contents() const { return buffer.contents(); }
+    std::size_t getSizeInBytes() const noexcept { return buffer.getSizeInBytes(); }
+    const void* contents() const noexcept { return buffer.contents(); }
 
-    BufferResource& get() { return buffer; }
-    const BufferResource& get() const { return buffer; }
+    BufferResource& get() noexcept { return buffer; }
+    const BufferResource& get() const noexcept { return buffer; }
 
 protected:
     BufferResource buffer;

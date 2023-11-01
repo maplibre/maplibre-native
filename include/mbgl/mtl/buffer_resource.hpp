@@ -22,26 +22,26 @@ public:
         @param usage A `MTL::ResourceOptions` value.  Currently, only `ResourceStorageModeShared` is supported.
      */
     BufferResource(Context& context_, const void* raw, std::size_t size, MTL::ResourceOptions usage);
-    BufferResource(BufferResource&&);
+    BufferResource(BufferResource&&) noexcept;
     virtual ~BufferResource();
 
-    BufferResource& operator=(BufferResource&&);
+    BufferResource& operator=(BufferResource&&) noexcept;
 
     BufferResource clone() const;
 
-    void update(const void* data, std::size_t size, std::size_t offset);
+    void update(const void* data, std::size_t size, std::size_t offset) noexcept;
 
-    std::size_t getSizeInBytes() const { return buffer ? buffer->length() : 0; }
-    void* contents() const { return buffer ? buffer->contents() : nullptr; }
+    std::size_t getSizeInBytes() const noexcept { return buffer ? buffer->length() : 0; }
+    const void* contents() const noexcept { return buffer ? buffer->contents() : nullptr; }
 
-    Context& getContext() const { return context; }
-    const MTLBufferPtr& getMetalBuffer() const { return buffer; }
+    Context& getContext() const noexcept { return context; }
+    const MTLBufferPtr& getMetalBuffer() const noexcept { return buffer; }
 
-    operator bool() const { return buffer.operator bool(); }
-    bool operator!() const { return !buffer.operator bool(); }
+    operator bool() const noexcept { return buffer.operator bool(); }
+    bool operator!() const noexcept { return !buffer.operator bool(); }
 
-    void bindVertex(const MTLRenderCommandEncoderPtr&, std::size_t offset, std::size_t index) const;
-    void bindFragment(const MTLRenderCommandEncoderPtr&, std::size_t offset, std::size_t index) const;
+    void bindVertex(const MTLRenderCommandEncoderPtr&, std::size_t offset, std::size_t index) const noexcept;
+    void bindFragment(const MTLRenderCommandEncoderPtr&, std::size_t offset, std::size_t index) const noexcept;
 
 protected:
     Context& context;

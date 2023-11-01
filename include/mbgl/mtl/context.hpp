@@ -94,10 +94,6 @@ public:
                                                                           Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
-    /*
-         UniqueFramebuffer createFramebuffer();
-         std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
-    */
 
 #if !defined(NDEBUG)
     void visualizeStencilBuffer() override;

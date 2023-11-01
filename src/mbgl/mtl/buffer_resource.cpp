@@ -23,7 +23,7 @@ BufferResource::BufferResource(Context& context_, const void* data, std::size_t 
     }
 }
 
-BufferResource::BufferResource(BufferResource&& other)
+BufferResource::BufferResource(BufferResource&& other) noexcept
     : context(other.context),
       buffer(std::move(other.buffer)),
       size(other.size),
@@ -40,7 +40,7 @@ BufferResource BufferResource::clone() const {
     return {context, buffer->contents(), size, usage};
 }
 
-BufferResource& BufferResource::operator=(BufferResource&& other) {
+BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     assert(&context == &other.context);
     if (buffer) {
         context.renderingStats().numBuffers--;
@@ -52,7 +52,7 @@ BufferResource& BufferResource::operator=(BufferResource&& other) {
     return *this;
 }
 
-void BufferResource::update(const void* data, std::size_t size, std::size_t offset) {
+void BufferResource::update(const void* data, std::size_t size, std::size_t offset) noexcept {
     assert(buffer && (data || size == 0));
     if (buffer && data && size > 0) {
         assert(buffer->contents());
@@ -66,7 +66,7 @@ void BufferResource::update(const void* data, std::size_t size, std::size_t offs
 
 void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
                                 std::size_t offset,
-                                std::size_t index) const {
+                                std::size_t index) const noexcept {
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setVertexBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
     }
@@ -74,7 +74,7 @@ void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
 
 void BufferResource::bindFragment(const MTLRenderCommandEncoderPtr& encoder,
                                   std::size_t offset,
-                                  std::size_t index) const {
+                                  std::size_t index) const noexcept {
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setFragmentBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
     }
