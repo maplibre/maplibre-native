@@ -93,5 +93,13 @@ void RenderPass::addDebugSignpost(const char* name) {
     }
 }
 
+void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::size_t index) {
+    buf.bindVertex(encoder, offset, index);
+}
+
+void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std::size_t index) {
+    buf.bindFragment(encoder, offset, index);
+}
+
 } // namespace mtl
 } // namespace mbgl

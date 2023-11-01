@@ -4,6 +4,7 @@
 #include <mbgl/mtl/renderer_backend.hpp>
 
 #include <Metal/MTLDevice.hpp>
+#include <Metal/MTLRenderCommandEncoder.hpp>
 
 #include <algorithm>
 
@@ -60,6 +61,22 @@ void BufferResource::update(const void* data, std::size_t size, std::size_t offs
             assert(size == size_);
             std::memcpy(static_cast<uint8_t*>(content) + offset, data, size_);
         }
+    }
+}
+
+void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
+                                std::size_t offset,
+                                std::size_t index) const {
+    if (const auto* mtlBuf = buffer.get()) {
+        encoder->setVertexBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
+    }
+}
+
+void BufferResource::bindFragment(const MTLRenderCommandEncoderPtr& encoder,
+                                  std::size_t offset,
+                                  std::size_t index) const {
+    if (const auto* mtlBuf = buffer.get()) {
+        encoder->setFragmentBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
     }
 }
 

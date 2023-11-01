@@ -40,6 +40,9 @@ public:
     operator bool() const { return buffer.operator bool(); }
     bool operator!() const { return !buffer.operator bool(); }
 
+    void bindVertex(const MTLRenderCommandEncoderPtr&, std::size_t offset, std::size_t index) const;
+    void bindFragment(const MTLRenderCommandEncoderPtr&, std::size_t offset, std::size_t index) const;
+
 protected:
     Context& context;
     MTLBufferPtr buffer;
