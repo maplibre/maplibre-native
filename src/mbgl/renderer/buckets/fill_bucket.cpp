@@ -113,8 +113,9 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
         for (std::size_t i = 0; i < nIndicies; i += 3) {
-            triangles.emplace_back(
-                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
+            triangles.emplace_back(static_cast<uint16_t>(triangleIndex + indices[i]),
+                                   static_cast<uint16_t>(triangleIndex + indices[i + 1]),
+                                   static_cast<uint16_t>(triangleIndex + indices[i + 2]));
         }
 
         triangleSegment.vertexLength += totalVertices;
