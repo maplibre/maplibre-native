@@ -352,7 +352,6 @@ void OfflineDownload::activateDownload() {
                 queueResource(Resource::spriteJSON(spriteURL, 1));
                 queueResource(Resource::spriteJSON(spriteURL, 2));
             }
-            
         }
 
         continueDownload();

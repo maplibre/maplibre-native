@@ -89,8 +89,8 @@ public:
 
     bool mutated = false;
     bool loaded = false;
-    size_t countOfSprites = 0;
-    size_t countOfSpritesLoaded = 0;
+    bool countOfSprites = 0;
+    bool countOfSpritesLoaded = 0;
 
 private:
     void parse(const std::string&);

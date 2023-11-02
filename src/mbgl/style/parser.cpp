@@ -166,9 +166,9 @@ void Parser::parseSources(const JSValue& value) {
 
 void Parser::parseSprites(const JSValue& value) {
     if (value.IsString()) {
-        /*std::string url = {value.GetString(), value.GetStringLength()};
+        std::string url = {value.GetString(), value.GetStringLength()};
         auto sprite = std::make_unique<Sprite>("default", url);
-        sprites.emplace_back(std::move(sprite));*/
+        sprites.emplace_back(std::move(sprite));
     }
     else if (value.IsArray()) {
         for (auto& spriteValue : value.GetArray()) {

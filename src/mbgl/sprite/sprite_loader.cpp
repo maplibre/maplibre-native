@@ -33,17 +33,20 @@ SpriteLoader::SpriteLoader(float pixelRatio_)
 
 SpriteLoader::~SpriteLoader() = default;
 
-void SpriteLoader::load(const std::unique_ptr<style::Sprite> sprite, FileSource& fileSource) {
-    std::string id = sprite->id;
-    std::string url = sprite->spriteURL;
-    if (url.empty()) {
+void SpriteLoader::load(const style::Sprite* sprite, FileSource& fileSource) {
+    if (sprite == nullptr) {
         // Treat a non-existent sprite as a successfully loaded empty sprite.
         observer->onSpriteLoaded({});
         return;
     }
-
-    data = std::make_unique<Data>();
-    data->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, id](Response res) {
+    
+    std::string id = sprite->id;
+    std::string url = sprite->spriteURL;
+    
+    dataMap[id] = std::make_unique<Data>();
+    dataMap[id]->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, id](Response res) {
+        std::lock_guard<std::mutex> lock(dataMapMutex);
+        Data* data = dataMap[id].get();
         if (res.error) {
             observer->onSpriteError(std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
@@ -59,7 +62,9 @@ void SpriteLoader::load(const std::unique_ptr<style::Sprite> sprite, FileSource&
         }
     });
 
-    data->spriteRequest = fileSource.request(Resource::spriteImage(url, pixelRatio), [this, id](Response res) {
+    dataMap[id]->spriteRequest = fileSource.request(Resource::spriteImage(url, pixelRatio), [this, id](Response res) {
+        std::lock_guard<std::mutex> lock(dataMapMutex);
+        Data* data = dataMap[id].get();
         if (res.error) {
             observer->onSpriteError(std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
@@ -68,7 +73,7 @@ void SpriteLoader::load(const std::unique_ptr<style::Sprite> sprite, FileSource&
             data->image = std::make_shared<std::string>();
             emitSpriteLoadedIfComplete(id);
         } else {
-            assert(data->image != res.data);
+            assert(dataMap[id]->image != res.data);
             data->image = std::move(res.data);
             emitSpriteLoadedIfComplete(id);
         }
@@ -76,6 +81,8 @@ void SpriteLoader::load(const std::unique_ptr<style::Sprite> sprite, FileSource&
 }
 
 void SpriteLoader::emitSpriteLoadedIfComplete(std::string id) {
+    
+    Data* data = dataMap[id].get();
     assert(data);
     if (!data->image || !data->json) {
         return;

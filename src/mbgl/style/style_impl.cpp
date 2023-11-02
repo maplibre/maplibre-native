@@ -121,15 +121,17 @@ void Style::Impl::parse(const std::string& json_) {
     countOfSprites = parser.sprites.size();
     countOfSpritesLoaded = 0;
     if (fileSource) {
-        if (!parser.sprites.empty()) {
-            auto& sprite = parser.sprites.at(0);
-            spriteLoader->load(std::move(sprite), *fileSource);
+        if (parser.sprites.empty()) {
+            spriteLoader->load(nullptr, *fileSource);
+        } else {
+            for (const auto& sprite : parser.sprites) {
+                if (sprite) {
+                    spriteLoader->load(sprite.get(), *fileSource);
+                }
+            }
         }
-        /*for (auto& sprite : parser.sprites) {
-            
-        }*/
     } else {
-        onSpriteError(std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite(s).")));
+        onSpriteError(std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
     glyphURL = parser.glyphURL;
 

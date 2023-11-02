@@ -1,8 +1,8 @@
 #pragma once
 
 #include <mbgl/style/image.hpp>
-#include <mapbox/std/weak.hpp>
 #include <mbgl/style/sprite.hpp>
+#include <mapbox/std/weak.hpp>
 
 #include <string>
 #include <map>
@@ -22,7 +22,7 @@ public:
     SpriteLoader(float pixelRatio);
     ~SpriteLoader();
 
-    void load(const std::unique_ptr<style::Sprite> sprite, FileSource&);
+    void load(const style::Sprite* sprite, FileSource&);
 
     void setObserver(SpriteLoaderObserver*);
 
@@ -35,7 +35,8 @@ private:
     const float pixelRatio;
 
     struct Data;
-    std::unique_ptr<Data> data;
+    std::unordered_map<std::string, std::unique_ptr<Data>> dataMap;
+    std::mutex dataMapMutex;
 
     SpriteLoaderObserver* observer = nullptr;
     std::shared_ptr<Scheduler> threadPool;
