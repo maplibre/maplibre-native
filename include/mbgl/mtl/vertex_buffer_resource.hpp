@@ -2,6 +2,8 @@
 
 #include <mbgl/mtl/buffer_resource.hpp>
 
+#include <memory>
+
 namespace mbgl {
 namespace mtl {
 
@@ -22,6 +24,8 @@ public:
 protected:
     BufferResource buffer;
 };
+
+using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
 } // namespace mtl
 } // namespace mbgl

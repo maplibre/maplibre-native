@@ -28,9 +28,9 @@ public:
 
     void addDebugSignpost(const char* name) override;
 
-    void bindVertex(const BufferResource&, std::size_t offset, std::size_t index);
+    void bindVertex(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
 
-    void bindFragment(const BufferResource&, std::size_t offset, std::size_t index);
+    void bindFragment(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
 
 private:
     void pushDebugGroup(const char* name) override;
@@ -41,6 +41,14 @@ private:
     mtl::CommandEncoder& commandEncoder;
     MTLRenderCommandEncoderPtr encoder;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> debugGroups;
+
+    struct BindInfo {
+        const BufferResource* buf = nullptr;
+        NS::UInteger offset = 0;
+    };
+    static constexpr auto maxBinds = 32;
+    std::array<std::optional<BindInfo>, maxBinds> vertexBinds;
+    std::array<std::optional<BindInfo>, maxBinds> fragmentBinds;
 };
 
 } // namespace mtl

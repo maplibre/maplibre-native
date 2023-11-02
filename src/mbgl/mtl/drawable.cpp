@@ -43,16 +43,6 @@ Drawable::Drawable(std::string name_)
 Drawable::~Drawable() {}
 
 namespace {
-// Downcast a generic vertex buffer resource and extract the Metal buffer
-MTL::Buffer* getMetalBuffer(const gfx::VertexBufferResource* resource_) {
-    if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
-        if (const auto& bufferResource = resource->get()) {
-            return bufferResource.getMetalBuffer().get();
-        }
-    }
-    return nullptr;
-}
-
 #if !defined(NDEBUG)
 std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
     if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
@@ -64,7 +54,7 @@ std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
 }
 #endif // !defined(NDEBUG)
 
-MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
+MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) noexcept {
     switch (type) {
         default:
             assert(false);
@@ -88,7 +78,7 @@ std::string debugLabel(const gfx::Drawable& drawable) {
 }
 #endif // !defined(NDEBUG)
 
-MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) {
+MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) noexcept {
     if (const auto* buf0 = indexes->getBuffer()) {
         if (const auto* buf1 = static_cast<const IndexBuffer*>(buf0)->buffer.get()) {
             const auto& buf2 = buf1->getResource<IndexBufferResource>().get();
@@ -98,7 +88,7 @@ MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) {
     return nullptr;
 }
 
-MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) {
+MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) noexcept {
     switch (mode) {
         case gfx::CullFaceSideType::Front:
             return MTL::CullModeFront;
@@ -110,7 +100,7 @@ MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) {
     }
 }
 
-MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
+MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) noexcept {
     switch (mode) {
         case gfx::CullFaceWindingType::Clockwise:
             return MTL::Winding::WindingClockwise;
@@ -284,16 +274,6 @@ void Drawable::draw(PaintParameters& parameters) const {
 
             assert(mlSegment.indexOffset + mlSegment.indexLength <= indexBufferLength);
             assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
-
-            for (const auto& binding : impl->attributeBindings) {
-                if (binding) {
-                    if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-                        assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
-                    } else if (impl->noBindingBuffer) {
-                        assert(binding->vertexStride <= impl->noBindingBuffer->length());
-                    }
-                }
-            }
 #endif
 
             encoder->drawIndexedPrimitives(primitiveType,
@@ -375,7 +355,7 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
         } else if (impl->noBindingBuffer) {
-            encoder->setVertexBuffer(impl->noBindingBuffer, /*offset=*/0, attributeIndex);
+            renderPass.bindVertex(impl->noBindingBuffer->get(), /*offset=*/0, attributeIndex);
         }
         attributeIndex += 1;
     }
@@ -442,7 +422,7 @@ void Drawable::uploadTextures(UploadPass&) const noexcept {
 }
 
 namespace {
-MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {
+MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) noexcept {
     switch (type) {
         case gfx::AttributeDataType::Byte:
             return MTL::VertexFormatChar;
@@ -530,8 +510,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     if (impl->indexes->getDirty()) {
-        auto indexBufferResource{
-            uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
+        auto indexBufferResource{uploadPass.createIndexBufferResource(
+            impl->indexes->data(), impl->indexes->bytes(), usage, /*persistent=*/false)};
         auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
                                                               std::move(indexBufferResource));
         auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
@@ -577,7 +557,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
                 if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
                     if (const auto& buf = context.getEmptyVertexBuffer()) {
-                        impl->noBindingBuffer = getMetalBuffer(buf.get());
+                        impl->noBindingBuffer = buf.get();
                     }
                 }
 
