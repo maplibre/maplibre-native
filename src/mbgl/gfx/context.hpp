@@ -153,13 +153,13 @@ public:
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
                                               const void* data,
                                               std::size_t size,
-                                              bool persistent = true) = 0;
+                                              bool persistent = false) = 0;
 
     /// `emplaceOrUpdateUniformBuffer` with type inference
     template <typename T>
     std::enable_if_t<!std::is_pointer_v<T>, bool> emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr,
                                                                                const T* data,
-                                                                               bool persistent = true) {
+                                                                               bool persistent = false) {
         return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T), persistent);
     }
 

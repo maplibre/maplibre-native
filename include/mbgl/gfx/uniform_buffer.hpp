@@ -71,14 +71,14 @@ public:
     void createOrUpdate(const StringIdentity id,
                         const std::vector<uint8_t>& data,
                         gfx::Context&,
-                        bool persistent = true);
+                        bool persistent = false);
     void createOrUpdate(
-        const StringIdentity id, const void* data, std::size_t size, gfx::Context&, bool persistent = true);
+        const StringIdentity id, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
     template <typename T>
     std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(const StringIdentity id,
                                                            const T* data,
                                                            gfx::Context& context,
-                                                           bool persistent = true) {
+                                                           bool persistent = false) {
         createOrUpdate(id, data, sizeof(T), context, persistent);
     }
 

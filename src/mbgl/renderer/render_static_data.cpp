@@ -88,9 +88,9 @@ void RenderStaticData::upload(gfx::UploadPass& uploadPass) {
     if (!uploaded) {
         // these are still used by stencil buffer rendering
         tileVertexBuffer = uploadPass.createVertexBuffer(
-            tileVertices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/true);
+            tileVertices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/false);
         quadTriangleIndexBuffer = uploadPass.createIndexBuffer(
-            quadTriangleIndices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/true);
+            quadTriangleIndices(), gfx::BufferUsageType::StaticDraw, /*persistent=*/false);
 #if MLN_LEGACY_RENDERER
         rasterVertexBuffer = uploadPass.createVertexBuffer(rasterVertices());
         heatmapTextureVertexBuffer = uploadPass.createVertexBuffer(heatmapTextureVertices());

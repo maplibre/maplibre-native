@@ -248,7 +248,7 @@ const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
         constexpr std::size_t size = 32;
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
         emptyVertexBuffer = std::make_unique<VertexBufferResource>(
-            createBuffer(nullptr, size, usage, /*isIndexBuffer=*/false, /*persistent=*/true));
+            createBuffer(nullptr, size, usage, /*isIndexBuffer=*/false, /*persistent=*/false));
     }
     return emptyVertexBuffer;
 }
