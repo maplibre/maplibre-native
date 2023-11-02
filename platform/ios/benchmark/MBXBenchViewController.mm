@@ -192,6 +192,8 @@ namespace  mbgl {
 
 - (void)renderFrame
 {
+    mbgl::gfx::BackendScope guard{*(frontend->getBackend())};
+    
     frontend->renderFrame();
     
     auto image = frontend->readStillImage();
