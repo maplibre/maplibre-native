@@ -131,6 +131,9 @@ void BufferResource::updateVertexBindOffset(const MTLRenderCommandEncoderPtr& en
                                             std::size_t index,
                                             std::size_t size_) const noexcept {
     // If we're using a MTLBuffer, just update the offset.
+    // The documentation for `setVertexBufferOffset` indicates that it should work for buffers
+    // assigned using `setVertexBytes` but, in practice, it produces a validation failure:
+    // `Set Vertex Buffer Offset Validation index(1) must have an existing buffer.`
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setVertexBufferOffset(offset, index);
     } else {

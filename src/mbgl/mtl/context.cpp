@@ -399,14 +399,9 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*baseInstance=*/0);
 #else
     const auto uboIndex = ShaderClass::uniforms[0].index;
-    mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/0, uboIndex, /*size=*/uboSize);
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
         encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
-        if (ii > 0) {
-            // mtlRenderPass.setVertexOffset(*uboBuffer, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);
-            // uboBuffer->updateVertexBindOffset(encoder, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);
-            mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);
-        }
+        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                        indexCount,
                                        MTL::IndexType::IndexTypeUInt16,
