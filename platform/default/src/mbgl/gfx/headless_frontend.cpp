@@ -30,9 +30,7 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
           {static_cast<uint32_t>(size.width * pixelRatio), static_cast<uint32_t>(size.height * pixelRatio)},
           swapBehavior,
           contextMode)),
-      asyncInvalidate([this] {
-          renderFrame();
-      }),
+      asyncInvalidate([this] { renderFrame(); }),
       invalidateOnUpdate(invalidateOnUpdate_),
       renderer(std::make_unique<Renderer>(*getBackend(), pixelRatio, localFontFamily)) {}
 
