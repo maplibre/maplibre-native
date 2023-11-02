@@ -358,9 +358,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         drawable3DPass();
     }
     drawableTargetsPass();
-    const auto startClear = util::MonotonicTimer::now().count();
     commonClearPass();
-    const auto clearTime = util::MonotonicTimer::now().count() - startClear;
     drawableOpaquePass();
     drawableTranslucentPass();
     drawableDebugOverlays();
@@ -392,7 +390,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
 
-    const auto encodingTime = renderTree.getElapsedTime() - clearTime - renderingTime;
+    const auto encodingTime = renderTree.getElapsedTime() - renderingTime;
 
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,

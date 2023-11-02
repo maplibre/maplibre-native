@@ -2,7 +2,6 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+OpenGL.h"
 
-#include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 
 #import <GLKit/GLKit.h>
@@ -48,10 +47,6 @@ public:
 
     void bind() override {
         backend.restoreFramebufferBinding();
-    }
-    
-    void swap() override {
-        static_cast<mbgl::gl::Context&>(backend.getContext()).finish();
     }
 
     mbgl::Size framebufferSize() {
