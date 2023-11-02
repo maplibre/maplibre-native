@@ -98,7 +98,7 @@ void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::
     if (0 <= index && index < maxBinds) {
         if (auto& bind = vertexBinds[index]) {
             // Is this the same buffer already bound to this index?
-            if (bind->buf == &buf) {
+            if (bind->buf == &buf && !buf.needReBind(bind->version)) {
                 // Yes, but is the offset different?
                 if (bind->offset != offset) {
                     // Yes, update just the offset
@@ -118,7 +118,7 @@ void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std
     if (0 <= index && index < maxBinds) {
         if (auto& bind = fragmentBinds[index]) {
             // Is this the same buffer already bound to this index?
-            if (bind->buf == &buf) {
+            if (bind->buf == &buf && !buf.needReBind(bind->version)) {
                 // Yes, but is the offset different?
                 if (bind->offset != offset) {
                     // Yes, update just the offset

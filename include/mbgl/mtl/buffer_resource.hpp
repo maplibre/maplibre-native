@@ -49,6 +49,14 @@ public:
     operator bool() const noexcept { return isValid(); }
     bool operator!() const noexcept { return !isValid(); }
 
+    using VersionType = std::uint16_t;
+
+    /// Used to detect whether buffer contents have changed
+    VersionType getVersion() const noexcept { return version; }
+
+    /// Indicates whether this buffer needs to be re-bound from a previous binding at the given version
+    bool needReBind(VersionType version) const noexcept;
+
     /// Bind this buffer to the specified vertex buffer index
     void bindVertex(const MTLRenderCommandEncoderPtr&,
                     std::size_t offset,
@@ -76,6 +84,7 @@ protected:
     std::vector<std::uint8_t> raw;
     NS::UInteger size;
     NS::UInteger usage;
+    std::uint16_t version = 0;
     bool isIndexBuffer;
     bool persistent;
 };

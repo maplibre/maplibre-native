@@ -45,6 +45,7 @@ private:
     struct BindInfo {
         const BufferResource* buf = nullptr;
         NS::UInteger offset = 0;
+        std::uint16_t version = 0;
     };
     static constexpr auto maxBinds = 32;
     std::array<std::optional<BindInfo>, maxBinds> vertexBinds;
