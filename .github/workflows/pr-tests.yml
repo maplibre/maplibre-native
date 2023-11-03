@@ -123,7 +123,9 @@ jobs:
           expect-files: "mbgl-benchmark-runner"
 
       - name: Download mbgl-benchmark-runner-main
-        run: wget -O mbgl-benchmark-runner-main "${download_url}/mbgl-benchmark-runner-main"
+        run: |
+          wget -O mbgl-benchmark-runner-main "${download_url}/mbgl-benchmark-runner-main"
+          chmod +x mbgl-benchmark-runner-main
 
       # needed for compare.py
       - name: Install scipy
@@ -131,7 +133,7 @@ jobs:
 
       - name: Run Benchmarks
         # excluding the API tests because they hang https://github.com/maplibre/maplibre-native/issues/1808
-        run: python3 vendor/benchmark/tools/compare.py benchmarks mbgl-benchmark-runner-main mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
+        run: python3 vendor/benchmark/tools/compare.py --no-color benchmarks ./mbgl-benchmark-runner-main mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
