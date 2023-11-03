@@ -16,6 +16,7 @@ BufferResource::BufferResource(Context& context_, const void* data, std::size_t 
       size(static_cast<NS::UInteger>(size_)),
       usage(usage_) {
     auto& device = context.getBackend().getDevice();
+    auto& heap = context.getHeap();
     // buffer = NS::TransferPtr((data && size) ? device->newBuffer(data, size, usage) : device->newBuffer(size, usage));
     buffer = NS::TransferPtr(heap->newBuffer(static_cast<NS::UInteger>(size), usage));
     if (data && size) {

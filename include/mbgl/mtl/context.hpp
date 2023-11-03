@@ -124,6 +124,8 @@ public:
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
+    
+    const MTLHeapPtr& getHeap() const { return heap; }
 
 private:
     RendererBackend& backend;
