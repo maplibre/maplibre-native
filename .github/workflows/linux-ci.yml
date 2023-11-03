@@ -15,6 +15,12 @@ concurrency:
   # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  id-token: write         # needed for AWS
+  actions: read           # needed for CodeQL
+  contents: read          # needed for CodeQL
+  security-events: write  # needed for CodeQL
+
 jobs:
   pre_job:
     runs-on: ubuntu-22.04
@@ -26,7 +32,7 @@ jobs:
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v40
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -87,22 +93,42 @@ jobs:
           CI: 1
         run: |
           cmake --version
-          cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
-          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test
+          cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON ${{ env.renderer_flag_cmake }}
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
 
-      - name: Build mbgl-render
-        if: matrix.renderer == 'drawable'
-        run: |
-          cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -B build-size -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_DRAWABLE_RENDERER=ON
-          cmake --build build-size --target mbgl-render
+      # mbgl-render (used for size test) & mbgl-benchmark-runner
 
-      - name: Upload mbgl-render
-        if: matrix.renderer == 'drawable'
+      - name: Upload mbgl-render as artifact
+        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
         uses: actions/upload-artifact@v3
         with:
           name: mbgl-render
           path: |
-            build-size/bin/mbgl-render
+            build/bin/mbgl-render
+  
+      - name: Upload mbgl-benchmark-runner as artifact
+        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
+        uses: actions/upload-artifact@v3
+        with:
+          name: mbgl-benchmark-runner
+          path: |
+            build/mbgl-benchmark-runner
+
+      - name: Configure AWS Credentials
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Upload mbgl-render & mbgl-benchmark-runner to S3
+        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        run: | 
+          aws s3 cp build/bin/mbgl-render s3://maplibre-native/mbgl-render-main
+          aws s3 cp build/mbgl-benchmark-runner s3://maplibre-native/mbgl-benchmark-runner-main
+
+      # CodeQL
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
@@ -125,12 +151,12 @@ jobs:
         run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
 
       - name: Upload render test result
-        if: always() && steps.render_test.outcome == 'failure'
+        if: always() && steps.render_test.outcome == 'failure' && matrix.renderer == 'drawable'
         uses: actions/upload-artifact@v3
         with:
           name: render-test-result
           path: |
-            metrics/linux-gcc8-release-style.html
+            metrics/linux-drawable.html
       
       # expression tests
 

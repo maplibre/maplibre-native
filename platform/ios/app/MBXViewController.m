@@ -17,6 +17,10 @@
 #import "LimeGreenStyleLayer.h"
 #endif
 
+#if MLN_DRAWABLE_RENDERER
+#import "ExampleCustomDrawableStyleLayer.h"
+#endif
+
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
 #import <objc/runtime.h>
@@ -108,6 +112,9 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
+#if MLN_DRAWABLE_RENDERER
+    MBXSettingsRuntimeStylingCustomDrawableLayer,
+#endif
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
@@ -441,6 +448,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
                 @"Style Route line with gradient",
+#if MLN_DRAWABLE_RENDERER
+                @"Add Custom Drawable Layer",
+#endif
             ]];
             break;
         case MBXSettingsMiscellaneous:
@@ -666,6 +676,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingLineGradient:
                     [self styleLineGradient];
                     break;
+#if MLN_DRAWABLE_RENDERER
+                case MBXSettingsRuntimeStylingCustomDrawableLayer:
+                    [self addCustomDrawableLayer];
+                    break;
+#endif
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
                     break;
@@ -1564,6 +1579,18 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
+#if MLN_DRAWABLE_RENDERER
+- (void)addCustomDrawableLayer
+{
+    // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
+    ExampleCustomDrawableStyleLayer* layer = [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
+
+    if (layer) {
+        [self.mapView.style addLayer:layer];
+    }
+}
+#endif
+
 - (void)styleRouteLine
 {
     CLLocationCoordinate2D coords[] = {
@@ -2451,9 +2478,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return features;
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered frameTime:(double)frameTime {
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered frameEncodingTime:(double)frameEncodingTime frameRenderingTime:(double)frameRenderingTime {
     if (self.frameTimeGraphEnabled) {
-        [self.frameTimeGraphView updatePathWithFrameDuration:frameTime];
+        [self.frameTimeGraphView updatePathWithFrameDuration:frameEncodingTime];
     }
 }
 

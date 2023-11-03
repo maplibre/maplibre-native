@@ -157,7 +157,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         return;
     }
 
-    const auto& context = static_cast<Context&>(parameters.context);
+    auto& context = static_cast<Context&>(parameters.context);
     const auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
     const auto& encoder = renderPass.getMetalEncoder();
     if (!encoder) {
@@ -289,8 +289,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                 if (binding) {
                     if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
                         assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
-                    } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
-                        assert(binding->vertexStride <= buffer->length());
+                    } else if (impl->noBindingBuffer) {
+                        assert(binding->vertexStride <= impl->noBindingBuffer->length());
                     }
                 }
             }
@@ -304,6 +304,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                                            instanceCount,
                                            baseVertex,
                                            baseInstance);
+            context.renderingStats().numDrawCalls++;
         }
     }
 
@@ -371,8 +372,8 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
-        } else if (const auto buffer = getMetalBuffer(impl->noBindingBuffer.get())) {
-            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
+        } else if (impl->noBindingBuffer) {
+            encoder->setVertexBuffer(impl->noBindingBuffer, /*offset=*/0, attributeIndex);
         }
         attributeIndex += 1;
     }
@@ -593,8 +594,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                 }
 
                 if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
-                    impl->noBindingBuffer = uploadPass.createVertexBufferResource(
-                        nullptr, 64, gfx::BufferUsageType::StaticDraw);
+                    if (const auto& buf = context.getEmptyVertexBuffer()) {
+                        impl->noBindingBuffer = getMetalBuffer(buf.get());
+                    }
                 }
 
                 auto attribDesc = NS::TransferPtr(MTL::VertexAttributeDescriptor::alloc()->init());

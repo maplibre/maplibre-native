@@ -44,9 +44,6 @@ public:
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
-    gfx::RenderingStats& renderingStats() { return stats; }
-    const gfx::RenderingStats& renderingStats() const override { return stats; }
-
     BufferResource createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const;
 
     UniqueShaderProgram createProgram(std::string name,
@@ -58,6 +55,8 @@ public:
 
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
+
+    void clear();
 
     // Actually remove the objects we marked as abandoned with the above methods.
     void performCleanup() override;
@@ -119,6 +118,9 @@ public:
     /// Get a reusable buffer containing the standard fixed tile indexes
     const BufferResource& getTileIndexBuffer();
 
+    /// Get a buffer to be bound to unused vertex buffers
+    const gfx::UniqueVertexBufferResource& getEmptyVertexBuffer();
+
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
@@ -130,14 +132,15 @@ private:
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
 
+    gfx::UniqueVertexBufferResource emptyVertexBuffer;
+
     gfx::ShaderProgramBasePtr clipMaskShader;
     MTLDepthStencilStatePtr clipMaskDepthStencilState;
     MTLRenderPipelineStatePtr clipMaskPipelineState;
-    BufferResource clipMaskUniformsBuffer;
+    std::optional<BufferResource> clipMaskUniformsBuffer;
     bool clipMaskUniformsBufferUsed = false;
     const gfx::Renderable* stencilStateRenderable = nullptr;
 
-    gfx::RenderingStats stats;
     MTLHeapPtr heap;
 };
 

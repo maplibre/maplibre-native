@@ -118,10 +118,6 @@ void RenderLineLayer::prepare(const LayerPrepareParameters& params) {
         params.lineAtlas.getDashPatternTexture(
             evaluated.get<LineDasharray>().from, evaluated.get<LineDasharray>().to, cap);
     }
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
 }
 
 #if MLN_LEGACY_RENDERER

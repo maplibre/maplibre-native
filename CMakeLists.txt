@@ -416,6 +416,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/timer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/tiny_unordered_map.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/traits.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/type_list.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/unitbezier.hpp
@@ -1216,6 +1217,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/index_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/mtl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/offscreen_texture.cpp
@@ -1227,6 +1229,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/upload_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background_pattern.cpp

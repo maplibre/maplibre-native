@@ -254,7 +254,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
                          fullyRendered:(BOOL)fullyRendered
-                             frameTime:(double)frameTime;
+                     frameEncodingTime:(double)frameEncodingTime
+                    frameRenderingTime:(double)frameRenderingTime;
 
 /**
  Tells the delegate that the map view is entering an idle state, and no more

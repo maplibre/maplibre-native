@@ -107,6 +107,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/tile_cover.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_range.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/timer.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/tiny_map.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp

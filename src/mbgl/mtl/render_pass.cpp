@@ -47,6 +47,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     // Let the encoder pass along any groups pushed to it after this
     commandEncoder.trackRenderPass(this);
+
+    commandEncoder.context.clear();
 }
 
 RenderPass::~RenderPass() {
