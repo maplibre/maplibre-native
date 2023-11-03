@@ -233,7 +233,7 @@ const BufferResource& Context::getTileIndexBuffer() {
                                              indexes.bytes(),
                                              gfx::BufferUsageType::StaticDraw,
                                              /*isIndexBuffer=*/true,
-                                             /*persustent=*/true));
+                                             /*persistent=*/true));
     }
     return *tileIndexBuffer;
 }
