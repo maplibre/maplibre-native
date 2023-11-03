@@ -33,10 +33,11 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaintNeeded,
                                    bool placementChanged,
-                                   double frameTime) override {
+                                   double frameEncodingTime,
+                                   double frameRenderingTime) override {
         void (mbgl::RendererObserver::*f)(
-            RenderMode, bool, bool, double) = &mbgl::RendererObserver::onDidFinishRenderingFrame;
-        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameTime);
+            RenderMode, bool, bool, double, double) = &mbgl::RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
     }
 
     void onDidFinishRenderingMap() final { delegate.invoke(&mbgl::RendererObserver::onDidFinishRenderingMap); }

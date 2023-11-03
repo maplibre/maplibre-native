@@ -232,7 +232,7 @@ objc_library(
 
 objc_library(
     name = "ios-benchapp",
-    copts = MAPLIBRE_FLAGS,
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     srcs = ["//platform/ios/benchmark:ios_benchmark_srcs"],
     hdrs = ["//platform/ios/benchmark:ios_benchmark_hdrs"],
     includes = [

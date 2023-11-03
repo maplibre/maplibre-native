@@ -6813,7 +6813,8 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                          frameTime:(double)frameTime {
+                                  frameEncodingTime:(double)frameEncodingTime
+                                 frameRenderingTime:(double)frameRenderingTime {
     if (!_mbglMap)
     {
         return;
@@ -6825,9 +6826,9 @@ static void *windowScreenContext = &windowScreenContext;
         [self.style didChangeValueForKey:@"layers"];
     }
 
-    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameTime:)])
+    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
     {
-        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered frameTime:frameTime];
+        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered frameEncodingTime:frameEncodingTime frameRenderingTime:frameRenderingTime];
     }
     else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
     {
