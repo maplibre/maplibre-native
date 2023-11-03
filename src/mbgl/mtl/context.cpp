@@ -370,7 +370,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  bufferSize,
                                  gfx::BufferUsageType::StaticDraw,
                                  /*isIndexBuffer=*/false,
-                                 /*persustent=*/!clipMaskUniformsBufferUsed);
+                                 /*persistent=*/!clipMaskUniformsBufferUsed);
         if (!uboBuffer) {
             return false;
         }
