@@ -364,32 +364,21 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
         const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        const auto& encoder = renderPass.getMetalEncoder();
         for (const auto& element : shaderMTL.getUniformBlocks().getMap()) {
             const auto& uniformBuffer = getUniformBuffers().get(element.first);
-            if (!uniformBuffer) {
-                try { // discard logging exceptions to conform to `noexcept`
-                    using namespace std::string_literals;
-                    const auto tileID = getTileID() ? util::toString(*getTileID()) : "<no tile>";
-                    const auto tileLabel = util::toString(getID()) + "/" + getName() + "/" + tileID;
-                    Log::Error(Event::General,
-                               "bindUniformBuffers: UBO "s + stringIndexer().get(element.first) + " not found on " +
-                                   tileLabel + ". skipping.");
-                } catch (...) {
+            assert(uniformBuffer && "UBO missing, drawable skipped");
+            if (uniformBuffer) {
+                const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
+                const auto& resource = buffer.getBufferResource();
+                const auto& block = static_cast<const UniformBlock&>(*element.second);
+                const auto index = block.getIndex();
+
+                if (block.getBindVertex()) {
+                    renderPass.bindVertex(resource, /*offset=*/0, index);
                 }
-                assert(false);
-                continue;
-            }
-
-            const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
-            const auto& block = static_cast<const UniformBlock&>(*element.second);
-            const auto index = block.getIndex();
-
-            if (block.getBindVertex()) {
-                renderPass.bindVertex(buffer.getBufferResource(), /*offset=*/0, index);
-            }
-            if (block.getBindFragment()) {
-                renderPass.bindFragment(buffer.getBufferResource(), /*offset=*/0, index);
+                if (block.getBindFragment()) {
+                    renderPass.bindFragment(resource, /*offset=*/0, index);
+                }
             }
         }
     }
