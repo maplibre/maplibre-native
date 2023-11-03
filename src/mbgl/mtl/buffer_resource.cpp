@@ -30,7 +30,7 @@ BufferResource::BufferResource(Context& context_,
       usage(usage_),
       isIndexBuffer(isIndexBuffer_),
       persistent(persistent_) {
-    // If the buffer is small, not for indexes, and not explicitly persustent, skip the overhead of an `NSBuffer`
+    // If the buffer is small, not for indexes, and not explicitly persistent, skip the overhead of an `NSBuffer`
     if (size_ < bufferThreshold && !isIndexBuffer_ && !persistent) {
         if (data) {
             raw.assign(static_cast<const std::uint8_t*>(data), static_cast<const std::uint8_t*>(data) + size);
