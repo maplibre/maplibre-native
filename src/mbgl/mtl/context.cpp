@@ -221,7 +221,7 @@ const BufferResource& Context::getTileVertexBuffer() {
                                               vertices.bytes(),
                                               gfx::BufferUsageType::StaticDraw,
                                               /*isIndexBuffer=*/true,
-                                              /*persustent=*/true));
+                                              /*persistent=*/true));
     }
     return *tileVertexBuffer;
 }
