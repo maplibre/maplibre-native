@@ -38,7 +38,7 @@ constexpr uint32_t maximumVertexBindingCount = 31;
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(mtl::maximumVertexBindingCount),
-      backend(backend_)  {
+      backend(backend_) {
     MTLHeapDescriptorPtr heapDescriptor = NS::TransferPtr(MTL::HeapDescriptor::alloc()->init());
     heapDescriptor->setSize(200000000);
     heapDescriptor->setStorageMode(MTL::StorageModeShared);
