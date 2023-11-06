@@ -12,6 +12,34 @@ option(MLN_QT_WITH_HEADLESS "Build MapLibre Native Qt with headless support" ON)
 option(MLN_QT_WITH_INTERNAL_SQLITE "Build MapLibre Native Qt bindings with internal sqlite" OFF)
 option(MLN_QT_DEPLOYMENT "Autogenerate files necessary for deployment" OFF)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Threads REQUIRED)
+
+    option(MLN_QT_WITH_INTERNAL_ICU "Build MapLibre GL Qt bindings with internal ICU" OFF)
+    if(NOT MLN_QT_WITH_INTERNAL_ICU)
+        # find ICU ignoring Qt paths
+        option(MLN_QT_IGNORE_ICU "Ignore Qt-provided ICU library" ON)
+        if(MLN_QT_IGNORE_ICU)
+            set(_CMAKE_PREFIX_PATH_ORIG ${CMAKE_PREFIX_PATH})
+            set(_CMAKE_FIND_ROOT_PATH_ORIG ${CMAKE_FIND_ROOT_PATH})
+            unset(CMAKE_PREFIX_PATH)
+            unset(CMAKE_FIND_ROOT_PATH)
+        endif()
+
+        find_package(ICU COMPONENTS uc REQUIRED)
+
+        if(MLN_QT_IGNORE_ICU)
+            set(CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_ORIG})
+            set(CMAKE_FIND_ROOT_PATH ${_CMAKE_FIND_ROOT_PATH_ORIG})
+            unset(_CMAKE_PREFIX_PATH_ORIG)
+            unset(_CMAKE_FIND_ROOT_PATH_ORIG)
+        endif()
+    else()
+        message(STATUS "Using internal ICU")
+        include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
+    endif()
+endif()
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR}
              COMPONENTS Gui
@@ -30,18 +58,6 @@ if(NOT MLN_QT_WITH_INTERNAL_SQLITE)
 else()
     message(STATUS "Using internal sqlite")
     include(${PROJECT_SOURCE_DIR}/vendor/sqlite.cmake)
-endif()
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    find_package(Threads REQUIRED)
-
-    option(MLN_QT_WITH_INTERNAL_ICU "Build MapLibre Native Qt bindings with internal ICU" OFF)
-    if(NOT MLN_QT_WITH_INTERNAL_ICU)
-       find_package(ICU COMPONENTS uc REQUIRED)
-    else()
-       message(STATUS "Using internal ICU")
-       include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
-    endif()
 endif()
 
 # Debugging & ccache on Windows

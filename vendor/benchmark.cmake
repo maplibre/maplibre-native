@@ -30,6 +30,13 @@ target_compile_definitions(
     PRIVATE HAVE_STEADY_CLOCK
 )
 
+if(WIN32)
+    target_compile_definitions(
+        mbgl-vendor-benchmark
+        PUBLIC BENCHMARK_STATIC_DEFINE
+    )
+endif()
+
 target_include_directories(
     mbgl-vendor-benchmark SYSTEM
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}/benchmark/include
