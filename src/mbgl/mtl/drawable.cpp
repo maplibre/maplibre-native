@@ -352,7 +352,7 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
         const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
                                                                                    : nullptr);
         if (buffer && buffer->get()) {
-            //assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
+            // assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
         } else if (impl->noBindingBuffer) {
             renderPass.bindVertex(impl->noBindingBuffer->get(), /*offset=*/0, attributeIndex);
