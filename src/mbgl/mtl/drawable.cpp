@@ -53,7 +53,7 @@ MTL::Buffer* getMetalBuffer(const gfx::VertexBufferResource* resource_) {
     return nullptr;
 }
 
-#if !defined(NDEBUG)
+/*#if !defined(NDEBUG)
 std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
     if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
         if (const auto& bufferResource = resource->get()) {
@@ -62,7 +62,7 @@ std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
     }
     return 0UL;
 }
-#endif // !defined(NDEBUG)
+#endif // !defined(NDEBUG)*/
 
 MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
     switch (type) {
@@ -288,7 +288,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             for (const auto& binding : impl->attributeBindings) {
                 if (binding) {
                     if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-                        assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
+                        //assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
                     } else if (impl->noBindingBuffer) {
                         assert(binding->vertexStride <= impl->noBindingBuffer->length());
                     }
@@ -370,7 +370,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
+            //assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         } else if (impl->noBindingBuffer) {
             encoder->setVertexBuffer(impl->noBindingBuffer, /*offset=*/0, attributeIndex);

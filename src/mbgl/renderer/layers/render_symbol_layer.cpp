@@ -1137,7 +1137,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 }
             };
 
-            constexpr bool staticVertexAndAttributes = true;
+            constexpr bool staticVertexAndAttributes = false;
 
             if (hasCollisionBox) {
                 const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
