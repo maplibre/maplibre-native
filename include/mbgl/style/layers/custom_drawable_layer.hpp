@@ -41,6 +41,11 @@ public:
         gfx::PolylineGeneratorOptions geometry;
     };
 
+    struct FillOptions {
+        Color color;
+        float opacity = 1.f;
+    };
+
 public:
     /// @brief Construct a new Interface object (internal core use only)
     Interface(RenderLayer& layer,
@@ -73,6 +78,13 @@ public:
     void setLineOptions(const LineOptions& options);
 
     /**
+     * @brief Set the fill options
+     *
+     * @param options
+     */
+    void setFillOptions(const FillOptions& options);
+
+    /**
      * @brief Add a polyline
      *
      * @param coordinates
@@ -80,16 +92,13 @@ public:
      */
     void addPolyline(const GeometryCoordinates& coordinates);
 
+    void addFill(const GeometryCollection& geometry);
+
     /**
-     * @brief Finishe the current drawable building session
+     * @brief Finish the current drawable building session
      *
      */
     void finish();
-
-protected:
-    gfx::ShaderPtr lineShaderDefault() const;
-
-    std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
 
 public:
     RenderLayer& layer;
@@ -102,9 +111,17 @@ public:
     UniqueChangeRequestVec& changes;
 
 private:
+    gfx::ShaderPtr lineShaderDefault() const;
+    gfx::ShaderPtr fillShaderDefault() const;
+
+    std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
+
+    gfx::ShaderPtr lineShader;
+    gfx::ShaderPtr fillShader;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
     LineOptions lineOptions;
+    FillOptions fillOptions;
 };
 
 class CustomDrawableLayer final : public Layer {

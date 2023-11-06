@@ -5,18 +5,20 @@
 namespace mbgl {
 namespace mtl {
 
-VertexBufferResource::VertexBufferResource(BufferResource&& ptr)
+VertexBufferResource::VertexBufferResource(BufferResource&& ptr) noexcept
     : buffer(std::move(ptr)) {
     if (buffer) {
-        buffer.getContext().renderingStats().numVertexBuffers++;
-        buffer.getContext().renderingStats().memVertexBuffers += buffer.getSizeInBytes();
+        auto& stats = buffer.getContext().renderingStats();
+        stats.numVertexBuffers++;
+        stats.memVertexBuffers += buffer.getSizeInBytes();
     }
 }
 
-VertexBufferResource::~VertexBufferResource() {
+VertexBufferResource::~VertexBufferResource() noexcept {
     if (buffer) {
-        buffer.getContext().renderingStats().numVertexBuffers--;
-        buffer.getContext().renderingStats().memVertexBuffers -= buffer.getSizeInBytes();
+        auto& stats = buffer.getContext().renderingStats();
+        stats.numVertexBuffers--;
+        stats.memVertexBuffers -= buffer.getSizeInBytes();
     }
 }
 

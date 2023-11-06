@@ -4,62 +4,158 @@
 #include <mbgl/mtl/renderer_backend.hpp>
 
 #include <Metal/MTLDevice.hpp>
+#include <Metal/MTLRenderCommandEncoder.hpp>
 
 #include <algorithm>
 
 namespace mbgl {
 namespace mtl {
 
-BufferResource::BufferResource(Context& context_, const void* data, std::size_t size_, MTL::ResourceOptions usage_)
+namespace {
+// The `setVertexBytes:length:atIndex:` method is the best option for binding a very small
+// amount (less than 4 KB) of dynamic buffer data to a vertex function, as shown in Listing
+// 5-1. This method avoids the overhead of creating an intermediary MTLBuffer object.
+// https://developer.apple.com/library/archive/documentation/3DDrawing/Conceptual/MTLBestPracticesGuide/BufferBindings.html
+constexpr auto bufferThreshold = 4096;
+} // namespace
+
+BufferResource::BufferResource(Context& context_,
+                               const void* data,
+                               std::size_t size_,
+                               MTL::ResourceOptions usage_,
+                               bool isIndexBuffer_,
+                               bool persistent_)
     : context(context_),
       size(static_cast<NS::UInteger>(size_)),
-      usage(usage_) {
-    auto& device = context.getBackend().getDevice();
-    buffer = NS::TransferPtr((data && size) ? device->newBuffer(data, size, usage) : device->newBuffer(size, usage));
-    if (buffer) {
+      usage(usage_),
+      isIndexBuffer(isIndexBuffer_),
+      persistent(persistent_) {
+    // If the buffer is small, not for indexes, and not explicitly persistent, skip the overhead of an `NSBuffer`
+    if (size_ < bufferThreshold && !isIndexBuffer_ && !persistent) {
+        if (data) {
+            raw.assign(static_cast<const std::uint8_t*>(data), static_cast<const std::uint8_t*>(data) + size);
+        } else {
+            raw.resize(size);
+        }
+        assert(raw.size() == size);
+    } else {
+        auto& device = context.getBackend().getDevice();
+        buffer = NS::TransferPtr((data && size) ? device->newBuffer(data, size, usage)
+                                                : device->newBuffer(size, usage));
+    }
+
+    if (isValid()) {
         context.renderingStats().numBuffers++;
         context.renderingStats().memBuffers += size;
     }
 }
 
-BufferResource::BufferResource(BufferResource&& other)
+BufferResource::BufferResource(BufferResource&& other) noexcept
     : context(other.context),
       buffer(std::move(other.buffer)),
+      raw(std::move(other.raw)),
       size(other.size),
-      usage(other.usage) {}
+      usage(other.usage),
+      isIndexBuffer(other.isIndexBuffer),
+      persistent(other.persistent) {}
 
-BufferResource::~BufferResource() {
-    if (buffer) {
+BufferResource::~BufferResource() noexcept {
+    if (isValid()) {
         context.renderingStats().numBuffers--;
         context.renderingStats().memBuffers -= size;
     }
 }
 
 BufferResource BufferResource::clone() const {
-    return {context, buffer->contents(), size, usage};
+    return {context, contents(), size, usage, isIndexBuffer, persistent};
 }
 
-BufferResource& BufferResource::operator=(BufferResource&& other) {
+BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     assert(&context == &other.context);
-    if (buffer) {
+    if (isValid()) {
         context.renderingStats().numBuffers--;
         context.renderingStats().memBuffers -= size;
     }
     buffer = std::move(other.buffer);
+    raw = std::move(other.raw);
     size = other.size;
     usage = other.usage;
+    isIndexBuffer = other.isIndexBuffer;
+    persistent = other.persistent;
     return *this;
 }
 
-void BufferResource::update(const void* data, std::size_t size, std::size_t offset) {
-    assert(buffer && (data || size == 0));
-    if (buffer && data && size > 0) {
-        assert(buffer->contents());
-        if (void* content = buffer->contents()) {
-            const auto size_ = std::min(size, static_cast<std::size_t>(buffer->length()) - offset);
-            assert(size == size_);
-            std::memcpy(static_cast<uint8_t*>(content) + offset, data, size_);
+void BufferResource::update(const void* data, std::size_t updateSize, std::size_t offset) noexcept {
+    assert(size >= 0 && updateSize + offset <= size);
+    updateSize = std::min(updateSize, size - offset);
+
+    if (updateSize > 0) {
+        if (buffer) {
+            if (auto* content = static_cast<uint8_t*>(buffer->contents())) {
+                std::memcpy(content + offset, data, updateSize);
+            }
+        } else {
+            std::memcpy(raw.data() + offset, data, updateSize);
         }
+        version++;
+    }
+}
+
+bool BufferResource::needReBind(VersionType version_) const noexcept {
+    // If we're using a raw buffer, an update means we have to re-bind.
+    // For a MTLBuffer, the binding can be left alone.
+    return (!buffer || version != version_);
+}
+
+void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
+                                const std::size_t offset,
+                                const std::size_t index,
+                                std::size_t size_) const noexcept {
+    assert(offset + size_ <= size);
+    if (const auto* mtlBuf = buffer.get()) {
+        encoder->setVertexBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
+    } else if (!raw.empty()) {
+        size_ = size_ ? std::min(size_, size - offset) : size - offset;
+        encoder->setVertexBytes(raw.data() + offset, size_, index);
+    }
+}
+
+void BufferResource::bindFragment(const MTLRenderCommandEncoderPtr& encoder,
+                                  const std::size_t offset,
+                                  const std::size_t index,
+                                  std::size_t size_) const noexcept {
+    assert(offset + size_ <= size);
+    if (const auto* mtlBuf = buffer.get()) {
+        encoder->setFragmentBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
+    } else if (!raw.empty()) {
+        size_ = size_ ? std::min(size_, size - offset) : size - offset;
+        encoder->setFragmentBytes(raw.data() + offset, size_, index);
+    }
+}
+
+void BufferResource::updateVertexBindOffset(const MTLRenderCommandEncoderPtr& encoder,
+                                            std::size_t offset,
+                                            std::size_t index,
+                                            std::size_t size_) const noexcept {
+    // If we're using a MTLBuffer, just update the offset.
+    // The documentation for `setVertexBufferOffset` indicates that it should work for buffers
+    // assigned using `setVertexBytes` but, in practice, it produces a validation failure:
+    // `Set Vertex Buffer Offset Validation index(1) must have an existing buffer.`
+    if (const auto* mtlBuf = buffer.get()) {
+        encoder->setVertexBufferOffset(offset, index);
+    } else {
+        bindVertex(encoder, offset, index, size_);
+    }
+}
+
+void BufferResource::updateFragmentBindOffset(const MTLRenderCommandEncoderPtr& encoder,
+                                              std::size_t offset,
+                                              std::size_t index,
+                                              std::size_t size_) const noexcept {
+    if (const auto* mtlBuf = buffer.get()) {
+        encoder->setFragmentBufferOffset(offset, index);
+    } else {
+        bindFragment(encoder, offset, index, size_);
     }
 }
 
