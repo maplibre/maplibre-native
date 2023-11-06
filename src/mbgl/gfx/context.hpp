@@ -123,7 +123,10 @@ public:
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
 
     /// Create a new uniform buffer
-    virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) = 0;
+    /// @param data The data to copy, may be `nullptr`
+    /// @param size The size of the buffer
+    /// @param persistent Performance hint, optimize for few or many uses
+    virtual UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent = false) = 0;
 
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
@@ -147,13 +150,17 @@ public:
 
     /// Update the uniform buffer with the provided data if it already exists, otherwise create it.
     ///  @return True if the buffer was created, false if it was updated
-    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size) = 0;
+    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
+                                              const void* data,
+                                              std::size_t size,
+                                              bool persistent = false) = 0;
 
     /// `emplaceOrUpdateUniformBuffer` with type inference
     template <typename T>
     std::enable_if_t<!std::is_pointer_v<T>, bool> emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr,
-                                                                               const T* data) {
-        return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T));
+                                                                               const T* data,
+                                                                               bool persistent = false) {
+        return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T), persistent);
     }
 
 #endif

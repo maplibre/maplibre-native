@@ -377,7 +377,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                     /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
                     /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
                     /* .padding = */ {0}};
-                interpolateBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+                interpolateBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO), false);
             }
             return interpolateBuffer;
         };
