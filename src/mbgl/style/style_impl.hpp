@@ -86,6 +86,7 @@ public:
     Immutable<std::vector<Immutable<Layer::Impl>>> getLayerImpls() const;
 
     void dumpDebugLogs() const;
+    bool areSpritesLoaded() const;
 
     bool mutated = false;
     bool loaded = false;

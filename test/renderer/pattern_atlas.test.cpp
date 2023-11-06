@@ -18,7 +18,7 @@ TEST(PatternAtlas, Basic) {
     FixtureLog log;
     PatternAtlas patternAtlas;
 
-    auto images = parseSprite(util::read_file("test/fixtures/annotations/emerald.png"),
+    auto images = parseSprite("default", util::read_file("test/fixtures/annotations/emerald.png"),
                               util::read_file("test/fixtures/annotations/emerald.json"));
     for (auto& image : images) {
         if (image->id == "metro") {

@@ -264,12 +264,16 @@ Source* Style::Impl::getSource(const std::string& id) const {
     return sources.get(id);
 }
 
+bool Style::Impl::areSpritesLoaded() const {
+    return (countOfSpritesLoaded >= countOfSprites);
+}
+
 bool Style::Impl::isLoaded() const {
     if (!loaded) {
         return false;
     }
 
-    if (countOfSpritesLoaded < countOfSprites) {
+    if (!areSpritesLoaded()) {
         return false;
     }
 

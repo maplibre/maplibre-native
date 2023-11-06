@@ -43,7 +43,9 @@ public:
         Log::setObserver(std::make_unique<Log::NullObserver>());
 
         spriteLoader.setObserver(&observer);
-        spriteLoader.load("test/fixtures/resources/sprite", fileSource);
+        
+        Sprite sprite = Sprite("default", "test/fixtures/resources/sprite");
+        spriteLoader.load(&sprite, fileSource);
 
         loop.run();
     }
