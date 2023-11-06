@@ -288,7 +288,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             for (const auto& binding : impl->attributeBindings) {
                 if (binding) {
                     if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-                        //assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
+                        // assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
                     } else if (impl->noBindingBuffer) {
                         assert(binding->vertexStride <= impl->noBindingBuffer->length());
                     }
@@ -370,7 +370,7 @@ void Drawable::bindAttributes(const RenderPass& renderPass) const {
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
         if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-            //assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
+            // assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
         } else if (impl->noBindingBuffer) {
             encoder->setVertexBuffer(impl->noBindingBuffer, /*offset=*/0, attributeIndex);
