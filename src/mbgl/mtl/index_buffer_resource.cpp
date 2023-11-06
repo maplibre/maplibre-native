@@ -5,18 +5,20 @@
 namespace mbgl {
 namespace mtl {
 
-IndexBufferResource::IndexBufferResource(BufferResource&& ptr)
+IndexBufferResource::IndexBufferResource(BufferResource&& ptr) noexcept
     : buffer(std::move(ptr)) {
     if (buffer) {
-        buffer.getContext().renderingStats().numIndexBuffers++;
-        buffer.getContext().renderingStats().memIndexBuffers += buffer.getSizeInBytes();
+        auto& stats = buffer.getContext().renderingStats();
+        stats.numIndexBuffers++;
+        stats.memIndexBuffers += buffer.getSizeInBytes();
     }
 }
 
-IndexBufferResource::~IndexBufferResource() {
+IndexBufferResource::~IndexBufferResource() noexcept {
     if (buffer) {
-        buffer.getContext().renderingStats().numIndexBuffers--;
-        buffer.getContext().renderingStats().memIndexBuffers -= buffer.getSizeInBytes();
+        auto& stats = buffer.getContext().renderingStats();
+        stats.numIndexBuffers--;
+        stats.memIndexBuffers -= buffer.getSizeInBytes();
     }
 }
 

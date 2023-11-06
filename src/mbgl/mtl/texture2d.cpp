@@ -201,11 +201,7 @@ void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
     context.renderingStats().numTextureBindings++;
 }
 
-void Texture2D::unbind(const RenderPass& renderPass, int32_t location) noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-    encoder->setFragmentTexture(nullptr, location);
-    encoder->setFragmentSamplerState(nullptr, location);
-
+void Texture2D::unbind(const RenderPass&, int32_t /*location*/) noexcept {
     context.renderingStats().numTextureBindings--;
 }
 
