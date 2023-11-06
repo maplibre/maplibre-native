@@ -436,12 +436,15 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setCullFaceMode(gfx::CullFaceMode::disabled());
 }
 
-bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
+                                           const void* data,
+                                           std::size_t size,
+                                           bool persistent) {
     if (buffer) {
         buffer->update(data, size);
         return false;
     } else {
-        buffer = createUniformBuffer(data, size);
+        buffer = createUniformBuffer(data, size, persistent);
         return true;
     }
 }
@@ -487,7 +490,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
     return std::make_shared<gl::UniformBufferGL>(data, size);
 }
 
