@@ -92,7 +92,12 @@ void BufferResource::update(const void* data, std::size_t updateSize, std::size_
     if (updateSize > 0) {
         if (buffer) {
             if (auto* content = static_cast<uint8_t*>(buffer->contents())) {
-                std::memcpy(content + offset, data, updateSize);
+                // Until we can be sure that the buffer is not still in use to render the
+                // previous frame, replace it with a new buffer instead of updating it.
+                auto& device = context.getBackend().getDevice();
+                if (auto newBuffer = NS::TransferPtr(device->newBuffer(content, size, usage))) {
+                    buffer = std::move(newBuffer);
+                }
             }
         } else {
             std::memcpy(raw.data() + offset, data, updateSize);
