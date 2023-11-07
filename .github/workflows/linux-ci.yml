@@ -88,6 +88,12 @@ jobs:
       - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
 
+      - name: npm install
+        run: npm install --ignore-scripts
+
+      - name: Generate shaders
+        run: node shaders/generate_shader_code.js --root ./ --opengl --metal --strip --compress --amalgamate
+
       - name: Build MapLibre Native Core
         env:
           CI: 1
@@ -202,6 +208,9 @@ jobs:
         run: |
           npm install --ignore-scripts
           node test/storage/server.js &
+
+      - name: Generate shaders
+        run: node shaders/generate_shader_code.js --root ./ --opengl --metal --strip --compress --amalgamate
 
       - name: Generate coverage report
         run: |

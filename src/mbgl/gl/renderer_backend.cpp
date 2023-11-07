@@ -86,10 +86,12 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         [&](shaders::BuiltIn programID) {
             const auto name = shaders::getProgramName(programID);
             auto [vert, frag] = shaders::gl::getShaderSource<gfx::Backend::Type::OpenGL>(programID);
-            auto source = ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL, std::move(vert), std::move(frag));
-
-            if (!registry.registerShaderGroup(
-                    std::make_shared<ShaderGroupGL>(ShaderID, programParameters.withDefaultSource(std::move(source))), name)) {
+            auto group = std::make_shared<ShaderGroupGL>(
+                ShaderID,
+                programParameters.withDefaultSource(
+                    ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL, std::move(vert), std::move(frag))));
+            if (!registry.registerShaderGroup(std::move(group), name)) {
+                assert(!"duplicate shader group");
                 throw std::runtime_error("Failed to register " + name + " with shader registry!");
             }
         }(ShaderID),

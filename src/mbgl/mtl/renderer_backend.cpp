@@ -91,9 +91,11 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     (
         [&](shaders::BuiltIn programID) {
             const auto& reflectionData = mbgl::shaders::getReflectionData<gfx::Backend::Type::Metal>(programID);
-            auto [source, _] = ProgramParameters::ProgramSource(gfx::Backend::Type::Metal,
-                mbgl::shaders::getShaderSource<gfx::Backend::Type::Metal>(programID), "");
-            auto group = std::make_shared<ShaderGroup>(programID, programParameters.withDefaultSource(std::move(source)));
+            const auto [programSource, _] = mbgl::shaders::getShaderSource<gfx::Backend::Type::Metal>(programID);
+            auto group = std::make_shared<ShaderGroup>(
+                programID,
+                programParameters.withDefaultSource(
+                    ProgramParameters::ProgramSource(gfx::Backend::Type::Metal, std::move(programSource), "")));
             if (!registry.registerShaderGroup(std::move(group), reflectionData.name)) {
                 assert(!"duplicate shader group");
                 throw std::runtime_error("Failed to register " + reflectionData.name + " with shader registry!");

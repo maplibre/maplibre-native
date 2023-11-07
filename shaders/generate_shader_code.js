@@ -233,7 +233,7 @@ ${(() => {
     let branches = [];
     programIDs.forEach((id) => {
         if (MTL.names.includes(id) && MTL.reflectedPrograms[id]) {
-            branches.push(`        case BuiltIn::${id}: { return Program<BuiltIn::${id}>::reflectionData; }`);
+            branches.push(`        case BuiltIn::${id}: { return MtlProgram<BuiltIn::${id}>::reflectionData; }`);
         }
     });
     return branches.join("\n");
